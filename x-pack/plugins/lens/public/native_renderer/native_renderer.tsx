@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HTMLAttributes } from 'react';
-import React, { useEffect, useRef } from 'react';
+
+import React, { HTMLAttributes, useEffect, useRef } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 
 type CleanupCallback = (el: Element) => void;

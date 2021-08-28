@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiDescribedFormGroup,
   EuiForm,
@@ -14,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import type { InputRangeFieldProps } from './input_fields';
+import { InputRangeFieldProps } from './input_fields';
 
 interface MLConfigurationPanelProps {
   isLoading: boolean;

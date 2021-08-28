@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Observable, Subject, Subscription } from 'rxjs';
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
-import { License } from '../common/license';
+
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { ILicense } from '../common/types';
+import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
-import type { ILicense } from '../common/types';
+import { License } from '../common/license';
 import { mountExpiredBanner } from './expired_banner';
-import { FeatureUsageService } from './services/feature_usage_service';
-import type { LicensingPluginSetup, LicensingPluginStart } from './types';
+import { FeatureUsageService } from './services';
 
 export const licensingSessionStorageKey = 'xpack.licensing';
 

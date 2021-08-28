@@ -6,8 +6,8 @@
  */
 
 import rison from 'rison-node';
-import type { TimeRange } from '../../../../src/plugins/data/common/query/timefilter/types';
-import type { LayerType } from './types';
+import type { TimeRange } from '../../../../src/plugins/data/common/query';
+import { LayerType } from './types';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = 'lens';

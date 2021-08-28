@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ScopedHistory } from '../../../core/public/application/scoped_history';
-import type { ChromeBreadcrumb } from '../../../core/public/chrome/types';
-import type { Capabilities } from '../../../core/types/capabilities';
-import type { LocatorPublic } from '../../share/common/url_service/locators/types';
+
+import { ScopedHistory, Capabilities } from 'kibana/public';
+import type { LocatorPublic } from 'src/plugins/share/common';
+import { ManagementSection, RegisterManagementSectionArgs } from './utils';
+import { ChromeBreadcrumb } from '../../../core/public/';
 import type { ManagementAppLocatorParams } from '../common/locator';
-import type { RegisterManagementSectionArgs } from './utils/management_section';
-import { ManagementSection } from './utils/management_section';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;

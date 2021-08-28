@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
-import {
+import { take } from 'rxjs/operators';
+import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
@@ -16,12 +18,16 @@ import {
   ALERT_REASON as ALERT_REASON_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
-import { take } from 'rxjs/operators';
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server/utils/create_lifecycle_rule_type_factory';
+import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentEsField,
+  getEnvironmentLabel,
+} from '../../../common/environment_filter_values';
 import {
   AlertType,
-  ALERT_TYPES_CONFIG,
   APM_SERVER_FEATURE_ID,
+  ALERT_TYPES_CONFIG,
   formatErrorCountReason,
 } from '../../../common/alert_types';
 import {
@@ -29,17 +35,12 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import {
-  ENVIRONMENT_NOT_DEFINED,
-  getEnvironmentEsField,
-  getEnvironmentLabel,
-} from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-import type { RegisterRuleDependencies } from './register_apm_alerts';
+import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
 const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;

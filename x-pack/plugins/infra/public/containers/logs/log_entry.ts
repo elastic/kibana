@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCallback } from 'react';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
@@ -11,9 +12,11 @@ import {
   logEntrySearchResponsePayloadRT,
   LOG_ENTRY_SEARCH_STRATEGY,
 } from '../../../common/search_strategies/log_entries/log_entry';
-import { normalizeDataSearchResponses } from '../../utils/data_search/normalize_data_search_responses';
-import { useDataSearch } from '../../utils/data_search/use_data_search_request';
-import { useLatestPartialDataSearchResponse } from '../../utils/data_search/use_latest_partial_data_search_response';
+import {
+  normalizeDataSearchResponses,
+  useDataSearch,
+  useLatestPartialDataSearchResponse,
+} from '../../utils/data_search';
 
 export const useLogEntry = ({
   sourceId,

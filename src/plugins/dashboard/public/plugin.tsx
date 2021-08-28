@@ -9,71 +9,89 @@
 import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import type { CoreSetup, CoreStart } from '../../../core/public';
-import { ScopedHistory } from '../../../core/public/application/scoped_history';
-import type { App, AppMountParameters, AppUpdater } from '../../../core/public/application/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
-import type { SavedObjectsClientContract } from '../../../core/public/saved_objects/saved_objects_client';
-import { APP_WRAPPER_CLASS } from '../../../core/utils/app_wrapper_class';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/utils/default_app_categories';
-import { esFilters } from '../../data/public/deprecated';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public/types';
+
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { APP_WRAPPER_CLASS } from '../../../core/public';
+import {
+  App,
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  AppUpdater,
+  ScopedHistory,
+  AppMountParameters,
+  DEFAULT_APP_CATEGORIES,
+  PluginInitializerContext,
+  SavedObjectsClientContract,
+} from '../../../core/public';
+import { VisualizationsStart } from '../../visualizations/public';
+
+import { createKbnUrlTracker } from './services/kibana_utils';
+import { UsageCollectionSetup } from './services/usage_collection';
+import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
+import { PresentationUtilPluginStart } from './services/presentation_util';
+import { KibanaLegacySetup, KibanaLegacyStart } from './services/kibana_legacy';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
+import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
+import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
+import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from './services/share';
+import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
+import {
+  getSavedObjectFinder,
+  SavedObjectLoader,
+  SavedObjectsStart,
+} from './services/saved_objects';
 import {
   CONTEXT_MENU_TRIGGER,
+  EmbeddableSetup,
+  EmbeddableStart,
   PANEL_NOTIFICATION_TRIGGER,
-} from '../../embeddable/public/lib/triggers/triggers';
-import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public/plugin';
-import type { HomePublicPluginSetup } from '../../home/public/plugin';
-import { FeatureCatalogueCategory } from '../../home/public/services/feature_catalogue/feature_catalogue_registry';
-import type { Start as InspectorStartContract } from '../../inspector/public/plugin';
-import type { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public/plugin';
-import type { ExitFullScreenButtonProps } from '../../kibana_react/public/exit_full_screen_button/exit_full_screen_button';
-import { ExitFullScreenButton as ExitFullScreenButtonUi } from '../../kibana_react/public/exit_full_screen_button/exit_full_screen_button';
-import { replaceUrlHashQuery } from '../../kibana_utils/public/state_management/url/format';
-import { createKbnUrlTracker } from '../../kibana_utils/public/state_management/url/kbn_url_tracker';
-import type { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public/types';
-import type { PresentationUtilPluginStart } from '../../presentation_util/public/types';
-import { getSavedObjectFinder } from '../../saved_objects/public/finder/saved_object_finder';
-import type { SavedObjectsStart } from '../../saved_objects/public/plugin';
-import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public/types';
-import type { SharePluginSetup, SharePluginStart } from '../../share/public/plugin';
-import type { UrlGeneratorState } from '../../share/public/url_generators/url_generator_definition';
-import type { SpacesOssPluginStart } from '../../spaces_oss/public/types';
-import type { UiActionsSetup, UiActionsStart } from '../../ui_actions/public/plugin';
-import type { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public/plugin';
-import type { UsageCollectionSetup } from '../../usage_collection/public/plugin';
-import type { VisualizationsStart } from '../../visualizations/public/plugin';
-import type { DashboardCapabilities } from '../common/types';
-import { AddToLibraryAction } from './application/actions/add_to_library_action';
-import { ClonePanelAction } from './application/actions/clone_panel_action';
-import { CopyToDashboardAction } from './application/actions/copy_to_dashboard_action';
-import { ExpandPanelAction } from './application/actions/expand_panel_action';
-import { ExportCSVAction } from './application/actions/export_csv_action';
-import { LibraryNotificationAction } from './application/actions/library_notification_action';
-import { ReplacePanelAction } from './application/actions/replace_panel_action';
-import { UnlinkFromLibraryAction } from './application/actions/unlink_from_library_action';
-import { DASHBOARD_CONTAINER_TYPE } from './application/embeddable/dashboard_constants';
-import { createDashboardContainerByValueRenderer } from './application/embeddable/dashboard_container_by_value_renderer';
-import type { DashboardContainerFactory } from './application/embeddable/dashboard_container_factory';
-import { DashboardContainerFactoryDefinition } from './application/embeddable/dashboard_container_factory';
-import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder/placeholder_embeddable_factory';
-import { DashboardConstants } from './dashboard_constants';
-import { dashboardFeatureCatalog } from './dashboard_strings';
-import type { DashboardAppLocator } from './locator';
-import { DashboardAppLocatorDefinition } from './locator';
-import { createSavedDashboardLoader } from './saved_dashboards/saved_dashboards';
-import type { DashboardUrlGeneratorState } from './url_generator';
-import { createDashboardUrlGenerator, DASHBOARD_APP_URL_GENERATOR } from './url_generator';
+} from './services/embeddable';
 import {
-  DashboardSetup,
-  DashboardStart
-} from './plugin_contract';
+  ExitFullScreenButton as ExitFullScreenButtonUi,
+  ExitFullScreenButtonProps,
+} from './services/kibana_react';
+
+import {
+  ClonePanelAction,
+  createDashboardContainerByValueRenderer,
+  DASHBOARD_CONTAINER_TYPE,
+  DashboardContainerFactory,
+  DashboardContainerFactoryDefinition,
+  ExpandPanelAction,
+  ReplacePanelAction,
+  UnlinkFromLibraryAction,
+  AddToLibraryAction,
+  LibraryNotificationAction,
+  CopyToDashboardAction,
+  DashboardCapabilities,
+} from './application';
+import {
+  createDashboardUrlGenerator,
+  DASHBOARD_APP_URL_GENERATOR,
+  DashboardUrlGeneratorState,
+} from './url_generator';
+import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
+import { createSavedDashboardLoader } from './saved_dashboards';
+import { DashboardConstants } from './dashboard_constants';
+import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
+import { UrlGeneratorState } from '../../share/public';
+import { ExportCSVAction } from './application/actions/export_csv_action';
+import { dashboardFeatureCatalog } from './dashboard_strings';
+import { replaceUrlHashQuery } from '../../kibana_utils/public';
+import { SpacesOssPluginStart } from './services/spaces';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
     [DASHBOARD_APP_URL_GENERATOR]: UrlGeneratorState<DashboardUrlGeneratorState>;
   }
+}
+
+export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_URL_GENERATOR>;
+
+export interface DashboardFeatureFlagConfig {
+  allowByValueEmbeddables: boolean;
 }
 
 export interface DashboardSetupDependencies {
@@ -102,6 +120,28 @@ export interface DashboardStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   spacesOss?: SpacesOssPluginStart;
   visualizations: VisualizationsStart;
+}
+
+export interface DashboardSetup {
+  locator?: DashboardAppLocator;
+}
+
+export interface DashboardStart {
+  getSavedDashboardLoader: () => SavedObjectLoader;
+  getDashboardContainerByValueRenderer: () => ReturnType<
+    typeof createDashboardContainerByValueRenderer
+  >;
+  /**
+   * @deprecated Use dashboard locator instead. Dashboard locator is available
+   * under `.locator` key. This dashboard URL generator will be removed soon.
+   *
+   * ```ts
+   * plugins.dashboard.locator.getLocation({ ... });
+   * ```
+   */
+  dashboardUrlGenerator?: DashboardUrlGenerator;
+  locator?: DashboardAppLocator;
+  dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
 }
 
 export class DashboardPlugin

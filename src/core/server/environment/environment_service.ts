@@ -5,18 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IConfigService } from '@kbn/config';
-import type { Logger } from '@kbn/logging';
-import type { PathConfigType } from '@kbn/utils';
-import { config as pathConfigDef } from '@kbn/utils';
+
 import { take } from 'rxjs/operators';
-import type { CoreContext } from '../core_context';
-import type { HttpConfigType } from '../http/http_config';
-import { config as httpConfigDef } from '../http/http_config';
-import { createDataFolder } from './create_data_folder';
-import type { PidConfigType } from './pid_config';
-import { config as pidConfigDef } from './pid_config';
+import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
+import { CoreContext } from '../core_context';
+import { Logger } from '../logging';
+import { IConfigService } from '../config';
+import { HttpConfigType, config as httpConfigDef } from '../http';
+import { PidConfigType, config as pidConfigDef } from './pid_config';
 import { resolveInstanceUuid } from './resolve_uuid';
+import { createDataFolder } from './create_data_folder';
 import { writePidFile } from './write_pid_file';
 
 /**

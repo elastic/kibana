@@ -5,22 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import { SavedObjectsSerializer } from '../../serialization/serializer';
-import { SavedObjectsErrorHelpers } from './errors';
-import type {
-  SavedObjectsUpdateObjectsSpacesObject,
-  UpdateObjectsSpacesParams,
-} from './update_objects_spaces';
-import { updateObjectsSpaces } from './update_objects_spaces';
+
 import {
   mockGetBulkOperationError,
   mockGetExpectedVersionProperties,
   mockRawDocExistsInNamespace,
 } from './update_objects_spaces.test.mock';
+
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { ElasticsearchClient } from 'src/core/server/elasticsearch';
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
+import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
+import { SavedObjectsSerializer } from '../../serialization';
+import type {
+  SavedObjectsUpdateObjectsSpacesObject,
+  UpdateObjectsSpacesParams,
+} from './update_objects_spaces';
+import { updateObjectsSpaces } from './update_objects_spaces';
+import { SavedObjectsErrorHelpers } from './errors';
 
 type SetupParams = Partial<
   Pick<UpdateObjectsSpacesParams, 'objects' | 'spacesToAdd' | 'spacesToRemove' | 'options'>

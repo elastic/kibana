@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { SeriesFilter } from '../../series_editor/columns/series_filter';
-import type { SeriesConfig } from '../../types';
+import { SeriesConfig } from '../../types';
 
 export function ReportFilters({
   seriesConfig,

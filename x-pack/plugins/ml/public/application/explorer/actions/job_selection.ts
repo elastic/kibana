@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlJobService } from '../../services/job_service';
+
 import { EXPLORER_ACTION } from '../explorer_constants';
 import { createJobs } from '../explorer_utils';
 

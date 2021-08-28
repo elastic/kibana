@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AnomaliesTable } from '../../../ml/anomaly_detection/anomalies_table/anomalies_table';
-import type { TabProps } from '../shared';
-import { TabContent } from '../shared';
+import { TabContent, TabProps } from '../shared';
 
 const TabComponent = (props: TabProps) => {
   const { node, onClose } = props;

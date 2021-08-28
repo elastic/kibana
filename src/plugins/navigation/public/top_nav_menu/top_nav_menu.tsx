@@ -5,17 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiBadgeProps } from '@elastic/eui';
-import { EuiBadge, EuiBadgeGroup, EuiHeaderLinks } from '@elastic/eui';
+
+import React, { ReactElement } from 'react';
+import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
-import type { ReactElement } from 'react';
-import React from 'react';
-import type { MountPoint } from '../../../../core/public/types';
-import type { DataPublicPluginStart } from '../../../data/public/types';
-import type { StatefulSearchBarProps } from '../../../data/public/ui/search_bar/create_search_bar';
-import type { SearchBarProps } from '../../../data/public/ui/search_bar/search_bar';
-import { MountPointPortal } from '../../../kibana_react/public/util/mount_point_portal';
-import type { TopNavMenuData } from './top_nav_menu_data';
+
+import { MountPoint } from '../../../../core/public';
+import { MountPointPortal } from '../../../kibana_react/public';
+import {
+  StatefulSearchBarProps,
+  DataPublicPluginStart,
+  SearchBarProps,
+} from '../../../data/public';
+import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
 export type TopNavMenuProps = StatefulSearchBarProps &

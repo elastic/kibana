@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ITileLayerArguments } from '../tile_layer/tile_layer';
-import { TileLayer } from '../tile_layer/tile_layer';
+
+import { ITileLayerArguments, TileLayer } from '../tile_layer/tile_layer';
 
 export class VectorTileLayer extends TileLayer {
   static type: string;

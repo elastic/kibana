@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FieldFilter as Filter } from '@kbn/es-query';
+
 import { useMemo } from 'react';
+import { FieldFilter as Filter } from '@kbn/es-query';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   SERVICE_NAME,
@@ -14,8 +16,8 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
+
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 const getWildcardFilter = (field: string, value: string): Filter => {
   return {

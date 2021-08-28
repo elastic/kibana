@@ -7,11 +7,13 @@
  */
 
 import Chance from 'chance';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { SavedObjectsErrorHelpers } from '../../saved_objects/service/lib/errors';
-import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
-import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
+
 import { getUpgradeableConfigMock } from './get_upgradeable_config.test.mock';
+import { SavedObjectsErrorHelpers } from '../../saved_objects';
+import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+
+import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 const chance = new Chance();
 describe('uiSettings/createOrUpgradeSavedConfig', function () {

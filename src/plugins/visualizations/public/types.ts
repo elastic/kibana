@@ -5,16 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { AggConfigOptions } from '../../data/common/search/aggs/agg_config';
-import type { IAggConfigs } from '../../data/common/search/aggs/agg_configs';
-import type { SearchSourceFields } from '../../data/common/search/search_source/types';
-import type { TimefilterContract } from '../../data/public/query/timefilter/timefilter';
-import type { ExpressionAstExpression } from '../../expressions/common/ast/types';
-import type { SavedObject } from '../../saved_objects/public/types';
-import type { VisParams } from '../common/types';
-import { PersistedState } from './persisted_state/persisted_state';
-import type { SerializedVis } from './vis';
-import { Vis } from './vis';
+
+import { SavedObject } from '../../../plugins/saved_objects/public';
+import {
+  AggConfigOptions,
+  IAggConfigs,
+  SearchSourceFields,
+  TimefilterContract,
+} from '../../../plugins/data/public';
+import { ExpressionAstExpression } from '../../expressions/public';
+
+import type { SerializedVis, Vis } from './vis';
+import type { PersistedState } from './persisted_state';
+import type { VisParams } from '../common';
 
 export type { Vis, SerializedVis, VisParams };
 export interface SavedVisState {

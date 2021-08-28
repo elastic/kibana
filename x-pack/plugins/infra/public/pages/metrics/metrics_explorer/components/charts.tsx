@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
+
+import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import type { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
-import type { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
-import { NoData } from '../../../../components/empty_states/no_data';
-import { InfraLoadingPanel } from '../../../../components/loading';
-import type {
-  MetricsExplorerChartOptions,
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
+import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
+  MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
+import { InfraLoadingPanel } from '../../../../components/loading';
+import { NoData } from '../../../../components/empty_states/no_data';
 import { MetricsExplorerChart } from './chart';
 
 type StringOrNull = string | null;

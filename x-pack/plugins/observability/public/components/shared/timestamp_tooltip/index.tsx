@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import type { TimeUnit } from '../../../../common/utils/formatters/datetime';
-import { asAbsoluteDateTime } from '../../../../common/utils/formatters/datetime';
+import { EuiToolTip } from '@elastic/eui';
+import { asAbsoluteDateTime, TimeUnit } from '../../../../common/utils/formatters/datetime';
 
 interface Props {
   /**

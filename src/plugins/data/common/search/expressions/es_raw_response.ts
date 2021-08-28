@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { ExpressionTypeDefinition } from '../../../../expressions/common/expression_types/types';
+
+import type { estypes } from '@elastic/elasticsearch';
+import { ExpressionTypeDefinition } from '../../../../expressions/common';
 
 const name = 'es_raw_response';
 

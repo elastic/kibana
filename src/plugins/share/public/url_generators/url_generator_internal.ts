@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { UrlGeneratorContract } from './url_generator_contract';
-import type {
+import { UrlGeneratorsStart } from './url_generator_service';
+import {
+  UrlGeneratorStateMapping,
   UrlGeneratorId,
   UrlGeneratorsDefinition,
-  UrlGeneratorStateMapping,
 } from './url_generator_definition';
-import type { UrlGeneratorsStart } from './url_generator_service';
+import { UrlGeneratorContract } from './url_generator_contract';
 
 export class UrlGeneratorInternal<Id extends UrlGeneratorId> {
   constructor(

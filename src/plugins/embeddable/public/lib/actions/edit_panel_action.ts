@@ -5,19 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
+import { ApplicationStart } from 'kibana/public';
+import { Action } from 'src/plugins/ui_actions/public';
 import { take } from 'rxjs/operators';
-import type { ApplicationStart } from '../../../../../core/public/application/types';
-import type { Action } from '../../../../ui_actions/public/actions/action';
-import type { SavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
-import type { EmbeddableInput } from '../../../common/types';
-import { ViewMode } from '../../../common/types';
-import type { EmbeddableStart } from '../../plugin';
-import { Container } from '../containers/container';
-import type { IEmbeddable } from '../embeddables/i_embeddable';
+import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
-import { EmbeddableStateTransfer } from '../state_transfer/embeddable_state_transfer';
-import type { EmbeddableEditorState } from '../state_transfer/types';
+import { EmbeddableStart } from '../../plugin';
+import {
+  IEmbeddable,
+  EmbeddableEditorState,
+  EmbeddableStateTransfer,
+  SavedObjectEmbeddableInput,
+  EmbeddableInput,
+  Container,
+} from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 

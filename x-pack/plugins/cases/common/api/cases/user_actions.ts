@@ -6,8 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { UserRT } from '../user';
 import { OWNER_FIELD } from './constants';
+
+import { UserRT } from '../user';
 
 /* To the next developer, if you add/removed fields here
  * make sure to check this file (x-pack/plugins/cases/server/services/user_actions/helpers.ts) too

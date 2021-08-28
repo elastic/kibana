@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import type {
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import {
   EuiDataGridColumn,
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import type {
-  Datatable,
-  DatatableColumn,
-  DatatableColumnMeta,
-} from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
-import type { ColumnConfig } from '../../../common/expressions/datatable/datatable_column';
-import type { FormatFactory } from '../../../common/types';
+import type { Datatable, DatatableColumn, DatatableColumnMeta } from 'src/plugins/expressions';
+import type { FormatFactory } from '../../../common';
+import type { ColumnConfig } from '../../../common/expressions';
 
 export const createGridColumns = (
   bucketColumns: string[],

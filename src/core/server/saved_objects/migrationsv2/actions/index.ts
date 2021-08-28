@@ -5,32 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DocumentsTransformFailed } from '../../migrations/core/migrate_raw_docs';
-import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
-import { pickupUpdatedMappings } from './pickup_updated_mappings';
-import type { AliasNotFound, RemoveIndexNotAConcreteIndex } from './update_aliases';
-import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
-import type { IncompatibleMappingException } from './wait_for_reindex_task';
-import type { WaitForTaskCompletionTimeout } from './wait_for_task';
-import { waitForTask } from './wait_for_task';
 
-export { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';
-export type { BulkOverwriteTransformedDocumentsParams } from './bulk_overwrite_transformed_documents';
-export { calculateExcludeFilters } from './calculate_exclude_filters';
-export type {
-  CalculatedExcludeFilter,
-  CalculateExcludeFiltersParams,
-} from './calculate_exclude_filters';
-export { checkForUnknownDocs } from './check_for_unknown_docs';
-export type {
-  CheckForUnknownDocsFoundDoc,
-  CheckForUnknownDocsParams,
-  UnknownDocsFound,
-} from './check_for_unknown_docs';
-export { cloneIndex } from './clone_index';
-export type { CloneIndexParams, CloneIndexResponse } from './clone_index';
-export { closePit } from './close_pit';
-export type { ClosePitParams } from './close_pit';
+import { RetryableEsClientError } from './catch_retryable_es_client_errors';
+import { DocumentsTransformFailed } from '../../migrations/core/migrate_raw_docs';
+
 export {
   BATCH_SIZE,
   DEFAULT_TIMEOUT,
@@ -38,45 +16,94 @@ export {
   INDEX_NUMBER_OF_SHARDS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
-export { createIndex } from './create_index';
-export type { CreateIndexParams } from './create_index';
-export { fetchIndices } from './fetch_indices';
+
+export type { RetryableEsClientError };
+
 // actions/* imports
 export type { FetchIndexResponse, FetchIndicesParams } from './fetch_indices';
-export { openPit, pitKeepAlive } from './open_pit';
-export type { OpenPitParams, OpenPitResponse } from './open_pit';
-export type { UpdateByQueryResponse } from './pickup_updated_mappings';
-export { readWithPit } from './read_with_pit';
-export type { ReadWithPit, ReadWithPitParams } from './read_with_pit';
-export { refreshIndex } from './refresh_index';
-export type { RefreshIndexParams } from './refresh_index';
-export { reindex } from './reindex';
-export type { ReindexParams, ReindexResponse } from './reindex';
-export { removeWriteBlock } from './remove_write_block';
-export type { RemoveWriteBlockParams } from './remove_write_block';
-export { searchForOutdatedDocuments } from './search_for_outdated_documents';
-export type {
-  SearchForOutdatedDocumentsOptions,
-  SearchResponse,
-} from './search_for_outdated_documents';
-export { setWriteBlock } from './set_write_block';
+export { fetchIndices } from './fetch_indices';
+
 export type { SetWriteBlockParams } from './set_write_block';
-export { transformDocs } from './transform_docs';
-export type { TransformDocsParams } from './transform_docs';
-export { updateAliases } from './update_aliases';
-export type { AliasAction, UpdateAliasesParams } from './update_aliases';
-export { updateAndPickupMappings } from './update_and_pickup_mappings';
-export type {
-  UpdateAndPickupMappingsParams,
-  UpdateAndPickupMappingsResponse,
-} from './update_and_pickup_mappings';
-export { verifyReindex } from './verify_reindex';
-export type { VerifyReindexParams } from './verify_reindex';
+export { setWriteBlock } from './set_write_block';
+
+export type { RemoveWriteBlockParams } from './remove_write_block';
+export { removeWriteBlock } from './remove_write_block';
+
+export type { CloneIndexResponse, CloneIndexParams } from './clone_index';
+export { cloneIndex } from './clone_index';
+
 export type { WaitForIndexStatusYellowParams } from './wait_for_index_status_yellow';
-export { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
+import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
+
+export type { WaitForTaskResponse, WaitForTaskCompletionTimeout } from './wait_for_task';
+import { waitForTask, WaitForTaskCompletionTimeout } from './wait_for_task';
+
+export type { UpdateByQueryResponse } from './pickup_updated_mappings';
+import { pickupUpdatedMappings } from './pickup_updated_mappings';
+
+export type { OpenPitResponse, OpenPitParams } from './open_pit';
+export { openPit, pitKeepAlive } from './open_pit';
+
+export type { ReadWithPit, ReadWithPitParams } from './read_with_pit';
+export { readWithPit } from './read_with_pit';
+
+export type { ClosePitParams } from './close_pit';
+export { closePit } from './close_pit';
+
+export type { TransformDocsParams } from './transform_docs';
+export { transformDocs } from './transform_docs';
+
+export type { RefreshIndexParams } from './refresh_index';
+export { refreshIndex } from './refresh_index';
+
+export type { ReindexResponse, ReindexParams } from './reindex';
+export { reindex } from './reindex';
+
+import type { IncompatibleMappingException } from './wait_for_reindex_task';
+
 export { waitForReindexTask } from './wait_for_reindex_task';
-export type { WaitForTaskCompletionTimeout, WaitForTaskResponse } from './wait_for_task';
-export type { RetryableEsClientError };
+
+export type { VerifyReindexParams } from './verify_reindex';
+export { verifyReindex } from './verify_reindex';
+
+import type { AliasNotFound, RemoveIndexNotAConcreteIndex } from './update_aliases';
+
+export type { AliasAction, UpdateAliasesParams } from './update_aliases';
+export { updateAliases } from './update_aliases';
+
+export type { CreateIndexParams } from './create_index';
+export { createIndex } from './create_index';
+
+export type {
+  UpdateAndPickupMappingsResponse,
+  UpdateAndPickupMappingsParams,
+} from './update_and_pickup_mappings';
+export { updateAndPickupMappings } from './update_and_pickup_mappings';
+
+export type {
+  CheckForUnknownDocsParams,
+  UnknownDocsFound,
+  CheckForUnknownDocsFoundDoc,
+} from './check_for_unknown_docs';
+export { checkForUnknownDocs } from './check_for_unknown_docs';
+
+export { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
+
+export type {
+  SearchResponse,
+  SearchForOutdatedDocumentsOptions,
+} from './search_for_outdated_documents';
+export { searchForOutdatedDocuments } from './search_for_outdated_documents';
+
+export type { BulkOverwriteTransformedDocumentsParams } from './bulk_overwrite_transformed_documents';
+export { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';
+
+export type {
+  CalculateExcludeFiltersParams,
+  CalculatedExcludeFilter,
+} from './calculate_exclude_filters';
+export { calculateExcludeFilters } from './calculate_exclude_filters';
+
 export { pickupUpdatedMappings, waitForTask, waitForIndexStatusYellow };
 export type { AliasNotFound, RemoveIndexNotAConcreteIndex };
 

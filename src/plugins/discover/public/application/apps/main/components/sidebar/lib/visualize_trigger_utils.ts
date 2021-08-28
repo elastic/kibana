@@ -5,17 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPatternField } from '../../../../../../../../data/common/index_patterns/fields/index_pattern_field';
+
 import {
-  visualizeFieldTrigger,
   VISUALIZE_FIELD_TRIGGER,
-} from '../../../../../../../../ui_actions/public/triggers/visualize_field_trigger';
-import {
-  visualizeGeoFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
-} from '../../../../../../../../ui_actions/public/triggers/visualize_geo_field_trigger';
+  visualizeFieldTrigger,
+  visualizeGeoFieldTrigger,
+} from '../../../../../../../../ui_actions/public';
 import { getUiActions } from '../../../../../../kibana_services';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { IndexPatternField, KBN_FIELD_TYPES } from '../../../../../../../../data/public';
 
 function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE

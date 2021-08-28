@@ -4,30 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { CoreSetup, CoreStart, Plugin as CorePlugin } from 'src/core/public';
+
 import { i18n } from '@kbn/i18n';
-import type { ReactElement } from 'react';
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { Plugin as CorePlugin } from '../../../../src/core/public/plugins/plugin';
-import type { ChartsPluginStart } from '../../../../src/plugins/charts/public/types';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public/types';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public/plugin';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry';
-import { Storage } from '../../../../src/plugins/kibana_utils/public/storage/storage';
-import type {
-  ManagementAppMountParams,
-  ManagementSetup,
-} from '../../../../src/plugins/management/public/types';
-import type { SpacesOssPluginStart } from '../../../../src/plugins/spaces_oss/public/types';
-import type { PluginStartContract as AlertingStart } from '../../alerting/public/plugin';
-import { KibanaFeature } from '../../features/common/kibana_feature';
-import type { FeaturesPluginStart } from '../../features/public/plugin';
-import type { SpacesPluginStart } from '../../spaces/public/plugin';
+import { ReactElement } from 'react';
+import { FeaturesPluginStart } from '../../features/public';
+import { KibanaFeature } from '../../features/common';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
 import { TypeRegistry } from './application/type_registry';
-import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
+import {
+  ManagementAppMountParams,
+  ManagementSetup,
+} from '../../../../src/plugins/management/public';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../src/plugins/home/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { PluginStartContract as AlertingStart } from '../../alerting/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import type { SpacesPluginStart } from '../../spaces/public';
+import type { SpacesOssPluginStart } from '../../../../src/plugins/spaces_oss/public';
+
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
-import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
+import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
+import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+
 import type {
   ActionTypeModel,
   AlertAddProps,

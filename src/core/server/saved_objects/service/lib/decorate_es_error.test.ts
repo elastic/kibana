@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { decorateEsError } from './decorate_es_error';

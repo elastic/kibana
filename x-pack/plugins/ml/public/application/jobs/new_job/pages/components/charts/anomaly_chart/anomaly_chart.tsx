@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
 import { Chart, Settings, TooltipType } from '@elastic/charts';
-import type { FC } from 'react';
-import React from 'react';
-import type { LineChartPoint } from '../../../../common/chart_loader/chart_loader';
-import type { Anomaly, ModelItem } from '../../../../common/results_loader/results_loader';
+import { ModelItem, Anomaly } from '../../../../common/results_loader';
 import { Anomalies } from '../common/anomalies';
+import { ModelBounds } from './model_bounds';
+import { Line } from './line';
+import { Scatter } from './scatter';
 import { Axes } from '../common/axes';
 import { getXRange } from '../common/utils';
-import { LoadingWrapper } from '../loading_wrapper/loading_wrapper';
-import { Line } from './line';
-import { ModelBounds } from './model_bounds';
-import { Scatter } from './scatter';
+import { LineChartPoint } from '../../../../common/chart_loader';
+import { LoadingWrapper } from '../loading_wrapper';
 
 export enum CHART_TYPE {
   LINE,

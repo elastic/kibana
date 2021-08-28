@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import type { Location } from 'history';
+
+import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { Location } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import type { IUrlParams } from '../../../context/url_params_context/types';
+import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
@@ -17,6 +18,7 @@ import { AggregatedTransactionsBadge } from '../../shared/aggregated_transaction
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
+
 import { useRedirect } from './useRedirect';
 
 function getRedirectLocation({

@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup } from '../../../../../core/server';
-import { builtInTutorials } from '../../tutorials/register';
-import type {
-  ScopedTutorialContextFactory,
-  TutorialContextFactory,
+
+import { CoreSetup } from 'src/core/server';
+import {
   TutorialProvider,
+  TutorialContextFactory,
+  ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
 import { tutorialSchema } from './lib/tutorial_schema';
+import { builtInTutorials } from '../../tutorials/register';
 
 export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here

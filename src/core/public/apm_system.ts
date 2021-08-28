@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { AgentConfigOptions } from '@elastic/apm-rum';
-import { ApmBase } from '@elastic/apm-rum';
+
+import type { ApmBase, AgentConfigOptions } from '@elastic/apm-rum';
 import { modifyUrl } from '@kbn/std';
-import type { InternalApplicationStart } from './application/types';
+import type { InternalApplicationStart } from './application';
 
 /** "GET protocol://hostname:port/pathname" */
 const HTTP_REQUEST_TRANSACTION_NAME_REGEX = /^(GET|POST|PUT|HEAD|PATCH|DELETE|OPTIONS|CONNECT|TRACE)\s(.*)$/;

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { render } from '@testing-library/react';
 import React from 'react';
-import type { CustomLink } from '../../../../../common/custom_link/custom_link_types';
-import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,

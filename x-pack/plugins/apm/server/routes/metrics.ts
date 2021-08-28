@@ -6,12 +6,11 @@
  */
 
 import * as t from 'io-ts';
-import { environmentRt } from '../../common/environment_rt';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getMetricsChartDataByAgent } from '../lib/metrics/get_metrics_chart_data_by_agent';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { kueryRt, rangeRt } from './default_api_types';
+import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
 const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/metrics/charts',

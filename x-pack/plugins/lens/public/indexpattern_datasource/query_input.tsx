@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import React from 'react';
-import type { Query } from '../../../../../src/plugins/data/public';
-import { QueryStringInput } from '../../../../../src/plugins/data/public/ui/query_string_input';
-import { useDebouncedValue } from '../shared_components/debounced_value';
+import { QueryStringInput, Query } from '../../../../../src/plugins/data/public';
+import { useDebouncedValue } from '../shared_components';
 
 export const QueryInput = ({
   value,

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { FeatureCollection } from 'geojson';
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
-import type { FileUploadGeoResults } from '../../../../../file_upload/public/lazy_load_bundle';
+import { FeatureCollection } from 'geojson';
+import { EuiPanel } from '@elastic/eui';
 import { DEFAULT_MAX_RESULT_WINDOW, SCALING_TYPES } from '../../../../common/constants';
+import { GeoJsonFileSource } from '../../sources/geojson_file_source';
+import { VectorLayer } from '../../layers/vector_layer';
+import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
+import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { FileUploadGeoResults } from '../../../../../file_upload/public';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { getFileUploadComponent } from '../../../kibana_services';
-import { createDefaultLayerDescriptor } from '../../sources/es_search_source/es_documents_layer_wizard';
-import { GeoJsonFileSource } from '../../sources/geojson_file_source/geojson_file_source';
-import type { RenderWizardArguments } from '../layer_wizard_registry';
-import { VectorLayer } from '../vector_layer/vector_layer';
 
 export enum UPLOAD_STEPS {
   CONFIGURE_UPLOAD = 'CONFIGURE_UPLOAD',

@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { SearchHit } from '../../../../../../src/core/types/elasticsearch/search';
+import type { SearchHit } from '../../../../../../src/core/types/elasticsearch';
+import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 import { getAgentStatus } from '../../../common/services/agent_status';
-import type {
-  Agent,
-  AgentSOAttributes,
-  FleetServerAgent,
-} from '../../../common/types/models/agent';
 
 type FleetServerAgentESResponse =
   | estypes.MgetHit<FleetServerAgent>

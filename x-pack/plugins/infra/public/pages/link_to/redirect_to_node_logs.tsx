@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { flowRight } from 'lodash';
 import React from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
-import { Redirect } from 'react-router-dom';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
 import { findInventoryFields } from '../../../common/inventory_models';
-import type { InventoryItemType } from '../../../common/inventory_models/types';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
-import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter/with_log_filter_url_state';
-import { replaceLogPositionInQueryString } from '../../containers/logs/log_position/with_log_position_url_state';
-import { useLogSource } from '../../containers/logs/log_source/log_source';
-import { replaceSourceIdInQueryString } from '../../containers/source_id/source_id';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import type { LinkDescriptor } from '../../hooks/use_link_props';
+import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
+import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
+import { useLogSource } from '../../containers/logs/log_source';
+import { replaceSourceIdInQueryString } from '../../containers/source_id';
+import { LinkDescriptor } from '../../hooks/use_link_props';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;

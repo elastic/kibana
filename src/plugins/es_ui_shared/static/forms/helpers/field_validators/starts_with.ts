@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { startsWith } from '../../../validators/string/starts_with';
-import type { ValidationFunc } from '../../hook_form_lib/types';
-import type { ERROR_CODE } from './types';
+
+import { ValidationFunc } from '../../hook_form_lib';
+import { startsWith } from '../../../validators/string';
+import { ERROR_CODE } from './types';
 
 export const startsWithField = ({ message, char }: { message: string; char: string }) => (
   ...args: Parameters<ValidationFunc>

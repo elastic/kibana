@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+
+import { IScopedClusterClient } from 'kibana/server';
 import { annotationProvider } from './annotation';
 
 export function annotationServiceProvider(client: IScopedClusterClient) {

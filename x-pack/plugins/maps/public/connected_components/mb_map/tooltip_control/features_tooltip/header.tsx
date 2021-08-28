@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Component, Fragment, ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
+  EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiTextColor,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { ReactNode } from 'react';
-import React, { Component, Fragment } from 'react';
-import type { IVectorLayer } from '../../../../classes/layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 interface Props {
   findLayerById: (layerId: string) => IVectorLayer | undefined;

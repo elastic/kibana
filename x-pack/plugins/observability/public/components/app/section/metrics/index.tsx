@@ -4,22 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Criteria, Direction, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
-import { EuiBasicTable } from '@elastic/eui';
+
+import {
+  Criteria,
+  Direction,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiTableSortingType,
+} from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
-import { SectionContainer } from '..';
-import { getDataHandler } from '../../../../data_handler';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useHasData } from '../../../../hooks/use_has_data';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import type {
+import React, { useState, useCallback } from 'react';
+import {
   MetricsFetchDataResponse,
   MetricsFetchDataSeries,
   NumberOrNull,
   StringOrNull,
-} from '../../../../typings/fetch_overview_data';
+} from '../../../..';
+import { SectionContainer } from '../';
+import { getDataHandler } from '../../../../data_handler';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useHasData } from '../../../../hooks/use_has_data';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { HostLink } from './host_link';
 import { formatDuration } from './lib/format_duration';
 import { MetricWithSparkline } from './metric_with_sparkline';

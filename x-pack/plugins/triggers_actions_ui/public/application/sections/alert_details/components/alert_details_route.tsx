@@ -4,21 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiSpacer } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
-import { ToastsApi } from '../../../../../../../../src/core/public/notifications/toasts/toasts_api';
-import type { ActionType } from '../../../../../../actions/common/types';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { Alert, AlertType, ResolvedRule } from '../../../../types';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
-import type { ComponentOpts as ActionApis } from '../../common/components/with_actions_api_operations';
-import { withActionOperations } from '../../common/components/with_actions_api_operations';
-import type { ComponentOpts as AlertApis } from '../../common/components/with_bulk_alert_api_operations';
-import { withBulkAlertOperations } from '../../common/components/with_bulk_alert_api_operations';
+import React, { useState, useEffect } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
+import { ToastsApi } from 'kibana/public';
+import { EuiSpacer } from '@elastic/eui';
+import { Alert, AlertType, ActionType, ResolvedRule } from '../../../../types';
 import { AlertDetailsWithApi as AlertDetails } from './alert_details';
+import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
+import {
+  ComponentOpts as AlertApis,
+  withBulkAlertOperations,
+} from '../../common/components/with_bulk_alert_api_operations';
+import {
+  ComponentOpts as ActionApis,
+  withActionOperations,
+} from '../../common/components/with_actions_api_operations';
+import { useKibana } from '../../../../common/lib/kibana';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 type AlertDetailsRouteProps = RouteComponentProps<{
   ruleId: string;

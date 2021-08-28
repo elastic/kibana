@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiLoadingContent } from '@elastic/eui';
 import React from 'react';
-import type { FileUploadComponentProps } from '../lazy_load_bundle';
-import { lazyLoadModules } from '../lazy_load_bundle';
+import { EuiLoadingContent } from '@elastic/eui';
+import { FileUploadComponentProps, lazyLoadModules } from '../lazy_load_bundle';
 
 interface State {
   JsonUploadAndParse: React.ComponentType<FileUploadComponentProps> | null;

@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import * as t from 'io-ts';
-import {
-  agentConfigurationIntakeRt,
-  serviceRt,
-} from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
-import { syncAgentConfigsToApmPackagePolicies } from '../../lib/fleet/sync_agent_configs_to_apm_package_policies';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
-import { deleteConfiguration } from '../../lib/settings/agent_configuration/delete_configuration';
-import { findExactConfiguration } from '../../lib/settings/agent_configuration/find_exact_configuration';
-import { getAgentNameByService } from '../../lib/settings/agent_configuration/get_agent_name_by_service';
-import { getEnvironments } from '../../lib/settings/agent_configuration/get_environments';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
-import { listConfigurations } from '../../lib/settings/agent_configuration/list_configurations';
-import { markAppliedByAgent } from '../../lib/settings/agent_configuration/mark_applied_by_agent';
+import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
 import { searchConfigurations } from '../../lib/settings/agent_configuration/search_configurations';
+import { findExactConfiguration } from '../../lib/settings/agent_configuration/find_exact_configuration';
+import { listConfigurations } from '../../lib/settings/agent_configuration/list_configurations';
+import { getEnvironments } from '../../lib/settings/agent_configuration/get_environments';
+import { deleteConfiguration } from '../../lib/settings/agent_configuration/delete_configuration';
 import { createApmServerRoute } from '../create_apm_server_route';
+import { getAgentNameByService } from '../../lib/settings/agent_configuration/get_agent_name_by_service';
+import { markAppliedByAgent } from '../../lib/settings/agent_configuration/mark_applied_by_agent';
+import {
+  serviceRt,
+  agentConfigurationIntakeRt,
+} from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
+import { syncAgentConfigsToApmPackagePolicies } from '../../lib/fleet/sync_agent_configs_to_apm_package_policies';
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({

@@ -7,10 +7,9 @@
  */
 
 import _ from 'lodash';
-import type { Filter } from '../../../../data/common/es_query';
-import { esFilters } from '../../../../data/public/deprecated';
-import type { DashboardPanelState } from '../../../common/types';
-import type {
+import { DashboardPanelState } from '..';
+import { esFilters, Filter } from '../../services/data';
+import {
   DashboardContainerInput,
   DashboardOptions,
   DashboardPanelMap,

@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ExpressionTypeDefinition } from '../types';
-import type { ExpressionValueRender } from './render';
+
+import { ExpressionTypeDefinition } from '../types';
+import { ExpressionValueRender } from '.';
 
 const name = 'range';
 

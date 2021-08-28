@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { LayerDescriptor } from '../../common/descriptor_types/layer_descriptor_types';
-import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source/create_layer_descriptor';
+
+import { LayerDescriptor } from '../../common/descriptor_types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
+import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
 
 export const createLayerDescriptors = {
   async createSecurityLayerDescriptors(

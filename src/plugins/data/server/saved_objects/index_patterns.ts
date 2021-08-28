@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsType } from '../../../../core/server/saved_objects/types';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../common/constants';
+
+import type { SavedObjectsType } from 'kibana/server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../common';
 
 export const indexPatternSavedObjectType: SavedObjectsType = {
   name: INDEX_PATTERN_SAVED_OBJECT_TYPE,

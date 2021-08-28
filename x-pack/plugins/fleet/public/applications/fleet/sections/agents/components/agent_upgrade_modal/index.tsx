@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBetaBadge, EuiConfirmModal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
 
-import type { Agent } from '../../../../../../../common/types/models/agent';
-import { useStartServices } from '../../../../../../hooks/use_core';
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiConfirmModal, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { Agent } from '../../../../types';
 import {
   sendPostAgentUpgrade,
   sendPostBulkAgentUpgrade,
-} from '../../../../../../hooks/use_request/agents';
+  useStartServices,
+} from '../../../../hooks';
 
 interface Props {
   onClose: () => void;

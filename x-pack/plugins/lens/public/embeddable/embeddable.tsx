@@ -4,45 +4,58 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { METRIC_TYPE } from '@kbn/analytics';
-import type { Ast } from '@kbn/interpreter/common';
-import { toExpression } from '@kbn/interpreter/common';
-import fastIsEqual from 'fast-deep-equal';
+
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import {
+  ExecutionContextSearch,
+  Filter,
+  Query,
+  TimefilterContract,
+  TimeRange,
+  IndexPattern,
+} from 'src/plugins/data/public';
+import { PaletteOutput } from 'src/plugins/charts/public';
+
 import { Subscription } from 'rxjs';
-import { distinctUntilChanged, map, skip } from 'rxjs/operators';
-import type { Query } from 'src/plugins/data/public';
-import type { IBasePath } from '../../../../../src/core/public/http/types';
-import type { PaletteOutput } from '../../../../../src/plugins/charts/common/palette';
-import type { Filter } from '../../../../../src/plugins/data/common/es_query';
-import { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { IndexPatternsContract } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
-import type { TimeRange } from '../../../../../src/plugins/data/common/query/timefilter/types';
-import type { ExecutionContextSearch } from '../../../../../src/plugins/data/common/search/expressions/kibana_context_type';
-import type { TimefilterContract } from '../../../../../src/plugins/data/public/query/timefilter/timefilter';
-import type { SavedObjectEmbeddableInput } from '../../../../../src/plugins/embeddable/common/lib/saved_object_embeddable';
-import type { EmbeddableInput } from '../../../../../src/plugins/embeddable/common/types';
-import type { IContainer } from '../../../../../src/plugins/embeddable/public/lib/containers/i_container';
-import { Embeddable as AbstractEmbeddable } from '../../../../../src/plugins/embeddable/public/lib/embeddables/embeddable';
-import type { EmbeddableOutput } from '../../../../../src/plugins/embeddable/public/lib/embeddables/i_embeddable';
-import type { ReferenceOrValueEmbeddable } from '../../../../../src/plugins/embeddable/public/lib/reference_or_value_embeddable/types';
-import type { DefaultInspectorAdapters } from '../../../../../src/plugins/expressions/common/execution/types';
-import type { RenderMode } from '../../../../../src/plugins/expressions/common/expression_renderers/types';
-import type { ReactExpressionRendererType } from '../../../../../src/plugins/expressions/public/react_expression_renderer';
-import type { ExpressionRendererEvent } from '../../../../../src/plugins/expressions/public/render';
-import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public/plugin';
-import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public/embeddable/events';
-import { DOC_TYPE, getEditPath, PLUGIN_ID } from '../../common/constants';
-import type { ErrorMessage } from '../editor_frame_service/types';
-import type { LensAttributeService } from '../lens_attribute_service';
-import { injectFilterReferences } from '../persistence/filter_references';
-import type { Document } from '../persistence/saved_object_store';
-import type { LensBrushEvent, LensFilterEvent, LensTableRowContextMenuEvent } from '../types';
-import { isLensBrushEvent, isLensFilterEvent, isLensTableRowContextMenuClickEvent } from '../types';
+import { toExpression, Ast } from '@kbn/interpreter/common';
+import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
+import { map, distinctUntilChanged, skip } from 'rxjs/operators';
+import fastIsEqual from 'fast-deep-equal';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  ExpressionRendererEvent,
+  ReactExpressionRendererType,
+} from '../../../../../src/plugins/expressions/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
+
+import {
+  Embeddable as AbstractEmbeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IContainer,
+  SavedObjectEmbeddableInput,
+  ReferenceOrValueEmbeddable,
+} from '../../../../../src/plugins/embeddable/public';
+import { Document, injectFilterReferences } from '../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import {
+  isLensBrushEvent,
+  isLensFilterEvent,
+  isLensTableRowContextMenuClickEvent,
+  LensBrushEvent,
+  LensFilterEvent,
+  LensTableRowContextMenuEvent,
+} from '../types';
+
+import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
+import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
+import { IBasePath } from '../../../../../src/core/public';
+import { LensAttributeService } from '../lens_attribute_service';
+import type { ErrorMessage } from '../editor_frame_service/types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 

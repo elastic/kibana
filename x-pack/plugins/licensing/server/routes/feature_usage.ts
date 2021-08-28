@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StartServicesAccessor } from '../../../../../src/core/server';
-import type { LicensingPluginStart, LicensingRouter } from '../types';
+
+import { StartServicesAccessor } from 'src/core/server';
+import { LicensingPluginStart } from '../types';
+import { LicensingRouter } from '../types';
 
 export function registerFeatureUsageRoute(
   router: LicensingRouter,

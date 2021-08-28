@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+
 import React, { useCallback } from 'react';
-import { getFieldValidityAndErrorMessage } from '../../hook_form_lib/helpers';
-import type { FieldHook } from '../../hook_form_lib/types';
+import { EuiFormRow, EuiRange } from '@elastic/eui';
+
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;

@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { EuiHeaderLink, EuiHeaderLinks, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AppMountParameters } from '../../../../../../../../src/core/public/application/types';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
-import { HeaderMenuPortal } from '../../../../../../observability/public/components/shared';
-import { createExploratoryViewUrl } from '../../../../../../observability/public/components/shared/exploratory_view/configurations/utils';
-import type { SeriesUrl } from '../../../../../../observability/public/components/shared/exploratory_view/types';
+import { EuiHeaderLinks, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  createExploratoryViewUrl,
+  HeaderMenuPortal,
+  SeriesUrl,
+} from '../../../../../../observability/public';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { AppMountParameters } from '../../../../../../../../src/core/public';
 
 const ANALYZE_DATA = i18n.translate('xpack.apm.analyzeDataButtonLabel', {
   defaultMessage: 'Analyze data',

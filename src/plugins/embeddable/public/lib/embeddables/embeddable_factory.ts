@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectAttributes } from '../../../../../core/types/saved_objects';
-import type { PersistableState } from '../../../../kibana_utils/common/persistable_state/types';
-import type { SavedObjectMetaData } from '../../../../saved_objects/public/finder/saved_object_finder';
-import type { PresentableGrouping as UiActionsPresentableGrouping } from '../../../../ui_actions/public/util/presentable';
-import type { EmbeddableInput, EmbeddableStateWithType } from '../../../common/types';
-import type { IContainer } from '../containers/i_container';
-import type { PropertySpec } from '../types';
+
+import { SavedObjectAttributes } from 'src/core/public';
+import { SavedObjectMetaData } from '../../../../saved_objects/public';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
-import type { EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { IContainer } from '../containers/i_container';
+import { PropertySpec } from '../types';
+import { PersistableState } from '../../../../kibana_utils/common';
+import { EmbeddableStateWithType } from '../../../common/types';
+import { UiActionsPresentableGrouping } from '../../../../ui_actions/public';
 
 export interface EmbeddableInstanceConfiguration {
   id: string;

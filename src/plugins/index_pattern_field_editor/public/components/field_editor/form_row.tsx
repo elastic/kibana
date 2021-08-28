@@ -6,19 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { get } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTitle,
+  EuiText,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import { get } from 'lodash';
-import React from 'react';
-import { ToggleField } from '../../../../es_ui_shared/static/forms/components/fields/toggle_field';
-import { UseField } from '../../../../es_ui_shared/static/forms/hook_form_lib/components/use_field';
-import { useFormData } from '../../../../es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
+
+import { UseField, ToggleField, useFormData } from '../../shared_imports';
 
 interface Props {
   title: string;

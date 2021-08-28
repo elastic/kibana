@@ -4,28 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useCallback, useEffect, useState } from 'react';
 import {
+  EuiText,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
-  EuiText,
 } from '@elastic/eui';
-import { isEqual } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { Field } from '../../../../../../src/plugins/es_ui_shared/static/forms/components/field';
-import { Form } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form';
-import { FormDataProvider } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form_data_provider';
-import { getUseField } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/use_field';
-import { useForm } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
-import { useGetTags } from '../../containers/use_get_tags';
-import { schema } from './schema';
-import { Tags } from './tags';
+import { isEqual } from 'lodash/fp';
 import * as i18n from './translations';
+import { Form, FormDataProvider, useForm, getUseField, Field } from '../../common/shared_imports';
+import { schema } from './schema';
+import { useGetTags } from '../../containers/use_get_tags';
+
+import { Tags } from './tags';
 
 const CommonUseField = getUseField({ component: Field });
 

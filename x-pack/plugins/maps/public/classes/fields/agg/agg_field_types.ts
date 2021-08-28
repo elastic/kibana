@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+
+import { IField } from '../field';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IESAggSource } from '../../sources/es_agg_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
-import type { IESAggSource } from '../../sources/es_agg_source/es_agg_source';
-import type { IField } from '../field';
 
 export interface IESAggField extends IField {
   getValueAggDsl(indexPattern: IndexPattern): unknown | null;

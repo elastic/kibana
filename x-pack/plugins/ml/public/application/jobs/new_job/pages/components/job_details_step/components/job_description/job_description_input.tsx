@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiTextArea } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 

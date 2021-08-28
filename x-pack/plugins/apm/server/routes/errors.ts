@@ -6,14 +6,13 @@
  */
 
 import * as t from 'io-ts';
-import { environmentRt } from '../../common/environment_rt';
-import { getErrorDistribution } from '../lib/errors/distribution/get_distribution';
-import { getErrorGroups } from '../lib/errors/get_error_groups';
-import { getErrorGroupSample } from '../lib/errors/get_error_group_sample';
-import { setupRequest } from '../lib/helpers/setup_request';
 import { createApmServerRoute } from './create_apm_server_route';
+import { getErrorDistribution } from '../lib/errors/distribution/get_distribution';
+import { getErrorGroupSample } from '../lib/errors/get_error_group_sample';
+import { getErrorGroups } from '../lib/errors/get_error_groups';
+import { setupRequest } from '../lib/helpers/setup_request';
+import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { kueryRt, rangeRt } from './default_api_types';
 
 const errorsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/errors',

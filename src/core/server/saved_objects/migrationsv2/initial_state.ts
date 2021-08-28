@@ -7,12 +7,12 @@
  */
 
 import * as Option from 'fp-ts/Option';
-import type { SavedObjectsMigrationVersion } from '../../../types/saved_objects';
-import type { IndexMapping } from '../mappings/types';
-import { excludeUnusedTypesQuery } from '../migrations/core/elastic_index';
-import type { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import { IndexMapping } from '../mappings';
+import { SavedObjectsMigrationVersion } from '../../../types';
+import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import type { InitState } from './types';
+import { InitState } from './types';
+import { excludeUnusedTypesQuery } from '../migrations/core';
 
 /**
  * Construct the initial state for the model

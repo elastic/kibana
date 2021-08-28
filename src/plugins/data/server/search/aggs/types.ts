@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ElasticsearchClient } from '../../../../../core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../core/server/saved_objects/types';
-import type { AggsCommonSetup, AggsStart as Start } from '../../../common/search/aggs/types';
+
+import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import { AggsCommonSetup, AggsStart as Start } from '../../../common';
 
 export type AggsSetup = AggsCommonSetup;
 

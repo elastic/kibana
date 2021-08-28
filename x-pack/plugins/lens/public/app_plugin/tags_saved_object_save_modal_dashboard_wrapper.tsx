@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+
+import React, { FC, useState, useMemo, useCallback } from 'react';
+import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
 import {
+  SaveModalDashboardProps,
   LazySavedObjectSaveModalDashboard,
   withSuspense,
-} from '../../../../../src/plugins/presentation_util/public/components';
-import type { SaveModalDashboardProps } from '../../../../../src/plugins/presentation_util/public/components/types';
-import type { OnSaveProps } from '../../../../../src/plugins/saved_objects/public/save_modal/saved_object_save_modal';
-import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public/types';
+} from '../../../../../src/plugins/presentation_util/public';
+import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 
 export type DashboardSaveProps = OnSaveProps & {
   returnToOrigin: boolean;

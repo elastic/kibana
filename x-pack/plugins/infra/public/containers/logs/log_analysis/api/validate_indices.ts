@@ -4,14 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { HttpHandler } from 'src/core/public';
 import { estypes } from '@elastic/elasticsearch';
-import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
-import type { ValidationIndicesFieldSpecification } from '../../../../../common/http_api/log_analysis/validation/log_entry_rate_indices';
+
 import {
   LOG_ANALYSIS_VALIDATE_INDICES_PATH,
+  ValidationIndicesFieldSpecification,
   validationIndicesRequestPayloadRT,
   validationIndicesResponsePayloadRT,
-} from '../../../../../common/http_api/log_analysis/validation/log_entry_rate_indices';
+} from '../../../../../common/http_api';
+
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {

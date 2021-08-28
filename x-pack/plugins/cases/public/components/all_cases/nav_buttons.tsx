@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import type { FunctionComponent } from 'react';
-import React from 'react';
 import styled, { css } from 'styled-components';
 import { ConfigureCaseButton } from '../configure_cases/button';
-import type { CasesNavigation } from '../links';
-import { LinkButton } from '../links';
-import type { ErrorMessage } from '../use_push_to_service/callout/types';
 import * as i18n from './translations';
+import { CasesNavigation, LinkButton } from '../links';
+import { ErrorMessage } from '../use_push_to_service/callout/types';
 
 const ButtonFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`

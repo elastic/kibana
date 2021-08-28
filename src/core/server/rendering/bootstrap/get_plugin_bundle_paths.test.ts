@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { UiPlugins } from '../../plugins/plugins_service';
-import type { InternalPluginInfo } from '../../plugins/types';
-import { PluginType } from '../../plugins/types';
+
+import { InternalPluginInfo, PluginType, UiPlugins } from '../../plugins';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 
 const createUiPlugins = (pluginDeps: Record<string, string[]>) => {

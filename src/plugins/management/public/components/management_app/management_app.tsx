@@ -5,21 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { ScopedHistory } from '../../../../../core/public/application/scoped_history';
-import type { AppMountParameters } from '../../../../../core/public/application/types';
-import type { ChromeBreadcrumb } from '../../../../../core/public/chrome/types';
-import type { KibanaPageTemplateProps } from '../../../../kibana_react/public/page_template/page_template';
-import { KibanaPageTemplate } from '../../../../kibana_react/public/page_template/page_template';
-import { reactRouterNavigate } from '../../../../kibana_react/public/react_router_navigate/react_router_navigate';
-import type { SectionsServiceStart } from '../../types';
-import { MANAGEMENT_BREADCRUMB } from '../../utils/breadcrumbs';
-import { ManagementSection } from '../../utils/management_section';
-import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
 import './management_app.scss';
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
+import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
+
 import { ManagementRouter } from './management_router';
+import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
+import {
+  KibanaPageTemplate,
+  KibanaPageTemplateProps,
+  reactRouterNavigate,
+} from '../../../../kibana_react/public';
+import { SectionsServiceStart } from '../../types';
 
 interface ManagementAppProps {
   appBasePath: string;

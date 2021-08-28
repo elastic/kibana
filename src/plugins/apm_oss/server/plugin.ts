@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { APMOSSConfig } from '.';
-import type { Plugin, PluginInitializerContext } from '../../../core/server/plugins/types';
-import type { APMOSSPluginSetup } from './types';
 
-export type { APMOSSPluginSetup };
+import { Observable } from 'rxjs';
+import { Plugin, PluginInitializerContext } from 'src/core/server';
+import { APMOSSConfig } from './';
 
 export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -23,4 +22,9 @@ export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
 
   start() {}
   stop() {}
+}
+
+export interface APMOSSPluginSetup {
+  config: APMOSSConfig;
+  config$: Observable<APMOSSConfig>;
 }

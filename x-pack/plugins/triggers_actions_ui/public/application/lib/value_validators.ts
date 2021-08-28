@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { constant, get, set } from 'lodash';
-import type { Alert, IErrorObject, UserConfiguredActionConnector } from '../../types';
+import { UserConfiguredActionConnector, IErrorObject, Alert } from '../../types';
 
 export function throwIfAbsent<T>(message: string) {
   return (value: T | undefined): T => {

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { memo, useCallback } from 'react';
-import { LinkAnchor } from '../links';
-import type { ActionsNavigation } from './helpers';
 import * as i18n from './translations';
+import { LinkAnchor } from '../links';
+import { ActionsNavigation } from './helpers';
 
 interface EndpointInfo {
   endpointId: string;

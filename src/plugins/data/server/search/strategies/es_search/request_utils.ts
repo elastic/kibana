@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Search } from '@elastic/elasticsearch/api/requestParams';
+
 import type { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
-import type { SharedGlobalConfig } from '../../../../../../core/server/plugins/types';
-import type { IUiSettingsClient } from '../../../../../../core/server/ui_settings/types';
-import { UI_SETTINGS } from '../../../../common/constants';
+import type { Search } from '@elastic/elasticsearch/api/requestParams';
+import type { IUiSettingsClient, SharedGlobalConfig } from 'kibana/server';
+import { UI_SETTINGS } from '../../../../common';
 
 export function getShardTimeout(config: SharedGlobalConfig): Pick<Search, 'timeout'> {
   const timeout = config.elasticsearch.shardTimeout.asMilliseconds();

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type {
-  DryRunPackagePolicy,
-  NewPackagePolicy,
   PackagePolicy,
-  PackagePolicyPackage,
+  NewPackagePolicy,
   UpdatePackagePolicy,
-} from '../models/package_policy';
+  DryRunPackagePolicy,
+  PackagePolicyPackage,
+} from '../models';
 
 export interface GetPackagePoliciesRequest {
   query: {

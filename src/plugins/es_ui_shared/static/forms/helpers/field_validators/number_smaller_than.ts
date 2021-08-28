@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isNumberSmallerThan } from '../../../validators/number/smaller_than';
-import type { ValidationError, ValidationFunc } from '../../hook_form_lib/types';
-import type { ERROR_CODE } from './types';
+
+import { ValidationFunc, ValidationError } from '../../hook_form_lib';
+import { isNumberSmallerThan } from '../../../validators/number';
+import { ERROR_CODE } from './types';
 
 export const numberSmallerThanField = ({
   than,

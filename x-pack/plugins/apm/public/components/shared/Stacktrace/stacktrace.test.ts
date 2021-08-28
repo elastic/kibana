@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getGroupedStackframes } from '.';
-import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+
+import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { getGroupedStackframes } from './';
 import stacktracesMock from './__fixtures__/stacktraces.json';
 
 describe('Stacktrace', () => {

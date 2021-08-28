@@ -5,16 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import Boom from '@hapi/boom';
+
 import type { Request } from '@hapi/hapi';
-import type { MockedLogger } from '@kbn/logging/mocks';
-import { loggerMock } from '@kbn/logging/mocks';
-import { getResponsePayloadBytes } from './get_payload_size';
+import Boom from '@hapi/boom';
+import { loggerMock, MockedLogger } from '../../logging/logger.mock';
 import { getEcsResponseLog } from './get_response_log';
 
 jest.mock('./get_payload_size', () => ({
   getResponsePayloadBytes: jest.fn().mockReturnValue(1234),
 }));
+
+import { getResponsePayloadBytes } from './get_payload_size';
 
 interface RequestFixtureOptions {
   auth?: Record<string, any>;

@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PublicContract } from '@kbn/utility-types';
-import type { HttpSetup } from '../../../../../core/public/http/types';
+
+import { PublicContract } from '@kbn/utility-types';
+import { HttpSetup, SavedObjectsFindOptions } from 'kibana/public';
 import type {
+  SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-} from '../../../../../core/server/saved_objects/service/saved_objects_client';
-import type { SavedObjectsFindOptions } from '../../../../../core/server/saved_objects/types';
-import type { SavedObject } from '../../../../../core/types/saved_objects';
-import type { SearchSessionSavedObjectAttributes } from '../../../common/search/session/types';
-
+} from 'kibana/server';
+import type { SearchSessionSavedObjectAttributes } from '../../../common';
 export type SearchSessionSavedObject = SavedObject<SearchSessionSavedObjectAttributes>;
 export type ISessionsClient = PublicContract<SessionsClient>;
 export interface SessionsClientDeps {

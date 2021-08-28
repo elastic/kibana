@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { RisonValue } from 'rison-node';
-import rison from 'rison-node';
-import { isStateHash, persistState, retrieveState } from '../state_hash/state_hash';
+
+import rison, { RisonValue } from 'rison-node';
+import { isStateHash, retrieveState, persistState } from '../state_hash';
 
 // should be:
 // export function decodeState<State extends RisonValue>(expandedOrHashedState: string)

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCallback } from 'react';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { last, map, startWith, switchMap } from 'rxjs/operators';
-import type { LogEntryCursor } from '../../../../common/log_entry/log_entry_cursor';
-import type { LogSourceColumnConfiguration } from '../../../../common/log_sources/log_source_configuration';
-import type { LogEntriesSearchRequestQuery } from '../../../../common/search_strategies/log_entries/log_entries';
-import { flattenDataSearchResponseDescriptor } from '../../../utils/data_search/flatten_data_search_response';
+import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
+import { LogEntryCursor } from '../../../../common/log_entry';
+import { LogEntriesSearchRequestQuery } from '../../../../common/search_strategies/log_entries/log_entries';
+import { flattenDataSearchResponseDescriptor } from '../../../utils/data_search';
 import { useObservable, useObservableState } from '../../../utils/use_observable';
 import { useLogEntriesAfterRequest } from './use_fetch_log_entries_after';
 import { useLogEntriesBeforeRequest } from './use_fetch_log_entries_before';

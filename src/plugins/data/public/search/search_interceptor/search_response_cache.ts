@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Observable, Subscription } from 'rxjs';
-import type { IKibanaSearchResponse } from '../../../common/search/types';
-import { isErrorResponse } from '../../../common/search/utils';
 import { SearchAbortController } from './search_abort_controller';
+import { IKibanaSearchResponse, isErrorResponse } from '../../../common';
 
 interface ResponseCacheItem {
   response$: Observable<IKibanaSearchResponse>;

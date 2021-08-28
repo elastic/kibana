@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DisposableAppender, LogMeta, LogRecord } from '@kbn/logging';
-import { LogLevel } from '@kbn/logging';
+
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { rewriteAppenderMocks } from './mocks';
-import type { RewriteAppenderConfig } from './rewrite_appender';
-import { RewriteAppender } from './rewrite_appender';
 import { createRewritePolicyMock, resetAllMocks } from './rewrite_appender.test.mocks';
+import { rewriteAppenderMocks } from './mocks';
+import { LogLevel, LogRecord, LogMeta, DisposableAppender } from '@kbn/logging';
+import { RewriteAppender, RewriteAppenderConfig } from './rewrite_appender';
 
 // Helper to ensure tuple is typed [A, B] instead of Array<A | B>
 const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];

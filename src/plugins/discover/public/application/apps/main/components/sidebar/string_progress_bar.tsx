@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiProgress } from '@elastic/eui';
 import React from 'react';
+import { EuiProgress } from '@elastic/eui';
 
 interface Props {
   percent: number;

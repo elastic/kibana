@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsFindOptionsReference } from '../../../../core/server/saved_objects/types';
-import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public/api';
+
+import { SavedObjectsFindOptionsReference } from 'kibana/server';
+import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 
 export const getTagFindReferences = ({
   selectedTags,

@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { Fragment, useState } from 'react';
-import type { OnSaveProps, SaveModalState } from './saved_object_save_modal';
-import { SavedObjectSaveModal } from './saved_object_save_modal';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { OnSaveProps, SaveModalState, SavedObjectSaveModal } from '.';
 
 interface SaveModalDocumentInfo {
   id?: string;

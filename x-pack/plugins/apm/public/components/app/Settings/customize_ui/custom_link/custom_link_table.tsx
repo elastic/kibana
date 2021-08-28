@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -14,11 +15,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
-import type { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
+import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
-import type { ITableColumn } from '../../../../shared/managed_table';
-import { ManagedTable } from '../../../../shared/managed_table';
+import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 
 interface Props {

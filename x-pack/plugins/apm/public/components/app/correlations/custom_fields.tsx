@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
-  EuiAccordion,
-  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiAccordion,
+  EuiComboBox,
   EuiFormRow,
   EuiLink,
   EuiSelect,
@@ -17,9 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
-import { useUiTracker } from '../../../../../observability/public/hooks/use_track_metric';
-import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { useFieldNames } from './use_field_names';
+import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
+import { useUiTracker } from '../../../../../observability/public';
 
 interface Props {
   fieldNames: string[];

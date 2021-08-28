@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PathConfigType } from '@kbn/utils';
-import { loggingSystemMock } from '../logging/logging_system.mock';
+
+import { PathConfigType } from '@kbn/utils';
 import { createDataFolder } from './create_data_folder';
 import { mkdir } from './fs';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 jest.mock('./fs', () => ({
   mkdir: jest.fn(() => Promise.resolve('')),

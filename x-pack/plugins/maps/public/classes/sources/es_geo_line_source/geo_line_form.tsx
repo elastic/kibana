@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
+
+import { IndexPattern } from 'src/plugins/data/public';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getTermsFields } from '../../../index_pattern_util';
+import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
 interface Props {
   indexPattern: IndexPattern;

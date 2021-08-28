@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
+
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { getDefaultFieldsFromJobCaps } from './fields';
+
+import { getDefaultFieldsFromJobCaps, DataFrameAnalyticsConfig } from '../common';
 
 export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import React from 'react';
 import { Observable } from 'rxjs';
-import { renderApp } from '.';
-import type { CoreStart } from '../../../../../src/core/public/types';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { embeddablePluginMock } from '../../../../../src/plugins/embeddable/public/mocks';
+import { CoreStart } from 'src/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
-import type { ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
+import { renderApp } from './';
 import { disableConsoleWarning } from '../utils/testHelpers';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { ApmPluginStartDeps } from '../plugin';
 
 jest.mock('../services/rest/index_pattern', () => ({
   createStaticIndexPattern: () => Promise.resolve(undefined),

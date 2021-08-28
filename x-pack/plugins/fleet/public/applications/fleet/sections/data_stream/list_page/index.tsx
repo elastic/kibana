@@ -4,25 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useMemo } from 'react';
 import type { EuiTableActionsColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiEmptyPrompt,
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 
-import type { DataStream } from '../../../../../../common/types/models/data_stream';
-import { PackageIcon } from '../../../../../components/package_icon';
-import { useStartServices } from '../../../../../hooks/use_core';
-import { usePagination } from '../../../../../hooks/use_pagination';
-import { useGetDataStreams } from '../../../../../hooks/use_request/data_stream';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import type { DataStream } from '../../../types';
+import { useGetDataStreams, useStartServices, usePagination, useBreadcrumbs } from '../../../hooks';
+import { PackageIcon } from '../../../components';
 
 import { DataStreamRowActions } from './components/data_stream_row_actions';
 

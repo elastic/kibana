@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { KBN_FIELD_TYPES } from '../../../../common';
-import { METRIC_TYPES } from '../metrics/metric_agg_types';
-import type { BaseAggParams } from '../types';
-import type { IBucketAggConfig } from './bucket_agg_type';
-import { BucketAggType } from './bucket_agg_type';
+
+import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggGeoTileFnName } from './geo_tile_fn';
+import { KBN_FIELD_TYPES } from '../../../../common';
+import { METRIC_TYPES } from '../metrics/metric_agg_types';
+import { BaseAggParams } from '../types';
 
 const geotileGridTitle = i18n.translate('data.search.aggs.buckets.geotileGridTitle', {
   defaultMessage: 'Geotile',

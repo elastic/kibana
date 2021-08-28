@@ -4,26 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
+  EuiTableRow,
+  EuiTableRowCell,
   EuiButtonEmpty,
   EuiCode,
   EuiDescriptionList,
-  EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
   EuiSpacer,
-  EuiTableRow,
-  EuiTableRowCell,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { AutoSizer } from '../../../../../../../components/auto_sizer';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
-import type { Process } from './types';
 
 interface Props {
   cells: React.ReactNode[];

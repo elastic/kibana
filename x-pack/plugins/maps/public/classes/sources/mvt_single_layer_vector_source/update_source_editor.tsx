@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import type { MVTFieldDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
-import { TooltipSelector } from '../../../components/tooltip_selector/tooltip_selector';
+import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { TooltipSelector } from '../../../components/tooltip_selector';
 import { MVTField } from '../../fields/mvt_field';
-import type { OnSourceChangeArgs } from '../source';
-import type { MVTSettings } from './mvt_single_layer_source_settings';
-import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
+import { MVTSettings, MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
+import { OnSourceChangeArgs } from '../source';
+import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 
 interface Props {
   tooltipFields: MVTField[];

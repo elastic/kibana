@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { estypes } from '@elastic/elasticsearch';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
-import type { MlClient } from '../../lib/ml_client/types';
+import type { MlClient } from '../../lib/ml_client';
 
 type ScheduledEvent = estypes.MlCalendarEvent;
 

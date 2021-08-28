@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart } from '../../../../../src/core/public/application/types';
-import { createAction } from '../../../../../src/plugins/ui_actions/public/actions/create_action';
-import type { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public/types';
-import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actions/public/types';
+import {
+  createAction,
+  ACTION_VISUALIZE_LENS_FIELD,
+  VisualizeFieldContext,
+} from '../../../../../src/plugins/ui_actions/public';
+import { ApplicationStart } from '../../../../../src/core/public';
 
 export const visualizeFieldAction = (application: ApplicationStart) =>
   createAction<VisualizeFieldContext>({

@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { identity } from 'lodash';
-import type { IFieldFormatsRegistry } from '.';
-import { FieldFormat } from './field_format';
+import { FieldFormat, IFieldFormatsRegistry } from '.';
 
 export const fieldFormatsMock: IFieldFormatsRegistry = {
   getByFieldType: jest.fn(),

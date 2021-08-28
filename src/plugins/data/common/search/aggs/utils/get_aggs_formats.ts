@@ -8,17 +8,17 @@
 
 /* eslint-disable max-classes-per-file */
 import { i18n } from '@kbn/i18n';
-import type { SerializedFieldFormat } from '../../../../../expressions/common/types/common';
-import { FieldFormat } from '../../../../../field_formats/common/field_format';
-import type {
+
+import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
+import {
+  FieldFormat,
   FieldFormatInstanceType,
   FieldFormatsContentType,
   IFieldFormat,
-} from '../../../../../field_formats/common/types';
-import type { DateRange } from '../../expressions/date_range';
+} from '../../../../../field_formats/common';
+import { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
-import type { IpRangeKey } from '../buckets/lib/ip_range';
-import { convertIPRangeToString } from '../buckets/lib/ip_range';
+import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
 
 type GetFieldFormat = (mapping: SerializedFieldFormat) => IFieldFormat;
 

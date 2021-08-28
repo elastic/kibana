@@ -4,22 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiCallOutProps, EuiListGroupItemProps } from '@elastic/eui';
-import { EuiAccordion, EuiCallOut, EuiListGroup, EuiSpacer } from '@elastic/eui';
+
+import React, { FC } from 'react';
+import {
+  EuiCallOut,
+  EuiSpacer,
+  EuiCallOutProps,
+  EuiAccordion,
+  EuiListGroup,
+  EuiListGroupItemProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React from 'react';
+
+import {
+  CategorizationAnalyzer,
+  FieldExampleCheck,
+} from '../../../../../../../../../common/types/categories';
+import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
 import {
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
   VALIDATION_CHECK_DESCRIPTION,
 } from '../../../../../../../../../common/constants/categorization_job';
-import type {
-  CategorizationAnalyzer,
-  FieldExampleCheck,
-} from '../../../../../../../../../common/types/categories';
 import { VALIDATION_RESULT } from '../../../../../../../../../common/types/categories';
-import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout/edit_categorization_analyzer_flyout';
 
 interface Props {
   validationChecks: FieldExampleCheck[];

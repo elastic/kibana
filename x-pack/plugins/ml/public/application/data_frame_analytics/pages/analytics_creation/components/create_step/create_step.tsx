@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useState } from 'react';
 import {
   EuiButton,
   EuiCheckbox,
@@ -13,12 +15,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useState } from 'react';
-import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form/use_create_analytics_form';
+
+import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { Messages } from '../shared';
 import { ANALYTICS_STEPS } from '../../page';
-import { CreateStepFooter } from '../create_step_footer/create_step_footer';
-import { Messages } from '../shared/messages';
+import { CreateStepFooter } from '../create_step_footer';
 
 interface Props extends CreateAnalyticsFormProps {
   step: ANALYTICS_STEPS;

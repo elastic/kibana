@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
+
 import { registerErrorCountAlertType } from './register_error_count_alert_type';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { createRuleTypeMocks } from './test_utils';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 describe('Error count alert', () => {
   it("doesn't send an alert when error count is less than threshold", async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();

@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { debounce, isEmpty } from 'lodash/fp';
-import { useEffect, useRef, useState } from 'react';
-import type { HttpSetup } from '../../../../../../../src/core/public/http/types';
-import { ToastsApi } from '../../../../../../../src/core/public/notifications/toasts/toasts_api';
-import type { ActionConnector } from '../../../../common/api/connectors';
+
+import { isEmpty, debounce } from 'lodash/fp';
+import { useState, useEffect, useRef } from 'react';
+import { HttpSetup, ToastsApi } from 'kibana/public';
+import { ActionConnector } from '../../../../common';
 import { getIssues } from './api';
+import { Issues } from './types';
 import * as i18n from './translations';
-import type { Issues } from './types';
 
 interface Props {
   http: HttpSetup;

@@ -5,25 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import type { CoreUsageDataSetup } from '../../core_usage_data/types';
-import type { InternalHttpServiceSetup } from '../../http/types';
-import type { IKibanaMigrator } from '../migrations/kibana/kibana_migrator';
+
+import { InternalHttpServiceSetup } from '../../http';
+import { CoreUsageDataSetup } from '../../core_usage_data';
+import { Logger } from '../../logging';
 import { SavedObjectConfig } from '../saved_objects_config';
-import { registerBulkCreateRoute } from './bulk_create';
-import { registerBulkGetRoute } from './bulk_get';
-import { registerBulkUpdateRoute } from './bulk_update';
+import { IKibanaMigrator } from '../migrations';
+import { registerGetRoute } from './get';
+import { registerResolveRoute } from './resolve';
 import { registerCreateRoute } from './create';
 import { registerDeleteRoute } from './delete';
-import { registerExportRoute } from './export';
 import { registerFindRoute } from './find';
-import { registerGetRoute } from './get';
-import { registerImportRoute } from './import';
-import { registerLogLegacyImportRoute } from './log_legacy_import';
-import { registerMigrateRoute } from './migrate';
-import { registerResolveRoute } from './resolve';
-import { registerResolveImportErrorsRoute } from './resolve_import_errors';
 import { registerUpdateRoute } from './update';
+import { registerBulkGetRoute } from './bulk_get';
+import { registerBulkCreateRoute } from './bulk_create';
+import { registerBulkUpdateRoute } from './bulk_update';
+import { registerLogLegacyImportRoute } from './log_legacy_import';
+import { registerExportRoute } from './export';
+import { registerImportRoute } from './import';
+import { registerResolveImportErrorsRoute } from './resolve_import_errors';
+import { registerMigrateRoute } from './migrate';
 
 export function registerRoutes({
   http,

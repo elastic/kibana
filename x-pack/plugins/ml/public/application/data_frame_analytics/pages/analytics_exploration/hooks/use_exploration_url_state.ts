@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ML_PAGES } from '../../../../../../common/constants/locator';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
-import type { ExplorationPageUrlState } from '../../../../../../common/types/locator';
-import { isPopulatedObject } from '../../../../../../common/util/object_utils';
+
 import { usePageUrlState } from '../../../../util/url_state';
+import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { ExplorationPageUrlState } from '../../../../../../common/types/locator';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
+import { isPopulatedObject } from '../../../../../../common/util/object_utils';
 
 export function getDefaultExplorationPageUrlState(
   overrides?: Partial<ExplorationPageUrlState>

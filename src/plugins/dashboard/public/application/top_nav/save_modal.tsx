@@ -5,13 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFormRow, EuiSwitch, EuiTextArea } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { Fragment } from 'react';
-import { SavedObjectSaveModal } from '../../../../saved_objects/public/save_modal/saved_object_save_modal';
-import type { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public/api';
-import type { DashboardSaveOptions } from '../../types';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
+
+import type { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
+import { SavedObjectSaveModal } from '../../services/saved_objects';
+import { DashboardSaveOptions } from '../../types';
 
 interface Props {
   onSave: ({

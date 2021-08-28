@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { HTML_CONTEXT_TYPE } from '../content_types/html_content_type';
+
 import { ColorFormat } from './color';
+import { HTML_CONTEXT_TYPE } from '../content_types';
 
 describe('Color Format', () => {
   describe('field is a number', () => {

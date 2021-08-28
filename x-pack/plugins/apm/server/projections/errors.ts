@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../observability/server/utils/queries';
-import {
-  ERROR_GROUP_ID,
   SERVICE_NAME,
+  ERROR_GROUP_ID,
 } from '../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../common/processor_event';
+import { rangeQuery, kqlQuery } from '../../../observability/server';
 import { environmentQuery } from '../../common/utils/environment_query';
-import type { Setup, SetupTimeRange } from '../lib/helpers/setup_request';
+import { ProcessorEvent } from '../../common/processor_event';
 
 export function getErrorGroupsProjection({
   environment,

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isWithinMaxBreakpoint, isWithinMinBreakpoint } from '@elastic/eui';
+
 import { useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import useWindowSize from 'react-use/lib/useWindowSize';
+import useDebounce from 'react-use/lib/useDebounce';
+import { isWithinMaxBreakpoint, isWithinMinBreakpoint } from '@elastic/eui';
 
 export type BreakPoints = ReturnType<typeof getScreenSizes>;
 

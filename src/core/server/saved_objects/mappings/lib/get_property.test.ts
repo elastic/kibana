@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IndexMapping, SavedObjectsFieldMapping } from '../types';
+
+import { SavedObjectsFieldMapping, IndexMapping } from '../types';
 import { getProperty } from './get_property';
 
 const MAPPINGS = {

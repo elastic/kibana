@@ -4,33 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
+
 import { curry } from 'lodash';
-import type { ActionTypeExecutorResult } from '../../../common/types';
-import type { ActionsConfigurationUtilities } from '../../actions_config';
-import type { ActionType, ActionTypeExecutorOptions } from '../../types';
-import { api } from './api';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+import { validate } from './validators';
 import {
-  ExecutorParamsSchemaITSM,
-  ExecutorParamsSchemaSIR,
   ExternalIncidentServiceConfiguration,
   ExternalIncidentServiceSecretConfiguration,
+  ExecutorParamsSchemaITSM,
+  ExecutorParamsSchemaSIR,
 } from './schema';
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
 import { createExternalService } from './service';
+import { api } from './api';
 import * as i18n from './translations';
-import type {
+import { Logger } from '../../../../../../src/core/server';
+import {
   ExecutorParams,
-  ExecutorSubActionCommonFieldsParams,
-  ExecutorSubActionGetChoicesParams,
   ExecutorSubActionPushParams,
-  PushToServiceResponse,
-  ServiceNowExecutorResultData,
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
+  PushToServiceResponse,
+  ExecutorSubActionCommonFieldsParams,
+  ServiceNowExecutorResultData,
+  ExecutorSubActionGetChoicesParams,
 } from './types';
-import { validate } from './validators';
 
 export type ActionParamsType =
   | TypeOf<typeof ExecutorParamsSchemaITSM>

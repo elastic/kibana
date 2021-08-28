@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type {
   Datatable,
   DatatableColumn,
   DatatableRow,
-} from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
-import { FieldFormat } from '../../../../../../src/plugins/field_formats/common/field_format';
+} from '../../../../../../src/plugins/expressions';
+import type { FieldFormat } from '../../../../../../src/plugins/field_formats/common';
 import type { DatatableArgs } from './datatable';
 import type { ColumnConfig, ColumnConfigArg } from './datatable_column';
 

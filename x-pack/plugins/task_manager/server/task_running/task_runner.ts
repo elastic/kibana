@@ -11,43 +11,49 @@
  * rescheduling, middleware application, etc.
  */
 
-import { withSpan } from '@kbn/apm-utils';
-import type { Logger } from '@kbn/logging';
 import apm from 'elastic-apm-node';
-import { defaults, flow, identity } from 'lodash';
+import { withSpan } from '@kbn/apm-utils';
 import { performance } from 'perf_hooks';
-import type { ExecutionContextStart } from '../../../../../src/core/server/execution_context/execution_context_service';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server/saved_objects/service/lib/errors';
-import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
-import type { Middleware } from '../lib/middleware';
-import type { Result } from '../lib/result_type';
+import { identity, defaults, flow } from 'lodash';
 import {
-  asErr,
+  Logger,
+  SavedObjectsErrorHelpers,
+  ExecutionContextStart,
+} from '../../../../../src/core/server';
+
+import { Middleware } from '../lib/middleware';
+import {
   asOk,
-  eitherAsync,
-  isOk,
+  asErr,
   mapErr,
-  mapOk,
-  promiseResult,
+  eitherAsync,
   unwrap,
+  isOk,
+  mapOk,
+  Result,
+  promiseResult,
 } from '../lib/result_type';
-import type {
+import {
+  TaskRun,
+  TaskMarkRunning,
+  asTaskRunEvent,
+  asTaskMarkRunningEvent,
+  startTaskTimer,
+  TaskTiming,
+  TaskPersistence,
+} from '../task_events';
+import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
+import {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
+  isFailedRunResult,
+  SuccessfulRunResult,
   FailedRunResult,
   FailedTaskResult,
-  SuccessfulRunResult,
   TaskDefinition,
+  TaskStatus,
 } from '../task';
-import { isFailedRunResult, TaskStatus } from '../task';
-import type { TaskMarkRunning, TaskRun, TaskTiming } from '../task_events';
-import {
-  asTaskMarkRunningEvent,
-  asTaskRunEvent,
-  startTaskTimer,
-  TaskPersistence,
-} from '../task_events';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError } from './errors';
 

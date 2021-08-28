@@ -4,46 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiKeyPadMenuItem,
-  EuiLink,
-  EuiSpacer,
   EuiTitle,
+  EuiSpacer,
+  EuiKeyPadMenuItem,
   EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { ConnectorAddModal } from '.';
-import type { ActionType } from '../../../../../actions/common/types';
-import type { AlertAction, AlertActionParam } from '../../../../../alerting/common/alert';
-import type { ActionGroup } from '../../../../../alerting/common/alert_type';
+import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
-  DEFAULT_HIDDEN_ACTION_TYPES,
-  DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES,
-  VIEW_LICENSE_OPTIONS_LINK,
-} from '../../../common/constants';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import type {
-  ActionConnector,
-  ActionTypeIndex,
   ActionTypeModel,
-  ActionTypeRegistryContract,
+  AlertAction,
+  ActionTypeIndex,
+  ActionConnector,
+  ActionType,
   ActionVariables,
+  ActionTypeRegistryContract,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
-import { loadAllActions as loadConnectors } from '../../lib/action_connector_api/connectors';
-import { loadActionTypes } from '../../lib/action_connector_api/connector_types';
-import { actionTypeCompare } from '../../lib/action_type_compare';
-import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import type { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
-import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
+import { actionTypeCompare } from '../../lib/action_type_compare';
+import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import {
+  VIEW_LICENSE_OPTIONS_LINK,
+  DEFAULT_HIDDEN_ACTION_TYPES,
+  DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES,
+} from '../../../common/constants';
+import { ActionGroup, AlertActionParam } from '../../../../../alerting/common';
+import { useKibana } from '../../../common/lib/kibana';
+import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
+import { ConnectorAddModal } from '.';
+import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 
 export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
   omitOptionalMessageVariables?: boolean;

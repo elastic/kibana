@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { apm, init } from '@elastic/apm-rum';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { ApmSystem } from './apm_system';
 
 jest.mock('@elastic/apm-rum');
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { init, apm } from '@elastic/apm-rum';
+import { ApmSystem } from './apm_system';
+
 const initMock = init as jest.Mocked<typeof init>;
 const apmMock = apm as DeeplyMockedKeys<typeof apm>;
 

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { InventoryMetric, TSVBMetricModel, TSVBMetricModelCreator, TSVBSeries } from './types';
+
+import { TSVBMetricModelCreator, TSVBMetricModel, TSVBSeries, InventoryMetric } from './types';
 
 export const createTSVBModel = (
   id: InventoryMetric,

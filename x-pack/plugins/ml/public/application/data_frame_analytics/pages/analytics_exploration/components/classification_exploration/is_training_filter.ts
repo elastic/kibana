@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ResultsSearchQuery } from '../../../../common/analytics';
-import { isResultsSearchBoolQuery } from '../../../../common/analytics';
+
+import { isResultsSearchBoolQuery, ResultsSearchQuery } from '../../../../common/analytics';
 
 export type IsTraining = boolean | undefined;
 

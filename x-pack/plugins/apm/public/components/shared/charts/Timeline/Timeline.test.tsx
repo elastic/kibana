@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { Timeline } from '.';
 import {
   disableConsoleWarning,
-  mockMoment,
   mountWithTheme,
+  mockMoment,
   toJson,
 } from '../../../../utils/testHelpers';
+import { Timeline } from '.';
 
 describe('Timeline', () => {
   let consoleMock: jest.SpyInstance;

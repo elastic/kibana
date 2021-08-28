@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { MouseEvent } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import type { MouseEvent } from 'react';
-import React from 'react';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../t_grid/helpers';
+
 import { EventsTdContent } from '../t_grid/styles';
+import { DEFAULT_ICON_BUTTON_WIDTH } from '../t_grid/helpers';
 
 interface ActionIconItemProps {
   ariaLabel?: string;

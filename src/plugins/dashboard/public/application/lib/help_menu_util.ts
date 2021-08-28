@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '../../../../../core/public/types';
+import { CoreStart } from 'kibana/public';
 
 export function addHelpMenuToAppChrome(
   chrome: CoreStart['chrome'],

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
+import { RouteInitialization } from '../types';
 import { indicesSchema } from './schemas/indices_schema';
 
 /**

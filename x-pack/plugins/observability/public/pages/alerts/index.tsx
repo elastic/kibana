@@ -4,24 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import type { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
-import type { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
+import { IndexPatternBase } from '@kbn/es-query';
+import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertWorkflowStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import type { RouteParams } from '../../routes';
+import { RouteParams } from '../../routes';
 import { callObservabilityApi } from '../../services/call_observability_api';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
-import './styles.scss';
 import { WorkflowStatusFilter } from './workflow_status_filter';
+import './styles.scss';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;

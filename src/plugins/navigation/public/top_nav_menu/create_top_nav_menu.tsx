@@ -7,11 +7,10 @@
  */
 
 import React from 'react';
-import type { I18nStart } from '../../../../core/public/i18n/i18n_service';
-import type { DataPublicPluginStart } from '../../../data/public/types';
-import type { TopNavMenuProps } from './top_nav_menu';
-import { TopNavMenu } from './top_nav_menu';
-import type { RegisteredTopNavMenuData } from './top_nav_menu_data';
+import { I18nStart } from 'kibana/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
+import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
 export function createTopNav(
   data: DataPublicPluginStart,

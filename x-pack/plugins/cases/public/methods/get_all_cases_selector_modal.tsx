@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLoadingSpinner } from '@elastic/eui';
+
 import React, { lazy, Suspense } from 'react';
-import type { AllCasesSelectorModalProps } from '../components/all_cases/selector_modal';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { AllCasesSelectorModalProps } from '../components/all_cases/selector_modal';
 import { OwnerProvider } from '../components/owner_context';
-import type { Owner } from '../types';
+import { Owner } from '../types';
 
 const AllCasesSelectorModalLazy = lazy(() => import('../components/all_cases/selector_modal'));
 export const getAllCasesSelectorModalLazy = (props: AllCasesSelectorModalProps & Owner) => (

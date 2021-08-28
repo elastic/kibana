@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCallOut, EuiText } from '@elastic/eui';
+
+import React, { FC, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
+import { EuiCallOut, EuiText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../../job_creator_context';
 
 export const MMLCallout: FC = () => {

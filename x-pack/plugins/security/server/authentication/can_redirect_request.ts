@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+
+import type { KibanaRequest } from 'src/core/server';
+
 import { ROUTE_TAG_API, ROUTE_TAG_CAN_REDIRECT } from '../routes/tags';
 
 const KIBANA_XSRF_HEADER = 'kbn-xsrf';

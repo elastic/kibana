@@ -4,28 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
+
 import { curry } from 'lodash';
-import type { ActionTypeExecutorResult } from '../../../common/types';
-import type { ActionsConfigurationUtilities } from '../../actions_config';
-import type { ActionType, ActionTypeExecutorOptions } from '../../types';
-import { api } from './api';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import { Logger } from '@kbn/logging';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import {
+  SwimlaneExecutorResultData,
+  SwimlanePublicConfigurationType,
+  SwimlaneSecretConfigurationType,
+  ExecutorParams,
+  ExecutorSubActionPushParams,
+} from './types';
+import { validate } from './validators';
 import {
   ExecutorParamsSchema,
   SwimlaneSecretsConfiguration,
   SwimlaneServiceConfiguration,
 } from './schema';
 import { createExternalService } from './service';
-import type {
-  ExecutorParams,
-  ExecutorSubActionPushParams,
-  SwimlaneExecutorResultData,
-  SwimlanePublicConfigurationType,
-  SwimlaneSecretConfigurationType,
-} from './types';
-import { validate } from './validators';
+import { api } from './api';
 
 interface GetActionTypeParams {
   logger: Logger;

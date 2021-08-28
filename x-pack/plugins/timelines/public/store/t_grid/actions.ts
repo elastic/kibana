@@ -6,13 +6,15 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import type { TimelineNonEcsData } from '../../../common/search_strategy/timeline/events/all';
-import type { TimelineExpandedDetailType } from '../../../common/types/timeline';
+import type { TimelineNonEcsData } from '../../../common/search_strategy';
+import type {
+  ColumnHeaderOptions,
+  DataProvider,
+  SortColumnTimeline,
+  TimelineExpandedDetailType,
+} from '../../../common/types/timeline';
 import { TimelineTabs } from '../../../common/types/timeline';
-import type { ColumnHeaderOptions } from '../../../common/types/timeline/columns';
-import type { DataProvider } from '../../../common/types/timeline/data_provider';
-import type { SortColumnTimeline } from '../../../common/types/timeline/store';
-import type { InitialyzeTGridSettings, TGridPersistInput } from './types';
+import { InitialyzeTGridSettings, TGridPersistInput } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 

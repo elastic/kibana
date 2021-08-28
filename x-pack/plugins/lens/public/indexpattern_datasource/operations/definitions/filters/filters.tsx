@@ -5,27 +5,21 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
-import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { omit } from 'lodash';
-import type { MouseEventHandler } from 'react';
-import React, { useState } from 'react';
-import type { OperationDefinition } from '..';
-import type { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/common/search/aggs/types';
-import { queryFilterToAst } from '../../../../../../../../src/plugins/data/common/search/expressions/query_filter_to_ast';
-import type { Query } from '../../../../../../../../src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/common/ast/build_function';
-import type { IndexPattern } from '../../../types';
-import { updateColumnParam } from '../../layer_helpers';
-import type { BaseIndexPatternColumn } from '../column_types';
-import {
-  DragDropBuckets,
-  DraggableBucketContainer,
-  NewBucketButton,
-} from '../shared_components/buckets';
 import './filters.scss';
+import React, { MouseEventHandler, useState } from 'react';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import { omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
+import { updateColumnParam } from '../../layer_helpers';
+import type { OperationDefinition } from '../index';
+import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
+import type { IndexPattern } from '../../../types';
+import type { AggFunctionsMapping, Query } from '../../../../../../../../src/plugins/data/public';
+import { queryFilterToAst } from '../../../../../../../../src/plugins/data/common';
+import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
+import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';

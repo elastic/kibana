@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALERT_RULE_TYPE_ID } from '../../../../../../rule_registry/common/technical_rule_data_field_names';
 import { AlertType } from '../../../../../common/alert_types';
-import { asPercent } from '../../../../../common/utils/formatters/formatters';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { TimeseriesChart } from '../timeseries_chart';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import {
   getComparisonChartTheme,
   getTimeRangeComparison,
 } from '../../time_comparison/get_time_range_comparison';
-import { TimeseriesChart } from '../timeseries_chart';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);

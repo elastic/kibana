@@ -6,22 +6,23 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { TypeOf } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
-import type { ActionsConfigurationUtilities } from '../../actions_config';
+
+import { TypeOf } from '@kbn/config-schema';
 import {
-  ExecutorParamsSchema,
-  ExecutorSubActionCommonFieldsParamsSchema,
-  ExecutorSubActionGetCapabilitiesParamsSchema,
-  ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
-  ExecutorSubActionGetIncidentParamsSchema,
-  ExecutorSubActionGetIssueParamsSchema,
-  ExecutorSubActionGetIssuesParamsSchema,
-  ExecutorSubActionHandshakeParamsSchema,
-  ExecutorSubActionPushParamsSchema,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
+  ExecutorParamsSchema,
+  ExecutorSubActionPushParamsSchema,
+  ExecutorSubActionGetIncidentParamsSchema,
+  ExecutorSubActionHandshakeParamsSchema,
+  ExecutorSubActionGetCapabilitiesParamsSchema,
+  ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
+  ExecutorSubActionGetIssuesParamsSchema,
+  ExecutorSubActionGetIssueParamsSchema,
+  ExecutorSubActionCommonFieldsParamsSchema,
 } from './schema';
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import { Logger } from '../../../../../../src/core/server';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
 export type JiraSecretConfigurationType = TypeOf<

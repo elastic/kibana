@@ -5,14 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AggConfig } from './agg_config';
-import type { IAggConfigs } from './agg_configs';
+
 import { AggParamType } from './param_types/agg';
-import { BaseParamType } from './param_types/base';
 import { FieldParamType } from './param_types/field';
-import { JsonParamType } from './param_types/json';
 import { OptionedParamType } from './param_types/optioned';
 import { StringParamType } from './param_types/string';
+import { JsonParamType } from './param_types/json';
+import { BaseParamType } from './param_types/base';
+
+import { AggConfig } from './agg_config';
+import { IAggConfigs } from './agg_configs';
 
 const paramTypeMap = {
   field: FieldParamType,

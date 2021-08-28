@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+
 import { i18n } from '@kbn/i18n';
 import { memoize, noop } from 'lodash';
 import moment from 'moment';
-import { FieldFormat } from '../../../common/field_format';
-import type { TextContextTypeConvert } from '../../../common/types';
-import { FIELD_FORMAT_IDS } from '../../../common/types';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { FieldFormat, FIELD_FORMAT_IDS } from '../../../common';
+import { TextContextTypeConvert } from '../../../common/types';
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;

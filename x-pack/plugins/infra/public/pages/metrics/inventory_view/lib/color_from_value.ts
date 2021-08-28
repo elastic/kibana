@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { first, gt, gte, isEqual, last, lt, lte, sortBy } from 'lodash';
+
+import { isEqual, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
 import { mix, parseToRgb, toColorString } from 'polished';
-import type {
-  InfraWaffleMapBounds,
-  InfraWaffleMapGradientRule,
-  InfraWaffleMapLegend,
-  InfraWaffleMapStepRule,
-} from '../../../../lib/lib';
 import {
-  GradientLegendRT,
+  InfraWaffleMapBounds,
+  InfraWaffleMapLegend,
   InfraWaffleMapRuleOperator,
-  StepLegendRT,
+  GradientLegendRT,
   SteppedGradientLegendRT,
+  StepLegendRT,
+  InfraWaffleMapStepRule,
+  InfraWaffleMapGradientRule,
 } from '../../../../lib/lib';
 
 const OPERATOR_TO_FN = {

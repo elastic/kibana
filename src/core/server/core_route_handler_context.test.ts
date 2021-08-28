@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { CoreRouteHandlerContext } from './core_route_handler_context';
-import { httpServerMock } from './http/http_server.mocks';
-import { coreMock } from './mocks';
+import { coreMock, httpServerMock } from './mocks';
 
 describe('#elasticsearch', () => {
   describe('#client', () => {

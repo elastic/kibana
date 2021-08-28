@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FIELD_ORIGIN, TOP_TERM_PERCENTAGE_SUFFIX } from '../../../../common/constants';
-import type { IVectorSource } from '../../sources/vector_source/vector_source';
-import type { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { TooltipProperty } from '../../tooltips/tooltip_property';
-import type { IESAggField } from './agg_field_types';
+
+import { IESAggField } from './agg_field_types';
+import { IVectorSource } from '../../sources/vector_source';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import { TOP_TERM_PERCENTAGE_SUFFIX, FIELD_ORIGIN } from '../../../../common/constants';
 
 export class TopTermPercentageField implements IESAggField {
   private readonly _topTermAggField: IESAggField;

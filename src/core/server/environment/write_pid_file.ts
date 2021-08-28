@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
+
 import { unlinkSync as unlink } from 'fs';
 import once from 'lodash/once';
-import { exists, writeFile } from './fs';
-import type { PidConfigType } from './pid_config';
+import { Logger } from '../logging';
+import { writeFile, exists } from './fs';
+import { PidConfigType } from './pid_config';
 
 export const writePidFile = async ({
   pidConfig,

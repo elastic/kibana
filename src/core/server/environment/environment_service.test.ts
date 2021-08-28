@@ -5,15 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { BehaviorSubject } from 'rxjs';
-import { configServiceMock } from '../config/mocks';
-import type { CoreContext } from '../core_context';
-import { mockCoreContext } from '../core_context.mock';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { createDataFolder } from './create_data_folder';
+
 import { EnvironmentService } from './environment_service';
 import { resolveInstanceUuid } from './resolve_uuid';
+import { createDataFolder } from './create_data_folder';
 import { writePidFile } from './write_pid_file';
+import { CoreContext } from '../core_context';
+
+import { configServiceMock } from '../config/mocks';
+import { loggingSystemMock } from '../logging/logging_system.mock';
+import { mockCoreContext } from '../core_context.mock';
 
 jest.mock('./resolve_uuid', () => ({
   resolveInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),

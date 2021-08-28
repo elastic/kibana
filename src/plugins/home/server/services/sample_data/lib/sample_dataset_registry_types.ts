@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SampleDatasetSchema } from './sample_dataset_schema';
 
-export type { AppLinkSchema, DataIndexSchema, SampleDatasetSchema } from './sample_dataset_schema';
+import type { SampleDatasetSchema } from './sample_dataset_schema';
+export type { SampleDatasetSchema, AppLinkSchema, DataIndexSchema } from './sample_dataset_schema';
 
 export enum DatasetStatusTypes {
   NOT_INSTALLED = 'not_installed',

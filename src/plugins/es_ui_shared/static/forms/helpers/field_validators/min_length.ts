@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { hasMinLengthArray } from '../../../validators/array/has_min_length';
-import { hasMinLengthString } from '../../../validators/string/has_min_length';
-import type { ValidationError, ValidationFunc } from '../../hook_form_lib/types';
-import type { ERROR_CODE } from './types';
+
+import { ValidationFunc, ValidationError } from '../../hook_form_lib';
+import { hasMinLengthString } from '../../../validators/string';
+import { hasMinLengthArray } from '../../../validators/array';
+import { ERROR_CODE } from './types';
 
 export const minLengthField = ({
   length = 0,

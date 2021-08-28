@@ -5,17 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFieldSearch, EuiResizeObserver, EuiSpacer } from '@elastic/eui';
+import React, { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
-import { DocumentsNavPreview } from './documents_nav_preview';
-import { PreviewFieldList } from './field_list/field_list';
-import { PreviewListItem } from './field_list/field_list_item';
-import './field_preview.scss';
+import { EuiSpacer, EuiResizeObserver, EuiFieldSearch } from '@elastic/eui';
+
 import { useFieldPreviewContext } from './field_preview_context';
-import { FieldPreviewEmptyPrompt } from './field_preview_empty_prompt';
-import { FieldPreviewError } from './field_preview_error';
 import { FieldPreviewHeader } from './field_preview_header';
+import { FieldPreviewEmptyPrompt } from './field_preview_empty_prompt';
+import { DocumentsNavPreview } from './documents_nav_preview';
+import { FieldPreviewError } from './field_preview_error';
+import { PreviewListItem } from './field_list/field_list_item';
+import { PreviewFieldList } from './field_list/field_list';
+
+import './field_preview.scss';
 
 export const FieldPreview = () => {
   const [fieldListHeight, setFieldListHeight] = useState(-1);

@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { HomePublicPluginSetup } from '../../home/public/plugin';
-import type { ManagementSetup } from '../../management/public/types';
-import type { UsageCollectionSetup } from '../../usage_collection/public/plugin';
-import { ComponentRegistry } from './component_registry/component_registry';
+
+import { ComponentRegistry } from './component_registry';
+import { HomePublicPluginSetup } from '../../home/public';
+
+import { ManagementSetup } from '../../management/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
 export interface AdvancedSettingsSetup {
   component: ComponentRegistry['setup'];

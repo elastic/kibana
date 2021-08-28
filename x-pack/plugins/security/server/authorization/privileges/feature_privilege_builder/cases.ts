@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { uniq } from 'lodash';
 
-import type { FeatureKibanaPrivileges } from '../../../../../features/common/feature_kibana_privileges';
-import type { KibanaFeature } from '../../../../../features/common/kibana_feature';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 // if you add a value here you'll likely also need to make changes here:

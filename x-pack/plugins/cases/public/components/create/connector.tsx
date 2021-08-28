@@ -4,23 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import { UseField } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/use_field';
-import { useFormContext } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/form_context';
-import { useFormData } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
-import type {
-  FieldConfig,
+
+import { ConnectorTypes, ActionConnector } from '../../../common';
+import {
+  UseField,
+  useFormData,
   FieldHook,
-} from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/types';
-import type { ActionConnector } from '../../../common/api/connectors';
-import { ConnectorTypes } from '../../../common/api/connectors';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
-import { ConnectorFieldsForm } from '../connectors/fields_form';
+  useFormContext,
+  FieldConfig,
+} from '../../common/shared_imports';
 import { ConnectorSelector } from '../connector_selector/form';
+import { ConnectorFieldsForm } from '../connectors/fields_form';
+import { FormProps, schema } from './schema';
+import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
-import type { FormProps } from './schema';
-import { schema } from './schema';
 
 interface Props {
   connectors: ActionConnector[];

@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { EuiDataGridColumn } from '@elastic/eui';
-import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
-import { FilterManager } from '../../../../../../src/plugins/data/public/query/filter_manager/filter_manager';
-import type { TimelineNonEcsData } from '../../../common/search_strategy/timeline/events/all';
-import type { TimelineExpandedDetail } from '../../../common/types/timeline';
-import { RowRendererId } from '../../../common/types/timeline';
-import type { ColumnHeaderOptions } from '../../../common/types/timeline/columns';
-import type { DataProvider } from '../../../common/types/timeline/data_provider';
+import type { Filter, FilterManager } from '../../../../../../src/plugins/data/public';
+import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
-  SerializedFilterQuery,
+  ColumnHeaderOptions,
+  DataProvider,
+  TimelineExpandedDetail,
   SortColumnTimeline,
-} from '../../../common/types/timeline/store';
+  SerializedFilterQuery,
+} from '../../../common/types/timeline';
+import { RowRendererId } from '../../../common/types/timeline';
 
 export interface TGridModelSettings {
   documentType: string;

@@ -7,25 +7,26 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '../../../core/public/types';
-import { coreMock } from '../../../core/public/mocks';
-import { inspectorPluginMock } from '../../inspector/public/mocks';
-import type { Start as InspectorStart } from '../../inspector/public/plugin';
-import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
-import { UiActionsService } from '../../ui_actions/public/service/ui_actions_service';
-import type { SavedObjectEmbeddableInput } from '../common/lib/saved_object_embeddable';
-import type { EmbeddableInput } from '../common/types';
-import type { IEmbeddable } from './lib/embeddables/i_embeddable';
-import { EmbeddablePanel } from './lib/panel/embeddable_panel';
-import type { ReferenceOrValueEmbeddable } from './lib/reference_or_value_embeddable/types';
-import { EmbeddableStateTransfer } from './lib/state_transfer/embeddable_state_transfer';
-import type {
+import {
+  EmbeddableStart,
   EmbeddableSetup,
   EmbeddableSetupDependencies,
-  EmbeddableStart,
   EmbeddableStartDependencies,
-} from './plugin';
+  EmbeddableStateTransfer,
+  IEmbeddable,
+  EmbeddablePanel,
+  EmbeddableInput,
+  SavedObjectEmbeddableInput,
+  ReferenceOrValueEmbeddable,
+} from '.';
 import { EmbeddablePublicPlugin } from './plugin';
+import { coreMock } from '../../../core/public/mocks';
+import { UiActionsService } from './lib/ui_actions';
+import { CoreStart } from '../../../core/public';
+import { Start as InspectorStart } from '../../inspector/public';
+
+import { inspectorPluginMock } from '../../inspector/public/mocks';
+import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 
 export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;

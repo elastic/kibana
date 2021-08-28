@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import type { EuiDataGridColumn } from '@elastic/eui';
-import { euiPaletteColorBlind } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
-import type {
+import React from 'react';
+
+import useObservable from 'react-use/lib/useObservable';
+
+import { euiPaletteColorBlind, EuiDataGridColumn } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+
+import {
+  isNumericChartData,
+  isOrdinalChartData,
   ChartData,
   ChartDataItem,
   NumericDataItem,
   OrdinalDataItem,
 } from '../../../../common/types/field_histograms';
-import { isNumericChartData, isOrdinalChartData } from '../../../../common/types/field_histograms';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+
 import { NON_AGGREGATABLE } from './common';
 
 export const hoveredRow$ = new BehaviorSubject<any | null>(null);

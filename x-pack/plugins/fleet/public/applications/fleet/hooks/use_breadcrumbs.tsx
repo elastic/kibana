@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 
-import type { ChromeBreadcrumb } from '../../../../../../../src/core/public/chrome/types';
-import type { DynamicPagePathValues, Page } from '../../../constants/page_paths';
-import {
-  FLEET_BASE_PATH,
-  INTEGRATIONS_BASE_PATH,
-  pagePathGetters,
-} from '../../../constants/page_paths';
-import { useStartServices } from '../../../hooks/use_core';
+import { i18n } from '@kbn/i18n';
+import type { ChromeBreadcrumb } from 'src/core/public';
+
+import type { Page, DynamicPagePathValues } from '../constants';
+import { FLEET_BASE_PATH, INTEGRATIONS_BASE_PATH, pagePathGetters } from '../constants';
+
+import { useStartServices } from './';
 
 interface AdditionalBreadcrumbOptions {
   useIntegrationsBasePath: boolean;

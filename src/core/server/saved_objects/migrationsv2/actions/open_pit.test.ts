@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+jest.mock('./catch_retryable_es_client_errors');
+import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { openPit } from './open_pit';
 
-jest.mock('./catch_retryable_es_client_errors');
 describe('openPit', () => {
   beforeEach(() => {
     jest.clearAllMocks();

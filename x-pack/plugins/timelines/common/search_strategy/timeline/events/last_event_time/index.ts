@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TimelineRequestBasicOptions } from '../..';
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common/search/strategies/es_search/types';
-import type { Inspect, Maybe } from '../../../common';
+
+import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { Inspect, Maybe } from '../../../common';
+import { TimelineRequestBasicOptions } from '../..';
 
 export enum LastEventIndexKey {
   hostDetails = 'hostDetails',

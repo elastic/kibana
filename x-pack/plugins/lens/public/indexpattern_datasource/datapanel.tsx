@@ -5,51 +5,45 @@
  * 2.0.
  */
 
+import './datapanel.scss';
+import { uniq, groupBy } from 'lodash';
+import React, { useState, memo, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFilterButton,
-  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormControlLayout,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiPopover,
-  EuiScreenReaderOnly,
+  EuiCallOut,
+  EuiFormControlLayout,
   EuiSpacer,
-  htmlIdGenerator,
+  EuiFilterGroup,
+  EuiFilterButton,
+  EuiScreenReaderOnly,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import type { EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { groupBy, uniq } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { CoreStart } from '../../../../../src/core/public/types';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public/types';
-import { esQuery } from '../../../../../src/plugins/data/public/deprecated';
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public/types';
-import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public/plugin';
-import type { PluginStart as IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public/types';
-import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger';
-import { ChildDragDropProvider } from '../drag_drop/providers/providers';
-import type { DragContextState } from '../drag_drop/providers/types';
-import { trackUiEvent } from '../lens_ui_telemetry/factory';
-import { Loader } from '../loader';
+import type { CoreStart } from 'kibana/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { htmlIdGenerator } from '@elastic/eui';
 import type { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
-import { ChangeIndexPattern } from './change_indexpattern';
-import './datapanel.scss';
-import type { FieldGroups } from './field_list';
-import { FieldList } from './field_list';
-import { LensFieldIcon } from './lens_field_icon';
-import { loadIndexPatterns, syncExistingFields } from './loader';
-import { fieldExists } from './pure_helpers';
+import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import type {
   IndexPattern,
-  IndexPatternField,
   IndexPatternPrivateState,
+  IndexPatternField,
   IndexPatternRef,
 } from './types';
+import { trackUiEvent } from '../lens_ui_telemetry';
+import { loadIndexPatterns, syncExistingFields } from './loader';
+import { fieldExists } from './pure_helpers';
+import { Loader } from '../loader';
+import { esQuery } from '../../../../../src/plugins/data/public';
+import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
@@ -63,6 +57,10 @@ export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'co
   core: CoreStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
 };
+import { LensFieldIcon } from './lens_field_icon';
+import { ChangeIndexPattern } from './change_indexpattern';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { FieldGroups, FieldList } from './field_list';
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import type { CasesNavigation } from '../links';
+
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import * as i18n from './translations';
+import { CasesNavigation } from '../links';
 
 interface Props {
   allCasesNavigation: CasesNavigation;

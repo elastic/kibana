@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { pick } from 'lodash';
-import type { AlertAttributesExcludedFromAADType } from '.';
-import { AlertAttributesExcludedFromAAD } from '.';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server/saved_objects/service/lib/errors';
-import type { SavedObjectsUpdateOptions } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import { SavedObjectsClient } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type { RawAlert } from '../types';
+import { RawAlert } from '../types';
+
+import {
+  SavedObjectsClient,
+  SavedObjectsErrorHelpers,
+  SavedObjectsUpdateOptions,
+} from '../../../../../src/core/server';
+
+import { AlertAttributesExcludedFromAAD, AlertAttributesExcludedFromAADType } from './index';
 
 export type PartiallyUpdateableAlertAttributes = Partial<
   Pick<RawAlert, AlertAttributesExcludedFromAADType>

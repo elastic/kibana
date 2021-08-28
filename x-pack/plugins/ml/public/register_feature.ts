@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public/plugin';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../src/plugins/home/public';
 import { PLUGIN_ID } from '../common/constants/app';
 
 export const registerFeature = (home: HomePublicPluginSetup) => {

@@ -4,34 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
+  EuiInMemoryTable,
   EuiBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiLink,
   EuiText,
+  EuiIcon,
   EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
 
-import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common/constants/plugin';
-import type { AgentPolicy } from '../../../../../../../../common/types/models/agent_policy';
-import type { PackagePolicy } from '../../../../../../../../common/types/models/package_policy';
-import { PackageIcon } from '../../../../../../../components/package_icon';
-import { PackagePolicyActionsMenu } from '../../../../../../../components/package_policy_actions_menu';
-import { pagePathGetters } from '../../../../../../../constants/page_paths';
-import { useCapabilities } from '../../../../../../../hooks/use_capabilities';
-import { useStartServices } from '../../../../../../../hooks/use_core';
-import { useLink } from '../../../../../../../hooks/use_link';
-import { usePackageInstallations } from '../../../../../../../hooks/use_package_installations';
-import { pkgKeyFromPackageInfo } from '../../../../../../../services/pkg_key_from_package_info';
-import type { InMemoryPackagePolicy } from '../../../../../../../types/in_memory_package_policy';
+import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
+import { pagePathGetters } from '../../../../../../../constants';
+import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../types';
+import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
+import {
+  useCapabilities,
+  useLink,
+  usePackageInstallations,
+  useStartServices,
+} from '../../../../../hooks';
+import { pkgKeyFromPackageInfo } from '../../../../../services';
 
 interface Props {
   packagePolicies: PackagePolicy[];

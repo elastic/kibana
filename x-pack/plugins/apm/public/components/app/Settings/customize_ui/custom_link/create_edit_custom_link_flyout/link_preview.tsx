@@ -4,24 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useEffect, useState } from 'react';
 import {
+  EuiPanel,
+  EuiText,
+  EuiSpacer,
+  EuiLink,
+  EuiToolTip,
+  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import React, { useEffect, useState } from 'react';
-import type { Filter } from '../../../../../../../common/custom_link/custom_link_types';
-import type { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
+import { Filter } from '../../../../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
-import { convertFiltersToQuery, replaceTemplateVariables } from './helper';
+import { replaceTemplateVariables, convertFiltersToQuery } from './helper';
 
 export interface LinkPreviewProps {
   label: string;

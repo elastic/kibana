@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PackageInfo } from '@kbn/config';
+
 import { createHash } from 'crypto';
-import { KibanaRequest } from '../../http/router/request';
-import type { HttpAuth } from '../../http/types';
-import type { UiPlugins } from '../../plugins/plugins_service';
-import type { IUiSettingsClient } from '../../ui_settings/types';
-import { getJsDependencyPaths } from './get_js_dependency_paths';
+import { PackageInfo } from '@kbn/config';
+import { UiPlugins } from '../../plugins';
+import { IUiSettingsClient } from '../../ui_settings';
+import { HttpAuth, KibanaRequest } from '../../http';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
+import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { getThemeTag } from './get_theme_tag';
 import { renderTemplate } from './render_template';
 

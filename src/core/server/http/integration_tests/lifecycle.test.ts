@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
-import request from 'request';
 import supertest from 'supertest';
+import request from 'request';
+import { schema } from '@kbn/config-schema';
+
+import { ensureRawRequest } from '../router';
+import { HttpService } from '../http_service';
+
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { HttpService } from '../http_service';
-import { ensureRawRequest } from '../router/request';
 import { createHttpServer } from '../test_utils';
 
 let server: HttpService;

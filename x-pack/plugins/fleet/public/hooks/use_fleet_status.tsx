@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import type { GetFleetStatusResponse } from '../../common/types/rest_spec/fleet_setup';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
+
+import type { GetFleetStatusResponse } from '../types';
 
 import { useConfig } from './use_config';
-import { sendGetFleetStatus } from './use_request/setup';
+import { sendGetFleetStatus } from './use_request';
 
 interface FleetStatusState {
   enabled: boolean;

@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { constant, get, trimEnd, trimStart } from 'lodash';
+
+import { constant, trimEnd, trimStart, get } from 'lodash';
 import { FieldFormat } from './field_format';
-import { asPrettyString } from './utils/as_pretty_string';
+import { asPrettyString } from './utils';
 
 const getTestFormat = (
   _params?: Record<string, any>,

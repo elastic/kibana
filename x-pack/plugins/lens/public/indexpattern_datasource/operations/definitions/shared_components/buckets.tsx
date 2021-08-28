@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
   EuiButtonIcon,
+  EuiIcon,
   EuiDragDropContext,
   euiDragDropReorder,
   EuiDraggable,
   EuiDroppable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 export const NewBucketButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
   <EuiButtonEmpty

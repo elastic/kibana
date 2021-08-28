@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiPopover, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { asDuration } from '../../../../../../common/utils/formatters/duration';
+import { asDuration } from '../../../../../../common/utils/formatters';
 import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { useTheme } from '../../../../../hooks/use_theme';
-import type { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_error_marks';
+import { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_error_marks';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
 import { Legend, Shape } from '../legend';
 

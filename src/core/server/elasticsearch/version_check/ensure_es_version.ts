@@ -5,14 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import { from, Observable, of, timer } from 'rxjs';
-import { catchError, distinctUntilChanged, exhaustMap, map } from 'rxjs/operators';
-import type { ElasticsearchClient } from '../client/types';
+
+/**
+ * ES and Kibana versions are locked, so Kibana should require that ES has the same version as
+ * that defined in Kibana's package.json.
+ */
+
+import { timer, of, from, Observable } from 'rxjs';
+import { map, distinctUntilChanged, catchError, exhaustMap } from 'rxjs/operators';
 import {
   esVersionCompatibleWithKibana,
   esVersionEqualsKibana,
 } from './es_kibana_version_compatability';
+import { Logger } from '../../logging';
+import type { ElasticsearchClient } from '../client';
 
 export interface PollEsNodesVersionOptions {
   internalClient: ElasticsearchClient;

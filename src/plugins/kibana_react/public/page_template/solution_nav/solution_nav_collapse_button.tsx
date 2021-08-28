@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiButtonIconPropsForButton } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
-import type { FunctionComponent } from 'react';
-import React from 'react';
 import './solution_nav_collapse_button.scss';
+
+import React, { FunctionComponent } from 'react';
+import classNames from 'classnames';
+
+import { EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export type KibanaPageTemplateSolutionNavCollapseButtonProps = Partial<EuiButtonIconPropsForButton> & {
   /**

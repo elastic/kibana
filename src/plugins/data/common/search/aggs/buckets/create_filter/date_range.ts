@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { RangeFilterParams } from '@kbn/es-query';
-import { buildRangeFilter } from '@kbn/es-query';
 import moment from 'moment';
-import type { DateRange } from '../../../expressions/date_range';
-import type { IBucketAggConfig } from '../bucket_agg_type';
+import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
+import { DateRange } from '../../../expressions';
+import { IBucketAggConfig } from '../bucket_agg_type';
 
 export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateRange) => {
   const filter: RangeFilterParams = {};

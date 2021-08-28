@@ -5,8 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Query } from '@elastic/eui';
+
 import { words } from 'lodash';
+
+import { Query } from '@elastic/eui';
+
 import { CATEGORY_FIELD } from '../components/search/search';
 
 const mapWords = (name?: string): string =>

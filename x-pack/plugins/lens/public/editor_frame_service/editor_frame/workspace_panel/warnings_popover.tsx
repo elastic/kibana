@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPopover, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import './warnings_popover.scss';
 import './workspace_panel_wrapper.scss';
+import './warnings_popover.scss';
+
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiPopover, EuiText, EuiButtonEmpty } from '@elastic/eui';
 
 export const WarningsPopover = ({
   children,

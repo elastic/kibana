@@ -5,19 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { shareReplay } from 'rxjs/operators';
-import type { CorePreboot, CoreSetup, CoreStart, RequestHandlerContext } from '..';
-import type { CoreContext } from '../core_context';
-import type { IRouter } from '../http/router/router';
-import type { RequestHandlerContextProvider } from '../http/types';
-import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
+import type { RequestHandlerContext } from 'src/core/server';
+import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
-import type {
+import {
   PluginsServicePrebootSetupDeps,
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
 } from './plugins_service';
-import type { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
+import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
+import { IRouter, RequestHandlerContextProvider } from '../http';
+import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
+import { CorePreboot, CoreSetup, CoreStart } from '..';
 
 export interface InstanceInfo {
   uuid: string;

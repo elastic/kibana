@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { EuiButton, EuiButtonIcon } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { NotificationsStart } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { NotificationsStart } from '../../../../../../src/core/public/notifications/notifications_service';
-import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
-import type { SpacesManager } from '../../spaces_manager/spaces_manager';
-import { ConfirmDeleteModal } from '../components/confirm_delete_modal/confirm_delete_modal';
+import type { SpacesManager } from '../../spaces_manager';
+import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 
 interface Props {
   style?: 'button' | 'icon';

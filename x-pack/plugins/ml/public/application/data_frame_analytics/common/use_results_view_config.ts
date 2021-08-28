@@ -4,26 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { useEffect, useState } from 'react';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type {
-  DataFrameAnalyticsConfig,
-  DataFrameTaskStateType,
-} from '../../../../common/types/data_frame_analytics';
-import type { TotalFeatureImportance } from '../../../../common/types/feature_importance';
+
+import { i18n } from '@kbn/i18n';
+
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+
+import { extractErrorMessage } from '../../../../common/util/errors';
+
+import { getIndexPatternIdFromName } from '../../util/index_utils';
+import { ml } from '../../services/ml_api_service';
+import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { useMlContext } from '../../contexts/ml';
+
+import { DataFrameAnalyticsConfig } from '../common';
+
+import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
+import { DataFrameTaskStateType } from '../pages/analytics_management/components/analytics_list/common';
+import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
+import { TotalFeatureImportance } from '../../../../common/types/feature_importance';
+import { getToastNotificationService } from '../../services/toast_notification_service';
 import {
   isClassificationAnalysis,
   isRegressionAnalysis,
 } from '../../../../common/util/analytics_utils';
-import { extractErrorMessage } from '../../../../common/util/errors/process_errors';
-import { useMlContext } from '../../contexts/ml/use_ml_context';
-import { ml } from '../../services/ml_api_service';
-import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
-import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { getToastNotificationService } from '../../services/toast_notification_service/toast_notification_service';
-import { getIndexPatternIdFromName } from '../../util/index_utils';
-import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 
 export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();

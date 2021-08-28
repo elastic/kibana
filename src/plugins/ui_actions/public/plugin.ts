@@ -5,14 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { CoreSetup, CoreStart } from '../../../core/public/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
-import { UiActionsService } from './service/ui_actions_service';
-import { rowClickTrigger } from './triggers/row_click_trigger';
-import { visualizeFieldTrigger } from './triggers/visualize_field_trigger';
-import { visualizeGeoFieldTrigger } from './triggers/visualize_geo_field_trigger';
+
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { UiActionsService } from './service';
+import { rowClickTrigger, visualizeFieldTrigger, visualizeGeoFieldTrigger } from './triggers';
 
 export type UiActionsSetup = Pick<
   UiActionsService,

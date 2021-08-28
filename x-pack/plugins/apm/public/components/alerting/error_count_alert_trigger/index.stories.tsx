@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useState } from 'react';
-import type { AlertParams } from '.';
-import { ErrorCountAlertTrigger } from '.';
-import type { CoreStart } from '../../../../../../../src/core/public/types';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import { AlertParams, ErrorCountAlertTrigger } from '.';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 
 const KibanaReactContext = createKibanaReactContext(({
   notifications: { toasts: { add: () => {} } },

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { GlobalSearchProviderResult, GlobalSearchResult } from './types';
-import type { IBasePath } from './utils';
-import { convertResultUrl } from './utils';
+
+import { GlobalSearchProviderResult, GlobalSearchResult } from './types';
+import { convertResultUrl, IBasePath } from './utils';
 
 /**
  * Convert a {@link GlobalSearchProviderResult | provider result}

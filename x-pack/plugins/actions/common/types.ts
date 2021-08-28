@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { LicenseType } from '../../licensing/common/types';
+
+import { LicenseType } from '../../licensing/common/types';
 
 export interface ActionType {
   id: string;

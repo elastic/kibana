@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { estypes } from '@elastic/elasticsearch';
+import { IScopedClusterClient } from 'kibana/server';
 import { cloneDeep } from 'lodash';
-import type { IScopedClusterClient } from '../../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import type { SavedObjectsClientContract } from '../../../../../../../src/core/server/saved_objects/types';
+import { SavedObjectsClientContract } from 'kibana/server';
+import { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
-import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
-import type { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
+import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
 
 const supportedTypes: string[] = [
   ES_FIELD_TYPES.DATE,

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiHeaderLink,
   EuiIcon,
@@ -22,7 +23,7 @@ import { useLicenseContext } from '../../../context/license/use_license_context'
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import type { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { getAPMHref } from '../Links/apm/APMLink';
 
 export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection/jobs'>;

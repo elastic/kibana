@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AnnotationsTable } from '../../../common/types/annotations';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs/combined_job';
-import type { InfluencersFilterQuery } from '../../../common/types/es_client';
-import type { EntityField } from '../../../common/util/anomaly_utils';
-import type { MlResultsService } from '../services/results_service';
-import type { RecordForInfluencer } from '../services/results_service/results_service';
-import type { TimeRangeBounds } from '../util/time_buckets';
-import type { SwimlaneType } from './explorer_constants';
+
+import { AnnotationsTable } from '../../../common/types/annotations';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { SwimlaneType } from './explorer_constants';
+import { TimeRangeBounds } from '../util/time_buckets';
+import { RecordForInfluencer } from '../services/results_service/results_service';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
+import { MlResultsService } from '../services/results_service';
+import { EntityField } from '../../../common/util/anomaly_utils';
 
 interface ClearedSelectedAnomaliesState {
   selectedCells: undefined;

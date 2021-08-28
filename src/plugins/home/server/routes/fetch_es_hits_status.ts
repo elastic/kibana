@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '../../../../core/server/http/router/router';
+import { IRouter } from 'src/core/server';
 
 export const registerHitsStatusRoute = (router: IRouter) => {
   router.post(

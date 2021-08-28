@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../../../../lib/lib';
+
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../../../../lib/lib';
 
 interface Props {
   onDrilldown: (filter: string) => void;

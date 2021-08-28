@@ -4,13 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { StartServicesAccessor } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import type { StartServicesAccessor } from '../../../../../../src/core/public/types';
-import type { IContainer } from '../../../../../../src/plugins/embeddable/public/lib/containers/i_container';
-import type { EmbeddableFactoryDefinition } from '../../../../../../src/plugins/embeddable/public/lib/embeddables/embeddable_factory_definition';
-import type { InfraClientStartDeps } from '../../types';
-import type { LogStreamEmbeddableInput } from './log_stream_embeddable';
-import { LogStreamEmbeddable, LOG_STREAM_EMBEDDABLE } from './log_stream_embeddable';
+import {
+  EmbeddableFactoryDefinition,
+  IContainer,
+} from '../../../../../../src/plugins/embeddable/public';
+import { InfraClientStartDeps } from '../../types';
+import {
+  LogStreamEmbeddable,
+  LogStreamEmbeddableInput,
+  LOG_STREAM_EMBEDDABLE,
+} from './log_stream_embeddable';
 
 export class LogStreamEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<LogStreamEmbeddableInput> {

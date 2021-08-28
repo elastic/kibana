@@ -7,21 +7,21 @@
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
-import { ConfigService, Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/dev-utils';
+import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
-import { resolve } from 'path';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
+
 import { from } from 'rxjs';
 import { first, map, toArray } from 'rxjs/operators';
-import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
-import type { CoreContext } from '../../core_context';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
-import type { PluginsConfigType } from '../plugins_config';
-import { config, PluginsConfig } from '../plugins_config';
+import { resolve } from 'path';
+import { ConfigService, Env } from '../../config';
+import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
-import { PluginType } from '../types';
 import { discover } from './plugins_discovery';
-import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
+import { CoreContext } from '../../core_context';
+import { PluginType } from '../types';
 
 const KIBANA_ROOT = process.cwd();
 

@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { FC } from 'react';
-import React from 'react';
-import { AnalyticsPanel } from './analytics_panel/analytics_panel';
-import { AnomalyDetectionPanel } from './anomaly_detection_panel/anomaly_detection_panel';
+import { AnomalyDetectionPanel } from './anomaly_detection_panel';
+import { AnalyticsPanel } from './analytics_panel';
 
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;

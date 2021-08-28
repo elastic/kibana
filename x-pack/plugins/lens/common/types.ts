@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Filter, FilterMeta } from '../../../../src/plugins/data/common/es_query';
-import type { Datatable } from '../../../../src/plugins/expressions/common/expression_types/specs/datatable';
-import type { SerializedFieldFormat } from '../../../../src/plugins/expressions/common/types/common';
-import type { IFieldFormat } from '../../../../src/plugins/field_formats/common/types';
+
+import type { FilterMeta, Filter } from '../../../../src/plugins/data/common';
+import type { IFieldFormat } from '../../../../src/plugins/field_formats/common';
+import type { Datatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/common';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 

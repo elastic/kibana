@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { SavedObject, SavedObjectKibanaServices } from '../../types';
-import type { SavedObjectDecoratorFactory } from './types';
+
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { SavedObjectDecoratorFactory } from './types';
+import { SavedObjectKibanaServices, SavedObject } from '../../types';
 
 export interface SavedObjectDecoratorConfig<T extends SavedObject = SavedObject> {
   /**

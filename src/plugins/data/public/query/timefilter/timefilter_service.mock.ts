@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { TimefilterService, TimeHistoryContract, TimefilterContract } from '.';
 import { Observable } from 'rxjs';
-import type { TimefilterContract } from './timefilter';
-import { TimefilterService } from './timefilter_service';
-import type { TimeHistoryContract } from './time_history';
 
 export type TimefilterServiceClientContract = PublicMethodsOf<TimefilterService>;
 

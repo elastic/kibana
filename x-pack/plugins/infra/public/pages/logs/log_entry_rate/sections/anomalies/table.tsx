@@ -4,43 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBasicTableColumn } from '@elastic/eui';
+
 import {
   EuiBasicTable,
-  EuiButtonIcon,
+  EuiBasicTableColumn,
+  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiButtonIcon,
   EuiSpacer,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import useSet from 'react-use/lib/useSet';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import {
-  formatOneDecimalPlace,
+  AnomalyType,
   getFriendlyNameForPartitionId,
-} from '../../../../../../common/log_analysis/log_analysis_results';
-import type { AnomalyType } from '../../../../../../common/log_analysis/log_entry_anomalies';
-import { isCategoryAnomaly } from '../../../../../../common/log_analysis/log_entry_anomalies';
-import type { TimeRange } from '../../../../../../common/time/time_range';
-import { RowExpansionButton } from '../../../../../components/basic_table/row_expansion_button';
-import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
+  formatOneDecimalPlace,
+  isCategoryAnomaly,
+} from '../../../../../../common/log_analysis';
+import { RowExpansionButton } from '../../../../../components/basic_table';
+import { AnomaliesTableExpandedRow } from './expanded_row';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
 import { RegularExpressionRepresentation } from '../../../../../components/logging/log_analysis_results/category_expression';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
-import type {
-  ChangePaginationOptions,
-  ChangeSortOptions,
+import {
+  Page,
   FetchNextPage,
   FetchPreviousPage,
-  LogEntryAnomalies,
-  Page,
-  PaginationOptions,
+  ChangeSortOptions,
+  ChangePaginationOptions,
   SortOptions,
+  PaginationOptions,
+  LogEntryAnomalies,
 } from '../../use_log_entry_anomalies_results';
-import { AnomaliesTableExpandedRow } from './expanded_row';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 interface TableItem {
   id: string;

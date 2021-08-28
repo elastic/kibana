@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel } from '@elastic/eui';
+
 import React, { Component } from 'react';
-import type { RenderWizardArguments } from '../../layer_wizard_registry';
-import { createSecurityLayerDescriptors } from './create_layer_descriptors';
+import { EuiPanel } from '@elastic/eui';
+import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { IndexPatternSelect } from './index_pattern_select';
-import type { IndexPatternMeta } from './security_index_pattern_utils';
+import { createSecurityLayerDescriptors } from './create_layer_descriptors';
+import { IndexPatternMeta } from './security_index_pattern_utils';
 
 interface State {
   indexPatternId: string | null;

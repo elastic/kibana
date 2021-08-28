@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiTitle,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiTitle,
+  EuiPageContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React from 'react';
-import { SavedObjectFinderUi } from '../../../../../../../../../src/plugins/saved_objects/public/finder/saved_object_finder';
-import { useMlKibana } from '../../../../contexts/kibana/kibana_context';
-import { useNavigateToPath } from '../../../../contexts/kibana/use_navigate_to_path';
+import { SavedObjectFinderUi } from '../../../../../../../../../src/plugins/saved_objects/public';
+import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
 export interface PageProps {
   nextStepPath: string;

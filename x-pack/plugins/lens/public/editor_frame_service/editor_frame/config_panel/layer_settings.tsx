@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { NativeRenderer } from '../../../native_renderer/native_renderer';
-import type { Visualization, VisualizationLayerWidgetProps } from '../../../types';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import { NativeRenderer } from '../../../native_renderer';
+import { Visualization, VisualizationLayerWidgetProps } from '../../../types';
 
 export function LayerSettings({
   layerId,

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Vis } from '../../../../../../src/plugins/visualizations/public';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
-import { Vis } from '../../../../../../src/plugins/visualizations/public/vis';
+import { TileMapVisParams } from './types';
 import { title } from './tile_map_vis_type';
-import type { TileMapVisParams } from './types';
 
 export function extractLayerDescriptorParams(vis: Vis<TileMapVisParams>) {
   const params: { [key: string]: any } = {

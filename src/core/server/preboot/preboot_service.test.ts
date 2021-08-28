@@ -5,12 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import type { LoggerFactory } from '@kbn/logging';
+
 import { nextTick } from '@kbn/test/jest';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { LoggerFactory } from '@kbn/logging';
+import { Env } from '@kbn/config';
+import { getEnvOptions } from '../config/mocks';
+import { configServiceMock, loggingSystemMock } from '../mocks';
+
 import { PrebootService } from './preboot_service';
 
 describe('PrebootService', () => {

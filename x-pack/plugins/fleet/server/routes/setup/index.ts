@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IRouter } from '../../../../../../src/core/server/http/router/router';
-import { PLUGIN_ID } from '../../../common/constants/plugin';
-import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../common/constants/routes';
-import type { FleetConfigType } from '../../../common/types';
 
-import { fleetSetupHandler, getFleetStatusHandler } from './handlers';
+import type { IRouter } from 'src/core/server';
+
+import { PLUGIN_ID, AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
+import type { FleetConfigType } from '../../../common';
+
+import { getFleetStatusHandler, fleetSetupHandler } from './handlers';
 
 export const registerFleetSetupRoute = (router: IRouter) => {
   router.post(

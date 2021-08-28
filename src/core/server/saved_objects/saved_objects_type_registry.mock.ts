@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
-import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
+
+import { ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from './saved_objects_type_registry';
 
 const createRegistryMock = (): jest.Mocked<
   ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>

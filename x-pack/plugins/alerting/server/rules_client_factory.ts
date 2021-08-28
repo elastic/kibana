@@ -4,19 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import { KibanaRequest } from '../../../../src/core/server/http/router/request';
-import type { PluginInitializerContext } from '../../../../src/core/server/plugins/types';
-import type { SavedObjectsServiceStart } from '../../../../src/core/server/saved_objects/saved_objects_service';
-import type { PluginStartContract as ActionsPluginStartContract } from '../../actions/server/plugin';
-import type { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server/saved_objects';
-import type { IEventLogClientService } from '../../event_log/server/types';
-import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server/plugin';
-import type { TaskManagerStartContract } from '../../task_manager/server/plugin';
-import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
-import { RulesClient } from './rules_client/rules_client';
-import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 
+import {
+  KibanaRequest,
+  Logger,
+  SavedObjectsServiceStart,
+  PluginInitializerContext,
+} from 'src/core/server';
+import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
+import { RulesClient } from './rules_client';
+import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
+import { TaskManagerStartContract } from '../../task_manager/server';
+import { IEventLogClientService } from '../../../plugins/event_log/server';
+import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;

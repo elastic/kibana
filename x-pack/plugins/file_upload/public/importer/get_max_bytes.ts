@@ -7,12 +7,12 @@
 
 import numeral from '@elastic/numeral';
 import {
-  ABSOLUTE_MAX_FILE_SIZE_BYTES,
-  FILE_SIZE_DISPLAY_FORMAT,
   MAX_FILE_SIZE,
   MAX_FILE_SIZE_BYTES,
+  ABSOLUTE_MAX_FILE_SIZE_BYTES,
+  FILE_SIZE_DISPLAY_FORMAT,
   UI_SETTING_MAX_FILE_SIZE,
-} from '../../common/constants';
+} from '../../common';
 import { getUiSettings } from '../kibana_services';
 
 export function getMaxBytes() {

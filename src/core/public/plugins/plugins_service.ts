@@ -5,17 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isPromise, withTimeout } from '@kbn/std';
-import type { PluginName, PluginOpaqueId } from '../../server/plugins/types';
-import type { CoreService } from '../../types/core_service';
-import type { CoreContext, InternalCoreSetup, InternalCoreStart } from '../core_system';
-import type { InjectedPluginMetadata } from '../injected_metadata/injected_metadata_service';
+
+import { withTimeout, isPromise } from '@kbn/std';
+import { PluginName, PluginOpaqueId } from '../../server';
+import { CoreService } from '../../types';
+import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import {
   createPluginInitializerContext,
   createPluginSetupContext,
   createPluginStartContext,
 } from './plugin_context';
+import { InternalCoreSetup, InternalCoreStart } from '../core_system';
+import { InjectedPluginMetadata } from '../injected_metadata';
 
 const Sec = 1000;
 /** @internal */

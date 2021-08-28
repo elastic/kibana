@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { lazy } from 'react';
-import { ConnectorTypes } from '../../../../common/api/connectors';
-import type { ResilientFieldsType } from '../../../../common/api/connectors/resilient';
-import type { CaseConnector } from '../types';
+
+import { CaseConnector } from '../types';
+import { ConnectorTypes, ResilientFieldsType } from '../../../../common';
 import * as i18n from './translations';
 
 export * from './types';

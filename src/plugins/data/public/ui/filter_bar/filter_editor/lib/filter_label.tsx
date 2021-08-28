@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
-import type { Filter } from '../../../../../common/es_query';
-import { FILTERS } from '../../../../../common/es_query';
-import type { FilterLabelStatus } from '../../filter_item';
 import { existsOperator, isOneOfOperator } from './filter_operators';
+import { Filter, FILTERS } from '../../../../../common';
+import type { FilterLabelStatus } from '../../filter_item';
 
 // @internal
 export interface FilterLabelProps {

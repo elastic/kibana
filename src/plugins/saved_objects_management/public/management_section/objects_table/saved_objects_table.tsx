@@ -5,44 +5,51 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiSpacer, Query } from '@elastic/eui';
+
+import React, { Component } from 'react';
+import { debounce } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
+import { EuiSpacer, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
-import React, { Component } from 'react';
-import type { ApplicationStart } from '../../../../../core/public/application/types';
-import type { HttpStart } from '../../../../../core/public/http/types';
-import type { NotificationsStart } from '../../../../../core/public/notifications/notifications_service';
-import type { OverlayStart } from '../../../../../core/public/overlays/overlay_service';
-import type { SavedObjectsClientContract } from '../../../../../core/public/saved_objects/saved_objects_client';
-import type { SavedObjectsFindOptions } from '../../../../../core/server/saved_objects/types';
-import type { IndexPatternsContract } from '../../../../data/common/index_patterns/index_patterns/index_patterns';
-import type { DataPublicPluginStart } from '../../../../data/public/types';
-import { RedirectAppLinks } from '../../../../kibana_react/public/app_links/redirect_app_link';
-import type { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public/api';
-import type { SavedObjectWithMetadata } from '../../../common/types';
-import { bulkGetObjects } from '../../lib/bulk_get_objects';
-import type { SavedObjectsExportResultDetails } from '../../lib/extract_export_details';
-import { extractExportDetails } from '../../lib/extract_export_details';
-import { fetchExportByTypeAndSearch } from '../../lib/fetch_export_by_type_and_search';
-import { fetchExportObjects } from '../../lib/fetch_export_objects';
-import { findObjects } from '../../lib/find_objects';
-import { getRelationships } from '../../lib/get_relationships';
-import { getSavedObjectCounts } from '../../lib/get_saved_object_counts';
-import { getTagFindReferences } from '../../lib/get_tag_references';
-import { parseQuery } from '../../lib/parse_query';
-import type { SavedObjectsManagementActionServiceStart } from '../../services/action_service';
-import type { SavedObjectsManagementColumnServiceStart } from '../../services/column_service';
-import type { ISavedObjectsManagementServiceRegistry } from '../../services/service_registry';
-import { DeleteConfirmModal } from './components/delete_confirm_modal';
-import { ExportModal } from './components/export_modal';
-import { Flyout } from './components/flyout';
-import { Header } from './components/header';
-import { Relationships } from './components/relationships';
-import { Table } from './components/table';
-
-
+import {
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  HttpStart,
+  OverlayStart,
+  NotificationsStart,
+  ApplicationStart,
+} from 'src/core/public';
+import { RedirectAppLinks } from '../../../../kibana_react/public';
+import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
+import { IndexPatternsContract } from '../../../../data/public';
+import {
+  parseQuery,
+  getSavedObjectCounts,
+  getRelationships,
+  fetchExportObjects,
+  fetchExportByTypeAndSearch,
+  findObjects,
+  bulkGetObjects,
+  extractExportDetails,
+  SavedObjectsExportResultDetails,
+  getTagFindReferences,
+} from '../../lib';
+import { SavedObjectWithMetadata } from '../../types';
+import {
+  ISavedObjectsManagementServiceRegistry,
+  SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementColumnServiceStart,
+} from '../../services';
+import {
+  Header,
+  Table,
+  Flyout,
+  Relationships,
+  DeleteConfirmModal,
+  ExportModal,
+} from './components';
+import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 
 interface ExportAllOption {
   id: string;

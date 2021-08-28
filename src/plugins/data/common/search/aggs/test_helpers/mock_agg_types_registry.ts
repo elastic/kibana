@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { fieldFormatsMock } from '../../../../../field_formats/common/mocks';
-import type { AggTypesDependencies } from '../agg_types';
-import { getAggTypes } from '../agg_types';
-import type { AggTypesRegistryStart } from '../agg_types_registry';
-import { AggTypesRegistry } from '../agg_types_registry';
-import type { TimeBucketsConfig } from '../buckets/lib/time_buckets/time_buckets';
+
+import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
+import { AggTypesDependencies, getAggTypes } from '../agg_types';
+import { TimeBucketsConfig } from '../buckets/lib/time_buckets/time_buckets';
 
 // Mocked uiSettings shared among aggs unit tests
 const mockGetConfig = jest.fn().mockImplementation((key: string) => {

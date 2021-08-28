@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { RequestHandlerWrapper } from '../../../../../../src/core/server/http/router/router';
+import { RequestHandlerWrapper } from 'kibana/server';
 
 export const handleDisabledApiKeysError: RequestHandlerWrapper = (handler) => {
   return async (context, request, response) => {

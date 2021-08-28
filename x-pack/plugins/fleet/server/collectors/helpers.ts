@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup } from '../../../../../src/core/server';
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
-import { SavedObjectsClient } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
+
+import type { CoreSetup } from 'kibana/server';
+
+import { SavedObjectsClient } from '../../../../../src/core/server';
+import type { ElasticsearchClient } from '../../../../../src/core/server';
 
 export async function getInternalClients(
   core: CoreSetup

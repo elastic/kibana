@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObject, SavedObjectReference } from '../../../../types/saved_objects';
-import { SavedObjectsErrorHelpers } from '../../service/lib/errors';
-import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
-import type { SavedObjectsClientContract } from '../../types';
-import type { SavedObjectsImportRetry } from '../types';
-import { checkConflicts } from './check_conflicts';
+
 import { mockUuidv4 } from './__mocks__';
+import { savedObjectsClientMock } from '../../../mocks';
+import { SavedObjectReference, SavedObjectsImportRetry } from 'kibana/public';
+import { SavedObjectsClientContract, SavedObject } from '../../types';
+import { SavedObjectsErrorHelpers } from '../../service';
+import { checkConflicts } from './check_conflicts';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckConflictsParams = Parameters<typeof checkConflicts>[0];

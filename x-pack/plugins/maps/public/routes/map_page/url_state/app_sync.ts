@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { map } from 'rxjs/operators';
-import { esFilters } from '../../../../../../../src/plugins/data/public/deprecated';
-import { connectToQueryState } from '../../../../../../../src/plugins/data/public/query/state_sync/connect_to_query_state';
-import type { BaseStateContainer } from '../../../../../../../src/plugins/kibana_utils/common/state_containers/types';
-import { syncState } from '../../../../../../../src/plugins/kibana_utils/public/state_sync/state_sync';
+import { connectToQueryState, esFilters } from '../../../../../../../src/plugins/data/public';
+import {
+  syncState,
+  BaseStateContainer,
+} from '../../../../../../../src/plugins/kibana_utils/public';
 import { getData } from '../../../kibana_services';
 import { kbnUrlStateStorage } from '../../../render_app';
 import { AppStateManager } from './app_state_manager';

@@ -4,26 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
-import type { ActionConnectorTableItem } from '../../../../triggers_actions_ui/public/types';
-import type { ClosureType } from '../../../common/api/cases/configure';
-import { SUPPORTED_CONNECTORS } from '../../../common/constants';
-import { useKibana } from '../../common/lib/kibana/kibana_react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
+
+import { SUPPORTED_CONNECTORS } from '../../../common';
+import { useKibana } from '../../common/lib/kibana';
+import { useConnectors } from '../../containers/configure/use_connectors';
 import { useActionTypes } from '../../containers/configure/use_action_types';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
-import { useConnectors } from '../../containers/configure/use_connectors';
-import type { Owner } from '../../types';
+
+import { ClosureType } from '../../containers/configure/types';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionConnectorTableItem } from '../../../../triggers_actions_ui/public/types';
+
+import { SectionWrapper } from '../wrappers';
+import { Connectors } from './connectors';
+import { ClosureOptions } from './closure_options';
+import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
+import * as i18n from './translations';
+import { Owner } from '../../types';
 import { OwnerProvider } from '../owner_context';
 import { getConnectorById } from '../utils';
-import { SectionWrapper } from '../wrappers';
-import { ClosureOptions } from './closure_options';
-import { Connectors } from './connectors';
-import * as i18n from './translations';
-import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`

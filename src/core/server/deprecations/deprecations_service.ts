@@ -5,15 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import type { CoreService } from '../../types/core_service';
-import type { CoreContext } from '../core_context';
-import type { IScopedClusterClient } from '../elasticsearch/client/scoped_cluster_client';
-import type { InternalHttpServiceSetup } from '../http/types';
-import type { SavedObjectsClientContract } from '../saved_objects/types';
+
 import { DeprecationsFactory } from './deprecations_factory';
+import { DomainDeprecationDetails, RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
-import type { DomainDeprecationDetails, RegisterDeprecationsConfig } from './types';
+
+import { CoreContext } from '../core_context';
+import { CoreService } from '../../types';
+import { InternalHttpServiceSetup } from '../http';
+import { Logger } from '../logging';
+import { IScopedClusterClient } from '../elasticsearch/client';
+import { SavedObjectsClientContract } from '../saved_objects/types';
 
 /**
  * The deprecations service provides a way for the Kibana platform to communicate deprecated

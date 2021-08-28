@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { Action } from '../../../../../../ui_actions/public/actions/action';
-import { IncompatibleActionError } from '../../../../../../ui_actions/public/actions/incompatible_action_error';
-import { ViewMode } from '../../../../../common/types';
-import type { ContainerInput, IContainer } from '../../../containers/i_container';
-import type { IEmbeddable } from '../../../embeddables/i_embeddable';
+import { Action, IncompatibleActionError } from '../../../ui_actions';
+import { ContainerInput, IContainer } from '../../../containers';
+import { ViewMode } from '../../../types';
+import { IEmbeddable } from '../../../embeddables';
 
 export const REMOVE_PANEL_ACTION = 'deletePanel';
 

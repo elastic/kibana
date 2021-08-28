@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { EuiBasicTable, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { switchMap, takeWhile, tap } from 'rxjs/operators';
-import { extractErrorProperties } from '../../../../../../../../../common/util/errors/process_errors';
-import { ml } from '../../../../../../../services/ml_api_service';
-import { CategorizationJobCreator } from '../../../../../common/job_creator/categorization_job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
+import { CategorizationJobCreator } from '../../../../../common/job_creator';
+import { ml } from '../../../../../../../services/ml_api_service';
+import { extractErrorProperties } from '../../../../../../../../../common/util/errors';
 
 const NUMBER_OF_PREVIEW = 5;
 export const CategoryStoppedPartitions: FC = () => {

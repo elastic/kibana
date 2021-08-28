@@ -4,22 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import type { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/types';
-import { useTrackPageview } from '../../../../../observability/public/hooks/use_track_metric';
-import type { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
-import { DocumentTitle } from '../../../components/document_title';
-import { NoData } from '../../../components/empty_states/no_data';
-import { SavedViewsToolbarControls } from '../../../components/saved_views/toolbar_control';
-import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
+import { IIndexPattern } from 'src/plugins/data/public';
+import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
+import { useTrackPageview } from '../../../../../observability/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { metricsExplorerTitle } from '../../../translations';
-import { MetricsPageTemplate } from '../page_template';
+
+import { DocumentTitle } from '../../../components/document_title';
+import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
+import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
+import { MetricsPageTemplate } from '../page_template';
+import { metricsExplorerTitle } from '../../../translations';
+import { SavedViewsToolbarControls } from '../../../components/saved_views/toolbar_control';
 
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;

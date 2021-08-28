@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectUnsanitizedDoc } from '../serialization/types';
-import type { SavedObjectsMigrationLogger } from './core/migration_logger';
+
+import { SavedObjectUnsanitizedDoc } from '../serialization';
+import { SavedObjectsMigrationLogger } from './core/migration_logger';
 
 /**
  * A migration function for a {@link SavedObjectsType | saved object type}

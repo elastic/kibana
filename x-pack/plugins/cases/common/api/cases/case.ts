@@ -6,11 +6,12 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseConnectorRt } from '../connectors';
+
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
+import { CaseConnectorRt } from '../connectors';
 import { SubCaseResponseRt } from './sub_case';
 
 const BucketsAggs = rt.array(

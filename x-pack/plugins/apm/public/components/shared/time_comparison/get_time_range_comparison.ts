@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
-import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { getDateDifference } from '../../../../common/utils/formatters/datetime';
+import { EuiTheme } from 'src/plugins/kibana_react/common';
+import { getDateDifference } from '../../../../common/utils/formatters';
 
 export enum TimeRangeComparisonType {
   WeekBefore = 'week',

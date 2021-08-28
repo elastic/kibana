@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { euiDarkVars, euiLightVars, euiThemeVars } from '@kbn/ui-shared-deps/theme';
+
 import type { DecoratorFn } from '@storybook/react';
 import React from 'react';
-import type { ThemedStyledComponentsModule, ThemeProviderProps } from 'styled-components';
 import * as styledComponents from 'styled-components';
-import { ThemeProvider } from 'styled-components';
+import { ThemedStyledComponentsModule, ThemeProvider, ThemeProviderProps } from 'styled-components';
+import { euiThemeVars, euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps/theme';
 
 export interface EuiTheme {
   eui: typeof euiThemeVars;

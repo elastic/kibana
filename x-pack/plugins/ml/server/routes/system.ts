@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
+
 import { wrapError } from '../client/error_wrapper';
-import { capabilitiesProvider } from '../lib/capabilities/check_capabilities';
 import { mlLog } from '../lib/log';
-import { getMlNodeCount } from '../lib/node_utils';
+import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import type { RouteInitialization, SystemRouteDeps } from '../types';
+import { RouteInitialization, SystemRouteDeps } from '../types';
+import { getMlNodeCount } from '../lib/node_utils';
 
 /**
  * System routes

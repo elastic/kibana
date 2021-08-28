@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../agg_config';
-import { AggGroupNames } from '../agg_groups';
-import type { AggTypeConfig } from '../agg_type';
-import { AggType } from '../agg_type';
+import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
-import { BaseParamType } from '../param_types/base';
-import type { FieldTypes } from '../param_types/field';
+import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
+import { BaseParamType, FieldTypes } from '../param_types';
+import { AggGroupNames } from '../agg_groups';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;

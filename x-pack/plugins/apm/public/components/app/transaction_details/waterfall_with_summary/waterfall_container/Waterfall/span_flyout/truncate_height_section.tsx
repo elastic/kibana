@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReactNode } from 'react';
-import React, { Fragment, useEffect, useRef, useState } from 'react';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import React, { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 
 const ToggleButtonContainer = euiStyled.div`
   margin-top: ${({ theme }) => theme.eui.euiSizeS}

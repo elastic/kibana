@@ -10,11 +10,10 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect, useState } from 'react';
-import type { ProcessListAPIResponse } from '../../../../../common/http_api/host_details/process_list';
-import { ProcessListAPIResponseRT } from '../../../../../common/http_api/host_details/process_list';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
-import { useSourceContext } from '../../../../containers/metrics_source/source';
+import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../../common/http_api';
+import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
+import { useSourceContext } from '../../../../containers/metrics_source';
 
 export interface SortBy {
   name: string;

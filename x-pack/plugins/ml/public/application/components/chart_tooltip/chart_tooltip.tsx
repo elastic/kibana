@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TooltipValueFormatter } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TooltipTrigger from 'react-popper-tooltip';
-import type { ChildrenArg, TooltipTriggerProps } from 'react-popper-tooltip/dist/types';
-import type { ChartTooltipValue, TooltipData } from './chart_tooltip_service';
-import { ChartTooltipService } from './chart_tooltip_service';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { TooltipValueFormatter } from '@elastic/charts';
+
 import './_index.scss';
+
+import { ChildrenArg, TooltipTriggerProps } from 'react-popper-tooltip/dist/types';
+import { ChartTooltipService, ChartTooltipValue, TooltipData } from './chart_tooltip_service';
 
 const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFormatter) => {
   if (!headerData) {

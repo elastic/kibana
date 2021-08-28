@@ -4,48 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import type { Option } from 'fp-ts/lib/Option';
-import { map as mapOptional, some } from 'fp-ts/lib/Option';
+
+import { Subject, Observable, Subscription } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
-import type { ExecutionContextStart } from '../../../../src/core/server/execution_context/execution_context_service';
-import { BufferedTaskStore } from './buffered_task_store';
-import type { TaskManagerConfig } from './config';
-import type { ManagedConfiguration } from './lib/create_managed_configuration';
-import type { TimedFillPoolResult } from './lib/fill_pool';
-import { fillPool, FillPoolResult } from './lib/fill_pool';
-import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
-import { intervalFromNow } from './lib/intervals';
-import type { Middleware } from './lib/middleware';
-import type { Result } from './lib/result_type';
-import { asErr, asOk, map, mapErr, mapOk } from './lib/result_type';
-import { delayOnClaimConflicts } from './polling/delay_on_claim_conflicts';
-import { createObservableMonitor } from './polling/observable_monitor';
-import { createTaskPoller, PollingError, PollingErrorType } from './polling/task_poller';
-import type { ClaimOwnershipResult } from './queries/task_claiming';
-import { TaskClaiming } from './queries/task_claiming';
-import type { ConcreteTaskInstance } from './task';
-import type {
-  EphemeralTaskRejectedDueToCapacity,
-  TaskClaim,
-  TaskManagerStat,
-  TaskMarkRunning,
-  TaskPollingCycle,
-  TaskRun,
-  TaskRunRequest,
-} from './task_events';
+import type { Logger, ExecutionContextStart } from '../../../../src/core/server';
+
+import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
+import { ManagedConfiguration } from './lib/create_managed_configuration';
+import { TaskManagerConfig } from './config';
+
 import {
-  asTaskManagerStatEvent,
-  asTaskPollingCycleEvent,
+  TaskMarkRunning,
+  TaskRun,
+  TaskClaim,
+  TaskRunRequest,
   asTaskRunRequestEvent,
+  TaskPollingCycle,
+  asTaskPollingCycleEvent,
+  TaskManagerStat,
+  asTaskManagerStatEvent,
+  EphemeralTaskRejectedDueToCapacity,
 } from './task_events';
+import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
+import { Middleware } from './lib/middleware';
+import { intervalFromNow } from './lib/intervals';
+import { ConcreteTaskInstance } from './task';
+import {
+  createTaskPoller,
+  PollingError,
+  PollingErrorType,
+  createObservableMonitor,
+} from './polling';
 import { TaskPool } from './task_pool';
-import type { TaskRunner } from './task_running/task_runner';
-import { TaskManagerRunner } from './task_running/task_runner';
+import { TaskManagerRunner, TaskRunner } from './task_running';
 import { TaskStore } from './task_store';
+import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
+import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { delayOnClaimConflicts } from './polling';
+import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;

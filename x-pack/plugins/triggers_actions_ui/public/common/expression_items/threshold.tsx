@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
-  EuiFieldNumber,
+  EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPopover,
   EuiSelect,
+  EuiFieldNumber,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { Fragment, useEffect, useState } from 'react';
-import type { IErrorObject } from '../../types';
-import { builtInComparators } from '../constants/comparators';
-import type { Comparator } from '../types';
-import { ClosablePopoverTitle } from './components/closable_popover_title';
+import { builtInComparators } from '../constants';
+import { Comparator } from '../types';
+import { IErrorObject } from '../../types';
+import { ClosablePopoverTitle } from './components';
 
 export interface ThresholdExpressionProps {
   thresholdComparator: string;

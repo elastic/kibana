@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useHasData } from '../../hooks/use_has_data';

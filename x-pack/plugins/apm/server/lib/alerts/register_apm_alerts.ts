@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
+
 import { Observable } from 'rxjs';
-import type { APMConfig } from '../..';
-import type { PluginSetupContract as AlertingPluginSetupContract } from '../../../../alerting/server/plugin';
-import type { MlPluginSetup } from '../../../../ml/server/plugin';
-import type { IRuleDataClient } from '../../../../rule_registry/server/rule_data_client/types';
-import { registerErrorCountAlertType } from './register_error_count_alert_type';
+import { Logger } from 'kibana/server';
+import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../alerting/server';
+import { IRuleDataClient } from '../../../../rule_registry/server';
 import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
 import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
+import { registerErrorCountAlertType } from './register_error_count_alert_type';
+import { APMConfig } from '../..';
+import { MlPluginSetup } from '../../../../ml/server';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
 
 export interface RegisterRuleDependencies {

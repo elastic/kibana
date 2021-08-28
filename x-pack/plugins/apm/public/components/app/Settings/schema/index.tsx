@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
+
 import React, { useState } from 'react';
-import type { NotificationsStart } from '../../../../../../../../src/core/public/notifications/notifications_service';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { i18n } from '@kbn/i18n';
+import { NotificationsStart } from 'kibana/public';
+import moment from 'moment';
 import { useLocalStorage } from '../../../../hooks/useLocalStorage';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { ConfirmSwitchModal } from './confirm_switch_modal';
 import { SchemaOverview } from './schema_overview';
+import { ConfirmSwitchModal } from './confirm_switch_modal';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import {
+  callApmApi,
+  APIReturnType,
+} from '../../../../services/rest/createCallApmApi';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 type FleetMigrationCheckResponse = APIReturnType<'GET /api/apm/fleet/migration_check'>;
 

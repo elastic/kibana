@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useStartServices } from '../../../../../hooks/use_core';
+import { useStartServices } from '../../../hooks';
 
-import { CloudInstructions } from './components/fleet_server_cloud_instructions';
-import { OnPremInstructions } from './components/fleet_server_on_prem_instructions';
+import { CloudInstructions, OnPremInstructions } from './components';
 
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;

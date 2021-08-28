@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EnrollmentAPIKey } from '../models/enrollment_api_key';
+
+import type { EnrollmentAPIKey } from '../models';
 
 export interface GetEnrollmentAPIKeysRequest {
   query: {

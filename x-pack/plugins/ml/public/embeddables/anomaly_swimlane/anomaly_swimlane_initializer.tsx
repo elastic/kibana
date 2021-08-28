@@ -4,27 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSelect,
+  EuiFieldText,
+  EuiModal,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useState } from 'react';
-import type { SwimlaneType } from '../../application/explorer/explorer_constants';
-import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
-import type { AnomalySwimlaneEmbeddableInput } from '../types';
+import { i18n } from '@kbn/i18n';
+import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
+import { AnomalySwimlaneEmbeddableInput } from '..';
 
 export interface AnomalySwimlaneInitializerProps {
   defaultTitle: string;

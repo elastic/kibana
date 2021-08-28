@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCurrentRoute } from '@kbn/typed-react-router-config';
-import { castArray } from 'lodash';
 import { useContext, useEffect, useRef } from 'react';
-import type { Breadcrumb } from './context';
-import { BreadcrumbsContext } from './context';
+import { castArray } from 'lodash';
+import { Breadcrumb, BreadcrumbsContext } from './context';
 
 export function useBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
   const api = useContext(BreadcrumbsContext);

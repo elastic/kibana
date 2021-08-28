@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
 import moment from 'moment';
+import { memoize } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../i18n';
-import type { Maybe } from '../../typings';
+import { asDecimalOrInteger, asInteger, asDecimal } from './formatters';
+import { TimeUnit } from './datetime';
+import { Maybe } from '../../typings';
 import { isFiniteNumber } from '../is_finite_number';
-import type { TimeUnit } from './datetime';
-import { asDecimal, asDecimalOrInteger, asInteger } from './formatters';
 
 interface FormatterOptions {
   defaultValue?: string;

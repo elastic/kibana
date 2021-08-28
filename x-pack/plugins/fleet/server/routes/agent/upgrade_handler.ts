@@ -4,23 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
 
-import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
-import { isAgentUpgradeable } from '../../../common/services/is_agent_upgradeable';
-import type {
-  PostAgentUpgradeResponse,
-  PostBulkAgentUpgradeResponse,
-} from '../../../common/types/rest_spec/agent';
-import { defaultIngestErrorHandler } from '../../errors/handlers';
+import type { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
+import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
-import { getAgentById } from '../../services/agents/crud';
-import { appContextService } from '../../services/app_context';
-import type {
-  PostAgentUpgradeRequestSchema,
-  PostBulkAgentUpgradeRequestSchema,
-} from '../../types/rest_spec/agent';
+import { appContextService } from '../../services';
+import { defaultIngestErrorHandler } from '../../errors';
+import { isAgentUpgradeable } from '../../../common/services';
+import { getAgentById } from '../../services/agents';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,

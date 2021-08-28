@@ -4,32 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
+
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
-import type { CoreSetup, CoreStart } from '../../../../src/core/server';
-import type { Plugin, PluginInitializerContext } from '../../../../src/core/server/plugins/types';
-import type { CoreStatus } from '../../../../src/core/server/status/types';
-import { ServiceStatusLevels } from '../../../../src/core/server/status/types';
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server/plugin';
-import type { TaskManagerConfig } from './config';
-import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
-import { createManagedConfiguration } from './lib/create_managed_configuration';
-import type { Middleware } from './lib/middleware';
-import { addMiddlewareToChain, createInitialMiddleware } from './lib/middleware';
-import { removeIfExists } from './lib/remove_if_exists';
-import { createMonitoringStats } from './monitoring';
-import type { MonitoringStats } from './monitoring/monitoring_stats_stream';
+import { map, distinctUntilChanged } from 'rxjs/operators';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  Logger,
+  CoreStart,
+  ServiceStatusLevels,
+  CoreStatus,
+} from '../../../../src/core/server';
 import { TaskPollingLifecycle } from './polling_lifecycle';
-import { healthRoute } from './routes/health';
+import { TaskManagerConfig } from './config';
+import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
+import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects } from './saved_objects';
-import type { EphemeralTask } from './task';
+import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
+import { FetchResult, SearchOpts, TaskStore } from './task_store';
+import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
-import type { FetchResult, SearchOpts } from './task_store';
-import { TaskStore } from './task_store';
-import type { TaskDefinitionRegistry } from './task_type_dictionary';
-import { TaskTypeDictionary } from './task_type_dictionary';
-import { registerTaskManagerUsageCollector } from './usage/task_manager_usage_collector';
+import { healthRoute } from './routes';
+import { createMonitoringStats, MonitoringStats } from './monitoring';
+import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
+import { EphemeralTask } from './task';
+import { registerTaskManagerUsageCollector } from './usage';
 
 export type TaskManagerSetupContract = {
   /**

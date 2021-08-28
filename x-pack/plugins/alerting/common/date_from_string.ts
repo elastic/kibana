@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { either } from 'fp-ts/lib/Either';
 
 // represents a Date from an ISO string
 export const DateFromString = new t.Type<Date, string, unknown>(

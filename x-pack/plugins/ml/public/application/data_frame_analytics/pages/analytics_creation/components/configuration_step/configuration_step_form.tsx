@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+
+import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiPanel,
   EuiRange,
@@ -15,46 +17,50 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, debounce } from 'lodash';
-import type { FC } from 'react';
-import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { Query } from '../../../../../../../../../../src/plugins/data/common/query';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
-import type { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
-import {
-  isRuntimeField,
-  isRuntimeMappings,
-} from '../../../../../../../common/util/runtime_field_utils';
-import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
-import { DataGrid } from '../../../../../components/data_grid/data_grid';
-import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix/scatterplot_matrix';
-import { useMlContext } from '../../../../../contexts/ml/use_ml_context';
+import { debounce, cloneDeep } from 'lodash';
+
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { getToastNotifications } from '../../../../../util/dependency_cache';
-import type { FieldSelectionItem } from '../../../../common/analytics';
-import { TRAINING_PERCENT_MAX, TRAINING_PERCENT_MIN } from '../../../../common/analytics';
+import { useMlContext } from '../../../../../contexts/ml';
+import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
+
+import {
+  ANALYSIS_CONFIG_TYPE,
+  TRAINING_PERCENT_MIN,
+  TRAINING_PERCENT_MAX,
+  FieldSelectionItem,
+} from '../../../../common/analytics';
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
-import type { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
-import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
-import type {
-  AnalyticsJobType,
+import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
+import {
+  isRuntimeMappings,
+  isRuntimeField,
+} from '../../../../../../../common/util/runtime_field_utils';
+import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { Messages } from '../shared';
+import {
+  DEFAULT_MODEL_MEMORY_LIMIT,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { useIndexData } from '../../hooks/use_index_data';
+import { handleExplainErrorMessage, shouldAddAsDepVarOption } from './form_options_validation';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
+
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
-import { RuntimeMappings } from '../runtime_mappings/runtime_mappings';
-import { fetchExplainData } from '../shared/fetch_explain_data';
-import { Messages } from '../shared/messages';
-import { AnalysisFieldsTable } from './analysis_fields_table';
-import type { ConfigurationStepProps } from './configuration_step';
-import { handleExplainErrorMessage, shouldAddAsDepVarOption } from './form_options_validation';
 import { JobType } from './job_type';
 import { SupportedFieldsMessage } from './supported_fields_message';
-import type { SavedSearchQuery } from './use_saved_search';
-import { useSavedSearch } from './use_saved_search';
+import { AnalysisFieldsTable } from './analysis_fields_table';
+import { DataGrid } from '../../../../../components/data_grid';
+import { fetchExplainData } from '../shared';
+import { useIndexData } from '../../hooks';
+import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
+import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
+import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
+import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
+
+import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
+import { RuntimeMappings } from '../runtime_mappings';
+import { ConfigurationStepProps } from './configuration_step';
 
 const runtimeMappingKey = 'runtime_mapping';
 const notIncludedReason = 'field not in includes list';

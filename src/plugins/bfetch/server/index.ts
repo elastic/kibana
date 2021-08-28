@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginInitializerContext } from '../../../core/server/plugins/types';
+
+import { PluginInitializerContext } from '../../../core/server';
 import { BfetchServerPlugin } from './plugin';
 
-export type { BatchProcessingRouteParams, BfetchServerSetup, BfetchServerStart, StreamingRequestHandler } from './types';
+export { BfetchServerSetup, BfetchServerStart, BatchProcessingRouteParams } from './plugin';
+export { StreamingRequestHandler } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new BfetchServerPlugin(initializerContext);

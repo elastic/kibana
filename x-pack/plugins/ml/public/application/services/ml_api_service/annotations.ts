@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { basePath } from '.';
-import type {
+
+import {
   Annotation,
   FieldToBucket,
   GetAnnotationsResponse,
 } from '../../../../common/types/annotations';
 import { http, http$ } from '../http_service';
+import { basePath } from './index';
 
 export const annotations = {
   getAnnotations$(obj: {

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fleetSetupRouteService, setupRouteService } from '../../../common/services/routes';
-import type { GetFleetStatusResponse } from '../../../common/types/rest_spec/fleet_setup';
+
+import { setupRouteService, fleetSetupRouteService } from '../../services';
+import type { GetFleetStatusResponse } from '../../types';
 
 import { sendRequest } from './use_request';
 

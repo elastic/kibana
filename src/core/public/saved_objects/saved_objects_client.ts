@@ -5,21 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { pick, throttle, cloneDeep } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { cloneDeep, pick, throttle } from 'lodash';
-import type { SavedObjectsResolveResponse } from '../../server/saved_objects/service/saved_objects_client';
-import type {
-  SavedObjectsClientContract as SavedObjectsApi,
-  SavedObjectsFindOptions as SavedObjectFindOptionsServer,
-} from '../../server/saved_objects/types';
-import type {
+
+import {
   SavedObject,
   SavedObjectReference,
+  SavedObjectsClientContract as SavedObjectsApi,
+  SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
-} from '../../types/saved_objects';
-import type { HttpFetchOptions, HttpSetup } from '../http/types';
+  SavedObjectsResolveResponse,
+} from '../../server';
+
 import { SimpleSavedObject } from './simple_saved_object';
 import type { ResolvedSimpleSavedObject } from './types';
+import { HttpFetchOptions, HttpSetup } from '../http';
 
 export type { SavedObjectsResolveResponse };
 

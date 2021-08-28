@@ -5,25 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ApplicationStart } from '../../../../../core/public/application/types';
-import type { SavedObjectsFindOptionsReference } from '../../../../../core/server/saved_objects/types';
-import { syncQueryStateWithUrl } from '../../../../data/public/query/state_sync/sync_state_with_url';
-import { useKibana } from '../../../../kibana_react/public/context/context';
-import { TableListView } from '../../../../kibana_react/public/table_list_view/table_list_view';
-import type { IKbnUrlStateStorage } from '../../../../kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
-import type { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public/api';
+import { attemptLoadDashboardByTitle } from '../lib';
+import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
-  dashboardListingTable,
   getDashboardBreadcrumb,
+  dashboardListingTable,
   noItemsStrings,
 } from '../../dashboard_strings';
-import type { DashboardAppServices, DashboardRedirect } from '../../types';
-import { attemptLoadDashboardByTitle } from '../lib/load_dashboard_by_title';
-import { confirmCreateWithUnsaved } from './confirm_overlays';
+import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
+import { syncQueryStateWithUrl } from '../../services/data';
+import { IKbnUrlStateStorage } from '../../services/kibana_utils';
+import { TableListView, useKibana } from '../../services/kibana_react';
+import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { confirmCreateWithUnsaved } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 
 export interface DashboardListingProps {

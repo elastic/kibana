@@ -4,24 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import React, { useCallback, useContext, useState } from 'react';
 import { encode } from 'rison-node';
-import { useUiTracker } from '../../../../../../../observability/public/hooks/use_track_metric';
-import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
-import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis/log_analysis_results';
-import type { LogEntry, LogEntryContext } from '../../../../../../common/log_entry/log_entry';
-import type { TimeRange } from '../../../../../../common/time/time_range';
-import { LogEntryColumn } from '../../../../../components/logging/log_text_stream/log_entry_column';
+import moment from 'moment';
+
+import { LogEntry, LogEntryContext } from '../../../../../../common/log_entry';
+import { TimeRange } from '../../../../../../common/time';
+import {
+  getFriendlyNameForPartitionId,
+  partitionField,
+} from '../../../../../../common/log_analysis';
+import { ViewLogInContext } from '../../../../../containers/logs/view_log_in_context';
+import {
+  LogEntryColumn,
+  LogEntryFieldColumn,
+  LogEntryMessageColumn,
+  LogEntryRowWrapper,
+  LogEntryTimestampColumn,
+} from '../../../../../components/logging/log_text_stream';
+import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 import { LogEntryContextMenu } from '../../../../../components/logging/log_text_stream/log_entry_context_menu';
-import { LogEntryFieldColumn } from '../../../../../components/logging/log_text_stream/log_entry_field_column';
-import { LogEntryMessageColumn } from '../../../../../components/logging/log_text_stream/log_entry_message_column';
-import { LogEntryRowWrapper } from '../../../../../components/logging/log_text_stream/log_entry_row';
-import { LogEntryTimestampColumn } from '../../../../../components/logging/log_text_stream/log_entry_timestamp_column';
-import { ViewLogInContext } from '../../../../../containers/logs/view_log_in_context/view_log_in_context';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
-import type { LogColumnConfiguration } from '../../../../../utils/source_configuration';
+import { useUiTracker } from '../../../../../../../observability/public';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;

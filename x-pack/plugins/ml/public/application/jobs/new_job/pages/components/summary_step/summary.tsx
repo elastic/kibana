@@ -4,46 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
+import { Subscription } from 'rxjs';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Subscription } from 'rxjs';
-import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning/new_job_awaiting_node';
-import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
-import { useNavigateToPath } from '../../../../../contexts/kibana/use_navigate_to_path';
+import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
+import { PreviousButton } from '../wizard_nav';
+import { WIZARD_STEPS, StepProps } from '../step_types';
+import { JobCreatorContext } from '../job_creator_context';
+import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
-import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service/toast_notification_service';
+import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
+import { JobDetails } from './components/job_details';
+import { DatafeedDetails } from './components/datafeed_details';
+import { DetectorChart } from './components/detector_chart';
+import { JobProgress } from './components/job_progress';
+import { PostSaveOptions } from './components/post_save_options';
+import { StartDatafeedSwitch } from './components/start_datafeed_switch';
+import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 import {
-  isAdvancedJobCreator,
-  isSingleMetricJobCreator,
-} from '../../../common/job_creator/type_guards';
-import {
-  advancedStartDatafeed,
   convertToAdvancedJob,
   resetJob,
+  advancedStartDatafeed,
 } from '../../../common/job_creator/util/general';
-import { JobRunner } from '../../../common/job_runner/job_runner';
-import { EDITOR_MODE, JsonEditorFlyout } from '../common/json_editor_flyout/json_editor_flyout';
-import { JobCreatorContext } from '../job_creator_context';
-import type { StepProps } from '../step_types';
-import { WIZARD_STEPS } from '../step_types';
-import { PreviousButton } from '../wizard_nav/wizard_nav';
-import { DatafeedSectionTitle, JobSectionTitle } from './components/common';
-import { DatafeedDetails } from './components/datafeed_details/datafeed_details';
-import { DetectorChart } from './components/detector_chart/detector_chart';
-import { JobDetails } from './components/job_details/job_details';
-import { JobProgress } from './components/job_progress/job_progress';
-import { PostSaveOptions } from './components/post_save_options/post_save_options';
-import { StartDatafeedSwitch } from './components/start_datafeed_switch/start_datafeed_switch';
+import { JobSectionTitle, DatafeedSectionTitle } from './components/common';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const {

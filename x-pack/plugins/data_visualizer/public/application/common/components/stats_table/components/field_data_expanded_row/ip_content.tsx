@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React from 'react';
-import { TopValues } from '../../../top_values/top_values';
+
+import React, { FC } from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
+import { TopValues } from '../../../top_values';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 

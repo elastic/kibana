@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiConfirmModal, EuiSuperSelect, EuiText, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+
+import React, { useState, Fragment, ReactNode } from 'react';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, EuiText, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import type { ReactNode } from 'react';
-import React, { Fragment, useState } from 'react';
-import { getDefaultTitle } from '../../../lib/get_default_title';
-import type { FailedImportConflict } from '../../../lib/resolve_import_errors';
+import { FailedImportConflict } from '../../../lib/resolve_import_errors';
+import { getDefaultTitle } from '../../../lib';
 
 export interface OverwriteModalProps {
   conflict: FailedImportConflict;

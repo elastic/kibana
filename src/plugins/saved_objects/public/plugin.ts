@@ -5,15 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreStart } from '../../../core/public/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
-import type { DataPublicPluginStart } from '../../data/public/types';
-import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '../common';
+
+import { CoreStart, Plugin } from 'src/core/public';
+
 import './index.scss';
-import type { SavedObjectDecoratorConfig } from './saved_object/decorators/registry';
-import { SavedObjectDecoratorRegistry } from './saved_object/decorators/registry';
-import { createSavedObjectClass } from './saved_object/saved_object';
-import type { SavedObject } from './types';
+import {
+  createSavedObjectClass,
+  SavedObjectDecoratorRegistry,
+  SavedObjectDecoratorConfig,
+} from './saved_object';
+import { DataPublicPluginStart } from '../../data/public';
+import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
+import { SavedObject } from './types';
 
 export interface SavedObjectSetup {
   registerDecorator: (config: SavedObjectDecoratorConfig<any>) => void;

@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { memo } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 
+// TODO: Needs to be moved
 import { EditPackagePolicyForm } from '../../../../../fleet/sections/agent_policy/edit_package_policy_page';
 
-// TODO: Needs to be moved
 export const Policy = memo(() => {
   const {
     params: { packagePolicyId },

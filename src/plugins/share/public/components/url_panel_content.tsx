@@ -5,30 +5,34 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiSwitchEvent } from '@elastic/eui';
+
+import React, { Component, ReactElement } from 'react';
+
 import {
   EuiButton,
   EuiCopy,
   EuiFlexGroup,
+  EuiSpacer,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiRadioGroup,
-  EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import type { ReactElement } from 'react';
-import React, { Component } from 'react';
+
 import { format as formatUrl, parse as parseUrl } from 'url';
-import type { HttpStart } from '../../../../core/public/http/types';
-import type { Capabilities } from '../../../../core/types/capabilities';
-import type { SecurityOssPluginStart } from '../../../security_oss/public/plugin';
+
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { HttpStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
+import type { Capabilities } from 'src/core/public';
+
 import { shortenUrl } from '../lib/url_shortener';
-import type { UrlParamExtension } from '../types';
+import { UrlParamExtension } from '../types';
+import type { SecurityOssPluginStart } from '../../../security_oss/public';
 
 interface Props {
   allowShortUrl: boolean;

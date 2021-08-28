@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
+
 import { difference } from 'lodash';
-import type { Capabilities as UICapabilities } from '../../../../src/core/types/capabilities';
-import type { ElasticsearchFeatureConfig } from '../common/elasticsearch_feature';
-import type { FeatureKibanaPrivileges } from '../common/feature_kibana_privileges';
-import type { KibanaFeatureConfig } from '../common/kibana_feature';
+import { Capabilities as UICapabilities } from '../../../../src/core/server';
+import { KibanaFeatureConfig } from '../common';
+import { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.

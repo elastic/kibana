@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ReactNode } from 'react';
-import React from 'react';
+
+import React, { ReactNode } from 'react';
 import { SPAN_ID } from '../../../../../common/elasticsearch_fieldnames';
-import type { Span } from '../../../../../typings/es_schemas/ui/span';
+import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { DiscoverLink } from './DiscoverLink';
 
 function getDiscoverQuery(span: Span) {

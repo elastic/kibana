@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// Remove after this issue is resolved: https://github.com/elastic/eui/issues/4688
-// eslint-disable-next-line import/no-extraneous-dependencies
-import type { EuiLinkAnchorProps } from '@elastic/eui';
-import type { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
-import type { FunctionComponent } from 'react';
-import rehype2react from 'rehype-react';
-import type { PluggableList, Plugin } from 'unified';
 
+import { FunctionComponent } from 'react';
+import { Plugin, PluggableList } from 'unified';
+// Remove after this issue is resolved: https://github.com/elastic/eui/issues/4688
+import { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import rehype2react from 'rehype-react';
+import { EuiLinkAnchorProps } from '@elastic/eui';
 export interface CursorPosition {
   start: number;
   end: number;

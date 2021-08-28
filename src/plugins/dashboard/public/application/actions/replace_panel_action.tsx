@@ -5,16 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreStart } from '../../../../../core/public/types';
-import { ViewMode } from '../../../../embeddable/common/types';
-import type { IEmbeddable } from '../../../../embeddable/public/lib/embeddables/i_embeddable';
-import type { EmbeddableStart } from '../../../../embeddable/public/plugin';
-import type { Action } from '../../../../ui_actions/public/actions/action';
-import { IncompatibleActionError } from '../../../../ui_actions/public/actions/incompatible_action_error';
-import { dashboardReplacePanelAction } from '../../dashboard_strings';
-import { DASHBOARD_CONTAINER_TYPE } from '../embeddable/dashboard_constants';
-import { DashboardContainer } from '../embeddable/dashboard_container';
+
+import { CoreStart } from 'src/core/public';
+import { IEmbeddable, ViewMode, EmbeddableStart } from '../../services/embeddable';
+import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
+import { dashboardReplacePanelAction } from '../../dashboard_strings';
 
 export const ACTION_REPLACE_PANEL = 'replacePanel';
 

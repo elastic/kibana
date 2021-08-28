@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiColorPickerSwatch, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+
+import { EuiColorPickerSwatch, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 export interface Props {

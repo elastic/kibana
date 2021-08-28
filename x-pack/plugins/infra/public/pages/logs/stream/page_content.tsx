@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/utils/app_wrapper_class';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { i18n } from '@kbn/i18n';
 import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { useLogSourceContext } from '../../../containers/logs/log_source/log_source';
-import { LogsPageTemplate } from '../page_template';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogsPageLogsContent } from './page_logs_content';
 import { LogsPageNoIndicesContent } from './page_no_indices_content';
+import { LogsPageTemplate } from '../page_template';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',

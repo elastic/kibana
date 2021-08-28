@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { schema } from '@kbn/config-schema';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+
 import { Router } from './router';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { schema } from '@kbn/config-schema';
 
 const logger = loggingSystemMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { ActionConnectorFieldsProps } from '../../../../types';
+import { ActionConnectorFieldsProps } from '../../../../types';
+import { TeamsActionConnector } from '../types';
+import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
-import type { TeamsActionConnector } from '../types';
 
 const TeamsActionFields: React.FunctionComponent<
   ActionConnectorFieldsProps<TeamsActionConnector>

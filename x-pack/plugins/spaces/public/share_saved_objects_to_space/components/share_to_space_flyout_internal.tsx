@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import './share_to_space_flyout_internal.scss';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,23 +25,21 @@ import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import type { ToastsStart } from '../../../../../../src/core/public/notifications/toasts/toasts_service';
-import type { SavedObjectReferenceWithContext } from '../../../../../../src/core/server/saved_objects/service/lib/collect_multi_namespace_references';
+import type { SavedObjectReferenceWithContext, ToastsStart } from 'src/core/public';
 import type {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
-} from '../../../../../../src/plugins/spaces_oss/public/api';
+} from 'src/plugins/spaces_oss/public';
+
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
-import { getCopyToSpaceFlyoutComponent } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout';
-import { useSpaces } from '../../spaces_context/context';
-import type { SpacesManager } from '../../spaces_manager/spaces_manager';
+import { getCopyToSpaceFlyoutComponent } from '../../copy_saved_objects_to_space';
+import { useSpaces } from '../../spaces_context';
+import type { SpacesManager } from '../../spaces_manager';
 import type { ShareToSpaceTarget } from '../../types';
 import type { ShareOptions } from '../types';
 import { AliasTable } from './alias_table';
 import { DEFAULT_OBJECT_NOUN } from './constants';
 import { RelativesFooter } from './relatives_footer';
-import './share_to_space_flyout_internal.scss';
 import { ShareToSpaceForm } from './share_to_space_form';
 import type { InternalLegacyUrlAliasTarget } from './types';
 

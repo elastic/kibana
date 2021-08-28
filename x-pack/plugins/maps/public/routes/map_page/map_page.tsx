@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
-import type { AppMountParameters } from '../../../../../../src/core/public/application/types';
-import { EmbeddableStateTransfer } from '../../../../../../src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer';
-import type { MapEmbeddableInput } from '../../embeddable/types';
+import { AppMountParameters } from 'kibana/public';
+import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapApp } from './map_app';
-import { getInitialLayersFromUrlParam } from './saved_map/get_initial_layers_from_url_param';
-import { SavedMap } from './saved_map/saved_map';
+import { SavedMap, getInitialLayersFromUrlParam } from './saved_map';
+import { MapEmbeddableInput } from '../../embeddable/types';
 
 interface Props {
   mapEmbeddableInput?: MapEmbeddableInput;

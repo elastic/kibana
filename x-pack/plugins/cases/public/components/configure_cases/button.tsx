@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiToolTip } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import type { CasesNavigation } from '../links';
-import { LinkButton } from '../links';
+import { CasesNavigation, LinkButton } from '../links';
 
 // TODO: Potentially move into links component?
 export interface ConfigureCaseButtonProps {

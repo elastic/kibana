@@ -4,50 +4,50 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiPopover,
-  EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useUnmount from 'react-use/lib/useUnmount';
-import type { ParamEditorProps } from '../..';
-import type { CodeEditorProps } from '../../../../../../../../../src/plugins/kibana_react/public/code_editor';
-import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public/code_editor';
-import { trackUiEvent } from '../../../../../lens_ui_telemetry/factory';
-import { useDebounceWithOptions } from '../../../../../shared_components/helpers';
-import { TooltipWrapper } from '../../../../../shared_components/tooltip_wrapper';
-import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
+import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
+import type { CodeEditorProps } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { TooltipWrapper, useDebounceWithOptions } from '../../../../../shared_components';
+import { ParamEditorProps } from '../../index';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
-import type { FormulaIndexPatternColumn } from '../formula';
-import { regenerateLayerFromAst } from '../parse';
-import { filterByVisibleOperation } from '../util';
-import type { ErrorWrapper } from '../validation';
-import { runASTValidation, tryToParse } from '../validation';
-import './formula.scss';
-import { MemoizedFormulaHelp } from './formula_help';
-import type { LensMathSuggestions } from './math_completion';
+import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
 import {
-  getHover,
-  getSignatureHelp,
-  getSuggestion,
-  getTokenInfo,
-  monacoPositionToOffset,
-  offsetToRowColumn,
-  suggest,
+  LensMathSuggestions,
   SUGGESTION_TYPE,
+  suggest,
+  getSuggestion,
+  getSignatureHelp,
+  getHover,
+  getTokenInfo,
+  offsetToRowColumn,
+  monacoPositionToOffset,
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
+import { MemoizedFormulaHelp } from './formula_help';
+import { trackUiEvent } from '../../../../../lens_ui_telemetry';
+
+import './formula.scss';
+import { FormulaIndexPatternColumn } from '../formula';
+import { regenerateLayerFromAst } from '../parse';
+import { filterByVisibleOperation } from '../util';
+import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 
 export const WrappedFormulaEditor = ({
   activeData,

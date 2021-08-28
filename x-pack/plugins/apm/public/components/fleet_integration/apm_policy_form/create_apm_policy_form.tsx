@@ -6,9 +6,11 @@
  */
 import React from 'react';
 import { APMPolicyForm } from '.';
-import type { NewPackagePolicy } from '../../../../../fleet/common/types/models/package_policy';
-import type { PackagePolicyCreateExtensionComponentProps } from '../../../../../fleet/public/types/ui_extensions';
-import type { PackagePolicyVars } from './typings';
+import {
+  PackagePolicyVars,
+  NewPackagePolicy,
+  PackagePolicyCreateExtensionComponentProps,
+} from './typings';
 
 interface Props {
   newPolicy: NewPackagePolicy;

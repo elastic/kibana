@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { PageLoadDistribution } from '../PageLoadDistribution';
 import { PageViewsTrend } from '../PageViewsTrend';
 

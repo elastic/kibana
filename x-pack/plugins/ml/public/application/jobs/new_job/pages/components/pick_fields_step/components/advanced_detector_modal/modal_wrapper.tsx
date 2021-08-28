@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React from 'react';
 
 const MAX_MODAL_WIDTH = 1200;
 

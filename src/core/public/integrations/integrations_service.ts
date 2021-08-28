@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreService } from '../../types/core_service';
-import type { IUiSettingsClient } from '../ui_settings/types';
-import { MomentService } from './moment/moment_service';
-import { StylesService } from './styles/styles_service';
+
+import { IUiSettingsClient } from '../ui_settings';
+import { CoreService } from '../../types';
+
+import { MomentService } from './moment';
+import { StylesService } from './styles';
 
 interface Deps {
   uiSettings: IUiSettingsClient;

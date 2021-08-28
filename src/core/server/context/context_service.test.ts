@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreContext } from '../core_context';
-import type { PluginOpaqueId } from '../plugins/types';
-import { ContextService } from './context_service';
+
+import { PluginOpaqueId } from '../../server';
 import { MockContextConstructor } from './context_service.test.mocks';
+import { ContextService } from './context_service';
+import { CoreContext } from '../core_context';
 
 const pluginDependencies = new Map<PluginOpaqueId, PluginOpaqueId[]>();
 

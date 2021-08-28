@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IIndexPattern } from '../../index_patterns/types';
-import type { EsQuerySortValue, SortOptions } from './types';
+
+import { IIndexPattern } from '../../index_patterns';
+import { EsQuerySortValue, SortOptions } from './types';
 
 export function normalizeSortRequest(
   sortObject: EsQuerySortValue | EsQuerySortValue[],

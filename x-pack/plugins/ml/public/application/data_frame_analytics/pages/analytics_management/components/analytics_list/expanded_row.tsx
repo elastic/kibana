@@ -4,34 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiIcon, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import React, { FC, Fragment, useState, useEffect } from 'react';
 import moment from 'moment-timezone';
-import type { FC } from 'react';
-import React, { Fragment, useEffect, useState } from 'react';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+
+import { EuiIcon, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { formatHumanReadableDateTimeSeconds } from '../../../../../../../common/util/date_utils';
+
+import { DataFrameAnalyticsListRow } from './common';
+import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
+import { ExpandedRowJsonPane } from './expanded_row_json_pane';
+import { ProgressBar } from './progress_bar';
 import {
-  getAnalysisType,
   getDependentVar,
   getPredictionFieldName,
-  isRegressionAnalysis,
-} from '../../../../../../../common/util/analytics_utils';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../../../common/util/date_utils';
-import type { Eval } from '../../../../common/analytics';
-import {
   getValuesFromResponse,
-  isRegressionEvaluateResponse,
   loadEvalData,
-  REGRESSION_STATS,
-} from '../../../../common/analytics';
-import type { DataFrameAnalyticsListRow } from './common';
-import { getDataFrameAnalyticsProgressPhase, isCompletedAnalyticsJob } from './common';
-import type { SectionConfig, SectionItem } from './expanded_row_details_pane';
-import { ExpandedRowDetailsPane } from './expanded_row_details_pane';
-import { ExpandedRowJsonPane } from './expanded_row_json_pane';
-import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
-import { ProgressBar } from './progress_bar';
+  Eval,
+} from '../../../../common';
 import { getTaskStateBadge } from './use_columns';
+import { getDataFrameAnalyticsProgressPhase, isCompletedAnalyticsJob } from './common';
+import {
+  isRegressionAnalysis,
+  getAnalysisType,
+  ANALYSIS_CONFIG_TYPE,
+  REGRESSION_STATS,
+  isRegressionEvaluateResponse,
+} from '../../../../common/analytics';
+import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {

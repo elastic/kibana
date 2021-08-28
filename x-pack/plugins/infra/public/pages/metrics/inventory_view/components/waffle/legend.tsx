@@ -4,21 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback } from 'react';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type {
+
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import {
   InfraFormatter,
   InfraWaffleMapBounds,
   InfraWaffleMapLegend,
+  SteppedGradientLegendRT,
+  StepLegendRT,
+  GradientLegendRT,
 } from '../../../../../lib/lib';
-import { GradientLegendRT, StepLegendRT, SteppedGradientLegendRT } from '../../../../../lib/lib';
-import type { WaffleLegendOptions } from '../../hooks/use_waffle_options';
-import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { GradientLegend } from './gradient_legend';
 import { LegendControls } from './legend_controls';
-import { SteppedGradientLegend } from './stepped_gradient_legend';
 import { StepLegend } from './steps_legend';
-
+import {
+  DEFAULT_LEGEND,
+  useWaffleOptionsContext,
+  WaffleLegendOptions,
+} from '../../hooks/use_waffle_options';
+import { SteppedGradientLegend } from './stepped_gradient_legend';
 interface Props {
   legend: InfraWaffleMapLegend;
   bounds: InfraWaffleMapBounds;

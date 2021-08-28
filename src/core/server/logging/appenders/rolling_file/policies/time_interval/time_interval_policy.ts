@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { Duration } from 'moment-timezone';
 import { schema } from '@kbn/config-schema';
-import type { LogRecord } from '@kbn/logging';
-import type { Duration } from 'moment-timezone';
+import { LogRecord } from '@kbn/logging';
 import { RollingFileContext } from '../../rolling_file_context';
-import type { TriggeringPolicy } from '../policy';
+import { TriggeringPolicy } from '../policy';
 import { getNextRollingTime } from './get_next_rolling_time';
 import { isValidRolloverInterval } from './utils';
 

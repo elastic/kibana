@@ -4,19 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import {
-  removeSelectedLayer,
-  removeTrackedLayerStateForSelectedLayer,
-  setSelectedLayer,
-} from '../../../actions/layer_actions';
-import { updateFlyout } from '../../../actions/ui_actions';
-import type { MapStoreState } from '../../../reducers/store';
+import { FlyoutFooter } from './flyout_footer';
+
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { hasDirtyState } from '../../../selectors/map_selectors';
-import { FlyoutFooter } from './flyout_footer';
+import {
+  setSelectedLayer,
+  removeSelectedLayer,
+  removeTrackedLayerStateForSelectedLayer,
+  updateFlyout,
+} from '../../../actions';
+import { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {

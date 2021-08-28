@@ -5,55 +5,53 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
-import type {
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '../../../../core/types/saved_objects';
-import { extractReferences as extractSearchSourceReferences } from '../../../data/common/search/search_source/extract_references';
-import type { EmbeddableStateWithType } from '../../../embeddable/common/types';
-import { AttributeService } from '../../../embeddable/public/lib/attribute_service/attribute_service';
-import type { IContainer } from '../../../embeddable/public/lib/containers/i_container';
-import type { EmbeddableFactoryDefinition } from '../../../embeddable/public/lib/embeddables/embeddable_factory_definition';
-import { ErrorEmbeddable } from '../../../embeddable/public/lib/embeddables/error_embeddable';
-import type { EmbeddableOutput } from '../../../embeddable/public/lib/embeddables/i_embeddable';
-import type { StartServicesGetter } from '../../../kibana_utils/public/core/create_start_service_getter';
-import type { SavedObjectMetaData } from '../../../saved_objects/public/finder/saved_object_finder';
-import { checkForDuplicateTitle } from '../../../saved_objects/public/saved_object/helpers/check_for_duplicate_title';
-import type { OnSaveProps } from '../../../saved_objects/public/save_modal/saved_object_save_modal';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import type { VisualizationsStartDeps } from '../plugin';
+import type { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
+import type { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+
+import { extractSearchSourceReferences } from '../../../data/public';
+import type { SavedObjectAttributes, SavedObjectReference } from '../../../../core/public';
+
 import {
-  extractControlsReferences,
-  injectControlsReferences,
-} from '../saved_visualizations/saved_visualization_references/controls_references';
-import {
-  extractTimeSeriesReferences,
-  injectTimeSeriesReferences,
-} from '../saved_visualizations/saved_visualization_references/timeseries_references';
-import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
-import {
-  getCapabilities,
-  getSavedVisualizationsLoader,
-  getTypes,
-  getUISettings,
-} from '../services';
-import type { SerializedVis } from '../vis';
-import { Vis } from '../vis';
-import { createVisAsync } from '../vis_async';
-import { showNewVisModal } from '../wizard/show_new_vis';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
-import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
+  EmbeddableFactoryDefinition,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+  IContainer,
+  AttributeService,
+} from '../../../embeddable/public';
+import type { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import type {
   VisualizeByReferenceInput,
   VisualizeByValueInput,
+  VisualizeEmbeddable,
   VisualizeInput,
   VisualizeOutput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
-import { VisualizeEmbeddable } from './visualize_embeddable';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import type { SerializedVis, Vis } from '../vis';
+import { createVisAsync } from '../vis_async';
+import {
+  getCapabilities,
+  getTypes,
+  getUISettings,
+  getSavedVisualizationsLoader,
+} from '../services';
+import { showNewVisModal } from '../wizard';
+import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
+import {
+  extractControlsReferences,
+  extractTimeSeriesReferences,
+  injectTimeSeriesReferences,
+  injectControlsReferences,
+} from '../saved_visualizations/saved_visualization_references';
+import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
+import { checkForDuplicateTitle } from '../../../saved_objects/public';
+import type { StartServicesGetter } from '../../../kibana_utils/public';
+import type { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;

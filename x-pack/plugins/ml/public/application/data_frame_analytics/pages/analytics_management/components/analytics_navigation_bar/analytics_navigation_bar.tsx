@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiTab, EuiTabs } from '@elastic/eui';
+
+import React, { FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
-import { useNavigateToPath } from '../../../../../contexts/kibana/use_navigate_to_path';
+import { EuiTab, EuiTabs } from '@elastic/eui';
+import { useNavigateToPath } from '../../../../../contexts/kibana';
 
 interface Tab {
   id: string;

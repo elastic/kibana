@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { HeapInfo } from 'v8';
-import v8 from 'v8';
+
+import v8, { HeapInfo } from 'v8';
 import { ProcessMetricsCollector } from './process';
 
 describe('ProcessMetricsCollector', () => {

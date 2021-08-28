@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
-import type { Environment } from '../../../../../common/environment_rt';
-import type { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
-import type { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
+import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
+import { Environment } from '../../../../../common/environment_rt';
 
 export const MaybeViewTraceLink = ({
   transaction,

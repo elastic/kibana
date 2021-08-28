@@ -5,9 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiText, keys } from '@elastic/eui';
+
 import React, { useEffect, useRef } from 'react';
 import * as ReactDOM from 'react-dom';
+import { keys, EuiText } from '@elastic/eui';
+
 import './_ui_ace_keyboard_mode.scss';
 
 const OverlayText = () => (

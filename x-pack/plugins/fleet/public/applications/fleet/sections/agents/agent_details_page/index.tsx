@@ -4,44 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useMemo, useCallback } from 'react';
+import { useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
 import {
-  EuiButtonEmpty,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
-  EuiLink,
+  EuiButtonEmpty,
   EuiText,
+  EuiLink,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
-import React, { useCallback, useMemo } from 'react';
-import { Route, Switch, useLocation, useRouteMatch } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { EuiIconTip } from '@elastic/eui';
 
-import { isAgentUpgradeable } from '../../../../../../common/services/is_agent_upgradeable';
-import type { Agent } from '../../../../../../common/types/models/agent';
-import type { AgentPolicy } from '../../../../../../common/types/models/agent_policy';
-import { Error } from '../../../../../components/error';
-import { Loading } from '../../../../../components/loading';
-import { FLEET_ROUTING_PATHS } from '../../../../../constants/page_paths';
-import { useStartServices } from '../../../../../hooks/use_core';
-import { useIntraAppState } from '../../../../../hooks/use_intra_app_state';
-import { useKibanaVersion } from '../../../../../hooks/use_kibana_version';
-import { useLink } from '../../../../../hooks/use_link';
-import { useGetOneAgent } from '../../../../../hooks/use_request/agents';
-import { useGetOneAgentPolicy } from '../../../../../hooks/use_request/agent_policy';
-import { WithHeaderLayout } from '../../../../../layouts/with_header';
-import type { AgentDetailsReassignPolicyAction } from '../../../../../types/intra_app_route_state';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { AgentHealth } from '../components/agent_health';
+import type { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
+import { FLEET_ROUTING_PATHS } from '../../../constants';
+import { Loading, Error } from '../../../components';
+import {
+  useGetOneAgent,
+  useGetOneAgentPolicy,
+  useLink,
+  useBreadcrumbs,
+  useStartServices,
+  useKibanaVersion,
+  useIntraAppState,
+} from '../../../hooks';
+import { WithHeaderLayout } from '../../../layouts';
+import { AgentHealth } from '../components';
+import { isAgentUpgradeable } from '../../../services';
 
-import { AgentDetailsActionMenu } from './components/actions_menu';
-import { AgentDetailsContent } from './components/agent_details';
-import { AgentLogs } from './components/agent_logs';
-import { AgentRefreshContext } from './hooks/use_agent';
+import { AgentRefreshContext } from './hooks';
+import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {

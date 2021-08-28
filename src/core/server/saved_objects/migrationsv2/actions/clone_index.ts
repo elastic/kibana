@@ -6,22 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Either from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { AcknowledgeResponse, IndexNotFound } from '.';
-import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
-import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { ElasticsearchClient } from '../../../elasticsearch';
+import {
+  catchRetryableEsClientErrors,
+  RetryableEsClientError,
+} from './catch_retryable_es_client_errors';
+import type { IndexNotFound, AcknowledgeResponse } from './';
+import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
 import {
   DEFAULT_TIMEOUT,
   INDEX_AUTO_EXPAND_REPLICAS,
   INDEX_NUMBER_OF_SHARDS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
-import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
-
 export type CloneIndexResponse = AcknowledgeResponse;
 
 /** @internal */

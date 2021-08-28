@@ -5,11 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsClientContract } from '../../../../core/server/saved_objects/types';
-import type { SavedObject } from '../../../../core/types/saved_objects';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../common/constants';
-import type { IFieldType } from '../../common/index_patterns/fields/types';
-import type { IndexPatternAttributes } from '../../common/index_patterns/types';
+
+import { SavedObjectsClientContract } from 'kibana/server';
+import {
+  IFieldType,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  IndexPatternAttributes,
+  SavedObject,
+} from '../../common';
 
 export const getFieldByName = (
   fieldName: string,

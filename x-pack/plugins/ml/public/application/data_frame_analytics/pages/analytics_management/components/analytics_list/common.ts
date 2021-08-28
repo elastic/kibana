@@ -4,27 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiTableActionsColumnType } from '@elastic/eui';
-import { Ast, Query } from '@elastic/eui';
+
+import { EuiTableActionsColumnType, Query, Ast } from '@elastic/eui';
+
 import { DATA_FRAME_TASK_STATE } from '../../../../../../../common/constants/data_frame_analytics';
-import type {
+import { DataFrameTaskStateType } from '../../../../../../../common/types/data_frame_analytics';
+export { DATA_FRAME_TASK_STATE };
+export { DataFrameTaskStateType };
+
+import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
+import {
   DataFrameAnalysisConfigType,
-  DataFrameAnalyticsConfig,
-  DataFrameAnalyticsId,
   DataFrameAnalyticsStats,
-  DataFrameTaskStateType,
 } from '../../../../../../../common/types/data_frame_analytics';
 
-export type { DataFrameAnalyticsStats } from '../../../../../../../common/types/data_frame_analytics';
-export { DATA_FRAME_TASK_STATE };
-export type { DataFrameTaskStateType };
-export { Query };
+export { DataFrameAnalyticsStats } from '../../../../../../../common/types/data_frame_analytics';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',
   CONTINUOUS = 'continuous',
 }
 
+export { Query };
 export type Clause = Parameters<typeof Query['isMust']>[0];
 
 type ExtractClauseType<T> = T extends (x: any) => x is infer Type ? Type : never;

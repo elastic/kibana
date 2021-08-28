@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEqual } from 'lodash';
 import { useState } from 'react';
-import type { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
+import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 
 export interface MetricThresholdPrefillOptions {
   groupBy: string | string[] | undefined;

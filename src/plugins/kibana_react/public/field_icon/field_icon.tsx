@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { EuiTokenProps } from '@elastic/eui';
-import { EuiToken } from '@elastic/eui';
-import classNames from 'classnames';
 import React from 'react';
+import classNames from 'classnames';
+import { EuiToken, EuiTokenProps } from '@elastic/eui';
 
 export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
   type:

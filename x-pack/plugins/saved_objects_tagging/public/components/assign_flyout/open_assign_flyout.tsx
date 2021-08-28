@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import type { NotificationsStart } from '../../../../../../src/core/public/notifications/notifications_service';
-import type { OverlayStart } from '../../../../../../src/core/public/overlays/overlay_service';
-import type { OverlayRef } from '../../../../../../src/core/public/overlays/types';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
-import type { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public/api';
-import type { ITagAssignmentService } from '../../services/assignments/assignment_service';
+import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
+import { NotificationsStart, OverlayStart, OverlayRef } from 'src/core/public';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { ITagAssignmentService, ITagsCache } from '../../services';
 
 export interface GetAssignFlyoutOpenerOptions {
   overlays: OverlayStart;

@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../../observability/server/utils/queries';
+
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -16,6 +13,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -27,7 +25,7 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { calculateFailedTransactionRate } from '../helpers/transaction_error_rate';
 
 export type ServiceOverviewTransactionGroupSortField =

@@ -4,24 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EsQueryConfig, Filter, Query } from '@kbn/es-query';
+
+import type { Filter, EsQueryConfig, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { get, isEmpty } from 'lodash/fp';
+import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import type { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/types';
-import type { BrowserFields } from '../../../common/search_strategy/index_fields';
-import { DataProviderType } from '../../../common/types/timeline';
-import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline/data_provider';
-import { EXISTS_OPERATOR } from '../../../common/types/timeline/data_provider';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   elementOrChildrenHasFocus,
   getFocusedAriaColindexCell,
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../common/utils/accessibility/helpers';
+} from '../../../common';
+import { IIndexPattern } from '../../../../../../src/plugins/data/public';
+import type { BrowserFields } from '../../../common/search_strategy/index_fields';
+import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
+import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
+
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
 const isNumber = (value: string | number) => !isNaN(Number(value));

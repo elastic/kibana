@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { FC, PropsWithChildren, PropsWithRef, ReactElement } from 'react';
 import React, { lazy, useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import type { StartServicesAccessor } from '../../../../../src/core/public/types';
+import type { StartServicesAccessor } from 'src/core/public';
+
 import type { PluginsStart } from '../plugin';
-import { SuspenseErrorBoundary } from '../suspense_error_boundary/suspense_error_boundary';
+import { SuspenseErrorBoundary } from '../suspense_error_boundary';
 
 interface InternalProps<T> {
   fn: () => Promise<FC<T>>;

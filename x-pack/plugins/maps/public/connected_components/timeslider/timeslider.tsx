@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
-import type { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
+import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
-import type { TimeRange } from '../../../../../../src/plugins/data/common/query/timefilter/types';
-import type { Timeslice } from '../../../common/descriptor_types/data_request_descriptor_types';
-import { getTimeFilter } from '../../kibana_services';
 import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
+import { TimeRange } from '../../../../../../src/plugins/data/common';
+import { getTimeFilter } from '../../kibana_services';
+import { Timeslice } from '../../../common/descriptor_types';
 
 export interface Props {
   closeTimeslider: () => void;

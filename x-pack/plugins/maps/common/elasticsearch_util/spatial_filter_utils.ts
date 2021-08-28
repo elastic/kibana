@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { FilterMeta } from '@kbn/es-query';
-import { FILTERS } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { Feature, Geometry, Polygon, Position } from 'geojson';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
-import type { Feature, Geometry, Polygon, Position } from 'geojson';
+import { FilterMeta, FILTERS } from '@kbn/es-query';
+import { MapExtent } from '../descriptor_types';
 import { ES_SPATIAL_RELATIONS } from '../constants';
-import type { MapExtent } from '../descriptor_types/map_descriptor';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
+import { GeoFilter, GeoShapeQueryBody, PreIndexedShape } from './types';
 import { makeESBbox } from './elasticsearch_geo_utils';
-import type { GeoFilter, GeoShapeQueryBody, PreIndexedShape } from './types';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
 

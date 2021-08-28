@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IScopedClusterClient } from '../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import type { RuntimeMappings } from '../../common/types/fields';
+
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
-import type { HistogramField } from '../models/data_visualizer/data_visualizer';
-import { DataVisualizer } from '../models/data_visualizer/data_visualizer';
-import type { RouteInitialization } from '../types';
+import { DataVisualizer } from '../models/data_visualizer';
+import { HistogramField } from '../models/data_visualizer/data_visualizer';
 import {
   dataVisualizerFieldHistogramsSchema,
   indexPatternTitleSchema,
 } from './schemas/data_visualizer_schema';
+import { RouteInitialization } from '../types';
+import { RuntimeMappings } from '../../common/types/fields';
 
 function getHistogramsForFields(
   client: IScopedClusterClient,

@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EsHitRecord, EsHitRecordList } from './context/api/context';
+
+import { EsHitRecord } from './context/api/context';
+import { EsHitRecordList } from './context/api/context';
 
 export interface ContextFetchState {
   /**

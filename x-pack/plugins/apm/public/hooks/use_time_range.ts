@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEqual } from 'lodash';
 import { useRef } from 'react';
 import { getDateRange } from '../context/url_params_context/helpers';

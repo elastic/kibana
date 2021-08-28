@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpSetup } from '../../../../../../src/core/public/http/types';
-import type {
-  GetAllTagsOptions,
-  ITagsClient,
+
+import { HttpSetup } from 'src/core/public';
+import {
   Tag,
   TagAttributes,
-} from '../../../../../../src/plugins/saved_objects_tagging_oss/common/types';
-import type { TagWithRelations } from '../../../common/types';
-import type { ITagsChangeListener } from './tags_cache';
+  GetAllTagsOptions,
+  ITagsClient,
+  TagWithRelations,
+} from '../../../common/types';
+import { ITagsChangeListener } from './tags_cache';
 
 export interface TagsClientOptions {
   http: HttpSetup;

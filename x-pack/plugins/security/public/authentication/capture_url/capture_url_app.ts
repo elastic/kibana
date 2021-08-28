@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApplicationSetup } from '../../../../../../src/core/public/application/types';
-import type { FatalErrorsSetup } from '../../../../../../src/core/public/fatal_errors/fatal_errors_service';
-import type { HttpSetup } from '../../../../../../src/core/public/http/types';
+
+import type { ApplicationSetup, FatalErrorsSetup, HttpSetup } from 'src/core/public';
+
 import { AUTH_URL_HASH_QUERY_STRING_PARAMETER } from '../../../common/constants';
 
 interface CreateDeps {

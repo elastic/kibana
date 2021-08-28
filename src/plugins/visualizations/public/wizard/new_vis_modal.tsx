@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { EuiModal } from '@elastic/eui';
-import type { UiCounterMetricType } from '@kbn/analytics';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { ApplicationStart } from '../../../../core/public/application/types';
-import type { DocLinksStart } from '../../../../core/public/doc_links/doc_links_service';
-import type { SavedObjectsStart } from '../../../../core/public/saved_objects/saved_objects_service';
-import type { IUiSettingsClient } from '../../../../core/public/ui_settings/types';
-import { EmbeddableStateTransfer } from '../../../embeddable/public/lib/state_transfer/embeddable_state_transfer';
-import type { UsageCollectionSetup } from '../../../usage_collection/public/plugin';
+
+import { EuiModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import {
+  ApplicationStart,
+  IUiSettingsClient,
+  SavedObjectsStart,
+  DocLinksStart,
+} from '../../../../core/public';
+import { SearchSelection } from './search_selection';
+import { GroupSelection } from './group_selection';
+import { AggBasedSelection } from './agg_based_selection';
+import type { TypesStart, BaseVisType, VisTypeAlias } from '../vis_types';
+import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import { EmbeddableStateTransfer } from '../../../embeddable/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { BaseVisType } from '../vis_types/base_vis_type';
-import type { TypesStart } from '../vis_types/types_service';
-import type { VisTypeAlias } from '../vis_types/vis_type_alias_registry';
-import { AggBasedSelection } from './agg_based_selection/agg_based_selection';
 import './dialog.scss';
-import { GroupSelection } from './group_selection/group_selection';
-import { SearchSelection } from './search_selection/search_selection';
 
 interface TypeSelectionProps {
   isOpen: boolean;

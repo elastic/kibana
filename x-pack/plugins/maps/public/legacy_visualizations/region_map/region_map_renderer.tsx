@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { ExpressionRenderDefinition } from '../../../../../../src/plugins/expressions/common/expression_renderers/types';
-import type { RegionMapVisRenderValue } from './region_map_fn';
+import type { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { RegionMapVisRenderValue } from './region_map_fn';
 import { RegionMapVisualization } from './region_map_visualization';
 import { REGION_MAP_RENDER } from './types';
 

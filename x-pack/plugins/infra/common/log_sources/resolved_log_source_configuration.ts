@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { estypes } from '@elastic/elasticsearch';
-import { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { IndexPatternsContract } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
-import type { ObjectEntries } from '../utility_types';
+import { IndexPattern, IndexPatternsContract } from '../../../../../src/plugins/data/common';
+import { ObjectEntries } from '../utility_types';
 import { ResolveLogSourceConfigurationError } from './errors';
-import type {
+import {
   LogSourceColumnConfiguration,
   LogSourceConfigurationProperties,
 } from './log_source_configuration';

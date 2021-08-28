@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { IRouter } from '../../../../../src/core/server/http/router/router';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IRouter, Logger } from 'src/core/server';
+
 import type { ConfigType } from '../config';
-import type { EncryptionKeyRotationService } from '../crypto/encryption_key_rotation_service';
+import type { EncryptionKeyRotationService } from '../crypto';
 import { defineKeyRotationRoutes } from './key_rotation';
 
 /**

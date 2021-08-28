@@ -5,16 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { BehaviorSubject } from 'rxjs';
-import { StatusService } from './status_service';
-import type {
-  CoreStatus,
+import type { StatusService } from './status_service';
+import {
   InternalStatusServiceSetup,
-  ServiceStatus,
   StatusServiceSetup,
+  ServiceStatusLevels,
+  ServiceStatus,
+  CoreStatus,
 } from './types';
-import { ServiceStatusLevels } from './types';
+import { BehaviorSubject } from 'rxjs';
 
 const available: ServiceStatus = {
   level: ServiceStatusLevels.available,

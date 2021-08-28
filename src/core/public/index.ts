@@ -24,169 +24,265 @@
  * @packageDocumentation
  */
 
-import type { PluginOpaqueId } from '../server/plugins/types';
-import type { Capabilities } from '../types/capabilities';
-import type { ChromeDocTitle } from './chrome/doc_title/doc_title_service';
-import type {
-  ChromeNavControl,
-  ChromeNavControls,
-} from './chrome/nav_controls/nav_controls_service';
-import type { ChromeNavLink } from './chrome/nav_links/nav_link';
-import type { ChromeNavLinks } from './chrome/nav_links/nav_links_service';
-import type {
-  ChromeRecentlyAccessed,
-  ChromeRecentlyAccessedHistoryItem,
-} from './chrome/recently_accessed/recently_accessed_service';
-import type {
+import './index.scss';
+
+import {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
-  ChromeStart,
-  ChromeUserBanner,
-} from './chrome/types';
-import type {
+  ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuGitHubLink,
-  ChromeHelpExtensionMenuLink,
-} from './chrome/ui/header/header_help_menu';
-import type { NavType } from './chrome/ui/header/types';
-import type { DocLinksStart } from './doc_links/doc_links_service';
-import type { FatalErrorsSetup, FatalErrorsStart } from './fatal_errors/fatal_errors_service';
-import type { FatalErrorInfo } from './fatal_errors/get_error_info';
-import type { HttpSetup, HttpStart } from './http/types';
-import type { I18nStart } from './i18n/i18n_service';
-import './index.scss';
-import type { NotificationsSetup, NotificationsStart } from './notifications/notifications_service';
-import type { AsyncPlugin, Plugin, PluginInitializer } from './plugins/plugin';
-import type { PluginInitializerContext } from './plugins/plugin_context';
-import type { SavedObjectsStart } from './saved_objects/saved_objects_service';
-import type { IUiSettingsClient, UiSettingsState } from './ui_settings/types';
+  ChromeNavControl,
+  ChromeNavControls,
+  ChromeNavLink,
+  ChromeNavLinks,
+  ChromeDocTitle,
+  ChromeStart,
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
+  ChromeUserBanner,
+  NavType,
+} from './chrome';
+import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
+import { HttpSetup, HttpStart } from './http';
+import { I18nStart } from './i18n';
+import { NotificationsSetup, NotificationsStart } from './notifications';
+import { OverlayStart } from './overlays';
+import {
+  Plugin,
+  AsyncPlugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginOpaqueId,
+} from './plugins';
+import { UiSettingsState, IUiSettingsClient } from './ui_settings';
+import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
+import { DocLinksStart } from './doc_links';
+import { SavedObjectsStart } from './saved_objects';
+import { DeprecationsServiceStart } from './deprecations';
 
 export type {
-  DomainDeprecationDetails,
+  PackageInfo,
   EnvironmentMode,
   IExternalUrlPolicy,
-  PackageInfo,
+  DomainDeprecationDetails,
 } from '../server/types';
-export type { AppCategory, UiSettingsParams, UiSettingsType, UserProvidedValues } from '../types';
-export { APP_WRAPPER_CLASS, DEFAULT_APP_CATEGORIES } from '../utils';
+export type { CoreContext, CoreSystem } from './core_system';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
+export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
+
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
-  App,
-  AppDeepLink,
-  AppLeaveAction,
-  AppLeaveActionType,
-  AppLeaveConfirmAction,
-  AppLeaveDefaultAction,
-  AppLeaveHandler,
   ApplicationSetup,
   ApplicationStart,
+  App,
   AppMount,
-  AppMountParameters,
-  AppNavOptions,
   AppUnmount,
+  AppMountParameters,
+  AppLeaveHandler,
+  AppLeaveActionType,
+  AppLeaveAction,
+  AppLeaveDefaultAction,
+  AppLeaveConfirmAction,
   AppUpdatableFields,
   AppUpdater,
-  NavigateToAppOptions,
-  PublicAppDeepLinkInfo,
+  AppNavOptions,
+  AppDeepLink,
   PublicAppInfo,
+  PublicAppDeepLinkInfo,
+  NavigateToAppOptions,
 } from './application';
-export { URL_MAX_LENGTH } from './core_app';
-export type { CoreContext, CoreSystem } from './core_system';
-export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
-export type { KibanaExecutionContext } from './execution_context';
-export { HttpFetchError } from './http';
-export type {
-  HttpFetchOptions,
-  HttpFetchOptionsWithPath,
-  HttpFetchQuery,
-  HttpHandler,
-  HttpHeadersInit,
-  HttpInterceptor,
-  HttpInterceptorRequestError,
-  HttpInterceptorResponseError,
-  HttpRequestInit,
-  HttpResponse,
-  IAnonymousPaths,
-  IBasePath,
-  IExternalUrl,
-  IHttpFetchError,
-  IHttpInterceptController,
-  IHttpResponseInterceptorOverrides,
-} from './http';
-export { __kbnBootstrap__ } from './kbn_bootstrap';
-export type {
-  ErrorToastOptions,
-  IToasts,
-  Toast,
-  ToastInput,
-  ToastInputFields,
-  ToastOptions,
-  ToastsApi,
-  ToastsSetup,
-  ToastsStart,
-} from './notifications';
-export type {
-  OverlayBannersStart,
-  OverlayFlyoutOpenOptions,
-  OverlayFlyoutStart,
-  OverlayModalConfirmOptions,
-  OverlayModalOpenOptions,
-  OverlayModalStart,
-  OverlayRef,
-  OverlayStart,
-} from './overlays';
+
 export { SimpleSavedObject } from './saved_objects';
+export type { ResolvedSimpleSavedObject } from './saved_objects';
 export type {
-  ResolvedSimpleSavedObject,
+  SavedObjectsBatchResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindResponsePublic,
+  SavedObjectsResolveResponse,
+  SavedObjectsUpdateOptions,
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectError,
   SavedObjectReference,
-  SavedObjectReferenceWithContext,
   SavedObjectsBaseOptions,
-  SavedObjectsBatchResponse,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsClient,
-  SavedObjectsClientContract,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-  SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
-  SavedObjectsFindResponsePublic,
-  SavedObjectsImportActionRequiredWarning,
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportFailure,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportResponse,
-  SavedObjectsImportRetry,
-  SavedObjectsImportSimpleWarning,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsImportWarning,
   SavedObjectsMigrationVersion,
+  SavedObjectsClientContract,
+  SavedObjectsClient,
+  SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportFailure,
+  SavedObjectsImportRetry,
   SavedObjectsNamespaceType,
-  SavedObjectsResolveResponse,
-  SavedObjectsUpdateOptions,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './saved_objects';
+
+export { HttpFetchError } from './http';
+
 export type {
-  MountPoint,
-  PublicUiSettingsParams,
-  UnmountCallback,
-  CoreStart,
-  CoreSetup,
-  StartServicesAccessor,
-} from './types';
+  HttpHeadersInit,
+  HttpRequestInit,
+  HttpFetchOptions,
+  HttpFetchOptionsWithPath,
+  HttpFetchQuery,
+  HttpInterceptorResponseError,
+  HttpInterceptorRequestError,
+  HttpInterceptor,
+  HttpResponse,
+  HttpHandler,
+  IBasePath,
+  IAnonymousPaths,
+  IExternalUrl,
+  IHttpInterceptController,
+  IHttpFetchError,
+  IHttpResponseInterceptorOverrides,
+} from './http';
+
+export type {
+  OverlayStart,
+  OverlayBannersStart,
+  OverlayRef,
+  OverlayFlyoutStart,
+  OverlayFlyoutOpenOptions,
+  OverlayModalOpenOptions,
+  OverlayModalConfirmOptions,
+  OverlayModalStart,
+} from './overlays';
+
+export type {
+  Toast,
+  ToastInput,
+  IToasts,
+  ToastsApi,
+  ToastInputFields,
+  ToastsSetup,
+  ToastsStart,
+  ToastOptions,
+  ErrorToastOptions,
+} from './notifications';
+
+export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
+
+export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+
+export { URL_MAX_LENGTH } from './core_app';
+
+export type { KibanaExecutionContext } from './execution_context';
+
+/**
+ * Core services exposed to the `Plugin` setup lifecycle
+ *
+ * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
+ *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
+ * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
+ *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
+ *
+ * @public
+ *
+ * @internalRemarks We document the properties with \@link tags to improve
+ * navigation in the generated docs until there's a fix for
+ * https://github.com/Microsoft/web-build-tools/issues/1237
+ */
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+  /** {@link ApplicationSetup} */
+  application: ApplicationSetup;
+  /** {@link FatalErrorsSetup} */
+  fatalErrors: FatalErrorsSetup;
+  /** {@link HttpSetup} */
+  http: HttpSetup;
+  /** {@link NotificationsSetup} */
+  notifications: NotificationsSetup;
+  /** {@link IUiSettingsClient} */
+  uiSettings: IUiSettingsClient;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+}
+
+/**
+ * Allows plugins to get access to APIs available in start inside async
+ * handlers, such as {@link App.mount}. Promise will not resolve until Core
+ * and plugin dependencies have completed `start`.
+ *
+ * @public
+ */
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+/**
+ * Core services exposed to the `Plugin` start lifecycle
+ *
+ * @public
+ *
+ * @internalRemarks We document the properties with \@link tags to improve
+ * navigation in the generated docs until there's a fix for
+ * https://github.com/Microsoft/web-build-tools/issues/1237
+ */
+export interface CoreStart {
+  /** {@link ApplicationStart} */
+  application: ApplicationStart;
+  /** {@link ChromeStart} */
+  chrome: ChromeStart;
+  /** {@link DocLinksStart} */
+  docLinks: DocLinksStart;
+  /** {@link HttpStart} */
+  http: HttpStart;
+  /** {@link SavedObjectsStart} */
+  savedObjects: SavedObjectsStart;
+  /** {@link I18nStart} */
+  i18n: I18nStart;
+  /** {@link NotificationsStart} */
+  notifications: NotificationsStart;
+  /** {@link OverlayStart} */
+  overlays: OverlayStart;
+  /** {@link IUiSettingsClient} */
+  uiSettings: IUiSettingsClient;
+  /** {@link FatalErrorsStart} */
+  fatalErrors: FatalErrorsStart;
+  /** {@link DeprecationsServiceStart} */
+  deprecations: DeprecationsServiceStart;
+  /**
+   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
+   * use *only* to retrieve config values. There is no way to set injected values
+   * in the new platform.
+   * @deprecated
+   * */
+  injectedMetadata: {
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  };
+}
+
 export type {
   Capabilities,
   ChromeBadge,
@@ -226,3 +322,5 @@ export type {
   UiSettingsState,
   NavType,
 };
+
+export { __kbnBootstrap__ } from './kbn_bootstrap';

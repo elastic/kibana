@@ -5,19 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { BehaviorSubject, of } from 'rxjs';
+
+import { of, BehaviorSubject } from 'rxjs';
+
+import { ServiceStatus, ServiceStatusLevels, CoreStatus } from './types';
+import { StatusService } from './status_service';
 import { first } from 'rxjs/operators';
-import { configServiceMock } from '../config/mocks';
 import { mockCoreContext } from '../core_context.mock';
+import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
 import { environmentServiceMock } from '../environment/environment_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
-import type { RouterMock } from '../http/router/router.mock';
-import { mockRouter } from '../http/router/router.mock';
+import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
-import { StatusService } from './status_service';
-import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
-import type { CoreStatus, ServiceStatus } from './types';
-import { ServiceStatusLevels } from './types';
+import { configServiceMock } from '../config/mocks';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 

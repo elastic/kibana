@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { FailureCorrelationImpactThreshold } from '../../../../../common/search_strategies/failure_correlations/types';
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/failure_correlations/constants';
-import type { FailureCorrelationImpactThreshold } from '../../../../../common/search_strategies/failure_correlations/types';
 
 export function getFailedTransactionsCorrelationImpactLabel(
   pValue: number

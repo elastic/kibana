@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBadge } from '@elastic/eui';
-import { noop } from 'lodash/fp';
+
 import React, { memo, useMemo } from 'react';
-import type { CaseStatusWithAllStatus } from '../../../common/ui/types';
-import { StatusAll } from '../../../common/ui/types';
+import { noop } from 'lodash/fp';
+import { EuiBadge } from '@elastic/eui';
+
 import { allCaseStatus, statuses } from './config';
 import * as i18n from './translations';
+import { CaseStatusWithAllStatus, StatusAll } from '../../../common';
 
 interface Props {
   disabled?: boolean;

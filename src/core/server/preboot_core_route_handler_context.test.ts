@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { coreMock } from './mocks';
+
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
+import { coreMock } from './mocks';
 
 describe('#uiSettings', () => {
   describe('#client', () => {

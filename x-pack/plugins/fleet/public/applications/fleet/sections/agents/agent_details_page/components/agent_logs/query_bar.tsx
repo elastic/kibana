@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import React, { memo, useEffect, useState } from 'react';
 
-import type { IFieldType } from '../../../../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import { QueryStringInput } from '../../../../../../../../../../../src/plugins/data/public/ui/query_string_input';
-import { useStartServices } from '../../../../../../../hooks/use_core';
+import React, { memo, useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+
+import type { IFieldType } from '../../../../../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../../../../../src/plugins/data/public';
+import { useStartServices } from '../../../../../hooks';
 
 import {
-  AGENT_ID_FIELD,
   AGENT_LOG_INDEX_PATTERN,
+  AGENT_ID_FIELD,
   DATASET_FIELD,
   LOG_LEVEL_FIELD,
 } from './constants';

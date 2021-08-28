@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FileLayer } from '@elastic/ems-client';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { Component } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSelect } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FileLayer } from '@elastic/ems-client';
 import { getEmsFileLayers } from '../util';
 import { getEmsUnavailableMessage } from './ems_unavailable_message';
 

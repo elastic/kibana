@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
-  EuiFieldNumber,
+  EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPopover,
   EuiSelect,
+  EuiFieldNumber,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
-import type { IErrorObject } from '../../types';
-import { builtInGroupByTypes } from '../constants/group_by_types';
-import type { GroupByType } from '../types';
-import { ClosablePopoverTitle } from './components/closable_popover_title';
+import { builtInGroupByTypes } from '../constants';
+import { GroupByType } from '../types';
+import { ClosablePopoverTitle } from './components';
+import { IErrorObject } from '../../types';
 
 export interface GroupByExpressionProps {
   groupBy: string;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { FeatureIdentifier } from '@kbn/mapbox-gl';
-import { Map as MbMap } from '@kbn/mapbox-gl';
-import type { FeatureCollection } from 'geojson';
 import _ from 'lodash';
-import type { ReactElement } from 'react';
-import React from 'react';
+import React, { ReactElement } from 'react';
+import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
+import { FeatureCollection } from 'geojson';
+import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
+import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
 import {
   DEFAULT_ICON,
   FIELD_ORIGIN,
@@ -23,8 +23,26 @@ import {
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import type { TileMetaFeature } from '../../../../common/descriptor_types/layer_descriptor_types';
-import type {
+import { StyleMeta } from './style_meta';
+import { VectorIcon } from './components/legend/vector_icon';
+import { VectorStyleLegend } from './components/legend/vector_style_legend';
+import { isOnlySingleFeatureType } from './style_util';
+import { StaticStyleProperty } from './properties/static_style_property';
+import { DynamicStyleProperty, IDynamicStyleProperty } from './properties/dynamic_style_property';
+import { DynamicSizeProperty } from './properties/dynamic_size_property';
+import { StaticSizeProperty } from './properties/static_size_property';
+import { StaticColorProperty } from './properties/static_color_property';
+import { DynamicColorProperty } from './properties/dynamic_color_property';
+import { StaticOrientationProperty } from './properties/static_orientation_property';
+import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
+import { StaticTextProperty } from './properties/static_text_property';
+import { DynamicTextProperty } from './properties/dynamic_text_property';
+import { LabelBorderSizeProperty } from './properties/label_border_size_property';
+import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
+import { SymbolizeAsProperty } from './properties/symbolize_as_property';
+import { StaticIconProperty } from './properties/static_icon_property';
+import { DynamicIconProperty } from './properties/dynamic_icon_property';
+import {
   ColorDynamicOptions,
   ColorStaticOptions,
   ColorStylePropertyDescriptor,
@@ -46,41 +64,19 @@ import type {
   StyleMetaDescriptor,
   StylePropertyField,
   StylePropertyOptions,
+  TileMetaFeature,
   VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
-} from '../../../../common/descriptor_types/style_property_descriptor_types';
-import type { VectorShapeTypeCounts } from '../../../../common/get_geometry_counts';
-import type { IESAggField } from '../../fields/agg/agg_field_types';
-import type { IField } from '../../fields/field';
-import type { IVectorLayer } from '../../layers/vector_layer/vector_layer';
-import type { IVectorSource } from '../../sources/vector_source/vector_source';
+} from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
-import type { IStyle } from '../style';
-import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
-import { VectorIcon } from './components/legend/vector_icon';
-import { VectorStyleLegend } from './components/legend/vector_style_legend';
-import type { StyleProperties } from './components/vector_style_editor';
-import { VectorStyleEditor } from './components/vector_style_editor';
-import { DynamicColorProperty } from './properties/dynamic_color_property';
-import { DynamicIconProperty } from './properties/dynamic_icon_property';
-import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
-import { DynamicSizeProperty } from './properties/dynamic_size_property';
-import type { IDynamicStyleProperty } from './properties/dynamic_style_property';
-import { DynamicStyleProperty } from './properties/dynamic_style_property';
-import { DynamicTextProperty } from './properties/dynamic_text_property';
-import { LabelBorderSizeProperty } from './properties/label_border_size_property';
-import { StaticColorProperty } from './properties/static_color_property';
-import { StaticIconProperty } from './properties/static_icon_property';
-import { StaticOrientationProperty } from './properties/static_orientation_property';
-import { StaticSizeProperty } from './properties/static_size_property';
-import { StaticStyleProperty } from './properties/static_style_property';
-import { StaticTextProperty } from './properties/static_text_property';
-import type { IStyleProperty } from './properties/style_property';
-import { SymbolizeAsProperty } from './properties/symbolize_as_property';
+import { IStyle } from '../style';
+import { IStyleProperty } from './properties/style_property';
+import { IField } from '../../fields/field';
+import { IVectorLayer } from '../../layers/vector_layer';
+import { IVectorSource } from '../../sources/vector_source';
 import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
-import { StyleMeta } from './style_meta';
-import { isOnlySingleFeatureType } from './style_util';
-import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
+import { IESAggField } from '../../fields/agg';
+import { VectorShapeTypeCounts } from '../../../../common/get_geometry_counts';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];

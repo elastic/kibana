@@ -4,44 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type {
+  AppMountParameters,
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  CoreStart,
+} from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { AppMountParameters } from '../../../../src/core/public/application/types';
-import { AppNavLinkStatus } from '../../../../src/core/public/application/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
+import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+
+import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../src/plugins/data/public/types';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public/plugin';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry';
-import { Storage } from '../../../../src/plugins/kibana_utils/public/storage/storage';
-import type { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public/types';
-import type { CloudSetup } from '../../cloud/public/plugin';
-import type { GlobalSearchPluginSetup } from '../../global_search/public/types';
-import type { LicensingPluginSetup } from '../../licensing/public/types';
-import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '../common/constants/plugin';
-import { appRoutesService, setupRouteService } from '../common/services/routes';
-import type { FleetConfigType } from '../common/types';
-import type { CheckPermissionsResponse } from '../common/types/rest_spec/app';
-import type { PostFleetSetupResponse } from '../common/types/rest_spec/fleet_setup';
+} from '../../../../src/plugins/data/public';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { CloudSetup } from '../../cloud/public';
+import type { GlobalSearchPluginSetup } from '../../global_search/public';
+import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
+import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common';
 
+import type { FleetConfigType } from '../common/types';
+
+import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
+import { licenseService } from './hooks';
+import { setHttpClient } from './hooks/use_request';
+import { createPackageSearchProvider } from './search_provider';
 import {
-  TutorialDirectoryHeaderLink,
   TutorialDirectoryNotice,
+  TutorialDirectoryHeaderLink,
   TutorialModuleNotice,
 } from './components/home_integration';
-import { CUSTOM_LOGS_INTEGRATION_NAME } from './constants';
-import { INTEGRATIONS_BASE_PATH } from './constants/page_paths';
-import { licenseService } from './hooks/use_license';
-import { setHttpClient } from './hooks/use_request/use_request';
-import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
-import { createPackageSearchProvider } from './search_provider';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
-import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types/ui_extensions';
+import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
+import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 
 export { FleetConfigType } from '../common/types';
 

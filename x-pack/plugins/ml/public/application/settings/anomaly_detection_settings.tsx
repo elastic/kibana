@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
+
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -16,15 +19,15 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+
+import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
+import { useNotifications } from '../contexts/kibana';
+import { ml } from '../services/ml_api_service';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
-import { useNotifications } from '../contexts/kibana/use_notifications_context';
-import { ml } from '../services/ml_api_service';
-import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
 
 export const AnomalyDetectionSettings: FC = () => {
   const [calendarsCount, setCalendarsCount] = useState(0);

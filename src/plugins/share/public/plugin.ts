@@ -6,26 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart } from '../../../core/public/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
-import type {
-  SecurityOssPluginSetup,
-  SecurityOssPluginStart,
-} from '../../security_oss/public/plugin';
-import { UrlService } from '../common/url_service/url_service';
 import './index.scss';
-import type { ShareMenuManagerStart } from './services/share_menu_manager';
-import { ShareMenuManager } from './services/share_menu_manager';
-import type { ShareMenuRegistrySetup } from './services/share_menu_registry';
-import { ShareMenuRegistry } from './services/share_menu_registry';
+
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { ShareMenuManager, ShareMenuManagerStart } from './services';
+import type { SecurityOssPluginSetup, SecurityOssPluginStart } from '../../security_oss/public';
+import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
 import { createShortUrlRedirectApp } from './services/short_url_redirect_app';
-import type {
+import {
+  UrlGeneratorsService,
   UrlGeneratorsSetup,
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
-import { UrlGeneratorsService } from './url_generators/url_generator_service';
-import type { RedirectOptions } from './url_service/redirect/redirect_manager';
-import { RedirectManager } from './url_service/redirect/redirect_manager';
+import { UrlService } from '../common/url_service';
+import { RedirectManager, RedirectOptions } from './url_service';
 
 export interface ShareSetupDependencies {
   securityOss?: SecurityOssPluginSetup;

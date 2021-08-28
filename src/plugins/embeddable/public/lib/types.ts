@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Adapters } from '../../../inspector/common/adapters/types';
+
+import { Adapters } from './inspector';
 
 export interface Trigger {
   id: string;

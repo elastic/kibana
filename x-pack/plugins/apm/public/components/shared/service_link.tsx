@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import type { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { useApmRouter } from '../../hooks/use_apm_router';
+import { TypeOf } from '@kbn/typed-react-router-config';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { truncate } from '../../utils/style';
-import type { ApmRoutes } from '../routing/apm_route_config';
+import { useApmRouter } from '../../hooks/use_apm_router';
 import { AgentIcon } from './agent_icon';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { ApmRoutes } from '../routing/apm_route_config';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 

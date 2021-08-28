@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { SeriesChartTypesSelect } from '../../series_builder/columns/chart_types';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { SeriesConfig } from '../../types';
 import { OperationTypeSelect } from '../../series_builder/columns/operation_type_select';
-import type { SeriesConfig } from '../../types';
+import { SeriesChartTypesSelect } from '../../series_builder/columns/chart_types';
 
 interface Props {
   seriesConfig: SeriesConfig;

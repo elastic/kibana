@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
-import type { DocLinksStart } from './doc_links_service';
-import { DocLinksService } from './doc_links_service';
+import { DocLinksService, DocLinksStart } from './doc_links_service';
 
 const createStartContractMock = (): DocLinksStart => {
   // This service is so simple that we actually use the real implementation

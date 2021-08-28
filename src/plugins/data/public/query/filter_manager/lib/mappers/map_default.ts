@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Filter } from '@kbn/es-query';
-import { FILTERS } from '@kbn/es-query';
-import { find, get, keys } from 'lodash';
+
+import { find, keys, get } from 'lodash';
+import { Filter, FILTERS } from '@kbn/es-query';
 
 export const mapDefault = (filter: Filter) => {
   const metaProperty = /(^\$|meta)/;

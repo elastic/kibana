@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { useCallback, useState } from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { useUiTracker } from '../../../../../../observability/public/hooks/use_track_metric';
-import type { InfraFormatter } from '../../../../lib/lib';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { useUiTracker } from '../../../../../../observability/public';
+import { InfraFormatter } from '../../../../lib/lib';
 import { Timeline } from './timeline/timeline';
 
 const showHistory = i18n.translate('xpack.infra.showHistory', {

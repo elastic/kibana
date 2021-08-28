@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useMemo } from 'react';
-import { Form } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form';
-import { useForm } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
-import { CaseType } from '../../../common/api/cases/case';
-import type { Case } from '../../../common/ui/types';
-import { useConnectors } from '../../containers/configure/use_connectors';
-import { usePostCase } from '../../containers/use_post_case';
-import type { UsePostComment } from '../../containers/use_post_comment';
-import { usePostComment } from '../../containers/use_post_comment';
-import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { schema, FormProps } from './schema';
+import { Form, useForm } from '../../common/shared_imports';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
+import { usePostCase } from '../../containers/use_post_case';
+import { usePostPushToService } from '../../containers/use_post_push_to_service';
+
+import { useConnectors } from '../../containers/configure/use_connectors';
+import { Case } from '../../containers/types';
+import { CaseType } from '../../../common';
+import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
 import { useOwnerContext } from '../owner_context/use_owner_context';
 import { getConnectorById } from '../utils';
-import type { FormProps } from './schema';
-import { schema } from './schema';
 
 const initialCaseValue: FormProps = {
   description: '',

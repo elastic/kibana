@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IConfigService } from '@kbn/config';
-import type { Logger } from '@kbn/logging';
+
 import { take } from 'rxjs/operators';
-import type { CoreContext } from '../core_context';
-import type { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http/types';
+import { Logger } from '../logging';
+import { IConfigService } from '../config';
+import { CoreContext } from '../core_context';
+import { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http';
+import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
-import type { I18nConfigType } from './i18n_config';
-import { config as i18nConfigDef } from './i18n_config';
 import { initTranslations } from './init_translations';
 import { registerRoutes } from './routes';
 

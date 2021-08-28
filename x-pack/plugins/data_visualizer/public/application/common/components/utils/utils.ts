@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEqual } from 'lodash';
-import { MB } from '../../../../../../file_upload/common/constants';
-import type { AnalysisResult, InputOverrides } from '../../../../../../file_upload/common/types';
+import { AnalysisResult, InputOverrides, MB } from '../../../../../../file_upload/common';
 
 export const DEFAULT_LINES_TO_SAMPLE = 1000;
 const UPLOAD_SIZE_MB = 5;

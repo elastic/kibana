@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import type {
-  NewPackagePolicy,
-  PackagePolicy,
-} from '../../../../../fleet/common/types/models/package_policy';
-import type { PackagePolicyEditExtensionComponentProps } from '../../../../../fleet/public/types/ui_extensions';
 import { AgentInstructionsAccordion } from './agent_instructions_accordion';
 import { ApmAgentInstructionsMappings } from './agent_instructions_mappings';
+import {
+  NewPackagePolicy,
+  PackagePolicy,
+  PackagePolicyEditExtensionComponentProps,
+} from '../apm_policy_form/typings';
 
 interface Props {
   policy: PackagePolicy;

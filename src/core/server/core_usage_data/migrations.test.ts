@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectUnsanitizedDoc } from '../saved_objects/serialization/types';
+
+import type { SavedObjectUnsanitizedDoc } from '../saved_objects';
 import { migrateTo7141 } from './migrations';
 import type { CoreUsageStats } from './types';
 

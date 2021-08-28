@@ -4,71 +4,84 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import type { Observable } from 'rxjs';
 
-import type { CoreSetup, CoreStart } from '../../../../src/core/server';
-import type { ElasticsearchServiceStart } from '../../../../src/core/server/elasticsearch/types';
-import type { HttpServiceSetup } from '../../../../src/core/server/http/types';
+import type { Observable } from 'rxjs';
 import type {
+  CoreSetup,
+  CoreStart,
+  ElasticsearchServiceStart,
+  Logger,
   AsyncPlugin,
   PluginInitializerContext,
-} from '../../../../src/core/server/plugins/types';
-import type { SavedObjectsServiceStart } from '../../../../src/core/server/saved_objects/saved_objects_service';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
-import type { DataPluginStart } from '../../../../src/plugins/data/server/plugin';
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server/plugin';
-import type { CloudSetup } from '../../cloud/server/plugin';
-import type {
-  EncryptedSavedObjectsPluginSetup,
-  EncryptedSavedObjectsPluginStart,
-} from '../../encrypted_saved_objects/server/plugin';
-import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server/plugin';
-import type { ILicense } from '../../licensing/common/types';
-import type { LicensingPluginSetup } from '../../licensing/server/types';
-import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server/plugin';
-import { AGENT_SAVED_OBJECT_TYPE } from '../common/constants/agent';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../common/constants/agent_policy';
-import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../common/constants/enrollment_api_key';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../common/constants/epm';
-import { OUTPUT_SAVED_OBJECT_TYPE } from '../common/constants/output';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../common/constants/package_policy';
-import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '../common/constants/plugin';
-import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../common/constants/preconfiguration';
-import type { FleetConfigType } from '../common/types';
+  SavedObjectsServiceStart,
+  HttpServiceSetup,
+} from 'kibana/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import { registerFleetUsageCollector } from './collectors/register';
-import { registerAPIRoutes as registerAgentAPIRoutes } from './routes/agent';
-import { registerRoutes as registerAgentPolicyRoutes } from './routes/agent_policy';
-import { registerRoutes as registerAppRoutes } from './routes/app';
-import { registerRoutes as registerDataStreamRoutes } from './routes/data_streams';
-import { registerRoutes as registerEnrollmentApiKeyRoutes } from './routes/enrollment_api_key';
-import { registerRoutes as registerEPMRoutes } from './routes/epm';
-import { registerRoutes as registerOutputRoutes } from './routes/output';
-import { registerRoutes as registerPackagePolicyRoutes } from './routes/package_policy';
-import { registerRoutes as registerPreconfigurationRoutes } from './routes/preconfiguration';
-import { makeRouterEnforcingSuperuser } from './routes/security';
-import { registerRoutes as registerSettingsRoutes } from './routes/settings';
-import { registerRoutes as registerSetupRoutes } from './routes/setup';
-import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
-  AgentPolicyServiceInterface,
-  AgentService,
+  EncryptedSavedObjectsPluginStart,
+  EncryptedSavedObjectsPluginSetup,
+} from '../../encrypted_saved_objects/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type { FleetConfigType } from '../common';
+import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import type { CloudSetup } from '../../cloud/server';
+
+import {
+  PLUGIN_ID,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  AGENT_SAVED_OBJECT_TYPE,
+  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+} from './constants';
+import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
+import {
+  registerEPMRoutes,
+  registerPackagePolicyRoutes,
+  registerDataStreamRoutes,
+  registerAgentPolicyRoutes,
+  registerSetupRoutes,
+  registerAgentAPIRoutes,
+  registerEnrollmentApiKeyRoutes,
+  registerOutputRoutes,
+  registerSettingsRoutes,
+  registerAppRoutes,
+  registerPreconfigurationRoutes,
+} from './routes';
+
+import type { ExternalCallback } from './types';
+import type {
   ESIndexPatternService,
+  AgentService,
+  AgentPolicyServiceInterface,
   PackageService,
 } from './services';
-import { authenticateAgentWithAccessToken } from './services/agents/authenticate';
-import { getAgentById, getAgentsByKuery } from './services/agents/crud';
-import { getAgentStatusById, getAgentStatusForAgentPolicy } from './services/agents/status';
-import { agentPolicyService } from './services/agent_policy';
-import { appContextService } from './services/app_context';
-import { FleetArtifactsClient } from './services/artifacts/client';
-import { getInstallation } from './services/epm/packages/get';
-import { ESIndexPatternSavedObjectService } from './services/es_index_pattern';
+import {
+  appContextService,
+  licenseService,
+  ESIndexPatternSavedObjectService,
+  agentPolicyService,
+  packagePolicyService,
+} from './services';
+import {
+  getAgentStatusById,
+  getAgentStatusForAgentPolicy,
+  authenticateAgentWithAccessToken,
+  getAgentsByKuery,
+  getAgentById,
+} from './services/agents';
+import { registerFleetUsageCollector } from './collectors/register';
+import { getInstallation } from './services/epm/packages';
+import { makeRouterEnforcingSuperuser } from './routes/security';
 import { startFleetServerSetup } from './services/fleet_server';
-import { licenseService } from './services/license';
-import { packagePolicyService } from './services/package_policy';
-import type { ExternalCallback } from './types/extensions';
+import { FleetArtifactsClient } from './services/artifacts';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;

@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import type { UiSettingsParams } from '../../../types/ui_settings';
+import { UiSettingsParams } from '../../../types';
 
 function parseThemeTags() {
   if (!process.env.KBN_OPTIMIZER_THEMES) {

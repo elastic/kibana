@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { captureBodyRt } from '../runtime_types/capture_body_rt';
 import { logLevelRt } from '../runtime_types/log_level_rt';
-import type { RawSettingDefinition } from './types';
+import { RawSettingDefinition } from './types';
 
 export const generalSettings: RawSettingDefinition[] = [
   // API Request Size

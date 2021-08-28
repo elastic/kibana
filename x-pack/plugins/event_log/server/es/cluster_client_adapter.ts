@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { Logger } from '@kbn/logging';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { isNumber, isUndefined, reject } from 'lodash';
+
 import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
+import { reject, isUndefined, isNumber } from 'lodash';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { Logger, ElasticsearchClient } from 'src/core/server';
 import util from 'util';
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
-import type { IEvent, IValidatedEvent } from '../../generated/schemas';
-import type { FindOptionsType } from '../event_log_client';
-import { SAVED_OBJECT_REL_PRIMARY } from '../types';
+import { estypes } from '@elastic/elasticsearch';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
+import { FindOptionsType } from '../event_log_client';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;

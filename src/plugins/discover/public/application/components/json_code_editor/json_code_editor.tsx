@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '@kbn/monaco';
-import React, { useCallback } from 'react';
 import './json_code_editor.scss';
+
+import React, { useCallback } from 'react';
+import { monaco } from '@kbn/monaco';
 import { JsonCodeEditorCommon } from './json_code_editor_common';
 
 interface JsonCodeEditorProps {

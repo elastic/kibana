@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpSetup } from '../../../../../src/core/public/http/types';
-import type { FileDataVisualizerSpec } from '../application/file_data_visualizer/file_data_visualizer';
-import type { IndexDataVisualizerSpec } from '../application/index_data_visualizer/index_data_visualizer';
+
+import { HttpSetup } from 'src/core/public';
+import type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../application';
 import { getCoreStart } from '../kibana_services';
 
 let loadModulesPromise: Promise<LazyLoadedModules>;

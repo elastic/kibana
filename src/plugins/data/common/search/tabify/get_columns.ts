@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { groupBy } from 'lodash';
-import type { IAggConfig } from '../aggs/agg_config';
-import type { TabbedAggColumn } from './types';
+import { IAggConfig } from '../aggs';
+import { TabbedAggColumn } from './types';
 
 const getColumn = (agg: IAggConfig, i: number): TabbedAggColumn => {
   let name = '';

@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { CoreSetup } from 'kibana/public';
+import type { ManagementAppMountParams } from 'src/plugins/management/public';
 import type {
   AppDependencies,
   IManagementSectionsPluginsSetup,
   IManagementSectionsPluginsStart,
   SessionsConfigSchema,
-} from '..';
-import { APP } from '..';
-import type { CoreSetup } from '../../../../../../../src/core/public/types';
-import type { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public/types';
+} from '../';
+import { APP } from '../';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { renderApp } from './render';

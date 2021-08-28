@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { StartServicesAccessor } from '../../../../../../core/server';
-import type { IRouter } from '../../../../../../core/server/http/router/router';
-import type { DataPluginStart, DataPluginStartDependencies } from '../../../plugin';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../util/schemas';
+import { IRouter, StartServicesAccessor } from '../../../../../../core/server';
+import type { DataPluginStart, DataPluginStartDependencies } from '../../../plugin';
 
 export const registerUpdateFieldsRoute = (
   router: IRouter,

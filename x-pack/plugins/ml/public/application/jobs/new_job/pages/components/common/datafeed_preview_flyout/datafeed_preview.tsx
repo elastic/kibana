@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+
+import React, { FC, useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { CombinedJob } from '../../../../../../../../common/types/anomaly_detection_jobs/combined_job';
-import { useMlApiContext } from '../../../../../../contexts/kibana/use_ml_api_context';
-import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor/ml_job_editor';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSpacer,
+  EuiLoadingSpinner,
+  EuiButton,
+} from '@elastic/eui';
+
+import { CombinedJob } from '../../../../../../../../common/types/anomaly_detection_jobs';
+import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
+import { useMlApiContext } from '../../../../../../contexts/kibana';
 
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;

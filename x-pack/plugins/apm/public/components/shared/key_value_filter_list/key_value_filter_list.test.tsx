@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fireEvent } from '@testing-library/react';
 import React from 'react';
-import { KeyValueFilterList } from '.';
+import { KeyValueFilterList } from './';
 import {
   expectTextsInDocument,
   renderWithTheme,
 } from '../../../utils/testHelpers';
+import { fireEvent } from '@testing-library/react';
 
 describe('KeyValueFilterList', () => {
   it('hides accordion when key value list is empty', () => {

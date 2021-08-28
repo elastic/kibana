@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public/context/context';
-import type { TimelineNonEcsData } from '../../../../timelines/common/search_strategy/timeline/events/all';
-import type { TGridCellAction } from '../../../../timelines/common/types/timeline/columns';
-import type { TimelinesUIStart } from '../../../../timelines/public/types';
-import type { ObservabilityPublicPluginsStart } from '../../plugin';
-import FilterForValueButton from './filter_for_value';
+import { i18n } from '@kbn/i18n';
+import { ObservabilityPublicPluginsStart } from '../..';
 import { getMappedNonEcsValue } from './render_cell_value';
+import FilterForValueButton from './filter_for_value';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { TimelineNonEcsData } from '../../../../timelines/common/search_strategy';
+import { TGridCellAction } from '../../../../timelines/common/types/timeline';
+import { TimelinesUIStart } from '../../../../timelines/public';
 
 export const FILTER_FOR_VALUE = i18n.translate('xpack.observability.hoverActions.filterForValue', {
   defaultMessage: 'Filter for value',

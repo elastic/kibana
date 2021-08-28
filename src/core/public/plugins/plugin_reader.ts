@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginInitializer } from './plugin';
+
+import { PluginInitializer } from './plugin';
 
 /**
  * Unknown variant for internal use only for when plugins are not known.

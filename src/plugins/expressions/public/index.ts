@@ -6,11 +6,27 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import './index.scss';
+
+import { PluginInitializerContext } from '../../../core/public';
 import { ExpressionsPublicPlugin } from './plugin';
 
 // Kibana Platform.
+export { ExpressionsPublicPlugin as Plugin };
+export * from './plugin';
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new ExpressionsPublicPlugin(initializerContext);
+}
+
+// Static exports.
+export { ExpressionExecutor, IExpressionLoaderParams, ExpressionRenderError } from './types';
+export {
+  ExpressionRendererComponent,
+  ReactExpressionRenderer,
+  ReactExpressionRendererProps,
+  ReactExpressionRendererType,
+} from './react_expression_renderer';
+export { ExpressionRenderHandler, ExpressionRendererEvent } from './render';
 export {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
@@ -22,9 +38,9 @@ export {
   DatatableColumnType,
   DatatableRow,
   Execution,
+  ExecutionContract,
   ExecutionContainer,
   ExecutionContext,
-  ExecutionContract,
   ExecutionParams,
   ExecutionState,
   Executor,
@@ -44,10 +60,6 @@ export {
   ExpressionRenderDefinition,
   ExpressionRenderer,
   ExpressionRendererRegistry,
-  ExpressionsInspectorAdapter,
-  ExpressionsService,
-  ExpressionsServiceSetup,
-  ExpressionsServiceStart,
   ExpressionType,
   ExpressionTypeDefinition,
   ExpressionTypeStyle,
@@ -55,11 +67,10 @@ export {
   ExpressionValueBoxed,
   ExpressionValueConverter,
   ExpressionValueError,
-  ExpressionValueFilter,
   ExpressionValueNum,
   ExpressionValueRender,
-  ExpressionValueRender as Render,
   ExpressionValueUnboxed,
+  ExpressionValueFilter,
   Font,
   FontLabel,
   FontStyle,
@@ -85,25 +96,16 @@ export {
   SerializedDatatable,
   SerializedFieldFormat,
   Style,
-  TablesAdapter,
   TextAlignment,
   TextDecoration,
   TypesRegistry,
   TypeString,
   TypeToString,
   UnmappedTypeStrings,
+  ExpressionValueRender as Render,
+  ExpressionsService,
+  ExpressionsServiceSetup,
+  ExpressionsServiceStart,
+  TablesAdapter,
+  ExpressionsInspectorAdapter,
 } from '../common';
-export * from './plugin';
-export {
-  ExpressionRendererComponent,
-  ReactExpressionRenderer,
-  ReactExpressionRendererProps,
-  ReactExpressionRendererType,
-} from './react_expression_renderer';
-export { ExpressionRendererEvent, ExpressionRenderHandler } from './render';
-// Static exports.
-export { ExpressionExecutor, ExpressionRenderError, IExpressionLoaderParams } from './types';
-export { ExpressionsPublicPlugin as Plugin };
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ExpressionsPublicPlugin(initializerContext);
-}

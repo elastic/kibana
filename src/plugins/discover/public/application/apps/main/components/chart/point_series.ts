@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Unit } from '@elastic/datemath';
+
 import { uniq } from 'lodash';
-import type { Duration, Moment } from 'moment';
-import type { SerializedFieldFormat } from '../../../../../../../expressions/common/types/common';
+import { Duration, Moment } from 'moment';
+import { Unit } from '@elastic/datemath';
+import { SerializedFieldFormat } from '../../../../../../../expressions/common';
 
 export interface Column {
   id: string;

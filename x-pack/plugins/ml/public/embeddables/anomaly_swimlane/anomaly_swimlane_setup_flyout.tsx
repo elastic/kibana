@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '../../../../../../src/core/public/types';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
+import { CoreStart } from 'kibana/public';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { HttpService } from '../../application/services/http_service';
-import { resolveJobSelection } from '../common/resolve_job_selection';
-import type { AnomalySwimlaneEmbeddableInput } from '../types';
-import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
+import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
+import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
+import { HttpService } from '../../application/services/http_service';
+import { AnomalySwimlaneEmbeddableInput } from '..';
+import { resolveJobSelection } from '../common/resolve_job_selection';
 
 export async function resolveAnomalySwimlaneUserInput(
   coreStart: CoreStart,

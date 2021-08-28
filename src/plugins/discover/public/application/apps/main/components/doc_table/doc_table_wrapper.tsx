@@ -5,22 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
-import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common/constants/ui_settings';
+import { TableHeader } from './components/table_header/table_header';
+import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../../common';
-import { getServices } from '../../../../../kibana_services';
-import type { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
-import type { SortOrder } from './components/table_header/helpers';
-import { TableHeader } from './components/table_header/table_header';
-import type { DocTableRow } from './components/table_row';
-import { TableRow } from './components/table_row';
+import { getServices, IndexPattern } from '../../../../../kibana_services';
+import { SortOrder } from './components/table_header/helpers';
+import { DocTableRow, TableRow } from './components/table_row';
+import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
 
 export interface DocTableProps {
   /**

@@ -4,28 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
-  EuiButtonEmpty,
+  EuiFieldPassword,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
   EuiButtonIcon,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiFieldPassword,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-  EuiSwitch,
   EuiTitle,
+  EuiSwitch,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect, useState } from 'react';
-import type { ActionConnectorFieldsProps } from '../../../../types';
+import { ActionConnectorFieldsProps } from '../../../../types';
+import { WebhookActionConnector } from '../types';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
-import type { WebhookActionConnector } from '../types';
 
 const HTTP_VERBS = ['post', 'put'];
 

@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/typed-react-router-config';
+import { TypeOf } from '@kbn/typed-react-router-config';
+import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
-import type { ContentsProps } from '.';
-import { useUiTracker } from '../../../../../../observability/public/hooks/use_track_metric';
-import type { NodeStats } from '../../../../../common/service_map';
+import { useUiTracker } from '../../../../../../observability/public';
+import { ContentsProps } from '.';
+import { NodeStats } from '../../../../../common/service_map';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import type { ApmRoutes } from '../../../routing/apm_route_config';
+import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
 
 export function BackendContents({ nodeData, environment }: ContentsProps) {

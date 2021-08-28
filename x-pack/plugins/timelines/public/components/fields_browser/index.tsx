@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
-import { Provider } from 'react-redux';
 import type { Store } from 'redux';
-import { StatefulFieldsBrowser } from '../t_grid/toolbar/fields_browser';
+import { Provider } from 'react-redux';
+import { I18nProvider } from '@kbn/i18n/react';
 import type { FieldBrowserProps } from '../t_grid/toolbar/fields_browser/types';
-
+import { StatefulFieldsBrowser } from '../t_grid/toolbar/fields_browser';
 export type { FieldBrowserProps } from '../t_grid/toolbar/fields_browser/types';
-// eslint-disable-next-line import/no-default-export
-export { FieldBrowserWrappedComponent as default };
 
 const EMPTY_BROWSER_FIELDS = {};
 
@@ -38,3 +35,6 @@ export const FieldBrowserWrappedComponent = (props: FieldBrowserWrappedComponent
 };
 
 FieldBrowserWrappedComponent.displayName = 'FieldBrowserWrappedComponent';
+
+// eslint-disable-next-line import/no-default-export
+export { FieldBrowserWrappedComponent as default };

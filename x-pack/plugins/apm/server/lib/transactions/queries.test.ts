@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import type { SearchParamsMock } from '../../utils/test_helpers';
-import { inspectSearchParams } from '../../utils/test_helpers';
+import {
+  inspectSearchParams,
+  SearchParamsMock,
+} from '../../utils/test_helpers';
 import { getTransactionBreakdown } from './breakdown';
-import { getTransaction } from './get_transaction';
 import { getTransactionTraceSamples } from './trace_samples';
+import { getTransaction } from './get_transaction';
 
 describe('transaction queries', () => {
   let mock: SearchParamsMock;

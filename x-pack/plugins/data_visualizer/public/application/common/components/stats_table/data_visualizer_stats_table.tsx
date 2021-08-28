@@ -4,34 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBasicTableColumn, HorizontalAlignment } from '@elastic/eui';
+
+import React, { useMemo, useState } from 'react';
+
 import {
   CENTER_ALIGNMENT,
+  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
   EuiToolTip,
+  HorizontalAlignment,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import type { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
-import { JOB_FIELD_TYPES } from '../../../../../common/constants';
-import type { DataVisualizerTableState } from '../../../../../common/types';
-import type { JobFieldType } from '../../../../../common/types/job_field_type';
-import { FileBasedNumberContentPreview } from '../field_data_row/number_content_preview';
-import { FieldTypeIcon } from '../field_type_icon/field_type_icon';
-import { BooleanContentPreview } from './components/field_data_row/boolean_content_preview';
-import { DistinctValues } from './components/field_data_row/distinct_values';
+import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
+import { JOB_FIELD_TYPES, JobFieldType, DataVisualizerTableState } from '../../../../../common';
+import { FieldTypeIcon } from '../field_type_icon';
 import { DocumentStat } from './components/field_data_row/document_stats';
+import { DistinctValues } from './components/field_data_row/distinct_values';
 import { IndexBasedNumberContentPreview } from './components/field_data_row/number_content_preview';
-import { TopValuesPreview } from './components/field_data_row/top_values_preview';
-import type { FieldVisConfig, FileBasedFieldVisConfig } from './types/field_vis_config';
-import { isIndexBasedFieldVisConfig } from './types/field_vis_config';
+
 import { useTableSettings } from './use_table_settings';
+import { TopValuesPreview } from './components/field_data_row/top_values_preview';
+import {
+  FieldVisConfig,
+  FileBasedFieldVisConfig,
+  isIndexBasedFieldVisConfig,
+} from './types/field_vis_config';
+import { FileBasedNumberContentPreview } from '../field_data_row';
+import { BooleanContentPreview } from './components/field_data_row';
 
 const FIELD_NAME = 'fieldName';
 

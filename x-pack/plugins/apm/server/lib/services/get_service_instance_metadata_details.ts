@@ -5,19 +5,19 @@
  * 2.0.
  */
 import { merge } from 'lodash';
-import { rangeQuery } from '../../../../observability/server/utils/queries';
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
   METRICSET_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeQuery } from '../../../../observability/server';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { maybe } from '../../../common/utils/maybe';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getServiceInstanceMetadataDetails({
   serviceName,

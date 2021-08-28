@@ -5,27 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import { mapToObject } from '@kbn/std';
+
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import type { CoreService } from '../../types/core_service';
-import type { UiSettingsParams } from '../../types/ui_settings';
-import type { CoreContext } from '../core_context';
-import type { InternalHttpServiceSetup } from '../http/types';
-import type { InternalSavedObjectsServiceSetup } from '../saved_objects/saved_objects_service';
-import type { SavedObjectsClientContract } from '../saved_objects/types';
-import { registerRoutes } from './routes';
-import { uiSettingsType } from './saved_objects/ui_settings';
-import { getCoreSettings } from './settings';
-import type {
+import { mapToObject } from '@kbn/std';
+
+import { CoreService } from '../../types';
+import { CoreContext } from '../core_context';
+import { Logger } from '../logging';
+import { SavedObjectsClientContract } from '../saved_objects/types';
+import { InternalSavedObjectsServiceSetup } from '../saved_objects';
+import { InternalHttpServiceSetup } from '../http';
+import { UiSettingsConfigType, config as uiConfigDefinition } from './ui_settings_config';
+import { UiSettingsClient } from './ui_settings_client';
+import {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
+  UiSettingsParams,
 } from './types';
-import { UiSettingsClient } from './ui_settings_client';
-import type { UiSettingsConfigType } from './ui_settings_config';
-import { config as uiConfigDefinition } from './ui_settings_config';
+import { uiSettingsType } from './saved_objects';
+import { registerRoutes } from './routes';
+import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
 
 export interface SetupDeps {

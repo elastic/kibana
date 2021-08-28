@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,8 +19,9 @@ import {
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
 import React from 'react';
-import type { OverlayStart } from '../../../../../core/public/overlays/overlay_service';
-import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
+
+import { OverlayStart } from '../../../../../core/public';
+import { toMountPoint } from '../../services/kibana_react';
 import { createConfirmStrings, discardConfirmStrings } from '../../dashboard_strings';
 
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';

@@ -5,22 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { cloneDeep, defaults, get, size, transform } from 'lodash';
-import { setup as htmlContentTypeSetup } from './content_types/html_content_type';
-import { setup as textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types/text_content_type';
+
+import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
-import type {
+import {
+  FieldFormatsGetConfigFn,
+  FieldFormatsContentType,
+  FieldFormatInstanceType,
   FieldFormatConvert,
   FieldFormatConvertFunction,
-  FieldFormatInstanceType,
-  FieldFormatsContentType,
-  FieldFormatsGetConfigFn,
-  HtmlContextTypeConvert,
   HtmlContextTypeOptions,
-  IFieldFormatMetaParams,
-  TextContextTypeConvert,
   TextContextTypeOptions,
+  IFieldFormatMetaParams,
 } from './types';
+import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
+import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 

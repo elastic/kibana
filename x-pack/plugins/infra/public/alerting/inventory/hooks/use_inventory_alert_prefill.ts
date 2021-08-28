@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useState } from 'react';
-import type {
-  SnapshotCustomMetricInput,
+import {
   SnapshotMetricInput,
+  SnapshotCustomMetricInput,
 } from '../../../../common/http_api/snapshot_api';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export const useInventoryAlertPrefill = () => {
   const [nodeType, setNodeType] = useState<InventoryItemType>('host');

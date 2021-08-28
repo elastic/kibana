@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup } from '../../../../../src/core/public/types';
-import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public/plugin';
-import type { FormatFactory } from '../../common/types';
+
+import type { CoreSetup } from 'kibana/public';
+import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import type { EditorFrameSetup } from '../types';
+import type { FormatFactory } from '../../common';
 
 export interface MetricVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;

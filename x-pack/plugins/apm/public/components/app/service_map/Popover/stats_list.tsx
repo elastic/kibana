@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { NodeStats } from '../../../../../common/service_map';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { NodeStats } from '../../../../../common/service_map';
 import {
   asDuration,
+  asPercent,
   asTransactionRate,
-} from '../../../../../common/utils/formatters/duration';
-import { asPercent } from '../../../../../common/utils/formatters/formatters';
+} from '../../../../../common/utils/formatters';
 
 export const ItemRow = euiStyled.tr`
   line-height: 2;

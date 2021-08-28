@@ -4,22 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { OperationDefinition } from '..';
-import type { IndexPatternLayer } from '../../../types';
-import type {
-  FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from '../column_types';
-import { getFilter, getFormatFromPreviousColumn } from '../helpers';
+import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { IndexPatternLayer } from '../../../types';
 import {
+  checkForDateHistogram,
+  getErrorsForDateReference,
+  dateBasedOperationToExpression,
+  hasDateField,
   buildLabelFunction,
   checkForDataLayerType,
-  checkForDateHistogram,
-  dateBasedOperationToExpression,
-  getErrorsForDateReference,
-  hasDateField,
 } from './utils';
+import { OperationDefinition } from '..';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {

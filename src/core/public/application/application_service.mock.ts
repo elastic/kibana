@@ -5,18 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { History } from 'history';
+
+import { History } from 'history';
 import { BehaviorSubject, Subject } from 'rxjs';
+
 import type { MountPoint } from '../types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
-import type { ApplicationServiceContract } from './test_types';
-import type {
+import {
   ApplicationSetup,
+  InternalApplicationStart,
   ApplicationStart,
   InternalApplicationSetup,
-  InternalApplicationStart,
   PublicAppInfo,
 } from './types';
+import { ApplicationServiceContract } from './test_types';
 
 const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
   register: jest.fn(),

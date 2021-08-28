@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -14,9 +16,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 const CORE_WEB_VITALS = i18n.translate('xpack.observability.ux.coreWebVitals', {
   defaultMessage: 'Core web vitals',

@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Section } from '../sections';
+
 import {
+  Section,
   AGENT,
-  LABELS,
-  MESSAGE_SPAN,
   SERVICE,
   SPAN,
-  TRACE,
+  LABELS,
   TRANSACTION,
+  TRACE,
+  MESSAGE_SPAN,
 } from '../sections';
 
 export const SPAN_METADATA_SECTIONS: Section[] = [

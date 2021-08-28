@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,9 +21,9 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { NotificationsStart } from 'src/core/public';
 
-import type { NotificationsStart } from '../../../../../../../../src/core/public/notifications/notifications_service';
-import type { User } from '../../../../../common/model/user';
+import type { User } from '../../../../../common/model';
 import type { UserAPIClient } from '../../user_api_client';
 
 interface Props {

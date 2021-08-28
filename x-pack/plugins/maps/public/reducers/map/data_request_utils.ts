@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { SOURCE_DATA_REQUEST_ID } from '../../../common/constants';
-import type {
-  DataMeta,
-  DataRequestDescriptor,
-} from '../../../common/descriptor_types/data_request_descriptor_types';
 import { findLayerById, setLayer } from './layer_utils';
-import type { MapState } from './types';
+import { DataMeta, DataRequestDescriptor } from '../../../common/descriptor_types';
+import { MapState } from './types';
 
 export function startDataRequest(
   state: MapState,

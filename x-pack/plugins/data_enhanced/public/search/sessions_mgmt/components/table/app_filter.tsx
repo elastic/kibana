@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FieldValueOptionType, SearchFilterConfig } from '@elastic/eui';
+
+import { FieldValueOptionType, SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import type { UISession } from '../../types';
+import { UISession } from '../../types';
 
 export const getAppFilter: (tableData: UISession[]) => SearchFilterConfig = (tableData) => ({
   type: 'field_value_selection',

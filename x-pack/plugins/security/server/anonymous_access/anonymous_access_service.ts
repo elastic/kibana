@@ -4,20 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Request } from '@hapi/hapi';
 
-import type { Logger } from '@kbn/logging';
+import type {
+  Capabilities,
+  CapabilitiesStart,
+  IBasePath,
+  IClusterClient,
+  Logger,
+} from 'src/core/server';
 
-import type { CapabilitiesStart } from '../../../../../src/core/server/capabilities/capabilities_service';
-import type { IClusterClient } from '../../../../../src/core/server/elasticsearch/client/cluster_client';
-import type { IBasePath } from '../../../../../src/core/server/http/base_path_service';
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type { Capabilities } from '../../../../../src/core/types/capabilities';
-import { addSpaceIdToPath } from '../../../spaces/common/lib/spaces_url_parser';
-import type { SpacesServiceStart } from '../../../spaces/server/spaces_service/spaces_service';
+import { KibanaRequest } from '../../../../../src/core/server';
+import { addSpaceIdToPath } from '../../../spaces/common';
+import type { SpacesServiceStart } from '../../../spaces/server';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
-import type { HTTPAuthorizationHeader } from '../authentication/http_authentication/http_authorization_header';
-import { AnonymousAuthenticationProvider } from '../authentication/providers/anonymous';
+import type { HTTPAuthorizationHeader } from '../authentication';
+import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 

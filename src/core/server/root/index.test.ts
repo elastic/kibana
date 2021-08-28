@@ -5,13 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/dev-utils';
+
+import { rawConfigService, configService, logger, mockServer } from './index.test.mocks';
+
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
-import { Root } from '.';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { getEnvOptions } from '../config/mocks';
-import { configService, logger, mockServer, rawConfigService } from './index.test.mocks';
+import { Root } from '.';
+import { Env } from '../config';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 

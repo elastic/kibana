@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Context } from '../form_data_context';
-import { useFormDataContext } from '../form_data_context';
-import { unflattenObject } from '../lib/utils';
-import type { FormData, FormHook } from '../types';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+
+import { FormData, FormHook } from '../types';
+import { unflattenObject } from '../lib';
+import { useFormDataContext, Context } from '../form_data_context';
 
 interface Options {
   watch?: string | string[];

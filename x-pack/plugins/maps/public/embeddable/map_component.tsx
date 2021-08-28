@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLoadingChart } from '@elastic/eui';
-import type { RefObject } from 'react';
-import React, { Component } from 'react';
+
+import React, { Component, RefObject } from 'react';
 import uuid from 'uuid/v4';
-import type { Query } from '../../../../../src/plugins/data/common';
-import type { Filter } from '../../../../../src/plugins/data/common/es_query';
-import type { TimeRange } from '../../../../../src/plugins/data/common/query/timefilter/types';
-import type { LayerDescriptor } from '../../common/descriptor_types/layer_descriptor_types';
-import type { MapCenterAndZoom } from '../../common/descriptor_types/map_descriptor';
+import { EuiLoadingChart } from '@elastic/eui';
+import type { Filter, Query, TimeRange } from '../../../../../src/plugins/data/common';
+import type { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
+import type { MapEmbeddableType } from './types';
 import type { LazyLoadedMapModules } from '../lazy_load_bundle';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
-import type { MapEmbeddableType } from './types';
 
 interface Props {
   filters?: Filter[];

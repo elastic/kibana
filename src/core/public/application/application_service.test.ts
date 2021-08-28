@@ -5,22 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { mount, shallow } from 'enzyme';
-import { createElement } from 'react';
-import { act } from 'react-dom/test-utils';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { bufferCount, take, takeUntil } from 'rxjs/operators';
-import { httpServiceMock } from '../http/http_service.mock';
-import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { ApplicationService } from './application_service';
+
 import {
   MockCapabilitiesService,
   MockHistory,
   parseAppUrlMock,
 } from './application_service.test.mocks';
-import type { MockLifecycle } from './test_types';
-import type { App, AppDeepLink, AppUpdater, PublicAppInfo } from './types';
-import { AppNavLinkStatus, AppStatus } from './types';
+
+import { createElement } from 'react';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { bufferCount, take, takeUntil } from 'rxjs/operators';
+import { mount, shallow } from 'enzyme';
+
+import { httpServiceMock } from '../http/http_service.mock';
+import { overlayServiceMock } from '../overlays/overlay_service.mock';
+import { MockLifecycle } from './test_types';
+import { ApplicationService } from './application_service';
+import { App, AppDeepLink, AppNavLinkStatus, AppStatus, AppUpdater, PublicAppInfo } from './types';
+import { act } from 'react-dom/test-utils';
 
 const createApp = (props: Partial<App>): App => {
   return {

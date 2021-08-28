@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { InfraMetadata } from '../../../../../../../../common/http_api/metadata_api';
+
+import { InfraMetadata } from '../../../../../../../../common/http_api';
 
 export const getFields = (metadata: InfraMetadata, group: 'cloud' | 'host' | 'agent') => {
   switch (group) {

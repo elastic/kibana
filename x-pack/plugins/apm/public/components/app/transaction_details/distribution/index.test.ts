@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getFormattedSelection } from '.';
+
+import { getFormattedSelection } from './index';
 
 describe('transaction_details/distribution', () => {
   describe('getFormattedSelection', () => {

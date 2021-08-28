@@ -4,20 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import type { APMConfig } from '../..';
-import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common/constants';
-import type { ApmIndicesConfig } from '../../../../observability/common/typings';
+
+import { Logger } from 'kibana/server';
 import { isActivePlatinumLicense } from '../../../common/license_check';
-import type { UxUIFilters } from '../../../typings/ui_filters';
-import type { APMRouteHandlerResources } from '../../routes/typings';
+import { APMConfig } from '../..';
+import { KibanaRequest } from '../../../../../../src/core/server';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
+import { UxUIFilters } from '../../../typings/ui_filters';
+import { APMRouteHandlerResources } from '../../routes/typings';
+import {
+  ApmIndicesConfig,
+  getApmIndices,
+} from '../settings/apm_indices/get_apm_indices';
+import {
+  APMEventClient,
+  createApmEventClient,
+} from './create_es_client/create_apm_event_client';
+import {
+  APMInternalClient,
+  createInternalESClient,
+} from './create_es_client/create_internal_es_client';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import type { APMEventClient } from './create_es_client/create_apm_event_client';
-import { createApmEventClient } from './create_es_client/create_apm_event_client';
-import type { APMInternalClient } from './create_es_client/create_internal_es_client';
-import { createInternalESClient } from './create_es_client/create_internal_es_client';
 
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933

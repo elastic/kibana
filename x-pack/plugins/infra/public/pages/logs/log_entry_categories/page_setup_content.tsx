@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public/hooks/use_track_metric';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { useTrackPageview } from '../../../../../observability/public';
 
 interface LogEntryCategoriesSetupContentProps {
   onOpenSetup: () => void;

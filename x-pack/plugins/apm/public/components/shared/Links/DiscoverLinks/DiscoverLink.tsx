@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiLink } from '@elastic/eui';
-import type { Location } from 'history';
+import { Location } from 'history';
+import { IBasePath } from 'kibana/public';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import type { RisonValue } from 'rison-node';
-import rison from 'rison-node';
+import rison, { RisonValue } from 'rison-node';
 import url from 'url';
-import type { IBasePath } from '../../../../../../../../src/core/public/http/types';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimepickerRisonData } from '../rison_helpers';

@@ -5,12 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { LogRecord } from '@kbn/logging';
-import { LogLevel } from '@kbn/logging';
-import moment from 'moment-timezone';
-import { rollingFileAppenderMocks } from './mocks';
-import type { RollingFileAppenderConfig } from './rolling_file_appender';
-import { RollingFileAppender } from './rolling_file_appender';
+
 import {
   createRollingStrategyMock,
   createTriggeringPolicyMock,
@@ -19,6 +14,10 @@ import {
   RollingFileContextMock,
   RollingFileManagerMock,
 } from './rolling_file_appender.test.mocks';
+import { rollingFileAppenderMocks } from './mocks';
+import moment from 'moment-timezone';
+import { LogLevel, LogRecord } from '@kbn/logging';
+import { RollingFileAppender, RollingFileAppenderConfig } from './rolling_file_appender';
 
 const config: RollingFileAppenderConfig = {
   type: 'rolling-file',

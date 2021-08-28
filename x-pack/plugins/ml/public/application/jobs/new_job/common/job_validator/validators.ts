@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+import { distinctUntilChanged, filter, map, pluck, switchMap, startWith } from 'rxjs/operators';
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, pluck, startWith, switchMap } from 'rxjs/operators';
-import type { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs/combined_job';
-import type {
+import {
   CardinalityModelPlotHigh,
   CardinalityValidationResult,
+  ml,
 } from '../../../../services/ml_api_service';
-import { ml } from '../../../../services/ml_api_service';
-import { JobCreator } from '../job_creator/job_creator';
-import type { BasicValidations } from './job_validator';
+import { JobCreator } from '../job_creator';
+import { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import { BasicValidations } from './job_validator';
 
 export enum VALIDATOR_SEVERITY {
   ERROR,

@@ -4,72 +4,60 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart } from '../../../../../../../src/core/public/types';
-import type { HttpSetup } from '../../../../../../../src/core/public/http/types';
-import type { SavedObjectsClientContract } from '../../../../../../../src/core/public/saved_objects/saved_objects_client';
-import type { IUiSettingsClient } from '../../../../../../../src/core/public/ui_settings/types';
-import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public/types';
-import type { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/common/ast/types';
-import type { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public/storage/types';
-import type { DateRange, LayerType } from '../../../../common/types';
-import type { FrameDatasourceAPI, OperationMetadata } from '../../../types';
-import type { IndexPatternDimensionEditorProps } from '../../dimension_panel/dimension_panel';
-import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
-import type { CounterRateIndexPatternColumn } from './calculations/counter_rate';
-import { counterRateOperation } from './calculations/counter_rate';
-import type { CumulativeSumIndexPatternColumn } from './calculations/cumulative_sum';
-import { cumulativeSumOperation } from './calculations/cumulative_sum';
-import type { DerivativeIndexPatternColumn } from './calculations/differences';
-import { derivativeOperation } from './calculations/differences';
-import type { MovingAverageIndexPatternColumn } from './calculations/moving_average';
-import { movingAverageOperation } from './calculations/moving_average';
-import type {
-  OverallAverageIndexPatternColumn,
-  OverallMaxIndexPatternColumn,
-  OverallMinIndexPatternColumn,
-  OverallSumIndexPatternColumn,
-} from './calculations/overall_metric';
+
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreStart } from 'kibana/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { termsOperation, TermsIndexPatternColumn } from './terms';
+import { filtersOperation, FiltersIndexPatternColumn } from './filters';
+import { cardinalityOperation, CardinalityIndexPatternColumn } from './cardinality';
+import { percentileOperation, PercentileIndexPatternColumn } from './percentile';
 import {
-  overallAverageOperation,
-  overallMaxOperation,
-  overallMinOperation,
-  overallSumOperation,
-} from './calculations/overall_metric';
-import type { CardinalityIndexPatternColumn } from './cardinality';
-import { cardinalityOperation } from './cardinality';
-import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
-import type { CountIndexPatternColumn } from './count';
-import { countOperation } from './count';
-import type { DateHistogramIndexPatternColumn } from './date_histogram';
-import { dateHistogramOperation } from './date_histogram';
-import type { FiltersIndexPatternColumn } from './filters/filters';
-import { filtersOperation } from './filters/filters';
-import type { FormulaIndexPatternColumn } from './formula/formula';
-import { formulaOperation } from './formula/formula';
-import type { MathIndexPatternColumn } from './formula/math';
-import { mathOperation } from './formula/math';
-import type { LastValueIndexPatternColumn } from './last_value';
-import { lastValueOperation } from './last_value';
-import type {
-  AvgIndexPatternColumn,
-  MaxIndexPatternColumn,
-  MedianIndexPatternColumn,
-  MinIndexPatternColumn,
-  SumIndexPatternColumn,
-} from './metrics';
-import {
-  averageOperation,
-  maxOperation,
-  medianOperation,
   minOperation,
+  MinIndexPatternColumn,
+  averageOperation,
+  AvgIndexPatternColumn,
   sumOperation,
+  SumIndexPatternColumn,
+  maxOperation,
+  MaxIndexPatternColumn,
+  medianOperation,
+  MedianIndexPatternColumn,
 } from './metrics';
-import type { PercentileIndexPatternColumn } from './percentile';
-import { percentileOperation } from './percentile';
-import type { RangeIndexPatternColumn } from './ranges/ranges';
-import { rangeOperation } from './ranges/ranges';
-import type { TermsIndexPatternColumn } from './terms';
-import { termsOperation } from './terms';
+import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
+import {
+  cumulativeSumOperation,
+  CumulativeSumIndexPatternColumn,
+  counterRateOperation,
+  CounterRateIndexPatternColumn,
+  derivativeOperation,
+  DerivativeIndexPatternColumn,
+  movingAverageOperation,
+  MovingAverageIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+  overallSumOperation,
+  OverallMinIndexPatternColumn,
+  overallMinOperation,
+  OverallMaxIndexPatternColumn,
+  overallMaxOperation,
+  OverallAverageIndexPatternColumn,
+  overallAverageOperation,
+} from './calculations';
+import { countOperation, CountIndexPatternColumn } from './count';
+import {
+  mathOperation,
+  MathIndexPatternColumn,
+  formulaOperation,
+  FormulaIndexPatternColumn,
+} from './formula';
+import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
+import { FrameDatasourceAPI, OperationMetadata } from '../../../types';
+import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
+import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
+import { DateRange, LayerType } from '../../../../common';
+import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { RangeIndexPatternColumn, rangeOperation } from './ranges';
+import { IndexPatternDimensionEditorProps } from '../../dimension_panel';
 
 /**
  * A union type of all available column types. If a column is of an unknown type somewhere
@@ -103,46 +91,34 @@ export type IndexPatternColumn =
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
 
-export {
-  CounterRateIndexPatternColumn,
-  counterRateOperation,
-  CumulativeSumIndexPatternColumn,
-  cumulativeSumOperation,
-  DerivativeIndexPatternColumn,
-  derivativeOperation,
-  MovingAverageIndexPatternColumn,
-  movingAverageOperation,
-  OverallAverageIndexPatternColumn,
-  overallAverageOperation,
-  OverallMaxIndexPatternColumn,
-  overallMaxOperation,
-  OverallMinIndexPatternColumn,
-  overallMinOperation,
-  OverallSumIndexPatternColumn,
-  overallSumOperation,
-} from './calculations';
-export { CardinalityIndexPatternColumn } from './cardinality';
 export { IncompleteColumn } from './column_types';
-export { CountIndexPatternColumn, countOperation } from './count';
-export { DateHistogramIndexPatternColumn, dateHistogramOperation } from './date_histogram';
-export { FiltersIndexPatternColumn, filtersOperation } from './filters';
-export { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
-export { formulaOperation } from './formula/formula';
-export { LastValueIndexPatternColumn, lastValueOperation } from './last_value';
+
+export { TermsIndexPatternColumn } from './terms';
+export { FiltersIndexPatternColumn } from './filters';
+export { CardinalityIndexPatternColumn } from './cardinality';
+export { PercentileIndexPatternColumn } from './percentile';
 export {
-  averageOperation,
-  AvgIndexPatternColumn,
-  MaxIndexPatternColumn,
-  maxOperation,
-  MedianIndexPatternColumn,
   MinIndexPatternColumn,
-  minOperation,
+  AvgIndexPatternColumn,
   SumIndexPatternColumn,
-  sumOperation,
+  MaxIndexPatternColumn,
+  MedianIndexPatternColumn,
 } from './metrics';
-export { PercentileIndexPatternColumn, percentileOperation } from './percentile';
-export { RangeIndexPatternColumn, rangeOperation } from './ranges';
-export { TermsIndexPatternColumn, termsOperation } from './terms';
+export { DateHistogramIndexPatternColumn } from './date_histogram';
+export {
+  CumulativeSumIndexPatternColumn,
+  CounterRateIndexPatternColumn,
+  DerivativeIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+  OverallMinIndexPatternColumn,
+  OverallMaxIndexPatternColumn,
+  OverallAverageIndexPatternColumn,
+} from './calculations';
+export { CountIndexPatternColumn } from './count';
+export { LastValueIndexPatternColumn } from './last_value';
+export { RangeIndexPatternColumn } from './ranges';
+export { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
@@ -172,6 +148,26 @@ const internalOperationDefinitions = [
   overallMaxOperation,
   overallAverageOperation,
 ];
+
+export { termsOperation } from './terms';
+export { rangeOperation } from './ranges';
+export { filtersOperation } from './filters';
+export { dateHistogramOperation } from './date_histogram';
+export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
+export { percentileOperation } from './percentile';
+export { countOperation } from './count';
+export { lastValueOperation } from './last_value';
+export {
+  cumulativeSumOperation,
+  counterRateOperation,
+  derivativeOperation,
+  movingAverageOperation,
+  overallSumOperation,
+  overallAverageOperation,
+  overallMaxOperation,
+  overallMinOperation,
+} from './calculations';
+export { formulaOperation } from './formula/formula';
 
 /**
  * Properties passed to the operation-specific part of the popover editor

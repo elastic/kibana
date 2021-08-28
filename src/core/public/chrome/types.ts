@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiBreadcrumb, IconType } from '@elastic/eui';
+
+import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import type { MountPoint } from '../types';
-import type { ChromeDocTitle } from './doc_title/doc_title_service';
-import type { ChromeNavControls } from './nav_controls/nav_controls_service';
-import type { ChromeNavLink } from './nav_links/nav_link';
-import type { ChromeNavLinks } from './nav_links/nav_links_service';
-import type { ChromeRecentlyAccessed } from './recently_accessed/recently_accessed_service';
-import type { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
+import { MountPoint } from '../types';
+import { ChromeDocTitle } from './doc_title';
+import { ChromeNavControls } from './nav_controls';
+import { ChromeNavLinks, ChromeNavLink } from './nav_links';
+import { ChromeRecentlyAccessed } from './recently_accessed';
+import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 
 /** @public */
 export interface ChromeBadge {

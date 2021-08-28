@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginServiceFactory } from '../create/factory';
-import type { PresentationDashboardsService } from '../dashboards';
+
+import { PluginServiceFactory } from '../create';
+import { PresentationDashboardsService } from '../dashboards';
 
 // TODO (clint): Create set of dashboards to stub and return.
 

@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
-import type { MlClient } from '../../lib/ml_client/types';
-import { DataRecognizer } from '../../models/data_recognizer/data_recognizer';
+
+import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { TypeOf } from '@kbn/config-schema';
+import { DataRecognizer } from '../../models/data_recognizer';
+import { GetGuards } from '../shared_services';
 import { moduleIdParamSchema, setupModuleBodySchema } from '../../routes/schemas/modules';
-import type { JobSavedObjectService } from '../../saved_objects/service';
-import type { GetGuards } from '../shared_services';
+import { MlClient } from '../../lib/ml_client';
+import { JobSavedObjectService } from '../../saved_objects';
 
 export type ModuleSetupPayload = TypeOf<typeof moduleIdParamSchema> &
   TypeOf<typeof setupModuleBodySchema>;

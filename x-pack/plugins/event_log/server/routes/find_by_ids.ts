@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+
+import { schema, TypeOf } from '@kbn/config-schema';
 import type {
+  KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-} from '../../../../../src/core/server/http/router/response';
+  Logger,
+} from 'src/core/server';
+import type { EventLogRouter, EventLogRequestHandlerContext } from '../types';
+
 import { BASE_EVENT_LOG_API_PATH } from '../../common';
-import type { FindOptionsType } from '../event_log_client';
-import { findOptionsSchema } from '../event_log_client';
-import type { EventLogRequestHandlerContext, EventLogRouter } from '../types';
+import { findOptionsSchema, FindOptionsType } from '../event_log_client';
 
 const paramSchema = schema.object({
   type: schema.string(),

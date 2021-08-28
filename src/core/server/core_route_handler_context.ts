@@ -5,21 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type {
-  DeprecationsClient,
-  InternalDeprecationsServiceStart,
-} from './deprecations/deprecations_service';
-import type { IScopedClusterClient } from './elasticsearch/client/scoped_cluster_client';
-import type { InternalElasticsearchServiceStart } from './elasticsearch/types';
-import { KibanaRequest } from './http/router/request';
-import type { InternalCoreStart } from './internal_types';
-import type { InternalSavedObjectsServiceStart } from './saved_objects/saved_objects_service';
-import type { ISavedObjectTypeRegistry } from './saved_objects/saved_objects_type_registry';
-import type { SavedObjectsClientProviderOptions } from './saved_objects/service/lib/scoped_client_provider';
-import type { SavedObjectsClientContract } from './saved_objects/types';
-import type { InternalUiSettingsServiceStart, IUiSettingsClient } from './ui_settings/types';
 
 // eslint-disable-next-line max-classes-per-file
+import { InternalCoreStart } from './internal_types';
+import { KibanaRequest } from './http/router';
+import { SavedObjectsClientContract } from './saved_objects/types';
+import {
+  InternalSavedObjectsServiceStart,
+  ISavedObjectTypeRegistry,
+  SavedObjectsClientProviderOptions,
+} from './saved_objects';
+import { InternalElasticsearchServiceStart, IScopedClusterClient } from './elasticsearch';
+import { InternalUiSettingsServiceStart, IUiSettingsClient } from './ui_settings';
+import { DeprecationsClient, InternalDeprecationsServiceStart } from './deprecations';
 
 class CoreElasticsearchRouteHandlerContext {
   #client?: IScopedClusterClient;

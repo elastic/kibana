@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { hsl } from 'color';
 import _ from 'lodash';
+import { hsl } from 'color';
+
 import { seedColors } from './seed_colors';
 
 const offset = 300; // Hue offset to start at

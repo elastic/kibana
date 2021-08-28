@@ -4,35 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IconType } from '@elastic/eui';
+
+import React, { useEffect, useState } from 'react';
 import {
-  EuiButtonGroup,
-  EuiFieldNumber,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiSwitch,
   EuiText,
+  EuiSwitch,
+  EuiSpacer,
+  EuiFieldText,
+  IconType,
+  EuiFormRow,
+  EuiButtonGroup,
   htmlIdGenerator,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
-import type { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public/toolbar_button/toolbar_button';
-import type {
-  AxesSettingsConfig,
-  AxisExtentConfig,
-} from '../../common/expressions/xy_chart/axis_config';
-import type { XYLayerConfig } from '../../common/expressions/xy_chart/layer_config';
+import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from '../../common/expressions';
+import { ToolbarPopover, useDebouncedValue } from '../shared_components';
+import { isHorizontalChart } from './state_helpers';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
 import { EuiIconAxisLeft } from '../assets/axis_left';
 import { EuiIconAxisRight } from '../assets/axis_right';
 import { EuiIconAxisTop } from '../assets/axis_top';
-import { useDebouncedValue } from '../shared_components/debounced_value';
-import { ToolbarPopover } from '../shared_components/toolbar_popover';
+import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 import { validateExtent } from './axes_configuration';
-import { isHorizontalChart } from './state_helpers';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 

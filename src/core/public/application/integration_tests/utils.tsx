@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { I18nProvider } from '@kbn/i18n/react';
-import { mount } from 'enzyme';
-import type { ReactElement } from 'react';
-import React from 'react';
+
+import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
-import type { MockedMounterTuple, Mountable } from '../test_types';
-import type { AppMountParameters } from '../types';
+import { mount } from 'enzyme';
+import { I18nProvider } from '@kbn/i18n/react';
+
+import { AppMountParameters } from '../types';
+import { MockedMounterTuple, Mountable } from '../test_types';
 
 type Dom = ReturnType<typeof mount> | null;
 type Renderer = () => Dom | Promise<Dom>;

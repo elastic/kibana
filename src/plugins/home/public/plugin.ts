@@ -5,31 +5,36 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
-import type { CoreSetup, CoreStart } from '../../../core/public/types';
-import type { AppMountParameters } from '../../../core/public/application/types';
-import { AppNavLinkStatus } from '../../../core/public/application/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
-import type { DataPublicPluginStart } from '../../data/public/types';
-import type { TelemetryPluginStart } from '../../telemetry/public/plugin';
-import type { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public/plugin';
-import type { UsageCollectionSetup } from '../../usage_collection/public/plugin';
-import { HOME_APP_BASE_PATH, PLUGIN_ID } from '../common/constants';
-import type { ConfigSchema } from '../config';
-import { setServices } from './application/kibana_services';
-import type { AddDataServiceSetup } from './services/add_data/add_data_service';
-import { AddDataService } from './services/add_data/add_data_service';
-import type { EnvironmentServiceSetup } from './services/environment/environment';
-import { EnvironmentService } from './services/environment/environment';
-import type { FeatureCatalogueRegistrySetup } from './services/feature_catalogue/feature_catalogue_registry';
+
 import {
+  EnvironmentService,
+  EnvironmentServiceSetup,
   FeatureCatalogueCategory,
   FeatureCatalogueRegistry,
-} from './services/feature_catalogue/feature_catalogue_registry';
-import type { TutorialServiceSetup } from './services/tutorials/tutorial_service';
-import { TutorialService } from './services/tutorials/tutorial_service';
+  FeatureCatalogueRegistrySetup,
+  TutorialService,
+  TutorialServiceSetup,
+  AddDataService,
+  AddDataServiceSetup,
+} from './services';
+import { ConfigSchema } from '../config';
+import { setServices } from './application/kibana_services';
+import { DataPublicPluginStart } from '../../data/public';
+import { TelemetryPluginStart } from '../../telemetry/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
+import { AppNavLinkStatus } from '../../../core/public';
+import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;

@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { mount, ReactWrapper } from 'enzyme';
 import sinon from 'sinon';
 
-import { HttpSetup, HttpFetchOptions } from '../../../../../src/core/public/types';
+import { HttpSetup, HttpFetchOptions } from '../../../../../src/core/public';
 import { SendRequestConfig, SendRequestResponse } from './send_request';
 import { useRequest, UseRequestResponse, UseRequestConfig } from './use_request';
 

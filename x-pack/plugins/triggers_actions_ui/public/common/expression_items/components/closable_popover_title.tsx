@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopoverTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiPopoverTitle, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 
 interface ClosablePopoverTitleProps {
   children: JSX.Element;

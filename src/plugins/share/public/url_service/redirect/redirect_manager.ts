@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import type { CoreSetup } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
-import type { CoreSetup } from '../../../../../core/public/types';
-import { migrateToLatest } from '../../../../kibana_utils/common/persistable_state/migrate_to_latest';
-import { UrlService } from '../../../common/url_service/url_service';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { migrateToLatest } from '../../../../kibana_utils/common';
+import type { UrlService } from '../../../common/url_service';
 import { render } from './render';
 import { parseSearchParams } from './util/parse_search_params';
 

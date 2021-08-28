@@ -4,43 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
+import React, { useMemo, useCallback, useState } from 'react';
 import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
 import { encode } from 'rison-node';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { ML_PAGES } from '../../../../../../../ml/common/constants/locator';
-import { useMlHref } from '../../../../../../../ml/public/locator/use_ml_href';
-import { localizedDate } from '../../../../../../common/formatters/datetime';
-import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
-import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis/log_analysis_results';
-import type { LogEntryAnomaly } from '../../../../../../common/log_analysis/log_entry_anomalies';
-import { isCategoryAnomaly } from '../../../../../../common/log_analysis/log_entry_anomalies';
-import type { LogEntryExample } from '../../../../../../common/log_analysis/log_entry_examples';
-import type { TimeRange } from '../../../../../../common/time/time_range';
-import {
-  LogColumnHeader,
-  LogColumnHeadersWrapper,
-} from '../../../../../components/logging/log_text_stream/column_headers';
-import type { LogEntryColumnWidths } from '../../../../../components/logging/log_text_stream/log_entry_column';
-import {
-  iconColumnId,
-  LogEntryColumn,
-} from '../../../../../components/logging/log_text_stream/log_entry_column';
-import { LogEntryContextMenu } from '../../../../../components/logging/log_text_stream/log_entry_context_menu';
-import { LogEntryFieldColumn } from '../../../../../components/logging/log_text_stream/log_entry_field_column';
-import { LogEntryMessageColumn } from '../../../../../components/logging/log_text_stream/log_entry_message_column';
-import { LogEntryRowWrapper } from '../../../../../components/logging/log_text_stream/log_entry_row';
-import { LogEntryTimestampColumn } from '../../../../../components/logging/log_text_stream/log_entry_timestamp_column';
-import { useLogEntryFlyoutContext } from '../../../../../containers/logs/log_flyout';
+import { i18n } from '@kbn/i18n';
+import { useMlHref, ML_PAGES } from '../../../../../../../ml/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import { shouldHandleLinkEvent, useLinkProps } from '../../../../../hooks/use_link_props';
-import type { LogColumnConfiguration } from '../../../../../utils/source_configuration';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import {
+  LogEntryColumn,
+  LogEntryFieldColumn,
+  LogEntryMessageColumn,
+  LogEntryRowWrapper,
+  LogEntryTimestampColumn,
+  LogEntryContextMenu,
+  LogEntryColumnWidths,
+  iconColumnId,
+} from '../../../../../components/logging/log_text_stream';
+import {
+  LogColumnHeadersWrapper,
+  LogColumnHeader,
+} from '../../../../../components/logging/log_text_stream/column_headers';
+import { useLinkProps, shouldHandleLinkEvent } from '../../../../../hooks/use_link_props';
+import { TimeRange } from '../../../../../../common/time/time_range';
+import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
+import { LogEntryExample, isCategoryAnomaly } from '../../../../../../common/log_analysis';
+import {
+  LogColumnConfiguration,
+  isTimestampLogColumnConfiguration,
   isFieldLogColumnConfiguration,
   isMessageLogColumnConfiguration,
-  isTimestampLogColumnConfiguration,
 } from '../../../../../utils/source_configuration';
+import { localizedDate } from '../../../../../../common/formatters/datetime';
+import { LogEntryAnomaly } from '../../../../../../common/log_analysis';
+import { useLogEntryFlyoutContext } from '../../../../../containers/logs/log_flyout';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'time' as const;

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ErrorType, MLErrorObject } from './types';
+
+import { MLErrorObject, ErrorType } from './types';
 
 export class MLRequestFailure extends Error {
   constructor(error: MLErrorObject, resp: ErrorType) {

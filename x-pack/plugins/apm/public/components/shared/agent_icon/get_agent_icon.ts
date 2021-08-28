@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   isIosAgentName,
-  isJavaAgentName,
   isRumAgentName,
+  isJavaAgentName,
   OPEN_TELEMETRY_AGENT_NAMES,
 } from '../../../../common/agent_name';
-import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import defaultIcon from '../span_icon/icons/default.svg';
 import dotNetIcon from './icons/dot-net.svg';
 import erlangIcon from './icons/erlang.svg';
@@ -22,10 +23,10 @@ import nodeJsIcon from './icons/nodejs.svg';
 import ocamlIcon from './icons/ocaml.svg';
 import openTelemetryIcon from './icons/opentelemetry.svg';
 import phpIcon from './icons/php.svg';
-import darkPhpIcon from './icons/php_dark.svg';
 import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';
 import rumJsIcon from './icons/rumjs.svg';
+import darkPhpIcon from './icons/php_dark.svg';
 import darkRumJsIcon from './icons/rumjs_dark.svg';
 import rustIcon from './icons/rust.svg';
 import darkRustIcon from './icons/rust_dark.svg';

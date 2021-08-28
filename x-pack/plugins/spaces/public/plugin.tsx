@@ -4,26 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
-import type { AdvancedSettingsSetup } from '../../../../src/plugins/advanced_settings/public/types';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public/plugin';
-import type {
-  ManagementSetup,
-  ManagementStart,
-} from '../../../../src/plugins/management/public/types';
-import type { SavedObjectsManagementPluginSetup } from '../../../../src/plugins/saved_objects_management/public/plugin';
-import type { SpacesApi } from '../../../../src/plugins/spaces_oss/public/api';
-import type { SpacesOssPluginSetup } from '../../../../src/plugins/spaces_oss/public/types';
-import type { FeaturesPluginStart } from '../../features/public/plugin';
-import { AdvancedSettingsService } from './advanced_settings/advanced_settings_service';
-import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space/copy_saved_objects_to_space_service';
+
+import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
+import type { HomePublicPluginSetup } from 'src/plugins/home/public';
+import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
+import type { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
+import type { SpacesApi, SpacesOssPluginSetup } from 'src/plugins/spaces_oss/public';
+
+import type { FeaturesPluginStart } from '../../features/public';
+import { AdvancedSettingsService } from './advanced_settings';
+import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
-import { ManagementService } from './management/management_service';
-import { initSpacesNavControl } from './nav_control/nav_control';
-import { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space/share_saved_objects_to_space_service';
-import { spaceSelectorApp } from './space_selector/space_selector_app';
-import { SpacesManager } from './spaces_manager/spaces_manager';
+import { ManagementService } from './management';
+import { initSpacesNavControl } from './nav_control';
+import { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space';
+import { spaceSelectorApp } from './space_selector';
+import { SpacesManager } from './spaces_manager';
 import { getUiApi } from './ui_api';
 
 export interface PluginsSetup {

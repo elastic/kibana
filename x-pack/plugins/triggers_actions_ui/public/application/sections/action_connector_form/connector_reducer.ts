@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEqual } from 'lodash';
-import type { Reducer } from 'react';
-import type { UserConfiguredActionConnector } from '../../../types';
+import { Reducer } from 'react';
+import { UserConfiguredActionConnector } from '../../../types';
 
 export type InitialConnector<Config, Secrets> = Partial<
   UserConfiguredActionConnector<Config, Secrets>

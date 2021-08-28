@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PreconfiguredAgentPolicy } from '../types/models/preconfiguration';
+
+import type { PreconfiguredAgentPolicy } from '../types';
 
 import {
-  autoUpdatePackages,
   defaultPackages,
-  FLEET_SERVER_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
+  FLEET_SERVER_PACKAGE,
+  autoUpdatePackages,
   monitoringTypes,
 } from './epm';
 

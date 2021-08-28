@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { lazy } from 'react';
 import { suspendedComponentWithProps } from '../../application/lib/suspended_component_with_props';
 

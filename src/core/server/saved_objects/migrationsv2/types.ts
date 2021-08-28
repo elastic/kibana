@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import * as Option from 'fp-ts/lib/Option';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { IndexMapping } from '../mappings/types';
-import type {
+import * as Option from 'fp-ts/lib/Option';
+import { estypes } from '@elastic/elasticsearch';
+import { ControlState } from './state_action_machine';
+import { AliasAction } from './actions';
+import { IndexMapping } from '../mappings';
+import { SavedObjectsRawDoc } from '..';
+import { TransformErrorObjects } from '../migrations/core';
+import {
   DocumentsTransformFailed,
   DocumentsTransformSuccess,
-  TransformErrorObjects,
 } from '../migrations/core/migrate_raw_docs';
-import type { SavedObjectsRawDoc } from '../serialization/types';
-import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../types';
-import type { AliasAction } from './actions/update_aliases';
-import type { ControlState } from './state_action_machine';
+import { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../types';
 
 export type MigrationLogLevel = 'error' | 'info' | 'warning';
 

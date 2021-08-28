@@ -5,32 +5,36 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { BrushEndListener, ElementClickListener, XYChartElementEvent } from '@elastic/charts';
+import './histogram.scss';
+import moment, { unitOfTime } from 'moment-timezone';
+import React, { useCallback } from 'react';
+import { EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   Axis,
+  BrushEndListener,
   Chart,
+  ElementClickListener,
   HistogramBarSeries,
   Position,
   ScaleType,
   Settings,
   TooltipType,
+  XYChartElementEvent,
 } from '@elastic/charts';
-import { EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import moment, { unitOfTime } from 'moment-timezone';
-import React, { useCallback } from 'react';
-import type { IUiSettingsClient } from '../../../../../../../../core/public/ui_settings/types';
-import { CurrentTime } from '../../../../../../../charts/public/static/components/current_time';
+
+import { IUiSettingsClient } from 'kibana/public';
 import {
+  CurrentTime,
   Endzones,
   getAdjustedInterval,
   renderEndzoneTooltip,
-} from '../../../../../../../charts/public/static/components/endzones';
-import type { DiscoverServices } from '../../../../../build_services';
+} from '../../../../../../../charts/public';
+import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search';
 import { FetchStatus } from '../../../../types';
-import type { DataCharts$, DataChartsMessage } from '../../services/use_saved_search';
+import { DiscoverServices } from '../../../../../build_services';
 import { useDataState } from '../../utils/use_data_state';
-import './histogram.scss';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;

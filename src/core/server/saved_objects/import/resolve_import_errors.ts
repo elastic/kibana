@@ -5,27 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Readable } from 'stream';
-import type { SavedObject } from '../../../types/saved_objects';
-import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import type { SavedObjectsClientContract } from '../types';
-import { checkConflicts } from './lib/check_conflicts';
-import { getImportIdMapForRetries } from './lib/check_origin_conflicts';
-import { collectSavedObjects } from './lib/collect_saved_objects';
-import { createObjectsFilter } from './lib/create_objects_filter';
-import { createSavedObjects } from './lib/create_saved_objects';
-import { executeImportHooks } from './lib/execute_import_hooks';
-import { regenerateIds } from './lib/regenerate_ids';
-import { splitOverwrites } from './lib/split_overwrites';
-import { validateReferences } from './lib/validate_references';
-import { validateRetries } from './lib/validate_retries';
-import type {
+import { SavedObject, SavedObjectsClientContract, SavedObjectsImportRetry } from '../types';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import {
   SavedObjectsImportFailure,
   SavedObjectsImportHook,
   SavedObjectsImportResponse,
-  SavedObjectsImportRetry,
   SavedObjectsImportSuccess,
 } from './types';
+import {
+  collectSavedObjects,
+  createObjectsFilter,
+  splitOverwrites,
+  regenerateIds,
+  validateReferences,
+  validateRetries,
+  createSavedObjects,
+  getImportIdMapForRetries,
+  checkConflicts,
+  executeImportHooks,
+} from './lib';
 
 /**
  * Options to control the "resolve import" operation.

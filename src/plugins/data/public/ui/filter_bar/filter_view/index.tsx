@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { EuiBadge, useInnerText } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
-import { isFilterPinned } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import { FilterLabel } from '..';
+import React, { FC } from 'react';
+import { Filter, isFilterPinned } from '@kbn/es-query';
+import { FilterLabel } from '../';
 import type { FilterLabelStatus } from '../filter_item';
 
 interface Props {

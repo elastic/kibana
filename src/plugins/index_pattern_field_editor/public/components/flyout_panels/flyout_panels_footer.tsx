@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiFlyoutFooterProps } from '@elastic/eui';
-import { EuiFlyoutFooter } from '@elastic/eui';
 import React, { useEffect } from 'react';
+import { EuiFlyoutFooter, EuiFlyoutFooterProps } from '@elastic/eui';
+
 import { useFlyoutPanelContext } from './flyout_panel';
 
 export const PanelFooter: React.FC<

@@ -4,28 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { Ast } from '@kbn/interpreter/common';
-import type { PaletteOutput } from '../../../../../../src/plugins/charts/common/palette';
-import type { Datatable } from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
-import type { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public/types';
-import { layerTypes } from '../../../common/constants';
-import type { LayerType } from '../../../common/types';
-import type { DragDropIdentifier } from '../../drag_drop/providers/types';
-import type { LensDispatch } from '../../state_management';
-import { selectSuggestion, switchVisualization } from '../../state_management';
-import type { DatasourceStates, VisualizationState } from '../../state_management/types';
-import type {
+
+import { Ast } from '@kbn/interpreter/common';
+import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { Datatable } from 'src/plugins/expressions';
+import { PaletteOutput } from 'src/plugins/charts/public';
+import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
+import {
+  Visualization,
   Datasource,
-  DatasourceMap,
-  DatasourcePublicAPI,
-  DatasourceSuggestion,
   TableChangeType,
   TableSuggestion,
-  Visualization,
+  DatasourceSuggestion,
+  DatasourcePublicAPI,
+  DatasourceMap,
   VisualizationMap,
 } from '../../types';
+import { DragDropIdentifier } from '../../drag_drop';
+import { LayerType, layerTypes } from '../../../common';
 import { getLayerType } from './config_panel/add_layer';
+import {
+  LensDispatch,
+  selectSuggestion,
+  switchVisualization,
+  DatasourceStates,
+  VisualizationState,
+} from '../../state_management';
 
 export interface Suggestion {
   visualizationId: string;

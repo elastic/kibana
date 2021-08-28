@@ -4,43 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useCallback, useState, useReducer, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
+  EuiTitle,
+  EuiFlyoutHeader,
+  EuiFlyout,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiIcon,
-  EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiFlyoutFooter,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlyoutBody,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
+import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
-import type { HttpSetup } from '../../../../../../../src/core/public/http/types';
-import type { ActionType } from '../../../../../actions/common/types';
-import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import type {
-  ActionConnector,
-  ActionTypeModel,
-  ConnectorAddFlyoutProps,
-  IErrorObject,
-  UserConfiguredActionConnector,
-} from '../../../types';
-import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
-import { createActionConnector } from '../../lib/action_connector_api/create';
-import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
-import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
 import { ActionTypeMenu } from './action_type_menu';
-import type { ConnectorReducer, InitialConnector } from './connector_reducer';
-import { createConnectorReducer } from './connector_reducer';
+import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
+import {
+  ActionType,
+  ActionConnector,
+  UserConfiguredActionConnector,
+  IErrorObject,
+  ConnectorAddFlyoutProps,
+  ActionTypeModel,
+} from '../../../types';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { createActionConnector } from '../../lib/action_connector_api';
+import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
+import { createConnectorReducer, InitialConnector, ConnectorReducer } from './connector_reducer';
+import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   onClose,

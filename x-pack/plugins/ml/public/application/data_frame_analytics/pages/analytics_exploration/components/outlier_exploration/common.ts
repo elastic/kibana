@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
-import type { DataGridItem } from '../../../../../components/data_grid/types';
+
+import { DataGridItem } from '../../../../../components/data_grid';
+
+import { DataFrameAnalyticsConfig } from '../../../../common';
 import { FEATURE_INFLUENCE, OUTLIER_SCORE } from '../../../../common/constants';
 
 export const getOutlierScoreFieldName = (jobConfig: DataFrameAnalyticsConfig) =>

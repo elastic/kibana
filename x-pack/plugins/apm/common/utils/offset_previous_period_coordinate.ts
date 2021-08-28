@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { Coordinate } from '../../typings/timeseries';
+import { Coordinate } from '../../typings/timeseries';
 
 export function offsetPreviousPeriodCoordinates({
   currentPeriodTimeseries,

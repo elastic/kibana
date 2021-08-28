@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, useContext, useState } from 'react';
+
+import React, { useState } from 'react';
+import { createContext, useContext } from 'react';
 
 interface ContextValues {
   prompt?: string;

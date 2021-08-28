@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { REMOVED_TYPES } from '../../migrations/core';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { REMOVED_TYPES } from '../../migrations/core/elastic_index';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [

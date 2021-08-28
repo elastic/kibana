@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useMemo, useState } from 'react';
-import type { GetLogEntryCategoriesSuccessResponsePayload } from '../../../../common/http_api/log_analysis/results/log_entry_categories';
-import type { GetLogEntryCategoryDatasetsSuccessResponsePayload } from '../../../../common/http_api/log_analysis/results/log_entry_category_datasets';
-import type { CategoriesSort } from '../../../../common/log_analysis/log_entry_categories_analysis';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { CanceledPromiseError, useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { callGetLogEntryCategoryDatasetsAPI } from './service_calls/get_log_entry_category_datasets';
+
+import {
+  GetLogEntryCategoriesSuccessResponsePayload,
+  GetLogEntryCategoryDatasetsSuccessResponsePayload,
+} from '../../../../common/http_api/log_analysis';
+import { CategoriesSort } from '../../../../common/log_analysis';
+import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetTopLogEntryCategoriesAPI } from './service_calls/get_top_log_entry_categories';
+import { callGetLogEntryCategoryDatasetsAPI } from './service_calls/get_log_entry_category_datasets';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 type TopLogEntryCategories = GetLogEntryCategoriesSuccessResponsePayload['data']['categories'];
 type LogEntryCategoryDatasets = GetLogEntryCategoryDatasetsSuccessResponsePayload['data']['datasets'];

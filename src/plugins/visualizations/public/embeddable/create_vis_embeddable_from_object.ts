@@ -5,30 +5,33 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPattern } from '../../../data/common/index_patterns/index_patterns/index_pattern';
-import { AttributeService } from '../../../embeddable/public/lib/attribute_service/attribute_service';
-import type { IContainer } from '../../../embeddable/public/lib/containers/i_container';
-import { ErrorEmbeddable } from '../../../embeddable/public/lib/embeddables/error_embeddable';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import type { SavedVisualizationsLoader } from '../saved_visualizations/saved_visualizations';
-import {
-  getCapabilities,
-  getHttp,
-  getSavedVisualizationsLoader,
-  getTimeFilter,
-  getUISettings,
-} from '../services';
-import { Vis } from '../vis';
-import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
+
+import { Vis } from '../types';
 import type {
-  VisualizeByReferenceInput,
-  VisualizeByValueInput,
   VisualizeInput,
+  VisualizeEmbeddable,
+  VisualizeByValueInput,
+  VisualizeByReferenceInput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
-import { VisualizeEmbeddable } from './visualize_embeddable';
+import {
+  IContainer,
+  ErrorEmbeddable,
+  AttributeService,
+} from '../../../../plugins/embeddable/public';
+import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
+import {
+  getSavedVisualizationsLoader,
+  getUISettings,
+  getHttp,
+  getTimeFilter,
+  getCapabilities,
+} from '../services';
+import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
+import { SavedVisualizationsLoader } from '../saved_visualizations';
+import { IndexPattern } from '../../../data/public';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
-import type { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,

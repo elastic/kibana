@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { State } from '../types';
-import { delayRetryState, resetRetryState } from './retry_state';
+
+import { resetRetryState, delayRetryState } from './retry_state';
+import { State } from '../types';
 
 const createState = (parts: Record<string, any>) => {
   return parts as State;

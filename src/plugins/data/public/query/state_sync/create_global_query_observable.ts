@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isFilterPinned } from '@kbn/es-query';
+
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { createStateContainer } from '../../../../kibana_utils/common/state_containers/create_state_container';
-import { compareFilters, COMPARE_ALL_OPTIONS } from '../../../common/es_query';
-import { FilterManager } from '../filter_manager/filter_manager';
-import type { QueryStringContract } from '../query_string/query_string_manager';
-import type { TimefilterSetup } from '../timefilter/timefilter_service';
-import type { QueryState, QueryStateChange } from './types';
+import { isFilterPinned } from '@kbn/es-query';
+import { TimefilterSetup } from '../timefilter';
+import { FilterManager } from '../filter_manager';
+import { QueryState, QueryStateChange } from './index';
+import { createStateContainer } from '../../../../kibana_utils/public';
+import { compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
+import { QueryStringContract } from '../query_string';
 
 export function createQueryStateObservable({
   timefilter: { timefilter },

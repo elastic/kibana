@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../..';
-import type { KibanaFeature } from '../../../../../features/common/kibana_feature';
+import type { KibanaFeature } from '../../../../../features/common';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
+import type { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model/put_payload';
+import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 
 const roleGrantsSubFeaturePrivileges = (
   features: KibanaFeature[],

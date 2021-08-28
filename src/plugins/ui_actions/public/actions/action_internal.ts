@@ -7,9 +7,10 @@
  */
 
 // @ts-ignore
-import { uiToReactComponent } from '../../../kibana_react/public/adapters/ui_to_react_component';
-import type { Presentable, PresentableGrouping } from '../util/presentable';
-import type { Action, ActionContext as Context, ActionDefinition } from './action';
+import React from 'react';
+import { Action, ActionContext as Context, ActionDefinition } from './action';
+import { Presentable, PresentableGrouping } from '../util/presentable';
+import { uiToReactComponent } from '../../../kibana_react/public';
 
 /**
  * @internal

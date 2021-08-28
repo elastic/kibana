@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { ExpressionType } from './expression_type';
+import { ExpressionValue } from './types';
 import { getType } from './get_type';
-import type { ExpressionValue } from './types';
 
 const identity = <T>(x: T) => x;
 

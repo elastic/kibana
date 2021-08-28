@@ -5,13 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ComponentType } from 'react';
-import { createElement as h } from 'react';
+
+import { ComponentType, createElement as h } from 'react';
 import { render as renderReact, unmountComponentAtNode } from 'react-dom';
-import type {
-  UiComponent,
-  UiComponentInstance,
-} from '../../../kibana_utils/common/ui/ui_component';
+import { UiComponent, UiComponentInstance } from '../../../kibana_utils/public';
 
 /**
  * Transform a React component into a `UiComponent`.

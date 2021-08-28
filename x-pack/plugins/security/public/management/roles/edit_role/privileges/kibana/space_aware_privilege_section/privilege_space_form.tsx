@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { ButtonColor } from '@elastic/eui';
 import {
   EuiButton,
@@ -28,13 +29,13 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { Space } from '../../../../../../../../../../src/plugins/spaces_oss/common/types';
-import type { Role } from '../../../../../../../common/model/role';
-import { copyRole } from '../../../../../../../common/model/role';
-import type { KibanaPrivileges } from '../../../../model/kibana_privileges';
+import type { Space } from '../../../../../../../../spaces/public';
+import type { Role } from '../../../../../../../common/model';
+import { copyRole } from '../../../../../../../common/model';
+import type { KibanaPrivileges } from '../../../../model';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import { FeatureTable } from '../feature_table/feature_table';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator/privilege_form_calculator';
+import { FeatureTable } from '../feature_table';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { SpaceSelector } from './space_selector';
 
 interface Props {

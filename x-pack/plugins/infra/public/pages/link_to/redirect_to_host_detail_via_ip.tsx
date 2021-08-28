@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
-import { Redirect } from 'react-router-dom';
-import { LoadingPage } from '../../components/loading_page';
-import { useSourceViaHttp } from '../../containers/metrics_source/use_source_via_http';
-import { Error } from '../error';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
-import { getFromFromLocation, getToFromLocation } from './query_params';
 import { useHostIpToName } from './use_host_ip_to_name';
+import { getFromFromLocation, getToFromLocation } from './query_params';
+import { LoadingPage } from '../../components/loading_page';
+import { Error } from '../error';
+import { useSourceViaHttp } from '../../containers/metrics_source/use_source_via_http';
 
 type RedirectToHostDetailType = RouteComponentProps<{
   hostIp: string;

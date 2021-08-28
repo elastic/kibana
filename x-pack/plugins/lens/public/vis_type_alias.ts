@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { VisTypeAlias } from '../../../../src/plugins/visualizations/public/vis_types/vis_type_alias_registry';
-import { getBasePath, getEditPath } from '../common/constants';
+import { VisTypeAlias } from 'src/plugins/visualizations/public';
+import { getBasePath, getEditPath } from '../common';
 
 export const getLensAliasConfig = (): VisTypeAlias => ({
   aliasPath: getBasePath(),

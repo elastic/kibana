@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButton,
   EuiErrorBoundary,
@@ -15,19 +16,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
-import { useTrackPageview } from '../../../../../observability/public/hooks/use_track_metric';
-import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { useLogSourceContext } from '../../../containers/logs/log_source/log_source';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useTrackPageview } from '../../../../../observability/public';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
-import { settingsTitle } from '../../../translations';
-import { Prompt } from '../../../utils/navigation_warning_prompt/prompt';
-import { LogsPageTemplate } from '../page_template';
+import { SourceLoadingPage } from '../../../components/source_loading_page';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { Prompt } from '../../../utils/navigation_warning_prompt';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { LogSourceConfigurationFormErrors } from './source_configuration_form_errors';
 import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
+import { LogsPageTemplate } from '../page_template';
+import { settingsTitle } from '../../../translations';
 
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;

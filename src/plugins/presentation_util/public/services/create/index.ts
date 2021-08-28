@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { PluginServiceRegistry } from './registry';
 
+export { PluginServiceRegistry } from './registry';
+export { PluginServiceProvider, PluginServiceProviders } from './provider';
 export {
+  PluginServiceFactory,
   KibanaPluginServiceFactory,
   KibanaPluginServiceParams,
-  PluginServiceFactory,
 } from './factory';
-export { PluginServiceProvider, PluginServiceProviders } from './provider';
-export { PluginServiceRegistry } from './registry';
 
 type ServiceHooks<Services> = { [K in keyof Services]: { useService: () => Services[K] } };
 

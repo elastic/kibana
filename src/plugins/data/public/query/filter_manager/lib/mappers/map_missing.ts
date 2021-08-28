@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Filter } from '@kbn/es-query';
-import { FILTERS, isMissingFilter } from '@kbn/es-query';
+
+import { Filter, isMissingFilter, FILTERS } from '@kbn/es-query';
 
 export const mapMissing = (filter: Filter) => {
   if (isMissingFilter(filter)) {

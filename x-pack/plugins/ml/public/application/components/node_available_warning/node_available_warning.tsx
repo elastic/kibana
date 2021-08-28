@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment, FC } from 'react';
+
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
-import { mlNodesAvailable, permissionToViewMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
+import { mlNodesAvailable, permissionToViewMlNodeCount } from '../../ml_nodes_check';
 import { getCloudDeploymentId, isCloud } from '../../services/ml_server_info';
 
 export const NodeAvailableWarning: FC = () => {

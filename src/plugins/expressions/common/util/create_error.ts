@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ExpressionValueError } from '../expression_types/specs/error';
+
+import { ExpressionValueError } from '../../common';
 
 export type SerializedError = {
   name: string;

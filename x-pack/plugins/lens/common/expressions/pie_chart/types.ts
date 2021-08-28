@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PaletteOutput } from '../../../../../../src/plugins/charts/common/palette';
-import type { LayerType, LensMultiTable } from '../../types';
+
+import type { PaletteOutput } from '../../../../../../src/plugins/charts/common';
+import type { LensMultiTable, LayerType } from '../../types';
 
 export interface SharedPieLayerState {
   groups: string[];

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AgentPolicy, FullAgentPolicy, NewAgentPolicy } from '../models/agent_policy';
+
+import type { AgentPolicy, NewAgentPolicy, FullAgentPolicy } from '../models';
 
 import type { ListWithKuery } from './common';
 

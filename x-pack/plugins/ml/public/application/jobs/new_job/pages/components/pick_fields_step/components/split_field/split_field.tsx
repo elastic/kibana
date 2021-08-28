@@ -4,19 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import type { Field } from '../../../../../../../../../common/types/fields';
-import {
-  filterCategoryFields,
-  newJobCapsService,
-} from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { MultiMetricJobCreator } from '../../../../../common/job_creator/multi_metric_job_creator';
-import { RareJobCreator } from '../../../../../common/job_creator/rare_job_creator';
-import { isMultiMetricJobCreator } from '../../../../../common/job_creator/type_guards';
+
+import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
+
+import { SplitFieldSelect } from '../split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { SplitFieldSelect } from '../split_field_select/split_field_select';
+import {
+  newJobCapsService,
+  filterCategoryFields,
+} from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
+import { Field } from '../../../../../../../../../common/types/fields';
+import {
+  MultiMetricJobCreator,
+  RareJobCreator,
+  isMultiMetricJobCreator,
+} from '../../../../../common/job_creator';
 
 export const SplitFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);

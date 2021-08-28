@@ -4,26 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  PluginConfigDescriptor,
-  PluginInitializerContext,
-} from '../../../../src/core/server/plugins/types';
-import { Plugin } from './plugin';
-import type { IEventLogConfig } from './types';
-import { ConfigSchema } from './types';
 
-export { ClusterClientAdapter } from './es/cluster_client_adapter';
-export { createReadySignal } from './lib/ready_signal';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { ConfigSchema, IEventLogConfig } from './types';
+import { Plugin } from './plugin';
+
 export {
-  IEvent,
-  IEventLogClient,
-  IEventLogClientService,
-  IEventLogger,
   IEventLogService,
+  IEventLogger,
+  IEventLogClientService,
+  IEvent,
   IValidatedEvent,
+  IEventLogClient,
   QueryEventsBySavedObjectResult,
   SAVED_OBJECT_REL_PRIMARY,
 } from './types';
+
+export { ClusterClientAdapter } from './es/cluster_client_adapter';
+
+export { createReadySignal } from './lib/ready_signal';
 
 export const config: PluginConfigDescriptor<IEventLogConfig> = {
   schema: ConfigSchema,

@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useMemo } from 'react';
-import { MetadataTable } from '..';
-import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { getSectionsWithRows } from '../helper';
 import { ERROR_METADATA_SECTIONS } from './sections';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import { getSectionsWithRows } from '../helper';
+import { MetadataTable } from '..';
 
 interface Props {
   error: APMError;

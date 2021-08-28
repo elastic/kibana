@@ -5,17 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
-import type { CoreSetup, CoreStart } from '../../../core/public/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
-import { toMountPoint } from '../../kibana_react/public/util/to_mount_point';
-import type { Adapters } from '../common/adapters/types';
-import type { InspectorOptions, InspectorSession } from './types';
-import { InspectorPanel } from './ui/inspector_panel';
-import { getRequestsViewDescription } from './views/requests';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { toMountPoint } from '../../kibana_react/public';
 import { InspectorViewRegistry } from './view_registry';
+import { InspectorOptions, InspectorSession } from './types';
+import { InspectorPanel } from './ui/inspector_panel';
+import { Adapters } from '../common';
+
+import { getRequestsViewDescription } from './views';
 
 export interface Setup {
   registerView: InspectorViewRegistry['register'];

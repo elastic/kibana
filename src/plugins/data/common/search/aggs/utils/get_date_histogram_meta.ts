@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DatatableColumn } from '../../../../../expressions/common/expression_types/specs/datatable';
-import type { TimeRange } from '../../../query/timefilter/types';
+
+import { DatatableColumn } from 'src/plugins/expressions/common';
+import { TimeRange } from '../../../types';
+import type { AggParamsDateHistogram } from '../buckets';
 import { BUCKET_TYPES } from '../buckets/bucket_agg_types';
-import type { AggParamsDateHistogram } from '../buckets/date_histogram';
 
 /**
  * Helper function returning the used interval, used time zone and applied time filters for data table column created by the date_histogramm agg type.

@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  AlertInstanceContext,
+
+import {
   AlertInstanceMeta,
   AlertInstanceState,
   RawAlertInstance,
-} from '../../common/alert_instance';
-import { rawAlertInstance } from '../../common/alert_instance';
-import type { DefaultActionGroupId } from '../../common/builtin_action_groups';
-import { parseDuration } from '../../common/parse_duration';
+  rawAlertInstance,
+  AlertInstanceContext,
+  DefaultActionGroupId,
+} from '../../common';
+
+import { parseDuration } from '../lib';
 
 interface ScheduledExecutionOptions<
   State extends AlertInstanceState,

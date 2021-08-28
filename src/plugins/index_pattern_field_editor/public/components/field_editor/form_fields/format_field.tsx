@@ -5,16 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React, { useState, useEffect, useRef } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useRef, useState } from 'react';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { UseField } from '../../../../../es_ui_shared/static/forms/hook_form_lib/components/use_field';
-import { useFormContext } from '../../../../../es_ui_shared/static/forms/hook_form_lib/form_context';
-import { useFormData } from '../../../../../es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
-import type { FieldFormatConfig } from '../../../types';
+
+import { UseField, useFormData, ES_FIELD_TYPES, useFormContext } from '../../../shared_imports';
 import { useFieldEditorContext } from '../../field_editor_context';
-import { FormatSelectEditor } from '../../field_format_editor/field_format_editor';
+import { FormatSelectEditor } from '../../field_format_editor';
 import type { FieldFormInternal } from '../field_editor';
+import type { FieldFormatConfig } from '../../../types';
 
 export const FormatField = () => {
   const { indexPattern, uiSettings, fieldFormats, fieldFormatEditors } = useFieldEditorContext();

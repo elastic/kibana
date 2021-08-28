@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGrid,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiButton } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { APMLink } from '../../../shared/Links/apm/APMLink';
 
 export function MLCallout({ onDismiss }: { onDismiss: () => void }) {

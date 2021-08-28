@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -23,8 +24,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { monaco } from '@kbn/monaco';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { CodeEditorField } from '../../../../../../../../../src/plugins/kibana_react/public/code_editor';
-import type { RoleIndexPrivilege } from '../../../../../../common/model/role';
+import { CodeEditorField } from '../../../../../../../../../src/plugins/kibana_react/public';
+import type { RoleIndexPrivilege } from '../../../../../../common/model';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import type { RoleValidator } from '../../validate_role';
 

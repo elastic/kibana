@@ -4,22 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import { Map as MbMap, MapMouseEvent, Point as MbPoint } from '@kbn/mapbox-gl';
+
+import React, { Component } from 'react';
+import { Map as MbMap, Point as MbPoint } from '@kbn/mapbox-gl';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import type { Feature, Geometry, Position } from 'geojson';
+import { Feature, Geometry, Position } from 'geojson';
+import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import * as jsts from 'jsts';
-import React, { Component } from 'react';
-import { DrawControl } from '..';
-import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common/constants';
-import type { ILayer } from '../../../../classes/layers/layer';
+import { MapMouseEvent } from '@kbn/mapbox-gl';
+import { getToasts } from '../../../../kibana_services';
+import { DrawControl } from '../';
+import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common';
+import { ILayer } from '../../../../classes/layers/layer';
 import {
   EXCLUDE_CENTROID_FEATURES,
   EXCLUDE_TOO_MANY_FEATURES_BOX,
 } from '../../../../classes/util/mb_filter_expressions';
-import { getToasts } from '../../../../kibana_services';
 
 const geoJSONReader = new jsts.io.GeoJSONReader();
 

@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IFieldSubType, IndexPatternBase } from '@kbn/es-query';
-import type {
-  IEsSearchRequest,
-  IEsSearchResponse,
-} from '../../../../../../src/plugins/data/common/search/strategies/es_search/types';
-import type { DocValueFields, Maybe } from '../common';
+
+import { IFieldSubType, IndexPatternBase } from '@kbn/es-query';
+import { IEsSearchRequest, IEsSearchResponse } from '../../../../../../src/plugins/data/common';
+import { DocValueFields, Maybe } from '../common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
 

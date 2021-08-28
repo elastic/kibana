@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React, { Fragment, useContext, useEffect } from 'react';
-import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
-import { ml } from '../../../../../services/ml_api_service';
+
+import React, { Fragment, FC, useContext, useEffect } from 'react';
+import { WizardNav } from '../wizard_nav';
+import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import type { StepProps } from '../step_types';
-import { WIZARD_STEPS } from '../step_types';
-import { WizardNav } from '../wizard_nav/wizard_nav';
-import { ValidateJob } from '../../../../../components/validate_job/validate_job_view';
+import { ml } from '../../../../../services/ml_api_service';
+import { ValidateJob } from '../../../../../components/validate_job';
+import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const idFilterList = [
   'job_id_valid',

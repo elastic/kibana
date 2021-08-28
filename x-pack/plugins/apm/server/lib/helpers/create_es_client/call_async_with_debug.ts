@@ -6,9 +6,10 @@
  */
 
 /* eslint-disable no-console */
-import chalk from 'chalk';
+
 import { omit } from 'lodash';
-import { KibanaRequest } from '../../../../../../../src/core/server/http/router/request';
+import chalk from 'chalk';
+import { KibanaRequest } from '../../../../../../../src/core/server';
 import { inspectableEsQueriesMap } from '../../../routes/register_routes';
 
 function formatObj(obj: Record<string, any>) {

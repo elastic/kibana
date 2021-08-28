@@ -5,22 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectEmbeddableInput } from '../../embeddable/common/lib/saved_object_embeddable';
-import type {
+
+import {
   EmbeddableInput,
   EmbeddableStateWithType,
   PanelState,
-} from '../../embeddable/common/types';
-import type {
+} from '../../../../src/plugins/embeddable/common/types';
+import { SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/common/lib/saved_object_embeddable';
+import {
+  RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,
   RawSavedDashboardPanel620,
   RawSavedDashboardPanel630,
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
-  RawSavedDashboardPanelTo60,
 } from './bwc/types';
-import type { GridData } from './embeddable/types';
 
+import { GridData } from './embeddable/types';
 export type PanelId = string;
 export type SavedObjectId = string;
 

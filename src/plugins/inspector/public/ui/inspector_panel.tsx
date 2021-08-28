@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import './inspector_panel.scss';
+import { i18n } from '@kbn/i18n';
+import React, { Component, Suspense } from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiLoadingSpinner,
   EuiTitle,
+  EuiFlyoutBody,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
-import React, { Component, Suspense } from 'react';
-import type { IUiSettingsClient } from '../../../../core/public/ui_settings/types';
-import { KibanaContextProvider } from '../../../kibana_react/public/context/context';
-import type { Adapters } from '../../common/adapters/types';
-import type { InspectorViewDescription } from '../types';
-import './inspector_panel.scss';
+import { IUiSettingsClient } from 'kibana/public';
+import { InspectorViewDescription } from '../types';
+import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
+import { KibanaContextProvider } from '../../../kibana_react/public';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
   return (

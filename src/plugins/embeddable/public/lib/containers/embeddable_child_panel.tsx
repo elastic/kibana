@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
+
+import { EuiLoadingChart } from '@elastic/eui';
 import { Subscription } from 'rxjs';
-import type { EmbeddableStart } from '../../plugin';
-import { ErrorEmbeddable } from '../embeddables/error_embeddable';
-import type { IEmbeddable } from '../embeddables/i_embeddable';
-import type { IContainer } from './i_container';
+import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
+import { IContainer } from './i_container';
+import { EmbeddableStart } from '../../plugin';
 
 export interface EmbeddableChildPanelProps {
   embeddableId: string;

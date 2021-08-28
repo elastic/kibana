@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
-import { setWriteBlock } from './set_write_block';
-import { updateAliases } from './update_aliases';
 
+import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 jest.mock('./catch_retryable_es_client_errors');
+import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { updateAliases } from './update_aliases';
+import { setWriteBlock } from './set_write_block';
+
 describe('updateAliases', () => {
   beforeEach(() => {
     jest.clearAllMocks();

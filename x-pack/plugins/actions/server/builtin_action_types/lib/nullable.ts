@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema, Type } from '@kbn/config-schema';
 
 // TODO: remove once this is merged:  https://github.com/elastic/kibana/pull/41728

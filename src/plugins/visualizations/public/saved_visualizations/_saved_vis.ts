@@ -5,20 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsClientContract } from '../../../../core/public/saved_objects/saved_objects_client';
-import type { IndexPatternsContract } from '../../../data/common/index_patterns/index_patterns/index_patterns';
-import { createSavedSearchesLoader } from '../../../discover/public/saved_searches/saved_searches';
-import type { SavedObjectsStart } from '../../../saved_objects/public/plugin';
-import type { SavedObject } from '../../../saved_objects/public/types';
-import { updateOldState } from '../legacy/vis_update_state';
-import type { ISavedVis } from '../types';
-import type { SerializedVis } from '../vis';
-import {
-  extractReferences,
-  injectReferences,
-} from './saved_visualization_references/saved_visualization_references';
 
+/**
+ * @name SavedVis
+ *
+ * @extends SavedObject.
+ *
+ * NOTE: It's a type of SavedObject, but specific to visualizations.
+ */
+import type { SavedObjectsStart, SavedObject } from '../../../../plugins/saved_objects/public';
 // @ts-ignore
+import { updateOldState } from '../legacy/vis_update_state';
+import { extractReferences, injectReferences } from './saved_visualization_references';
+import { createSavedSearchesLoader } from '../../../discover/public';
+import type { SavedObjectsClientContract } from '../../../../core/public';
+import type { IndexPatternsContract } from '../../../../plugins/data/public';
+import type { ISavedVis, SerializedVis } from '../types';
 
 export interface SavedVisServices {
   savedObjectsClient: SavedObjectsClientContract;

@@ -5,23 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HotObservable } from 'rxjs/internal/testing/HotObservable';
 import { TestScheduler } from 'rxjs/testing';
+
 import { configServiceMock } from '../config/mocks';
+
 import { mockCoreContext } from '../core_context.mock';
 import { config as RawElasticsearchConfig } from '../elasticsearch/elasticsearch_config';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { config as RawHttpConfig } from '../http/http_config';
-import { httpServiceMock } from '../http/http_service.mock';
-import { config as RawKibanaConfig } from '../kibana_config';
 import { config as RawLoggingConfig } from '../logging/logging_config';
-import { metricsServiceMock } from '../metrics/metrics_service.mock';
+import { config as RawKibanaConfig } from '../kibana_config';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '../saved_objects/saved_objects_config';
+import { httpServiceMock } from '../http/http_service.mock';
+import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
+
+import { CoreUsageDataService } from './core_usage_data_service';
+import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { typeRegistryMock } from '../saved_objects/saved_objects_type_registry.mock';
 import { CORE_USAGE_STATS_TYPE } from './constants';
-import { CoreUsageDataService } from './core_usage_data_service';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 
 describe('CoreUsageDataService', () => {

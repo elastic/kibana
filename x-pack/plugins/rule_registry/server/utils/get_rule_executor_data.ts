@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AlertExecutorOptions } from '../../../alerting/server/types';
+
+import { AlertExecutorOptions } from '../../../alerting/server';
 import {
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_NAME,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
+  ALERT_RULE_NAME,
   ALERT_RULE_UUID,
   TAGS,
 } from '../../common/technical_rule_data_field_names';

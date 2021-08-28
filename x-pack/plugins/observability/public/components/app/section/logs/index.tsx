@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiSpacer, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -12,13 +13,13 @@ import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
-import { SectionContainer } from '..';
+import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import type { LogsFetchDataResponse } from '../../../../typings/fetch_overview_data';
+import { LogsFetchDataResponse } from '../../../../typings';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';

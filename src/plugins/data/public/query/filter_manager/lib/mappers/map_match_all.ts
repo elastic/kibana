@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Filter } from '@kbn/es-query';
-import { FILTERS, isMatchAllFilter } from '@kbn/es-query';
+
+import { Filter, isMatchAllFilter, FILTERS } from '@kbn/es-query';
 
 export const mapMatchAll = (filter: Filter) => {
   if (isMatchAllFilter(filter)) {

@@ -5,12 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { createStateContainer } from '../../../kibana_utils/common/state_containers/create_state_container';
-import type { StateContainer } from '../../../kibana_utils/common/state_containers/types';
-import type { ExpressionAstExpression } from '../ast/types';
-import type { ExecutorState } from '../executor/container';
-import { defaultState as executorDefaultState } from '../executor/container';
-import type { ExpressionValue } from '../expression_types/types';
+
+import {
+  StateContainer,
+  createStateContainer,
+} from '../../../kibana_utils/common/state_containers';
+import { ExecutorState, defaultState as executorDefaultState } from '../executor';
+import { ExpressionAstExpression } from '../ast';
+import { ExpressionValue } from '../expression_types';
 
 export interface ExecutionState<Output = ExpressionValue> extends ExecutorState {
   ast: ExpressionAstExpression;

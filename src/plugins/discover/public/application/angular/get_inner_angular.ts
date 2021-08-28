@@ -9,29 +9,28 @@
 // inner angular imports
 // these are necessary to bootstrap the local angular.
 // They can stay even after NP cutover
-import { EuiIcon } from '@elastic/eui';
-import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
+import '../index.scss';
 import angular from 'angular';
 // required for `ngSanitize` angular module
 import 'angular-sanitize';
-import type { CoreStart } from '../../../../../core/public/types';
-import type { PluginInitializerContext } from '../../../../../core/public/plugins/plugin_context';
-import type { DataPublicPluginStart } from '../../../../data/public/types';
+import { EuiIcon } from '@elastic/eui';
+import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
+import { CoreStart, PluginInitializerContext } from 'kibana/public';
+import { DataPublicPluginStart } from '../../../../data/public';
+import { Storage } from '../../../../kibana_utils/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../navigation/public';
+import { createContextAppLegacy } from '../components/context_app/context_app_legacy_directive';
+import { createDiscoverGridDirective } from './create_discover_grid_directive';
 import {
+  configureAppAngularModule,
   PrivateProvider,
   registerListenEventListener,
   watchMultiDecorator,
 } from '../../../../kibana_legacy/public';
-import { configureAppAngularModule } from '../../../../kibana_legacy/public/angular/angular_config';
-import { Storage } from '../../../../kibana_utils/public/storage/storage';
-import type { NavigationPublicPluginStart as NavigationStart } from '../../../../navigation/public/types';
+import { PromiseServiceCreator } from './helpers';
+import { DiscoverStartPlugins } from '../../plugin';
 import { getScopedHistory } from '../../kibana_services';
-import type { DiscoverStartPlugins } from '../../plugin';
-import { createContextAppLegacy } from '../components/context_app/context_app_legacy_directive';
-import '../index.scss';
 import { createDiscoverDirective } from './create_discover_directive';
-import { createDiscoverGridDirective } from './create_discover_grid_directive';
-import { PromiseServiceCreator } from './helpers/promises';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover

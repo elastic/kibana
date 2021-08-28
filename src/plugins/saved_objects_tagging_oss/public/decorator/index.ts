@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectDecoratorConfig } from '../../../saved_objects/public/saved_object/decorators/registry';
-import { decoratorId, tagDecoratorFactory } from './factory';
-import type { InternalTagDecoratedSavedObject } from './types';
+
+import { SavedObjectDecoratorConfig } from '../../../saved_objects/public';
+import { tagDecoratorFactory, decoratorId } from './factory';
+import { InternalTagDecoratedSavedObject } from './types';
 
 export { TagDecoratedSavedObject } from './types';
 

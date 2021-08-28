@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as XJson from '../../../src/plugins/es_ui_shared/public/xjson';
 
+import { XJson } from '../../../src/plugins/es_ui_shared/public';
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
 export { XJsonMode } from '@kbn/ace';

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
-import { agentPolicyStatuses } from '../../../common/constants/agent_policy';
-import { dataTypes } from '../../../common/constants/epm';
+import { agentPolicyStatuses, dataTypes } from '../../../common';
 
-import { NamespaceSchema, PackagePolicySchema } from './package_policy';
+import { PackagePolicySchema, NamespaceSchema } from './package_policy';
 
 export const AgentPolicyBaseSchema = {
   name: schema.string({ minLength: 1 }),

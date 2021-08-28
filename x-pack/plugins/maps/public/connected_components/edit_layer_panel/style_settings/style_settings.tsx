@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { Fragment } from 'react';
-import type { StyleDescriptor } from '../../../../common/descriptor_types/style_property_descriptor_types';
-import type { ILayer } from '../../../classes/layers/layer';
+
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+import { StyleDescriptor } from '../../../../common/descriptor_types';
+import { ILayer } from '../../../classes/layers/layer';
 
 export interface Props {
   layer: ILayer;

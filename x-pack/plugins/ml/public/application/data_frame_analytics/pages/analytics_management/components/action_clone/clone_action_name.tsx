@@ -4,26 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { FC } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
-import type { FC } from 'react';
-import React from 'react';
-import type { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns/types';
+import { i18n } from '@kbn/i18n';
+import { IIndexPattern } from 'src/plugins/data/common';
+import { DeepReadonly } from '../../../../../../../common/types/common';
+import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
+import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
 import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
-import type { DeepReadonly } from '../../../../../../../common/types/common';
-import type { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
-import {
-  isClassificationAnalysis,
-  isOutlierAnalysis,
-  isRegressionAnalysis,
-} from '../../../../../../../common/util/analytics_utils';
-import { extractErrorMessage } from '../../../../../../../common/util/errors/process_errors';
-import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
-import { useNavigateToPath } from '../../../../../contexts/kibana/use_navigate_to_path';
-import type { State } from '../../hooks/use_create_analytics_form/state';
-import { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from '../../hooks/use_create_analytics_form/state';
-import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
+import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
+import { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from '../../hooks/use_create_analytics_form';
+import { State } from '../../hooks/use_create_analytics_form/state';
+import { DataFrameAnalyticsListRow } from '../analytics_list/common';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 interface PropDefinition {
   /**

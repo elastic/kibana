@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { Observable } from 'rxjs';
-import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server/plugin';
-import type { MonitoredHealth } from '../routes/health';
-import type { TaskManagerUsage } from './types';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { MonitoredHealth } from '../routes/health';
+import { TaskManagerUsage } from './types';
 
 export function createTaskManagerUsageCollector(
   usageCollection: UsageCollectionSetup,

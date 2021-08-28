@@ -4,32 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiHealth, EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiHealth, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
+import React, { useEffect } from 'react';
+/**
+ * We need to produce types and code transpilation at different folders during the build of the package.
+ * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
+ * This way plugins can do targeted imports to reduce the final code bundle
+ */
+import type {
   ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_REASON as ALERT_REASON_TYPED,
   ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
+  ALERT_REASON as ALERT_REASON_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_REASON as ALERT_REASON_NON_TYPED,
   ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
+  ALERT_REASON as ALERT_REASON_NON_TYPED,
   TIMESTAMP,
-  //@ts-expect-error
+  // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
-import React, { useEffect } from 'react';
-import type { TopAlert } from '.';
-import type { TimelineNonEcsData } from '../../../../timelines/common/search_strategy/timeline/events/all';
-import type { CellValueElementProps } from '../../../../timelines/common/types/timeline/cells';
-import { asDuration } from '../../../common/utils/formatters/duration';
+
+import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
+import { asDuration } from '../../../common/utils/formatters';
+import { SeverityBadge } from './severity_badge';
+import { TopAlert } from '.';
+import { parseAlert } from './parse_alert';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTheme } from '../../hooks/use_theme';
-import { parseAlert } from './parse_alert';
-import { SeverityBadge } from './severity_badge';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;

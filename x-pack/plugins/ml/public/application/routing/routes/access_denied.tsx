@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import { Page } from '../../access_denied/page';
-import type { MlRoute, PageProps } from '../router';
-import { PageLoader } from '../router';
+import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
+import { Page } from '../../access_denied';
 
 const breadcrumbs = [
   {

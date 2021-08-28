@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SubFeaturePrivilegeGroupConfig } from '../../../../../features/common/sub_feature';
+
+import type { SubFeaturePrivilegeGroupConfig } from '../../../../../features/common';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
 
 export class SubFeaturePrivilegeGroup {

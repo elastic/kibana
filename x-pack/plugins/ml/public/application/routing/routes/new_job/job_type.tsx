@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
+import React, { FC } from 'react';
 import { parse } from 'query-string';
-import type { FC } from 'react';
-import React from 'react';
-import type { NavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
-import { Page } from '../../../jobs/new_job/pages/job_type/page';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { basicResolvers } from '../../resolvers';
-import type { MlRoute, PageProps } from '../../router';
-import { PageLoader } from '../../router';
+
+import { i18n } from '@kbn/i18n';
+
+import { NavigateToPath } from '../../../contexts/kibana';
+
+import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
+import { basicResolvers } from '../../resolvers';
+import { Page } from '../../../jobs/new_job/pages/job_type';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 export const jobTypeRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   path: '/jobs/new_job/step/job_type',

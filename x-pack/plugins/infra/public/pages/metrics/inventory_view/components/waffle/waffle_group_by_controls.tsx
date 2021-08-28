@@ -4,21 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+
+import {
+  EuiBadge,
+  EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  EuiPopover,
 } from '@elastic/eui';
-import { EuiBadge, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import type { IFieldType } from '../../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
-import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import type { InfraGroupByOptions } from '../../../../../lib/lib';
-import { DropdownButton } from '../dropdown_button';
+import { IFieldType } from 'src/plugins/data/public';
+import { InfraGroupByOptions } from '../../../../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
+import { DropdownButton } from '../dropdown_button';
 
 interface Props {
   options: Array<{ text: string; field: string; toolTipContent?: string }>;

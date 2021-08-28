@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
-import { resultsServiceProvider } from '../../models/results_service/results_service';
-import type { GetGuards } from '../shared_services';
+
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { resultsServiceProvider } from '../../models/results_service';
+import { GetGuards } from '../shared_services';
 
 type OrigResultsServiceProvider = ReturnType<typeof resultsServiceProvider>;
 

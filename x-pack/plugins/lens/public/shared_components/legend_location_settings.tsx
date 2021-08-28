@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
-import { EuiButtonGroup, EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiButtonGroup, EuiFieldNumber } from '@elastic/eui';
+import { VerticalAlignment, HorizontalAlignment, Position } from '@elastic/charts';
 import { useDebouncedValue } from './debounced_value';
 import { TooltipWrapper } from './tooltip_wrapper';
 

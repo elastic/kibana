@@ -5,20 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { coreAppMock } from './core_app/core_app.mock';
-import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
-import { integrationsServiceMock } from './integrations/integrations_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
-import { renderingServiceMock } from './rendering/rendering_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
+import { renderingServiceMock } from './rendering/rendering_service.mock';
+import { integrationsServiceMock } from './integrations/integrations_service.mock';
+import { coreAppMock } from './core_app/core_app.mock';
 
 export const MockInjectedMetadataService = injectedMetadataServiceMock.create();
 export const InjectedMetadataServiceConstructor = jest

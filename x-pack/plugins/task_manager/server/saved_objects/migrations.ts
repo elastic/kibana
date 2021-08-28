@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectMigrationMap } from '../../../../../src/core/server/saved_objects/migrations/types';
-import type { SavedObjectUnsanitizedDoc } from '../../../../../src/core/server/saved_objects/serialization/types';
-import type { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
+
+import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '../../../../../src/core/server';
+import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
 
 export const migrations: SavedObjectMigrationMap = {
   '7.4.0': (doc) => ({

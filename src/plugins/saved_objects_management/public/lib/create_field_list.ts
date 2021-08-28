@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { forOwn, isBoolean, isNumber, isPlainObject, isString, keyBy } from 'lodash';
-import { SimpleSavedObject } from '../../../../core/public/saved_objects/simple_saved_object';
-import { castEsToKbnFieldTypeName } from '../../../data/common/kbn_field_types';
-import { SavedObjectLoader } from '../../../saved_objects/public/saved_object/saved_object_loader';
-import type { SavedObjectWithMetadata } from '../../common/types';
-import type { ObjectField } from '../management_section/types';
+
+import { forOwn, keyBy, isNumber, isBoolean, isPlainObject, isString } from 'lodash';
+import { SimpleSavedObject } from '../../../../core/public';
+import { castEsToKbnFieldTypeName } from '../../../data/public';
+import { ObjectField } from '../management_section/types';
+import { SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObjectWithMetadata } from '../types';
 
 const maxRecursiveIterations = 20;
 

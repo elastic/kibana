@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import './datapanel.scss';
+import React, { memo, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiAccordion,
-  EuiIconTip,
-  EuiLoadingSpinner,
+  EuiText,
   EuiNotificationBadge,
   EuiSpacer,
-  EuiText,
+  EuiAccordion,
+  EuiLoadingSpinner,
+  EuiIconTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import React, { memo, useCallback, useMemo } from 'react';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public/types';
-import type { Filter } from '../../../../../src/plugins/data/common/es_query';
-import type { Query } from '../../../../../src/plugins/data/public';
-import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public/plugin';
-import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public/plugin';
-import type { DatasourceDataPanelProps } from '../types';
-import './datapanel.scss';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
-import type { IndexPattern, IndexPatternField } from './types';
+import { Query, Filter } from '../../../../../src/plugins/data/public';
+import { DatasourceDataPanelProps } from '../types';
+import { IndexPattern } from './types';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface FieldItemSharedProps {
   core: DatasourceDataPanelProps['core'];

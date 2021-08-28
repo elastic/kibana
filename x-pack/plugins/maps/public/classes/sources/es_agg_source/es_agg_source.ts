@@ -4,22 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { GeoJsonProperties } from 'geojson';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters/types';
+import { Adapters } from 'src/plugins/inspector/public';
+import { GeoJsonProperties } from 'geojson';
+import { IESSource } from '../es_source';
+import { AbstractESSource } from '../es_source';
+import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
-import type {
-  AbstractESAggSourceDescriptor,
-  AggDescriptor,
-} from '../../../../common/descriptor_types/source_descriptor_types';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
-import type { IESAggField } from '../../fields/agg/agg_field_types';
-import { esAggFieldsFactory } from '../../fields/agg/es_agg_factory';
-import type { IField } from '../../fields/field';
-import type { ITooltipProperty } from '../../tooltips/tooltip_property';
-import type { IESSource } from '../es_source/es_source';
-import { AbstractESSource } from '../es_source/es_source';
+import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { IField } from '../../fields/field';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 

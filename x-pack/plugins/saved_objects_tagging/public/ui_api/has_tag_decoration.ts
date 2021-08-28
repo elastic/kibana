@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public/api';
-import type { TagDecoratedSavedObject } from '../../../../../src/plugins/saved_objects_tagging_oss/public/decorator/types';
+
+import {
+  SavedObjectsTaggingApiUi,
+  TagDecoratedSavedObject,
+} from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 
 export const hasTagDecoration: SavedObjectsTaggingApiUi['hasTagDecoration'] = (
   object

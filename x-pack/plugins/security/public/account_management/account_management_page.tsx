@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { CoreStart, NotificationsStart } from 'src/core/public';
 
-import type { CoreStart } from '../../../../../src/core/public/types';
-import type { NotificationsStart } from '../../../../../src/core/public/notifications/notifications_service';
-import type { AuthenticatedUser } from '../../common/model/authenticated_user';
-import { getUserDisplayName } from '../../common/model/user';
-import type { AuthenticationServiceSetup } from '../authentication/authentication_service';
-import type { UserAPIClient } from '../management/users/user_api_client';
-import { ChangePassword } from './change_password/change_password';
-import { PersonalInfo } from './personal_info/personal_info';
+import type { AuthenticatedUser } from '../../common/model';
+import { getUserDisplayName } from '../../common/model';
+import type { AuthenticationServiceSetup } from '../authentication';
+import type { UserAPIClient } from '../management';
+import { ChangePassword } from './change_password';
+import { PersonalInfo } from './personal_info';
 
 interface Props {
   authc: AuthenticationServiceSetup;

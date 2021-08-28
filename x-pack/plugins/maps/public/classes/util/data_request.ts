@@ -6,10 +6,8 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import type {
-  DataMeta,
-  DataRequestDescriptor,
-} from '../../../common/descriptor_types/data_request_descriptor_types';
+
+import { DataRequestDescriptor, DataMeta } from '../../../common/descriptor_types';
 
 export class DataRequest {
   private readonly _descriptor: DataRequestDescriptor;

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCallOut } from '@elastic/eui';
+
 import React, { useMemo } from 'react';
-import { ConnectorTypes } from '../../../../common/api/connectors';
-import type { SwimlaneFieldsType } from '../../../../common/api/connectors/swimlane';
-import { ConnectorCard } from '../card';
-import type { ConnectorFieldsProps } from '../types';
+import { EuiCallOut } from '@elastic/eui';
 import * as i18n from './translations';
+
+import { ConnectorTypes, SwimlaneFieldsType } from '../../../../common';
+import { ConnectorFieldsProps } from '../types';
+import { ConnectorCard } from '../card';
 import { connectorValidator } from './validator';
 
 const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFieldsType>> = ({

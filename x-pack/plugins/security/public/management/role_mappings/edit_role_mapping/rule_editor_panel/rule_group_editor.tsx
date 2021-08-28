@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import './rule_group_editor.scss';
+
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,13 +18,10 @@ import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { FieldRule } from '../../model/field_rule';
-import type { Rule } from '../../model/rule';
-import type { RuleGroup } from '../../model/rule_group';
+import type { FieldRule, Rule, RuleGroup } from '../../model';
 import { isRuleGroup } from '../services/is_rule_group';
 import { AddRuleButton } from './add_rule_button';
 import { FieldRuleEditor } from './field_rule_editor';
-import './rule_group_editor.scss';
 import { RuleGroupTitle } from './rule_group_title';
 
 interface Props {

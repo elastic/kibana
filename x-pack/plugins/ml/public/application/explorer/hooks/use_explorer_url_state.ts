@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ML_PAGES } from '../../../../common/constants/locator';
-import type { ExplorerAppState } from '../../../../common/types/locator';
+
 import { usePageUrlState } from '../../util/url_state';
+import { ExplorerAppState } from '../../../../common/types/locator';
+import { ML_PAGES } from '../../../../common/constants/locator';
 
 export function useExplorerUrlState() {
   /**

@@ -4,76 +4,75 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { AppMountParameters } from '../../../../src/core/public/application/types';
-import { AppNavLinkStatus } from '../../../../src/core/public/application/types';
-import type {
-  ChartsPluginSetup,
-  ChartsPluginStart,
-} from '../../../../src/plugins/charts/public/types';
-import type { DashboardStart } from '../../../../src/plugins/dashboard/public/plugin_contract';
-import type {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../src/plugins/data/public/types';
-import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer';
-import type {
-  EmbeddableSetup,
-  EmbeddableStart,
-} from '../../../../src/plugins/embeddable/public/plugin';
-import type { ExpressionsServiceSetup } from '../../../../src/plugins/expressions/common/service/expressions_services';
-import type {
+
+import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
+import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { UsageCollectionSetup, UsageCollectionStart } from 'src/plugins/usage_collection/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import {
+  ExpressionsServiceSetup,
   ExpressionsSetup,
   ExpressionsStart,
-} from '../../../../src/plugins/expressions/public/plugin';
-import type {
-  FieldFormatsSetup,
-  FieldFormatsStart,
-} from '../../../../src/plugins/field_formats/public/plugin';
-import type { PluginStart as IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public/types';
-import type { Start as InspectorStartContract } from '../../../../src/plugins/inspector/public/plugin';
-import type { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public/types';
-import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public/types';
-import type { UiActionsStart } from '../../../../src/plugins/ui_actions/public/plugin';
-import { VISUALIZE_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public/triggers/visualize_field_trigger';
-import { ACTION_VISUALIZE_FIELD } from '../../../../src/plugins/ui_actions/public/types';
-import type { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public/plugin';
-import type {
-  UsageCollectionSetup,
-  UsageCollectionStart,
-} from '../../../../src/plugins/usage_collection/public/plugin';
-import type {
+} from '../../../../src/plugins/expressions/public';
+import {
   VisualizationsSetup,
   VisualizationsStart,
-} from '../../../../src/plugins/visualizations/public/plugin';
-import type { GlobalSearchPluginSetup } from '../../global_search/public/types';
-import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public/types';
-import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
-import type { FormatFactory } from '../common/types';
-import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
-import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
-import type { DatatableVisualizationPluginSetupPlugins } from './datatable_visualization';
-import { DatatableVisualization as DatatableVisualizationType } from './datatable_visualization';
-import { EditorFrameService as EditorFrameServiceType } from './editor_frame_service/service';
-import type { LensEmbeddableInput } from './embeddable/embeddable';
-import type { EmbeddableComponentProps } from './embeddable/embeddable_component';
-import { getEmbeddableComponent } from './embeddable/embeddable_component';
-import type { LensEmbeddableStartServices } from './embeddable/embeddable_factory';
-import { EmbeddableFactory } from './embeddable/embeddable_factory';
-import { HeatmapVisualization as HeatmapVisualizationType } from './heatmap_visualization';
-import type { IndexPatternDatasourceSetupPlugins } from './indexpattern_datasource';
-import { IndexPatternDatasource as IndexPatternDatasourceType } from './indexpattern_datasource';
-import type { LensAttributeService } from './lens_attribute_service';
-import type { MetricVisualizationPluginSetupPlugins } from './metric_visualization';
-import { MetricVisualization as MetricVisualizationType } from './metric_visualization';
-import type { PieVisualizationPluginSetupPlugins } from './pie_visualization';
-import { PieVisualization as PieVisualizationType } from './pie_visualization';
-import { getSearchProvider } from './search_provider';
-import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
+} from '../../../../src/plugins/visualizations/public';
+import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
+import { GlobalSearchPluginSetup } from '../../global_search/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
+import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
+import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
+import { IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public';
+import type {
+  IndexPatternDatasource as IndexPatternDatasourceType,
+  IndexPatternDatasourceSetupPlugins,
+} from './indexpattern_datasource';
+import type {
+  XyVisualization as XyVisualizationType,
+  XyVisualizationPluginSetupPlugins,
+} from './xy_visualization';
+import type {
+  MetricVisualization as MetricVisualizationType,
+  MetricVisualizationPluginSetupPlugins,
+} from './metric_visualization';
+import type {
+  DatatableVisualization as DatatableVisualizationType,
+  DatatableVisualizationPluginSetupPlugins,
+} from './datatable_visualization';
+import type {
+  PieVisualization as PieVisualizationType,
+  PieVisualizationPluginSetupPlugins,
+} from './pie_visualization';
+import type { HeatmapVisualization as HeatmapVisualizationType } from './heatmap_visualization';
+import { AppNavLinkStatus } from '../../../../src/core/public';
+import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+
+import {
+  UiActionsStart,
+  ACTION_VISUALIZE_FIELD,
+  VISUALIZE_FIELD_TRIGGER,
+} from '../../../../src/plugins/ui_actions/public';
+import { APP_ID, FormatFactory, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import type { EditorFrameStart, VisualizationType } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
-import type { XyVisualizationPluginSetupPlugins } from './xy_visualization';
-import { XyVisualization as XyVisualizationType } from './xy_visualization';
+import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
+import { getSearchProvider } from './search_provider';
+
+import { LensAttributeService } from './lens_attribute_service';
+import { LensEmbeddableInput } from './embeddable';
+import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
+import {
+  EmbeddableComponentProps,
+  getEmbeddableComponent,
+} from './embeddable/embeddable_component';
+import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
+import { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;

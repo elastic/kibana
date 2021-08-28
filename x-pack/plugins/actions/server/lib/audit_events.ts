@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EcsEventOutcome, EcsEventType } from '@kbn/logging';
-import type { AuditEvent } from '../../../security/server/audit/audit_events';
+
+import type { EcsEventOutcome, EcsEventType } from 'src/core/server';
+import { AuditEvent } from '../../../security/server';
 
 export enum ConnectorAuditAction {
   CREATE = 'connector_create',

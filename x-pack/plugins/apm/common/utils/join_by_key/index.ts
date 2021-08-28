@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { castArray, isEqual, merge, pull } from 'lodash';
-import type { UnionToIntersection, ValuesType } from 'utility-types';
+
+import { UnionToIntersection, ValuesType } from 'utility-types';
+import { isEqual, pull, merge, castArray } from 'lodash';
 
 /**
  * Joins a list of records by a given key. Key can be any type of value, from

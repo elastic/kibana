@@ -5,21 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import { assertNever } from '@kbn/std';
 import moment from 'moment-timezone';
+import { assertNever } from '@kbn/std';
+import { TriggeringPolicy } from './policy';
 import { RollingFileContext } from '../rolling_file_context';
-import type { TriggeringPolicy } from './policy';
-import type { SizeLimitTriggeringPolicyConfig } from './size_limit/size_limit_policy';
 import {
-  SizeLimitTriggeringPolicy,
   sizeLimitTriggeringPolicyConfigSchema,
-} from './size_limit/size_limit_policy';
-import type { TimeIntervalTriggeringPolicyConfig } from './time_interval/time_interval_policy';
+  SizeLimitTriggeringPolicyConfig,
+  SizeLimitTriggeringPolicy,
+} from './size_limit';
 import {
+  TimeIntervalTriggeringPolicyConfig,
   TimeIntervalTriggeringPolicy,
   timeIntervalTriggeringPolicyConfigSchema,
-} from './time_interval/time_interval_policy';
+} from './time_interval';
 
 export type { TriggeringPolicy } from './policy';
 

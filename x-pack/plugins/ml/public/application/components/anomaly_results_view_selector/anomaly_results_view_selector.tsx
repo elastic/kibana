@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useMemo } from 'react';
+
 import { EuiButtonGroup } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
-import { ML_PAGES } from '../../../../common/constants/locator';
-import { useMlLocator } from '../../contexts/kibana/use_create_url';
-import { useNavigateToPath } from '../../contexts/kibana/use_navigate_to_path';
+
 import { useUrlState } from '../../util/url_state';
+import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { ML_PAGES } from '../../../../common/constants/locator';
 
 interface Props {
   viewId: typeof ML_PAGES.SINGLE_METRIC_VIEWER | typeof ML_PAGES.ANOMALY_EXPLORER;

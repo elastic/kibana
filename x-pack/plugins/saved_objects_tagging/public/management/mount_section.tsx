@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { I18nProvider } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React from 'react';
+
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
-import type { CoreSetup } from '../../../../../src/core/public/types';
-import type { ApplicationStart } from '../../../../../src/core/public/application/types';
-import type { ManagementAppMountParams } from '../../../../../src/plugins/management/public/types';
-import type { ITagsCache } from '../../../../../src/plugins/saved_objects_tagging_oss/public/api';
-import { getTagsCapabilities } from '../../common/capabilities';
-import type { ITagAssignmentService } from '../services/assignments/assignment_service';
-import type { ITagInternalClient } from '../services/tags/tags_client';
-import type { SavedObjectTaggingPluginStart } from '../types';
+import { I18nProvider } from '@kbn/i18n/react';
+import { CoreSetup, ApplicationStart } from 'src/core/public';
+import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
+import { getTagsCapabilities } from '../../common';
+import { SavedObjectTaggingPluginStart } from '../types';
+import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
 import { TagManagementPage } from './tag_management_page';
 
 interface MountSectionParams {

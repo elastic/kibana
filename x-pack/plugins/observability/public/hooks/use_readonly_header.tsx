@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCallback, useEffect } from 'react';
+
 import * as i18n from '../components/app/cases/translations';
+import { useGetUserCasesPermissions } from '../hooks/use_get_user_cases_permissions';
 import { useKibana } from '../utils/kibana_react';
-import { useGetUserCasesPermissions } from './use_get_user_cases_permissions';
 
 /**
  * This component places a read-only icon badge in the header if user only has read permissions

@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { BehaviorSubject } from 'rxjs';
-import { map, take, takeLast } from 'rxjs/operators';
-import type { App } from '../../application/types';
+
 import { NavLinksService } from './nav_links_service';
+import { take, map, takeLast } from 'rxjs/operators';
+import { App } from '../../application';
+import { BehaviorSubject } from 'rxjs';
 
 const availableApps = new Map([
   ['app1', { id: 'app1', order: 0, title: 'App 1', icon: 'app1' }],

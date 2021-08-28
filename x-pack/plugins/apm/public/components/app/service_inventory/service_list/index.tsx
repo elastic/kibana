@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,10 +13,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/typed-react-router-config';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import { orderBy } from 'lodash';
 import React, { useMemo } from 'react';
-import type { ValuesType } from 'utility-types';
+import { ValuesType } from 'utility-types';
+import {
+  BreakPoints,
+  useBreakPoints,
+} from '../../../../hooks/use_break_points';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
@@ -24,24 +29,21 @@ import {
 } from '../../../../../common/transaction_types';
 import {
   asMillisecondDuration,
+  asPercent,
   asTransactionRate,
-} from '../../../../../common/utils/formatters/duration';
-import { asPercent } from '../../../../../common/utils/formatters/formatters';
+} from '../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import type { BreakPoints } from '../../../../hooks/use_break_points';
-import { useBreakPoints } from '../../../../hooks/use_break_points';
-import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
-import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../utils/style';
-import type { ApmRoutes } from '../../../routing/apm_route_config';
-import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
+import { ApmRoutes } from '../../../routing/apm_route_config';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
-import type { ITableColumn } from '../../../shared/managed_table';
-import { ManagedTable } from '../../../shared/managed_table';
+import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 
 type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 type Items = ServiceListAPIResponse['items'];

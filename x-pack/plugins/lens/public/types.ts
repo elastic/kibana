@@ -4,40 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { MutableRefObject } from 'react';
-import type { CoreSetup } from '../../../../src/core/public/types';
-import type { SavedObjectReference } from '../../../../src/core/types/saved_objects';
-import type { PaletteOutput } from '../../../../src/plugins/charts/common/palette';
-import type { Filter } from '../../../../src/plugins/data/common/es_query';
-import type { Query } from '../../../../src/plugins/data/public';
-import type {
-  RangeSelectContext,
-  ValueClickContext,
-} from '../../../../src/plugins/embeddable/public/lib/triggers/triggers';
-import type { ExpressionAstExpression } from '../../../../src/plugins/expressions/common/ast/types';
-import type { IInterpreterRenderHandlers } from '../../../../src/plugins/expressions/common/expression_renderers/types';
-import type { Datatable } from '../../../../src/plugins/expressions/common/expression_types/specs/datatable';
-import type { ExpressionRendererEvent } from '../../../../src/plugins/expressions/public/render';
-import type { UiActionsStart } from '../../../../src/plugins/ui_actions/public/plugin';
-import type { RowClickContext } from '../../../../src/plugins/ui_actions/public/triggers/row_click_trigger';
-import type { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public/types';
-import type { DateRange, LayerType } from '../common/types';
+
+import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { CoreSetup } from 'kibana/public';
+import { PaletteOutput } from 'src/plugins/charts/public';
+import { SavedObjectReference } from 'kibana/public';
+import { MutableRefObject } from 'react';
+import { RowClickContext } from '../../../../src/plugins/ui_actions/public';
 import {
-  LENS_EDIT_RESIZE_ACTION,
+  ExpressionAstExpression,
+  ExpressionRendererEvent,
+  IInterpreterRenderHandlers,
+  Datatable,
+} from '../../../../src/plugins/expressions/public';
+import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
+import type { DateRange, LayerType } from '../common';
+import { Query, Filter } from '../../../../src/plugins/data/public';
+import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
+import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
+import {
   LENS_EDIT_SORT_ACTION,
+  LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
 } from './datatable_visualization/components/constants';
 import type {
-  LensResizeActionData,
   LensSortActionData,
+  LensResizeActionData,
   LensToggleActionData,
 } from './datatable_visualization/components/types';
-import type {
-  DragContextState,
-  DragDropIdentifier,
-  DraggingIdentifier,
-} from './drag_drop/providers/types';
+import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 

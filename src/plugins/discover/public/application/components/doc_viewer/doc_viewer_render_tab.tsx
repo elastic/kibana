@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useRef } from 'react';
-import type { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
+
+import React, { useRef, useEffect } from 'react';
+import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 interface Props {
   render: DocViewRenderFn;

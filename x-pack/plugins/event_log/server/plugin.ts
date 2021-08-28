@@ -4,30 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import type { CoreSetup, CoreStart } from '../../../../src/core/server';
-import type { IContextProvider } from '../../../../src/core/server/context/container/context';
-import type { IClusterClient } from '../../../../src/core/server/elasticsearch/client/cluster_client';
-import type {
+
+import {
+  CoreSetup,
+  CoreStart,
+  Logger,
   Plugin as CorePlugin,
   PluginInitializerContext,
+  IClusterClient,
   SharedGlobalConfig,
-} from '../../../../src/core/server/plugins/types';
-import type { SpacesPluginStart } from '../../spaces/server/plugin';
-import type { EsContext } from './es/context';
-import { createEsContext } from './es/context';
-import { EventLogService } from './event_log_service';
-import { EventLogClientService } from './event_log_start_service';
-import { findRoute } from './routes/find';
-import { findByIdsRoute } from './routes/find_by_ids';
-import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
+  IContextProvider,
+} from 'src/core/server';
+import { SpacesPluginStart } from '../../spaces/server';
+
 import type {
   EventLogRequestHandlerContext,
-  IEventLogClientService,
   IEventLogConfig,
-  IEventLogger,
   IEventLogService,
+  IEventLogger,
+  IEventLogClientService,
 } from './types';
+import { findRoute } from './routes';
+import { EventLogService } from './event_log_service';
+import { createEsContext, EsContext } from './es';
+import { EventLogClientService } from './event_log_start_service';
+import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
+import { findByIdsRoute } from './routes/find_by_ids';
 
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 

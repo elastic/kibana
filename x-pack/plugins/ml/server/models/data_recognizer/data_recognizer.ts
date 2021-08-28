@@ -5,55 +5,54 @@
  * 2.0.
  */
 
-import numeral from '@elastic/numeral';
-import Boom from '@hapi/boom';
 import fs from 'fs';
-import { merge } from 'lodash';
+import Boom from '@hapi/boom';
+import numeral from '@elastic/numeral';
+import { KibanaRequest, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+
 import moment from 'moment';
-import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
-import type { IndexPatternAttributes } from '../../../../../../src/plugins/data/common/index_patterns/types';
-import type { Datafeed } from '../../../common/types/anomaly_detection_jobs/datafeed';
-import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs/job';
-import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
-import { isDefined } from '../../../common/types/guards';
-import type { MlJobsStatsResponse } from '../../../common/types/job_service';
-import type { MlInfoResponse } from '../../../common/types/ml_server_info';
-import type {
-  DatafeedOverride,
-  DatafeedResponse,
-  DataRecognizerConfigResponse,
-  FileBasedModule,
-  GeneralDatafeedsOverride,
-  GeneralJobsOverride,
-  JobOverride,
-  JobResponse,
-  JobSpecificOverride,
-  KibanaObjectConfig,
-  KibanaObjectResponse,
+import { IndexPatternAttributes } from 'src/plugins/data/server';
+import { merge } from 'lodash';
+import { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
+import { getAuthorizationHeader } from '../../lib/request_authorization';
+import { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlClient } from '../../lib/ml_client';
+import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
+import {
   KibanaObjects,
-  Logo,
-  Module,
+  KibanaObjectConfig,
   ModuleDatafeed,
   ModuleJob,
+  Module,
+  FileBasedModule,
+  Logo,
+  JobOverride,
+  DatafeedOverride,
+  GeneralJobsOverride,
+  DatafeedResponse,
+  JobResponse,
+  KibanaObjectResponse,
+  DataRecognizerConfigResponse,
+  GeneralDatafeedsOverride,
+  JobSpecificOverride,
+  isGeneralJobOverride,
 } from '../../../common/types/modules';
-import { isGeneralJobOverride } from '../../../common/types/modules';
-import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import {
   getLatestDataOrBucketTimestamp,
   prefixDatafeedId,
   splitIndexPatternNames,
 } from '../../../common/util/job_utils';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 import { mlLog } from '../../lib/log';
-import type { MlClient } from '../../lib/ml_client/types';
-import { getAuthorizationHeader } from '../../lib/request_authorization';
-import type { JobSavedObjectService } from '../../saved_objects/service';
-import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit/calculate_model_memory_limit';
-import { fieldsServiceProvider } from '../fields_service/fields_service';
+import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
+import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
-import { resultsServiceProvider } from '../results_service/results_service';
+import { resultsServiceProvider } from '../results_service';
+import { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
+import { MlJobsStatsResponse } from '../../../common/types/job_service';
+import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import { JobSavedObjectService } from '../../saved_objects';
+import { isDefined } from '../../../common/types/guards';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';

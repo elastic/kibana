@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
+
 import { createHash } from 'crypto';
-import type { IRouter } from '../../http/router/router';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import { IRouter } from '../../http';
 
 interface TranslationCache {
   translations: string;

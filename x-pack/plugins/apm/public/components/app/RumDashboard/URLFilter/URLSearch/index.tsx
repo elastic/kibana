@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { map } from 'lodash';
-import type { FormEvent } from 'react';
-import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import React, { useEffect, useState, FormEvent } from 'react';
+import { map } from 'lodash';
 import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
-import { useUxQuery } from '../../hooks/useUxQuery';
 import { I18LABELS } from '../../translations';
 import { formatToSec } from '../../UXMetrics/KeyUXMetrics';
-import { getPercentileLabel } from '../../UXMetrics/translations';
-import type { UrlOption } from './RenderOption';
 import { SelectableUrlList } from './SelectableUrlList';
+import { UrlOption } from './RenderOption';
+import { useUxQuery } from '../../hooks/useUxQuery';
+import { getPercentileLabel } from '../../UXMetrics/translations';
 
 interface Props {
   onChange: (value?: string[], excludedValue?: string[]) => void;

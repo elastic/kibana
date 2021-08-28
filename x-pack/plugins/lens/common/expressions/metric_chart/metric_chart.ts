@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
+
+import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
 import type { LensMultiTable } from '../../types';
 import type { MetricConfig } from './types';
 

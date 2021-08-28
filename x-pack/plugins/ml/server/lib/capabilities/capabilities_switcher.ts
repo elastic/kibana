@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
+
 import { cloneDeep } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import type { CoreSetup } from '../../../../../../src/core/server';
-import type { CapabilitiesSwitcher } from '../../../../../../src/core/server/capabilities/types';
-import type { ILicense } from '../../../../licensing/common/types';
-import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license/ml_license';
-import type { MlCapabilities } from '../../../common/types/capabilities';
-import { basicLicenseMlCapabilities } from '../../../common/types/capabilities';
+import { CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
+import { ILicense } from '../../../../licensing/common/types';
+import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
+import { MlCapabilities, basicLicenseMlCapabilities } from '../../../common/types/capabilities';
 
 export const setupCapabilitiesSwitcher = (
   coreSetup: CoreSetup,

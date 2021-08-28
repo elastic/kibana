@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { httpServerMock } from '../http/http_server.mocks';
-import type { HttpResources, HttpResourcesServiceToolkit } from './types';
+import { HttpResources, HttpResourcesServiceToolkit } from './types';
 
 const createHttpResourcesMock = (): jest.Mocked<HttpResources> => ({
   register: jest.fn(),

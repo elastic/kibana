@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
-import { NewAgentPolicySchema } from '../models/agent_policy';
+import { NewAgentPolicySchema } from '../models';
 
-import { ListWithKuerySchema } from './common';
+import { ListWithKuerySchema } from './index';
 
 export const GetAgentPoliciesRequestSchema = {
   query: ListWithKuerySchema.extends({

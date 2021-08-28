@@ -4,12 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { difference, without } from 'lodash';
-import type { ToastsStart } from '../../../../../../../src/core/public/notifications/toasts/toasts_service';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs/summary_job';
+
+import { i18n } from '@kbn/i18n';
+
+import { ToastsStart } from 'kibana/public';
+import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+
 import { getTimeRangeFromSelection } from '../../components/job_selector/job_select_service_utils';
 import { mlJobService } from '../../services/job_service';
+
 import { createTimeSeriesJobData } from './timeseriesexplorer_utils';
 
 /**

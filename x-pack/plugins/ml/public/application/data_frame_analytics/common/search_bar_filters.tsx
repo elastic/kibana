@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { stringMatch } from '../../util/string_utils';
-import type {
-  DataFrameAnalyticsListRow,
-  FieldClause,
+import {
   TermClause,
+  FieldClause,
   Value,
+  DataFrameAnalyticsListRow,
 } from '../pages/analytics_management/components/analytics_list/common';
 
 export function filterAnalytics(

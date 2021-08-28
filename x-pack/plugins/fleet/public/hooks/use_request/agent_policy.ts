@@ -4,24 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { agentPolicyRouteService } from '../../../common/services/routes';
+
+import { agentPolicyRouteService } from '../../services';
+
 import type {
-  CopyAgentPolicyRequest,
-  CopyAgentPolicyResponse,
-  CreateAgentPolicyRequest,
-  CreateAgentPolicyResponse,
-  DeleteAgentPolicyRequest,
-  DeleteAgentPolicyResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
-  GetFullAgentPolicyResponse,
   GetOneAgentPolicyResponse,
+  GetFullAgentPolicyResponse,
+  CreateAgentPolicyRequest,
+  CreateAgentPolicyResponse,
   UpdateAgentPolicyRequest,
   UpdateAgentPolicyResponse,
-} from '../../../common/types/rest_spec/agent_policy';
+  CopyAgentPolicyRequest,
+  CopyAgentPolicyResponse,
+  DeleteAgentPolicyRequest,
+  DeleteAgentPolicyResponse,
+} from '../../types';
 
+import { useRequest, sendRequest, useConditionalRequest } from './use_request';
 import type { SendConditionalRequestConfig } from './use_request';
-import { sendRequest, useConditionalRequest, useRequest } from './use_request';
 
 export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) => {
   return useRequest<GetAgentPoliciesResponse>({

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
 
-export * from './enrollment_api_key';
+import type { KibanaRequest } from 'src/core/server';
+
 export { invalidateAPIKeys } from './security';
+export * from './enrollment_api_key';
 
 export function parseApiKeyFromHeaders(headers: KibanaRequest['headers']) {
   const authorizationHeader = headers.authorization;

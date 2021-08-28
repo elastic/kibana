@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty } from '@elastic/eui';
+
 import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { observabilityAppId } from '../../../common';
-import { CASES_OWNER } from '../../components/app/cases/constants';
+
+import { EuiButtonEmpty } from '@elastic/eui';
 import * as i18n from '../../components/app/cases/translations';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { CASES_OWNER } from '../../components/app/cases/constants';
+import { useKibana } from '../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../utils/kibana_react';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { casesBreadcrumbs, getCaseUrl, useFormatUrl } from './links';
+import { observabilityAppId } from '../../../common';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;

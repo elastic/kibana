@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { get } from 'lodash';
-import type { AllowUnknownProperties } from '../typings/common';
-import type { APMError } from '../typings/es_schemas/ui/apm_error';
-import type { Span } from '../typings/es_schemas/ui/span';
-import type { Transaction } from '../typings/es_schemas/ui/transaction';
+import { AllowUnknownProperties } from '../typings/common';
+import { APMError } from '../typings/es_schemas/ui/apm_error';
+import { Span } from '../typings/es_schemas/ui/span';
+import { Transaction } from '../typings/es_schemas/ui/transaction';
 import * as fieldnames from './elasticsearch_fieldnames';
 
 describe('Transaction', () => {

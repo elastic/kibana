@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server/saved_objects/service/lib/errors';
+
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { TaskStore } from '../task_store';
 
 /**

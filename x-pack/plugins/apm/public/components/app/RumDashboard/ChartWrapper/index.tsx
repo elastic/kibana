@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { HTMLAttributes, ReactNode } from 'react';
 import {
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingChart,
 } from '@elastic/eui';
-import type { HTMLAttributes, ReactNode } from 'react';
-import React from 'react';
 
 interface Props {
   children?: ReactNode;

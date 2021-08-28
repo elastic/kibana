@@ -6,9 +6,11 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import type { GeoJsonProperties, Geometry } from 'geojson';
-import type { ReactNode } from 'react';
-import type { Query } from '../../../../../src/plugins/data/common';
+
+import { ReactNode } from 'react';
+import { GeoJsonProperties } from 'geojson';
+import { Geometry } from 'geojson';
+import { Query } from '../../../../../src/plugins/data/common';
 import { DRAW_SHAPE, ES_SPATIAL_RELATIONS } from '../constants';
 
 export type MapExtent = {

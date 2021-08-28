@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { useQuickTimeRanges } from '../../../../hooks/use_quick_time_ranges';
-import { DEFAULT_TIME } from '../configurations/constants/constants';
 import { useSeriesStorage } from '../hooks/use_series_storage';
+import { useQuickTimeRanges } from '../../../../hooks/use_quick_time_ranges';
+import { DEFAULT_TIME } from '../configurations/constants';
 
 export interface TimePickerTime {
   from: string;

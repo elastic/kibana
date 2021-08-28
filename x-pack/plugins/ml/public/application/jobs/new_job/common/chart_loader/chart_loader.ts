@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs/datafeed';
-import type {
-  AggFieldPair,
+import { isEqual } from 'lodash';
+import { IndexPatternTitle } from '../../../../../../common/types/kibana';
+import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
+import {
   Field,
-  RuntimeMappings,
   SplitField,
+  AggFieldPair,
+  RuntimeMappings,
 } from '../../../../../../common/types/fields';
-import type { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
-import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
+import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
 
 type DetectorIndex = number;
 export interface LineChartPoint {

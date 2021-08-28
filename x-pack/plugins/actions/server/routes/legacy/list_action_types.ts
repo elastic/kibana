@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IRouter } from '../../../../../../src/core/server/http/router/router';
+
+import { IRouter } from 'kibana/server';
+import { ILicenseState, verifyApiAccess } from '../../lib';
 import { BASE_ACTION_API_PATH } from '../../../common';
-import type { ILicenseState } from '../../lib/license_state';
-import { verifyApiAccess } from '../../lib/verify_api_access';
-import type { ActionsRequestHandlerContext } from '../../types';
+import { ActionsRequestHandlerContext } from '../../types';
 
 export const listActionTypesRoute = (
   router: IRouter<ActionsRequestHandlerContext>,

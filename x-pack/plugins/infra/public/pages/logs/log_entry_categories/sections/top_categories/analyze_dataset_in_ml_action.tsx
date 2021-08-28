@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { ML_PAGES } from '../../../../../../../ml/common/constants/locator';
-import { useMlHref } from '../../../../../../../ml/public/locator/use_ml_href';
-import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
-import type { TimeRange } from '../../../../../../common/time/time_range';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { TimeRange } from '../../../../../../common/time/time_range';
+import { useMlHref, ML_PAGES } from '../../../../../../../ml/public';
+import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import { shouldHandleLinkEvent } from '../../../../../hooks/use_link_props';
 
 export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{

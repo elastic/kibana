@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { FilterStateStore } from '../../../../../src/plugins/data/common';
-import type { Filter } from '../../../../../src/plugins/data/common/es_query';
-import { createAction } from '../../../../../src/plugins/ui_actions/public/actions/create_action';
-import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables/constants';
-import type { AnomalyChartsFieldSelectionContext } from '../embeddables/types';
-import type { MlCoreSetup } from '../plugin';
+import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import { MlCoreSetup } from '../plugin';
+import { Filter, FilterStateStore } from '../../../../../src/plugins/data/common';
+import {
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  AnomalyChartsFieldSelectionContext,
+} from '../embeddables';
 import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from './constants';
+import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
 
 export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction';
 

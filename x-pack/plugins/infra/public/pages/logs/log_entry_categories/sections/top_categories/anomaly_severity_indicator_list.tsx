@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis/log_analysis_results';
-import type { LogEntryCategoryDataset } from '../../../../../../common/log_analysis/log_entry_categories_analysis';
+
+import { LogEntryCategoryDataset } from '../../../../../../common/log_analysis';
+import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
 
 export const AnomalySeverityIndicatorList: React.FunctionComponent<{

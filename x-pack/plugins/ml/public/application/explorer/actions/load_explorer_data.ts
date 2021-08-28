@@ -5,26 +5,15 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
-import { useCallback, useMemo } from 'react';
+import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
-import { forkJoin, Observable, of, Subject } from 'rxjs';
-import { map, mergeMap, switchMap, tap } from 'rxjs/operators';
-import type { TimefilterContract } from '../../../../../../../src/plugins/data/public/query/timefilter/timefilter';
-import type { CombinedJob } from '../../../../common/types/anomaly_detection_jobs/combined_job';
-import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import { useMlKibana } from '../../contexts/kibana/kibana_context';
-import { useTimefilter } from '../../contexts/kibana/use_timefilter';
-import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
-import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
-import { mlJobService } from '../../services/job_service';
-import type { MlResultsService } from '../../services/results_service';
-import { mlResultsServiceProvider } from '../../services/results_service';
-import type { TimeBucketsInterval } from '../../util/time_buckets';
-import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../explorer_constants';
+
+import { forkJoin, of, Observable, Subject } from 'rxjs';
+import { mergeMap, switchMap, tap, map } from 'rxjs/operators';
+
+import { useCallback, useMemo } from 'react';
 import { explorerService } from '../explorer_dashboard_service';
-import type { AppStateSelectedCells, ExplorerJob } from '../explorer_utils';
 import {
   getDateFormatTz,
   getSelectionInfluencers,
@@ -33,11 +22,23 @@ import {
   loadAnnotationsTableData,
   loadAnomaliesTableData,
   loadFilteredTopInfluencers,
-  loadOverallAnnotations,
   loadTopInfluencers,
+  loadOverallAnnotations,
+  AppStateSelectedCells,
+  ExplorerJob,
 } from '../explorer_utils';
-import type { ExplorerState } from '../reducers/explorer_reducer/state';
+import { ExplorerState } from '../reducers';
+import { useMlKibana, useTimefilter } from '../../contexts/kibana';
+import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
+import { MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
 import { isViewBySwimLaneData } from '../swimlane_container';
+import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../explorer_constants';
+import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
+import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
+import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
+import { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import { mlJobService } from '../../services/job_service';
+import { TimeBucketsInterval } from '../../util/time_buckets';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument

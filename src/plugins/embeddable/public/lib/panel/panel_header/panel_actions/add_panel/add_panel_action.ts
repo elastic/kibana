@@ -5,18 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { NotificationsStart } from '../../../../../../../../core/public/notifications/notifications_service';
-import type { OverlayStart } from '../../../../../../../../core/public/overlays/overlay_service';
-import type {
-  Action,
-  ActionExecutionContext,
-} from '../../../../../../../ui_actions/public/actions/action';
-import type { UsageCollectionStart } from '../../../../../../../usage_collection/public/plugin';
-import { ViewMode } from '../../../../../../common/types';
-import type { EmbeddableStart } from '../../../../../plugin';
-import type { IContainer } from '../../../../containers/i_container';
+import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
+import { NotificationsStart, OverlayStart } from 'src/core/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
+import { ViewMode } from '../../../../types';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
+import { IContainer } from '../../../../containers';
+import { UsageCollectionStart } from '../../../../../../../usage_collection/public';
 
 export const ACTION_ADD_PANEL = 'ACTION_ADD_PANEL';
 

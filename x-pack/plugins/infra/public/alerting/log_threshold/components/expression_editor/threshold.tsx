@@ -4,27 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiExpression,
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelect,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isFinite, isNumber } from 'lodash';
+
 import React, { useState } from 'react';
-import type { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
-import type { AlertParams } from '../../../../../common/alerting/logs/log_threshold/types';
+import { i18n } from '@kbn/i18n';
+import { isNumber, isFinite } from 'lodash';
+import {
+  EuiPopoverTitle,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPopover,
+  EuiSelect,
+  EuiFieldNumber,
+  EuiExpression,
+  EuiFormRow,
+} from '@elastic/eui';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
 import {
   Comparator,
   ComparatorToi18nMap,
+  AlertParams,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 const thresholdPrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdPrefix', {
   defaultMessage: 'is',
 });

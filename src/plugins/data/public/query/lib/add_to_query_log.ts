@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IUiSettingsClient } from '../../../../../core/public/ui_settings/types';
-import type { IStorageWrapper } from '../../../../kibana_utils/public/storage/types';
-import type { Query } from '../../../common';
+
+import { IUiSettingsClient } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { Query } from '../../../common';
 import { getQueryLog } from './get_query_log';
 
 interface AddToQueryLogDependencies {

@@ -4,27 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { uniq, startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import type {
+import {
+  parse,
+  TinymathLocation,
   TinymathAST,
   TinymathFunction,
-  TinymathLocation,
-  TinymathNamedArgument,
   TinymathVariable,
+  TinymathNamedArgument,
 } from '@kbn/tinymath';
-import { parse } from '@kbn/tinymath';
-import { startsWith, uniq } from 'lodash';
-import type { GenericOperationDefinition } from '../..';
-import { parseTimeShift } from '../../../../../../../../../src/plugins/data/common/search/aggs/utils/parse_time_shift';
-import type { QuerySuggestion } from '../../../../../../../../../src/plugins/data/public/autocomplete/providers/query_suggestion_provider';
-import type { DataPublicPluginStart } from '../../../../../../../../../src/plugins/data/public/types';
-import { timeShiftOptionOrder, timeShiftOptions } from '../../../../time_shift_utils';
-import type { IndexPattern } from '../../../../types';
+import type {
+  DataPublicPluginStart,
+  QuerySuggestion,
+} from '../../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
-import { groupArgsByType, tinymathFunctions, unquotedStringRegex } from '../util';
-import { hasFunctionFieldArgument } from '../validation';
+import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
+import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
+import { hasFunctionFieldArgument } from '../validation';
+import { timeShiftOptions, timeShiftOptionOrder } from '../../../../time_shift_utils';
+import { parseTimeShift } from '../../../../../../../../../src/plugins/data/common';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',

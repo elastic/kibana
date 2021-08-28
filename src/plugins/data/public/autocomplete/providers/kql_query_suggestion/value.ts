@@ -5,15 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { flatten } from 'lodash';
-import type { CoreSetup } from '../../../../../../core/public/types';
-import type { IFieldType } from '../../../../common/index_patterns/fields/types';
-import type { IIndexPattern } from '../../../../common/index_patterns/types';
-import type { DataPublicPluginStart } from '../../../types';
-import type { QuerySuggestion } from '../query_suggestion_provider';
-import { QuerySuggestionTypes } from '../query_suggestion_provider';
+import { CoreSetup } from 'kibana/public';
 import { escapeQuotes } from './lib/escape_kuery';
-import type { KqlQuerySuggestionProvider } from './types';
+import { KqlQuerySuggestionProvider } from './types';
+import {
+  DataPublicPluginStart,
+  IFieldType,
+  IIndexPattern,
+  QuerySuggestion,
+  QuerySuggestionTypes,
+} from '../../../../../../../src/plugins/data/public';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
   values

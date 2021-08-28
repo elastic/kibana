@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
+
+import type { HttpHandler } from 'src/core/public';
+
 import {
   getLogEntryCategoryExamplesRequestPayloadRT,
   getLogEntryCategoryExamplesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_EXAMPLES_PATH,
-} from '../../../../../common/http_api/log_analysis/results/log_entry_category_examples';
+} from '../../../../../common/http_api/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {

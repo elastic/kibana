@@ -4,45 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBasicTableColumn } from '@elastic/eui';
+
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  EuiAccordion,
-  EuiBadge,
-  EuiBetaBadge,
-  EuiButton,
   EuiCallOut,
   EuiCode,
+  EuiAccordion,
+  EuiPanel,
+  EuiBasicTableColumn,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPanel,
   EuiProgress,
   EuiSpacer,
   EuiText,
+  EuiBadge,
+  EuiIcon,
+  EuiLink,
   EuiTitle,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { enableInspectEsQueries } from '../../../../../observability/common/ui_settings_keys';
-import { useUiTracker } from '../../../../../observability/public/hooks/use_track_metric';
-import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
-import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFailedTransactionsCorrelationsFetcher } from '../../../hooks/use_failed_transactions_correlations_fetcher';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { ImpactBar } from '../../shared/ImpactBar';
-import { createHref, push } from '../../shared/Links/url_helpers';
-import { Summary } from '../../shared/Summary';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { CorrelationsTable } from './correlations_table';
+import { enableInspectEsQueries } from '../../../../../observability/public';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
-import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
+import { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
+import { ImpactBar } from '../../shared/ImpactBar';
 import { isErrorMessage } from './utils/is_error_message';
+import { Summary } from '../../shared/Summary';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
+import { createHref, push } from '../../shared/Links/url_helpers';
+import { useUiTracker } from '../../../../../observability/public';
+import { useFailedTransactionsCorrelationsFetcher } from '../../../hooks/use_failed_transactions_correlations_fetcher';
+import { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function FailedTransactionsCorrelations({
   onFilter,

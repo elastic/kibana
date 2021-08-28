@@ -4,16 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
+
 import { omit, union } from 'lodash/fp';
-import type { ColumnHeaderOptions } from '../../../common/types/timeline/columns';
-import type { DataProvider } from '../../../common/types/timeline/data_provider';
-import type { SortColumnTimeline } from '../../../common/types/timeline/store';
+
+import { isEmpty } from 'lodash';
 import type { ToggleDetailPanel } from './actions';
-import { getTGridManageDefaults, tGridDefaults } from './defaults';
+import { TGridPersistInput, TimelineById, TimelineId } from './types';
 import type { TGridModel, TGridModelSettings } from './model';
-import type { TGridPersistInput, TimelineById } from './types';
-import { TimelineId } from './types';
+
+import type {
+  ColumnHeaderOptions,
+  DataProvider,
+  SortColumnTimeline,
+} from '../../../common/types/timeline';
+import { getTGridManageDefaults, tGridDefaults } from './defaults';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 export type Maybe<T> = T | null;

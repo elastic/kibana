@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useReducer, useRef } from 'react';
-import type { ClosureType } from '../../../common/api/cases/configure';
-import type { CaseConnector } from '../../../common/api/connectors';
-import { ConnectorTypes } from '../../../common/api/connectors';
-import { useToasts } from '../../common/lib/kibana/hooks';
-import { useOwnerContext } from '../../components/owner_context/use_owner_context';
+
+import { useEffect, useCallback, useReducer, useRef } from 'react';
 import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
+
 import * as i18n from './translations';
-import type { CaseConfigure, CaseConnectorMapping } from './types';
+import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
+import { ConnectorTypes } from '../../../common';
+import { useToasts } from '../../common/lib/kibana';
+import { useOwnerContext } from '../../components/owner_context/use_owner_context';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];

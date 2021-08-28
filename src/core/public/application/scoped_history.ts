@@ -5,16 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type {
-  Action,
+
+import {
   History,
-  Href,
-  Location,
-  LocationDescriptorObject,
-  LocationListener,
   Path,
+  LocationDescriptorObject,
   TransitionPromptHook,
   UnregisterCallback,
+  LocationListener,
+  Location,
+  Href,
+  Action,
 } from 'history';
 
 /**

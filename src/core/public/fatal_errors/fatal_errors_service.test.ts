@@ -7,14 +7,16 @@
  */
 
 import * as Rx from 'rxjs';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
-import { FatalErrorsService } from './fatal_errors_service';
-import { mockRender } from './fatal_errors_service.test.mocks';
 
 expect.addSnapshotSerializer({
   test: (val) => val instanceof Rx.Observable,
   print: () => `Rx.Observable`,
 });
+
+import { mockRender } from './fatal_errors_service.test.mocks';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+
+import { FatalErrorsService } from './fatal_errors_service';
 
 function setupService() {
   const rootDomElement = document.createElement('div');

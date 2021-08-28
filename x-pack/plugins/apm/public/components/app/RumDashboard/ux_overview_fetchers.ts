@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+
+import {
   FetchDataParams,
   HasDataParams,
   UxFetchDataResponse,
   UXHasDataResponse,
-} from '../../../../../observability/public/typings/fetch_overview_data';
+} from '../../../../../observability/public/';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 
 export { createCallApmApi } from '../../../services/rest/createCallApmApi';

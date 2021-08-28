@@ -5,20 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
-import type { IScopedClusterClient } from '../../../../../../core/server/elasticsearch/client/scoped_cluster_client';
-import type { IRouter } from '../../../../../../core/server/http/router/router';
-import type { SavedObjectsBulkCreateObject } from '../../../../../../core/server/saved_objects/service/saved_objects_client';
+import type {
+  IRouter,
+  Logger,
+  IScopedClusterClient,
+  SavedObjectsBulkCreateObject,
+} from 'src/core/server';
+import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
-import { loadData } from '../lib/load_data';
-import type { SampleDatasetSchema } from '../lib/sample_dataset_schema';
 import {
   dateToIso8601IgnoringTime,
   translateTimeRelativeToDifference,
   translateTimeRelativeToWeek,
 } from '../lib/translate_timestamp';
-import type { SampleDataUsageTracker } from '../usage/usage';
+import { loadData } from '../lib/load_data';
+import { SampleDataUsageTracker } from '../usage/usage';
 
 const insertDataIntoIndex = (
   dataIndexConfig: any,

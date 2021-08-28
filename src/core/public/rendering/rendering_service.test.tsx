@@ -8,11 +8,12 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject } from 'rxjs';
+
+import { RenderingService } from './rendering_service';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { RenderingService } from './rendering_service';
+import { BehaviorSubject } from 'rxjs';
 
 describe('RenderingService#start', () => {
   let application: ReturnType<typeof applicationServiceMock.createInternalStartContract>;

@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 import { filter, get, pickBy } from 'lodash/fp';
 import styled from 'styled-components';
-import type {
-  BrowserField,
-  BrowserFields,
-} from '../../../../../common/search_strategy/index_fields';
+
 import {
   elementOrChildrenHasFocus,
   skipFocusInContainerTo,
   stopPropagationAndPreventDefault,
-} from '../../../../../common/utils/accessibility/helpers';
+} from '../../../../../public';
+import { TimelineId } from '../../../../../public/types';
+import type { BrowserField, BrowserFields } from '../../../../../common';
 import { defaultHeaders } from '../../../../store/t_grid/defaults';
-import { TimelineId } from '../../../../store/t_grid/types';
 import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
 
 export const LoadingSpinner = styled(EuiLoadingSpinner)`

@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Observable, Subscription } from 'rxjs';
 
-import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient, HttpServiceSetup, Logger } from 'src/core/server';
 
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
-import type { HttpServiceSetup } from '../../../../../src/core/server/http/types';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server/saved_objects/service/lib/errors';
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server/plugin';
+} from '../../../task_manager/server';
 import type { ConfigType } from '../config';
-import type { OnlineStatusRetryScheduler } from '../elasticsearch/elasticsearch_service';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { Session } from './session';
 import { SessionCookie } from './session_cookie';
 import { SessionIndex } from './session_index';

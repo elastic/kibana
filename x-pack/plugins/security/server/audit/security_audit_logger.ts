@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AuthenticationProvider } from '../../common/model/authentication_provider';
+
+import type { AuthenticationProvider } from '../../common/model';
 import type { LegacyAuditLogger } from './audit_service';
 
 /**

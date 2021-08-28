@@ -4,22 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiSpacer,
-  EuiTextAlign,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { Fragment } from 'react';
 import uuid from 'uuid/v4';
-import { SOURCE_TYPES } from '../../../../common/constants';
-import type { JoinDescriptor } from '../../../../common/descriptor_types/layer_descriptor_types';
-import type { ILayer } from '../../../classes/layers/layer';
+
+import {
+  EuiButtonEmpty,
+  EuiTitle,
+  EuiSpacer,
+  EuiToolTip,
+  EuiTextAlign,
+  EuiCallOut,
+} from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { Join } from './resources/join';
+import { ILayer } from '../../../classes/layers/layer';
+import { JoinDescriptor } from '../../../../common/descriptor_types';
+import { SOURCE_TYPES } from '../../../../common/constants';
 
 export interface JoinField {
   label: string;

@@ -4,31 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MlJob } from '@elastic/elasticsearch/api/types';
-import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
+
 import { groupBy, keyBy, memoize } from 'lodash';
-import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
+import { KibanaRequest, Logger, SavedObjectsClientContract } from 'kibana/server';
+import { i18n } from '@kbn/i18n';
+import { MlJob } from '@elastic/elasticsearch/api/types';
+import { MlClient } from '../ml_client';
+import { JobSelection } from '../../routes/schemas/alerting_schema';
+import { datafeedsProvider, DatafeedsService } from '../../models/job_service/datafeeds';
 import { ALL_JOBS_SELECTION, HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
-import type { DatafeedStats } from '../../../common/types/anomaly_detection_jobs/datafeed_stats';
-import { isDefined } from '../../../common/types/guards';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
+import { GetGuards } from '../../shared_services/shared_services';
 import {
-  getResultJobsHealthRuleConfig,
-  resolveLookbackInterval,
-} from '../../../common/util/alerts';
-import { parseInterval } from '../../../common/util/parse_interval';
-import { annotationServiceProvider } from '../../models/annotation_service';
-import type { AnnotationService } from '../../models/annotation_service/annotation';
-import type { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';
-import { jobAuditMessagesProvider } from '../../models/job_audit_messages/job_audit_messages';
-import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import { datafeedsProvider } from '../../models/job_service/datafeeds';
-import type { JobSelection } from '../../routes/schemas/alerting_schema';
-import type { GetGuards } from '../../shared_services/shared_services';
-import type { MlClient } from '../ml_client/types';
-import type {
   AnomalyDetectionJobsHealthAlertContext,
   DelayedDataResponse,
   JobsErrorsResponse,
@@ -36,6 +23,19 @@ import type {
   MmlTestResponse,
   NotStartedDatafeedResponse,
 } from './register_jobs_monitoring_rule_type';
+import {
+  getResultJobsHealthRuleConfig,
+  resolveLookbackInterval,
+} from '../../../common/util/alerts';
+import { AnnotationService } from '../../models/annotation_service/annotation';
+import { annotationServiceProvider } from '../../models/annotation_service';
+import { parseInterval } from '../../../common/util/parse_interval';
+import { isDefined } from '../../../common/types/guards';
+import {
+  jobAuditMessagesProvider,
+  JobAuditMessagesService,
+} from '../../models/job_audit_messages/job_audit_messages';
+import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 
 interface TestResult {
   name: string;

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FieldFormat } from '../../types';
+
+import { FieldFormat } from '../../types';
 import {
   FCP_FIELD,
   FID_FIELD,

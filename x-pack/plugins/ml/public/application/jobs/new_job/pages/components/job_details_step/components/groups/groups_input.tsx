@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+
+import React, { FC, useState, useContext, useEffect, useMemo } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { tabColor } from '../../../../../../../../../common/util/group_color_utils';
 import { JobCreatorContext } from '../../../job_creator_context';
+import { tabColor } from '../../../../../../../../../common/util/group_color_utils';
 import { Description } from './description';
 
 export const GroupsInput: FC = () => {

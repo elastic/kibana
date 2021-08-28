@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { InvalidJSONProperty } from '../../../../kibana_utils/common/errors/errors';
-import type { SearchSourceFields } from './types';
+
+import { SearchSourceFields } from './types';
+import { InvalidJSONProperty } from '../../../../kibana_utils/common';
 
 export const parseSearchSourceJSON = (searchSourceJSON: string) => {
   // if we have a searchSource, set its values based on the searchSourceJson field

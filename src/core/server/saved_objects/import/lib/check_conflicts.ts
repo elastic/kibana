@@ -5,10 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { v4 as uuidv4 } from 'uuid';
-import type { SavedObject, SavedObjectError } from '../../../../types/saved_objects';
-import type { SavedObjectsClientContract } from '../../types';
-import type { SavedObjectsImportFailure, SavedObjectsImportRetry } from '../types';
+import {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsImportFailure,
+  SavedObjectError,
+  SavedObjectsImportRetry,
+} from '../../types';
 
 interface CheckConflictsParams {
   objects: Array<SavedObject<{ title?: string }>>;

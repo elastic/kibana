@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Observable } from 'rxjs';
-import type {
+import {
   GlobalSearchProviderFindOptions,
-  GlobalSearchProviderFindParams,
   GlobalSearchProviderResult,
+  GlobalSearchProviderFindParams,
 } from '../common/types';
-import type { SearchServiceSetup, SearchServiceStart } from './services/search_service';
+import { SearchServiceSetup, SearchServiceStart } from './services';
 
 export type GlobalSearchPluginSetup = Pick<SearchServiceSetup, 'registerResultProvider'>;
 export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find' | 'getSearchableTypes'>;

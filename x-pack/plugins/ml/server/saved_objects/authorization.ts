@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type { SecurityPluginSetup } from '../../../security/server/plugin';
+
+import { KibanaRequest } from 'kibana/server';
+import type { SecurityPluginSetup } from '../../../security/server';
 import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 
 export function authorizationProvider(authorization: SecurityPluginSetup['authz']) {

@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { isEqual, uniqWith } from 'lodash';
-import type { IEsError, Reason } from '../../../../../src/plugins/data/public/search/errors/types';
-import { isEsError } from '../../../../../src/plugins/data/public/search/errors/types';
-import type { ExpressionRenderError } from '../../../../../src/plugins/expressions/public/types';
+import { ExpressionRenderError } from '../../../../../src/plugins/expressions/public';
+import { isEsError } from '../../../../../src/plugins/data/public';
+import type { IEsError, Reason } from '../../../../../src/plugins/data/public';
 
 type ErrorCause = Required<IEsError>['attributes'];
 

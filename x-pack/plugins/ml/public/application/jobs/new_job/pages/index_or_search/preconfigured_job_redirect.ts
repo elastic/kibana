@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApplicationStart } from '../../../../../../../../../src/core/public/application/types';
-import type { IndexPatternsContract } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
-import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
-import type { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs/datafeed';
-import type { Job } from '../../../../../../common/types/anomaly_detection_jobs/job';
+
+import { ApplicationStart } from 'kibana/public';
+import { IndexPatternsContract } from '../../../../../../../../../src/plugins/data/public';
 import { mlJobService } from '../../../../services/job_service';
-import { getIndexPatternIdFromName, loadIndexPatterns } from '../../../../util/index_utils';
+import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
+import { Datafeed, Job } from '../../../../../../common/types/anomaly_detection_jobs';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export async function preConfiguredJobRedirect(
   indexPatterns: IndexPatternsContract,

@@ -4,22 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsExportTransformContext } from '../../../../../src/core/server/saved_objects/export/types';
-import type { SavedObjectsTypeMappingDefinition } from '../../../../../src/core/server/saved_objects/mappings/types';
-import type { SavedObjectsServiceSetup } from '../../../../../src/core/server/saved_objects/saved_objects_service';
-import type { SavedObject } from '../../../../../src/core/types/saved_objects';
-import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server/plugin';
-import { getOldestIdleActionTask } from '../../../task_manager/server/queries/oldest_idle_action_task';
+
+import type {
+  SavedObject,
+  SavedObjectsExportTransformContext,
+  SavedObjectsServiceSetup,
+  SavedObjectsTypeMappingDefinition,
+} from 'kibana/server';
+import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import mappings from './mappings.json';
+import { getMigrations } from './migrations';
+import { RawAction } from '../types';
+import { getImportWarnings } from './get_import_warnings';
+import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { ActionTypeRegistry } from '../action_type_registry';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
-import type { RawAction } from '../types';
-import { getImportWarnings } from './get_import_warnings';
-import mappings from './mappings.json';
-import { getMigrations } from './migrations';
-import { transformConnectorsForExport } from './transform_connectors_for_export';
+import { getOldestIdleActionTask } from '../../../task_manager/server';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,

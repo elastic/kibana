@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { KibanaResponseFactory } from '../../../../../src/core/server/http/router/response';
-import type { RouteMethod } from '../../../../../src/core/server/http/router/route';
-import type { RequestHandler } from '../../../../../src/core/server/http/router/router';
+
+import type { KibanaResponseFactory, RequestHandler, RouteMethod } from 'src/core/server';
+
 import type { SecurityRequestHandlerContext } from '../types';
 
 export const createLicensedRouteHandler = <

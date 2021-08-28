@@ -5,22 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup } from '../../../core/server';
-import type { Plugin, PluginInitializerContext } from '../../../core/server/plugins/types';
-import type { UsageCollectionSetup } from '../../usage_collection/server/plugin';
-import { capabilitiesProvider } from './capabilities_provider';
-import { registerRoutes } from './routes';
-import { sampleDataTelemetry } from './saved_objects/sample_data_telemetry';
-import type {
-  SampleDataRegistrySetup,
-  SampleDataRegistryStart,
-} from './services/sample_data/sample_data_registry';
-import { SampleDataRegistry } from './services/sample_data/sample_data_registry';
-import type {
+
+import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import {
+  TutorialsRegistry,
   TutorialsRegistrySetup,
   TutorialsRegistryStart,
-} from './services/tutorials/tutorials_registry';
-import { TutorialsRegistry } from './services/tutorials/tutorials_registry';
+  SampleDataRegistry,
+  SampleDataRegistrySetup,
+  SampleDataRegistryStart,
+} from './services';
+import { UsageCollectionSetup } from '../../usage_collection/server';
+import { capabilitiesProvider } from './capabilities_provider';
+import { sampleDataTelemetry } from './saved_objects';
+import { registerRoutes } from './routes';
 
 interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;

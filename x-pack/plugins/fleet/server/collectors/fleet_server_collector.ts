@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isBoom } from '@hapi/boom';
 
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClient } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import { getAgentStatusForAgentPolicy } from '../services/agents/status';
+import { isBoom } from '@hapi/boom';
+import type { SavedObjectsClient, ElasticsearchClient } from 'kibana/server';
+
+import { packagePolicyService, settingsService } from '../services';
+import { getAgentStatusForAgentPolicy } from '../services/agents';
 import { isFleetServerSetup } from '../services/fleet_server';
-import { packagePolicyService } from '../services/package_policy';
-import * as settingsService from '../services/settings';
 
 const DEFAULT_USAGE = {
   total_all_statuses: 0,

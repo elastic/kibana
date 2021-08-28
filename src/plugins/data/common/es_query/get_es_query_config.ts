@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EsQueryConfig } from '@kbn/es-query';
-import { UI_SETTINGS } from '../constants';
-import type { GetConfigFn } from '../types';
+
+import { EsQueryConfig } from '@kbn/es-query';
+import { GetConfigFn, UI_SETTINGS } from '..';
 
 interface KibanaConfig {
   get: GetConfigFn;

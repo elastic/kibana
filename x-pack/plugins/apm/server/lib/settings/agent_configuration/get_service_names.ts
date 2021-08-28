@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PromiseReturnType } from '../../../../../observability/typings/common';
-import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration/all_option';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { Setup } from '../../helpers/setup_request';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
+import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration/all_option';
 import { getProcessorEventForAggregatedTransactions } from '../../helpers/aggregated_transactions';
-import type { Setup } from '../../helpers/setup_request';
 
 export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
   typeof getServiceNames

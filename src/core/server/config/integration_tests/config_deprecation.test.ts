@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+
 import { mockLoggingSystem } from './config_deprecation.test.mocks';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('configuration deprecations', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;

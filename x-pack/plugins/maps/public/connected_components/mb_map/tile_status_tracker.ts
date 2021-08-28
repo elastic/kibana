@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MapSourceDataEvent } from '@kbn/mapbox-gl';
-import { Map as MapboxMap } from '@kbn/mapbox-gl';
+
+import type { Map as MapboxMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
 import _ from 'lodash';
+import { ILayer } from '../../classes/layers/layer';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
-import type { ILayer } from '../../classes/layers/layer';
 
 interface MbTile {
   // references internal object from mapbox

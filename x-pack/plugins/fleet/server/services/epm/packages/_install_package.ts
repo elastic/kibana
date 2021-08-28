@@ -4,32 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '../../../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../../../src/core/server/saved_objects/types';
-import type { SavedObject } from '../../../../../../../src/core/types/saved_objects';
-import {
-  ASSETS_SAVED_OBJECT_TYPE,
-  MAX_TIME_COMPLETE_INSTALL,
-  PACKAGES_SAVED_OBJECT_TYPE,
-} from '../../../../common/constants/epm';
-import type {
-  AssetReference,
-  InstallablePackage,
-  Installation,
-  InstallSource,
-  InstallType,
-  PackageAssetReference,
-} from '../../../../common/types/models/epm';
-import { ConcurrentInstallOperationError } from '../../../errors';
-import { saveArchiveEntries } from '../archive/storage';
-import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
+
+import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+
+import { MAX_TIME_COMPLETE_INSTALL, ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
+import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import type { AssetReference, Installation, InstallType } from '../../../types';
+import { installTemplates } from '../elasticsearch/template/install';
+import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
+import { getAllTemplateRefs } from '../elasticsearch/template/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
-import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
-import { deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/remove';
-import { getAllTemplateRefs, installTemplates } from '../elasticsearch/template/install';
+import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installTransform } from '../elasticsearch/transform/install';
-import { getKibanaAssets, installKibanaAssets } from '../kibana/assets/install';
+import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
+import { saveArchiveEntries } from '../archive/storage';
+import { ConcurrentInstallOperationError } from '../../../errors';
 
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
 import { deleteKibanaSavedObjectsAssets } from './remove';

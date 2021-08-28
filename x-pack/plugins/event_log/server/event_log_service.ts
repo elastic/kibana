@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Observable } from 'rxjs';
-import type { IClusterClient } from '../../../../src/core/server/elasticsearch/client/cluster_client';
-import type { PluginInitializerContext } from '../../../../src/core/server/plugins/types';
-import type { IEvent } from '../generated/schemas';
-import type { EsContext } from './es/context';
-import { EventLogger } from './event_logger';
-import { Plugin } from './plugin';
-import type { SavedObjectProvider } from './saved_object_provider_registry';
-import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
-import type { IEventLogConfig, IEventLogger, IEventLogService } from './types';
 
+import { Observable } from 'rxjs';
+import { IClusterClient, PluginInitializerContext } from 'src/core/server';
+
+import { Plugin } from './plugin';
+import { EsContext } from './es';
+import { IEvent, IEventLogger, IEventLogService, IEventLogConfig } from './types';
+import { EventLogger } from './event_logger';
+import { SavedObjectProvider, SavedObjectProviderRegistry } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 

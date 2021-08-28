@@ -5,27 +5,32 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
-import { HomePublicPlugin } from './plugin';
 
-export { getDisplayText, INSTRUCTION_VARIANT } from '../common/instruction_variant';
+import { PluginInitializerContext } from 'kibana/public';
+
 export type {
-  EnvironmentSetup,
   FeatureCatalogueSetup,
+  EnvironmentSetup,
+  TutorialSetup,
   HomePublicPluginSetup,
   HomePublicPluginStart,
-  TutorialSetup,
 } from './plugin';
+
 export { FeatureCatalogueCategory } from './services';
+
 export type {
-  Environment,
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
-  TutorialDirectoryHeaderLinkComponent,
-  TutorialDirectoryNoticeComponent,
-  TutorialModuleNoticeComponent,
+  Environment,
   TutorialVariables,
+  TutorialDirectoryNoticeComponent,
+  TutorialDirectoryHeaderLinkComponent,
+  TutorialModuleNoticeComponent,
 } from './services';
+
+export { INSTRUCTION_VARIANT, getDisplayText } from '../common/instruction_variant';
+
+import { HomePublicPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new HomePublicPlugin(initializerContext);

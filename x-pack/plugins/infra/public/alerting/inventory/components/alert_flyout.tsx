@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useContext, useMemo } from 'react';
-import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics/types';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
-import type { InfraWaffleMapOptions } from '../../../lib/lib';
+
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
-import { useAlertPrefillContext } from '../../use_alert_prefill';
+import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
+import { InfraWaffleMapOptions } from '../../../lib/lib';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { useAlertPrefillContext } from '../../../alerting/use_alert_prefill';
 
 interface Props {
   visible?: boolean;

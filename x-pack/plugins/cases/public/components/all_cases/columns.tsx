@@ -4,42 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  EuiAvatar,
+  EuiBadgeGroup,
+  EuiBadge,
+  EuiLink,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
-} from '@elastic/eui';
-import {
-  EuiAvatar,
-  EuiBadge,
-  EuiBadgeGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { CaseType } from '../../../common/api/cases/case';
-import { CaseStatuses } from '../../../common/api/cases/status';
-import type { ActionConnector } from '../../../common/api/connectors';
-import type { Case, DeleteCase, SubCase } from '../../../common/ui/types';
-import { useKibana } from '../../common/lib/kibana/kibana_react';
-import { ALERTS } from '../../common/translations';
-import { useDeleteCases } from '../../containers/use_delete_cases';
-import type { UpdateCase } from '../../containers/use_get_cases';
-import { StatusContextMenu } from '../case_action_bar/status_context_menu';
-import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+
+import {
+  CaseStatuses,
+  CaseType,
+  DeleteCase,
+  Case,
+  SubCase,
+  ActionConnector,
+} from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import type { CaseDetailsHrefSchema, CasesNavigation } from '../links';
-import { CaseDetailsLink } from '../links';
+import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
+import * as i18n from './translations';
+import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
+import { ALERTS } from '../../common/translations';
+import { getActions } from './actions';
+import { UpdateCase } from '../../containers/use_get_cases';
+import { useDeleteCases } from '../../containers/use_delete_cases';
+import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { useKibana } from '../../common/lib/kibana';
+import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
-import { getActions } from './actions';
-import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
-import * as i18n from './translations';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>

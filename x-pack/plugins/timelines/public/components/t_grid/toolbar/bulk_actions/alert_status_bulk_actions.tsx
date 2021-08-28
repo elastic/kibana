@@ -4,23 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useEffect, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
-import { BulkActions } from '.';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import type {
   AlertStatus,
-  OnUpdateAlertStatusError,
-  OnUpdateAlertStatusSuccess,
-  SetEventsDeleted,
   SetEventsLoading,
-} from '../../../../../common/types/timeline/actions';
-import { useStatusBulkActionItems } from '../../../../hooks/use_status_bulk_action_items';
-import * as tGridActions from '../../../../store/t_grid/actions';
+  SetEventsDeleted,
+  OnUpdateAlertStatusSuccess,
+  OnUpdateAlertStatusError,
+} from '../../../../../common';
 import type { Refetch } from '../../../../store/t_grid/inputs';
-import type { TGridModel } from '../../../../store/t_grid/model';
-import * as tGridSelectors from '../../../../store/t_grid/selectors';
-import type { TimelineState } from '../../../../store/t_grid/types';
+import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../../store/t_grid';
+import { BulkActions } from './';
+import { useStatusBulkActionItems } from '../../../../hooks/use_status_bulk_action_items';
 
 interface OwnProps {
   id: string;

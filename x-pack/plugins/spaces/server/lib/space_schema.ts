@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
-import { MAX_SPACE_INITIALS } from '../../common/constants';
+import { MAX_SPACE_INITIALS } from '../../common';
 
 export const SPACE_ID_REGEX = /^[a-z0-9_\-]+$/;
 

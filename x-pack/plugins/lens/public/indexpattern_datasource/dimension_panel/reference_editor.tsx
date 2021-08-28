@@ -5,36 +5,37 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption, EuiFormRowProps } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import type { HttpSetup } from '../../../../../../src/core/public/http/types';
-import type { SavedObjectsClientContract } from '../../../../../../src/core/public/saved_objects/saved_objects_client';
-import type { IUiSettingsClient } from '../../../../../../src/core/public/ui_settings/types';
-import type { DataPublicPluginStart } from '../../../../../../src/plugins/data/public/types';
-import type { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public/storage/types';
-import type { DateRange } from '../../../common/types';
-import { trackUiEvent } from '../../lens_ui_telemetry/factory';
-import type { VisualizationDimensionGroupConfig } from '../../types';
-import type {
-  FieldBasedIndexPatternColumn,
-  OperationType,
-  RequiredReference,
-} from '../operations/definitions';
-import { operationDefinitionMap } from '../operations/definitions';
-import {
-  deleteColumn,
-  insertOrReplaceColumn,
-  isOperationAllowedAsReference,
-} from '../operations/layer_helpers';
-import { getOperationDisplay } from '../operations/operations';
-import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
-import { hasField } from '../utils';
 import './dimension_editor.scss';
-import type { IndexPatternDimensionEditorProps } from './dimension_panel';
-import { FieldSelect } from './field_select';
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFormRow,
+  EuiFormRowProps,
+  EuiSpacer,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+} from '@elastic/eui';
+import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DateRange } from '../../../common';
 import type { OperationSupportMatrix } from './operation_support';
+import type { OperationType } from '../indexpattern';
+import {
+  operationDefinitionMap,
+  getOperationDisplay,
+  insertOrReplaceColumn,
+  deleteColumn,
+  isOperationAllowedAsReference,
+  FieldBasedIndexPatternColumn,
+  RequiredReference,
+} from '../operations';
+import { FieldSelect } from './field_select';
+import { hasField } from '../utils';
+import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
+import { trackUiEvent } from '../../lens_ui_telemetry';
+import { VisualizationDimensionGroupConfig } from '../../types';
+import { IndexPatternDimensionEditorProps } from './dimension_panel';
 
 const operationPanels = getOperationDisplay();
 

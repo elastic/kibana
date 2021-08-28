@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
 import React from 'react';
+import { EuiConfirmModal } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface ConfirmDeleteCaseModalProps {

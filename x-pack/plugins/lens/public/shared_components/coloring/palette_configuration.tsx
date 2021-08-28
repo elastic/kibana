@@ -4,39 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
+import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import {
+  EuiFormRow,
+  htmlIdGenerator,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiSuperSelect,
   EuiIcon,
   EuiIconTip,
   EuiLink,
-  EuiSuperSelect,
   EuiText,
-  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import type { PaletteOutput } from '../../../../../../src/plugins/charts/common/palette';
-import type { PaletteRegistry } from '../../../../../../src/plugins/charts/public/services/palettes/types';
-import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common/types';
-import { CustomStops } from './color_stops';
-import { CUSTOM_PALETTE, defaultPaletteParams, DEFAULT_COLOR_STEPS } from './constants';
-import './palette_configuration.scss';
 import { PalettePicker } from './palette_picker';
+
+import './palette_configuration.scss';
+
+import { CustomStops } from './color_stops';
+import { defaultPaletteParams, CUSTOM_PALETTE, DEFAULT_COLOR_STEPS } from './constants';
+import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
 import {
   getColorStops,
-  getDataMinMax,
   getPaletteStops,
-  getSwitchToCustomParams,
   mergePaletteParams,
+  getDataMinMax,
   remapStopsByNewInterval,
+  getSwitchToCustomParams,
   reversePalette,
   roundStopValues,
 } from './utils';
-
 const idPrefix = htmlIdGenerator()();
 
 const ContinuityOption: FC<{ iconType: string }> = ({ children, iconType }) => {

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type {
   AssetReference,
   CategorySummaryList,
-  InstallType,
-  PackageInfo,
   PackageList,
+  PackageInfo,
   PackageUsageStats,
+  InstallType,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {

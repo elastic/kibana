@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { UsageCollectionSetup } from '../../../../usage_collection/server/plugin';
-import type { Usage } from './fetch';
-import { fetchProvider } from './fetch';
+
+import { fetchProvider, Usage } from './fetch';
+import { UsageCollectionSetup } from '../../../../usage_collection/server';
 
 export async function makeKQLUsageCollector(
   usageCollection: UsageCollectionSetup,

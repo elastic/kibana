@@ -5,11 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EmbeddableInput, PanelState } from '../../../../../embeddable/common/types';
-import type { DashboardPanelState } from '../../../../common/types';
+
+import { PanelState, EmbeddableInput } from '../../../services/embeddable';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
-import type { IPanelPlacementArgs, PanelPlacementMethod } from './dashboard_panel_placement';
-import { findTopLeftMostOpenSpace } from './dashboard_panel_placement';
+import { DashboardPanelState } from '../types';
+import {
+  IPanelPlacementArgs,
+  findTopLeftMostOpenSpace,
+  PanelPlacementMethod,
+} from './dashboard_panel_placement';
 
 /**
  * Creates and initializes a basic panel state.

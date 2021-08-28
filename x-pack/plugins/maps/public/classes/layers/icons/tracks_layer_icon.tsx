@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FunctionComponent } from 'react';
-import React from 'react';
+
+import React, { FunctionComponent } from 'react';
 
 export const TracksLayerIcon: FunctionComponent = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="49" height="25" fill="none" viewBox="0 0 49 25">

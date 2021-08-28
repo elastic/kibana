@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { trackUiEvent } from '../../../lens_ui_telemetry/factory';
-import type { DatasourceDimensionDropHandlerProps, DraggedOperation } from '../../../types';
+import { DatasourceDimensionDropHandlerProps, DraggedOperation } from '../../../types';
 import {
-  copyColumn,
+  insertOrReplaceColumn,
   deleteColumn,
   getColumnOrder,
-  insertOrReplaceColumn,
   reorderByGroups,
-} from '../../operations/layer_helpers';
+  copyColumn,
+} from '../../operations';
 import { mergeLayer } from '../../state_helpers';
-import type { DraggedField, IndexPatternPrivateState } from '../../types';
 import { isDraggedField } from '../../utils';
-import { getField, getNewOperation } from './get_drop_props';
+import { getNewOperation, getField } from './get_drop_props';
+import { IndexPatternPrivateState, DraggedField } from '../../types';
+import { trackUiEvent } from '../../../lens_ui_telemetry';
 
 type DropHandlerProps<T> = DatasourceDimensionDropHandlerProps<IndexPatternPrivateState> & {
   droppedItem: T;

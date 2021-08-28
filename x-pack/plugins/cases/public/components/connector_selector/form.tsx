@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFormRow } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+
 import React, { useCallback } from 'react';
+import { isEmpty } from 'lodash/fp';
+import { EuiFormRow } from '@elastic/eui';
 import styled from 'styled-components';
-import { getFieldValidityAndErrorMessage } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/helpers';
-import type { FieldHook } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/types';
-import type { ActionConnector } from '../../../common/api/connectors';
+
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../common/shared_imports';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
+import { ActionConnector } from '../../../common';
 
 interface ConnectorSelectorProps {
   connectors: ActionConnector[];

@@ -8,7 +8,7 @@
 
 import sinon from 'sinon';
 
-// import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from 'src/core/public';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 import { IFieldType, FieldSpec, fieldList } from '../../common/index_patterns';
 import { IndexPattern, KBN_FIELD_TYPES } from '../';

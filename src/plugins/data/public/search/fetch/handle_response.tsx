@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
-import type { SearchRequest } from '../../../common/search/search_source/fetch/types';
-import type { IKibanaSearchResponse } from '../../../common/search/types';
-import { getNotifications } from '../../services';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
+import { IKibanaSearchResponse } from 'src/plugins/data/common';
 import { ShardFailureOpenModalButton } from '../../ui/shard_failure_modal';
+import { toMountPoint } from '../../../../kibana_react/public';
+import { getNotifications } from '../../services';
+import { SearchRequest } from '..';
 
 export function handleResponse(request: SearchRequest, response: IKibanaSearchResponse) {
   const { rawResponse, warning } = response;

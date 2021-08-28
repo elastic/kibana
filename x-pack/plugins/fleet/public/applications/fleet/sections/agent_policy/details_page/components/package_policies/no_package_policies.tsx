@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo } from 'react';
 
-import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common/constants/plugin';
-import { pagePathGetters } from '../../../../../../../constants/page_paths';
-import { useCapabilities } from '../../../../../../../hooks/use_capabilities';
-import { useStartServices } from '../../../../../../../hooks/use_core';
+import React, { memo } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+
+import { useCapabilities, useStartServices } from '../../../../../hooks';
+import { pagePathGetters, INTEGRATIONS_PLUGIN_ID } from '../../../../../constants';
 
 export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
   const { application } = useStartServices();

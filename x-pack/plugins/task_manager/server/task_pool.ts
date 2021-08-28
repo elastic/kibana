@@ -9,15 +9,14 @@
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
-import type { Logger } from '@kbn/logging';
-import { padStart } from 'lodash';
-import type { Duration } from 'moment';
-import moment from 'moment';
-import { performance } from 'perf_hooks';
 import { Observable, Subject } from 'rxjs';
+import moment, { Duration } from 'moment';
+import { performance } from 'perf_hooks';
+import { padStart } from 'lodash';
+import { Logger } from '../../../../src/core/server';
+import { TaskRunner } from './task_running';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
-import type { TaskManagerStat } from './task_events';
-import type { TaskRunner } from './task_running/task_runner';
+import { TaskManagerStat } from './task_events';
 
 interface Opts {
   maxWorkers$: Observable<number>;

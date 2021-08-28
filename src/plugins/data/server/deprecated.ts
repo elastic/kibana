@@ -5,29 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import {
+  buildQueryFilter,
+  buildCustomFilter,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildRangeFilter,
+  isFilterDisabled,
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  buildEsQuery,
+  buildQueryFromFilters,
+} from '../common';
 /*
  * Filter helper namespace:
  * @deprecated Import helpers from the "@kbn/es-query" package directly instead.
  * @removeBy 8.1
  */
-import {
-  buildCustomFilter,
-  buildEmptyFilter,
-  buildEsQuery,
-  buildExistsFilter,
-  buildFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildQueryFilter,
-  buildQueryFromFilters,
-  buildRangeFilter,
-  fromKueryExpression,
-  isFilterDisabled,
-  nodeTypes,
-  toElasticsearchQuery,
-} from '../common/es_query';
-import { getEsQueryConfig } from '../common/es_query/get_es_query_config';
-
 export const esFilters = {
   buildQueryFilter,
   buildCustomFilter,
@@ -43,6 +42,9 @@ export const esFilters = {
 /*
  * esQuery and esKuery:
  */
+
+import { getEsQueryConfig } from '../common';
+
 /*
  * Filter helper namespace
  * @deprecated Import helpers from the "@kbn/es-query" package directly instead.
@@ -65,4 +67,4 @@ export const esQuery = {
   buildEsQuery,
 };
 
-export type { EsQueryConfig, Filter, IFieldSubType, KueryNode, Query } from '../common';
+export type { Filter, Query, EsQueryConfig, KueryNode, IFieldSubType } from '../common';

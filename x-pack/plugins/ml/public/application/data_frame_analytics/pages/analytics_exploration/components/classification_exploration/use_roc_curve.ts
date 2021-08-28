@@ -4,17 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState } from 'react';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import type { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
+
+import { useState, useEffect } from 'react';
+
+import {
+  isClassificationEvaluateResponse,
+  ResultsSearchQuery,
+  RocCurveItem,
+  ANALYSIS_CONFIG_TYPE,
+} from '../../../../common/analytics';
+import { isKeywordAndTextType } from '../../../../common/fields';
+
 import {
   getDependentVar,
   getPredictionFieldName,
-} from '../../../../../../../common/util/analytics_utils';
-import type { ResultsSearchQuery, RocCurveItem } from '../../../../common/analytics';
-import { isClassificationEvaluateResponse, loadEvalData } from '../../../../common/analytics';
-import { isKeywordAndTextType } from '../../../../common/fields';
+  loadEvalData,
+  DataFrameAnalyticsConfig,
+} from '../../../../common';
+
 import { ACTUAL_CLASS_ID, OTHER_CLASS_ID } from './column_data';
+
 import { isTrainingFilter } from './is_training_filter';
 
 const AUC_VALUE_LABEL = 'AUC';

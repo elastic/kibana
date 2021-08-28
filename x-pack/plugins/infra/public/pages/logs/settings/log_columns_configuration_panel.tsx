@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButtonIcon,
   EuiDragDropContext,
@@ -21,25 +22,20 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
-import type {
-  DragHandleProps,
-  DropResult,
-} from '../../../../../observability/public/typings/eui_draggable';
-import type {
+import { DragHandleProps, DropResult } from '../../../../../observability/public';
+import {
   FieldLogColumnConfiguration,
+  getLogColumnConfigurationId,
+  isMessageLogColumnConfiguration,
+  isTimestampLogColumnConfiguration,
   LogColumnConfiguration,
   MessageLogColumnConfiguration,
   TimestampLogColumnConfiguration,
 } from '../../../utils/source_configuration';
-import {
-  getLogColumnConfigurationId,
-  isMessageLogColumnConfiguration,
-  isTimestampLogColumnConfiguration,
-} from '../../../utils/source_configuration';
 import { AddLogColumnButtonAndPopover } from './add_log_column_popover';
-import type { FormElement } from './form_elements';
+import { FormElement } from './form_elements';
 import { LogSourceConfigurationFormError } from './source_configuration_form_errors';
-import type { FormValidationError } from './validation_errors';
+import { FormValidationError } from './validation_errors';
 
 export const LogColumnsConfigurationPanel = React.memo<{
   availableFields: string[];

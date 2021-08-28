@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,8 +23,10 @@ import React, { useEffect, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { clearCache } from '../../../../services/rest/callApi';
-import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
+import {
+  APIReturnType,
+  callApmApi,
+} from '../../../../services/rest/createCallApmApi';
 
 const APM_INDEX_LABELS = [
   {

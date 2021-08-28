@@ -14,7 +14,7 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { ServiceProfilingFlamegraph } from './service_profiling_flamegraph';
 import { ServiceProfilingTimeline } from './service_profiling_timeline';
 

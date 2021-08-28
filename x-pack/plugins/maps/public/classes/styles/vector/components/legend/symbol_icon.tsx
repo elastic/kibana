@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { Component } from 'react';
 // @ts-expect-error
-import { buildSrcUrl, getMakiSymbolSvg, styleSvg } from '../../symbol_utils';
-
+import { getMakiSymbolSvg, styleSvg, buildSrcUrl } from '../../symbol_utils';
 
 interface Props {
   symbolId: string;

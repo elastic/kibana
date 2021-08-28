@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
 import { FieldsBrowser } from './field_browser';

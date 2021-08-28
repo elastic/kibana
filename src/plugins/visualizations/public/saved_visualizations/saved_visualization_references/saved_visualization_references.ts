@@ -5,17 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type {
+
+import {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectReference,
-} from '../../../../../core/types/saved_objects';
-import { extractReferences as extractSearchSourceReferences } from '../../../../data/common/search/search_source/extract_references';
-import { injectReferences as injectSearchSourceReferences } from '../../../../data/common/search/search_source/inject_references';
-import type { SearchSourceFields } from '../../../../data/common/search/search_source/types';
-import type { SavedVisState, VisSavedObject } from '../../types';
-import { extractControlsReferences, injectControlsReferences } from './controls_references';
+} from '../../../../../core/public';
+import { SavedVisState, VisSavedObject } from '../../types';
+import {
+  extractSearchSourceReferences,
+  injectSearchSourceReferences,
+  SearchSourceFields,
+} from '../../../../data/public';
+
 import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
+import { extractControlsReferences, injectControlsReferences } from './controls_references';
 
 export function extractReferences({
   attributes,

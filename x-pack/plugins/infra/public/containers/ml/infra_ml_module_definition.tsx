@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCallback, useMemo, useState } from 'react';
-import { getJobId } from '../../../common/log_analysis/job_parameters';
+import { getJobId } from '../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import type { JobSummary } from './api/ml_get_jobs_summary_api';
-import type { GetMlModuleResponsePayload, JobDefinition } from './api/ml_get_module';
-import type { ModuleDescriptor, ModuleSourceConfiguration } from './infra_ml_module_types';
+import { JobSummary } from './api/ml_get_jobs_summary_api';
+import { GetMlModuleResponsePayload, JobDefinition } from './api/ml_get_module';
+import { ModuleDescriptor, ModuleSourceConfiguration } from './infra_ml_module_types';
 
 export const useInfraMLModuleDefinition = <JobType extends string>({
   sourceConfiguration: { spaceId, sourceId },

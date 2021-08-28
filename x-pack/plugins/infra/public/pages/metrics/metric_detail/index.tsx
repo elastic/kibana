@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
-import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { withTheme } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { findInventoryModel } from '../../../../common/inventory_models';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import { EuiTheme, withTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { DocumentTitle } from '../../../components/document_title';
-import { InfraLoadingPanel } from '../../../components/loading';
-import { Source } from '../../../containers/metrics_source/source';
-import { useLinkProps } from '../../../hooks/use_link_props';
-import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { inventoryTitle } from '../../../translations';
-import { MetricsPageTemplate } from '../page_template';
-import { NodeDetailsPage } from './components/node_details_page';
-import { useMetadata } from './hooks/use_metadata';
-import { useMetricsTimeContext } from './hooks/use_metrics_time';
-import type { NavItem } from './lib/side_nav_context';
 import { withMetricPageProviders } from './page_providers';
+import { useMetadata } from './hooks/use_metadata';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { Source } from '../../../containers/metrics_source';
+import { InfraLoadingPanel } from '../../../components/loading';
+import { findInventoryModel } from '../../../../common/inventory_models';
+import { NavItem } from './lib/side_nav_context';
+import { NodeDetailsPage } from './components/node_details_page';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { useMetricsTimeContext } from './hooks/use_metrics_time';
+import { useLinkProps } from '../../../hooks/use_link_props';
+import { MetricsPageTemplate } from '../page_template';
+import { inventoryTitle } from '../../../translations';
 
 interface Props {
   theme: EuiTheme | undefined;

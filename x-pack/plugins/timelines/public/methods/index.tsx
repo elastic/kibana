@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
-import React, { lazy, Suspense } from 'react';
-import { Provider } from 'react-redux';
 import type { Store } from 'redux';
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public/types';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public/storage/storage';
-import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
-import type { LastUpdatedAtProps } from '../components/last_updated';
-import type { LoadingPanelProps } from '../components/loading';
-import type { FieldBrowserProps } from '../components/t_grid/toolbar/fields_browser/types';
-import { createStore } from '../store/t_grid';
-import { initialTGridState } from '../store/t_grid/reducer';
+import { Provider } from 'react-redux';
+import type { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import type { TGridProps } from '../types';
+import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from '../components';
+import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
+import { initialTGridState } from '../store/t_grid/reducer';
+import { createStore } from '../store/t_grid';
 
 const initializeStore = ({
   store,

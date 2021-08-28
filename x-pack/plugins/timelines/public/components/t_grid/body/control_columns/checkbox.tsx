@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import type { ActionProps, HeaderActionProps } from '../../../../../common/types/timeline/actions';
+import { ActionProps, HeaderActionProps } from '../../../../../common';
 import * as i18n from './translations';
 
 export const RowCheckBox = ({

@@ -4,37 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiOutsideClickDetector,
-  EuiPanel,
-  EuiPortal,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-} from '@elastic/eui';
+
+import { EuiPortal, EuiTabs, EuiTab, EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo, useState } from 'react';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public/context/context';
-import { findInventoryModel } from '../../../../../../common/inventory_models';
-import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import { useLinkProps } from '../../../../../hooks/use_link_props';
-import type { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
-import { getNodeDetailUrl } from '../../../../link_to/redirect_to_node_detail';
-import { createUptimeLink } from '../../lib/create_uptime_link';
-import { AnomaliesTab } from './tabs/anomalies/anomalies';
-import { LogsTab } from './tabs/logs';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiOutsideClickDetector } from '@elastic/eui';
+import { EuiIcon, EuiButtonIcon } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetricsTab } from './tabs/metrics/metrics';
-import { OsqueryTab } from './tabs/osquery';
+import { LogsTab } from './tabs/logs';
 import { ProcessesTab } from './tabs/processes';
-import { PropertiesTab } from './tabs/properties';
-import { OVERLAY_BOTTOM_MARGIN, OVERLAY_Y_START } from './tabs/shared';
+import { PropertiesTab } from './tabs/properties/index';
+import { AnomaliesTab } from './tabs/anomalies/anomalies';
+import { OsqueryTab } from './tabs/osquery';
+import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN } from './tabs/shared';
+import { useLinkProps } from '../../../../../hooks/use_link_props';
+import { getNodeDetailUrl } from '../../../../link_to';
+import { findInventoryModel } from '../../../../../../common/inventory_models';
+import { createUptimeLink } from '../../lib/create_uptime_link';
 
 interface Props {
   isOpen: boolean;

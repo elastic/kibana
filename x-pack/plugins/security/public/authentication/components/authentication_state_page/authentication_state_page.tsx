@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import './authentication_state_page.scss';
+
 import { EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import './authentication_state_page.scss';
 
 interface Props {
   className?: string;

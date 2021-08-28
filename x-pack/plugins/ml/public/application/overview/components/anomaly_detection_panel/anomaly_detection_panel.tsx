@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, Fragment, useState, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,20 +17,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import type { FC } from 'react';
-import React, { Fragment, useEffect, useState } from 'react';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import type {
-  MlSummaryJob,
-  MlSummaryJobs,
-} from '../../../../../common/types/anomaly_detection_jobs/summary_job';
-import type { Dictionary } from '../../../../../common/types/common';
-import { useMlKibana } from '../../../contexts/kibana/kibana_context';
-import { useMlLocator } from '../../../contexts/kibana/use_create_url';
-import { useNavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
-import { ml } from '../../../services/ml_api_service';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
-import { getGroupsFromJobs, getJobsWithTimerange, getStatsBarData } from './utils';
+import { ml } from '../../../services/ml_api_service';
+import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
+import { Dictionary } from '../../../../../common/types/common';
+import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 
 export type GroupsDictionary = Dictionary<Group>;
 

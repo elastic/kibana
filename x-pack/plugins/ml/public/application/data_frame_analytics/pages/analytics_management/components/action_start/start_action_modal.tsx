@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import type { StartAction } from './use_start_action';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+
+import { StartAction } from './use_start_action';
 
 export const StartActionModal: FC<StartAction> = ({ closeModal, item, startAndCloseModal }) => {
   return (

@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { BehaviorSubject } from 'rxjs';
-import type { CoreStart } from '../../../../../core/public/types';
-import type { AppUpdater } from '../../../../../core/public/application/types';
-import type { PluginInitializerContext } from '../../../../../core/public/plugins/plugin_context';
+import { CoreStart, AppUpdater, PluginInitializerContext } from 'src/core/public';
 
 /**
  * A factory function for creating a service.

@@ -4,35 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IEsSearchRequest } from '../../../../../../src/plugins/data/common/search/strategies/es_search/types';
-import type { ESQuery } from '../../typed_json';
+
+import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
+import { ESQuery } from '../../typed_json';
 import {
-  DataProviderType,
-  RowRendererId,
-  TimelineStatus,
-  TimelineType,
-} from '../../types/timeline';
-import type {
-  DocValueFields,
-  Maybe,
-  PaginationInputPaginated,
-  SortField,
-  TimerangeInput,
-} from '../common';
-import { EntityType, TimelineEventsQueries } from './events';
-import type {
+  TimelineEventsQueries,
   TimelineEventsAllRequestOptions,
   TimelineEventsAllStrategyResponse,
-} from './events/all';
-import type {
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
-} from './events/details';
-import type {
   TimelineEventsLastEventTimeRequestOptions,
   TimelineEventsLastEventTimeStrategyResponse,
   TimelineKpiStrategyResponse,
-} from './events/last_event_time';
+  EntityType,
+} from './events';
+import {
+  DocValueFields,
+  PaginationInputPaginated,
+  TimerangeInput,
+  SortField,
+  Maybe,
+} from '../common';
+import {
+  DataProviderType,
+  TimelineType,
+  TimelineStatus,
+  RowRendererId,
+} from '../../types/timeline';
 
 export * from './events';
 

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 
 export const NO_DATA = i18n.translate('xpack.observability.ux.coreVitals.noData', {

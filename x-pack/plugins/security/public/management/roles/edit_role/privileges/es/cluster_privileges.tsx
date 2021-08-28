@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import type { Role } from '../../../../../../common/model/role';
-import { isRoleReadOnly } from '../../../../../../common/model/role';
+import type { Role } from '../../../../../../common/model';
+import { isRoleReadOnly } from '../../../../../../common/model';
 
 interface Props {
   role: Role;

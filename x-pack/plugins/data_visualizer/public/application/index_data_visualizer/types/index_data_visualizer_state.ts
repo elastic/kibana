@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Query } from '../../../../../../../src/plugins/data/common/query';
-import type { SearchQueryLanguage } from './combined_query';
+
+import { Query } from '../../../../../../../src/plugins/data/common/query';
+import { SearchQueryLanguage } from './combined_query';
 
 export interface ListingPageUrlState {
   pageSize: number;

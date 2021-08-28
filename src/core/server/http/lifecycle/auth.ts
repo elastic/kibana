@@ -5,14 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Request, ResponseToolkit } from '@hapi/hapi';
-import { Lifecycle } from '@hapi/hapi';
-import type { Logger } from '@kbn/logging';
-import type { ResponseHeaders } from '../router/headers';
-import { KibanaRequest } from '../router/request';
-import type { IKibanaResponse, LifecycleResponseFactory } from '../router/response';
-import { isKibanaResponse, lifecycleResponseFactory } from '../router/response';
-import { HapiResponseAdapter } from '../router/response_adapter';
+
+import { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
+import { Logger } from '../../logging';
+import {
+  HapiResponseAdapter,
+  KibanaRequest,
+  IKibanaResponse,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
+  isKibanaResponse,
+  ResponseHeaders,
+} from '../router';
 
 /** @public */
 export enum AuthResultType {

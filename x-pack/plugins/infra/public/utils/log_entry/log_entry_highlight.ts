@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  LogColumn,
+
+import {
   LogEntry,
-  LogFieldColumn,
+  LogColumn,
   LogMessageColumn,
-  LogMessageFieldPart,
+  LogFieldColumn,
   LogMessagePart,
-} from '../../../common/log_entry/log_entry';
+  LogMessageFieldPart,
+} from '../../../common/log_entry';
 
 export interface LogEntryHighlightsMap {
   [entryId: string]: LogEntry[];

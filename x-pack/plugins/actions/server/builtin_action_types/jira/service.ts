@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import axios from 'axios';
-import type { ActionsConfigurationUtilities } from '../../actions_config';
-import { getErrorMessage, request } from '../lib/axios_utils';
-import * as i18n from './translations';
-import type {
+
+import { Logger } from '../../../../../../src/core/server';
+import {
   CreateCommentParams,
   CreateIncidentParams,
   ExternalService,
@@ -26,6 +24,10 @@ import type {
   ResponseError,
   UpdateIncidentParams,
 } from './types';
+
+import * as i18n from './translations';
+import { request, getErrorMessage } from '../lib/axios_utils';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;

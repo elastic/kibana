@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { BroadcastChannel as BroadcastChannelType } from 'broadcast-channel';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -12,9 +13,10 @@ import { skip, tap, throttleTime } from 'rxjs/operators';
 import type {
   HttpFetchOptionsWithPath,
   HttpSetup,
-} from '../../../../../src/core/public/http/types';
-import type { NotificationsSetup } from '../../../../../src/core/public/notifications/notifications_service';
-import type { Toast } from '../../../../../src/core/public/notifications/toasts/toasts_api';
+  NotificationsSetup,
+  Toast,
+} from 'src/core/public';
+
 import {
   SESSION_CHECK_MS,
   SESSION_EXPIRATION_WARNING_MS,

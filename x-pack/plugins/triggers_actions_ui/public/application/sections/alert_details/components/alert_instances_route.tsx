@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
-import { ToastsApi } from '../../../../../../../../src/core/public/notifications/toasts/toasts_api';
-import type { AlertInstanceSummary } from '../../../../../../alerting/common/alert_instance_summary';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { Alert, AlertType } from '../../../../types';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import type { ComponentOpts as AlertApis } from '../../common/components/with_bulk_alert_api_operations';
-import { withBulkAlertOperations } from '../../common/components/with_bulk_alert_api_operations';
+import { ToastsApi } from 'kibana/public';
+import React, { useState, useEffect } from 'react';
+import { Alert, AlertInstanceSummary, AlertType } from '../../../../types';
+import {
+  ComponentOpts as AlertApis,
+  withBulkAlertOperations,
+} from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesWithApi as AlertInstances } from './alert_instances';
+import { useKibana } from '../../../../common/lib/kibana';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 type WithAlertInstanceSummaryProps = {
   alert: Alert;

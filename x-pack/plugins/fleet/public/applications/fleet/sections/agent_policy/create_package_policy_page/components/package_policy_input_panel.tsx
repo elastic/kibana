@@ -4,28 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
+
+import React, { useState, Fragment, memo, useMemo } from 'react';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, memo, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiText,
+  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import type { PackagePolicyInputValidationResults } from '../../../../../../../common/services/validate_package_policy';
-import { countValidationErrors } from '../../../../../../../common/services/validate_package_policy';
-import type { RegistryInput, RegistryStream } from '../../../../../../../common/types/models/epm';
 import type {
   NewPackagePolicyInput,
   PackagePolicyInputStream,
-} from '../../../../../../../common/types/models/package_policy';
-import { hasInvalidButRequiredVar } from '../services/has_invalid_but_required_var';
+  RegistryInput,
+  RegistryStream,
+} from '../../../../types';
+import type { PackagePolicyInputValidationResults } from '../services';
+import { hasInvalidButRequiredVar, countValidationErrors } from '../services';
 
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';

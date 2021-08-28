@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Request, ResponseToolkit } from '@hapi/hapi';
-import { Server } from '@hapi/hapi';
-import type { Logger } from '@kbn/logging';
-import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
+
+import { Request, ResponseToolkit, Server } from '@hapi/hapi';
 import { format as formatUrl } from 'url';
+import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
+
+import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
 
 export class HttpsRedirectServer {

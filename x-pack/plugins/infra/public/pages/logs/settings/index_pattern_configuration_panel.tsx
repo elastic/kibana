@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
-import { useTrackPageview } from '../../../../../observability/public/hooks/use_track_metric';
-import type { LogIndexPatternReference } from '../../../../common/log_sources/log_source_configuration';
+import { useTrackPageview } from '../../../../../observability/public';
+import { LogIndexPatternReference } from '../../../../common/log_sources';
 import { useLinkProps } from '../../../hooks/use_link_props';
-import type { FormElement } from './form_elements';
+import { FormElement } from './form_elements';
 import { getFormRowProps } from './form_field_props';
 import { IndexPatternSelector } from './index_pattern_selector';
-import type { FormValidationError } from './validation_errors';
+import { FormValidationError } from './validation_errors';
 
 export const IndexPatternConfigurationPanel: React.FC<{
   isLoading: boolean;

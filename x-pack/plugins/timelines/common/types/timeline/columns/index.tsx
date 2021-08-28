@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import type { ReactNode } from 'react';
-import type { IFieldSubType } from '../../../../../../../src/plugins/data/common/es_query';
-import type { BrowserFields } from '../../../search_strategy/index_fields';
-import type { TimelineNonEcsData } from '../../../search_strategy/timeline/events/all';
+
+import { ReactNode } from 'react';
+
+import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { IFieldSubType } from '../../../../../../../src/plugins/data/common';
+import { BrowserFields } from '../../../search_strategy/index_fields';
+import { TimelineNonEcsData } from '../../../search_strategy/timeline';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 

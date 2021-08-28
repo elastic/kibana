@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import {
-  CATEGORY_EXAMPLES_ERROR_LIMIT,
-  CATEGORY_EXAMPLES_VALIDATION_STATUS,
-  CATEGORY_EXAMPLES_WARNING_LIMIT,
+  VALID_TOKEN_COUNT,
   MEDIAN_LINE_LENGTH_LIMIT,
   NULL_COUNT_PERCENT_LIMIT,
-  VALID_TOKEN_COUNT,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
+  CATEGORY_EXAMPLES_ERROR_LIMIT,
+  CATEGORY_EXAMPLES_WARNING_LIMIT,
 } from '../../../../../common/constants/categorization_job';
-import type {
-  CategoryFieldExample,
+import {
   FieldExampleCheck,
+  CategoryFieldExample,
+  VALIDATION_RESULT,
 } from '../../../../../common/types/categories';
-import { VALIDATION_RESULT } from '../../../../../common/types/categories';
 import { getMedianStringLength } from '../../../../../common/util/string_utils';
 
 export class ValidationResults {

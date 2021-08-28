@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useState } from 'react';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+
+import { useState, useCallback } from 'react';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 export const useDeleteSavedObject = (type: string) => {
   const kibana = useKibana();

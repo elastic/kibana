@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { ElasticsearchClient } from 'src/core/server';
 import { chunk } from 'lodash';
-import type { ElasticsearchClient } from '../../../../../../../src/core/server/elasticsearch/client/types';
-import type { ApmIndicesConfig } from '../../../../../observability/common/typings';
-import type {
-  SearchServiceFetchParams,
-  SearchServiceParams,
-} from '../../../../common/search_strategies/correlations/types';
+import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
+import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { asyncSearchServiceLogProvider } from '../correlations/async_search_service_log';
-import { fetchTransactionDurationFieldCandidates } from '../correlations/queries/query_field_candidates';
 import { asyncErrorCorrelationsSearchServiceStateProvider } from './async_search_service_state';
-import { ERROR_CORRELATION_THRESHOLD } from './constants';
+import { fetchTransactionDurationFieldCandidates } from '../correlations/queries';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
 import { fetchFailedTransactionsCorrelationPValues } from './queries/query_failure_correlation';
+import { ERROR_CORRELATION_THRESHOLD } from './constants';
 
 export const asyncErrorCorrelationSearchServiceProvider = (
   esClient: ElasticsearchClient,

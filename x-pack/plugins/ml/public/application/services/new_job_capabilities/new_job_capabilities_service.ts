@@ -4,12 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/types';
-import type { AggId, Aggregation, Field, FieldId } from '../../../../common/types/fields';
-import { EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import {
+  Field,
+  Aggregation,
+  AggId,
+  FieldId,
+  EVENT_RATE_FIELD_ID,
+} from '../../../../common/types/fields';
+import { ES_FIELD_TYPES, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { ml } from '../ml_api_service';
-import { NewJobCapabilitiesServiceBase, processTextAndKeywordFields } from './new_job_capabilities';
+import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
 const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP];
 

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
-import type { Ecs } from '../../../../../../cases/common/ui/types';
+import { isEmpty } from 'lodash';
+
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
-import type { TopAlert } from '../../../../pages/alerts';
 import { parseAlert } from '../../../../pages/alerts/parse_alert';
+import { TopAlert } from '../../../../pages/alerts/';
 import { useKibana } from '../../../../utils/kibana_react';
+import { Ecs } from '../../../../../../cases/common';
 
 // no alerts in observability so far
 // dummy hook for now as hooks cannot be called conditionally

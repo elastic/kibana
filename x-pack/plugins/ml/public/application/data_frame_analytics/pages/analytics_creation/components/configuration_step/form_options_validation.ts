@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
+
 import { i18n } from '@kbn/i18n';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+import { estypes } from '@elastic/elasticsearch';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
+import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../common/fields';
-import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 export const CATEGORICAL_TYPES = new Set(['ip', 'keyword']);
 

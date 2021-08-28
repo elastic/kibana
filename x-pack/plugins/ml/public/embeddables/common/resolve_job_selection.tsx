@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { CoreStart } from 'kibana/public';
 import moment from 'moment';
-import React from 'react';
-import { from } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import type { CoreStart } from '../../../../../../src/core/public/types';
-import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public/dashboard_constants';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context/context';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs/job';
-import { getMlGlobalServices } from '../../application/app';
+import { from } from 'rxjs';
+import React from 'react';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
+import {
+  KibanaContextProvider,
+  toMountPoint,
+} from '../../../../../../src/plugins/kibana_react/public';
+import { getMlGlobalServices } from '../../application/app';
+import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
+import { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { JobSelectorFlyout } from './components/job_selector_flyout';
 
 /**

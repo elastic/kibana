@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import type { CoreSetup } from '../../../../src/core/server';
-import type { Plugin, PluginInitializerContext } from '../../../../src/core/server/plugins/types';
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server/plugin';
+
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CloudConfigType } from './config';
+import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
-import { registerCloudUsageCollector } from './collectors/cloud_usage_collector';
-import type { CloudConfigType } from './config';
-import { registerFullstoryRoute } from './routes/fullstory';
 import { parseDeploymentIdFromDeploymentUrl } from './utils';
+import { registerFullstoryRoute } from './routes/fullstory';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;

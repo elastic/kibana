@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { lazy } from 'react';
-import type { ActionTypeModel } from '../../../../../triggers_actions_ui/public/types';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionTypeModel } from '../../../../../triggers_actions_ui/public/types';
+import { CaseActionParams } from './types';
 import * as i18n from './translations';
-import type { CaseActionParams } from './types';
 
 interface ValidationResult {
   errors: {

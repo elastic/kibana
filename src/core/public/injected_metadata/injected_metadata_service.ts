@@ -5,13 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EnvironmentMode, PackageInfo } from '@kbn/config';
-import { deepFreeze } from '@kbn/std';
+
 import { get } from 'lodash';
-import type { IExternalUrlPolicy } from '../../server/external_url/external_url_config';
-import type { DiscoveredPlugin, PluginName } from '../../server/plugins/types';
-import type { AppCategory } from '../../types/app_category';
-import type { UiSettingsParams, UserProvidedValues } from '../../types/ui_settings';
+import { deepFreeze } from '@kbn/std';
+import { DiscoveredPlugin, PluginName } from '../../server';
+import {
+  EnvironmentMode,
+  IExternalUrlPolicy,
+  PackageInfo,
+  UiSettingsParams,
+  UserProvidedValues,
+} from '../../server/types';
+import { AppCategory } from '../';
 
 export interface InjectedPluginMetadata {
   id: PluginName;

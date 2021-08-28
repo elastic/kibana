@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ArchivePackage, RegistryPackage } from '../../../../common/types/models/epm';
-import { appContextService } from '../../app_context';
 
-import type { ArchiveEntry } from '.';
+import type { ArchivePackage, RegistryPackage } from '../../../../common';
+import { appContextService } from '../../';
+
+import type { ArchiveEntry } from './index';
 
 const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
 export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);

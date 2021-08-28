@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { chunk } from 'lodash';
 import moment from 'moment';
-import { MB } from '../../common/constants';
-import type {
+import { i18n } from '@kbn/i18n';
+import { getHttp } from '../kibana_services';
+import {
   ImportDoc,
   ImportFailure,
   ImportResponse,
-  IngestPipeline,
   Mappings,
   Settings,
-} from '../../common/types';
-import { getHttp } from '../kibana_services';
-import type { CreateDocsResponse, IImporter, ImportResults } from './types';
+  IngestPipeline,
+  MB,
+} from '../../common';
+import { CreateDocsResponse, IImporter, ImportResults } from './types';
 
 const CHUNK_SIZE = 5000;
 export const MAX_CHUNK_CHAR_COUNT = 1000000;

@@ -5,24 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import semverSatisfies from 'semver/functions/satisfies';
 import uuid from 'uuid';
-import type {
-  RawSavedDashboardPanel610,
-  RawSavedDashboardPanel620,
+import {
+  GridData,
+  SavedDashboardPanelTo60,
+  SavedDashboardPanel620,
+  SavedDashboardPanel630,
+  SavedDashboardPanel610,
+} from './';
+import {
+  RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel630,
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
-  RawSavedDashboardPanelTo60,
+  RawSavedDashboardPanel610,
+  RawSavedDashboardPanel620,
 } from './bwc/types';
-import type { GridData } from './embeddable/types';
-import type {
-  SavedDashboardPanel610,
-  SavedDashboardPanel620,
-  SavedDashboardPanel630,
-  SavedDashboardPanelTo60,
-} from './types';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;

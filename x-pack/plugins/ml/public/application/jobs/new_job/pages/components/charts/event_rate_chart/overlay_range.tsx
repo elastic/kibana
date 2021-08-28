@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
+
+import React, { FC } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import type { FC } from 'react';
-import React from 'react';
+import { RectAnnotation, LineAnnotation, AnnotationDomainType, Position } from '@elastic/charts';
 import { timeFormatter } from '../../../../../../../../common/util/date_utils';
-import { useCurrentEuiTheme } from '../../../../../../components/color_range_legend/use_color_range';
+import { useCurrentEuiTheme } from '../../../../../../components/color_range_legend';
 
 interface Props {
   overlayKey: number;

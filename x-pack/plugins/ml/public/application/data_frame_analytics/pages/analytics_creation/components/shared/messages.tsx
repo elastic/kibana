@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment, FC } from 'react';
+
 import { EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
-import type { FormMessage } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+
+import { FormMessage } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 interface Props {
   messages: FormMessage[];

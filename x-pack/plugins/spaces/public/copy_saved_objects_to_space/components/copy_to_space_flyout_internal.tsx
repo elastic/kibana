@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -23,11 +24,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { ProcessedImportResponse } from '../../../../../../src/plugins/saved_objects_management/public/lib/process_import_response';
-import { processImportResponse } from '../../../../../../src/plugins/saved_objects_management/public/lib/process_import_response';
-import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
-import { useSpaces } from '../../spaces_context/context';
+import { processImportResponse } from '../../../../../../src/plugins/saved_objects_management/public';
+import { useSpaces } from '../../spaces_context';
 import type { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';

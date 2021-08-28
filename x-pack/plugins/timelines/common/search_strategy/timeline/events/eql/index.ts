@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type {
+
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
-} from '../../../../../../../../src/plugins/data/common/search/strategies/eql_search/types';
-import type { Inspect, Maybe, PaginationInputPaginated } from '../../../common';
-import type { EqlSearchResponse } from '../../../eql';
-import type { TimelineEdges, TimelineEventsAllRequestOptions } from '../all';
+} from '../../../../../../../../src/plugins/data/common';
+import { EqlSearchResponse, Inspect, Maybe, PaginationInputPaginated } from '../../..';
+import { TimelineEdges, TimelineEventsAllRequestOptions } from '../..';
 
 export interface TimelineEqlRequestOptions
   extends EqlSearchStrategyRequest,

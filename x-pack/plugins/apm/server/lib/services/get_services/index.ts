@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
+
+import { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
 import { hasHistoricalAgentData } from './has_historical_agent_data';

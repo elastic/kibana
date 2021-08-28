@@ -6,16 +6,13 @@
  */
 
 import React from 'react';
-import type {
-  SizeDynamicOptions,
-  SizeStaticOptions,
-} from '../../../../../../common/descriptor_types/style_property_descriptor_types';
-import type { Props } from '../style_prop_editor';
-import { StylePropEditor } from '../style_prop_editor';
+
+import { Props, StylePropEditor } from '../style_prop_editor';
 // @ts-expect-error
 import { DynamicSizeForm } from './dynamic_size_form';
 // @ts-expect-error
 import { StaticSizeForm } from './static_size_form';
+import { SizeDynamicOptions, SizeStaticOptions } from '../../../../../../common/descriptor_types';
 
 type SizeEditorProps = Omit<Props<SizeStaticOptions, SizeDynamicOptions>, 'children'>;
 

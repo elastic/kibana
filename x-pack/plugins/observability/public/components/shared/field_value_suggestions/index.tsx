@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useState } from 'react';
 import { useValuesList } from '../../../hooks/use_values_list';
-import { FieldValueCombobox } from './field_value_combobox';
 import { FieldValueSelection } from './field_value_selection';
-import type { FieldValueSuggestionsProps } from './types';
+import { FieldValueSuggestionsProps } from './types';
+import { FieldValueCombobox } from './field_value_combobox';
 
 export function FieldValueSuggestions({
   fullWidth,

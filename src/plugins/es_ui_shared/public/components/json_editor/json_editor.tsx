@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
+
 import { EuiCodeEditor } from '../code_editor';
-import type { OnJsonEditorUpdateHandler } from './use_json';
-import { useJson } from './use_json';
+import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 
 interface Props<T extends object = { [key: string]: any }> {
   onUpdate: OnJsonEditorUpdateHandler<T>;

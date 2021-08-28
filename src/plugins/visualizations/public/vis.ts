@@ -5,20 +5,32 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+/**
+ * @name Vis
+ *
+ * @description This class consists of aggs, params, listeners, title, and type.
+ *  - Aggs: Instances of IAggConfig.
+ *  - Params: The settings in the Options tab.
+ *
+ * Not to be confused with vislib/vis.js.
+ */
+
+import { isFunction, defaults, cloneDeep } from 'lodash';
+import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
-import type { Assign } from '@kbn/utility-types';
-import { cloneDeep, defaults, isFunction } from 'lodash';
-import { IndexPattern } from '../../data/common/index_patterns/index_patterns/index_pattern';
-import type { AggConfigOptions } from '../../data/common/search/aggs/agg_config';
-import type { IAggConfigs } from '../../data/common/search/aggs/agg_configs';
-import type {
+
+import { PersistedState } from './persisted_state';
+import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
+import {
+  IAggConfigs,
+  IndexPattern,
   ISearchSource,
+  AggConfigOptions,
   SearchSourceFields,
-} from '../../data/common/search/search_source/types';
-import type { VisParams } from '../common/types';
-import { PersistedState } from './persisted_state/persisted_state';
-import { getAggs, getSavedSearchLoader, getSearch, getTypes } from './services';
-import { BaseVisType } from './vis_types/base_vis_type';
+} from '../../../plugins/data/public';
+import { BaseVisType } from './vis_types';
+import { VisParams } from '../common/types';
 
 export interface SerializedVisData {
   expression?: string;

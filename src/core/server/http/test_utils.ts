@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Env } from '@kbn/config';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import moment from 'moment';
+
 import { BehaviorSubject } from 'rxjs';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
-import type { CoreContext } from '../core_context';
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import moment from 'moment';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { Env } from '../config';
 import { HttpService } from './http_service';
+import { CoreContext } from '../core_context';
+import { getEnvOptions, configServiceMock } from '../config/mocks';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 const coreId = Symbol('core');
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import './expression.scss';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
-} from '../../../../../src/plugins/expressions/common/expression_renderers/types';
-import type { MetricChartProps } from '../../common/expressions/metric_chart/metric_chart';
-import type { FormatFactory } from '../../common/types';
-import { LensIconChartMetric } from '../assets/chart_metric';
-import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
-import { VisualizationContainer } from '../visualization_container';
+} from '../../../../../src/plugins/expressions/public';
 import { AutoScale } from './auto_scale';
-import './expression.scss';
+import { VisualizationContainer } from '../visualization_container';
+import { EmptyPlaceholder } from '../shared_components';
+import { LensIconChartMetric } from '../assets/chart_metric';
+import type { FormatFactory } from '../../common';
+import type { MetricChartProps } from '../../common/expressions';
 
 export { metricChart } from '../../common/expressions';
-export type { MetricConfig, MetricState } from '../../common/expressions';
+export type { MetricState, MetricConfig } from '../../common/expressions';
 
 export const getMetricChartRenderer = (
   formatFactory: FormatFactory

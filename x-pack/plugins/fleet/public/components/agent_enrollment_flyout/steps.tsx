@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { useCallback, useMemo } from 'react';
+import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import semver from 'semver';
 
-import type { AgentPolicy } from '../../../common/types/models/agent_policy';
-import { useKibanaVersion } from '../../hooks/use_kibana_version';
+import type { AgentPolicy } from '../../types';
+import { useKibanaVersion } from '../../hooks';
 
-import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
+import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
 export const DownloadStep = () => {
   const kibanaVersion = useKibanaVersion();

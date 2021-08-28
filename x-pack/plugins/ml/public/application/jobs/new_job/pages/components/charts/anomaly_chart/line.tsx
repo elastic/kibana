@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CurveType, LineSeries, ScaleType } from '@elastic/charts';
-import type { FC } from 'react';
-import React from 'react';
+
+import React, { FC } from 'react';
+import { LineSeries, ScaleType, CurveType } from '@elastic/charts';
 import { seriesStyle, useChartColors } from '../common/settings';
 
 interface Props {

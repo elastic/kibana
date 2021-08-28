@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
-import type { FC } from 'react';
-import React from 'react';
-import type { Field, SplitField } from '../../../../../../../../../common/types/fields';
+
+import React, { FC } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+
+import { Field, SplitField } from '../../../../../../../../../common/types/fields';
 
 interface DropDownLabel {
   label: string;

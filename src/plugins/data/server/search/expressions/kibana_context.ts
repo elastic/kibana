@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { StartServicesAccessor } from '../../../../../core/server';
-import type { SavedObjectsClientCommon } from '../../../common/index_patterns/types';
-import { getKibanaContextFn } from '../../../common/search/expressions/kibana_context';
-import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+
+import { StartServicesAccessor } from 'src/core/server';
+import { getKibanaContextFn } from '../../../common/search/expressions';
+import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+import { SavedObjectsClientCommon } from '../../../common/index_patterns';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies

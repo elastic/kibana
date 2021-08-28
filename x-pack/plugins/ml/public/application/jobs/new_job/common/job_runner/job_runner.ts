@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { BehaviorSubject } from 'rxjs';
-import { DATAFEED_STATE } from '../../../../../../common/constants/states';
-import type { DatafeedId } from '../../../../../../common/types/anomaly_detection_jobs/datafeed';
-import type { JobId } from '../../../../../../common/types/anomaly_detection_jobs/job';
-import { mlJobService } from '../../../../services/job_service';
 import { ml } from '../../../../services/ml_api_service';
-import { JobCreator } from '../job_creator/job_creator';
+import { mlJobService } from '../../../../services/job_service';
+import { JobCreator } from '../job_creator';
+import { DatafeedId, JobId } from '../../../../../../common/types/anomaly_detection_jobs';
+import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 
 const REFRESH_INTERVAL_MS = 250;
 const NODE_ASSIGNMENT_CHECK_REFRESH_INTERVAL_MS = 2000;

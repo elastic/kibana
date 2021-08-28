@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
 
-import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type { SessionStorageFactory } from '../../../../../src/core/server/http/session_storage';
-import type { HttpServiceSetup } from '../../../../../src/core/server/http/types';
+import type {
+  HttpServiceSetup,
+  KibanaRequest,
+  Logger,
+  SessionStorageFactory,
+} from 'src/core/server';
+
 import type { ConfigType } from '../config';
 
 /**

@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
+
 import { EuiToken, EuiToolTip } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import { JOB_FIELD_TYPES } from '../../../../../common/constants';
-import type { JobFieldType } from '../../../../../common/types/job_field_type';
+
 import { getJobTypeAriaLabel } from '../../util/field_types_utils';
+import { JOB_FIELD_TYPES } from '../../../../../common';
+import type { JobFieldType } from '../../../../../common';
 
 interface FieldTypeIconProps {
   tooltipEnabled: boolean;

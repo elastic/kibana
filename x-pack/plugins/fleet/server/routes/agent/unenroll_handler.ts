@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
 import type {
   PostAgentUnenrollResponse,
   PostBulkAgentUnenrollResponse,
-} from '../../../common/types/rest_spec/agent';
-import { defaultIngestErrorHandler } from '../../errors/handlers';
-import * as AgentService from '../../services/agents';
-import { licenseService } from '../../services/license';
+} from '../../../common/types';
 import type {
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
-} from '../../types/rest_spec/agent';
+} from '../../types';
+import { licenseService } from '../../services';
+import * as AgentService from '../../services/agents';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const postAgentUnenrollHandler: RequestHandler<
   TypeOf<typeof PostAgentUnenrollRequestSchema.params>,

@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingChart } from '@elastic/eui';
-import classNames from 'classnames';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { EmbeddableInput } from '../../../../../embeddable/common/types';
-import type { IContainer } from '../../../../../embeddable/public/lib/containers/i_container';
-import { Embeddable } from '../../../../../embeddable/public/lib/embeddables/embeddable';
+import { EuiLoadingChart } from '@elastic/eui';
+import classNames from 'classnames';
+import { Embeddable, EmbeddableInput, IContainer } from '../../../services/embeddable';
 
 export const PLACEHOLDER_EMBEDDABLE = 'placeholder';
 

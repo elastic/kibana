@@ -5,24 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { FC } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCheckboxGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
   EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
   EuiSpacer,
+  EuiFormRow,
+  EuiCheckboxGroup,
   EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React from 'react';
 
 export interface ExportModalProps {
   onExport: () => void;

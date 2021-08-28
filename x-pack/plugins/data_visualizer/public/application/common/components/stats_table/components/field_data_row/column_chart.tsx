@@ -4,14 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BarSeries, Chart, Settings } from '@elastic/charts';
-import type { EuiDataGridColumn } from '@elastic/eui';
+
+import React, { FC } from 'react';
 import classNames from 'classnames';
-import type { FC } from 'react';
-import React from 'react';
+
+import { BarSeries, Chart, Settings } from '@elastic/charts';
+import { EuiDataGridColumn } from '@elastic/eui';
+
 import './column_chart.scss';
-import type { ChartData } from './field_histograms';
-import { isUnsupportedChartData } from './field_histograms';
+
+import { isUnsupportedChartData, ChartData } from './field_histograms';
+
 import { useColumnChart } from './use_column_chart';
 
 interface Props {

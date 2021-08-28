@@ -5,20 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IConfigService } from '@kbn/config';
-import { deepFreeze, pick } from '@kbn/std';
-import type { PathConfigType } from '@kbn/utils';
-import { config as pathConfig } from '@kbn/utils';
-import { combineLatest, Observable } from 'rxjs';
+
 import { map, shareReplay } from 'rxjs/operators';
-import type { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { config as elasticsearchConfig } from '../elasticsearch/elasticsearch_config';
-import type { KibanaConfigType } from '../kibana_config';
-import { config as kibanaConfig } from '../kibana_config';
-import type { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
-import { savedObjectsConfig } from '../saved_objects/saved_objects_config';
-import type { SharedGlobalConfig } from './types';
-import { SharedGlobalConfigKeys } from './types';
+import { combineLatest, Observable } from 'rxjs';
+import { PathConfigType, config as pathConfig } from '@kbn/utils';
+import { pick, deepFreeze } from '@kbn/std';
+import { IConfigService } from '@kbn/config';
+
+import { SharedGlobalConfig, SharedGlobalConfigKeys } from './types';
+import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
+import {
+  ElasticsearchConfigType,
+  config as elasticsearchConfig,
+} from '../elasticsearch/elasticsearch_config';
+import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
 
 const createGlobalConfig = ({
   kibana,

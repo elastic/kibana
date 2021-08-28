@@ -7,20 +7,21 @@
  */
 import { i18n } from '@kbn/i18n';
 import { filter } from 'rxjs/operators';
-import { SearchSource } from '../../../../../../data/common/search/search_source/search_source';
-import { tabifyAggResponse } from '../../../../../../data/common/search/tabify/tabify';
-import { isCompleteResponse } from '../../../../../../data/common/search/utils';
-import { search } from '../../../../../../data/public';
-import type { DataPublicPluginStart } from '../../../../../../data/public/types';
-import type { Adapters } from '../../../../../../inspector/common/adapters/types';
-import type { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common/state_containers/types';
-import { FetchStatus } from '../../../types';
+import {
+  DataPublicPluginStart,
+  isCompleteResponse,
+  search,
+  SearchSource,
+} from '../../../../../../data/public';
+import { Adapters } from '../../../../../../inspector';
+import { getChartAggConfigs, getDimensions } from './index';
+import { tabifyAggResponse } from '../../../../../../data/common';
 import { buildPointSeriesData } from '../components/chart/point_series';
-import type { AppState } from '../services/discover_state';
-import type { SavedSearchData } from '../services/use_saved_search';
+import { FetchStatus } from '../../../types';
+import { SavedSearchData } from '../services/use_saved_search';
+import { AppState } from '../services/discover_state';
+import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
 import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
-import { getChartAggConfigs } from './get_chart_agg_configs';
-import { getDimensions } from './get_dimensions';
 
 export function fetchChart(
   data$: SavedSearchData,

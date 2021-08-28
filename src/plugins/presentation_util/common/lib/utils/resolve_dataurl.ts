@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { get } from 'lodash';
+import { isValidUrl } from './url';
+import { missingImage } from './missing_asset';
+
 /*
  * NOTE: args.dataurl can come as an expression here.
  * For example:
  *   [{"type":"expression","chain":[{"type":"function","function":"asset","arguments":{"_":["..."]}}]}]
  */
-import { get } from 'lodash';
-import { missingImage } from './missing_asset';
-import { isValidUrl } from './url';
-
 export const resolveFromArgs = (args: any, defaultDataurl: string | null = null): string => {
   const dataurl = get(args, 'dataurl.0', null);
   return isValidUrl(dataurl) ? dataurl : defaultDataurl;

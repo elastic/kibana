@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+
 import React, { memo } from 'react';
-import * as i18n from './translations';
+import { EuiFlexGroup, EuiFlexItem, EuiAvatar } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
+
 import { UserActionUsername } from './user_action_username';
+import * as i18n from './translations';
 
 interface UserActionUsernameWithAvatarProps {
   username?: string | null;

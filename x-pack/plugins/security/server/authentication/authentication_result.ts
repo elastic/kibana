@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AuthHeaders } from '../../../../../src/core/server/http/lifecycle/auth';
-import type { AuthenticatedUser } from '../../common/model/authenticated_user';
+
+import type { AuthHeaders } from 'src/core/server';
+
+import type { AuthenticatedUser } from '../../common/model';
 
 /**
  * Represents status that `AuthenticationResult` can be in.

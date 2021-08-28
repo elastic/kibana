@@ -7,6 +7,7 @@
  */
 
 import Boom from '@hapi/boom';
+
 import { decodeVersion } from './decode_version';
 
 describe('decodeVersion', () => {

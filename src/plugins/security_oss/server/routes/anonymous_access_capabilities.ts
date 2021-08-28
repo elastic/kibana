@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IRouter } from '../../../../core/server/http/router/router';
+
+import type { IRouter } from 'src/core/server';
+
 import type { AnonymousAccessService } from '../plugin';
 
 interface Deps {

@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButtonIcon } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useState } from 'react';
 import styled, { css } from 'styled-components';
-import type { InspectQuery } from '../../store/t_grid/inputs';
+
 import { ModalInspectQuery } from './modal';
 import * as i18n from './translations';
+import { InspectQuery } from '../../store/t_grid/inputs';
 
 export const BUTTON_CLASS = 'inspectButtonComponent';
 

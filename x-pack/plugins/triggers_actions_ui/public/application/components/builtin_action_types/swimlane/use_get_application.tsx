@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useRef, useState } from 'react';
-import { ToastsApi } from '../../../../../../../../src/core/public/notifications/toasts/toasts_api';
+
+import { useState, useCallback, useRef } from 'react';
+import { ToastsApi } from 'kibana/public';
 import { getApplication as getApplicationApi } from './api';
 import * as i18n from './translations';
-import type { SwimlaneFieldMappingConfig } from './types';
+import { SwimlaneFieldMappingConfig } from './types';
 
 interface Props {
   toastNotifications: Pick<

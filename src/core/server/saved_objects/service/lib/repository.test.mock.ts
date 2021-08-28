@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
+
+import type { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
 import type * as InternalUtils from './internal_utils';
-import { updateObjectsSpaces } from './update_objects_spaces';
+import type { updateObjectsSpaces } from './update_objects_spaces';
 
 export const mockCollectMultiNamespaceReferences = jest.fn() as jest.MockedFunction<
   typeof collectMultiNamespaceReferences

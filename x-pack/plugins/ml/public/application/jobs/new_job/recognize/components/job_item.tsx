@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, memo } from 'react';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -16,13 +18,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { memo } from 'react';
-import type { DatafeedResponse, JobOverride } from '../../../../../../common/types/modules';
-import { extractErrorMessage } from '../../../../../../common/util/errors/process_errors';
-import { tabColor } from '../../../../../../common/util/group_color_utils';
-import type { ModuleJobUI } from '../page';
+import { ModuleJobUI } from '../page';
 import { SETUP_RESULTS_WIDTH } from './module_jobs';
+import { tabColor } from '../../../../../../common/util/group_color_utils';
+import { JobOverride, DatafeedResponse } from '../../../../../../common/types/modules';
+import { extractErrorMessage } from '../../../../../../common/util/errors';
 
 interface JobItemProps {
   job: ModuleJobUI;

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { ALLOWED_DATA_UNITS } from '../constants/validation';
-import { isPopulatedObject } from './object_utils';
 import { parseInterval } from './parse_interval';
+import { isPopulatedObject } from './object_utils';
 
 /**
  * Provides a validator function for maximum allowed input length.

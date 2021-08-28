@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getFieldIdFromDraggable, KEYBOARD_DRAG_OFFSET } from '@kbn/securitysolution-t-grid';
-import { isString, keyBy } from 'lodash/fp';
+
 import type { DropResult, FluidDragActions, Position } from 'react-beautiful-dnd';
-import type { Dispatch } from 'redux';
-import type { BrowserField, BrowserFields } from '../../../common/search_strategy/index_fields';
-import { TimelineId } from '../../../common/types/timeline';
-import type { ColumnHeaderOptions } from '../../../common/types/timeline/columns';
-import { stopPropagationAndPreventDefault } from '../../../common/utils/accessibility/helpers';
-import * as tGridActions from '../../store/t_grid/actions';
+import { KEYBOARD_DRAG_OFFSET, getFieldIdFromDraggable } from '@kbn/securitysolution-t-grid';
+import { Dispatch } from 'redux';
+import { isString, keyBy } from 'lodash/fp';
+
+import { stopPropagationAndPreventDefault, TimelineId } from '../../../common';
+import type { BrowserField, BrowserFields, ColumnHeaderOptions } from '../../../common';
+import { tGridActions } from '../../store/t_grid';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../t_grid/body/constants';
 
 /**

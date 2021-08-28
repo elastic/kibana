@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { LegacyAuditLogger } from '../../../security/server/audit/audit_service';
+
+import { LegacyAuditLogger } from '../../../security/server';
 
 export enum ScopeType {
   Consumer,

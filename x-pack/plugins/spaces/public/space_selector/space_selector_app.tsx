@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 
-import type { StartServicesAccessor } from '../../../../../src/core/public/types';
-import type {
-  ApplicationSetup,
-  AppMountParameters,
-} from '../../../../../src/core/public/application/types';
-import type { SpacesManager } from '../spaces_manager/spaces_manager';
+import { i18n } from '@kbn/i18n';
+import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
+
+import type { SpacesManager } from '../spaces_manager';
 
 interface CreateDeps {
   application: ApplicationSetup;

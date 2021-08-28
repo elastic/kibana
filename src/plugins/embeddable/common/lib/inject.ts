@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { SavedObjectReference } from '../../../../core/types/saved_objects';
-import type { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
+import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
+import { SavedObjectReference } from '../../../../core/types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
 
 export const getInjectFunction = (embeddables: CommonEmbeddableStartContract) => {

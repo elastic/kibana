@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import type { KibanaResponseFactory } from '../../../core/server/http/router/response';
-import { KbnError } from '../common/errors/errors';
+import { KibanaResponseFactory } from 'kibana/server';
+import { KbnError } from '../common';
 
 export class KbnServerError extends KbnError {
   public errBody?: Record<string, any>;

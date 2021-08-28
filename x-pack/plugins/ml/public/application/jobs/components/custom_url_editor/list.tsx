@@ -4,26 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useState, ChangeEvent } from 'react';
+
 import {
   EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiTextArea,
   EuiToolTip,
+  EuiTextArea,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ChangeEvent, FC } from 'react';
-import React, { useState } from 'react';
-import type { Job } from '../../../../../common/types/anomaly_detection_jobs/job';
-import type { KibanaUrlConfig, UrlConfig } from '../../../../../common/types/custom_urls';
-import { parseInterval } from '../../../../../common/util/parse_interval';
-import { useMlKibana } from '../../../contexts/kibana/kibana_context';
+import { useMlKibana } from '../../../contexts/kibana';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
-import { TIME_RANGE_TYPE } from './constants';
 import { getTestUrl } from './utils';
+
+import { parseInterval } from '../../../../../common/util/parse_interval';
+import { TIME_RANGE_TYPE } from './constants';
+import { UrlConfig, KibanaUrlConfig } from '../../../../../common/types/custom_urls';
+import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: KibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.

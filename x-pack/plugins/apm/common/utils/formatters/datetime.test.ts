@@ -7,8 +7,8 @@
 
 import moment from 'moment-timezone';
 import {
-  asAbsoluteDateTime,
   asRelativeDateTimeRange,
+  asAbsoluteDateTime,
   getDateDifference,
 } from './datetime';
 

@@ -4,16 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  HttpStart,
+  IBasePath,
+} from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { HttpStart, IBasePath } from '../../../../src/core/public/http/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public/plugin';
-import type { AuthenticatedUser } from '../../security/common/model/authenticated_user';
-import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/public/plugin';
-import { ELASTIC_SUPPORT_LINK } from '../common/constants';
+import type {
+  AuthenticatedUser,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '../../security/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
+import { ELASTIC_SUPPORT_LINK } from '../common/constants';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
 

@@ -4,51 +4,53 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ElementClickListener,
-  HeatmapBrushEvent,
-  HeatmapElementEvent,
-  HeatmapSpec,
-  TooltipSettings,
-  TooltipValue,
-} from '@elastic/charts';
-import { Chart, Heatmap, Position, ScaleType, Settings } from '@elastic/charts';
+
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiText,
   EuiLoadingChart,
   EuiResizeObserver,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import { throttle } from 'lodash';
-import moment from 'moment';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common/constants/anomalies';
-import type { AnnotationsTable } from '../../../common/types/annotations';
-import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
-import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
-import { useUiSettings } from '../contexts/kibana/use_ui_settings_context';
-import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
-import { mlEscape } from '../util/string_utils';
-import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
-import type { SwimlaneType } from './explorer_constants';
-import { SWIMLANE_TYPE } from './explorer_constants';
-import type {
-  AppStateSelectedCells,
-  OverallSwimlaneData,
-  ViewBySwimLaneData,
-} from './explorer_utils';
 import {
-  X_AXIS_RIGHT_OVERFLOW,
-  Y_AXIS_LABEL_FONT_COLOR,
-  Y_AXIS_LABEL_PADDING,
-  Y_AXIS_LABEL_WIDTH,
-} from './swimlane_annotation_container';
+  Chart,
+  Settings,
+  Heatmap,
+  HeatmapElementEvent,
+  ElementClickListener,
+  TooltipValue,
+  HeatmapSpec,
+  TooltipSettings,
+  HeatmapBrushEvent,
+  Position,
+  ScaleType,
+} from '@elastic/charts';
+import moment from 'moment';
+
+import { i18n } from '@kbn/i18n';
 import { SwimLanePagination } from './swimlane_pagination';
+import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
+import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
+import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
+import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
+import { mlEscape } from '../util/string_utils';
+import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
+import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
+
 import './_explorer.scss';
+import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
+import { useUiSettings } from '../contexts/kibana';
+import {
+  Y_AXIS_LABEL_WIDTH,
+  Y_AXIS_LABEL_PADDING,
+  Y_AXIS_LABEL_FONT_COLOR,
+  X_AXIS_RIGHT_OVERFLOW,
+} from './swimlane_annotation_container';
+import { AnnotationsTable } from '../../../common/types/annotations';
 
 declare global {
   interface Window {

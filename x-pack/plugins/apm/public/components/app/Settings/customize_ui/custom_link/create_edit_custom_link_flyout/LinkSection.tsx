@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiFieldText,
   EuiFormRow,
@@ -13,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { CustomLink } from '../../../../../../../common/custom_link/custom_link_types';
+import { CustomLink } from '../../../../../../../common/custom_link/custom_link_types';
 import { Documentation } from './Documentation';
 
 interface InputField {

@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { createContext } from 'react';
-import type { Aggregation, Field } from '../../../../../../common/types/fields';
-import type { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { Field, Aggregation } from '../../../../../../common/types/fields';
 import { TimeBuckets } from '../../../../util/time_buckets';
-import { ChartLoader } from '../../common/chart_loader/chart_loader';
-import { SingleMetricJobCreator } from '../../common/job_creator/single_metric_job_creator';
-import type { JobCreatorType } from '../../common/job_creator/type_guards';
-import { JobValidator } from '../../common/job_validator/job_validator';
-import { ResultsLoader } from '../../common/results_loader/results_loader';
+import { JobCreatorType, SingleMetricJobCreator } from '../../common/job_creator';
+import { ChartLoader } from '../../common/chart_loader';
+import { ResultsLoader } from '../../common/results_loader';
+import { JobValidator } from '../../common/job_validator';
+import { ExistingJobsAndGroups } from '../../../../services/job_service';
 
 export interface JobCreatorContextValue {
   jobCreatorUpdated: number;

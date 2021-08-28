@@ -4,36 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Observable } from 'rxjs';
-import { ML_BASE_PATH } from '../../../../common/constants/app';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
-import type { JobAction } from '../../../../common/constants/job_actions';
-import type { CombinedJobWithStats } from '../../../../common/types/anomaly_detection_jobs/combined_job';
-import type {
-  Datafeed,
-  IndicesOptions,
-} from '../../../../common/types/anomaly_detection_jobs/datafeed';
-import type { Job } from '../../../../common/types/anomaly_detection_jobs/job';
+import { HttpService } from '../http_service';
+
+import type { Dictionary } from '../../../../common/types/common';
 import type {
   MlJobWithTimeRange,
   MlSummaryJobs,
-} from '../../../../common/types/anomaly_detection_jobs/summary_job';
+  CombinedJobWithStats,
+  Job,
+  Datafeed,
+  IndicesOptions,
+} from '../../../../common/types/anomaly_detection_jobs';
 import type { JobMessage } from '../../../../common/types/audit_message';
+import type { JobAction } from '../../../../common/constants/job_actions';
+import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
+import type { ExistingJobsAndGroups } from '../job_service';
 import type {
   CategorizationAnalyzer,
-  Category,
   CategoryFieldExample,
   FieldExampleCheck,
 } from '../../../../common/types/categories';
-import type { Dictionary } from '../../../../common/types/common';
-import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
+import type { Category } from '../../../../common/types/categories';
 import type {
-  BulkCreateResults,
   JobsExistResponse,
+  BulkCreateResults,
   ResetJobsResponse,
 } from '../../../../common/types/job_service';
-import { HttpService } from '../http_service';
-import type { ExistingJobsAndGroups } from '../job_service';
+import { ML_BASE_PATH } from '../../../../common/constants/app';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
   jobsSummary(jobIds: string[]) {

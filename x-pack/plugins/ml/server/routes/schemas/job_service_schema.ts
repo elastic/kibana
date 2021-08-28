@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
 import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';

@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { CurveType, Fit, LineSeries, ScaleType } from '@elastic/charts';
+import React, { useEffect } from 'react';
+import numeral from '@elastic/numeral';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
 } from '@elastic/eui/dist/eui_charts_theme';
-import numeral from '@elastic/numeral';
-import React, { useEffect } from 'react';
-import type { PercentileRange } from '.';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import { PercentileRange } from './index';
 import { useBreakdowns } from './use_breakdowns';
+import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   field: string;

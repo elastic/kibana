@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ElasticsearchClient } from '../../elasticsearch/client/types';
+
+import { ElasticsearchClient } from '../../elasticsearch';
 import { next } from './next';
-import type { State } from './types';
+import { State } from './types';
 
 describe('migrations v2 next', () => {
   it.todo('when state.retryDelay > 0 delays execution of the next action');

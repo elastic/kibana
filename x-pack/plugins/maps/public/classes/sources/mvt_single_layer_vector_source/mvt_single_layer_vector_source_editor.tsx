@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Component, ChangeEvent } from 'react';
+import _ from 'lodash';
 import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
-import type { ChangeEvent } from 'react';
-import React, { Component } from 'react';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
-import type {
+import {
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceSettings,
-} from '../../../../common/descriptor_types/source_descriptor_types';
+} from '../../../../common/descriptor_types';
 import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
 
 interface Props {

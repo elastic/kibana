@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility/helpers';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../clipboard';
-import { SUCCESS_TOAST_TITLE } from '../../clipboard/translations';
+import { i18n } from '@kbn/i18n';
+
+import { stopPropagationAndPreventDefault } from '../../../../common';
 import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';
+import { HoverActionComponentProps } from './types';
+import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../clipboard';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { COPY_TO_CLIPBOARD } from '../../t_grid/body/translations';
-import type { HoverActionComponentProps } from './types';
+import { SUCCESS_TOAST_TITLE } from '../../clipboard/translations';
 
 export const FIELD = i18n.translate('xpack.timelines.hoverActions.fieldLabel', {
   defaultMessage: 'Field',

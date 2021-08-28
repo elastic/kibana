@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Direction } from '@elastic/eui';
 import type {
   CustomPaletteState,
   PaletteOutput,
-} from '../../../../../../src/plugins/charts/common/palette';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
-import type { DatatableColumn } from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+} from '../../../../../../src/plugins/charts/common';
+import type {
+  ExpressionFunctionDefinition,
+  DatatableColumn,
+} from '../../../../../../src/plugins/expressions/common';
 import type { CustomPaletteParams } from '../../types';
 
 export type LensGridDirection = 'none' | Direction;

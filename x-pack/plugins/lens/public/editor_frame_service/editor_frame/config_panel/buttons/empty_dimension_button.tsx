@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { DragDrop } from '../../../../drag_drop/drag_drop';
-import { DragContext } from '../../../../drag_drop/providers/providers';
-import type { DragDropIdentifier } from '../../../../drag_drop/providers/types';
-import { generateId } from '../../../../id_generator/id_generator';
-import type { Datasource, DropType, VisualizationDimensionGroupConfig } from '../../../../types';
-import type { LayerDatasourceDropProps } from '../types';
-import { getAdditionalClassesOnDroppable, getCustomDropTarget } from './drop_targets_utils';
+import { i18n } from '@kbn/i18n';
+import { generateId } from '../../../../id_generator';
+import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
+
+import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../../types';
+import { LayerDatasourceDropProps } from '../types';
+import { getCustomDropTarget, getAdditionalClassesOnDroppable } from './drop_targets_utils';
 
 const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
   defaultMessage: 'Empty dimension',

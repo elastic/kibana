@@ -8,12 +8,12 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
+
+import { AppDependencies } from './app_context';
+import { AppProviders } from './app_providers';
 // @ts-ignore
 import { App } from './app.container';
-import type { AppDependencies } from './app_context';
-import { AppProviders } from './app_providers';
 
-// @ts-ignore
 const AppWithRouter = (props: { [key: string]: any }) => (
   <Router history={props.history}>
     <App {...props} />

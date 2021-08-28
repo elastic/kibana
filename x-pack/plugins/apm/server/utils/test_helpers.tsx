@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { APMConfig } from '..';
-import type {
+
+import { APMConfig } from '../';
+import { PromiseReturnType } from '../../../observability/typings/common';
+import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../src/core/types/elasticsearch';
-import type { PromiseReturnType } from '../../../observability/typings/common';
-import type { UxUIFilters } from '../../typings/ui_filters';
+import { UxUIFilters } from '../../typings/ui_filters';
 
 interface Options {
   mockResponse?: (

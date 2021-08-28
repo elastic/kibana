@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import { SavedObjectSaveModal } from '../../../../../../../saved_objects/public/save_modal/saved_object_save_modal';
-import { showSaveModal } from '../../../../../../../saved_objects/public/save_modal/show_saved_object_save_modal';
-import type { DiscoverServices } from '../../../../../build_services';
-import type { SavedSearch } from '../../../../../saved_searches/types';
+import { i18n } from '@kbn/i18n';
+import { SavedObjectSaveModal, showSaveModal } from '../../../../../../../saved_objects/public';
+import { SavedSearch } from '../../../../../saved_searches';
+import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns';
+import { DiscoverServices } from '../../../../../build_services';
+import { GetStateReturn } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../helpers/breadcrumbs';
-import type { GetStateReturn } from '../../services/discover_state';
 import { persistSavedSearch } from '../../utils/persist_saved_search';
 
 async function saveDataSource({

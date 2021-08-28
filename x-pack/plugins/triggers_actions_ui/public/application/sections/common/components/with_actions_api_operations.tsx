@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import type { ActionType } from '../../../../../../actions/common/types';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { loadActionTypes } from '../../../lib/action_connector_api/connector_types';
+
+import { ActionType } from '../../../../types';
+import { loadActionTypes } from '../../../lib/action_connector_api';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   loadActionTypes: () => Promise<ActionType[]>;

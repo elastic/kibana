@@ -5,19 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { Filter } from '../../data/common/es_query';
-import type { RefreshInterval, TimeRange } from '../../data/common/query/timefilter/types';
-import type { Query } from '../../data/public';
-import { esFilters } from '../../data/public/deprecated';
-import type { QueryState } from '../../data/public/query/state_sync/types';
-import { ViewMode } from '../../embeddable/common/types';
-import { setStateToKbnUrl } from '../../kibana_utils/public/state_management/url/kbn_url_storage';
-import type {
-  LocatorDefinition,
-  LocatorPublic,
-} from '../../share/common/url_service/locators/types';
+import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
+import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';
+import { esFilters } from '../../data/public';
+import { setStateToKbnUrl } from '../../kibana_utils/public';
+import { ViewMode } from '../../embeddable/public';
 import { DashboardConstants } from './dashboard_constants';
 
 const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { DocumentTitle } from '../../../../components/document_title';
-import type { InfraHttpError } from '../../../../types';
-import { ErrorPageBody } from '../../../error';
+import { i18n } from '@kbn/i18n';
 import { InvalidNodeError } from './invalid_node';
+import { DocumentTitle } from '../../../../components/document_title';
+import { ErrorPageBody } from '../../../error';
+import { InfraHttpError } from '../../../../types';
 
 interface Props {
   name: string;

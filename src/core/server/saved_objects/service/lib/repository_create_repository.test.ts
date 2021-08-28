@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { MockedLogger } from '@kbn/logging/mocks';
-import { loggerMock } from '@kbn/logging/mocks';
-import { KibanaMigrator } from '../../migrations/kibana/kibana_migrator';
-import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+
 import { SavedObjectsRepository } from './repository';
+import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
+import { KibanaMigrator } from '../../migrations';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { loggerMock, MockedLogger } from '../../../logging/logger.mock';
 
 jest.mock('./repository');
 

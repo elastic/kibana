@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RoleType } from '../helpers/create_role';
+
+import { RoleType } from '../helpers/create_role';
 
 export const powerUserRole: RoleType = {
   elasticsearch: {

@@ -5,20 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import type {
-  IndexMapping,
-  SavedObjectsMappingProperties,
+
+/**
+ * The MigrationOpts interface defines the minimum set of data required
+ * in order to properly migrate an index. MigrationContext expands this
+ * with computed values and values from the index being migrated, and is
+ * serves as a central blueprint for what migrations will end up doing.
+ */
+
+import { Logger } from '../../../logging';
+import { MigrationEsClient } from './migration_es_client';
+import { SavedObjectsSerializer } from '../../serialization';
+import {
   SavedObjectsTypeMappingDefinitions,
-} from '../../mappings/types';
-import { SavedObjectsSerializer } from '../../serialization/serializer';
-import type { KibanaMigratorStatus } from '../kibana/kibana_migrator';
+  SavedObjectsMappingProperties,
+  IndexMapping,
+} from '../../mappings';
 import { buildActiveMappings } from './build_active_mappings';
-import type { VersionedTransformer } from './document_migrator';
+import { VersionedTransformer } from './document_migrator';
 import * as Index from './elastic_index';
-import type { MigrationEsClient } from './migration_es_client';
-import type { SavedObjectsMigrationLogger } from './migration_logger';
-import { MigrationLogger } from './migration_logger';
+import { SavedObjectsMigrationLogger, MigrationLogger } from './migration_logger';
+import { KibanaMigratorStatus } from '../kibana';
 
 export interface MigrationOpts {
   batchSize: number;

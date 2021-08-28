@@ -5,21 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiToolTip, htmlIdGenerator, keys } from '@elastic/eui';
+
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import ReactResizeDetector from 'react-resize-detector';
+import ReactMonacoEditor from 'react-monaco-editor';
+import { htmlIdGenerator, EuiToolTip, keys } from '@elastic/eui';
+import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import ReactMonacoEditor from 'react-monaco-editor';
-import ReactResizeDetector from 'react-resize-detector';
-import './editor.scss';
+
 import {
   DARK_THEME,
-  DARK_THEME_TRANSPARENT,
   LIGHT_THEME,
+  DARK_THEME_TRANSPARENT,
   LIGHT_THEME_TRANSPARENT,
 } from './editor_theme';
+
+import './editor.scss';
 
 export interface Props {
   /** Width of editor. Defaults to 100%. */

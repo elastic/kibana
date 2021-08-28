@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression } from '@kbn/es-query';
+
+import type { ElasticsearchClient } from 'src/core/server';
 import pMap from 'p-map';
 
-import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../common/constants/agent';
-import * as AgentStatusKueryHelper from '../../../common/services/agent_status';
-import type { AgentStatus } from '../../../common/types/models/agent';
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression } from '@kbn/es-query';
+
+import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import type { AgentStatus } from '../../types';
+import { AgentStatusKueryHelper } from '../../../common/services';
 
 import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
 

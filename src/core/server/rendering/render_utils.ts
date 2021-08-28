@@ -7,7 +7,7 @@
  */
 
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
-import type { PublicUiSettingsParams, UserProvidedValues } from '../../types/ui_settings';
+import { PublicUiSettingsParams, UserProvidedValues } from '../ui_settings';
 
 export const getSettingValue = <T>(
   settingName: string,

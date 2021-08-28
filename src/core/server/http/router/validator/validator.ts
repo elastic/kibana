@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isConfigSchema, ObjectType, schema, Type, ValidationError } from '@kbn/config-schema';
+
+import { ValidationError, ObjectType, Type, schema, isConfigSchema } from '@kbn/config-schema';
 import { Stream } from 'stream';
 import { RouteValidationError } from './validator_error';
 

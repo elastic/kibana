@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import type { Error } from '../types';
+import { Error } from '../types';
 
 interface Props {
   title: React.ReactNode;

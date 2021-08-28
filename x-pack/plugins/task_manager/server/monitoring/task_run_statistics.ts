@@ -4,43 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { JsonObject, JsonValue } from '@kbn/utility-types';
-import { isNumber, mapValues } from 'lodash';
+
 import { combineLatest, Observable } from 'rxjs';
-import { filter, map, startWith } from 'rxjs/operators';
-import type { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
-import type { ClaimAndFillPoolResult } from '../lib/fill_pool';
-import { FillPoolResult } from '../lib/fill_pool';
-import type { Ok } from '../lib/result_type';
-import { isOk, unwrap } from '../lib/result_type';
-import type { TaskLifecycleEvent } from '../polling_lifecycle';
-import { TaskPollingLifecycle } from '../polling_lifecycle';
-import type { ConcreteTaskInstance } from '../task';
-import type {
+import { filter, startWith, map } from 'rxjs/operators';
+import { JsonObject, JsonValue } from '@kbn/utility-types';
+import { isNumber, mapValues } from 'lodash';
+import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
+import { TaskLifecycleEvent } from '../polling_lifecycle';
+import {
+  isTaskRunEvent,
+  isTaskPollingCycleEvent,
+  TaskRun,
   ErroredTask,
   RanTask,
-  TaskClaim,
-  TaskManagerStat,
-  TaskRun,
   TaskTiming,
-} from '../task_events';
-import {
-  isTaskClaimEvent,
   isTaskManagerStatEvent,
-  isTaskPollingCycleEvent,
-  isTaskRunEvent,
+  TaskManagerStat,
   TaskPersistence,
+  TaskClaim,
+  isTaskClaimEvent,
 } from '../task_events';
-import { TaskRunResult } from '../task_running/task_runner';
-import { HealthStatus } from './monitoring_stats_stream';
-import type { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
-import type { AveragedStat } from './task_run_calcultors';
+import { isOk, Ok, unwrap } from '../lib/result_type';
+import { ConcreteTaskInstance } from '../task';
+import { TaskRunResult } from '../task_running';
+import { FillPoolResult, ClaimAndFillPoolResult } from '../lib/fill_pool';
 import {
-  calculateFrequency,
+  AveragedStat,
   calculateRunningAverage,
-  createMapOfRunningAveragedStats,
+  calculateFrequency,
   createRunningAveragedStat,
+  createMapOfRunningAveragedStats,
 } from './task_run_calcultors';
+import { HealthStatus } from './monitoring_stats_stream';
+import { TaskPollingLifecycle } from '../polling_lifecycle';
+import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
 
 interface FillPoolStat extends JsonObject {
   duration: number[];

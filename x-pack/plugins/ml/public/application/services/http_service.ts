@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Observable } from 'rxjs';
-import type {
-  HttpFetchOptions,
-  HttpFetchOptionsWithPath,
-  HttpStart,
-} from '../../../../../../src/core/public/http/types';
+import { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from 'kibana/public';
 import { getHttp } from '../util/dependency_cache';
 
 function getResultHeaders(headers: HeadersInit) {

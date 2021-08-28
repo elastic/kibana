@@ -4,23 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
-import type {
-  CalloutMessage,
-  ValidateAnalyticsJobResponse,
-} from '../../../../../../../common/constants/validation';
-import { VALIDATION_STATUS } from '../../../../../../../common/constants/validation';
-import { extractErrorMessage } from '../../../../../../../common/util/errors/process_errors';
-import { useMlApiContext } from '../../../../../contexts/kibana/use_ml_api_context';
-import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form/use_create_analytics_form';
-import { ANALYTICS_STEPS } from '../../page';
+
+import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { ValidationStep } from './validation_step';
 import { ValidationStepDetails } from './validation_step_details';
+import { ANALYTICS_STEPS } from '../../page';
+import { useMlApiContext } from '../../../../../contexts/kibana';
+import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import {
+  CalloutMessage,
+  ValidateAnalyticsJobResponse,
+  VALIDATION_STATUS,
+} from '../../../../../../../common/constants/validation';
 
 export interface ValidationSummary {
   warning: number;

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiLoadingContent, EuiText } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
-import { sendGetFileByPath } from '../../../../../../../hooks/use_request/epm';
-import { useLinks } from '../../../../../hooks/use_links';
+import { useLinks, sendGetFileByPath } from '../../../../../hooks';
 
 import { markdownRenderers } from './markdown_renderers';
 

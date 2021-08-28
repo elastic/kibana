@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { XYCurveType } from '../../../common/expressions/xy_chart/xy_args';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import type { XYCurveType } from '../../../common/expressions';
 
 export interface LineCurveOptionProps {
   /**

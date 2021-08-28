@@ -5,16 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, EuiSpacer, EuiTextColor } from '@elastic/eui';
+import React, { useState, useMemo, useCallback } from 'react';
+import VirtualList from 'react-tiny-virtual-list';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
-import VirtualList from 'react-tiny-virtual-list';
+import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
+
 import { useFieldEditorContext } from '../../field_editor_context';
-import type { FieldPreview } from '../field_preview_context';
-import { defaultValueFormatter, useFieldPreviewContext } from '../field_preview_context';
-import './field_list.scss';
+import {
+  useFieldPreviewContext,
+  defaultValueFormatter,
+  FieldPreview,
+} from '../field_preview_context';
 import { PreviewListItem } from './field_list_item';
+
+import './field_list.scss';
 
 const ITEM_HEIGHT = 40;
 const SHOW_MORE_HEIGHT = 40;

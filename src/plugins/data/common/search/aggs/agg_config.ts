@@ -6,21 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { Assign, Ensure, SerializableRecord } from '@kbn/utility-types';
-import _ from 'lodash';
 import moment from 'moment';
-import type {
-  ExpressionAstArgument,
+import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { Assign, Ensure } from '@kbn/utility-types';
+
+import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
+import {
   ExpressionAstExpression,
-} from '../../../../expressions/common/ast/types';
-import type { SerializedFieldFormat } from '../../../../expressions/common/types/common';
-import type { ISearchSource } from '../search_source/types';
-import type { ISearchOptions } from '../types';
-import type { IAggConfigs } from './agg_configs';
+  ExpressionAstArgument,
+  SerializedFieldFormat,
+} from 'src/plugins/expressions/common';
+
+import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
-import type { IAggType } from './agg_type';
-import { parseTimeShift } from './utils/parse_time_shift';
+import { IAggConfigs } from './agg_configs';
+import { parseTimeShift } from './utils';
 
 /** @public **/
 export type AggConfigSerialized = Ensure<

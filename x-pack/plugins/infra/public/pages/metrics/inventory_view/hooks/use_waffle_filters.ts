@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import createContainter from 'constate';
+
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import * as rt from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { esKuery } from '../../../../../../../../src/plugins/data/public/deprecated';
+import createContainter from 'constate';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
-import { useSourceContext } from '../../../../containers/metrics_source/source';
-import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import { useUrlState } from '../../../../utils/use_url_state';
+import { useSourceContext } from '../../../../containers/metrics_source';
+import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
+import { esKuery } from '../../../../../../../../src/plugins/data/public';
 
 const validateKuery = (expression: string) => {
   try {

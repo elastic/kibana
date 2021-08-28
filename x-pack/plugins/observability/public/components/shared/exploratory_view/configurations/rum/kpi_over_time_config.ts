@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ConfigProps, SeriesConfig } from '../../types';
-import {
-  FieldLabels,
-  OPERATION_COLUMN,
-  RECORDS_FIELD,
-  REPORT_METRIC_FIELD,
-} from '../constants/constants';
+
+import { ConfigProps, SeriesConfig } from '../../types';
+import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
+import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
@@ -22,13 +19,13 @@ import {
   SERVICE_NAME,
   TBT_FIELD,
   TRANSACTION_DURATION,
-  TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_TYPE,
-  TRANSACTION_URL,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
   USER_AGENT_VERSION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
+  TRANSACTION_URL,
 } from '../constants/elasticsearch_fieldnames';
 import {
   BACKEND_TIME_LABEL,
@@ -41,7 +38,6 @@ import {
   TBT_LABEL,
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
-import { buildPhraseFilter } from '../utils';
 
 export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {

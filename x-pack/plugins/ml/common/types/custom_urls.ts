@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AnomalyRecordDoc } from './anomalies';
+
+import { AnomalyRecordDoc } from './anomalies';
 
 /**
  * Base Interface for basic custom URL.

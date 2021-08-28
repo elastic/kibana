@@ -8,9 +8,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
 import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
-import type { OnFormChangeFn, PackagePolicyVars } from '../typings';
+import { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
-import type { SettingDefinition } from './typings';
+import { SettingDefinition } from './typings';
 import {
   isSettingsFormValid,
   mergeNewVars,

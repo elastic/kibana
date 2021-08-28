@@ -4,29 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { CoreSetup, CoreStart } from 'kibana/public';
+import * as t from 'io-ts';
 import type {
   ClientRequestParamsOf,
   EndpointOf,
+  formatRequest as formatRequestType,
   ReturnOf,
   RouteRepositoryClient,
-  ServerRoute,
   ServerRouteRepository,
+  ServerRoute,
 } from '@kbn/server-route-repository';
-import { formatRequest as formatRequestType } from '@kbn/server-route-repository';
 // @ts-expect-error cannot find module or correspondent type declarations
 // The code and types are at separated folders on @kbn/server-route-repository
 // so in order to do targeted imports they must me imported separately, and
 // an error is expected here
 import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
-import * as t from 'io-ts';
-import type { CoreSetup, CoreStart } from '../../../../../../src/core/public/types';
-import type { FetchOptions } from '../../../common/fetch_options';
-import type { APMServerRouteRepository } from '../../../server/routes/get_global_apm_server_route_repository';
-import type {
-  APMRouteHandlerResources,
-  InspectResponse,
-} from '../../../server/routes/typings';
+import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
+import type {
+  APMServerRouteRepository,
+  InspectResponse,
+  APMRouteHandlerResources,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../server';
 
 export type APMClientOptions = Omit<
   FetchOptions,

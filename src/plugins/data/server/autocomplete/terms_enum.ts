@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '../../../../core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../core/server/saved_objects/types';
-import type { IFieldType } from '../../common/index_patterns/fields/types';
-import type { ConfigSchema } from '../../config';
-import { findIndexPatternById, getFieldByName } from '../index_patterns/utils';
-import { shimAbortSignal } from '../search/strategies/es_search/request_utils';
+import { IFieldType } from '../../common';
+import { findIndexPatternById, getFieldByName } from '../index_patterns';
+import { shimAbortSignal } from '../search';
+import { ConfigSchema } from '../../config';
 
 export async function termsEnumSuggestions(
   config: ConfigSchema,

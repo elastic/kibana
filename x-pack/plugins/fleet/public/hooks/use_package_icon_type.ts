@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ICON_TYPES } from '@elastic/eui';
+
 import { useEffect, useState } from 'react';
+import { ICON_TYPES } from '@elastic/eui';
 
-import type { PackageInfo, PackageListItem } from '../../common/types/models/epm';
-import { useLinks as useEPMLinks } from '../applications/integrations/hooks/use_links';
-
-import { sendGetPackageInfoByKey } from './use_request/epm';
+import type { PackageInfo, PackageListItem } from '../types';
 
 // TODO: Determine whether this can be relocated
+import { useLinks as useEPMLinks } from '../applications/integrations/hooks';
+
+import { sendGetPackageInfoByKey } from './index';
+
 type Package = PackageInfo | PackageListItem;
 
 export interface UsePackageIconType {

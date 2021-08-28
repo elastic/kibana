@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { createWriteStream } from 'fs';
-import { config } from './logging_config';
-import { LoggingSystem } from './logging_system';
 
 const mockStreamWrite = jest.fn();
 jest.mock('fs', () => ({
@@ -25,7 +22,12 @@ jest.mock('@kbn/legacy-logging', () => ({
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
 let mockConsoleLog: jest.SpyInstance;
+
+import { createWriteStream } from 'fs';
 const mockCreateWriteStream = (createWriteStream as unknown) as jest.Mock<typeof createWriteStream>;
+
+import { LoggingSystem, config } from '.';
+
 let system: LoggingSystem;
 beforeEach(() => {
   mockConsoleLog = jest.spyOn(global.console, 'log').mockReturnValue(undefined);

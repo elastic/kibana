@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import styled from 'styled-components';
-import { parseCustomFieldName } from '../../configurations/lens_attributes';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import type { SeriesConfig } from '../../types';
 import { ReportMetricOptions } from '../report_metric_options';
+import { SeriesConfig } from '../../types';
 import { SeriesChartTypesSelect } from './chart_types';
-import { DatePickerCol } from './date_picker_col';
 import { OperationTypeSelect } from './operation_type_select';
+import { DatePickerCol } from './date_picker_col';
+import { parseCustomFieldName } from '../../configurations/lens_attributes';
 import { ReportDefinitionField } from './report_definition_field';
 
 function getColumnType(seriesConfig: SeriesConfig, selectedMetricField?: string) {

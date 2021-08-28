@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { AGG_DELIMITER, AGG_TYPE, COUNT_PROP_NAME, JOIN_FIELD_NAME_PREFIX } from './constants';
 
 export function getJoinAggKey({

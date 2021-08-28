@@ -5,16 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiButton, EuiPopoverFooter } from '@elastic/eui';
-import type { UiCounterMetricType } from '@kbn/analytics';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { useEffect, useState } from 'react';
-import { IndexPatternField } from '../../../../../../../data/common/index_patterns/fields/index_pattern_field';
-import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { VisualizeInformation } from './lib/visualize_trigger_utils';
-import { getVisualizeInformation, triggerVisualizeActions } from './lib/visualize_trigger_utils';
+import { EuiButton, EuiPopoverFooter } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
+
+import { triggerVisualizeActions, VisualizeInformation } from './lib/visualize_trigger_utils';
 import type { FieldDetails } from './types';
+import { getVisualizeInformation } from './lib/visualize_trigger_utils';
 
 interface Props {
   field: IndexPatternField;

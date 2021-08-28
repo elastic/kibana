@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { InventoryFormatterType } from '../inventory_models/types';
+
 import { createBytesFormatter } from './bytes';
-import { formatHighPercision } from './high_precision';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';
+import { InventoryFormatterType } from '../inventory_models/types';
+import { formatHighPercision } from './high_precision';
 import { InfraWaffleMapDataFormat } from './types';
 
 export const FORMATTERS = {

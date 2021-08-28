@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { settingDefinitions } from '../setting_definitions';
-import type { SettingValidation } from '../setting_definitions/types';
+import { SettingValidation } from '../setting_definitions/types';
 
 // retrieve validation from config definitions settings and validate on the server
 const knownSettings = settingDefinitions.reduce<

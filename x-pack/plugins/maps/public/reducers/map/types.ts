@@ -6,20 +6,20 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
-import type { TimeRange } from '../../../../../../src/plugins/data/common/query/timefilter/types';
-import { INITIAL_LOCATION } from '../../../common/constants';
-import type { Timeslice } from '../../../common/descriptor_types/data_request_descriptor_types';
-import type { LayerDescriptor } from '../../../common/descriptor_types/layer_descriptor_types';
-import type {
+
+import {
   DrawState,
   EditState,
   Goto,
+  LayerDescriptor,
   MapCenter,
   MapExtent,
   MapQuery,
+  Timeslice,
   TooltipState,
-} from '../../../common/descriptor_types/map_descriptor';
+} from '../../../common/descriptor_types';
+import { INITIAL_LOCATION } from '../../../common/constants';
+import { Filter, TimeRange } from '../../../../../../src/plugins/data/public';
 
 export type MapContext = {
   zoom?: number;

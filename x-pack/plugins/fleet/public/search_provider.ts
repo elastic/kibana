@@ -4,19 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CoreSetup, CoreStart, ApplicationStart } from 'src/core/public';
+
 import type { Observable } from 'rxjs';
-import { combineLatest, from, of } from 'rxjs';
+import { from, of, combineLatest } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
 
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { ApplicationStart } from '../../../../src/core/public/application/types';
-import type { GlobalSearchProviderResult } from '../../global_search/common/types';
-import type { GlobalSearchResultProvider } from '../../global_search/public/types';
-import { INTEGRATIONS_PLUGIN_ID } from '../common/constants/plugin';
-import type { GetPackagesResponse } from '../common/types/rest_spec/epm';
+import type {
+  GlobalSearchResultProvider,
+  GlobalSearchProviderResult,
+} from '../../global_search/public';
 
-import { pagePathGetters } from './constants/page_paths';
-import { sendGetPackages } from './hooks/use_request/epm';
+import { INTEGRATIONS_PLUGIN_ID } from '../common';
+
+import { sendGetPackages } from './hooks';
+import type { GetPackagesResponse } from './types';
+import { pagePathGetters } from './constants';
 
 const packageType = 'integration';
 

@@ -6,7 +6,8 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import type { SavedObject } from '../../../../src/core/types/saved_objects';
+
+import { SavedObject } from '../../../../src/core/types/saved_objects';
 
 export type MapSavedObjectAttributes = {
   title: string;

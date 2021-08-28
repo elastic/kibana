@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ObservabilityFetchDataPlugins } from '../fetch_overview_data';
+
+import { ObservabilityFetchDataPlugins } from '../fetch_overview_data';
 
 export interface ISection {
   id: ObservabilityFetchDataPlugins | 'alert';

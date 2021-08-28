@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
 
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
-import type { AuthenticationProvider } from '../../common/model/authentication_provider';
+import type { ElasticsearchClient, Logger } from 'src/core/server';
+
+import type { AuthenticationProvider } from '../../common/model';
 import type { ConfigType } from '../config';
 
 export interface SessionIndexOptions {

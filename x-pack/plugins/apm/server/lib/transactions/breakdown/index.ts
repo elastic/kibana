@@ -4,27 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { flatten, last, orderBy } from 'lodash';
-import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../../../observability/server/utils/queries';
+
+import { flatten, orderBy, last } from 'lodash';
+import { asPercent } from '../../../../common/utils/formatters';
+import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   SERVICE_NAME,
-  SPAN_SELF_TIME_SUM,
   SPAN_SUBTYPE,
   SPAN_TYPE,
-  TRANSACTION_BREAKDOWN_COUNT,
-  TRANSACTION_NAME,
+  SPAN_SELF_TIME_SUM,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
+  TRANSACTION_BREAKDOWN_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { asPercent } from '../../../../common/utils/formatters/formatters';
-import { getVizColorForIndex } from '../../../../common/viz_colors';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
-import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { MAX_KPIS } from './constants';
+import { getVizColorForIndex } from '../../../../common/viz_colors';
 
 export async function getTransactionBreakdown({
   environment,

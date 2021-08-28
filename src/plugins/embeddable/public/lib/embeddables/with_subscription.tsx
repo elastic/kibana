@@ -8,8 +8,7 @@
 
 import React from 'react';
 import * as Rx from 'rxjs';
-import type { EmbeddableInput } from '../../../common/types';
-import type { EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 
 export const withEmbeddableSubscription = <
   I extends EmbeddableInput,

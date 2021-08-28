@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart } from '../../../../src/core/public/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public/types';
-import type { FileUploadStartApi } from './api';
+
+import { CoreStart, Plugin } from '../../../../src/core/public';
 import {
-  analyzeFile,
-  checkIndexExists,
+  FileUploadStartApi,
   FileUploadComponent,
-  getTimeFieldRange,
-  hasImportPermission,
   importerFactory,
+  hasImportPermission,
   IndexNameFormComponent,
+  checkIndexExists,
+  getTimeFieldRange,
+  analyzeFile,
 } from './api';
-import { getMaxBytes, getMaxBytesFormatted } from './importer/get_max_bytes';
 import { setStartServices } from './kibana_services';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { getMaxBytes, getMaxBytesFormatted } from './importer/get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FileUploadSetupDependencies {}

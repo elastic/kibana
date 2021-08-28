@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiStepProps } from '@elastic/eui';
-import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo, useState } from 'react';
 
-import type { AgentPolicy } from '../../common/types/models/agent_policy';
-import { useAgentPolicyRefresh } from '../hooks/use_agent_policy_refresh';
-import { useCapabilities } from '../hooks/use_capabilities';
-import { useLink } from '../hooks/use_link';
-import type { InMemoryPackagePolicy } from '../types/in_memory_package_policy';
+import React, { useMemo, useState } from 'react';
+import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
+import type { EuiStepProps } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
+
+import { useAgentPolicyRefresh, useCapabilities, useLink } from '../hooks';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';

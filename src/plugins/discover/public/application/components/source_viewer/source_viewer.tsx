@@ -5,17 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import './source_viewer.scss';
+
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { monaco } from '@kbn/monaco';
-import React, { useEffect, useState } from 'react';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
-import { getServices } from '../../../kibana_services';
-import { ElasticRequestState } from '../doc/elastic_request_state';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useEsDocSearch } from '../doc/use_es_doc_search';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor/json_code_editor_common';
-import './source_viewer.scss';
+import { ElasticRequestState } from '../doc/elastic_request_state';
+import { getServices } from '../../../../public/kibana_services';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 
 interface SourceViewerProps {
   id: string;

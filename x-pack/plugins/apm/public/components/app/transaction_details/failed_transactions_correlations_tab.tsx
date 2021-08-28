@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { useTrackMetric } from '../../../../../observability/public/hooks/use_track_metric';
+
+import { i18n } from '@kbn/i18n';
+
+import {
+  METRIC_TYPE,
+  useTrackMetric,
+} from '../../../../../observability/public';
+
 import { isActivePlatinumLicense } from '../../../../common/license_check';
+
 import { useLicenseContext } from '../../../context/license/use_license_context';
+
 import { LicensePrompt } from '../../shared/license_prompt';
+
 import { FailedTransactionsCorrelations } from '../correlations/failed_transactions_correlations';
+
 import type { TabContentProps } from './types';
 
 function FailedTransactionsCorrelationsTab({ onFilter }: TabContentProps) {

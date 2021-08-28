@@ -4,28 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
+
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import type { APMConfig } from '../..';
-import type { CoreSetup } from '../../../../../../src/core/server';
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server/saved_objects/service/lib/errors';
-import type { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/server/plugin';
-import { unwrapEsResponse } from '../../../../observability/server/utils/unwrap_es_response';
-import type {
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import {
+  CoreSetup,
+  Logger,
+  SavedObjectsErrorHelpers,
+} from '../../../../../../src/core/server';
+import { unwrapEsResponse } from '../../../../observability/server';
+import { APMConfig } from '../..';
+import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server/plugin';
+} from '../../../../task_manager/server';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import type { CollectTelemetryParams } from './collect_data_telemetry';
-import { collectDataTelemetry } from './collect_data_telemetry';
+import {
+  collectDataTelemetry,
+  CollectTelemetryParams,
+} from './collect_data_telemetry';
+import { APMUsage } from './types';
 import { apmSchema } from './schema';
-import type { APMUsage } from './types';
 
 const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 

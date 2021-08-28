@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { mapValues } from 'lodash';
 import React, {
   createContext,
@@ -13,14 +14,16 @@ import React, {
   useState,
 } from 'react';
 import { withRouter } from 'react-router-dom';
+import {
+  UxLocalUIFilterName,
+  uxLocalUIFilterNames,
+} from '../../../common/ux_ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import type { UxLocalUIFilterName } from '../../../common/ux_ui_filter';
-import { uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
-import type { UxUIFilters } from '../../../typings/ui_filters';
+import { UxUIFilters } from '../../../typings/ui_filters';
 import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
 import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
-import type { IUrlParams } from './types';
+import { IUrlParams } from './types';
 
 export interface TimeRange {
   rangeFrom: string;

@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Datatable } from '../../../expressions/common/expression_types/specs/datatable';
-import type { FormatFactory } from '../../../field_formats/common/types';
-import { createEscapeValue } from './escape_value';
 
 // Inspired by the inspector CSV exporter
+
+import { Datatable } from 'src/plugins/expressions';
+import { FormatFactory } from '../../../field_formats/common';
+import { createEscapeValue } from './escape_value';
+
 export const LINE_FEED_CHARACTER = '\r\n';
 export const CSV_MIME_TYPE = 'text/plain;charset=utf-8';
 

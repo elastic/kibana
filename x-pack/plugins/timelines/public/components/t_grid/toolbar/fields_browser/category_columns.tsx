@@ -6,6 +6,7 @@
  */
 
 /* eslint-disable react/display-name */
+
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -16,19 +17,19 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import type { OnUpdateColumns } from '../../../../../common/types/timeline/store';
+
 import { useDeepEqualSelector } from '../../../../hooks/use_selector';
-import * as tGridSelectors from '../../../../store/t_grid/selectors';
-import { getColumnsWithTimestamp } from '../../../utils/helpers';
 import {
-  CountBadge,
+  LoadingSpinner,
   getCategoryPaneCategoryClassName,
   getFieldCount,
-  LoadingSpinner,
   VIEW_ALL_BUTTON_CLASS_NAME,
+  CountBadge,
 } from './helpers';
 import * as i18n from './translations';
+import { tGridSelectors } from '../../../../store/t_grid';
+import { getColumnsWithTimestamp } from '../../../utils/helpers';
+import type { OnUpdateColumns, BrowserFields } from '../../../../../common';
 
 const CategoryName = styled.span<{ bold: boolean }>`
   .euiText {

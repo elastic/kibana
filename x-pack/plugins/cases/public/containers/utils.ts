@@ -4,34 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { set } from '@elastic/safer-lodash-set';
+import { camelCase, isArray, isObject } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { camelCase, isArray, isObject } from 'lodash';
-import type { ToastInputFields } from '../../../../../src/core/public/notifications/toasts/toasts_api';
-import type {
-  CasePatchRequest,
-  CaseResponse,
-  CasesFindResponse,
-  CasesResponse,
-} from '../../common/api/cases/case';
-import { CaseResponseRt, CasesFindResponseRt, CasesResponseRt } from '../../common/api/cases/case';
-import { CommentType } from '../../common/api/cases/comment';
-import type {
-  CasesConfigurationsResponse,
-  CasesConfigureResponse,
-} from '../../common/api/cases/configure';
+
+import { ToastInputFields } from 'kibana/public';
 import {
+  CasesFindResponse,
+  CasesFindResponseRt,
+  CaseResponse,
+  CaseResponseRt,
+  CasesResponse,
+  CasesResponseRt,
+  CasesStatusResponseRt,
+  CasesStatusResponse,
+  throwErrors,
+  CasesConfigurationsResponse,
   CaseConfigurationsResponseRt,
+  CasesConfigureResponse,
   CaseConfigureResponseRt,
-} from '../../common/api/cases/configure';
-import type { CasesStatusResponse } from '../../common/api/cases/status';
-import { CasesStatusResponseRt } from '../../common/api/cases/status';
-import type { CaseUserActionsResponse } from '../../common/api/cases/user_actions';
-import { CaseUserActionsResponseRt } from '../../common/api/cases/user_actions';
-import { throwErrors } from '../../common/api/runtime_types';
-import type { AllCases, Case, UpdateByKey } from '../../common/ui/types';
+  CaseUserActionsResponse,
+  CaseUserActionsResponseRt,
+  CommentType,
+  CasePatchRequest,
+} from '../../common';
+import { AllCases, Case, UpdateByKey } from './types';
 import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;

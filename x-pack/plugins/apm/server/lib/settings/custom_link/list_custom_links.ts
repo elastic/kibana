@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import * as t from 'io-ts';
-import type {
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import {
   CustomLink,
   CustomLinkES,
 } from '../../../../common/custom_link/custom_link_types';
-import type { Setup } from '../../helpers/setup_request';
-import { filterOptionsRt } from './custom_link_types';
+import { Setup } from '../../helpers/setup_request';
 import { fromESFormat } from './helper';
+import { filterOptionsRt } from './custom_link_types';
 
 export async function listCustomLinks({
   setup,

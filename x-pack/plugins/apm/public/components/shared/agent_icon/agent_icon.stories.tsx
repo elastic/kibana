@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiCard,
   EuiFlexGroup,
@@ -13,9 +14,9 @@ import {
 } from '@elastic/eui';
 import type { Story } from '@storybook/react';
 import React from 'react';
-import { AgentIcon } from '.';
 import { AGENT_NAMES } from '../../../../common/agent_name';
 import { getAgentIcon } from './get_agent_icon';
+import { AgentIcon } from './index';
 
 export default {
   title: 'shared/AgentIcon',

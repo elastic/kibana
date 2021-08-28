@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FeatureKibanaPrivileges } from '../../../../../features/common/feature_kibana_privileges';
+
+import type { FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeApiBuilder extends BaseFeaturePrivilegeBuilder {

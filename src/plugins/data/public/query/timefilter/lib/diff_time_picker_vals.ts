@@ -7,8 +7,9 @@
  */
 
 import _ from 'lodash';
-import type { RefreshInterval } from '../../../../common/query/timefilter/types';
-import type { InputTimeRange } from '../types';
+
+import { RefreshInterval } from '../../../../common';
+import { InputTimeRange } from '../types';
 
 const valueOf = function (o: any) {
   if (o) return o.valueOf();

@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Option } from 'fp-ts/lib/Option';
-import type { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
-import type { ClaimAndFillPoolResult } from './lib/fill_pool';
-import type { Err, Result } from './lib/result_type';
-import { PollingError } from './polling/task_poller';
-import type { ConcreteTaskInstance } from './task';
-import { TaskRunResult } from './task_running/task_runner';
+
+import { Option } from 'fp-ts/lib/Option';
+
+import { ConcreteTaskInstance } from './task';
+
+import { Result, Err } from './lib/result_type';
+import { ClaimAndFillPoolResult } from './lib/fill_pool';
+import { PollingError } from './polling';
+import { TaskRunResult } from './task_running';
+import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
 
 export enum TaskPersistence {
   Recurring = 'recurring',

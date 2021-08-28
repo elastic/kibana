@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectReference } from '../../../../core/types/saved_objects';
+
+import { SavedObjectReference } from '../../../../core/types';
 
 export interface ObjectField {
   type: FieldType;

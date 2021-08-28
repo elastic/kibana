@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { Datatable } from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
-import { FieldFormat } from '../../../../../../src/plugins/field_formats/common/field_format';
-import type { ColumnConfigArg } from './datatable_column';
+import type { FieldFormat } from '../../../../../../src/plugins/field_formats/common';
+import type { Datatable } from '../../../../../../src/plugins/expressions/common';
+import { ColumnConfigArg } from './datatable_column';
 import { getOriginalId } from './transpose_helpers';
 import { isNumericFieldForDatatable } from './utils';
 

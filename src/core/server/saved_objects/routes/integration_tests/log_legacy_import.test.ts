@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { UnwrapPromise } from '@kbn/utility-types';
 import supertest from 'supertest';
-import { loggingSystemMock } from '../../../logging/logging_system.mock';
+import { UnwrapPromise } from '@kbn/utility-types';
 import { registerLogLegacyImportRoute } from '../log_legacy_import';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { setupServer } from '../test_utils';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;

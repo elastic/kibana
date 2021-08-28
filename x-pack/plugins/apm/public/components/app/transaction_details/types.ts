@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { XYBrushArea } from '@elastic/charts';
+
+import { XYBrushArea } from '@elastic/charts';
+
 import type { TraceSample } from '../../../hooks/use_transaction_trace_samples_fetcher';
 
 export interface TabContentProps {

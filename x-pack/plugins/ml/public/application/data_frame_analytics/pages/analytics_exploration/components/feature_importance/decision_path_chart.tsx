@@ -4,32 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  AxisStyle,
-  LineAnnotationDatum,
-  LineAnnotationStyle,
-  PartialTheme,
-  RecursivePartial,
-} from '@elastic/charts';
+
 import {
   AnnotationDomainType,
   Axis,
+  AxisStyle,
   Chart,
   LineAnnotation,
+  LineAnnotationStyle,
+  LineAnnotationDatum,
   LineSeries,
+  PartialTheme,
   Position,
+  RecursivePartial,
   ScaleType,
   Settings,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import euiVars from '@elastic/eui/dist/eui_theme_light.json';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
-import type { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
-import { isRegressionFeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
-import { formatSingleValue } from '../../../../../formatters/format_value';
-import type { DecisionPathPlotData } from './use_classification_path_data';
 
+import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import euiVars from '@elastic/eui/dist/eui_theme_light.json';
+import type { DecisionPathPlotData } from './use_classification_path_data';
+import { formatSingleValue } from '../../../../../formatters/format_value';
+import {
+  FeatureImportanceBaseline,
+  isRegressionFeatureImportanceBaseline,
+} from '../../../../../../../common/types/feature_importance';
 const { euiColorFullShade, euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
 

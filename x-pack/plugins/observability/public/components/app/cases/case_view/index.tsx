@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Suspense, useCallback, useState } from 'react';
-import { LazyAlertsFlyout } from '../../../..';
-import type { Case } from '../../../../../../cases/common/ui/types';
-import { observabilityAppId } from '../../../../../common';
-import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
+
+import React, { useCallback, useState, Suspense } from 'react';
 import {
   casesBreadcrumbs,
   getCaseDetailsUrl,
@@ -18,8 +14,13 @@ import {
   getConfigureCasesUrl,
   useFormatUrl,
 } from '../../../../pages/cases/links';
-import { useKibana } from '../../../../utils/kibana_react';
+import { Case } from '../../../../../../cases/common';
 import { useFetchAlertData, useFetchAlertDetail } from './helpers';
+import { useKibana } from '../../../../utils/kibana_react';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
+import { observabilityAppId } from '../../../../../common';
+import { LazyAlertsFlyout } from '../../../..';
 
 interface Props {
   caseId: string;

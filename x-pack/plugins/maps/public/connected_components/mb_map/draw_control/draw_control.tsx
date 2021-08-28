@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { Map as MbMap, MapMouseEvent } from '@kbn/mapbox-gl';
+import _ from 'lodash';
+import React, { Component } from 'react';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import type { Feature } from 'geojson';
-import _ from 'lodash';
 // @ts-expect-error
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
-import React, { Component } from 'react';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { Feature } from 'geojson';
+import { MapMouseEvent } from '@kbn/mapbox-gl';
 import { DRAW_SHAPE } from '../../../../common/constants';
 import { DrawCircle, DRAW_CIRCLE_RADIUS_MB_FILTER } from './draw_circle';
 import { DrawTooltip } from './draw_tooltip';

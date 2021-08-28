@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ResponseObject } from '@hapi/hapi';
-import { Server as HapiServer } from '@hapi/hapi';
-import type { MetricsCollector, OpsServerMetrics } from './types';
+
+import { ResponseObject, Server as HapiServer } from '@hapi/hapi';
+import { OpsServerMetrics, MetricsCollector } from './types';
 
 interface ServerResponseTime {
   count: number;

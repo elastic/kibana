@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { OverlayStart } from '../../../../../core/public/overlays/overlay_service';
-import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
+import { OverlayStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
+import { EuiConfirmModal } from '@elastic/eui';
+import { toMountPoint } from '../../../../kibana_react/public';
 
 export function confirmModalPromise(
   message = '',

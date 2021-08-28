@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import React from 'react';
+import classNames from 'classnames';
 import { TableCellActions } from './table_cell_actions';
-
 export interface CellProps {
   timefield: boolean;
   sourcefield?: boolean;

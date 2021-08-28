@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type {
-  MustCondition,
-  MustNotCondition,
+import type { estypes } from '@elastic/elasticsearch';
+import {
   ScriptBasedSortClause,
   ScriptClause,
+  mustBeAllOf,
+  MustCondition,
+  MustNotCondition,
 } from './query_clauses';
-import { mustBeAllOf } from './query_clauses';
 
 export function taskWithLessThanMaxAttempts(type: string, maxAttempts: number): MustCondition {
   return {

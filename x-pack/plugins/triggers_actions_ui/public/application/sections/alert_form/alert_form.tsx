@@ -4,72 +4,76 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiComboBox,
-  EuiEmptyPrompt,
-  EuiErrorBoundary,
-  EuiFieldNumber,
-  EuiFieldSearch,
-  EuiFieldText,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiIconTip,
-  EuiLink,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiNotificationBadge,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+
+import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTextColor,
+  EuiTitle,
+  EuiForm,
+  EuiSpacer,
+  EuiFieldText,
+  EuiFieldSearch,
+  EuiFlexGrid,
+  EuiFormRow,
+  EuiComboBox,
+  EuiFieldNumber,
+  EuiSelect,
+  EuiIconTip,
+  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiEmptyPrompt,
+  EuiListGroupItem,
+  EuiListGroup,
+  EuiLink,
+  EuiText,
+  EuiNotificationBadge,
+  EuiErrorBoundary,
+  EuiToolTip,
+  EuiCallOut,
+} from '@elastic/eui';
 import { capitalize, isObject } from 'lodash';
-import React, { Fragment, Suspense, useCallback, useEffect, useState } from 'react';
-import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
-import type { AlertAction, AlertActionParam } from '../../../../../alerting/common/alert';
-import { RecoveredActionGroup } from '../../../../../alerting/common/builtin_action_groups';
-import { isActionGroupDisabledForActionTypeId } from '../../../../../alerting/common/disabled_action_groups';
+import { KibanaFeature } from '../../../../../features/public';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
 } from '../../../../../alerting/common/parse_duration';
-import { KibanaFeature } from '../../../../../features/common/kibana_feature';
-import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
-import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import type {
-  ActionTypeRegistryContract,
-  Alert,
-  AlertType,
-  AlertTypeIndex,
+import { loadAlertTypes } from '../../lib/alert_api';
+import { AlertReducerAction, InitialAlert } from './alert_reducer';
+import {
   AlertTypeModel,
+  Alert,
   IErrorObject,
-  RuleTypeRegistryContract,
+  AlertAction,
+  AlertTypeIndex,
+  AlertType,
   ValidationResult,
+  RuleTypeRegistryContract,
+  ActionTypeRegistryContract,
 } from '../../../types';
-import { SectionLoading } from '../../components/section_loading';
-import { recoveredActionGroupMessage } from '../../constants';
-import { loadAlertTypes } from '../../lib/alert_api/rule_types';
-import { alertTypeCompare, alertTypeGroupCompare } from '../../lib/alert_type_compare';
-import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
-import type { IsDisabledResult, IsEnabledResult } from '../../lib/check_alert_type_enabled';
-import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
-import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
+import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
-import './alert_form.scss';
-import { AlertNotifyWhen } from './alert_notify_when';
-import type { AlertReducerAction, InitialAlert } from './alert_reducer';
+import {
+  AlertActionParam,
+  ALERTS_FEATURE_ID,
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
+} from '../../../../../alerting/common';
+import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
+import './alert_form.scss';
+import { useKibana } from '../../../common/lib/kibana';
+import { recoveredActionGroupMessage } from '../../constants';
+import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
+import { IsEnabledResult, IsDisabledResult } from '../../lib/check_alert_type_enabled';
+import { AlertNotifyWhen } from './alert_notify_when';
+import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
+import { alertTypeCompare, alertTypeGroupCompare } from '../../lib/alert_type_compare';
+import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { SectionLoading } from '../../components/section_loading';
 
 const ENTER_KEY = 13;
 

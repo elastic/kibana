@@ -9,7 +9,7 @@
 
 import dateMath from '@elastic/datemath';
 import { formatDate } from '@elastic/eui';
-import type { TimeRange } from '../../../../../src/plugins/data/common/query/timefilter/types';
+import { TimeRange } from '../../../../../src/plugins/data/common';
 import { TIME_FORMAT } from '../constants/time_format';
 
 export function formatHumanReadableDate(ts: number) {

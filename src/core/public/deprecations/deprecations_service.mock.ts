@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DeprecationsServiceStart } from './deprecations_service';
 import { DeprecationsService } from './deprecations_service';
+import type { DeprecationsServiceStart } from './deprecations_service';
 
 const createServiceMock = (): jest.Mocked<DeprecationsServiceStart> => ({
   getAllDeprecations: jest.fn().mockResolvedValue([]),

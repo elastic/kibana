@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type {
-  PackageInfo,
-  RegistryPolicyTemplate,
-} from '../../../../../../../../common/types/models/epm';
+import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
-import { Details } from './details';
-import { Readme } from './readme';
 import { Screenshots } from './screenshots';
+import { Readme } from './readme';
+import { Details } from './details';
 
 interface Props {
   packageInfo: PackageInfo;

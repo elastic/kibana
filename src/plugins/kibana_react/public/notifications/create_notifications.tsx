@@ -7,9 +7,9 @@
  */
 
 import * as React from 'react';
-import type { KibanaServices } from '../context/types';
-import { toMountPoint } from '../util/to_mount_point';
-import type { KibanaReactNotifications } from './types';
+import { KibanaServices } from '../context/types';
+import { KibanaReactNotifications } from './types';
+import { toMountPoint } from '../util';
 
 export const createNotifications = (services: KibanaServices): KibanaReactNotifications => {
   const show: KibanaReactNotifications['toasts']['show'] = ({

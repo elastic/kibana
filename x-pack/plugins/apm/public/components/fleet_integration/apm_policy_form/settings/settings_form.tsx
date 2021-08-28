@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { PackagePolicyVars } from '../typings';
+import { PackagePolicyVars } from '../typings';
 import { FormRowSetting } from './form_row_setting';
-import type { SettingDefinition } from './typings';
+import { SettingDefinition } from './typings';
 import { validateSettingValue } from './utils';
 
 export type FormRowOnChange = (key: string, value: any) => void;

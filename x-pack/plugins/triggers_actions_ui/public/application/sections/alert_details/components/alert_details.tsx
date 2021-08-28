@@ -4,40 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { i18n } from '@kbn/i18n';
+import React, { useState, useEffect, useReducer } from 'react';
+import { keyBy } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
+  EuiPageHeader,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiBadge,
   EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
   EuiSwitch,
-  EuiText,
+  EuiCallOut,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { keyBy } from 'lodash';
-import React, { useEffect, useReducer, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import type { ActionType } from '../../../../../../actions/common/types';
-import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common/alert';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { Alert, AlertType } from '../../../../types';
-import { routeToRuleDetails } from '../../../constants';
-import { getAlertDetailsBreadcrumb, getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
+import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
-import { AlertEdit } from '../../alert_form';
-import { alertReducer } from '../../alert_form/alert_reducer';
-import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/components/with_bulk_alert_api_operations';
-import { withBulkAlertOperations } from '../../common/components/with_bulk_alert_api_operations';
+import { Alert, AlertType, ActionType } from '../../../../types';
+import {
+  ComponentOpts as BulkOperationsComponentOpts,
+  withBulkAlertOperations,
+} from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
+import { AlertEdit } from '../../alert_form';
+import { routeToRuleDetails } from '../../../constants';
+import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
+import { useKibana } from '../../../../common/lib/kibana';
+import { alertReducer } from '../../alert_form/alert_reducer';
 
 export type AlertDetailsProps = {
   alert: Alert;

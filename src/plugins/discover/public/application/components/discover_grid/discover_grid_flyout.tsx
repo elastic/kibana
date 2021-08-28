@@ -5,29 +5,30 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { useMemo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiHideFor,
-  EuiPagination,
-  EuiPortal,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiButtonEmpty,
+  EuiText,
+  EuiSpacer,
+  EuiPortal,
+  EuiPagination,
+  EuiHideFor,
   keys,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
-import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { DiscoverServices } from '../../../build_services';
-import type { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DocViewer } from '../doc_viewer/doc_viewer';
+import { IndexPattern } from '../../../kibana_services';
+import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DiscoverServices } from '../../../build_services';
 import { getContextUrl } from '../../helpers/get_context_url';
 import { getSingleDocUrl } from '../../helpers/get_single_doc_url';
-import { DocViewer } from '../doc_viewer/doc_viewer';
 
 interface Props {
   columns: string[];

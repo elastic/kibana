@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCallOut, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { Component } from 'react';
+import { EuiPanel, EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { createNewIndexAndPattern } from './create_new_index_pattern';
+import { RenderWizardArguments } from '../layer_wizard_registry';
+import { VectorLayer } from '../vector_layer';
+import { ESSearchSource } from '../../sources/es_search_source';
 import { ADD_LAYER_STEP_ID } from '../../../connected_components/add_layer_panel/view';
 import { getIndexNameFormComponent } from '../../../kibana_services';
-import { ESSearchSource } from '../../sources/es_search_source/es_search_source';
-import type { RenderWizardArguments } from '../layer_wizard_registry';
-import { VectorLayer } from '../vector_layer/vector_layer';
-import { createNewIndexAndPattern } from './create_new_index_pattern';
 
 interface State {
   indexName: string;

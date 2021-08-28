@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
-import { isValidJson } from '../../../../../../../../../common/util/validation_utils';
-import { MLJobEditor } from '../../../../../../jobs_list/components/ml_job_editor/ml_job_editor';
-import { AdvancedJobCreator } from '../../../../../common/job_creator/advanced_job_creator';
+
+import React, { FC, useState, useContext, useEffect } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
+import { MLJobEditor } from '../../../../../../jobs_list/components/ml_job_editor';
 import { Description } from './description';
+import { isValidJson } from '../../../../../../../../../common/util/validation_utils';
+import { AdvancedJobCreator } from '../../../../../common/job_creator';
 
 const EDITOR_HEIGHT = '400px';
 

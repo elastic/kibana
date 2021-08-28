@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { estypes } from '@elastic/elasticsearch';
-import type {
-  DocumentCounts,
-  FieldRequestConfig,
-  FieldVisStats,
-} from '../../../../common/types/field_request_config';
 import { lazyLoadModules } from '../../../lazy_load_bundle';
-import type { OverallStats } from '../types/overall_stats';
+import type { DocumentCounts, FieldRequestConfig, FieldVisStats } from '../../../../common/types';
+import { OverallStats } from '../types/overall_stats';
 
 export function basePath() {
   return '/internal/data_visualizer';

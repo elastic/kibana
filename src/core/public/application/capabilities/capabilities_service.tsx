@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
-import type { RecursiveReadonly } from '@kbn/utility-types';
-import type { Capabilities } from '../../../types/capabilities';
-import type { HttpStart } from '../../http/types';
+
+import { Capabilities } from '../../../types/capabilities';
+import { HttpStart } from '../../http';
 
 interface StartDeps {
   appIds: string[];

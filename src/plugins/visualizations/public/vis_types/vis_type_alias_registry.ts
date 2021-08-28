@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObject } from '../../../../core/types/saved_objects';
+
+import { SavedObject } from '../../../../core/types/saved_objects';
 import { BaseVisType } from './base_vis_type';
 
 export type VisualizationStage = 'experimental' | 'beta' | 'production';

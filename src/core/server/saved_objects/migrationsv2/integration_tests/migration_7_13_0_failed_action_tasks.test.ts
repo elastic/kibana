@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs/promises';
 import Path from 'path';
+import fs from 'fs/promises';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
 import { Root } from '../../../root';
+import { ElasticsearchClient } from '../../../elasticsearch';
 
 const logFilePath = Path.join(__dirname, '7_13_failed_action_tasks_test.log');
 

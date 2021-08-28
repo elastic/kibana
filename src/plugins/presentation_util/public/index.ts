@@ -5,18 +5,41 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PresentationUtilPlugin } from './plugin';
-import { pluginServices } from './services';
 
-export { Project, ProjectID, projectIDs } from '../common/labs';
-export * from '../common/lib';
+import { PresentationUtilPlugin } from './plugin';
+
 export {
-  LazyDashboardPicker,
+  PresentationCapabilitiesService,
+  PresentationDashboardsService,
+  PresentationLabsService,
+  getStubPluginServices,
+} from './services';
+
+export {
+  KibanaPluginServiceFactory,
+  PluginServiceFactory,
+  PluginServices,
+  PluginServiceProviders,
+  PluginServiceProvider,
+  PluginServiceRegistry,
+  KibanaPluginServiceParams,
+} from './services/create';
+
+export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
+export { SaveModalDashboardProps } from './components/types';
+export { projectIDs, ProjectID, Project } from '../common/labs';
+export * from '../common/lib';
+
+export {
   LazyLabsBeakerButton,
   LazyLabsFlyout,
+  LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from './components';
+
+export * from './components/types';
+
 export {
   AddFromLibraryButton,
   PrimaryActionButton,
@@ -27,27 +50,11 @@ export {
   SolutionToolbarButton,
   SolutionToolbarPopover,
 } from './components/solution_toolbar';
-export * from './components/types';
-export { SaveModalDashboardProps } from './components/types';
-export {
-  getStubPluginServices,
-  PresentationCapabilitiesService,
-  PresentationDashboardsService,
-  PresentationLabsService,
-} from './services';
-export {
-  KibanaPluginServiceFactory,
-  KibanaPluginServiceParams,
-  PluginServiceFactory,
-  PluginServiceProvider,
-  PluginServiceProviders,
-  PluginServiceRegistry,
-  PluginServices,
-} from './services/create';
-export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
 
 export function plugin() {
   return new PresentationUtilPlugin();
 }
+
+import { pluginServices } from './services';
 
 export const useLabs = () => (() => pluginServices.getHooks().labs.useService())();

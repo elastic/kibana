@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AssetParts, InstallSource } from '../../../../common/types/models/epm';
+
+import type { AssetParts, InstallSource } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 
-import type { SharedKey } from './cache';
 import {
+  getArchiveEntry,
+  setArchiveEntry,
   deleteArchiveEntry,
+  getArchiveFilelist,
+  setArchiveFilelist,
   deleteArchiveFilelist,
   deletePackageInfo,
-  getArchiveEntry,
-  getArchiveFilelist,
-  setArchiveEntry,
-  setArchiveFilelist,
 } from './cache';
+import type { SharedKey } from './cache';
 import { getBufferExtractor } from './extract';
 
 export * from './cache';

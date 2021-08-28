@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { unlink } from 'fs/promises';
 import path from 'path';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import { unlink } from 'fs/promises';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { Env } from '@kbn/config';
 import { getEnvOptions } from '../../../config/mocks';
-import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
-import type { InternalCoreStart } from '../../../internal_types';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import { ElasticsearchClient } from '../../../elasticsearch';
+import { InternalCoreStart } from '../../../internal_types';
 import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;

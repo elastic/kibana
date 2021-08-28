@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { from } from 'rxjs';
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
-import type { MapStore } from '../../../reducers/store';
 import { getLayerList } from '../../../selectors/map_selectors';
+import { MapStore } from '../../../reducers/store';
 
 export function waitUntilTimeLayersLoad$(store: MapStore) {
   // @ts-expect-error

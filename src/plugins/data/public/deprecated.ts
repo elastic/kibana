@@ -9,66 +9,65 @@
 /*
  * Filters:
  */
-import { FilterStateStore } from '../common';
-import type {
-  CustomFilter,
-  EsQueryConfig,
-  ExistsFilter,
-  IFieldSubType,
-  KueryNode,
-  MatchAllFilter,
-  PhraseFilter,
-  PhrasesFilter,
-  RangeFilter,
-  RangeFilterMeta,
-  RangeFilterParams,
-} from '../common/es_query';
+
 import {
-  buildEmptyFilter,
-  buildEsQuery,
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildQueryFilter,
-  buildQueryFromFilters,
-  buildRangeFilter,
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  decorateQuery,
-  disableFilter,
-  FILTERS,
-  fromKueryExpression,
   getPhraseFilterField,
   getPhraseFilterValue,
   isExistsFilter,
-  isFilter,
   isFilterPinned,
-  isFilters,
   isMatchAllFilter,
   isMissingFilter,
   isPhraseFilter,
   isPhrasesFilter,
   isQueryStringFilter,
   isRangeFilter,
-  luceneStringToDsl,
-  nodeTypes,
-  onlyDisabledFiltersChanged,
-  toElasticsearchQuery,
   toggleFilterNegated,
-} from '../common/es_query';
-import { getEsQueryConfig } from '../common/es_query/get_es_query_config';
-import { generateFilters } from './query/filter_manager/lib/generate_filters';
-import { getDisplayValueFromFilter } from './query/filter_manager/lib/get_display_value';
-import { mapAndFlattenFilters as oldMapAndFlattenFilters } from './query/filter_manager/lib/map_and_flatten_filters';
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildQueryFilter,
+  buildRangeFilter,
+  disableFilter,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  nodeTypes,
+  buildEsQuery,
+  buildQueryFromFilters,
+  luceneStringToDsl,
+  decorateQuery,
+  FILTERS,
+  isFilter,
+  isFilters,
+  KueryNode,
+  RangeFilter,
+  RangeFilterMeta,
+  RangeFilterParams,
+  ExistsFilter,
+  PhrasesFilter,
+  PhraseFilter,
+  CustomFilter,
+  MatchAllFilter,
+  IFieldSubType,
+  EsQueryConfig,
+  FilterStateStore,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  onlyDisabledFiltersChanged,
+  getEsQueryConfig,
+} from '../common';
+
+import { FilterLabel, FilterItem } from './ui';
+
 import {
-  changeTimeFilter as oldChangeTimeFilter,
-  convertRangeFilterToTimeRangeString as oldConvertRangeFilterToTimeRangeString,
-} from './query/timefilter/lib/change_time_filter';
-import {
-  extractTimeFilter as oldExtractTimeFilter,
+  getDisplayValueFromFilter,
+  generateFilters,
   extractTimeRange,
-} from './query/timefilter/lib/extract_time_filter';
-import { FilterItem, FilterLabel } from './ui/filter_bar';
+  changeTimeFilter as oldChangeTimeFilter,
+  mapAndFlattenFilters as oldMapAndFlattenFilters,
+  extractTimeFilter as oldExtractTimeFilter,
+  convertRangeFilterToTimeRangeString as oldConvertRangeFilterToTimeRangeString,
+} from './query';
 
 /**
  * @deprecated  This import will be removed.
@@ -140,7 +139,6 @@ export const esFilters = {
 /**
  * Deprecated type exports
  */
-export type { Filter, Query } from '../common';
 export {
   KueryNode,
   RangeFilter,
@@ -178,3 +176,5 @@ export const esQuery = {
   luceneStringToDsl,
   decorateQuery,
 };
+
+export type { Filter, Query } from '../common';

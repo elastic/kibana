@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import datemath from '@elastic/datemath';
-import * as rt from 'io-ts';
-import moment from 'moment';
+
 import { useCallback, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import type { TimeRange as KibanaTimeRange } from '../../../../../../../src/plugins/data/common/query/timefilter/types';
-import { decodeOrThrow } from '../../../../common/runtime_types';
-import type { TimeRange } from '../../../../common/time/time_range';
+import datemath from '@elastic/datemath';
+import moment from 'moment';
+import * as rt from 'io-ts';
+import { TimeRange as KibanaTimeRange } from '../../../../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../common/time/time_range';
+import { useUrlState } from '../../../utils/use_url_state';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../hooks/use_kibana_timefilter_time';
-import { useUrlState } from '../../../utils/use_url_state';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 
 const autoRefreshRT = rt.type({
   interval: rt.number,

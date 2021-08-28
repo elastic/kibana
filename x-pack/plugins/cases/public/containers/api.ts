@@ -4,60 +4,61 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { assign, omit } from 'lodash';
-import type {
+
+import {
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
+  CASES_URL,
   CasesFindResponse,
   CasesResponse,
-} from '../../common/api/cases/case';
-import { CaseType } from '../../common/api/cases/case';
-import type { CommentRequest } from '../../common/api/cases/comment';
-import { CommentType } from '../../common/api/cases/comment';
-import type { CasesStatusResponse } from '../../common/api/cases/status';
-import type {
-  SubCasePatchRequest,
-  SubCaseResponse,
-  SubCasesResponse,
-} from '../../common/api/cases/sub_case';
-import type { CaseUserActionsResponse } from '../../common/api/cases/user_actions';
-import {
+  CasesStatusResponse,
+  CaseType,
+  CaseUserActionsResponse,
+  CommentRequest,
+  CommentType,
   getCaseCommentsUrl,
   getCaseDetailsUrl,
   getCasePushUrl,
   getCaseUserActionUrl,
   getSubCaseDetailsUrl,
   getSubCaseUserActionUrl,
-} from '../../common/api/helpers';
-import type { User } from '../../common/api/user';
-import {
-  CASES_URL,
-  CASE_REPORTERS_URL,
-  CASE_STATUS_URL,
-  CASE_TAGS_URL,
-  SUB_CASES_PATCH_DEL_URL,
+  StatusAll,
   SUB_CASE_DETAILS_URL,
-} from '../../common/constants';
-import type {
+  SUB_CASES_PATCH_DEL_URL,
+  SubCasePatchRequest,
+  SubCaseResponse,
+  SubCasesResponse,
+  User,
+} from '../../common';
+
+import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
+
+import { KibanaServices } from '../common/lib/kibana';
+
+import {
   ActionLicense,
   AllCases,
   BulkUpdateStatus,
   Case,
   CasesStatus,
-  CaseUserActions,
   FetchCasesProps,
-} from '../../common/ui/types';
-import { SortFieldCase, StatusAll } from '../../common/ui/types';
-import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
-import { KibanaServices } from '../common/lib/kibana/services';
+  SortFieldCase,
+  CaseUserActions,
+} from './types';
+
 import {
+  convertToCamelCase,
   convertAllCasesToCamel,
   convertArrayToCamelCase,
-  convertToCamelCase,
   decodeCaseResponse,
-  decodeCasesFindResponse,
   decodeCasesResponse,
+  decodeCasesFindResponse,
   decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
 } from './utils';

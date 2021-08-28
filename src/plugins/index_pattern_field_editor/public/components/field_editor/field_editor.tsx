@@ -5,34 +5,47 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
-import React, { useEffect } from 'react';
-import type { RuntimeType } from '../../../../data/common/index_patterns/types';
-import { TextField } from '../../../../es_ui_shared/static/forms/components/fields/text_field';
-import { Form } from '../../../../es_ui_shared/static/forms/hook_form_lib/components/form';
-import { UseField } from '../../../../es_ui_shared/static/forms/hook_form_lib/components/use_field';
-import { useForm } from '../../../../es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
-import { useFormData } from '../../../../es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
-import { useFormIsModified } from '../../../../es_ui_shared/static/forms/hook_form_lib/hooks/use_form_is_modified';
-import type { FormHook } from '../../../../es_ui_shared/static/forms/hook_form_lib/types';
-import type { Field } from '../../types';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiComboBoxOptionOption,
+  EuiCode,
+  EuiCallOut,
+} from '@elastic/eui';
+
+import {
+  Form,
+  useForm,
+  useFormData,
+  useFormIsModified,
+  FormHook,
+  UseField,
+  TextField,
+  RuntimeType,
+} from '../../shared_imports';
+import { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
-import { useFieldPreviewContext } from '../preview/field_preview_context';
-import { AdvancedParametersSection } from './advanced_parameters_section';
+import { useFieldPreviewContext } from '../preview';
+
 import { RUNTIME_FIELD_OPTIONS } from './constants';
-import { CustomLabelField } from './form_fields/custom_label_field';
-import { FormatField } from './form_fields/format_field';
-import { PopularityField } from './form_fields/popularity_field';
-import type { ScriptSyntaxError } from './form_fields/script_field';
-import { ScriptField } from './form_fields/script_field';
-import { TypeField } from './form_fields/type_field';
-import { FormRow } from './form_row';
 import { schema } from './form_schema';
 import { getNameFieldConfig } from './lib';
+import {
+  TypeField,
+  CustomLabelField,
+  ScriptField,
+  FormatField,
+  PopularityField,
+  ScriptSyntaxError,
+} from './form_fields';
+import { FormRow } from './form_row';
+import { AdvancedParametersSection } from './advanced_parameters_section';
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;

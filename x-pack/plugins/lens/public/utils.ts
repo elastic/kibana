@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { uniq } from 'lodash';
+import { IndexPattern, IndexPatternsContract, TimefilterContract } from 'src/plugins/data/public';
+import { IUiSettingsClient } from 'kibana/public';
 import moment from 'moment-timezone';
-import type { IUiSettingsClient } from '../../../../src/core/public/ui_settings/types';
-import type { SavedObjectReference } from '../../../../src/core/types/saved_objects';
-import { IndexPattern } from '../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { IndexPatternsContract } from '../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
-import type { TimefilterContract } from '../../../../src/plugins/data/public/query/timefilter/timefilter';
-import type { Document } from './persistence/saved_object_store';
-import type { DatasourceStates } from './state_management/types';
-import type { Datasource, DatasourceMap } from './types';
+import { SavedObjectReference } from 'kibana/public';
+import { uniq } from 'lodash';
+import { Document } from './persistence/saved_object_store';
+import { Datasource, DatasourceMap } from './types';
+import { DatasourceStates } from './state_management';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {

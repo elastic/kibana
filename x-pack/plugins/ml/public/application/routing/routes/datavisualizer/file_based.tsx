@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/check_capabilities';
-import type { NavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
-import { FileDataVisualizerPage } from '../../../datavisualizer/file_based/file_datavisualizer';
-import { checkBasicLicense } from '../../../license/check_license';
-import { loadIndexPatterns } from '../../../util/index_utils';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import type { MlRoute, PageProps } from '../../router';
-import { PageLoader } from '../../router';
+
+import { NavigateToPath } from '../../../contexts/kibana';
+
+import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
+import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
+
+import { checkBasicLicense } from '../../../license';
+import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/check_capabilities';
+import { loadIndexPatterns } from '../../../util/index_utils';
+
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 export const fileBasedRouteFactory = (
   navigateToPath: NavigateToPath,

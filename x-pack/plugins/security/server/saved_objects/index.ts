@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup } from '../../../../../src/core/server';
-import { SavedObjectsClient } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type { AuditServiceSetup } from '../audit/audit_service';
-import type { SecurityAuditLogger } from '../audit/security_audit_logger';
-import type { AuthorizationServiceSetupInternal } from '../authorization/authorization_service';
+
+import type { CoreSetup } from 'src/core/server';
+
+import { SavedObjectsClient } from '../../../../../src/core/server';
+import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { SpacesService } from '../plugin';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
@@ -23,16 +24,17 @@ interface SetupSavedObjectsParams {
   getSpacesService(): SpacesService | undefined;
 }
 
+export type {
+  EnsureAuthorizedDependencies,
+  EnsureAuthorizedOptions,
+  EnsureAuthorizedResult,
+  EnsureAuthorizedActionResult,
+} from './ensure_authorized';
+
 export {
   ensureAuthorized,
   getEnsureAuthorizedActionResult,
   isAuthorizedForObjectInAllSpaces,
-} from './ensure_authorized';
-export type {
-  EnsureAuthorizedActionResult,
-  EnsureAuthorizedDependencies,
-  EnsureAuthorizedOptions,
-  EnsureAuthorizedResult,
 } from './ensure_authorized';
 
 export function setupSavedObjects({

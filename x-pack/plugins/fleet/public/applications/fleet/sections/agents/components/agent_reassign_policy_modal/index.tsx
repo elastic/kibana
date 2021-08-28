@@ -4,26 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSelect,
-  EuiSpacer,
+  EuiFormRow,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect, useMemo, useState } from 'react';
 
-import type { Agent } from '../../../../../../../common/types/models/agent';
-import { AgentPolicyPackageBadges } from '../../../../../../components/agent_policy_package_badges';
-import { useStartServices } from '../../../../../../hooks/use_core';
+import type { Agent } from '../../../../types';
 import {
-  sendPostBulkAgentReassign,
   sendPutAgentReassign,
-} from '../../../../../../hooks/use_request/agents';
-import { useGetAgentPolicies } from '../../../../../../hooks/use_request/agent_policy';
+  sendPostBulkAgentReassign,
+  useStartServices,
+  useGetAgentPolicies,
+} from '../../../../hooks';
+import { AgentPolicyPackageBadges } from '../../../../components';
 
 interface Props {
   onClose: () => void;

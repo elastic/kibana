@@ -4,11 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup, RequestHandlerContext } from '../../../../../../src/core/server';
-import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import type { PluginInitializerContext } from '../../../../../../src/core/server/plugins/types';
-import type { LicensingApiRequestHandlerContext } from '../../../../licensing/server/types';
-import type { PromiseReturnType } from '../../../typings/common';
+
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  KibanaRequest,
+  RequestHandlerContext,
+} from 'kibana/server';
+import { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
+import { PromiseReturnType } from '../../../typings/common';
 import { createAnnotationsClient } from './create_annotations_client';
 import { registerAnnotationAPIs } from './register_annotation_apis';
 

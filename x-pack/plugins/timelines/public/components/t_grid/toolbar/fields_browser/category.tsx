@@ -4,22 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiInMemoryTable } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import styled from 'styled-components';
-import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import type { OnUpdateColumns } from '../../../../../common/types/timeline/store';
 import {
   arrayIndexToAriaIndex,
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-} from '../../../../../common/utils/accessibility/helpers';
+} from '../../../../../common';
+import type { BrowserFields, OnUpdateColumns } from '../../../../../common';
+
 import { CategoryTitle } from './category_title';
-import type { FieldItem } from './field_items';
 import { getFieldColumns } from './field_items';
+import type { FieldItem } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
+
 import * as i18n from './translations';
 
 const TableContainer = styled.div<{ height: number; width: number }>`

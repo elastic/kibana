@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFormRow, EuiIcon, EuiSuperSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { Component } from 'react';
-import type {
-  Action,
-  ActionExecutionContext,
-} from '../../../../../src/plugins/ui_actions/public/actions/action';
+import { EuiFormRow, EuiSuperSelect, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { isUrlDrilldown } from '../trigger_actions/trigger_utils';
 
 interface Props {

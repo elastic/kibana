@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { v4 as uuidv4 } from 'uuid';
-import type { SavedObject } from '../../../../types/saved_objects';
+import { SavedObject } from '../../types';
 
 /**
  * Takes an array of saved objects and returns an importIdMap of randomly-generated new IDs.

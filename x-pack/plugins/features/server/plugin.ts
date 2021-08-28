@@ -4,25 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
+
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
-import type { RecursiveReadonly } from '@kbn/utility-types';
-import type { CoreSetup, CoreStart } from '../../../../src/core/server';
-import type { Plugin, PluginInitializerContext } from '../../../../src/core/server/plugins/types';
-import type { SavedObjectsServiceStart } from '../../../../src/core/server/saved_objects/saved_objects_service';
-import type { Capabilities as UICapabilities } from '../../../../src/core/types/capabilities';
-import type { ElasticsearchFeatureConfig } from '../common/elasticsearch_feature';
-import { ElasticsearchFeature } from '../common/elasticsearch_feature';
-import type { KibanaFeatureConfig } from '../common/kibana_feature';
-import { KibanaFeature } from '../common/kibana_feature';
-import type { FeaturePrivilegeIterator } from './feature_privilege_iterator/feature_privilege_iterator';
-import { featurePrivilegeIterator } from './feature_privilege_iterator/feature_privilege_iterator';
-import type { SubFeaturePrivilegeIterator } from './feature_privilege_iterator/sub_feature_privilege_iterator';
-import { subFeaturePrivilegeIterator } from './feature_privilege_iterator/sub_feature_privilege_iterator';
+import {
+  CoreSetup,
+  CoreStart,
+  SavedObjectsServiceStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '../../../../src/core/server';
+import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { FeatureRegistry } from './feature_registry';
+import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
 import { defineRoutes } from './routes';
-import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
+import {
+  ElasticsearchFeatureConfig,
+  ElasticsearchFeature,
+  KibanaFeature,
+  KibanaFeatureConfig,
+} from '../common';
+import type {
+  FeaturePrivilegeIterator,
+  SubFeaturePrivilegeIterator,
+} from './feature_privilege_iterator';
+import {
+  featurePrivilegeIterator,
+  subFeaturePrivilegeIterator,
+} from './feature_privilege_iterator';
 
 /**
  * Describes public Features plugin contract returned at the `setup` stage.

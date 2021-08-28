@@ -5,14 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObject, SavedObjectReference } from '../../../../types/saved_objects';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
-import type { SavedObjectsClientContract } from '../../types';
-import type { SavedObjectsImportFailure, SavedObjectsImportRetry } from '../types';
-import { checkOriginConflicts, getImportIdMapForRetries } from './check_origin_conflicts';
+
 import { mockUuidv4 } from './__mocks__';
+import {
+  SavedObjectsClientContract,
+  SavedObjectReference,
+  SavedObject,
+  SavedObjectsImportRetry,
+  SavedObjectsImportFailure,
+} from '../../types';
+import { checkOriginConflicts, getImportIdMapForRetries } from './check_origin_conflicts';
+import { savedObjectsClientMock } from '../../../mocks';
+import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckOriginConflictsParams = Parameters<typeof checkOriginConflicts>[0];

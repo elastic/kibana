@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ConfigDeprecationProvider } from '@kbn/config';
+
+import type { ConfigDeprecationProvider } from 'src/core/server';
 
 export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot,

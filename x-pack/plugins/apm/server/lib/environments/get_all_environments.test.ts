@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SearchParamsMock } from '../../utils/test_helpers';
-import { inspectSearchParams } from '../../utils/test_helpers';
+
 import { getAllEnvironments } from './get_all_environments';
+import {
+  SearchParamsMock,
+  inspectSearchParams,
+} from '../../utils/test_helpers';
 
 describe('getAllEnvironments', () => {
   let mock: SearchParamsMock;

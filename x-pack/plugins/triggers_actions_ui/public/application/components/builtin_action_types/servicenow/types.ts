@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+
+import { UserConfiguredActionConnector } from '../../../../types';
+import {
   ExecutorSubActionPushParamsITSM,
   ExecutorSubActionPushParamsSIR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../actions/server/builtin_action_types/servicenow/types';
-import type { UserConfiguredActionConnector } from '../../../../types';
 
 export type ServiceNowActionConnector = UserConfiguredActionConnector<
   ServiceNowConfig,

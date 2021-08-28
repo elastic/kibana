@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
-import type {
+import {
   InfraTimerangeInput,
   SnapshotGroupBy,
   SnapshotMetricInput,
   SnapshotNodeMetric,
   SnapshotNodePath,
 } from '../../common/http_api/snapshot_api';
-import type { MetricsSourceConfigurationProperties } from '../../common/metrics_sources';
-import type { WaffleSortOption } from '../pages/metrics/inventory_view/hooks/use_waffle_options';
+import { MetricsSourceConfigurationProperties } from '../../common/metrics_sources';
+import { WaffleSortOption } from '../pages/metrics/inventory_view/hooks/use_waffle_options';
 
 export interface InfraWaffleMapNode {
   pathId: string;

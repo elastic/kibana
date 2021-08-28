@@ -4,16 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { BrushEndListener, PartialTheme } from '@elastic/charts';
-import { Chart, HistogramBarSeries, ScaleType, Settings, TooltipType } from '@elastic/charts';
-import type { FC } from 'react';
-import React from 'react';
-import type { LineChartPoint } from '../../../../common/chart_loader/chart_loader';
-import type { Anomaly } from '../../../../common/results_loader/results_loader';
-import { Anomalies } from '../common/anomalies';
+
+import React, { FC } from 'react';
+import {
+  HistogramBarSeries,
+  Chart,
+  ScaleType,
+  Settings,
+  TooltipType,
+  BrushEndListener,
+  PartialTheme,
+} from '@elastic/charts';
 import { Axes } from '../common/axes';
+import { LineChartPoint } from '../../../../common/chart_loader';
+import { Anomaly } from '../../../../common/results_loader';
 import { useChartColors } from '../common/settings';
-import { LoadingWrapper } from '../loading_wrapper/loading_wrapper';
+import { LoadingWrapper } from '../loading_wrapper';
+import { Anomalies } from '../common/anomalies';
 import { OverlayRange } from './overlay_range';
 
 interface Props {

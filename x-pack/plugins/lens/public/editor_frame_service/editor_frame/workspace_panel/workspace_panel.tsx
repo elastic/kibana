@@ -4,68 +4,69 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
+import classNames from 'classnames';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { toExpression } from '@kbn/interpreter/common';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
+  EuiButtonEmpty,
   EuiLink,
   EuiPageContentBody,
+  EuiButton,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { toExpression } from '@kbn/interpreter/common';
-import classNames from 'classnames';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import type { CoreStart } from '../../../../../../../src/core/public/types';
-import type { ApplicationStart } from '../../../../../../../src/core/public/application/types';
-import type { ExecutionContextSearch } from '../../../../../../../src/plugins/data/common/search/expressions/kibana_context_type';
-import type { TimefilterContract } from '../../../../../../../src/plugins/data/public/query/timefilter/timefilter';
-import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public/types';
-import type { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common/execution/types';
-import type { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public/react_expression_renderer';
-import type { ExpressionRendererEvent } from '../../../../../../../src/plugins/expressions/public/render';
-import type { ExpressionRenderError } from '../../../../../../../src/plugins/expressions/public/types';
-import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
-import type { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public/plugin';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable/events';
+import { CoreStart, ApplicationStart } from 'kibana/public';
+import {
+  DataPublicPluginStart,
+  ExecutionContextSearch,
+  TimefilterContract,
+} from 'src/plugins/data/public';
+import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  ExpressionRendererEvent,
+  ExpressionRenderError,
+  ReactExpressionRendererType,
+} from '../../../../../../../src/plugins/expressions/public';
+import {
+  FramePublicAPI,
+  isLensBrushEvent,
+  isLensFilterEvent,
+  isLensEditEvent,
+  VisualizationMap,
+  DatasourceMap,
+  DatasourceFixAction,
+} from '../../../types';
+import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
+import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
+import { buildExpression } from '../expression_helpers';
+import { trackUiEvent } from '../../../lens_ui_telemetry';
+import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
+import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
-import { DragDrop } from '../../../drag_drop/drag_drop';
-import { DragContext } from '../../../drag_drop/providers/providers';
-import type { DragDropIdentifier } from '../../../drag_drop/providers/types';
-import { trackUiEvent } from '../../../lens_ui_telemetry/factory';
+import { getOriginalRequestErrorMessages } from '../../error_helper';
+import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
+import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 import {
   onActiveDataChange,
-  setSaveable,
-  updateDatasourceState,
-  updateVisualizationState,
   useLensDispatch,
+  updateVisualizationState,
+  updateDatasourceState,
+  setSaveable,
   useLensSelector,
-} from '../../../state_management';
-import {
-  selectActiveDatasourceId,
-  selectDatasourceStates,
   selectExecutionContext,
   selectIsFullscreenDatasource,
-  selectSearchSessionId,
   selectVisualization,
-} from '../../../state_management/selectors';
-import type {
-  DatasourceFixAction,
-  DatasourceMap,
-  FramePublicAPI,
-  VisualizationMap,
-} from '../../../types';
-import { isLensBrushEvent, isLensEditEvent, isLensFilterEvent } from '../../../types';
-import { getOriginalRequestErrorMessages } from '../../error_helper';
-import { buildExpression } from '../expression_helpers';
-import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
-import type { Suggestion } from '../suggestion_helpers';
-import { switchToSuggestion } from '../suggestion_helpers';
-import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
+  selectDatasourceStates,
+  selectActiveDatasourceId,
+  selectSearchSessionId,
+} from '../../../state_management';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;

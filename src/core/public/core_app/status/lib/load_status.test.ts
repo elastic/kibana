@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { StatusResponse } from '../../../../types/status';
+
+import { StatusResponse } from '../../../../types/status';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { notificationServiceMock } from '../../../notifications/notifications_service.mock';
 import { loadStatus } from './load_status';

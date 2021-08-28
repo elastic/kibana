@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IBasePath } from '../../../../../../../src/core/public/http/types';
+
+import { IBasePath } from '../../../../../../../src/core/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export function getUpgradeAssistantHref(basePath: IBasePath) {

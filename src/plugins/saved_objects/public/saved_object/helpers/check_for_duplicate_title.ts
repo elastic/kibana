@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SAVE_DUPLICATE_REJECTED } from '../../constants';
-import type { SavedObject, SavedObjectKibanaServices } from '../../types';
-import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
+
+import { SavedObject, SavedObjectKibanaServices } from '../../types';
 import { findObjectByTitle } from './find_object_by_title';
+import { SAVE_DUPLICATE_REJECTED } from '../../constants';
+import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
 
 /**
  * check for an existing SavedObject with the same title in ES

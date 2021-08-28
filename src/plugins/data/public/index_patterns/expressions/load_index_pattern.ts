@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { StartServicesAccessor } from '../../../../../core/public/types';
-import type {
+
+import { StartServicesAccessor } from 'src/core/public';
+import {
+  getIndexPatternLoadMeta,
   IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternLoadStartDependencies,
-} from '../../../common/index_patterns/expressions/load_index_pattern';
-import { getIndexPatternLoadMeta } from '../../../common/index_patterns/expressions/load_index_pattern';
-import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
+} from '../../../common/index_patterns/expressions';
+import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed

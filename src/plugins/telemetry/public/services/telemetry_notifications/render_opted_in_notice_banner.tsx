@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '../../../../../core/public/types';
-import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
+import { CoreStart } from 'kibana/public';
 import { OptedInNoticeBanner } from '../../components/opted_in_notice_banner';
+import { toMountPoint } from '../../../../kibana_react/public';
 
 interface RenderBannerConfig {
   http: CoreStart['http'];

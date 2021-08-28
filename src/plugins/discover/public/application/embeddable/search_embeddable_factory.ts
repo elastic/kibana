@@ -5,17 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
+
 import { auto } from 'angular';
-import type { TimeRange } from '../../../../data/common/query/timefilter/types';
-import { Container } from '../../../../embeddable/public/lib/containers/container';
-import type { EmbeddableFactoryDefinition } from '../../../../embeddable/public/lib/embeddables/embeddable_factory_definition';
-import { ErrorEmbeddable } from '../../../../embeddable/public/lib/embeddables/error_embeddable';
-import type { UiActionsStart } from '../../../../ui_actions/public/plugin';
+import { i18n } from '@kbn/i18n';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { getServices } from '../../kibana_services';
+import {
+  EmbeddableFactoryDefinition,
+  Container,
+  ErrorEmbeddable,
+} from '../../../../embeddable/public';
+
+import { TimeRange } from '../../../../data/public';
+
+import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
-import type { SearchInput, SearchOutput } from './types';
 
 interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];

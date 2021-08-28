@@ -4,34 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiFlyoutProps } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiFlyoutProps } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import { dataTypes } from '../../../../../../../common/constants/epm';
-import type {
-  AgentPolicy,
-  NewAgentPolicy,
-} from '../../../../../../../common/types/models/agent_policy';
-import { useCapabilities } from '../../../../../../hooks/use_capabilities';
-import { useStartServices } from '../../../../../../hooks/use_core';
-import { sendCreateAgentPolicy } from '../../../../../../hooks/use_request/agent_policy';
-import { AgentPolicyForm, agentPolicyFormValidation } from '../../components/agent_policy_form';
+import { dataTypes } from '../../../../../../../common';
+import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
+import { useCapabilities, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
+import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 
 const FlyoutWithHigherZIndex = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};

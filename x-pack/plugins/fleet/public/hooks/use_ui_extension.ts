@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useContext } from 'react';
 
-import type { UIExtensionPoint, UIExtensionsStorage } from '../types/ui_extensions';
+import type { UIExtensionPoint, UIExtensionsStorage } from '../types';
 
 export const UIExtensionsContext = React.createContext<UIExtensionsStorage>({});
 

@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import { useMlKibana } from '../../../contexts/kibana/kibana_context';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import type { NavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
-import { Page } from '../../../jobs/new_job/pages/index_or_search/page';
-import { preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search/preconfigured_job_redirect';
-import { checkBasicLicense } from '../../../license/check_license';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
-import { loadIndexPatterns } from '../../../util/index_utils';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { basicResolvers } from '../../resolvers';
-import type { MlRoute, PageProps } from '../../router';
-import { PageLoader } from '../../router';
+
+import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
+
+import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
+import { basicResolvers } from '../../resolvers';
+import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { checkBasicLicense } from '../../../license';
+import { loadIndexPatterns } from '../../../util/index_utils';
+import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
+import { checkMlNodesAvailable } from '../../../ml_nodes_check';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 enum MODE {
   NEW_JOB,

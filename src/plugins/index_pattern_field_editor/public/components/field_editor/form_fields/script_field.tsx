@@ -5,20 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiCode, EuiCodeBlock, EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { PainlessContext } from '@kbn/monaco';
-import { PainlessLang } from '@kbn/monaco';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { RuntimeType } from '../../../../../data/common/index_patterns/types';
-import { UseField } from '../../../../../es_ui_shared/static/forms/hook_form_lib/components/use_field';
-import { useFormData } from '../../../../../es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
-import type { FieldConfig } from '../../../../../es_ui_shared/static/forms/hook_form_lib/types';
-import { CodeEditor } from '../../../../../kibana_react/public/code_editor';
-import type { RuntimeFieldPainlessError } from '../../../lib/runtime_field_validation';
-import type { FieldFormInternal } from '../field_editor';
+import { EuiFormRow, EuiLink, EuiCode, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { PainlessLang, PainlessContext } from '@kbn/monaco';
+
+import {
+  UseField,
+  useFormData,
+  RuntimeType,
+  FieldConfig,
+  CodeEditor,
+} from '../../../shared_imports';
+import { RuntimeFieldPainlessError } from '../../../lib';
 import { schema } from '../form_schema';
+import type { FieldFormInternal } from '../field_editor';
 
 interface Props {
   links: { runtimePainless: string };

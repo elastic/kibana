@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { estypes } from '@elastic/elasticsearch';
 /*
  * Contains utility functions for building and processing queries.
  */
-import { estypes } from '@elastic/elasticsearch';
 
 // Builds the base filter criteria used in queries,
 // adding criteria for the time range and an optional query.

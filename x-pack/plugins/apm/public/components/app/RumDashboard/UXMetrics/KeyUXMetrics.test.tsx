@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { KeyUXMetrics } from './KeyUXMetrics';
 

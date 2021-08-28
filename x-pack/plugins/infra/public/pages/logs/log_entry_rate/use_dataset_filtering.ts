@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useReducer } from 'react';
-import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../../../../ml/public/ui_actions/constants';
+
+import { useEffect, useReducer, useCallback } from 'react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { Filter } from '../../../../../../../src/plugins/data/common';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../../../../ml/public';
 
 interface ReducerState {
   selectedDatasets: string[];

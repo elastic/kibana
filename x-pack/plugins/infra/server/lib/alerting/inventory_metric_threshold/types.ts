@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Unit } from '@elastic/datemath';
-import type { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
-import type { SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { AlertStates, Comparator } from '../common/types';
+
+import { Unit } from '@elastic/datemath';
+import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
+import { SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { Comparator, AlertStates } from '../common/types';
 
 export { Comparator, AlertStates };
 

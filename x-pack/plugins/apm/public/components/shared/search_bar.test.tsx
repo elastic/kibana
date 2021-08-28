@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fireEvent, getByTestId, getByText } from '@testing-library/react';
-import type { MemoryHistory } from 'history';
-import { createMemoryHistory } from 'history';
+
+import { getByTestId, fireEvent, getByText } from '@testing-library/react';
+import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import type { CoreStart } from '../../../../../../src/core/public/types';
-import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public/context/context';
+import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { MockApmPluginContextWrapper } from '../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../context/apm_service/apm_service_context';
-import * as useServiceTransactionTypesHook from '../../context/apm_service/use_service_transaction_types_fetcher';
-import type { IUrlParams } from '../../context/url_params_context/types';
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
+import { IUrlParams } from '../../context/url_params_context/types';
 import * as useFetcherHook from '../../hooks/use_fetcher';
+import * as useServiceTransactionTypesHook from '../../context/apm_service/use_service_transaction_types_fetcher';
 import { renderWithTheme } from '../../utils/testHelpers';
 import { fromQuery } from './Links/url_helpers';
+import { CoreStart } from 'kibana/public';
 import { SearchBar } from './search_bar';
 
 function setup({

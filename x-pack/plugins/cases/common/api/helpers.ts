@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
-  CASE_ALERTS_URL,
-  CASE_COMMENTS_URL,
-  CASE_COMMENT_DETAILS_URL,
-  CASE_CONFIGURE_DETAILS_URL,
   CASE_DETAILS_URL,
-  CASE_PUSH_URL,
+  CASE_COMMENTS_URL,
   CASE_USER_ACTIONS_URL,
-  SUB_CASES_URL,
+  CASE_COMMENT_DETAILS_URL,
   SUB_CASE_DETAILS_URL,
+  SUB_CASES_URL,
+  CASE_PUSH_URL,
   SUB_CASE_USER_ACTIONS_URL,
+  CASE_CONFIGURE_DETAILS_URL,
+  CASE_ALERTS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {

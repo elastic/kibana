@@ -5,6 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -12,18 +16,15 @@ import {
   EuiInMemoryTable,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import type { IUiSettingsClient } from '../../../../../../core/public/ui_settings/types';
-import type {
-  Datatable,
-  DatatableColumn,
-} from '../../../../../expressions/common/expression_types/specs/datatable';
-import type { FieldFormatsStart } from '../../../../../field_formats/public/plugin';
-import type { UiActionsStart } from '../../../../../ui_actions/public/plugin';
-import type { DataViewColumn, DataViewRow } from '../types';
+import { i18n } from '@kbn/i18n';
+
+import { DataViewRow, DataViewColumn } from '../types';
+import { IUiSettingsClient } from '../../../../../../core/public';
+import { Datatable, DatatableColumn } from '../../../../../expressions/public';
+import { FieldFormatsStart } from '../../../../../field_formats/public';
+import { UiActionsStart } from '../../../../../ui_actions/public';
 
 interface DataTableFormatState {
   columns: DataViewColumn[];

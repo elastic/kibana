@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { map } from 'lodash';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { map } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import { DEFAULT_TIME } from '../../configurations/constants/constants';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { ReportViewType, SeriesUrl } from '../../types';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import type { ReportViewType, SeriesUrl } from '../../types';
-import type { ReportTypeItem } from '../series_builder';
+import { DEFAULT_TIME } from '../../configurations/constants';
+import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { ReportTypeItem } from '../series_builder';
 
 interface Props {
   seriesId: string;

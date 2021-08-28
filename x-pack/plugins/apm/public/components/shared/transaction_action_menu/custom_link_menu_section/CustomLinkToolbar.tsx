@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiToolTip,
+  EuiButtonEmpty,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APMLink } from '../../Links/apm/APMLink';

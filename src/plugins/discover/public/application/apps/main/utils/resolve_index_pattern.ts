@@ -5,13 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { ToastsStart } from '../../../../../../../core/public/notifications/toasts/toasts_service';
-import type { IUiSettingsClient } from '../../../../../../../core/public/ui_settings/types';
-import type { SavedObject } from '../../../../../../../core/types/saved_objects';
-import { IndexPattern } from '../../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { IndexPatternsContract } from '../../../../../../data/common/index_patterns/index_patterns/index_patterns';
-import { SearchSource } from '../../../../../../data/common/search/search_source/search_source';
+import { IUiSettingsClient, SavedObject, ToastsStart } from 'kibana/public';
+import { IndexPattern } from '../../../../kibana_services';
+import { IndexPatternsContract, SearchSource } from '../../../../../../data/common';
 
 export type IndexPatternSavedObject = SavedObject & { title: string };
 

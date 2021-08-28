@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { History } from 'history';
-import { createMemoryHistory } from 'history';
+
 import { act } from 'react-dom/test-utils';
+import { History, createMemoryHistory } from 'history';
+import { IBasePath } from '../../http';
 import { BasePath } from '../../http/base_path';
-import type { IBasePath } from '../../http/types';
+
 import { renderApp } from './error_application';
 
 describe('renderApp', () => {

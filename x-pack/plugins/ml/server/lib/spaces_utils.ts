@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type { SpacesPluginStart } from '../../../spaces/server/plugin';
+
+import { KibanaRequest } from '../../../../../src/core/server';
+import { SpacesPluginStart } from '../../../spaces/server';
 import { PLUGIN_ID } from '../../common/constants/app';
 
 export function spacesUtilsProvider(

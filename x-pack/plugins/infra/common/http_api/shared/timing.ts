@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+
 import { tracingSpanRT } from '../../performance_tracing';
 
 export const routeTimingMetadataRT = rt.type({

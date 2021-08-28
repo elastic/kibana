@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
+
 import { chain, isNil, pick, snakeCase } from 'lodash';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common/expression_functions/types';
-import type { ExpressionValueBoxed } from '../../../../expressions/common/expression_types/types';
-import type { GeoPoint, GeoPointOutput } from './geo_point';
+import { i18n } from '@kbn/i18n';
+import { ExpressionFunctionDefinition, ExpressionValueBoxed } from 'src/plugins/expressions/common';
+import { GeoPoint, GeoPointOutput } from './geo_point';
 
 // The API Extractor is not handling encapsulated interfaces in union types properly.
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { LocatorClientDependencies } from './locators/locator_client';
-import { LocatorClient } from './locators/locator_client';
+
+import { LocatorClient, LocatorClientDependencies } from './locators';
 
 export type UrlServiceDependencies = LocatorClientDependencies;
 

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsUtils } from '../../../../../../src/core/server/saved_objects/service/lib/utils';
+
+import { SavedObjectsUtils } from '../../../../../../src/core/server';
 
 /**
  * Converts a Space ID string to its namespace ID representation. Note that a Space ID string is equivalent to a namespace string.

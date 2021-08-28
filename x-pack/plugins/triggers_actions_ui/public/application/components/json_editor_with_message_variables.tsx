@@ -4,15 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCodeEditor, EuiFormRow } from '@elastic/eui';
-import { XJsonMode } from '@kbn/ace';
-import 'brace/theme/github';
+
 import React, { useState } from 'react';
-import * as XJson from '../../../../../../src/plugins/es_ui_shared/public/xjson';
-import type { ActionVariable } from '../../../../alerting/common/alert';
-import { templateActionVariable } from '../lib/template_action_variable';
-import { AddMessageVariables } from './add_message_variables';
+import { EuiCodeEditor, EuiFormRow } from '@elastic/eui';
+
+import 'brace/theme/github';
+import { XJsonMode } from '@kbn/ace';
+
 import './add_message_variables.scss';
+import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
+
+import { AddMessageVariables } from './add_message_variables';
+import { ActionVariable } from '../../../../alerting/common';
+import { templateActionVariable } from '../lib';
 
 interface Props {
   messageVariables?: ActionVariable[];

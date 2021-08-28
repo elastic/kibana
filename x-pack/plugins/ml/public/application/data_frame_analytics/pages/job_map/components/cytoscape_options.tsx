@@ -10,7 +10,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
   JOB_MAP_NODE_TYPES,
 } from '../../../../../../common/constants/data_frame_analytics';
-import type { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
+import { EuiThemeType } from '../../../../components/color_range_legend';
 import classificationJobIcon from './icons/ml_classification_job.svg';
 import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';
 import regressionJobIcon from './icons/ml_regression_job.svg';

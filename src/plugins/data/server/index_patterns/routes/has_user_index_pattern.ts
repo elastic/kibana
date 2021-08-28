@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { StartServicesAccessor } from '../../../../../core/server';
-import type { IRouter } from '../../../../../core/server/http/router/router';
-import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+
 import { handleErrors } from './util/handle_errors';
+import { IRouter, StartServicesAccessor } from '../../../../../core/server';
+import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
 export const registerHasUserIndexPatternRoute = (
   router: IRouter,

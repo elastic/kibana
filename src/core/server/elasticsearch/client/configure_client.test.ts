@@ -5,20 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { RequestEvent } from '@elastic/elasticsearch';
-import { errors } from '@elastic/elasticsearch';
+
+import { Buffer } from 'buffer';
+import { Readable } from 'stream';
+
+import { RequestEvent, errors } from '@elastic/elasticsearch';
 import type {
-  RequestBody,
   TransportRequestOptions,
   TransportRequestParams,
+  RequestBody,
 } from '@elastic/elasticsearch/lib/Transport';
-import { Buffer } from 'buffer';
-import { EventEmitter } from 'events';
-import { Readable } from 'stream';
+
+import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { EventEmitter } from 'events';
 import type { ElasticsearchClientConfig } from './client_config';
 import { configureClient } from './configure_client';
-import { ClientMock, parseClientOptionsMock } from './configure_client.test.mocks';
 
 const createFakeConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isFinite } from 'lodash';
 
 // _.isNumber() returns true for NaN, _.isFinite() does not refine

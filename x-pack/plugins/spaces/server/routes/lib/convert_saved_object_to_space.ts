@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
+
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 export function convertSavedObjectToSpace(savedObject: any): Space {
   return {

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { mlLog } from '../log';
-import type { MlClient } from '../ml_client/types';
+
+import type { MlClient } from '../../lib/ml_client';
+import { mlLog } from '../../lib/log';
 
 export function upgradeCheckProvider(mlClient: MlClient) {
   async function isUpgradeInProgress(): Promise<boolean> {

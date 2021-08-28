@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { useEffect } from 'react';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 export const useReadOnlyBadge = (isReadOnly = false) => {
   const chrome = useKibana().services.chrome;

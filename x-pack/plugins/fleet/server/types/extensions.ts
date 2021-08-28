@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+
 import type { DeepReadonly } from 'utility-types';
 
-import type { RequestHandlerContext } from '../../../../../src/core/server';
-import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
 import type {
+  DeletePackagePoliciesResponse,
   NewPackagePolicy,
   UpdatePackagePolicy,
-} from '../../common/types/models/package_policy';
-import type { DeletePackagePoliciesResponse } from '../../common/types/rest_spec/package_policy';
+} from '../../common';
 
 export type PostPackagePolicyDeleteCallback = (
   deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>

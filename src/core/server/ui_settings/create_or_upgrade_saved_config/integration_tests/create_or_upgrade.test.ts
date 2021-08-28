@@ -5,16 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type {
+
+import { SavedObjectsClientContract } from 'src/core/server';
+
+import {
+  createTestServers,
   TestElasticsearchUtils,
   TestKibanaUtils,
   TestUtils,
 } from '../../../../test_helpers/kbn_server';
-import { createTestServers } from '../../../../test_helpers/kbn_server';
-import { httpServerMock } from '../../../http/http_server.mocks';
-import { loggingSystemMock } from '../../../logging/logging_system.mock';
-import type { SavedObjectsClientContract } from '../../../saved_objects/types';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
+import { httpServerMock } from '../../../http/http_server.mocks';
 
 const logger = loggingSystemMock.create().get();
 describe('createOrUpgradeSavedConfig()', () => {

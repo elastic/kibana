@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiListGroupItemProps, EuiListGroupProps, EuiPopoverProps } from '@elastic/eui';
+
 import {
-  EuiHorizontalRule,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiPopover,
-  EuiSpacer,
   EuiText,
+  EuiListGroup,
+  EuiSpacer,
+  EuiHorizontalRule,
+  EuiListGroupItem,
+  EuiPopoverProps,
+  EuiListGroupItemProps,
 } from '@elastic/eui';
-import type { HTMLAttributes, ReactNode } from 'react';
-import React from 'react';
+import React, { HTMLAttributes, ReactNode } from 'react';
 import styled from 'styled-components';
+import { EuiListGroupProps } from '@elastic/eui';
 
 type Props = EuiPopoverProps & HTMLAttributes<HTMLDivElement>;
 

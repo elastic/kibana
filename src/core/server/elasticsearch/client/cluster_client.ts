@@ -5,19 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Client } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
-import type { GetAuthHeaders } from '../../http/auth_headers_storage';
-import type { Headers } from '../../http/router/headers';
-import { filterHeaders } from '../../http/router/headers';
-import { ensureRawRequest, isKibanaRequest, isRealRequest } from '../../http/router/request';
-import { DEFAULT_HEADERS } from '../default_headers';
-import type { ScopeableRequest } from '../types';
-import type { ElasticsearchClientConfig } from './client_config';
+import { Logger } from '../../logging';
+import { GetAuthHeaders, Headers, isKibanaRequest, isRealRequest } from '../../http';
+import { ensureRawRequest, filterHeaders } from '../../http/router';
+import { ScopeableRequest } from '../types';
+import { ElasticsearchClient } from './types';
 import { configureClient } from './configure_client';
-import type { IScopedClusterClient } from './scoped_cluster_client';
-import { ScopedClusterClient } from './scoped_cluster_client';
-import type { ElasticsearchClient } from './types';
+import { ElasticsearchClientConfig } from './client_config';
+import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
+import { DEFAULT_HEADERS } from '../default_headers';
 
 const noop = () => undefined;
 

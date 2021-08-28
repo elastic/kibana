@@ -6,36 +6,37 @@
  * Side Public License, v 1.
  */
 
+import './discover_sidebar.scss';
+import { throttle } from 'lodash';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
-  EuiFlexGroup,
   EuiFlexItem,
-  EuiNotificationBadge,
-  EuiPageSideBar,
-  EuiSpacer,
+  EuiFlexGroup,
   EuiText,
   EuiTitle,
+  EuiSpacer,
+  EuiNotificationBadge,
+  EuiPageSideBar,
   useResizeObserver,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { isEqual, sortBy, throttle } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
-import { IndexPatternField } from '../../../../../../../data/common/index_patterns/fields/index_pattern_field';
-import { FIELDS_LIMIT_SETTING } from '../../../../../../common';
-import type { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
+
+import { isEqual, sortBy } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
-import { DiscoverFieldSearch } from './discover_field_search';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import './discover_sidebar.scss';
-import type { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
-import type { FieldFilterState } from './lib/field_filter';
-import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
-import { getDetails } from './lib/get_details';
-import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
+import { DiscoverFieldSearch } from './discover_field_search';
+import { FIELDS_LIMIT_SETTING } from '../../../../../../common';
 import { groupFields } from './lib/group_fields';
+import { IndexPatternField } from '../../../../../../../data/public';
+import { getDetails } from './lib/get_details';
+import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
+import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
+import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
+import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
+import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 
 /**
  * Default number of available fields displayed and added on scroll

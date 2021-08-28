@@ -7,9 +7,10 @@
 
 import type * as React from 'react';
 
-import type { CoreStart, StartServicesAccessor } from '../../../../../src/core/public/types';
+import type { CoreStart, StartServicesAccessor } from 'src/core/public';
+
 import type { PluginsStart } from '../plugin';
-import type { SpacesManager } from '../spaces_manager/spaces_manager';
+import type { SpacesManager } from '../spaces_manager';
 import type { ShareToSpacesData } from '../types';
 
 export type KibanaServices = Partial<CoreStart>;

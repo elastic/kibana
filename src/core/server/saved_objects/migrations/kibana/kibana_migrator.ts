@@ -10,26 +10,32 @@
  * This file contains the logic for managing the Kibana index version
  * (the shape of the mappings and documents in the index).
  */
-import type { Logger } from '@kbn/logging';
+
 import { BehaviorSubject } from 'rxjs';
 import Semver from 'semver';
-import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
-import type { KibanaConfigType } from '../../../kibana_config';
-import type { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings/types';
-import { runResilientMigrator } from '../../migrationsv2';
-import type { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { SavedObjectsSerializer } from '../../serialization/serializer';
-import type { SavedObjectsRawDoc, SavedObjectUnsanitizedDoc } from '../../serialization/types';
-import type { SavedObjectsType } from '../../types';
-import { buildActiveMappings } from '../core/build_active_mappings';
+import { KibanaConfigType } from '../../../kibana_config';
+import { ElasticsearchClient } from '../../../elasticsearch';
+import { Logger } from '../../../logging';
+import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
+import {
+  SavedObjectUnsanitizedDoc,
+  SavedObjectsSerializer,
+  SavedObjectsRawDoc,
+} from '../../serialization';
+import {
+  buildActiveMappings,
+  createMigrationEsClient,
+  IndexMigrator,
+  MigrationResult,
+  MigrationStatus,
+} from '../core';
+import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
-import type { VersionedTransformer } from '../core/document_migrator';
-import { DocumentMigrator } from '../core/document_migrator';
-import { IndexMigrator } from '../core/index_migrator';
+import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { SavedObjectsType } from '../../types';
+import { runResilientMigrator } from '../../migrationsv2';
 import { migrateRawDocsSafely } from '../core/migrate_raw_docs';
-import type { MigrationResult, MigrationStatus } from '../core/migration_coordinator';
-import { createMigrationEsClient } from '../core/migration_es_client';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;

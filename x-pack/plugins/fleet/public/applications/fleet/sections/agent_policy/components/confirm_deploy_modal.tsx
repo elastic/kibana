@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-import type { AgentPolicy } from '../../../../../../common/types/models/agent_policy';
+import type { AgentPolicy } from '../../../types';
 
 export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   onConfirm: () => void;

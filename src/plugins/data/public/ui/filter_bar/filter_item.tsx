@@ -5,25 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
+import { InjectedIntl } from '@kbn/i18n/react';
 import {
+  Filter,
   isFilterPinned,
-  toggleFilterDisabled,
   toggleFilterNegated,
   toggleFilterPinned,
+  toggleFilterDisabled,
 } from '@kbn/es-query';
-import type { InjectedIntl } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import type { MouseEvent } from 'react';
-import React, { useEffect, useState } from 'react';
-import type { IUiSettingsClient } from '../../../../../core/public/ui_settings/types';
-import type { IIndexPattern } from '../../../common/index_patterns/types';
-import { getDisplayValueFromFilter } from '../../query/filter_manager/lib/get_display_value';
-import { getIndexPatternFromFilter } from '../../query/filter_manager/lib/get_index_pattern_from_filter';
-import { getIndexPatterns } from '../../services';
+import React, { MouseEvent, useState, useEffect } from 'react';
+import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
+import { IIndexPattern } from '../..';
+import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '../../query';
+import { getIndexPatterns } from '../../services';
 
 type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';
 

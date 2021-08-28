@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFilterButton,
@@ -16,12 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
 
-import { AGENTS_INDEX } from '../../../../../../../common/constants/agent';
-import type { AgentPolicy } from '../../../../../../../common/types/models/agent_policy';
-import { AgentEnrollmentFlyout } from '../../../../../../components/agent_enrollment_flyout';
-import { SearchBar } from '../../../../components/search_bar';
+import type { AgentPolicy } from '../../../../types';
+import { AgentEnrollmentFlyout, SearchBar } from '../../../../components';
+import { AGENTS_INDEX } from '../../../../constants';
 
 const statusFilters = [
   {

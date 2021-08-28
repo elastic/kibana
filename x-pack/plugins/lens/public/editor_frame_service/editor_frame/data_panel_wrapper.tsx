@@ -5,27 +5,25 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import './data_panel_wrapper.scss';
+
+import React, { useMemo, memo, useContext, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import React, { memo, useContext, useEffect, useMemo, useState } from 'react';
-import type { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public/plugin';
-import { DragContext } from '../../drag_drop/providers/providers';
-import type { DragDropIdentifier } from '../../drag_drop/providers/types';
-import { NativeRenderer } from '../../native_renderer/native_renderer';
+import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { NativeRenderer } from '../../native_renderer';
+import { DragContext, DragDropIdentifier } from '../../drag_drop';
+import { StateSetter, DatasourceDataPanelProps, DatasourceMap } from '../../types';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import {
-  setState,
   switchDatasource,
-  updateDatasourceState,
   useLensDispatch,
+  updateDatasourceState,
   useLensSelector,
-} from '../../state_management';
-import {
+  setState,
+  selectExecutionContext,
   selectActiveDatasourceId,
   selectDatasourceStates,
-  selectExecutionContext,
-} from '../../state_management/selectors';
-import type { DatasourceDataPanelProps, DatasourceMap, StateSetter } from '../../types';
-import './data_panel_wrapper.scss';
+} from '../../state_management';
 import { initializeDatasources } from './state_helpers';
 
 interface DataPanelWrapperProps {

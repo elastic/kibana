@@ -4,72 +4,62 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiBottomBar,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiLink,
-  EuiPortal,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiBottomBar,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiLink,
+  EuiFlyout,
+  EuiCodeBlock,
+  EuiPortal,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+} from '@elastic/eui';
 import styled from 'styled-components';
 
-import { storedPackagePoliciesToAgentInputs } from '../../../../../../common/services/package_policies_to_agent_inputs';
-import type { PackagePolicyValidationResults } from '../../../../../../common/services/validate_package_policy';
+import type { AgentPolicy, PackageInfo, UpdatePackagePolicy, PackagePolicy } from '../../../types';
 import {
-  validatePackagePolicy,
-  validationHasErrors,
-} from '../../../../../../common/services/validate_package_policy';
-import type { AgentPolicy } from '../../../../../../common/types/models/agent_policy';
-import type { PackageInfo } from '../../../../../../common/types/models/epm';
-import type {
-  PackagePolicy,
-  UpdatePackagePolicy,
-} from '../../../../../../common/types/models/package_policy';
-import type {
-  GetOnePackagePolicyResponse,
-  UpgradePackagePolicyDryRunResponse,
-} from '../../../../../../common/types/rest_spec/package_policy';
-import { Error } from '../../../../../components/error';
-import { ExtensionWrapper } from '../../../../../components/extension_wrapper';
-import { Loading } from '../../../../../components/loading';
-import { useConfig } from '../../../../../hooks/use_config';
-import { useStartServices } from '../../../../../hooks/use_core';
-import { useLink } from '../../../../../hooks/use_link';
-import { sendGetAgentStatus } from '../../../../../hooks/use_request/agents';
-import { sendGetOneAgentPolicy } from '../../../../../hooks/use_request/agent_policy';
-import { sendGetPackageInfoByKey } from '../../../../../hooks/use_request/epm';
-import {
-  sendGetOnePackagePolicy,
+  useLink,
+  useBreadcrumbs,
+  useStartServices,
+  useConfig,
+  useUIExtension,
   sendUpdatePackagePolicy,
+  sendGetAgentStatus,
+  sendGetOneAgentPolicy,
+  sendGetOnePackagePolicy,
+  sendGetPackageInfoByKey,
   sendUpgradePackagePolicy,
   sendUpgradePackagePolicyDryRun,
-} from '../../../../../hooks/use_request/package_policy';
-import { useUIExtension } from '../../../../../hooks/use_ui_extension';
-import { pkgKeyFromPackageInfo } from '../../../../../services/pkg_key_from_package_info';
-import type { PackagePolicyEditExtensionComponentProps } from '../../../../../types/ui_extensions';
-import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks/use_breadcrumbs';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { ConfirmDeployAgentPolicyModal } from '../components/confirm_deploy_modal';
-import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components/layout';
+} from '../../../hooks';
+import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
+import { Loading, Error, ExtensionWrapper } from '../../../components';
+import { ConfirmDeployAgentPolicyModal } from '../components';
+import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
+import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
+import { validatePackagePolicy, validationHasErrors } from '../create_package_policy_page/services';
+import type {
+  PackagePolicyFormState,
+  EditPackagePolicyFrom,
+} from '../create_package_policy_page/types';
 import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
 import type {
-  EditPackagePolicyFrom,
-  PackagePolicyFormState,
-} from '../create_package_policy_page/types';
+  GetOnePackagePolicyResponse,
+  UpgradePackagePolicyDryRunResponse,
+} from '../../../../../../common/types/rest_spec';
+import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
+import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
 
 export const EditPackagePolicyPage = memo(() => {
   const {

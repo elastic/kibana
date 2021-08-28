@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { wrapError } from '../client/error_wrapper';
-import { jobAuditMessagesProvider } from '../models/job_audit_messages/job_audit_messages';
-import type { RouteInitialization } from '../types';
+import { RouteInitialization } from '../types';
+import { jobAuditMessagesProvider } from '../models/job_audit_messages';
 import {
-  clearJobAuditMessagesBodySchema,
-  jobAuditMessagesJobIdSchema,
   jobAuditMessagesQuerySchema,
+  jobAuditMessagesJobIdSchema,
+  clearJobAuditMessagesBodySchema,
 } from './schemas/job_audit_messages_schema';
 
 /**

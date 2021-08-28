@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEqual } from 'lodash';
-import type { ActionPayload } from '../../explorer_dashboard_service';
+import { ActionPayload } from '../../explorer_dashboard_service';
 import { getDefaultSwimlaneData, getInfluencers } from '../../explorer_utils';
+
 import { getIndexPattern } from './get_index_pattern';
-import type { ExplorerState } from './state';
+import { ExplorerState } from './state';
 
 export const jobSelectionChange = (state: ExplorerState, payload: ActionPayload): ExplorerState => {
   const { selectedJobs } = payload;

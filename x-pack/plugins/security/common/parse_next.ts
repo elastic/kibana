@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { parse } from 'url';
 
 import { NEXT_URL_QUERY_STRING_PARAMETER } from './constants';

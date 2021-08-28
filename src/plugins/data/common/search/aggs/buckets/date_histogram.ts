@@ -5,28 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
-import { every, find, get, noop } from 'lodash';
+
+import { get, noop, find, every } from 'lodash';
 import moment from 'moment-timezone';
-import { KBN_FIELD_TYPES } from '../../../../common';
-import { UI_SETTINGS } from '../../../constants';
-import type { IFieldType } from '../../../index_patterns/fields/types';
-import type { TimeRange, TimeRangeBounds } from '../../../query/timefilter/types';
-import type { ExtendedBounds } from '../../expressions/extended_bounds';
-import { extendedBoundsToAst } from '../../expressions/extended_bounds_to_ast';
-import { timerangeToAst } from '../../expressions/timerange_to_ast';
+import { i18n } from '@kbn/i18n';
+
+import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
+import { IFieldType } from '../../../index_patterns';
+
+import { ExtendedBounds, extendedBoundsToAst, timerangeToAst } from '../../expressions';
+import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
+import { createFilterDateHistogram } from './create_filter/date_histogram';
+import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
+import { BUCKET_TYPES } from './bucket_agg_types';
+import { aggDateHistogramFnName } from './date_histogram_fn';
+import { TimeBuckets } from './lib/time_buckets';
+
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
-import type { BaseAggParams } from '../types';
-import { dateHistogramInterval } from '../utils/date_interval_utils/date_histogram_interval';
-import { inferTimeZone } from '../utils/infer_time_zone';
-import type { IBucketAggConfig } from './bucket_agg_type';
-import { BucketAggType } from './bucket_agg_type';
-import { BUCKET_TYPES } from './bucket_agg_types';
-import { createFilterDateHistogram } from './create_filter/date_histogram';
-import { aggDateHistogramFnName } from './date_histogram_fn';
-import { TimeBuckets } from './lib/time_buckets/time_buckets';
-import { autoInterval, intervalOptions, isAutoInterval } from './_interval_options';
+import { BaseAggParams } from '../types';
+import { dateHistogramInterval } from '../utils';
+import { inferTimeZone } from '../utils';
 
 /** @internal */
 export type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;

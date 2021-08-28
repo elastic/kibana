@@ -4,29 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import { kibanaPackageJson } from '@kbn/utils';
+
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import { kibanaPackageJson } from '@kbn/utils';
+import type { KibanaRequest } from 'src/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObjectsServiceStart,
+  HttpServiceSetup,
+  Logger,
+} from 'src/core/server';
 
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
-import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type { HttpServiceSetup } from '../../../../../src/core/server/http/types';
-import type { SavedObjectsServiceStart } from '../../../../../src/core/server/saved_objects/saved_objects_service';
-import type { DataPluginStart } from '../../../../../src/plugins/data/server/plugin';
-import type { CloudSetup } from '../../../cloud/server/plugin';
-import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server/plugin';
-import type { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server/saved_objects';
-import type { SecurityPluginStart } from '../../../security/server/plugin';
-import type { FleetConfigType } from '../../common/types';
-import type { FleetAppContext } from '../plugin';
+import type { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsPluginSetup,
+} from '../../../encrypted_saved_objects/server';
+
+import type { SecurityPluginStart } from '../../../security/server';
+import type { FleetConfigType } from '../../common';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
   PutPackagePolicyUpdateCallback,
-} from '../types/extensions';
+} from '../types';
+import type { FleetAppContext } from '../plugin';
+import type { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { capitalize, union } from 'lodash';
 import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import type { ESFilter } from '../../../../../src/core/types/elasticsearch';
+import { ESFilter } from '../../../../../src/core/types/elasticsearch';
 import { createEsParams, useEsSearch } from './use_es_search';
 
 export interface Props {

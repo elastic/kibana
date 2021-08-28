@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import './collapsible_panel.scss';
+
 import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -19,7 +21,6 @@ import type { ReactNode } from 'react';
 import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import './collapsible_panel.scss';
 
 interface Props {
   iconType?: IconType;

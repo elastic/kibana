@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiCodeEditorProps } from '@elastic/eui';
-import { EuiCodeEditor } from '@elastic/eui';
-import { XJsonMode } from '@kbn/ace';
-import type { FC } from 'react';
-import React from 'react';
-import { expandLiteralStrings } from '../../../../../../shared_imports';
+
+import React, { FC } from 'react';
+
+import { EuiCodeEditor, EuiCodeEditorProps } from '@elastic/eui';
+import { expandLiteralStrings, XJsonMode } from '../../../../../../shared_imports';
 
 export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 

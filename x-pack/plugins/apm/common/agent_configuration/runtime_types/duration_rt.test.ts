@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { getDurationRt } from './duration_rt';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { getDurationRt } from './duration_rt';
 
 describe('getDurationRt', () => {
   describe('must be at least 1m', () => {

@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { MockedLogger } from '@kbn/logging/mocks';
-import { loggerMock } from '@kbn/logging/mocks';
+
+import { loggerMock, MockedLogger } from '../../../logging/logger.mock';
 import type { SavedObjectsClientContract } from '../../types';
-import { PointInTimeFinder } from './point_in_time_finder';
 import type { ISavedObjectsRepository } from './repository';
+import { PointInTimeFinder } from './point_in_time_finder';
 
 const createPointInTimeFinderMock = ({
   logger = loggerMock.create(),

@@ -5,24 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ApplicationStart } from '../../../core/public/application/types';
-import type { ChromeStart } from '../../../core/public/chrome/types';
-import type { DocLinksStart } from '../../../core/public/doc_links/doc_links_service';
-import type { HttpStart } from '../../../core/public/http/types';
-import type { OverlayStart } from '../../../core/public/overlays/overlay_service';
-import type { SavedObjectsStart } from '../../../core/public/saved_objects/saved_objects_service';
-import type { IUiSettingsClient } from '../../../core/public/ui_settings/types';
-import type { Capabilities } from '../../../core/types/capabilities';
-import type { TimefilterContract } from '../../data/public/query/timefilter/timefilter';
-import type { DataPublicPluginStart } from '../../data/public/types';
-import type { EmbeddableStart } from '../../embeddable/public/plugin';
-import type { ExpressionsStart } from '../../expressions/public/plugin';
-import { createGetterSetter } from '../../kibana_utils/common/create_getter_setter';
-import { SavedObjectLoader } from '../../saved_objects/public/saved_object/saved_object_loader';
-import type { UiActionsStart } from '../../ui_actions/public/plugin';
-import type { UsageCollectionSetup } from '../../usage_collection/public/plugin';
-import type { SavedVisualizationsLoader } from './saved_visualizations/saved_visualizations';
-import type { TypesStart } from './vis_types/types_service';
+
+import type {
+  ApplicationStart,
+  Capabilities,
+  ChromeStart,
+  HttpStart,
+  IUiSettingsClient,
+  OverlayStart,
+  SavedObjectsStart,
+  DocLinksStart,
+} from '../../../core/public';
+import type { TypesStart } from './vis_types';
+import { createGetterSetter } from '../../../plugins/kibana_utils/public';
+import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';
+import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
+import { ExpressionsStart } from '../../../plugins/expressions/public';
+import { UiActionsStart } from '../../../plugins/ui_actions/public';
+import { SavedVisualizationsLoader } from './saved_visualizations';
+import { SavedObjectLoader } from '../../saved_objects/public';
+import { EmbeddableStart } from '../../embeddable/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

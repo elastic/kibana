@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
+
 import { Observable } from 'rxjs';
-import type { SavedObjectsFindOptionsReference } from '../../../core/server/saved_objects/types';
-import type { SavedObject, SavedObjectReference } from '../../../core/types/saved_objects';
-import type { SavedObject as SavedObjectClass } from '../../saved_objects/public/types';
-import type { ITagsClient, Tag } from '../common/types';
-import type { TagDecoratedSavedObject } from './decorator/types';
+import { SearchFilterConfig, EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import { SavedObject, SavedObjectReference } from '../../../core/types';
+import { SavedObjectsFindOptionsReference } from '../../../core/public';
+import { SavedObject as SavedObjectClass } from '../../saved_objects/public';
+import { TagDecoratedSavedObject } from './decorator';
+import { ITagsClient, Tag } from '../common';
 
 /**
  * @public

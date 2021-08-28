@@ -10,16 +10,16 @@ jest.mock('../../export', () => ({
   exportSavedObjectsToStream: jest.fn(),
 }));
 
+import supertest from 'supertest';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import { createListStream } from '@kbn/utils';
-import supertest from 'supertest';
-import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { CoreUsageStatsClient } from '../../../core_usage_data/core_usage_stats_client';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { savedObjectsExporterMock } from '../../export/saved_objects_exporter.mock';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
-import { createExportableType, setupServer } from '../test_utils';
+import { setupServer, createExportableType } from '../test_utils';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const allowedTypes = ['index-pattern', 'search'];

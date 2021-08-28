@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import { Collector } from './collector';
+
+import type { Logger } from 'src/core/server';
 import type { CollectorOptions } from './types';
+import { Collector } from './collector';
 
 /**
  * Same as {@link CollectorOptions} but with the `schema` property enforced

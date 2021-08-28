@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { TinymathAST } from '@kbn/tinymath';
-import type { OperationDefinition } from '..';
-import type { IndexPattern } from '../../../types';
-import type { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { OperationDefinition } from '../index';
+import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { IndexPattern } from '../../../types';
 
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'math';

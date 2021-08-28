@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { RouteValidationError, RouteValidator } from './';
 import { schema, Type } from '@kbn/config-schema';
-import { RouteValidator } from './validator';
-import { RouteValidationError } from './validator_error';
 
 describe('Router validator', () => {
   it('should validate and infer the type from a function', () => {

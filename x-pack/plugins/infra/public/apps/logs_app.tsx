@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { History } from 'history';
+
+import { History } from 'history';
+import { CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import type { CoreStart } from '../../../../../src/core/public/types';
-import type { AppMountParameters } from '../../../../../src/core/public/application/types';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public/storage/storage';
+import { AppMountParameters } from '../../../../../src/core/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import '../index.scss';
 import { NotFoundPage } from '../pages/404';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
-import { LogsPage } from '../pages/logs/page';
-import type { InfraClientStartDeps } from '../types';
+import { LogsPage } from '../pages/logs';
+import { InfraClientStartDeps } from '../types';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
 

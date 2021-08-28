@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { ServiceStatus, ServiceStatusLevels } from './types';
 import { calculateLegacyStatus } from './legacy_status';
-import type { ServiceStatus } from './types';
-import { ServiceStatusLevels } from './types';
 
 const available: ServiceStatus = { level: ServiceStatusLevels.available, summary: 'Available' };
 const degraded: ServiceStatus = {

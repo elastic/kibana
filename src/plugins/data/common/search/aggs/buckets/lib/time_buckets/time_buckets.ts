@@ -5,23 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Unit } from '@elastic/datemath';
-import { isObject as isObjectLodash, isPlainObject, isString, sortBy } from 'lodash';
-import type { Moment } from 'moment';
-import moment from 'moment';
-import type { Assign } from 'utility-types';
-import type { TimeRangeBounds } from '../../../../../query/timefilter/types';
-import {
-  parseInterval,
-  splitStringInterval,
-} from '../../../utils/date_interval_utils/parse_interval';
-import { autoInterval } from '../../_interval_options';
+import { Assign } from 'utility-types';
+import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
+import moment, { Moment } from 'moment';
+
+import { Unit } from '@elastic/datemath';
+import { parseInterval, splitStringInterval } from '../../../utils';
+import { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
-import type { EsInterval } from './calc_es_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
+  EsInterval,
 } from './calc_es_interval';
+import { autoInterval } from '../../_interval_options';
 
 interface TimeBucketsInterval extends moment.Duration {
   // TODO double-check whether all of these are needed

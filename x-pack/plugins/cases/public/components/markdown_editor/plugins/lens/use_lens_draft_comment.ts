@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiMarkdownAstNodePosition } from '@elastic/eui';
+
+import { EuiMarkdownAstNodePosition } from '@elastic/eui';
 import { useCallback, useEffect, useState } from 'react';
 import { first } from 'rxjs/operators';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID } from './constants';
 import { INSERT_LENS } from './translations';
 

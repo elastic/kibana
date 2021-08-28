@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { either } from 'fp-ts/lib/Either';
 
 export const floatRt = new t.Type<string, string, unknown>(
   'floatRt',

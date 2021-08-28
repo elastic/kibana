@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
-import classNames from 'classnames';
-import React, { useCallback } from 'react';
-import { NativeRenderer } from '../../../native_renderer/native_renderer';
-import { updateVisualizationState, useLensDispatch } from '../../../state_management';
-import type { DatasourceStates, VisualizationState } from '../../../state_management/types';
-import type { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
-import { ChartSwitch } from './chart_switch';
-import { WorkspaceTitle } from './title';
-import { WarningsPopover } from './warnings_popover';
 import './workspace_panel_wrapper.scss';
+
+import React, { useCallback } from 'react';
+import { EuiPageContent, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import classNames from 'classnames';
+import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
+import { NativeRenderer } from '../../../native_renderer';
+import { ChartSwitch } from './chart_switch';
+import { WarningsPopover } from './warnings_popover';
+import {
+  useLensDispatch,
+  updateVisualizationState,
+  DatasourceStates,
+  VisualizationState,
+} from '../../../state_management';
+import { WorkspaceTitle } from './title';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];

@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
 
-import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
-import type { Agent } from '../../../common/types/models/agent';
-import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
-import type { BulkActionResult } from '../../types';
+import type { Agent, BulkActionResult } from '../../types';
 import { agentPolicyService } from '../agent_policy';
+import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
-import { bulkCreateAgentActions, createAgentAction } from './actions';
-import type { GetAgentsOptions } from './crud';
 import {
-  bulkUpdateAgents,
   getAgentDocuments,
-  getAgentPolicyForAgent,
   getAgents,
+  getAgentPolicyForAgent,
   updateAgent,
+  bulkUpdateAgents,
 } from './crud';
+import type { GetAgentsOptions } from './index';
+import { createAgentAction, bulkCreateAgentActions } from './actions';
 import { searchHitToAgent } from './helpers';
 
 export async function reassignAgent(

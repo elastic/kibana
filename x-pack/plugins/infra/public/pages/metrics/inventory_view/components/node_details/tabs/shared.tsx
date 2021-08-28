@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
-import type { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../../lib/lib';
+
+import { InventoryItemType } from '../../../../../../../common/inventory_models/types';
+import { InfraWaffleMapOptions, InfraWaffleMapNode } from '../../../../../../lib/lib';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
 export interface TabProps {
   options: InfraWaffleMapOptions;

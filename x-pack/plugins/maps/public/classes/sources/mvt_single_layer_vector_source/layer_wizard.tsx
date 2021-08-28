@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import type { TiledSingleLayerVectorSourceSettings } from '../../../../common/descriptor_types/source_descriptor_types';
-import { VectorTileLayerIcon } from '../../layers/icons/vector_tile_layer_icon';
-import type { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { TiledVectorLayer } from '../../layers/tiled_vector_layer/tiled_vector_layer';
-import { MVTSingleLayerVectorSource, sourceTitle } from './mvt_single_layer_vector_source';
 import { MVTSingleLayerVectorSourceEditor } from './mvt_single_layer_vector_source_editor';
+import { MVTSingleLayerVectorSource, sourceTitle } from './mvt_single_layer_vector_source';
+import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { TiledVectorLayer } from '../../layers/tiled_vector_layer/tiled_vector_layer';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import { TiledSingleLayerVectorSourceSettings } from '../../../../common/descriptor_types';
+import { VectorTileLayerIcon } from '../../layers/icons/vector_tile_layer_icon';
 
 export const mvtVectorSourceWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],

@@ -6,8 +6,8 @@
  */
 
 import createContainer from 'constate';
-import { useInventoryAlertPrefill } from './inventory/hooks/use_inventory_alert_prefill';
 import { useMetricThresholdAlertPrefill } from './metric_threshold/hooks/use_metric_threshold_alert_prefill';
+import { useInventoryAlertPrefill } from './inventory/hooks/use_inventory_alert_prefill';
 
 const useAlertPrefill = () => {
   const metricThresholdPrefill = useMetricThresholdAlertPrefill();

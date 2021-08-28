@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Elasticsearch, Kibana } from '../create_apm_users_and_roles';
-import { AbortError, callKibana, isAxiosError } from './call_kibana';
+
+import { Elasticsearch, Kibana } from '../create_apm_users_and_roles';
+import { AbortError } from './call_kibana';
+import { callKibana, isAxiosError } from './call_kibana';
 
 export async function getKibanaVersion({
   elasticsearch,

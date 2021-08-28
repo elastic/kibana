@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Feature, FeatureCollection } from 'geojson';
-import type { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters/types';
+
+import { Feature, FeatureCollection } from 'geojson';
+import { AbstractVectorSource, BoundsFilters, GeoJsonWithMeta } from '../vector_source';
 import { EMPTY_FEATURE_COLLECTION, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
-import type { MapExtent } from '../../../../common/descriptor_types/map_descriptor';
-import type {
-  GeojsonFileSourceDescriptor,
+import {
   InlineFieldDescriptor,
-} from '../../../../common/descriptor_types/source_descriptor_types';
-import type { IField } from '../../fields/field';
-import { InlineField } from '../../fields/inline_field';
-import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
+  GeojsonFileSourceDescriptor,
+  MapExtent,
+} from '../../../../common/descriptor_types';
 import { registerSource } from '../source_registry';
-import type { BoundsFilters, GeoJsonWithMeta } from '../vector_source/vector_source';
-import { AbstractVectorSource } from '../vector_source/vector_source';
+import { IField } from '../../fields/field';
+import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { InlineField } from '../../fields/inline_field';
 
 function getFeatureCollection(
   geoJson: Feature | FeatureCollection | null | undefined

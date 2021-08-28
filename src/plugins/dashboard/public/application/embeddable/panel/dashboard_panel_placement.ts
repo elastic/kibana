@@ -7,10 +7,9 @@
  */
 
 import _ from 'lodash';
-import { PanelNotFoundError } from '../../../../../embeddable/public/lib/errors';
-import type { GridData } from '../../../../common/embeddable/types';
-import type { DashboardPanelState } from '../../../../common/types';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../dashboard_constants';
+import { PanelNotFoundError } from '../../../services/embeddable';
+import { GridData } from '../../../../common';
+import { DashboardPanelState, DASHBOARD_GRID_COLUMN_COUNT } from '..';
 
 export type PanelPlacementMethod<PlacementArgs extends IPanelPlacementArgs> = (
   args: PlacementArgs

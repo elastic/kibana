@@ -4,25 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem, EuiFlyoutFooter, EuiFlyoutHeader, Query } from '@elastic/eui';
+
+import React, { FC, useState, useEffect, useCallback } from 'react';
+import { EuiFlyoutFooter, EuiFlyoutHeader, EuiFlexItem, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { NotificationsStart } from '../../../../../../src/core/public/notifications/notifications_service';
-import type { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public/api';
-import type { AssignableObject } from '../../../common/assignments';
-import { getKey } from '../../../common/assignments';
-import type { ITagAssignmentService } from '../../services/assignments/assignment_service';
+import { NotificationsStart } from 'src/core/public';
+import { AssignableObject } from '../../../common/assignments';
+import { ITagAssignmentService, ITagsCache } from '../../services';
+import { parseQuery, computeRequiredChanges } from './lib';
+import { AssignmentOverrideMap, AssignmentStatus, AssignmentStatusMap } from './types';
+import {
+  AssignFlyoutHeader,
+  AssignFlyoutSearchBar,
+  AssignFlyoutResultList,
+  AssignFlyoutFooter,
+  AssignFlyoutActionBar,
+} from './components';
+import { getKey, sortByStatusAndTitle } from './utils';
+
 import './assign_flyout.scss';
-import { AssignFlyoutActionBar } from './components/action_bar';
-import { AssignFlyoutFooter } from './components/footer';
-import { AssignFlyoutHeader } from './components/header';
-import { AssignFlyoutResultList } from './components/result_list';
-import { AssignFlyoutSearchBar } from './components/search_bar';
-import { computeRequiredChanges } from './lib/compute_changes';
-import { parseQuery } from './lib/parse_query';
-import type { AssignmentOverrideMap, AssignmentStatus, AssignmentStatusMap } from './types';
-import { sortByStatusAndTitle } from './utils';
 
 interface AssignFlyoutProps {
   tagIds: string[];

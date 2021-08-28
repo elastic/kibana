@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsStart } from '../../../saved_objects/public/plugin';
-import type { SavedObject } from '../../../saved_objects/public/types';
+
+import { SavedObject, SavedObjectsStart } from '../../../saved_objects/public';
 
 export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
   class SavedSearch extends savedObjects.SavedObjectClass {

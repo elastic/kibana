@@ -6,14 +6,15 @@
  */
 
 import * as rt from 'io-ts';
-import { paginationCursorRT, paginationRT } from '../../../log_analysis/log_analysis_results';
+
+import { timeRangeRT, routeTimingMetadataRT } from '../../shared';
 import {
-  anomaliesSortRT,
-  logEntryAnomalyDatasetsRT,
   logEntryAnomalyRT,
-} from '../../../log_analysis/log_entry_anomalies';
-import { timeRangeRT } from '../../../time/time_range';
-import { routeTimingMetadataRT } from '../../shared/timing';
+  logEntryAnomalyDatasetsRT,
+  anomaliesSortRT,
+  paginationRT,
+  paginationCursorRT,
+} from '../../../log_analysis';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH =
   '/api/infra/log_analysis/results/log_entry_anomalies';

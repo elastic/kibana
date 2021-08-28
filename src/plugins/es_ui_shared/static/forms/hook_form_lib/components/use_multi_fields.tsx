@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import type { FieldHook } from '../types';
-import type { Props as UseFieldProps } from './use_field';
-import { UseField } from './use_field';
+
+import { UseField, Props as UseFieldProps } from './use_field';
+import { FieldHook } from '../types';
 
 type FieldsArray = Array<{ id: string } & Omit<UseFieldProps<unknown, {}, unknown>, 'children'>>;
 

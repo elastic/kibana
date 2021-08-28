@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup, CoreStart } from '../../../core/public/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
-import type { SavedObjectSetup } from '../../saved_objects/public/plugin';
-import type { SavedObjectsTaggingApi } from './api';
+
+import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from 'src/core/public';
+import { SavedObjectSetup } from '../../saved_objects/public';
+import { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
+import { SavedObjectsTaggingApi } from './api';
 import { tagDecoratorConfig } from './decorator';
-import type { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
 
 interface SetupDeps {
   savedObjects?: SavedObjectSetup;

@@ -4,26 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Suspense, useEffect, useState } from 'react';
 import {
-  EuiButton,
-  EuiCallOut,
-  EuiDescriptionList,
-  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiSteps,
   EuiText,
+  EuiButton,
+  EuiSteps,
+  EuiLoadingSpinner,
+  EuiDescriptionList,
+  EuiCallOut,
+  EuiSpacer,
+  EuiErrorBoundary,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { Option } from 'fp-ts/lib/Option';
-import { getOrElse, map } from 'fp-ts/lib/Option';
+import { Option, map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import React, { Suspense, useEffect, useState } from 'react';
-import type { ActionTypeExecutorResult } from '../../../../../actions/common/types';
-import type { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import { ActionTypeExecutorResult } from '../../../../../actions/common';
 
 export interface ConnectorAddFlyoutProps {
   connector: ActionConnector;

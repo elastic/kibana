@@ -4,18 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { basePath } from '.';
-import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
-import type { DeepPartial } from '../../../../common/types/common';
-import type {
-  AnalyticsMapReturnType,
-  DataFrameAnalyticsConfig,
-  DataFrameAnalyticsStats,
-  DeleteDataFrameAnalyticsWithIndexStatus,
-} from '../../../../common/types/data_frame_analytics';
-import type { NewJobCapsResponse } from '../../../../common/types/fields';
-import type { UpdateDataFrameAnalyticsConfig } from '../../data_frame_analytics/common/analytics';
+
 import { http } from '../http_service';
+
+import { basePath } from './index';
+import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
+import {
+  DataFrameAnalyticsConfig,
+  UpdateDataFrameAnalyticsConfig,
+} from '../../data_frame_analytics/common';
+import { DeepPartial } from '../../../../common/types/common';
+import { NewJobCapsResponse } from '../../../../common/types/fields';
+import {
+  DeleteDataFrameAnalyticsWithIndexStatus,
+  AnalyticsMapReturnType,
+} from '../../../../common/types/data_frame_analytics';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;

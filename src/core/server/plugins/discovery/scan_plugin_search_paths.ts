@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import type { PathLike } from 'fs';
-import { readdir, stat, Stats } from 'fs';
+
+import { PathLike, readdir, stat, Stats } from 'fs';
 import { resolve } from 'path';
 import { bindNodeCallback, from, Observable } from 'rxjs';
 import { catchError, mergeMap } from 'rxjs/operators';
+import { Logger } from '../../logging';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 
 const fsReadDir$ = bindNodeCallback<string, string[]>(readdir);

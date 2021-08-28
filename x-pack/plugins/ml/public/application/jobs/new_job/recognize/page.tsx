@@ -4,30 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useState, Fragment, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiPageHeaderSection,
+  EuiPageHeader,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiText,
+  EuiSpacer,
+  EuiCallOut,
+  EuiPanel,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { merge } from 'lodash';
 import moment from 'moment';
-import type { FC } from 'react';
-import React, { Fragment, useEffect, useState } from 'react';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { TIME_FORMAT } from '../../../../../common/constants/time_format';
-import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
-import type { RuntimeMappings } from '../../../../../common/types/fields';
-import type {
+import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import { ml } from '../../../services/ml_api_service';
+import { useMlContext } from '../../../contexts/ml';
+import {
   DatafeedResponse,
   JobOverride,
   JobResponse,
@@ -35,19 +34,18 @@ import type {
   KibanaObjectResponse,
   ModuleJob,
 } from '../../../../../common/types/modules';
-import { isPopulatedObject } from '../../../../../common/util/object_utils';
-import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning/jobs_awaiting_node_warning';
-import { useMlKibana } from '../../../contexts/kibana/kibana_context';
-import { useMlLocator } from '../../../contexts/kibana/use_create_url';
-import { useMlContext } from '../../../contexts/ml/use_ml_context';
-import { ml } from '../../../services/ml_api_service';
-import type { TimeRange } from '../common/components/time_range_picker';
 import { CreateResultCallout } from './components/create_result_callout';
-import type { JobSettingsFormValues } from './components/job_settings_form';
-import { JobSettingsForm } from './components/job_settings_form';
 import { KibanaObjects } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
 import { checkForSavedObjects } from './resolvers';
+import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
+import { TimeRange } from '../common/components';
+import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { TIME_FORMAT } from '../../../../../common/constants/time_format';
+import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
+import { isPopulatedObject } from '../../../../../common/util/object_utils';
+import { RuntimeMappings } from '../../../../../common/types/fields';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;

@@ -4,66 +4,72 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { first, map, share } from 'rxjs/operators';
-import type { CoreSetup, CoreStart } from '../../../../src/core/server';
-import type { IContextProvider } from '../../../../src/core/server/context/container/context';
-import type { ElasticsearchServiceStart } from '../../../../src/core/server/elasticsearch/types';
-import { KibanaRequest } from '../../../../src/core/server/http/router/request';
-import type { PluginInitializerContext } from '../../../../src/core/server/plugins/types';
-import type { SavedObjectsServiceStart } from '../../../../src/core/server/saved_objects/saved_objects_service';
-import type { SavedObjectsBulkGetObject } from '../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type { ServiceStatus, StatusServiceSetup } from '../../../../src/core/server/status/types';
-import { ServiceStatusLevels } from '../../../../src/core/server/status/types';
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server/plugin';
-import type {
-  PluginSetupContract as ActionsPluginSetupContract,
-  PluginStartContract as ActionsPluginStartContract,
-} from '../../actions/server/plugin';
-import type {
+import { BehaviorSubject, Observable } from 'rxjs';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { combineLatest } from 'rxjs';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
-} from '../../encrypted_saved_objects/server/plugin';
-import type {
-  IEventLogClientService,
-  IEventLogger,
-  IEventLogService,
-} from '../../event_log/server/types';
-import type { PluginStartContract as FeaturesPluginStart } from '../../features/server/plugin';
-import { LICENSE_TYPE } from '../../licensing/common/types';
-import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server/types';
-import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server/plugin';
-import type { SpacesPluginStart } from '../../spaces/server/plugin';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '../../task_manager/server/plugin';
-import { ALERTS_FEATURE_ID } from '../common';
-import type { AlertsHealth, AlertTypeParams, AlertTypeState } from '../common/alert';
-import type { AlertInstanceContext, AlertInstanceState } from '../common/alert_instance';
-import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
-import { AlertingAuthorization } from './authorization/alerting_authorization';
-import type { AlertsConfig } from './config';
-import { getHealth } from './health/get_health';
-import { getHealthStatusStream } from './health/get_state';
-import { initializeAlertingHealth, scheduleAlertingHealthCheck } from './health/task';
+} from '../../encrypted_saved_objects/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import { SpacesPluginStart } from '../../spaces/server';
+import { RulesClient } from './rules_client';
+import { RuleTypeRegistry } from './rule_type_registry';
+import { TaskRunnerFactory } from './task_runner';
+import { RulesClientFactory } from './rules_client_factory';
+import { ILicenseState, LicenseState } from './lib/license_state';
+import {
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  SavedObjectsServiceStart,
+  IContextProvider,
+  ElasticsearchServiceStart,
+  StatusServiceSetup,
+  ServiceStatus,
+  SavedObjectsBulkGetObject,
+  ServiceStatusLevels,
+} from '../../../../src/core/server';
+import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
+import { defineRoutes } from './routes';
+import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import {
+  PluginSetupContract as ActionsPluginSetupContract,
+  PluginStartContract as ActionsPluginStartContract,
+} from '../../actions/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertsHealth,
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  Services,
+} from './types';
+import { registerAlertsUsageCollector } from './usage';
+import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
+import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
+import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import { setupSavedObjects } from './saved_objects';
 import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
-import type { ILicenseState } from './lib/license_state';
-import { LicenseState } from './lib/license_state';
-import { defineRoutes } from './routes';
-import { RulesClient } from './rules_client/rules_client';
-import { RulesClientFactory } from './rules_client_factory';
-import { RuleTypeRegistry } from './rule_type_registry';
-import { setupSavedObjects } from './saved_objects';
-import { TaskRunnerFactory } from './task_runner/task_runner_factory';
-import type { AlertingRequestHandlerContext, AlertType, Services } from './types';
-import { registerAlertsUsageCollector } from './usage/alerts_usage_collector';
-import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
+import {
+  getHealthStatusStream,
+  scheduleAlertingHealthCheck,
+  initializeAlertingHealth,
+} from './health';
+import { AlertsConfig } from './config';
+import { getHealth } from './health/get_health';
+import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { AlertingAuthorization } from './authorization';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {

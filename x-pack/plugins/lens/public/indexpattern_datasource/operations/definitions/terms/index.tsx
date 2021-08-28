@@ -5,33 +5,30 @@
  * 2.0.
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
-import {
-  EuiAccordion,
-  EuiFormRow,
-  EuiIconTip,
-  EuiSelect,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { uniq } from 'lodash';
 import React from 'react';
-import type { OperationDefinition } from '..';
-import { operationDefinitionMap } from '..';
-import type { CoreStart } from '../../../../../../../../src/core/public/types';
-import type { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/common/search/aggs/types';
-import { esQuery } from '../../../../../../../../src/plugins/data/public/deprecated';
-import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/common/ast/build_function';
-import type { FieldStatsResponse } from '../../../../../common/api';
-import type { DataType, FrameDatasourceAPI } from '../../../../types';
-import type { IndexPattern, IndexPatternLayer } from '../../../types';
-import { isReferenced, updateColumnParam } from '../../layer_helpers';
-import type { FieldBasedIndexPatternColumn } from '../column_types';
-import type { FiltersIndexPatternColumn } from '../filters/filters';
-import { defaultLabel } from '../filters/filters';
-import { getInvalidFieldMessage } from '../helpers';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFormRow,
+  EuiSelect,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiSpacer,
+  EuiAccordion,
+  EuiIconTip,
+} from '@elastic/eui';
+import { uniq } from 'lodash';
+import { CoreStart } from 'kibana/public';
+import { FieldStatsResponse } from '../../../../../common';
+import { AggFunctionsMapping, esQuery } from '../../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
+import { updateColumnParam, isReferenced } from '../../layer_helpers';
+import { DataType, FrameDatasourceAPI } from '../../../../types';
+import { FiltersIndexPatternColumn, OperationDefinition, operationDefinitionMap } from '../index';
+import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
+import { getInvalidFieldMessage } from '../helpers';
+import type { IndexPatternLayer, IndexPattern } from '../../../types';
+import { defaultLabel } from '../filters';
 
 function ofName(name?: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {

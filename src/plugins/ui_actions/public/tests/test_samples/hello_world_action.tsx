@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
-import { CoreStart } from 'src/core/public/types';
+import { CoreStart } from 'src/core/public';
 import { createAction, Action } from '../../actions';
 import { toMountPoint, reactToUiComponent } from '../../../../kibana_react/public';
 

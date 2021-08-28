@@ -5,36 +5,38 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { SavedObject } from '../../../../../core/types/saved_objects';
-import { FORMATS_UI_SETTINGS } from '../../../../field_formats/common/constants/ui_settings';
-import type { FieldFormatsStartCommon } from '../../../../field_formats/common/types';
-import { SavedObjectNotFound } from '../../../../kibana_utils/common/errors/errors';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE, UI_SETTINGS } from '../../constants';
-import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
-import { DuplicateIndexPatternError } from '../errors/duplicate_index_pattern';
-import { IndexPatternMissingIndices } from '../lib/errors';
-import type {
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE, SavedObjectsClientCommon } from '../..';
+
+import { createIndexPatternCache } from '.';
+import type { RuntimeField } from '../types';
+import { IndexPattern } from './index_pattern';
+import {
+  createEnsureDefaultIndexPattern,
+  EnsureDefaultIndexPattern,
+} from './ensure_default_index_pattern';
+import {
+  OnNotification,
+  OnError,
+  UiSettingsCommon,
+  IIndexPatternsApiClient,
+  GetFieldsOptions,
+  IndexPatternSpec,
+  IndexPatternAttributes,
   FieldAttrs,
   FieldSpec,
-  GetFieldsOptions,
-  IIndexPatternsApiClient,
-  IndexPatternAttributes,
   IndexPatternFieldMap,
-  IndexPatternSpec,
-  OnError,
-  OnNotification,
-  RuntimeField,
-  SavedObjectsClientCommon,
   TypeMeta,
-  UiSettingsCommon,
 } from '../types';
+import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '../../../../field_formats/common/';
+import { UI_SETTINGS, SavedObject } from '../../../common';
+import { SavedObjectNotFound } from '../../../../kibana_utils/common';
+import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
-import type { EnsureDefaultIndexPattern } from './ensure_default_index_pattern';
-import { createEnsureDefaultIndexPattern } from './ensure_default_index_pattern';
-import { IndexPattern } from './index_pattern';
-import { createIndexPatternCache } from './_pattern_cache';
+import { DuplicateIndexPatternError } from '../errors';
+import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 

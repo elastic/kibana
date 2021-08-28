@@ -6,11 +6,10 @@
  */
 
 import memoizeOne from 'memoize-one';
-import type { DatasourceDimensionDropProps, OperationMetadata } from '../../types';
-import type { OperationType } from '../operations/definitions';
-import type { OperationFieldTuple } from '../operations/operations';
-import { memoizedGetAvailableOperationsByMetadata } from '../operations/operations';
-import type { IndexPatternPrivateState } from '../types';
+import { DatasourceDimensionDropProps, OperationMetadata } from '../../types';
+import { OperationType } from '../indexpattern';
+import { memoizedGetAvailableOperationsByMetadata, OperationFieldTuple } from '../operations';
+import { IndexPatternPrivateState } from '../types';
 
 export interface OperationSupportMatrix {
   operationByField: Partial<Record<string, Set<OperationType>>>;

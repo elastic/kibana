@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { withApmSpan } from '../../../utils/with_apm_span';
-import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
+
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getTraceSamples } from './get_trace_samples';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getTransactionTraceSamples({
   kuery,

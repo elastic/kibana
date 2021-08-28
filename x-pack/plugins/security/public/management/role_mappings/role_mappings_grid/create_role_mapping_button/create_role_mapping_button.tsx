@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { ScopedHistory } from 'src/core/public';
 
-import type { ScopedHistory } from '../../../../../../../../src/core/public/application/scoped_history';
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public/react_router_navigate/react_router_navigate';
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { EDIT_ROLE_MAPPING_PATH } from '../../../management_urls';
 
 interface CreateRoleMappingButtonProps {

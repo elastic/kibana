@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../observability/server/utils/queries';
+
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../common/processor_event';
-import { SERVICE_NODE_NAME_MISSING } from '../../common/service_nodes';
+import { rangeQuery, kqlQuery } from '../../../observability/server';
 import { environmentQuery } from '../../common/utils/environment_query';
-import type { Setup, SetupTimeRange } from '../lib/helpers/setup_request';
+import { SERVICE_NODE_NAME_MISSING } from '../../common/service_nodes';
+import { ProcessorEvent } from '../../common/processor_event';
 
 function getServiceNodeNameFilters(serviceNodeName?: string) {
   if (!serviceNodeName) {

@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { CoreStart } from '../../../types';
-import type { InternalApplicationStart } from '../../../application/types';
-import type { HttpStart } from '../../../http/types';
-import type { ChromeNavLink } from '../../nav_links/nav_link';
+import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
+import { HttpStart } from '../../../http';
+import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
-import type { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed/recently_accessed_service';
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;

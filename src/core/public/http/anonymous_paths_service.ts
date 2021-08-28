@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreService } from '../../types/core_service';
-import type { IAnonymousPaths, IBasePath } from './types';
+
+import { IAnonymousPaths, IBasePath } from 'src/core/public';
+import { CoreService } from '../../types';
 
 interface Deps {
   basePath: IBasePath;

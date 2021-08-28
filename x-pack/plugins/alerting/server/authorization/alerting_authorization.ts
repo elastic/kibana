@@ -6,19 +6,21 @@
  */
 
 import Boom from '@hapi/boom';
-import type { KueryNode } from '@kbn/es-query';
-import type { JsonObject } from '@kbn/utility-types';
-import { fromPairs, has, map, mapValues } from 'lodash';
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
-import type { PluginStartContract as FeaturesPluginStart } from '../../../features/server/plugin';
-import type { SecurityPluginSetup } from '../../../security/server/plugin';
-import { ALERTS_FEATURE_ID } from '../../common';
-import type { RegistryRuleType } from '../rule_type_registry';
-import type { RuleTypeRegistry } from '../types';
-import type { AlertingAuthorizationFilterOpts } from './alerting_authorization_kuery';
-import { asFiltersByRuleTypeAndConsumer, asFiltersBySpaceId } from './alerting_authorization_kuery';
+import { map, mapValues, fromPairs, has } from 'lodash';
+import { KibanaRequest } from 'src/core/server';
+import { JsonObject } from '@kbn/utility-types';
+import { KueryNode } from '@kbn/es-query';
+import { ALERTS_FEATURE_ID, RuleTypeRegistry } from '../types';
+import { SecurityPluginSetup } from '../../../security/server';
+import { RegistryRuleType } from '../rule_type_registry';
+import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertingAuthorizationAuditLogger, ScopeType } from './audit_logger';
+import { Space } from '../../../spaces/server';
+import {
+  asFiltersByRuleTypeAndConsumer,
+  asFiltersBySpaceId,
+  AlertingAuthorizationFilterOpts,
+} from './alerting_authorization_kuery';
 
 export enum AlertingAuthorizationEntity {
   Rule = 'rule',

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -16,8 +17,8 @@ import {
   SectionLinks,
   SectionSubtitle,
   SectionTitle,
-} from '../../../../../observability/public/components/shared/action_menu';
-import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+} from '../../../../../observability/public';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';

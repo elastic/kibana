@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Required } from '@kbn/utility-types';
-import type { HttpStart } from '../../../../core/public/http/types';
-import type {
-  SavedObjectsImportAmbiguousConflictError,
+
+import {
+  HttpStart,
   SavedObjectsImportConflictError,
-  SavedObjectsImportResponse,
   SavedObjectsImportRetry,
-} from '../../../../core/server/saved_objects/import/types';
-import type { FailedImport, ProcessedImportResponse } from './process_import_response';
+  SavedObjectsImportResponse,
+  SavedObjectsImportAmbiguousConflictError,
+} from 'src/core/public';
+import { Required } from '@kbn/utility-types';
+import { FailedImport, ProcessedImportResponse } from './process_import_response';
 
 // the HTTP route requires type and ID; all other field are optional
 type RetryObject = Required<Partial<SavedObjectsImportRetry>, 'type' | 'id'>;

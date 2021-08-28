@@ -4,13 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useReducer } from 'react';
-import { getDatafeedId, getJobId } from '../../../../common/log_analysis/job_parameters';
-import type { JobStatus, SetupStatus } from '../../../../common/log_analysis/log_analysis';
-import { isJobStatusWithResults } from '../../../../common/log_analysis/log_analysis';
-import type { MandatoryProperty } from '../../../../common/utility_types';
-import type { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_summary_api';
-import type { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+
+import {
+  JobStatus,
+  getDatafeedId,
+  getJobId,
+  isJobStatusWithResults,
+  SetupStatus,
+} from '../../../../common/log_analysis';
+import { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_summary_api';
+import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+import { MandatoryProperty } from '../../../../common/utility_types';
 
 interface StatusReducerState<JobType extends string> {
   jobStatus: Record<JobType, JobStatus>;

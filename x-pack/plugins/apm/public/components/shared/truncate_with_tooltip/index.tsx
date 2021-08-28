@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { truncate } from '../../../utils/style';
 
 const tooltipAnchorClassname = '_apm_truncate_tooltip_anchor_';

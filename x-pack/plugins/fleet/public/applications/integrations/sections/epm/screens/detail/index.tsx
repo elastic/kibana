@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ReactEventHandler } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -18,50 +22,46 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ReactEventHandler } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, Route, Switch, useHistory, useLocation, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
-import styled from 'styled-components';
 
-import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '../../../../../../../common/constants/plugin';
-import type {
-  DetailViewPanelName,
-  PackageInfo,
-} from '../../../../../../../common/types/models/epm';
-import { InstallStatus } from '../../../../../../../common/types/models/epm';
-import { Error } from '../../../../../../components/error';
-import { Loading } from '../../../../../../components/loading';
-import {
-  INTEGRATIONS_ROUTING_PATHS,
-  pagePathGetters,
-} from '../../../../../../constants/page_paths';
-import { useCapabilities } from '../../../../../../hooks/use_capabilities';
-import { useStartServices } from '../../../../../../hooks/use_core';
-import { useLink } from '../../../../../../hooks/use_link';
-import { useGetPackageInfoByKey } from '../../../../../../hooks/use_request/epm';
-import { useUIExtension } from '../../../../../../hooks/use_ui_extension';
-import type { WithHeaderLayoutProps } from '../../../../../../layouts/with_header';
-import { WithHeaderLayout } from '../../../../../../layouts/with_header';
-import { pkgKeyFromPackageInfo } from '../../../../../../services/pkg_key_from_package_info';
-import type { CreatePackagePolicyRouteState } from '../../../../../../types/intra_app_route_state';
-import { useAgentPolicyContext } from '../../../../hooks/use_agent_policy_context';
-import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import {
   useGetPackageInstallStatus,
   useSetPackageInstallStatus,
-} from '../../../../hooks/use_package_install';
+  useUIExtension,
+  useBreadcrumbs,
+  useStartServices,
+} from '../../../../hooks';
+import {
+  PLUGIN_ID,
+  INTEGRATIONS_PLUGIN_ID,
+  INTEGRATIONS_ROUTING_PATHS,
+  pagePathGetters,
+} from '../../../../constants';
+import {
+  useCapabilities,
+  useGetPackageInfoByKey,
+  useLink,
+  useAgentPolicyContext,
+} from '../../../../hooks';
+import { pkgKeyFromPackageInfo } from '../../../../services';
+import type {
+  CreatePackagePolicyRouteState,
+  DetailViewPanelName,
+  PackageInfo,
+} from '../../../../types';
+import { InstallStatus } from '../../../../types';
+import { Error, Loading } from '../../../../components';
+import type { WithHeaderLayoutProps } from '../../../../layouts';
+import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 
-import { AssetsPage } from './assets/assets';
-import { IconPanel, LoadingIconPanel } from './components/icon_panel';
-import { IntegrationAgentPolicyCount } from './components/integration_agent_policy_count';
-import { UpdateIcon } from './components/update_icon';
-import { CustomViewPage } from './custom/custom';
+import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
+import { AssetsPage } from './assets';
+import { OverviewPage } from './overview';
+import { PackagePoliciesPage } from './policies';
+import { SettingsPage } from './settings';
+import { CustomViewPage } from './custom';
 import './index.scss';
-import { OverviewPage } from './overview/overview';
-import { PackagePoliciesPage } from './policies/package_policies';
-import { SettingsPage } from './settings/settings';
 
 export interface DetailParams {
   pkgkey: string;

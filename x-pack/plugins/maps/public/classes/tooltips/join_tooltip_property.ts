@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
+
+import { ITooltipProperty } from './tooltip_property';
 import { InnerJoin } from '../joins/inner_join';
-import type { ITooltipProperty } from './tooltip_property';
+import { Filter } from '../../../../../../src/plugins/data/public';
 
 export class JoinTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;

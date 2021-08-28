@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSwitchEvent } from '@elastic/eui';
+
+import React, { ChangeEvent } from 'react';
 import {
   EuiButtonEmpty,
   EuiFieldNumber,
@@ -15,19 +16,17 @@ import {
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ChangeEvent } from 'react';
-import React from 'react';
-import type { Value } from '../../../../../../src/plugins/kibana_react/public/validated_range/validated_dual_range';
-import { ValidatedDualRange } from '../../../../../../src/plugins/kibana_react/public/validated_range/validated_dual_range';
+import { MapSettings } from '../../reducers/map';
+import { ValidatedDualRange, Value } from '../../../../../../src/plugins/kibana_react/public';
 import { INITIAL_LOCATION, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
-import type { MapCenter } from '../../../common/descriptor_types/map_descriptor';
+import { MapCenter } from '../../../common/descriptor_types';
 // @ts-ignore
 import { ValidatedRange } from '../../components/validated_range';
-import type { MapSettings } from '../../reducers/map/types';
 
 interface Props {
   center: MapCenter;

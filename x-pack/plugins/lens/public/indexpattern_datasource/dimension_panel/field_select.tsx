@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
+import './field_select.scss';
 import { partition } from 'lodash';
 import React, { useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { trackUiEvent } from '../../lens_ui_telemetry/factory';
-import type { DataType } from '../../types';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiComboBoxOptionOption,
+  EuiComboBoxProps,
+} from '@elastic/eui';
+import classNames from 'classnames';
+import { OperationType } from '../indexpattern';
 import { LensFieldIcon } from '../lens_field_icon';
-import type { OperationType } from '../operations/definitions';
+import { DataType } from '../../types';
+import { OperationSupportMatrix } from './operation_support';
+import { IndexPattern, IndexPatternPrivateState } from '../types';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
-import type { IndexPattern, IndexPatternPrivateState } from '../types';
-import './field_select.scss';
-import type { OperationSupportMatrix } from './operation_support';
 import { TruncatedLabel } from './truncated_label';
-
 export interface FieldChoice {
   type: 'field';
   field: string;

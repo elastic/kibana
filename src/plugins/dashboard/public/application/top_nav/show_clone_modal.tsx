@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 import { DashboardCloneModal } from './clone_modal';
 
 export function showCloneModal(

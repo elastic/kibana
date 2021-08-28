@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiNotificationBadge } from '@elastic/eui';
+
+import { EuiFlexGroup, EuiHealth, EuiNotificationBadge, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 
-import type { SimplifiedAgentStatus } from '../../../../../../../common/types/models/agent';
 import {
   AGENT_STATUSES,
   getColorForAgentStatus,
   getLabelForAgentStatus,
 } from '../../services/agent_status';
+import type { SimplifiedAgentStatus } from '../../../../types';
 
 export const AgentStatusBadges: React.FC<{
   showInactive?: boolean;

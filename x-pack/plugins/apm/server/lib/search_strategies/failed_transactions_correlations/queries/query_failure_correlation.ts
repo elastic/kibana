@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '../../../../../../../../src/core/server/elasticsearch/client/types';
-import { EVENT_OUTCOME } from '../../../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../../../common/event_outcome';
-import type { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
+import { ElasticsearchClient } from 'kibana/server';
+import { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
 import {
   getQueryWithParams,
   getTermsQuery,
 } from '../../correlations/queries/get_query_with_params';
 import { getRequestBase } from '../../correlations/queries/get_request_base';
+import { EVENT_OUTCOME } from '../../../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../../../common/event_outcome';
 
 export const getFailureCorrelationRequest = (
   params: SearchServiceFetchParams,

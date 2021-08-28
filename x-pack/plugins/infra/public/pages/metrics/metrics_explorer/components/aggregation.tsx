@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import React, { useCallback } from 'react';
-import type { MetricsExplorerAggregation } from '../../../../../common/http_api/metrics_explorer';
+import { MetricsExplorerAggregation } from '../../../../../common/http_api/metrics_explorer';
+import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 import {
   metricsExplorerAggregationRT,
   METRIC_EXPLORER_AGGREGATIONS,
 } from '../../../../../common/http_api/metrics_explorer';
-import type { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 
 interface Props {
   options: MetricsExplorerOptions;

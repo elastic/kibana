@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import './space_result.scss';
+
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -15,12 +17,12 @@ import {
 } from '@elastic/eui';
 import React, { lazy, Suspense, useState } from 'react';
 
-import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
-import { getSpaceAvatarComponent } from '../../space_avatar/space_avatar';
-import type { SummarizedCopyToSpaceResult } from '../lib/summarize_copy_result';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import { getSpaceAvatarComponent } from '../../space_avatar';
+import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
-import './space_result.scss';
 import { SpaceCopyResultDetails } from './space_result_details';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.

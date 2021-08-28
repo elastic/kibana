@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
-import { CaseType } from '../../../common/api/cases/case';
-import type { Case } from '../../../common/ui/types';
+
+import React, { useState, useCallback, useMemo } from 'react';
+import { Case, CaseType } from '../../../common';
 import { useOwnerContext } from '../owner_context/use_owner_context';
 import { CreateCaseModal } from './create_case_modal';
 

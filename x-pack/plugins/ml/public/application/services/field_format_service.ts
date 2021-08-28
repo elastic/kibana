@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { getIndexPatternById, getIndexPatternIdFromName } from '../util/index_utils';
 import { mlJobService } from './job_service';
+import { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 type FormatsByJobId = Record<string, any>;
 type IndexPatternIdsByJob = Record<string, any>;

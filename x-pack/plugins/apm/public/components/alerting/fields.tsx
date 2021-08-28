@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSelectOption } from '@elastic/eui';
-import { EuiExpression, EuiFieldNumber, EuiSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import { EuiSelect, EuiExpression, EuiFieldNumber } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSelectOption } from '@elastic/eui';
 import {
   ENVIRONMENT_ALL,
   getEnvironmentLabel,

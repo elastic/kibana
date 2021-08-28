@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Moment } from 'moment';
+
+import { Moment } from 'moment';
 
 export interface RefreshInterval {
   pause: boolean;

@@ -7,33 +7,22 @@
 
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
-import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
+import type { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
+  ISpacesClient,
   LegacyUrlAliasTarget,
-} from '../../../spaces/common/types';
-import type { ISpacesClient } from '../../../spaces/server/spaces_client/spaces_client';
-import {
-  SavedObjectAction,
-  savedObjectEvent,
-  SpaceAuditAction,
-  spaceAuditEvent,
-} from '../audit/audit_events';
-import type { AuditLogger } from '../audit/audit_service';
-import type { AuthorizationServiceSetup } from '../authorization/authorization_service';
+  Space,
+} from '../../../spaces/server';
+import type { AuditLogger } from '../audit';
+import { SavedObjectAction, savedObjectEvent, SpaceAuditAction, spaceAuditEvent } from '../audit';
+import type { AuthorizationServiceSetup } from '../authorization';
 import type { SecurityPluginSetup } from '../plugin';
-import type {
-  EnsureAuthorizedDependencies,
-  EnsureAuthorizedOptions,
-} from '../saved_objects/ensure_authorized';
-import {
-  ensureAuthorized,
-  isAuthorizedForObjectInAllSpaces,
-} from '../saved_objects/ensure_authorized';
+import type { EnsureAuthorizedDependencies, EnsureAuthorizedOptions } from '../saved_objects';
+import { ensureAuthorized, isAuthorizedForObjectInAllSpaces } from '../saved_objects';
 import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
 
 const PURPOSE_PRIVILEGE_MAP: Record<

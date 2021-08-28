@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import type { ReactNode } from 'react';
-import React from 'react';
-import { Router } from 'react-router-dom';
-import { ServiceMap } from '.';
-import type { CoreStart } from '../../../../../../../src/core/public/types';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import { CoreStart } from 'kibana/public';
+import React, { ReactNode } from 'react';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { License } from '../../../../../licensing/common/license';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
-import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
+import { ServiceMap } from '.';
+import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
+import { Router } from 'react-router-dom';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const history = createMemoryHistory();
 

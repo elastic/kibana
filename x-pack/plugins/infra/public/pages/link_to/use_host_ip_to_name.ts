@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState } from 'react';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public/context/context';
-import type { IpToHostResponse } from '../../../common/http_api/ip_to_hostname';
+
+import { useState, useEffect } from 'react';
+import { IpToHostResponse } from '../../../common/http_api/ip_to_hostname';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const useHostIpToName = (ipAddress: string | null, indexPattern: string | null) => {
   const fetch = useKibana().services.http?.fetch;

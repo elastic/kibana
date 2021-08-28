@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
-import type { Ast } from '@kbn/interpreter/common';
-import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
-import { layerTypes } from '../../common/constants';
-import type { ValidLayer, XYLayerConfig } from '../../common/expressions/xy_chart/layer_config';
-import type { DatasourcePublicAPI, OperationMetadata } from '../types';
+import { PaletteRegistry } from 'src/plugins/charts/public';
+import { State } from './types';
+import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import type { State } from './types';
+import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource

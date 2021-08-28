@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useState } from 'react';
-import type { SavedObjectsBatchResponse } from '../../../../../src/core/public/saved_objects/saved_objects_client';
-import type { SavedObjectAttributes } from '../../../../../src/core/types/saved_objects';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
-import { useUiTracker } from '../../../observability/public/hooks/use_track_metric';
+
+import { useState, useCallback } from 'react';
+import { SavedObjectAttributes, SavedObjectsBatchResponse } from 'src/core/public';
+import { useUiTracker } from '../../../observability/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes>(type: string) => {
   const trackMetric = useUiTracker({ app: 'infra_metrics' });

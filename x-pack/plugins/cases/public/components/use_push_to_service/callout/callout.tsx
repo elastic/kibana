@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiCallOut, EuiDescriptionList } from '@elastic/eui';
+
+import { EuiCallOut, EuiButton, EuiDescriptionList } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useMemo } from 'react';
+
+import { CLOSED_CASE_PUSH_ERROR_ID, ErrorMessage } from './types';
 import * as i18n from './translations';
-import type { ErrorMessage } from './types';
-import { CLOSED_CASE_PUSH_ERROR_ID } from './types';
 
 export interface CallOutProps {
   handleButtonClick: (

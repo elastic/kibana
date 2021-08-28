@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CaseStatuses } from '../../../common/api/cases/status';
-import { StatusAll } from '../../../common/ui/types';
+import { CaseStatuses, StatusAll } from '../../../common';
 import * as i18n from './translations';
-import type { AllCaseStatus, Statuses } from './types';
+import { AllCaseStatus, Statuses } from './types';
 
 export const allCaseStatus: AllCaseStatus = {
   [StatusAll]: { color: 'hollow', label: i18n.ALL },

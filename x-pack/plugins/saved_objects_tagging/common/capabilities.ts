@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Capabilities } from '../../../../src/core/types/capabilities';
+
+import { Capabilities } from 'src/core/types';
 import { tagFeatureId } from './constants';
 
 /**

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/logging';
 import fs from 'fs';
 import { join as joinPath } from 'path';
-import type { MetricsCollector, OpsOsMetrics } from './types';
+import { Logger } from '@kbn/logging';
+import { MetricsCollector, OpsOsMetrics } from './types';
 
 type OsCgroupMetrics = Pick<OpsOsMetrics, 'cpu' | 'cpuacct'>;
 

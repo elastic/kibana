@@ -5,18 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { MemoryHistory } from 'history';
-import { createMemoryHistory } from 'history';
-import { act } from 'react-dom/test-utils';
-import { Observable } from 'rxjs';
+
 import { take } from 'rxjs/operators';
-import { httpServiceMock } from '../../http/http_service.mock';
-import { overlayServiceMock } from '../../overlays/overlay_service.mock';
-import type { MountPoint } from '../../types';
-import { ApplicationService } from '../application_service';
-import type { MockLifecycle } from '../test_types';
-import type { AppMountParameters } from '../types';
+import { act } from 'react-dom/test-utils';
+import { createMemoryHistory, MemoryHistory } from 'history';
+
 import { createRenderer } from './utils';
+import { ApplicationService } from '../application_service';
+import { httpServiceMock } from '../../http/http_service.mock';
+import { MockLifecycle } from '../test_types';
+import { overlayServiceMock } from '../../overlays/overlay_service.mock';
+import { AppMountParameters } from '../types';
+import { Observable } from 'rxjs';
+import { MountPoint } from 'kibana/public';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 

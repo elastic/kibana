@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { VisTypeDefinition } from '../../../../../../src/plugins/visualizations/public/vis_types/types';
-import { RegionMapEditor } from './region_map_editor';
+import { VisTypeDefinition } from '../../../../../../src/plugins/visualizations/public';
 import { toExpressionAst } from './to_ast';
-import type { RegionMapVisParams } from './types';
-import { REGION_MAP_VIS_TYPE } from './types';
+import { REGION_MAP_VIS_TYPE, RegionMapVisParams } from './types';
+import { RegionMapEditor } from './region_map_editor';
 
 export const title = i18n.translate('xpack.maps.regionMapMap.vis.title', {
   defaultMessage: 'Region Map',

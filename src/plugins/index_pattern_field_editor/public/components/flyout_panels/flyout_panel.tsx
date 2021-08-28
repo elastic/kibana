@@ -5,17 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFlexItem } from '@elastic/eui';
-import classnames from 'classnames';
-import type { CSSProperties } from 'react';
+
 import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useLayoutEffect,
-  useMemo,
+  CSSProperties,
   useState,
+  useLayoutEffect,
+  useCallback,
+  createContext,
+  useContext,
+  useMemo,
 } from 'react';
+import classnames from 'classnames';
+import { EuiFlexItem } from '@elastic/eui';
+
 import { useFlyoutPanelsContext } from './flyout_panels';
 
 interface Context {

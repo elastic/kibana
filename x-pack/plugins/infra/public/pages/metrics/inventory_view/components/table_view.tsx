@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiInMemoryTable, EuiPopover, EuiToolTip } from '@elastic/eui';
+
+import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { first, last } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { CONTAINER_CLASSNAME } from '../../../../apps/common_styles';
-import type { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
-import { fieldToName } from '../lib/field_to_display_name';
+
+import { last, first } from 'lodash';
+import React, { useState, useCallback, useEffect } from 'react';
+import { EuiPopover } from '@elastic/eui';
 import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
+import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
+import { fieldToName } from '../lib/field_to_display_name';
 import { NodeContextMenu } from './waffle/node_context_menu';
+import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
+import { CONTAINER_CLASSNAME } from '../../../../apps/common_styles';
 
 interface Props {
   nodes: SnapshotNode[];

@@ -4,30 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState, useEffect, useMemo } from 'react';
 import {
-  EuiButton,
-  EuiCode,
-  EuiCodeBlock,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
   EuiSteps,
   EuiText,
+  EuiSpacer,
+  EuiButton,
+  EuiCode,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiCodeBlock,
+  EuiCopy,
+  EuiLink,
 } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect, useMemo, useState } from 'react';
 
-import { fullAgentPolicyToYaml } from '../../../common/services/full_agent_policy_to_yaml';
-import { agentPolicyRouteService } from '../../../common/services/routes';
-import { useStartServices } from '../../hooks/use_core';
-import { useLink } from '../../hooks/use_link';
-import { sendGetOneAgentPolicyFull } from '../../hooks/use_request/agent_policy';
+import { useStartServices, useLink, sendGetOneAgentPolicyFull } from '../../hooks';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../services';
 
-import { AgentPolicySelectionStep, DownloadStep } from './steps';
+import { DownloadStep, AgentPolicySelectionStep } from './steps';
 import type { BaseProps } from './types';
 
 type Props = BaseProps;

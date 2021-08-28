@@ -4,19 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+/**
+ * WHY ARE THE LAYOUTS A SEPERATE FILE?
+ *
+ * Files with React can not be included on the server without
+ * crashing due to the requirement of the `window` object.
+ */
+
 import { i18n } from '@kbn/i18n';
-import type { FunctionComponent, ReactNode } from 'react';
-import type { LayoutProps } from '../../public/pages/metrics/metric_detail/types';
-import { Layout as AwsEC2Layout } from './aws_ec2/layout';
-import { Layout as AwsRDSLayout } from './aws_rds/layout';
-import { Layout as AwsS3Layout } from './aws_s3/layout';
-import { Layout as AwsSQSLayout } from './aws_sqs/layout';
-import { Layout as ContainerLayout } from './container/layout';
+
+import { ReactNode, FunctionComponent } from 'react';
 import { Layout as HostLayout } from './host/layout';
 import { Layout as PodLayout } from './pod/layout';
-import type { InventoryItemType } from './types';
-
+import { Layout as ContainerLayout } from './container/layout';
+import { Layout as AwsEC2Layout } from './aws_ec2/layout';
+import { Layout as AwsS3Layout } from './aws_s3/layout';
+import { Layout as AwsRDSLayout } from './aws_rds/layout';
+import { Layout as AwsSQSLayout } from './aws_sqs/layout';
+import { InventoryItemType } from './types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { LayoutProps } from '../../public/pages/metrics/metric_detail/types';
 
 interface Layouts {
   [type: string]: ReactNode;

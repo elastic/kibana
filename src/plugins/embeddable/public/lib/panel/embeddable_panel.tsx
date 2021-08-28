@@ -5,41 +5,43 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiPanel, htmlIdGenerator } from '@elastic/eui';
+
+import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import classNames from 'classnames';
-import deepEqual from 'fast-deep-equal';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import type { CoreStart } from '../../../../../core/public/types';
-import type { OverlayStart } from '../../../../../core/public/overlays/overlay_service';
-import type { Start as InspectorStartContract } from '../../../../inspector/public/plugin';
-import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
-import type { Action } from '../../../../ui_actions/public/actions/action';
-import { buildContextMenuForActions } from '../../../../ui_actions/public/context_menu/build_eui_context_menu_panels';
-import { UiActionsService } from '../../../../ui_actions/public/service/ui_actions_service';
-import type { UsageCollectionStart } from '../../../../usage_collection/public/plugin';
-import type { EmbeddableInput } from '../../../common/types';
-import { ViewMode } from '../../../common/types';
-import type { EmbeddableStart } from '../../plugin';
-import { EditPanelAction } from '../actions/edit_panel_action';
-import { ErrorEmbeddable } from '../embeddables/error_embeddable';
-import type { EmbeddableError, EmbeddableOutput, IEmbeddable } from '../embeddables/i_embeddable';
-import { EmbeddableStateTransfer } from '../state_transfer/embeddable_state_transfer';
-import type { EmbeddableContext } from '../triggers/triggers';
+import deepEqual from 'fast-deep-equal';
+import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
+import { CoreStart, OverlayStart } from '../../../../../core/public';
+import { toMountPoint } from '../../../../kibana_react/public';
+import { UsageCollectionStart } from '../../../../usage_collection/public';
+
+import { Start as InspectorStartContract } from '../inspector';
 import {
-  contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-} from '../triggers/triggers';
-import { EmbeddableErrorLabel } from './embeddable_error_label';
+  EmbeddableContext,
+  contextMenuTrigger,
+} from '../triggers';
+import {
+  IEmbeddable,
+  EmbeddableOutput,
+  EmbeddableError,
+  EmbeddableInput,
+} from '../embeddables/i_embeddable';
+import { ViewMode } from '../types';
+
+import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
-import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
-import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
-import { RemovePanelAction } from './panel_header/panel_actions/remove_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
+import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
+import { EditPanelAction } from '../actions';
+import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
+import { EmbeddableStart } from '../../plugin';
+import { EmbeddableErrorLabel } from './embeddable_error_label';
+import { EmbeddableStateTransfer, ErrorEmbeddable } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },

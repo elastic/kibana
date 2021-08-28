@@ -5,19 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { DisposableAppender, Layout, LogRecord } from '@kbn/logging';
-import type { LayoutConfigType } from '../../layouts/layouts';
-import { Layouts } from '../../layouts/layouts';
+import { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
+import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 import { BufferAppender } from '../buffer/buffer_appender';
-import type { TriggeringPolicyConfig } from './policies';
-import { createTriggeringPolicy, triggeringPolicyConfigSchema } from './policies';
-import type { TriggeringPolicy } from './policies/policy';
-import { RollingFileContext } from './rolling_file_context';
+import {
+  TriggeringPolicyConfig,
+  createTriggeringPolicy,
+  triggeringPolicyConfigSchema,
+  TriggeringPolicy,
+} from './policies';
+import {
+  RollingStrategy,
+  createRollingStrategy,
+  RollingStrategyConfig,
+  rollingStrategyConfigSchema,
+} from './strategies';
 import { RollingFileManager } from './rolling_file_manager';
-import type { RollingStrategyConfig } from './strategies';
-import { createRollingStrategy, rollingStrategyConfigSchema } from './strategies';
-import type { RollingStrategy } from './strategies/strategy';
+import { RollingFileContext } from './rolling_file_context';
 
 export interface RollingFileAppenderConfig {
   type: 'rolling-file';

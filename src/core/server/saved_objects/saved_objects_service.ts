@@ -5,48 +5,45 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import { Observable, Subject } from 'rxjs';
-import { filter, first, switchMap, take } from 'rxjs/operators';
-import type { CoreService } from '../../types/core_service';
-import type { CoreContext } from '../core_context';
-import type { CoreUsageDataSetup } from '../core_usage_data/types';
-import type { ElasticsearchClient } from '../elasticsearch/client/types';
-import type {
+
+import { Subject, Observable } from 'rxjs';
+import { first, filter, take, switchMap } from 'rxjs/operators';
+import { CoreService } from '../../types';
+import {
+  SavedObjectsClient,
+  SavedObjectsClientProvider,
+  SavedObjectsClientProviderOptions,
+} from './';
+import { KibanaMigrator, IKibanaMigrator } from './migrations';
+import { CoreContext } from '../core_context';
+import { CoreUsageDataSetup } from '../core_usage_data';
+import {
+  ElasticsearchClient,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
-} from '../elasticsearch/types';
-import { KibanaRequest } from '../http/router/request';
-import type { InternalHttpServiceSetup } from '../http/types';
-import type { KibanaConfigType } from '../kibana_config';
-import type { ServiceStatus } from '../status/types';
-import type { ISavedObjectsExporter } from './export/saved_objects_exporter';
-import { SavedObjectsExporter } from './export/saved_objects_exporter';
-import type { ISavedObjectsImporter } from './import/saved_objects_importer';
-import { SavedObjectsImporter } from './import/saved_objects_importer';
-import type { IKibanaMigrator } from './migrations/kibana/kibana_migrator';
-import { KibanaMigrator } from './migrations/kibana/kibana_migrator';
-import { registerCoreObjectTypes } from './object_types/registration';
-import { registerRoutes } from './routes';
-import type {
+} from '../elasticsearch';
+import { KibanaConfigType } from '../kibana_config';
+import {
   SavedObjectsConfigType,
   SavedObjectsMigrationConfigType,
+  SavedObjectConfig,
 } from './saved_objects_config';
-import { SavedObjectConfig } from './saved_objects_config';
-import type { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
-import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
-import { SavedObjectsSerializer } from './serialization/serializer';
-import type { ISavedObjectsRepository } from './service/lib/repository';
-import { SavedObjectsRepository } from './service/lib/repository';
-import type {
+import { KibanaRequest, InternalHttpServiceSetup } from '../http';
+import { SavedObjectsClientContract, SavedObjectsType, SavedObjectStatusMeta } from './types';
+import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
+import {
   SavedObjectsClientFactoryProvider,
-  SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
-import { SavedObjectsClientProvider } from './service/lib/scoped_client_provider';
-import { SavedObjectsClient } from './service/saved_objects_client';
+import { Logger } from '../logging';
+import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
+import { SavedObjectsSerializer } from './serialization';
+import { SavedObjectsExporter, ISavedObjectsExporter } from './export';
+import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
+import { registerRoutes } from './routes';
+import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
-import type { SavedObjectsClientContract, SavedObjectStatusMeta, SavedObjectsType } from './types';
+import { registerCoreObjectTypes } from './object_types';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to

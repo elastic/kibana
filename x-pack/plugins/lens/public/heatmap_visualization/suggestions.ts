@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { partition } from 'lodash';
-import { layerTypes } from '../../common/constants';
 import type { Visualization } from '../types';
-import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
 import type { HeatmapVisualizationState } from './types';
+import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
+import { layerTypes } from '../../common';
 
 export const getSuggestions: Visualization<HeatmapVisualizationState>['getSuggestions'] = ({
   table,

@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AllRule } from '../../model/all_rule';
-import { FieldRule } from '../../model/field_rule';
-import type { Rule } from '../../model/rule';
+import type { Rule } from '../../model';
+import { AllRule, FieldRule } from '../../model';
 
 interface Props {
   onClick: (newRule: Rule) => void;

@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
-import React from 'react';
 import styled, { css } from 'styled-components';
 import { HeaderPage } from '../header_page';
-import type { CasesNavigation } from '../links';
-import type { ErrorMessage } from '../use_push_to_service/callout/types';
-import { Count } from './count';
-import { NavButtons } from './nav_buttons';
 import * as i18n from './translations';
+import { Count } from './count';
+import { CasesNavigation } from '../links';
+import { ErrorMessage } from '../use_push_to_service/callout/types';
+import { NavButtons } from './nav_buttons';
 
 interface OwnProps {
   actionsErrors: ErrorMessage[];

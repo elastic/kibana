@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiFormRow, EuiPanel, EuiSwitch, EuiTitle } from '@elastic/eui';
+import React from 'react';
+import { EuiFormRow, EuiPanel, EuiSwitch, EuiSwitchEvent, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import { MapSettings } from '../../reducers/map';
 import { MbValidatedColorPicker } from '../../classes/styles/vector/components/color/mb_validated_color_picker';
-import type { MapSettings } from '../../reducers/map/types';
 
 interface Props {
   settings: MapSettings;

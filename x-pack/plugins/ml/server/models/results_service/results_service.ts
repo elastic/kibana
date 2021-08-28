@@ -4,29 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
-import { cloneDeep, get, slice, sortBy } from 'lodash';
+
+import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
-import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
+import Boom from '@hapi/boom';
+import { IScopedClusterClient } from 'kibana/server';
+import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
-import type {
+import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
+import {
   AnomaliesTableRecord,
   AnomalyCategorizerStatsDoc,
   AnomalyRecordDoc,
 } from '../../../common/types/anomalies';
-import type { MlJobsResponse } from '../../../common/types/job_service';
-import type {
-  DatafeedResultsChartDataParams,
-  GetDatafeedResultsChartDataResult,
+import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
+import {
   GetStoppedPartitionResult,
+  GetDatafeedResultsChartDataResult,
+  defaultSearchQuery,
+  DatafeedResultsChartDataParams,
 } from '../../../common/types/results';
-import { defaultSearchQuery } from '../../../common/types/results';
-import type { MlClient } from '../../lib/ml_client/types';
-import { annotationServiceProvider } from '../annotation_service';
+import { MlJobsResponse } from '../../../common/types/job_service';
+import type { MlClient } from '../../lib/ml_client';
 import { datafeedsProvider } from '../job_service/datafeeds';
-import { buildAnomalyTableItems } from './build_anomaly_table_items';
-import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
+import { annotationServiceProvider } from '../annotation_service';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.

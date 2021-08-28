@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+
+import React, { FC, Fragment, useMemo, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGrid,
@@ -20,22 +23,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
-import {
-  ANALYSIS_ADVANCED_FIELDS,
-  NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
-} from '../../../../common/analytics';
-import { getModelMemoryLimitErrors } from '../../../analytics_management/hooks/use_create_analytics_form/reducer';
-import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form/use_create_analytics_form';
-import { ANALYTICS_STEPS } from '../../page';
-import { ContinueButton } from '../continue_button';
-import { fetchExplainData } from '../shared/fetch_explain_data';
 import { HyperParameters } from './hyper_parameters';
+import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { getModelMemoryLimitErrors } from '../../../analytics_management/hooks/use_create_analytics_form/reducer';
+import {
+  ANALYSIS_CONFIG_TYPE,
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
+  ANALYSIS_ADVANCED_FIELDS,
+} from '../../../../common/analytics';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { ANALYTICS_STEPS } from '../../page';
+import { fetchExplainData } from '../shared';
+import { ContinueButton } from '../continue_button';
 import { OutlierHyperParameters } from './outlier_hyper_parameters';
 
 const defaultNumTopClassesOption: EuiComboBoxOptionOption = {

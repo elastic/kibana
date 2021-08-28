@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ClientOptions, NodeOptions } from '@elastic/elasticsearch';
-import type { Duration } from 'moment';
-import type { ConnectionOptions as TlsConnectionOptions } from 'tls';
+
+import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
-import { DEFAULT_HEADERS } from '../default_headers';
+import { Duration } from 'moment';
+import { ClientOptions, NodeOptions } from '@elastic/elasticsearch';
 import { ElasticsearchConfig } from '../elasticsearch_config';
+import { DEFAULT_HEADERS } from '../default_headers';
 
 /**
  * Configuration options to be used to create a {@link IClusterClient | cluster client} using the

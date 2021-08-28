@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SerializableRecord } from '@kbn/utility-types';
+
 import { identity } from 'lodash';
-import type { SavedObjectReference } from '../../../../core/types/saved_objects';
-import type { PersistableState } from '../../../kibana_utils/common/persistable_state/types';
-import type { ExpressionAstFunction } from '../ast/types';
-import type { ExpressionValue } from '../expression_types/types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { AnyExpressionFunctionDefinition } from './types';
 import { ExpressionFunctionParameter } from './expression_function_parameter';
-import type { AnyExpressionFunctionDefinition } from './types';
+import { ExpressionValue } from '../expression_types/types';
+import { ExpressionAstFunction } from '../ast';
+import { SavedObjectReference } from '../../../../core/types';
+import { PersistableState } from '../../../kibana_utils/common';
 
 export class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> {
   /**

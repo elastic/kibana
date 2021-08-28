@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import type { ObservabilityRuleTypeFormatter } from '../../../../observability/public/rules/create_observability_rule_type_registry';
+import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '-';

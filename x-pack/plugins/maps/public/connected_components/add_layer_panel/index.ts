@@ -4,23 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import { DRAW_MODE } from '../../../common/constants';
-import type { LayerDescriptor } from '../../../common/descriptor_types/layer_descriptor_types';
+import { AddLayerPanel } from './view';
+import { FLYOUT_STATE } from '../../reducers/ui';
 import {
   addPreviewLayers,
   promotePreviewLayers,
   removePreviewLayers,
+  setDrawMode,
   setFirstPreviewLayerToSelectedLayer,
-} from '../../actions/layer_actions';
-import { setEditLayerToSelectedLayer } from '../../actions/map_actions';
-import { setDrawMode, updateFlyout } from '../../actions/ui_actions';
-import type { MapStoreState } from '../../reducers/store';
-import { FLYOUT_STATE } from '../../reducers/ui';
+  setEditLayerToSelectedLayer,
+  updateFlyout,
+} from '../../actions';
+import { MapStoreState } from '../../reducers/store';
+import { LayerDescriptor } from '../../../common/descriptor_types';
 import { hasPreviewLayers, isLoadingPreviewLayers } from '../../selectors/map_selectors';
-import { AddLayerPanel } from './view';
+import { DRAW_MODE } from '../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {

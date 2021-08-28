@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TooltipInfo } from '@elastic/charts';
+
+import { TooltipInfo } from '@elastic/charts';
 import React from 'react';
-import { getDurationFormatter } from '../../../../../common/utils/formatters/duration';
-import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { CustomTooltip } from './custom_tooltip';
 
 type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;

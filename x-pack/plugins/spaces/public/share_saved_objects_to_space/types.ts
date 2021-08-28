@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  SavedObjectsImportResponse,
-  SavedObjectsImportRetry,
-} from '../../../../../src/core/server/saved_objects/import/types';
+
+import type { SavedObjectsImportResponse, SavedObjectsImportRetry } from 'src/core/public';
 
 export interface ShareOptions {
   selectedSpaceIds: string[];

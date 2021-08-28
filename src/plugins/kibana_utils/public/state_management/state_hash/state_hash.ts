@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import { Sha256 } from '../../../../../core/public/utils/crypto/sha256';
+import { Sha256 } from '../../../../../core/public/utils';
 import { hashedItemStore } from '../../storage/hashed_item_store';
 
 // This prefix is used to identify hash strings that have been encoded in the URL.

@@ -5,12 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { schema } from '@kbn/config-schema';
-import { reportServerError } from '../../../../kibana_utils/server/report_server_error';
-import type { SearchRouteDependencies } from '../search_service';
-import type { DataPluginRouter } from '../types';
-import { getCallMsearch } from './call_msearch';
 
+import { schema } from '@kbn/config-schema';
+
+import { SearchRouteDependencies } from '../search_service';
+
+import { getCallMsearch } from './call_msearch';
+import { reportServerError } from '../../../../kibana_utils/server';
+import type { DataPluginRouter } from '../types';
 /**
  * The msearch route takes in an array of searches, each consisting of header
  * and body json, and reformts them into a single request for the _msearch API.

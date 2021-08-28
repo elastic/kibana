@@ -4,29 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButton, EuiErrorBoundary, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/utils/app_wrapper_class';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
-import { useTrackPageview } from '../../../../../observability/public/hooks/use_track_metric';
+import { FilterBar } from './components/filter_bar';
+
 import { DocumentTitle } from '../../../components/document_title';
 import { NoIndices } from '../../../components/empty_states/no_indices';
-import { ViewSourceConfigurationButton } from '../../../components/source_configuration/view_source_configuration_button';
+
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { Source } from '../../../containers/metrics_source/source';
-import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
-import { useLinkProps } from '../../../hooks/use_link_props';
+import { ViewSourceConfigurationButton } from '../../../components/source_configuration/view_source_configuration_button';
+import { Source } from '../../../containers/metrics_source';
+import { useTrackPageview } from '../../../../../observability/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { inventoryTitle } from '../../../translations';
-import { MetricsPageTemplate } from '../page_template';
-import { FilterBar } from './components/filter_bar';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { LayoutView } from './components/layout_view';
-import { SavedViews } from './components/saved_views';
-import { useWaffleOptionsContext } from './hooks/use_waffle_options';
+import { useLinkProps } from '../../../hooks/use_link_props';
+import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
+import { useWaffleOptionsContext } from './hooks/use_waffle_options';
+import { MetricsPageTemplate } from '../page_template';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
+import { inventoryTitle } from '../../../translations';
+import { SavedViews } from './components/saved_views';
 
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;

@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+
 import { omit } from 'lodash';
-import type { IRouter } from '../../../../../src/core/server/http/router/router';
-import { BASE_ALERTING_API_PATH } from '../../common';
-import type { AlertTypeParams } from '../../common/alert';
-import type { ILicenseState } from '../lib/license_state';
-import type { FindOptions, FindResult } from '../rules_client/rules_client';
-import type { AlertingRequestHandlerContext } from '../types';
-import type { RewriteRequestCase, RewriteResponseCase } from './lib/rewrite_request_case';
-import { verifyAccessAndContext } from './lib/verify_access_and_context';
+import { IRouter } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import { ILicenseState } from '../lib';
+import { FindOptions, FindResult } from '../rules_client';
+import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
+import { AlertTypeParams, AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 
 // query definition
 const querySchema = schema.object({

@@ -4,19 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { EuiDataGridSorting } from '@elastic/eui';
-import type {
-  Datatable,
-  DatatableColumn,
-} from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
-import type {
-  ColumnConfig,
-  LensGridDirection,
-} from '../../../common/expressions/datatable/datatable_column';
-import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
-import type { LensMultiTable } from '../../../common/types';
+import type { Datatable, DatatableColumn } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../../types';
+import type { LensMultiTable } from '../../../common';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
+import type { ColumnConfig, LensGridDirection } from '../../../common/expressions';
+import { getOriginalId } from '../../../common/expressions';
 
 export const createGridResizeHandler = (
   columnConfig: ColumnConfig,

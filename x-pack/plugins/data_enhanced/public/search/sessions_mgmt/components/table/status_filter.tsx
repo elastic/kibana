@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FieldValueOptionType, SearchFilterConfig } from '@elastic/eui';
+
+import { FieldValueOptionType, SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { TableText } from '..';
-import type { UISession } from '../../types';
+import { TableText } from '../';
+import { UISession } from '../../types';
 import { getStatusText } from '../status';
 
 export const getStatusFilter: (tableData: UISession[]) => SearchFilterConfig = (tableData) => ({

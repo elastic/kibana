@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RequestHandlerContext } from '../../../../src/core/server';
-import type { AlertTypeParams, AlertTypeState } from '../../alerting/common/alert';
-import type {
+
+import { RequestHandlerContext } from 'kibana/server';
+import {
   AlertInstanceContext,
   AlertInstanceState,
-} from '../../alerting/common/alert_instance';
-import type { AlertExecutorOptions, AlertServices, AlertType } from '../../alerting/server/types';
+  AlertTypeParams,
+  AlertTypeState,
+} from '../../alerting/common';
+import { AlertExecutorOptions, AlertServices, AlertType } from '../../alerting/server';
 import { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<

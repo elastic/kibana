@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IconType } from '@elastic/eui';
-import { EuiFlexItem, EuiIcon, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+
 import React, { useState } from 'react';
-import type { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public/toolbar_button/toolbar_button';
-import { ToolbarButton } from '../../../../../src/plugins/kibana_react/public/toolbar_button/toolbar_button';
+import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@elastic/eui';
 import { EuiIconLegend } from '../assets/legend';
+import { ToolbarButton, ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,

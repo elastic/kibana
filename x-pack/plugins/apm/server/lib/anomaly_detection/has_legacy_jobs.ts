@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { withApmSpan } from '../../utils/with_apm_span';
-import type { Setup } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
 // Determine whether there are any legacy ml jobs.

@@ -5,9 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiComboBox } from '@elastic/eui';
+
+import React, { useState, useEffect } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+
+import { EuiComboBox } from '@elastic/eui';
 import { pluginServices } from '../services';
 
 export interface DashboardPickerProps {

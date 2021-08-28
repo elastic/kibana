@@ -4,20 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSelectableOption } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiSelectable,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import React, { useCallback, useState, useMemo } from 'react';
+
+import { EuiButtonEmpty, EuiModalFooter, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
+import { EuiSelectableOption } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SavedView } from '../../containers/saved_view/saved_view';
 
 interface Props<ViewState> {

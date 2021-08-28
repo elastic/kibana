@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Env } from '@kbn/config';
+
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { getEnvOptions } from '../config/mocks';
-import type { PluginsConfigType } from './plugins_config';
-import { PluginsConfig } from './plugins_config';
+import { PluginsConfig, PluginsConfigType } from './plugins_config';
+import { Env } from '../config';
 
 describe('PluginsConfig', () => {
   it('retrieves additionalPluginPaths from config.paths when in production mode', () => {

@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
+import { EuiPanel, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
-import type { TypedLensByValueInput } from '../../../../../lens/public/embeddable/embeddable_component';
-import type { ObservabilityPublicPluginsStart } from '../../../plugin';
-import { EmptyView } from './components/empty_view';
+import { isEmpty } from 'lodash';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
-import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
-import { useLensAttributes } from './hooks/use_lens_attributes';
 import { useSeriesStorage } from './hooks/use_series_storage';
-import { LensEmbeddable } from './lens_embeddable';
+import { useLensAttributes } from './hooks/use_lens_attributes';
+import { TypedLensByValueInput } from '../../../../../lens/public';
+import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
 import { SeriesBuilder } from './series_builder/series_builder';
-import type { SeriesUrl } from './types';
+import { SeriesUrl } from './types';
+import { LensEmbeddable } from './lens_embeddable';
+import { EmptyView } from './components/empty_view';
 
 export const combineTimeRanges = (
   allSeries: Record<string, SeriesUrl>,

@@ -4,12 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AlertTypeParams } from '../../../../alerting/common/alert';
-import type { ObservabilityRuleTypeModel } from '../../../../observability/public/rules/create_observability_rule_type_registry';
-import type { InventoryMetricConditions } from '../../../server/lib/alerting/inventory_metric_threshold/types';
-import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../server/lib/alerting/inventory_metric_threshold/types';
+import {
+  InventoryMetricConditions,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../server/lib/alerting/inventory_metric_threshold/types';
+
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
+
+import { AlertTypeParams } from '../../../../alerting/common';
 import { validateMetricThreshold } from './components/validation';
 import { formatReason } from './rule_data_formatters';
 

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment, FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
-import { BucketSpan } from '../bucket_span/bucket_span';
-import { Influencers } from '../influencers/influencers';
-import { SparseDataSwitch } from '../sparse_data/sparse_data_switch';
-import { SplitFieldSelector } from '../split_field/split_field';
+
+import { BucketSpan } from '../bucket_span';
+import { SplitFieldSelector } from '../split_field';
+import { Influencers } from '../influencers';
+import { SparseDataSwitch } from '../sparse_data';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;

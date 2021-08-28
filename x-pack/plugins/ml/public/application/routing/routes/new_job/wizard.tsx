@@ -4,26 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { parse } from 'query-string';
-import type { FC } from 'react';
-import React from 'react';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
+
+import { NavigateToPath } from '../../../contexts/kibana';
+
+import { basicResolvers } from '../../resolvers';
+import { MlRoute, PageLoader, PageProps } from '../../router';
+import { useResolver } from '../../use_resolver';
+import { Page } from '../../../jobs/new_job/pages/new_job';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
-import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import type { NavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
-import { Page } from '../../../jobs/new_job/pages/new_job/page';
 import { mlJobService } from '../../../services/job_service';
 import {
-  ANOMALY_DETECTOR,
   loadNewJobCapabilities,
+  ANOMALY_DETECTOR,
 } from '../../../services/new_job_capabilities/load_new_job_capabilities';
+import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { basicResolvers } from '../../resolvers';
-import type { MlRoute, PageProps } from '../../router';
-import { PageLoader } from '../../router';
-import { useResolver } from '../../use_resolver';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;

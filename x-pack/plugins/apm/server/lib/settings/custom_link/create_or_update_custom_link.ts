@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+
+import {
   CustomLink,
   CustomLinkES,
 } from '../../../../common/custom_link/custom_link_types';
-import type { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
-import type { Setup } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import { toESFormat } from './helper';
+import { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
 
 export function createOrUpdateCustomLink({
   customLinkId,

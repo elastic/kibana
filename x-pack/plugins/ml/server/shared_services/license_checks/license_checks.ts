@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MlLicense } from '../../../common/license/ml_license';
-import { InsufficientBasicLicenseError, InsufficientFullLicenseError } from './errors';
+
+import { MlLicense } from '../../../common/license';
+import { InsufficientFullLicenseError, InsufficientBasicLicenseError } from './errors';
 
 export type LicenseCheck = () => void;
 

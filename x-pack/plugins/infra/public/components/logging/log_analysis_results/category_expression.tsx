@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React, { memo } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 export const RegularExpressionRepresentation: React.FunctionComponent<{
   maximumSegmentCount?: number;

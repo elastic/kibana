@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
+
+import { either } from 'fp-ts/lib/Either';
 
 export const NumberFromString = new rt.Type<number, string, unknown>(
   'NumberFromString',

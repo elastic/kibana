@@ -8,12 +8,12 @@
 import { SavedObjectsClientContract } from 'kibana/public';
 import { htmlIdGenerator } from '@elastic/eui';
 import { useMemo } from 'react';
-// import {
-//   DASHBOARD_APP_URL_GENERATOR,
-//   DashboardUrlGenerator,
-//   SavedDashboardPanel,
-//   DashboardSavedObject,
-// } from '../../../../../../src/plugins/dashboard/public';
+import {
+  DASHBOARD_APP_URL_GENERATOR,
+  DashboardUrlGenerator,
+  SavedDashboardPanel,
+  DashboardSavedObject,
+} from '../../../../../../src/plugins/dashboard/public';
 import { useMlKibana } from '../contexts/kibana';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 

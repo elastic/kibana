@@ -7,11 +7,14 @@
  */
 
 import React from 'react';
-import type { DiscoverGridEmbeddableProps } from '../angular/create_discover_grid_directive';
-import { DiscoverGridEmbeddable } from '../angular/create_discover_grid_directive';
+
+import {
+  DiscoverGridEmbeddable,
+  DiscoverGridEmbeddableProps,
+} from '../angular/create_discover_grid_directive';
 import { DiscoverDocTableEmbeddable } from '../apps/main/components/doc_table/create_doc_table_embeddable';
-import type { DocTableEmbeddableProps } from '../apps/main/components/doc_table/doc_table_embeddable';
-import type { SearchProps } from './saved_search_embeddable';
+import { DocTableEmbeddableProps } from '../apps/main/components/doc_table/doc_table_embeddable';
+import { SearchProps } from './saved_search_embeddable';
 
 interface SavedSearchEmbeddableComponentProps {
   searchProps: SearchProps;

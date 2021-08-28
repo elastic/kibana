@@ -5,10 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiModal,
   EuiModalBody,
@@ -17,10 +21,8 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment } from 'react';
 
 interface Props {
   onClone: (

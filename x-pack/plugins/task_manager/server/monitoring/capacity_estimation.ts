@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { JsonObject } from '@kbn/utility-types';
+
 import { mapValues } from 'lodash';
 import stats from 'stats-lite';
-import type { Result } from '../lib/result_type';
-import { asErr, asOk, map } from '../lib/result_type';
-import type { RawMonitoredStat, RawMonitoringStats } from './monitoring_stats_stream';
-import { HealthStatus } from './monitoring_stats_stream';
-import type { AveragedStat } from './task_run_calcultors';
-import type { TaskPersistenceTypes } from './task_run_statistics';
+import { JsonObject } from '@kbn/utility-types';
+import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
+import { AveragedStat } from './task_run_calcultors';
+import { TaskPersistenceTypes } from './task_run_statistics';
+import { asErr, asOk, map, Result } from '../lib/result_type';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+
+import {
   ApmFetchDataResponse,
   FetchDataParams,
-} from '../../../../observability/public/typings/fetch_overview_data';
+} from '../../../../observability/public';
 import { callApmApi } from './createCallApmApi';
 
 export const fetchObservabilityOverviewPageData = async ({

@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getDeprecationsFor } from './config/test_utils';
+
 import { config } from './kibana_config';
+import { getDeprecationsFor } from './config/test_utils';
 
 const CONFIG_PATH = 'kibana';
 

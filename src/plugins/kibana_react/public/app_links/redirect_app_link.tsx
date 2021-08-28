@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { FunctionComponent, useRef, useMemo } from 'react';
 import classNames from 'classnames';
-import type { FunctionComponent } from 'react';
-import React, { useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type { ApplicationStart } from '../../../../core/public/application/types';
+import { ApplicationStart } from 'src/core/public';
 import { createNavigateToUrlClickHandler } from './click_handler';
 
 interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDivElement> {

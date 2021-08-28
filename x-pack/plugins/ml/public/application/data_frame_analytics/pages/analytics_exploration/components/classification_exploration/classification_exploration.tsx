@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import { ExplorationPageWrapper } from '../exploration_page_wrapper/exploration_page_wrapper';
-import { FeatureImportanceSummaryPanel } from '../total_feature_importance_summary/feature_importance_summary';
+
+import { ExplorationPageWrapper } from '../exploration_page_wrapper';
 import { EvaluatePanel } from './evaluate_panel';
+import { FeatureImportanceSummaryPanel } from '../total_feature_importance_summary/feature_importance_summary';
 
 interface Props {
   jobId: string;

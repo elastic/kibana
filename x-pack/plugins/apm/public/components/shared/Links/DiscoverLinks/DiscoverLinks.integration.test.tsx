@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Location } from 'history';
+
+import { Location } from 'history';
 import React from 'react';
-import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import type { Span } from '../../../../../typings/es_schemas/ui/span';
-import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import { Span } from '../../../../../typings/es_schemas/ui/span';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { DiscoverErrorLink } from './DiscoverErrorLink';
 import { DiscoverSpanLink } from './DiscoverSpanLink';

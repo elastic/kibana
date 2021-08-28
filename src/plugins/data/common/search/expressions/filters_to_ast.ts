@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Filter } from '@kbn/es-query';
-import { buildExpression } from '../../../../expressions/common/ast/build_expression';
-import { buildExpressionFunction } from '../../../../expressions/common/ast/build_function';
-import type { ExpressionFunctionKibanaFilter } from './kibana_filter';
+
+import { Filter } from '@kbn/es-query';
+import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
+import { ExpressionFunctionKibanaFilter } from './kibana_filter';
 
 export const filtersToAst = (filters: Filter[] | Filter) => {
   return (Array.isArray(filters) ? filters : [filters]).map((filter) => {

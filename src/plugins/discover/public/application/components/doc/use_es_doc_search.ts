@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { estypes } from '@elastic/elasticsearch';
+import { getServices, IndexPattern } from '../../../kibana_services';
+import { DocProps } from './doc';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
-import { getServices } from '../../../kibana_services';
-import type { ElasticSearchHit } from '../../doc_views/doc_views_types';
-import type { DocProps } from './doc';
 import { ElasticRequestState } from './elastic_request_state';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;

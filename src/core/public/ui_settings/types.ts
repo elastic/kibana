@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Observable } from 'rxjs';
-import type { PublicUiSettingsParams, UserProvidedValues } from '../../types/ui_settings';
+import { PublicUiSettingsParams, UserProvidedValues } from 'src/core/server/types';
 
 /** @public */
 export interface UiSettingsState {

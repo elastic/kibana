@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { History } from 'history';
-import type { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
-import { isTimeseriesEmpty, onBrushEnd } from './helper';
+
+import { onBrushEnd, isTimeseriesEmpty } from './helper';
+import { History } from 'history';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 
 describe('Chart helper', () => {
   describe('onBrushEnd', () => {

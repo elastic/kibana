@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButton,
   EuiCallOut,
@@ -17,11 +18,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public/hooks/use_track_metric';
-import type { LogIndexNameReference } from '../../../../common/log_sources/log_source_configuration';
-import type { FormElement } from './form_elements';
+import { useTrackPageview } from '../../../../../observability/public';
+import { LogIndexNameReference } from '../../../../common/log_sources';
+import { FormElement } from './form_elements';
 import { getFormRowProps, getInputFieldProps } from './form_field_props';
-import type { FormValidationError } from './validation_errors';
+import { FormValidationError } from './validation_errors';
 
 export const IndexNamesConfigurationPanel: React.FC<{
   isLoading: boolean;

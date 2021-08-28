@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { InternalCorePreboot } from './internal_types';
-import type { IUiSettingsClient } from './ui_settings/types';
 
 // eslint-disable-next-line max-classes-per-file
+import { InternalCorePreboot } from './internal_types';
+import { IUiSettingsClient } from './ui_settings';
 
 class PrebootCoreUiSettingsRouteHandlerContext {
   constructor(public readonly client: IUiSettingsClient) {}

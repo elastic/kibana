@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { uniq } from 'lodash';
-import type { PromiseReturnType } from '../../../../../observability/typings/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromMetricDocuments } from './get_services_from_metric_documents';
 import { getServiceTransactionStats } from './get_service_transaction_stats';

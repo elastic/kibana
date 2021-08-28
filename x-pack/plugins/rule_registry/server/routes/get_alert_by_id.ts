@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { transformError } from '@kbn/securitysolution-es-utils';
-import { id as _id } from '@kbn/securitysolution-io-ts-list-types';
+
+import { IRouter } from 'kibana/server';
 import * as t from 'io-ts';
-import type { IRouter } from '../../../../../src/core/server/http/router/router';
+import { id as _id } from '@kbn/securitysolution-io-ts-list-types';
+import { transformError } from '@kbn/securitysolution-es-utils';
+
+import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import type { RacRequestHandlerContext } from '../types';
 import { buildRouteValidation } from './utils/route_validation';
 
 export const getAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) => {

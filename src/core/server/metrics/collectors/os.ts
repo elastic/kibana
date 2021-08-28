@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/logging';
-import type { LinuxOs } from 'getos';
-import getosAsync from 'getos';
 import os from 'os';
+import getosAsync, { LinuxOs } from 'getos';
 import { promisify } from 'util';
+import { Logger } from '@kbn/logging';
+import { OpsOsMetrics, MetricsCollector } from './types';
 import { OsCgroupMetricsCollector } from './cgroup';
-import type { MetricsCollector, OpsOsMetrics } from './types';
 
 const getos = promisify(getosAsync);
 

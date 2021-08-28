@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useEffect, useMemo, useState } from 'react';
-import type { LogEntriesHighlightsResponse } from '../../../../common/http_api/log_entries/highlights';
-import type { LogEntry } from '../../../../common/log_entry/log_entry';
-import type { TimeKey } from '../../../../common/time/time_key';
+import { LogEntriesHighlightsResponse } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
+import { TimeKey } from '../../../../common/time';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogEntriesHighlights } from './api/fetch_log_entries_highlights';

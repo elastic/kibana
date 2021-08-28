@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginInitializerContext } from '../../../../../core/server/plugins/types';
-import type { UsageCollectionSetup } from '../../../../usage_collection/server/plugin';
+
+import { PluginInitializerContext } from 'kibana/server';
+import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { fetchProvider } from './fetch';
 
 export interface CollectedUsage {

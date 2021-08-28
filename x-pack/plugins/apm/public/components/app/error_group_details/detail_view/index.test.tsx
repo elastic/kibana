@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { shallow } from 'enzyme';
 import React from 'react';
-import { DetailView } from '.';
 import { mockMoment } from '../../../../utils/testHelpers';
+import { DetailView } from './index';
 
 describe('DetailView', () => {
   beforeEach(() => {

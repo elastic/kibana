@@ -4,25 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGroup,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiProgress,
-  EuiResizeObserver,
   EuiSwitch,
   EuiTitle,
+  EuiResizeObserver,
+  EuiProgress,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs/summary_job';
-import { useMlKibana } from '../../contexts/kibana/kibana_context';
-import type { JobSelectionMaps } from './job_selector';
+import { NewSelectionIdBadges } from './new_selection_id_badges';
 // @ts-ignore
 import { JobSelectorTable } from './job_selector_table';
 import {
@@ -30,8 +28,9 @@ import {
   getTimeRangeFromSelection,
   normalizeTimes,
 } from './job_select_service_utils';
-import { NewSelectionIdBadges } from './new_selection_id_badges/new_selection_id_badges';
-
+import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import { useMlKibana } from '../../contexts/kibana';
+import { JobSelectionMaps } from './job_selector';
 
 export const BADGE_LIMIT = 10;
 export const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels

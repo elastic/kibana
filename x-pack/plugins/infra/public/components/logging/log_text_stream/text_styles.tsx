@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
-import {
-  css,
-  euiStyled,
-} from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { TextScale } from '../../../../common/log_text_scale/log_text_scale';
+
+import React, { useMemo, useState, useCallback } from 'react';
+
+import { euiStyled, css } from '../../../../../../../src/plugins/kibana_react/common';
+import { TextScale } from '../../../../common/log_text_scale';
 
 export type WrapMode = 'none' | 'pre-wrapped' | 'long';
 

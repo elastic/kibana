@@ -4,19 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+import type {
+  VisualizationsSetup,
+  VisualizationStage,
+} from '../../../../src/plugins/visualizations/public';
 import type { SavedObject } from '../../../../src/core/types/saved_objects';
-import type { VisualizationsSetup } from '../../../../src/plugins/visualizations/public/plugin';
-import type { VisualizationStage } from '../../../../src/plugins/visualizations/public/vis_types/vis_type_alias_registry';
+import type { MapSavedObject } from '../common/map_saved_object_type';
 import {
-  APP_ICON,
   APP_ID,
+  APP_ICON,
   APP_NAME,
   getEditPath,
   MAP_PATH,
   MAP_SAVED_OBJECT_TYPE,
 } from '../common/constants';
-import type { MapSavedObject } from '../common/map_saved_object_type';
 
 export function getMapsVisTypeAlias(
   visualizations: VisualizationsSetup,

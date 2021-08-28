@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiDatePickerProps } from '@elastic/eui';
-import { EuiDatePicker } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
-import React from 'react';
-import type { StyledComponent } from 'styled-components';
-import type { EuiTheme } from '../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common/eui_styled_components';
+
+import { EuiDatePicker, EuiDatePickerProps } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
+import { StyledComponent } from 'styled-components';
+import { euiStyled, EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 
 // The return type of this component needs to be specified because the inferred
 // return type depends on types that are not exported from EUI. You get a TS4023

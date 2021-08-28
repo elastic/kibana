@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectConfig } from '../../../saved_objects/public/types';
-import type { InternalTagDecoratedSavedObject } from './types';
+
+import { SavedObjectConfig } from '../../../saved_objects/public';
+import { InternalTagDecoratedSavedObject } from './types';
 
 /**
  * Inject the tags back into the object's references

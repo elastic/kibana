@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ConnectorTypes } from '../../../../common/api/connectors';
-import type { ServiceNowSIRFieldsType } from '../../../../common/api/connectors/servicenow_sir';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
+
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
+
+import { ConnectorTypes, ServiceNowSIRFieldsType } from '../../../../common';
+import { useKibana } from '../../../common/lib/kibana';
+import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
-import type { ConnectorFieldsProps } from '../types';
-import { choicesToEuiOptions } from './helpers';
-import * as i18n from './translations';
-import type { Choice, Fields } from './types';
 import { useGetChoices } from './use_get_choices';
+import { Choice, Fields } from './types';
+import { choicesToEuiOptions } from './helpers';
+
+import * as i18n from './translations';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {

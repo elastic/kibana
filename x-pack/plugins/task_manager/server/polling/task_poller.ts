@@ -8,17 +8,25 @@
 /*
  * This module contains the logic for polling the task manager index for new work.
  */
-import type { Logger } from '@kbn/logging';
-import type { Option } from 'fp-ts/lib/Option';
-import { getOrElse, map as mapOptional, none } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { after } from 'lodash';
+
 import { performance } from 'perf_hooks';
-import { combineLatest, merge, Observable, of, Subject, timer } from 'rxjs';
-import { catchError, concatMap, filter, mapTo, scan, switchMap, tap } from 'rxjs/operators';
+import { after } from 'lodash';
+import { Subject, merge, of, Observable, combineLatest, timer } from 'rxjs';
+import { mapTo, filter, scan, concatMap, tap, catchError, switchMap } from 'rxjs/operators';
+
+import { pipe } from 'fp-ts/lib/pipeable';
+import { Option, none, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
+import { Logger } from '../../../../../src/core/server';
 import { pullFromSet } from '../lib/pull_from_set';
-import type { Err, Result } from '../lib/result_type';
-import { asErr, asOk, isErr, map as mapResult, promiseResult } from '../lib/result_type';
+import {
+  Result,
+  Err,
+  isErr,
+  map as mapResult,
+  asOk,
+  asErr,
+  promiseResult,
+} from '../lib/result_type';
 import { timeoutPromiseAfter } from './timeout_promise_after';
 
 type WorkFn<T, H> = (...params: T[]) => Promise<H>;

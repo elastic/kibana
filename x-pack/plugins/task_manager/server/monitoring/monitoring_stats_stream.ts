@@ -4,29 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { set } from '@elastic/safer-lodash-set';
-import type { Logger } from '@kbn/logging';
-import type { JsonObject } from '@kbn/utility-types';
-import { merge, Observable, of } from 'rxjs';
-import { map, scan } from 'rxjs/operators';
-import type { TaskManagerConfig } from '../config';
-import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
-import type { ManagedConfiguration } from '../lib/create_managed_configuration';
-import { TaskPollingLifecycle } from '../polling_lifecycle';
-import { TaskStore } from '../task_store';
-import type { CapacityEstimationStat } from './capacity_estimation';
-import { withCapacityEstimate } from './capacity_estimation';
-import type { ConfigStat } from './configuration_statistics';
-import { createConfigurationAggregator } from './configuration_statistics';
-import type { EphemeralTaskStat, SummarizedEphemeralTaskStat } from './ephemeral_task_statistics';
-import { createEphemeralTaskAggregator, summarizeEphemeralStat } from './ephemeral_task_statistics';
-import type { AggregatedStatProvider } from './runtime_statistics_aggregator';
-import type { SummarizedTaskRunStat, TaskRunStat } from './task_run_statistics';
-import { createTaskRunAggregator, summarizeTaskRunStat } from './task_run_statistics';
-import type { SummarizedWorkloadStat, WorkloadStat } from './workload_statistics';
-import { createWorkloadAggregator, summarizeWorkloadStat } from './workload_statistics';
 
-export { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
+import { merge, of, Observable } from 'rxjs';
+import { map, scan } from 'rxjs/operators';
+import { set } from '@elastic/safer-lodash-set';
+import { Logger } from 'src/core/server';
+import { JsonObject } from '@kbn/utility-types';
+import { TaskStore } from '../task_store';
+import { TaskPollingLifecycle } from '../polling_lifecycle';
+import {
+  createWorkloadAggregator,
+  summarizeWorkloadStat,
+  SummarizedWorkloadStat,
+  WorkloadStat,
+} from './workload_statistics';
+import {
+  EphemeralTaskStat,
+  createEphemeralTaskAggregator,
+  SummarizedEphemeralTaskStat,
+  summarizeEphemeralStat,
+} from './ephemeral_task_statistics';
+import {
+  createTaskRunAggregator,
+  summarizeTaskRunStat,
+  TaskRunStat,
+  SummarizedTaskRunStat,
+} from './task_run_statistics';
+import { ConfigStat, createConfigurationAggregator } from './configuration_statistics';
+import { TaskManagerConfig } from '../config';
+import { AggregatedStatProvider } from './runtime_statistics_aggregator';
+import { ManagedConfiguration } from '../lib/create_managed_configuration';
+import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
+import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
+
+export { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 
 export interface MonitoringStats {
   last_update: string;

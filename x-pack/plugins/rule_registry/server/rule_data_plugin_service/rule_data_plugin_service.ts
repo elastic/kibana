@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import type { Either } from 'fp-ts/lib/Either';
-import { isLeft, left, right } from 'fp-ts/lib/Either';
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
-import type { WaitResult } from '../rule_data_client/rule_data_client';
-import { RuleDataClient } from '../rule_data_client/rule_data_client';
-import type { IRuleDataClient } from '../rule_data_client/types';
+
+import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
+
+import { ElasticsearchClient, Logger } from 'kibana/server';
+
+import { IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';
-import type { IndexOptions } from './index_options';
+import { IndexOptions } from './index_options';
 import { ResourceInstaller } from './resource_installer';
 import { joinWithDash } from './utils';
 

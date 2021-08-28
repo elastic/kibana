@@ -5,18 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { Component } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
-  EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import type { Datatable } from '../../../../../expressions/common/expression_types/specs/datatable';
+import { Datatable } from '../../../../../expressions/public';
 
 interface TableSelectorState {
   isPopoverOpen: boolean;

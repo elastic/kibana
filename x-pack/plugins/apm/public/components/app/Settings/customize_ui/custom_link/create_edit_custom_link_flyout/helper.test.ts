@@ -4,8 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
-import { getSelectOptions, replaceTemplateVariables } from './helper';
+
+import {
+  getSelectOptions,
+  replaceTemplateVariables,
+} from '../create_edit_custom_link_flyout/helper';
+import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 
 describe('Custom link helper', () => {
   describe('getSelectOptions', () => {

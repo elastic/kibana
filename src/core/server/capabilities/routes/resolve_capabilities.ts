@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '../../http/router/router';
-import type { CapabilitiesResolver } from '../resolve_capabilities';
+import { IRouter } from '../../http';
+import { CapabilitiesResolver } from '../resolve_capabilities';
 
 export function registerCapabilitiesRoutes(router: IRouter, resolver: CapabilitiesResolver) {
   router.post(

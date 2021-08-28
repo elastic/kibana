@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { mockCoreContext } from '../core_context.mock';
-import type {
+
+import {
+  httpServiceMock,
   InternalHttpServicePrebootMock,
   InternalHttpServiceSetupMock,
 } from '../http/http_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
-import type { RouterMock } from '../http/router/router.mock';
-import { mockRouter } from '../http/router/router.mock';
-import type { CapabilitiesSetup } from './capabilities_service';
-import { CapabilitiesService } from './capabilities_service';
+import { mockRouter, RouterMock } from '../http/router/router.mock';
+import { CapabilitiesService, CapabilitiesSetup } from './capabilities_service';
+import { mockCoreContext } from '../core_context.mock';
 
 describe('CapabilitiesService', () => {
   let http: InternalHttpServiceSetupMock;

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { GetSpaceResult } from '../common/types';
+
+import type { GetSpaceResult } from '../common';
 
 /**
  * The structure for all of the space data that must be loaded for share-to-space components to function.

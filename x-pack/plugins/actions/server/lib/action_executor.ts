@@ -4,28 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { withSpan } from '@kbn/apm-utils';
-import type { Logger } from '@kbn/logging';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { Logger, KibanaRequest } from 'src/core/server';
 import { cloneDeep } from 'lodash';
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server/saved_objects';
-import type { IEvent } from '../../../event_log/generated/schemas';
-import type { IEventLogger } from '../../../event_log/server/types';
-import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server/types';
-import type { SpacesServiceStart } from '../../../spaces/server/spaces_service/spaces_service';
-import type { ActionTypeExecutorResult } from '../../common/types';
-import { ActionsClient } from '../actions_client';
-import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import type {
+import { withSpan } from '@kbn/apm-utils';
+import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
+import {
+  ActionTypeExecutorResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
-  PreConfiguredAction,
   RawAction,
+  PreConfiguredAction,
 } from '../types';
-import type { ActionExecutionSource } from './action_execution_source';
-import type { RelatedSavedObjects } from './related_saved_objects';
-import { validateConfig, validateParams, validateSecrets } from './validate_with_schema';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
+import { SpacesServiceStart } from '../../../spaces/server';
+import { EVENT_LOG_ACTIONS } from '../constants/event_log';
+import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { ActionsClient } from '../actions_client';
+import { ActionExecutionSource } from './action_execution_source';
+import { RelatedSavedObjects } from './related_saved_objects';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;

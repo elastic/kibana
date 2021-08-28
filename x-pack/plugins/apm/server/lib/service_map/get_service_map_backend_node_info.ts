@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery } from '../../../../observability/server/utils/queries';
+
+import { rangeQuery } from '../../../../observability/server';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -16,7 +17,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { calculateThroughput } from '../helpers/calculate_throughput';
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 interface Options {
   setup: Setup & SetupTimeRange;

@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { Observable } from 'rxjs';
-import type { IClusterClient } from '../../../../src/core/server/elasticsearch/client/cluster_client';
-import { KibanaRequest } from '../../../../src/core/server/http/router/request';
-import type { SpacesServiceStart } from '../../spaces/server/spaces_service/spaces_service';
-import type { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-import type { EsContext } from './es/context';
-import type { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
-import type { IEventLogClient } from './types';
 
+import { Observable } from 'rxjs';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { IClusterClient, KibanaRequest } from 'src/core/server';
+import { SpacesServiceStart } from '../../spaces/server';
+
+import { EsContext } from './es';
+import { IEventLogClient } from './types';
+import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 

@@ -5,26 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiIconProps } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
-import type { Filter, Query } from '@kbn/es-query';
-import type { InjectedIntl } from '@kbn/i18n/react';
-import { injectI18n } from '@kbn/i18n/react';
+
+import { compact } from 'lodash';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import { compact, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
-import { withKibana } from '../../../../kibana_react/public/context/context';
-import type { KibanaReactContextValue } from '../../../../kibana_react/public/context/types';
-import type { IIndexPattern } from '../../../common/index_patterns/types';
-import type { TimeRange } from '../../../common/query/timefilter/types';
-import type { SavedQuery, SavedQueryAttributes } from '../../query/saved_query/types';
-import type { TimeHistoryContract } from '../../query/timefilter/time_history';
-import type { IDataPluginServices } from '../../types';
-import { FilterBar } from '../filter_bar/filter_bar';
+import { get, isEqual } from 'lodash';
+import { EuiIconProps } from '@elastic/eui';
+
+import { METRIC_TYPE } from '@kbn/analytics';
+import { Query, Filter } from '@kbn/es-query';
+import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
+
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
-import type { SavedQueryMeta } from '../saved_query_form/save_query_form';
-import { SaveQueryForm } from '../saved_query_form/save_query_form';
-import { SavedQueryManagementComponent } from '../saved_query_management/saved_query_management_component';
+import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
+import { IDataPluginServices } from '../../types';
+import { TimeRange, IIndexPattern } from '../../../common';
+import { FilterBar } from '../filter_bar/filter_bar';
+import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
+import { SavedQueryManagementComponent } from '../saved_query_management';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;

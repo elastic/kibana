@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { readFile } from 'fs/promises';
+
 import { resolve } from 'path';
+import { readFile } from 'fs/promises';
 import supertest from 'supertest';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
-import { HttpService } from '../../http/http_service';
-import type { IRouter } from '../../http/router/router';
-import { createHttpServer } from '../../http/test_utils';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { HttpService, IRouter } from '../../http';
+import { createHttpServer } from '../../http/test_utils';
 import { registerRouteForBundle } from '../bundle_routes/bundles_route';
 import { FileHashCache } from '../bundle_routes/file_hash_cache';
 

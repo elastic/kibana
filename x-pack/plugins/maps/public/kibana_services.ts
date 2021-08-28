@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart } from '../../../../src/core/public/types';
-import type { PaletteRegistry } from '../../../../src/plugins/charts/public/services/palettes/types';
-import type { MapsEmsConfig } from '../../../../src/plugins/maps_ems/config';
-import { EMSSettings } from '../common/ems_settings';
+
+import type { CoreStart } from 'kibana/public';
+import type { MapsEmsConfig } from '../../../../src/plugins/maps_ems/public';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
+import type { EMSSettings } from '../common/ems_settings';
+import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);

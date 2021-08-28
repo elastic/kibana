@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { IScopedClusterClient } from 'kibana/server';
 import RE2 from 're2';
-import type { IScopedClusterClient } from '../../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import type { Job } from '../../../../common/types/anomaly_detection_jobs/job';
 import { mlLog } from '../../../lib/log';
+import { Job } from '../../../../common/types/anomaly_detection_jobs';
 
 const GROUP = 'metrics';
 const MODULE_PREFIX = 'kibana-metrics-ui';

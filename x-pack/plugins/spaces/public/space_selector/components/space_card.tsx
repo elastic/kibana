@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import './space_card.scss';
+
 import { EuiCard, EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 
-import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
-import { ENTER_SPACE_PATH } from '../../../common/constants';
-import { addSpaceIdToPath } from '../../../common/lib/spaces_url_parser';
-import { getSpaceAvatarComponent } from '../../space_avatar/space_avatar';
-import './space_card.scss';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
+import { getSpaceAvatarComponent } from '../../space_avatar';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>

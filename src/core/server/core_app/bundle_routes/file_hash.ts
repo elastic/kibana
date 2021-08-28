@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Stats } from 'fs';
-import type { IFileHashCache } from './file_hash_cache';
+
+import type { Stats } from 'fs';
 import { generateFileHash, getFileCacheKey } from './utils';
+import { IFileHashCache } from './file_hash_cache';
 
 /**
  *  Get the hash of a file via a file descriptor

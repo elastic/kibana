@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Location } from 'history';
+
+import { Location } from 'history';
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 

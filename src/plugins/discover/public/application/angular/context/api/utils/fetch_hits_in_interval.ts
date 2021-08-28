@@ -5,15 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type {
-  EsQuerySortValue,
-  ISearchSource,
-} from '../../../../../../../data/common/search/search_source/types';
-import { SortDirection } from '../../../../../../../data/common/search/search_source/types';
-import type { EsHitRecord, EsHitRecordList } from '../context';
+
+import { ISearchSource, EsQuerySortValue, SortDirection } from '../../../../../../../data/public';
 import { convertTimeValueToIso } from './date_conversion';
-import type { IntervalValue } from './generate_intervals';
-import type { EsQuerySearchAfter } from './get_es_query_search_after';
+import { EsHitRecordList, EsHitRecord } from '../context';
+import { IntervalValue } from './generate_intervals';
+import { EsQuerySearchAfter } from './get_es_query_search_after';
 
 interface RangeQuery {
   format: string;

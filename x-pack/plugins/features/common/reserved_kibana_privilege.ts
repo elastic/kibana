@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FeatureKibanaPrivileges } from './feature_kibana_privileges';
+
+import { FeatureKibanaPrivileges } from '.';
 
 export interface ReservedKibanaPrivilege {
   id: string;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
-import { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+import { IScopedClusterClient } from 'kibana/server';
+import { estypes, ApiResponse } from '@elastic/elasticsearch';
+
+import { JobSavedObjectService } from '../../saved_objects';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { JobType } from '../../../common/types/saved_objects';
-import type { JobSavedObjectService } from '../../saved_objects/service';
 
 export function searchProvider(
   client: IScopedClusterClient,

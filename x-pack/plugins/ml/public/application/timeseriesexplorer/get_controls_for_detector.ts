@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { JobId } from '../../../common/types/anomaly_detection_jobs/job';
+
 import { mlJobService } from '../services/job_service';
-import type { Entity } from './components/entity_control/entity_control';
+import { Entity } from './components/entity_control/entity_control';
+import { JobId } from '../../../common/types/anomaly_detection_jobs';
 
 /**
  * Extracts entities from the detector configuration

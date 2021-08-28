@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import type { Geometry, Polygon } from 'geojson';
+
 import React, { Component } from 'react';
-import type { RisonObject } from 'rison-node';
-import rison from 'rison-node';
-import { URL_MAX_LENGTH } from '../../../../../../../../src/core/public/core_app/errors/url_overflow';
-import type { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public/actions/apply_filter_action';
-import type {
-  Action,
-  ActionExecutionContext,
-} from '../../../../../../../../src/plugins/ui_actions/public/actions/action';
+import { i18n } from '@kbn/i18n';
+
+import { Filter } from 'src/plugins/data/public';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { Geometry, Polygon } from 'geojson';
+import rison, { RisonObject } from 'rison-node';
+import { URL_MAX_LENGTH } from '../../../../../../../../src/core/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public';
+import {
+  createSpatialFilterWithGeometry,
+  PreIndexedShape,
+} from '../../../../../common/elasticsearch_util';
 import { ES_SPATIAL_RELATIONS, GEO_JSON_TYPE } from '../../../../../common/constants';
-import { createSpatialFilterWithGeometry } from '../../../../../common/elasticsearch_util/spatial_filter_utils';
-import type { PreIndexedShape } from '../../../../../common/elasticsearch_util/types';
 import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
 // over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Query } from '../..';
-import type { Filter } from '../../../common/es_query';
-import type { RefreshInterval, TimeRange } from '../../../common/query/timefilter/types';
+
+import { RefreshInterval, TimeRange, Query, Filter } from '../..';
 
 export type SavedQueryTimeFilter = TimeRange & {
   refreshInterval: RefreshInterval;

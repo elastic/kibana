@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { cloneDeep, cloneDeepWith, get, set } from 'lodash';
 import type { ChangeEventHandler, FocusEventHandler, ReactEventHandler } from 'react';
 import { useState } from 'react';

@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { StartServicesAccessor, IRouter, Logger } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
-import type { StartServicesAccessor } from '../../../../core/server';
-import type { IRouter } from '../../../../core/server/http/router/router';
 
 export function registerKqlTelemetryRoute(
   router: IRouter,

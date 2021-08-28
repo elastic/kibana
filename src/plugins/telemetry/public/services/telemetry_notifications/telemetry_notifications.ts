@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreStart } from '../../../../../core/public/types';
-import { TelemetryService } from '../telemetry_service';
+
+import { CoreStart } from 'kibana/public';
 import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
 import { renderOptInBanner } from './render_opt_in_banner';
+import { TelemetryService } from '../telemetry_service';
 
 interface TelemetryNotificationsConstructor {
   http: CoreStart['http'];

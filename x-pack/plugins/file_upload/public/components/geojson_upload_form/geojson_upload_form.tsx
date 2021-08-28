@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { ChangeEvent, Component } from 'react';
 import { EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ChangeEvent } from 'react';
-import React, { Component } from 'react';
-import { validateIndexName } from '../../validate_index_name';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { OnFileSelectParameters } from './geojson_file_picker';
-import { GeoJsonFilePicker } from './geojson_file_picker';
+import { GeoJsonFilePicker, OnFileSelectParameters } from './geojson_file_picker';
+import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { IndexNameForm } from './index_name_form';
+import { validateIndexName } from '../../validate_index_name';
 
 const GEO_FIELD_TYPE_OPTIONS = [
   {

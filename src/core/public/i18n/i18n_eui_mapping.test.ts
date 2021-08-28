@@ -7,8 +7,10 @@
  */
 
 jest.mock('@kbn/i18n');
-import i18ntokens from '@elastic/eui/i18ntokens.json';
+
 import { i18n } from '@kbn/i18n';
+
+import i18ntokens from '@elastic/eui/i18ntokens.json';
 import { getEuiContextMapping } from './i18n_eui_mapping';
 
 /** Regexp to find {values} usage */

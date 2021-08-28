@@ -7,11 +7,7 @@
  */
 
 import React from 'react';
-import type {
-  Datatable,
-  DatatableColumn,
-  DatatableRow,
-} from '../../../../expressions/common/expression_types/specs/datatable';
+import { Datatable, DatatableColumn, DatatableRow } from '../../../../expressions/common';
 
 type DataViewColumnRender = (value: string, _item: DatatableRow) => React.ReactNode | string;
 

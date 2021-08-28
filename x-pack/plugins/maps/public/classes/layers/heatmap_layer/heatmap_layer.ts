@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { GeoJSONSource as MbGeoJSONSource, Map as MbMap } from '@kbn/mapbox-gl';
-import type { FeatureCollection } from 'geojson';
-import { EMPTY_FEATURE_COLLECTION, LAYER_TYPE } from '../../../../common/constants';
-import type { HeatmapLayerDescriptor } from '../../../../common/descriptor_types/layer_descriptor_types';
-import type { MapQuery } from '../../../../common/descriptor_types/map_descriptor';
-import type { DataRequestContext } from '../../../actions/data_request_actions';
-import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_source';
-import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
-import { DataRequestAbortError } from '../../util/data_request';
+
+import type { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from '@kbn/mapbox-gl';
+import { FeatureCollection } from 'geojson';
 import { AbstractLayer } from '../layer';
-import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from '../vector_layer/utils';
+import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
+import { EMPTY_FEATURE_COLLECTION, LAYER_TYPE } from '../../../../common/constants';
+import { HeatmapLayerDescriptor, MapQuery } from '../../../../common/descriptor_types';
+import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
+import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from '../vector_layer';
+import { DataRequestContext } from '../../../actions';
+import { DataRequestAbortError } from '../../util/data_request';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__'; // unique name to store scaled value for weighting
 

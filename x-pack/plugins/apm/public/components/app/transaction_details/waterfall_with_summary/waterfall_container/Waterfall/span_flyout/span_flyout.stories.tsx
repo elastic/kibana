@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Story } from '@storybook/react';
-import type { ComponentProps, ComponentType } from 'react';
-import React from 'react';
+
+import { Story } from '@storybook/react';
+import React, { ComponentProps, ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { SpanFlyout } from '.';
 import { MockApmPluginContextWrapper } from '../../../../../../../context/apm_plugin/mock_apm_plugin_context';
+import { SpanFlyout } from './';
 
 type Args = ComponentProps<typeof SpanFlyout>;
 

@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { Component, Fragment } from 'react';
-import { TooltipSelector } from '../../../components/tooltip_selector/tooltip_selector';
+import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { TooltipSelector } from '../../../components/tooltip_selector';
 import { getEmsFileLayers } from '../../../util';
-import type { IField } from '../../fields/field';
-import type { OnSourceChangeArgs } from '../source';
-import type { IEmsFileSource } from './ems_file_source';
+import { IEmsFileSource } from './ems_file_source';
+import { IField } from '../../fields/field';
+import { OnSourceChangeArgs } from '../source';
 
 interface Props {
   layerId: string;

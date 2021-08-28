@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import moment from 'moment-timezone';
+import { schema } from '@kbn/config-schema';
 import { getNextRollingTime } from './get_next_rolling_time';
 
 const format = 'YYYY-MM-DD HH:mm:ss:SSS';

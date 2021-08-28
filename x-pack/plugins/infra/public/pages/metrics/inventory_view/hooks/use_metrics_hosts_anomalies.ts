@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
-import type {
+
+import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
+import { HttpHandler } from 'src/core/public';
+import {
+  INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
   Metric,
+  Sort,
   Pagination,
   PaginationCursor,
-  Sort,
-} from '../../../../../common/http_api/infra_ml/results/common';
-import type { MetricsHostsAnomaly } from '../../../../../common/http_api/infra_ml/results/metrics_hosts_anomalies';
-import {
   getMetricsHostsAnomaliesRequestPayloadRT,
+  MetricsHostsAnomaly,
   getMetricsHostsAnomaliesSuccessReponsePayloadRT,
-  INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
-} from '../../../../../common/http_api/infra_ml/results/metrics_hosts_anomalies';
+} from '../../../../../common/http_api/infra_ml';
+import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 
 export type SortOptions = Sort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;

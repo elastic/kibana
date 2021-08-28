@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment, FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
-import { ModelMemoryLimitInput } from '../../../common/model_memory_limit/model_memory_limit_input';
-import { BucketSpan } from '../bucket_span/bucket_span';
-import { Influencers } from '../influencers/influencers';
+
+import { BucketSpan } from '../bucket_span';
+import { Influencers } from '../influencers';
+import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;

@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import type { YConfig } from '../../common/expressions/xy_chart/axis_config';
-import type { ValidLayer, XYLayerConfig } from '../../common/expressions/xy_chart/layer_config';
-import type { SeriesType } from '../../common/expressions/xy_chart/series_type';
-import type { DatasourcePublicAPI, FramePublicAPI } from '../types';
+
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
+import type { SeriesType, XYLayerConfig, YConfig, ValidLayer } from '../../common/expressions';
 import { visualizationTypes } from './types';
 
 export function isHorizontalSeries(seriesType: SeriesType) {

@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup } from '../../../../../src/core/public/types';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public/types';
+
+import type { CoreSetup } from 'kibana/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../../src/plugins/data/public/types';
-import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public/plugin';
-import type {
-  FieldFormatsSetup,
-  FieldFormatsStart,
-} from '../../../../../src/plugins/field_formats/public/plugin';
-import type { PluginStart as IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public/types';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public/storage/storage';
-import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public/plugin';
+} from '../../../../../src/plugins/data/public';
 import type { Datasource, EditorFrameSetup } from '../types';
+import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import type {
+  FieldFormatsStart,
+  FieldFormatsSetup,
+} from '../../../../../src/plugins/field_formats/public';
 import { getTimeZone } from '../utils';
 
 export interface IndexPatternDatasourceSetupPlugins {

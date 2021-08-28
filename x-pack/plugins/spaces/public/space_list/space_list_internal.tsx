@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -17,11 +18,11 @@ import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { SpaceListProps } from 'src/plugins/spaces_oss/public';
 
-import type { SpaceListProps } from '../../../../../src/plugins/spaces_oss/public/api';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import { getSpaceAvatarComponent } from '../space_avatar/space_avatar';
-import { useSpaces } from '../spaces_context/context';
+import { getSpaceAvatarComponent } from '../space_avatar';
+import { useSpaces } from '../spaces_context';
 import type { ShareToSpacesData, ShareToSpaceTarget } from '../types';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.

@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import { FilterValueLabel } from '../../../../../../observability/public/components/shared/filter_value_label/filter_value_label';
-import type { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import type { FiltersUIHook } from '../hooks/useLocalUIFilters';
+import { FilterValueLabel } from '../../../../../../observability/public';
+import { FiltersUIHook } from '../hooks/useLocalUIFilters';
+import { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
   indexPattern?: IndexPattern;

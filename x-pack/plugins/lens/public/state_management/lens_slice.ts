@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { createSlice, current } from '@reduxjs/toolkit';
-import type { TableInspectorAdapter } from '../editor_frame_service/types';
-import type { LensEmbeddableInput } from '../embeddable/embeddable';
+
+import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
+import { LensEmbeddableInput } from '..';
+import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getInitialDatasourceId, getResolvedDateRange } from '../utils';
-import type { LensAppState, LensStoreDeps } from './types';
+import { LensAppState, LensStoreDeps } from './types';
 
 export const initialState: LensAppState = {
   searchSessionId: '',

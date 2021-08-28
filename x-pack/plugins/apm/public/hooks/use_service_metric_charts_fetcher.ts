@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
-import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
-import { useFetcher } from './use_fetcher';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
+import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
+import { useFetcher } from './use_fetcher';
+
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
   charts: [],
 };

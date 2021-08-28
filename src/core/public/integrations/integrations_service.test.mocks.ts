@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreService } from '../../types/core_service';
+
+import { CoreService } from '../../types';
 
 const createCoreServiceMock = (): jest.Mocked<CoreService> => {
   return {

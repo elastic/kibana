@@ -5,42 +5,53 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { estypes } from '@elastic/elasticsearch';
-import type {
+import { useEffect, useMemo } from 'react';
+
+import {
   EuiDataGridCellValueElementProps,
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import moment from 'moment-timezone';
-import { useEffect, useMemo } from 'react';
-import type { CoreSetup } from '../../../../../../../src/core/public/types';
-import type { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+
+import { CoreSetup } from 'src/core/public';
+
+import {
+  IndexPattern,
+  IFieldType,
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+} from '../../../../../../../src/plugins/data/public';
+
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
-import type {
+import { extractErrorMessage } from '../../../../common/util/errors';
+import {
   FeatureImportance,
   FeatureImportanceClassName,
   TopClasses,
 } from '../../../../common/types/feature_importance';
-import type { RuntimeMappings } from '../../../../common/types/fields';
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import { extractErrorMessage } from '../../../../common/util/errors/process_errors';
-import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
+
+import {
+  BASIC_NUMERICAL_TYPES,
+  EXTENDED_NUMERICAL_TYPES,
+} from '../../data_frame_analytics/common/fields';
+
 import {
   FEATURE_IMPORTANCE,
   FEATURE_INFLUENCE,
   OUTLIER_SCORE,
   TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
-import {
-  BASIC_NUMERICAL_TYPES,
-  EXTENDED_NUMERICAL_TYPES,
-} from '../../data_frame_analytics/common/fields';
-import { mlFieldFormatService } from '../../services/field_format_service';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { getNestedProperty } from '../../util/object_utils';
-import type { DataGridItem, IndexPagination, RenderCellValue } from './types';
+import { mlFieldFormatService } from '../../services/field_format_service';
+
+import { DataGridItem, IndexPagination, RenderCellValue } from './types';
+import { RuntimeMappings } from '../../../../common/types/fields';
+import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 
 export const INIT_MAX_COLUMNS = 10;
 export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED = 10000;

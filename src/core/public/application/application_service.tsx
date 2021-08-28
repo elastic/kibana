@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import type { History } from 'history';
-import { createBrowserHistory } from 'history';
 import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, map, shareReplay, take, takeUntil } from 'rxjs/operators';
-import type { PluginOpaqueId } from '../../server/plugins/types';
-import type { Capabilities } from '../../types/capabilities';
-import type { HttpSetup, HttpStart } from '../http/types';
-import type { OverlayStart } from '../overlays/overlay_service';
-import type { MountPoint } from '../types';
-import { getLeaveAction, isConfirmAction } from './application_leave';
-import { CapabilitiesService } from './capabilities/capabilities_service';
-import { getUserConfirmationHandler } from './navigation_confirm';
-import type {
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
+import { createBrowserHistory, History } from 'history';
+
+import { MountPoint } from '../types';
+import { HttpSetup, HttpStart } from '../http';
+import { OverlayStart } from '../overlays';
+import { PluginOpaqueId } from '../plugins';
+import { AppRouter } from './ui';
+import { Capabilities, CapabilitiesService } from './capabilities';
+import {
   App,
   AppDeepLink,
   AppLeaveHandler,
   AppMount,
+  AppNavLinkStatus,
+  AppStatus,
   AppUpdatableFields,
   AppUpdater,
   InternalApplicationSetup,
@@ -31,12 +31,9 @@ import type {
   Mounter,
   NavigateToAppOptions,
 } from './types';
-import { AppNavLinkStatus, AppStatus } from './types';
-import { AppRouter } from './ui/app_router';
-import { appendAppPath } from './utils/append_app_path';
-import { getAppInfo } from './utils/get_app_info';
-import { parseAppUrl } from './utils/parse_app_url';
-import { relativeToAbsolute } from './utils/relative_to_absolute';
+import { getLeaveAction, isConfirmAction } from './application_leave';
+import { getUserConfirmationHandler } from './navigation_confirm';
+import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
 
 interface SetupDeps {
   http: HttpSetup;

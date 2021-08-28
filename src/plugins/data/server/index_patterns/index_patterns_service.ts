@@ -5,26 +5,30 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import type { CoreSetup, CoreStart } from '../../../../core/server';
-import type { ElasticsearchClient } from '../../../../core/server/elasticsearch/client/types';
-import type { Plugin } from '../../../../core/server/plugins/types';
-import type { SavedObjectsClientContract } from '../../../../core/server/saved_objects/types';
-import type { UiSettingsServiceStart } from '../../../../core/server/ui_settings/types';
-import type { ExpressionsServerSetup } from '../../../expressions/server/plugin';
-import type { FieldFormatsStart } from '../../../field_formats/server/types';
-import type { UsageCollectionSetup } from '../../../usage_collection/server/plugin';
-import { IndexPatternsService as IndexPatternsCommonService } from '../../common/index_patterns/index_patterns/index_patterns';
-import type { DataPluginStart } from '../plugin';
-import { indexPatternSavedObjectType } from '../saved_objects/index_patterns';
-import { capabilitiesProvider } from './capabilities_provider';
-import { createScriptedFieldsDeprecationsConfig } from './deprecations/scripted_fields';
-import { getIndexPatternLoad } from './expressions/load_index_pattern';
-import { IndexPatternsApiServer } from './index_patterns_api_client';
-import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
+
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+  UiSettingsServiceStart,
+} from 'kibana/server';
+import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { DataPluginStart } from '../plugin';
 import { registerRoutes } from './routes';
-import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
+import { indexPatternSavedObjectType } from '../saved_objects';
+import { capabilitiesProvider } from './capabilities_provider';
+import { IndexPatternsCommonService } from '../';
+import { FieldFormatsStart } from '../../../field_formats/server';
+import { getIndexPatternLoad } from './expressions';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
+import { IndexPatternsApiServer } from './index_patterns_api_client';
+import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
+import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
+import { createScriptedFieldsDeprecationsConfig } from './deprecations';
 
 export interface IndexPatternsServiceStart {
   indexPatternsServiceFactory: (

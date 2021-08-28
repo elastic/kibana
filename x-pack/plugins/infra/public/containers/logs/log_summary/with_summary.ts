@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useContext } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
-import type { RendererFunction } from '../../../utils/typed_react';
-import { LogFilterState } from '../log_filter/log_filter_state';
-import { LogPositionState } from '../log_position/log_position_state';
-import { useLogSourceContext } from '../log_source/log_source';
-import type { LogSummaryBuckets } from './log_summary';
-import { useLogSummary } from './log_summary';
+import { RendererFunction } from '../../../utils/typed_react';
+import { LogFilterState } from '../log_filter';
+import { LogPositionState } from '../log_position';
+import { useLogSourceContext } from '../log_source';
+import { LogSummaryBuckets, useLogSummary } from './log_summary';
 
 const FETCH_THROTTLE_INTERVAL = 3000;
 

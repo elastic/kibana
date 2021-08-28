@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { connect } from 'react-redux';
-import { DRAW_MODE } from '../../../common/constants';
-import type { MapStoreState } from '../../reducers/store';
-import { getGeoFieldNames } from '../../selectors/map_selectors';
-import { getDrawMode } from '../../selectors/ui_selectors';
 import { ToolbarOverlay } from './toolbar_overlay';
+import { MapStoreState } from '../../reducers/store';
+import { getDrawMode } from '../../selectors/ui_selectors';
+import { getGeoFieldNames } from '../../selectors/map_selectors';
+import { DRAW_MODE } from '../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {

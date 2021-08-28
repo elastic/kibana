@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Observer } from './fields/observer';
+
+import { Observer } from './fields/observer';
 
 // all documents types extend APMBaseDoc and inherit all properties
 export interface APMBaseDoc {

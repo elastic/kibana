@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery } from '../../../../../observability/server/utils/queries';
-import { OBSERVER_VERSION_MAJOR } from '../../../../common/elasticsearch_fieldnames';
+
+import { rangeQuery } from '../../../../../observability/server';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { OBSERVER_VERSION_MAJOR } from '../../../../common/elasticsearch_fieldnames';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 // returns true if 6.x data is found
 export async function getLegacyDataStatus(setup: Setup & SetupTimeRange) {

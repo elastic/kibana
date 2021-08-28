@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
-import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-import type { TimeRange } from '../../../../../../../src/plugins/data/common/query/timefilter/types';
+
+import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
+import { Filter, TimeRange } from 'src/plugins/data/public';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import type {
+import { TooltipProperty, ITooltipProperty } from '../../tooltips/tooltip_property';
+import { AbstractSource, ISource } from '../source';
+import { IField } from '../../fields/field';
+import {
   ESSearchSourceResponseMeta,
+  MapExtent,
+  MapQuery,
   Timeslice,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
-} from '../../../../common/descriptor_types/data_request_descriptor_types';
-import type { MapExtent, MapQuery } from '../../../../common/descriptor_types/map_descriptor';
-import type { IField } from '../../fields/field';
-import type { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { TooltipProperty } from '../../tooltips/tooltip_property';
+} from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
-import type { ISource } from '../source';
-import { AbstractSource } from '../source';
 
 export interface SourceTooltipConfig {
   tooltipContent: string | null;

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { SpaceListProps } from '../../../../../src/plugins/spaces_oss/public/api';
+import type { SpaceListProps } from 'src/plugins/spaces_oss/public';
 
 export const getSpaceListComponent = async (): Promise<React.FC<SpaceListProps>> => {
   const { SpaceListInternal } = await import('./space_list_internal');

@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { JobId } from '../../common/types/anomaly_detection_jobs';
+import { useMlKibana } from '../application/contexts/kibana';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import { PLUGIN_ID } from '../../common/constants/app';
-import type { MlAnomalyDetectionAlertRule } from '../../common/types/alerts';
-import type { JobId } from '../../common/types/anomaly_detection_jobs/job';
-import { useMlKibana } from '../application/contexts/kibana/kibana_context';
+import { MlAnomalyDetectionAlertRule } from '../../common/types/alerts';
 
 interface MlAnomalyAlertFlyoutProps {
   initialAlert?: MlAnomalyDetectionAlertRule;

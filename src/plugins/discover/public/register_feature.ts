@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { HomePublicPluginSetup } from '../../home/public/plugin';
-import { FeatureCatalogueCategory } from '../../home/public/services/feature_catalogue/feature_catalogue_registry';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 
 export function registerFeature(home: HomePublicPluginSetup) {
   home.featureCatalogue.register({

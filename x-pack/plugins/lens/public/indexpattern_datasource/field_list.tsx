@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import { throttle } from 'lodash';
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public/plugin';
-import type { DatasourceDataPanelProps } from '../types';
-import type { FieldItemSharedProps } from './fields_accordion';
-import { FieldsAccordion } from './fields_accordion';
-import { FieldItem } from './field_item';
 import './field_list.scss';
+import { throttle } from 'lodash';
+import React, { useState, Fragment, useCallback, useMemo, useEffect } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { FieldItem } from './field_item';
 import { NoFieldsCallout } from './no_fields_callout';
-import type { IndexPatternField } from './types';
-
+import { IndexPatternField } from './types';
+import { FieldItemSharedProps, FieldsAccordion } from './fields_accordion';
+import { DatasourceDataPanelProps } from '../types';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 const PAGINATION_SIZE = 50;
 
 export type FieldGroups = Record<

@@ -5,27 +5,33 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
-import type { UiCounterMetricType } from '@kbn/analytics';
-import type { UnregisterCallback } from 'history';
-import { parse } from 'query-string';
+
 import React, { Component } from 'react';
 import { Subscription } from 'rxjs';
-import { ScopedHistory } from '../../../../core/public/application/scoped_history';
-import type { DocLinksStart } from '../../../../core/public/doc_links/doc_links_service';
-import type { ToastsStart } from '../../../../core/public/notifications/toasts/toasts_service';
-import type { IUiSettingsClient } from '../../../../core/public/ui_settings/types';
-import { url } from '../../../kibana_utils/common/url';
-import { ComponentRegistry } from '../component_registry/component_registry';
-import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement/advanced_settings_voice_announcement';
-import { CallOuts } from './components/call_outs/call_outs';
-import { Form } from './components/form/form';
-import { parseErrorMsg, Search } from './components/search/search';
-import { DEFAULT_CATEGORY } from './lib/default_category';
-import { getAriaName } from './lib/get_aria_name';
-import { fieldSorter } from './lib/sort_fields';
-import { toEditableConfig } from './lib/to_editable_config';
-import type { FieldSetting, SettingsChanges } from './types';
+import { UnregisterCallback } from 'history';
+import { parse } from 'query-string';
+
+import { UiCounterMetricType } from '@kbn/analytics';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
+
+import {
+  IUiSettingsClient,
+  DocLinksStart,
+  ToastsStart,
+  ScopedHistory,
+} from '../../../../core/public';
+import { url } from '../../../kibana_utils/public';
+
+import { CallOuts } from './components/call_outs';
+import { Search } from './components/search';
+import { Form } from './components/form';
+import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
+import { ComponentRegistry } from '../';
+
+import { getAriaName, toEditableConfig, fieldSorter, DEFAULT_CATEGORY } from './lib';
+
+import { FieldSetting, SettingsChanges } from './types';
+import { parseErrorMsg } from './components/search/search';
 
 export const QUERY = 'query';
 

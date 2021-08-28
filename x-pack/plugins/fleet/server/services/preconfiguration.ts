@@ -4,35 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import { groupBy, isEqual, omit, pick } from 'lodash';
 
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common/constants/agent_policy';
-import type { PreconfigurationError } from '../../common/constants/preconfiguration';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
+import { groupBy, omit, pick, isEqual } from 'lodash';
+
+import type {
+  NewPackagePolicy,
+  AgentPolicy,
+  Installation,
+  Output,
+  PreconfiguredAgentPolicy,
+  PreconfiguredPackage,
+  PreconfigurationError,
+} from '../../common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
+
 import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_LATEST_KEYWORD,
-} from '../../common/constants/preconfiguration';
-import type { AgentPolicy } from '../../common/types/models/agent_policy';
-import type { Installation } from '../../common/types/models/epm';
-import type { Output } from '../../common/types/models/output';
-import type { NewPackagePolicy } from '../../common/types/models/package_policy';
-import type {
-  PreconfiguredAgentPolicy,
-  PreconfiguredPackage,
-} from '../../common/types/models/preconfiguration';
+} from '../constants';
 
-import { addPackageToAgentPolicy, agentPolicyService } from './agent_policy';
-import { appContextService } from './app_context';
-import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
-import { getInstallation, getPackageInfo } from './epm/packages/get';
-import { ensurePackagesCompletedInstall } from './epm/packages/install';
+import { escapeSearchQueryPhrase } from './saved_object';
+
 import { pkgToPkgKey } from './epm/registry';
+import { getInstallation, getPackageInfo } from './epm/packages';
+import { ensurePackagesCompletedInstall } from './epm/packages/install';
+import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
+import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
 import { overridePackageInputs } from './package_policy';
-import { escapeSearchQueryPhrase } from './saved_object';
+import { appContextService } from './app_context';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;

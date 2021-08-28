@@ -5,24 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { Component, FormEvent } from 'react';
+
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
-  EuiFocusTrap,
   EuiFormRow,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiOutsideClickDetector,
+  EuiFieldText,
+  EuiButton,
   EuiSwitch,
+  EuiButtonEmpty,
+  EuiModalHeader,
+  EuiModalFooter,
+  EuiModalBody,
+  EuiModalHeaderTitle,
+  EuiFocusTrap,
+  EuiOutsideClickDetector,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FormEvent } from 'react';
-import React, { Component } from 'react';
-import type { IEmbeddable } from '../../../../embeddables/i_embeddable';
+import { i18n } from '@kbn/i18n';
+import { IEmbeddable } from '../../../../';
 
 interface CustomizePanelProps {
   embeddable: IEmbeddable;

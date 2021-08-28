@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectMigrationFn } from '../../../../../../src/core/server/saved_objects/migrations/types';
-import type { SavedObjectUnsanitizedDoc } from '../../../../../../src/core/server/saved_objects/serialization/types';
-import type { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server/plugin';
-import type { Agent, AgentAction } from '../../../common/types/models/agent';
-import type { AgentPolicy } from '../../../common/types/models/agent_policy';
-import type { EnrollmentAPIKey } from '../../../common/types/models/enrollment_api_key';
-import type { PackagePolicy } from '../../../common/types/models/package_policy';
-import type { Settings } from '../../../common/types/models/settings';
+
+import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
+
+import type { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
+import type {
+  Agent,
+  AgentPolicy,
+  PackagePolicy,
+  EnrollmentAPIKey,
+  Settings,
+  AgentAction,
+} from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<
   Exclude<Agent, 'policy_id' | 'policy_revision'> & {

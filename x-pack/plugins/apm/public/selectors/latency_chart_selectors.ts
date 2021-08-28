@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Fit } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
-import type { EuiTheme } from '../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { asDuration } from '../../common/utils/formatters/duration';
-import type { APMChartSpec, Coordinate } from '../../typings/timeseries';
-import type { APIReturnType } from '../services/rest/createCallApmApi';
+import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
+import { asDuration } from '../../common/utils/formatters';
+import { APMChartSpec, Coordinate } from '../../typings/timeseries';
+import { APIReturnType } from '../services/rest/createCallApmApi';
 
 export type LatencyChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
 

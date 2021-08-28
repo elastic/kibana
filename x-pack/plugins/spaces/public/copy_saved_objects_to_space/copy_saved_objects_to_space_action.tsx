@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { lazy } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import { i18n } from '@kbn/i18n';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 
-import type { StartServicesAccessor } from '../../../../../src/core/public/types';
-import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public/services/types/action';
-import type { SavedObjectsManagementRecord } from '../../../../../src/plugins/saved_objects_management/public/services/types/record';
+import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
 import type { PluginsStart } from '../plugin';
-import { SuspenseErrorBoundary } from '../suspense_error_boundary/suspense_error_boundary';
-import { getCopyToSpaceFlyoutComponent } from './components/copy_to_space_flyout';
-import type { CopyToSpaceFlyoutProps } from './components/copy_to_space_flyout_internal';
+import { SuspenseErrorBoundary } from '../suspense_error_boundary';
+import type { CopyToSpaceFlyoutProps } from './components';
+import { getCopyToSpaceFlyoutComponent } from './components';
 
 const LazyCopyToSpaceFlyout = lazy(() =>
   getCopyToSpaceFlyoutComponent().then((component) => ({ default: component }))

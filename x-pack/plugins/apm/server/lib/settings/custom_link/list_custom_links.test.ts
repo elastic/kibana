@@ -4,14 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { listCustomLinks } from './list_custom_links';
+import {
+  inspectSearchParams,
+  SearchParamsMock,
+} from '../../../utils/test_helpers';
+import { Setup } from '../../helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import type { SearchParamsMock } from '../../../utils/test_helpers';
-import { inspectSearchParams } from '../../../utils/test_helpers';
-import type { Setup } from '../../helpers/setup_request';
-import { listCustomLinks } from './list_custom_links';
 
 describe('List Custom Links', () => {
   let mock: SearchParamsMock;

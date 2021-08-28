@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { routeTimingMetadataRT } from '../shared/timing';
+import { routeTimingMetadataRT } from '../shared';
 import { getLogSourceConfigurationPath, LOG_SOURCE_CONFIGURATION_PATH } from './common';
 
 export const LOG_SOURCE_STATUS_PATH_SUFFIX = 'status';

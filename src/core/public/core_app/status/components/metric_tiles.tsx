@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { FunctionComponent } from 'react';
+import { EuiFlexGrid, EuiFlexItem, EuiCard } from '@elastic/eui';
+import { formatNumber, Metric } from '../lib';
+
 /*
  * Displays a metric with the correct format.
  */
-import { EuiCard, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
-import React from 'react';
-import { formatNumber } from '../lib/format_number';
-import type { Metric } from '../lib/load_status';
-
 export const MetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) => {
   const { name } = metric;
   return (

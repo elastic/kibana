@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '../../../../src/core/server/http/router/request';
-import type { KibanaResponseFactory } from '../../../../src/core/server/http/router/response';
-import type { RouteMethod } from '../../../../src/core/server/http/router/route';
-import type { RequestHandler } from '../../../../src/core/server/http/router/router';
-import type { ILicense } from '../common/types';
+
+import { RequestHandler, KibanaRequest, RouteMethod, KibanaResponseFactory } from 'src/core/server';
+
+import { ILicense } from '../common/types';
 import type { LicensingRequestHandlerContext } from './types';
 
 export type CheckLicense = (

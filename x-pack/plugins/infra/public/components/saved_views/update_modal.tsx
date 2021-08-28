@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
+  EuiButton,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiFieldText,
   EuiSpacer,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useState } from 'react';
 
 interface Props<ViewState> {
   isInvalid: boolean;

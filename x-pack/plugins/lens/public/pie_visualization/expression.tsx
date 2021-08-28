@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public/types';
-import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 import type {
-  ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
-} from '../../../../../src/plugins/expressions/common/expression_renderers/types';
-import type { PieExpressionProps } from '../../common/expressions/pie_chart/types';
-import type { FormatFactory } from '../../common/types';
+  ExpressionRenderDefinition,
+} from 'src/plugins/expressions/public';
 import type { LensFilterEvent } from '../types';
 import { PieComponent } from './render_function';
+import type { FormatFactory } from '../../common';
+import type { PieExpressionProps } from '../../common/expressions';
+import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 
 export { pie } from '../../common/expressions';
 

@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+
+import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+
+import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type {
-  TimelineItem,
-  TimelineNonEcsData,
-} from '../../../../../common/search_strategy/timeline/events/all';
-import type { TimelineExpandedDetailType } from '../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
-import type {
+  ColumnHeaderOptions,
   ControlColumnProps,
-  SetEventsDeleted,
+  OnRowSelected,
   SetEventsLoading,
-} from '../../../../../common/types/timeline/actions';
-import type { ColumnHeaderOptions } from '../../../../../common/types/timeline/columns';
-import type { OnRowSelected } from '../../../../../common/types/timeline/store';
-import * as tGridActions from '../../../../store/t_grid/actions';
+  SetEventsDeleted,
+  TimelineExpandedDetailType,
+} from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { getMappedNonEcsValue } from '../data_driven_columns';
+import { tGridActions } from '../../../../store/t_grid';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { mount } from 'enzyme';
-import { createMemoryHistory } from 'history';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ScopedHistory } from '../scoped_history';
-import type { AppMountParameters, Mounter } from '../types';
-import { AppStatus } from '../types';
+import { mount } from 'enzyme';
+
 import { AppContainer } from './app_container';
+import { Mounter, AppMountParameters, AppStatus } from '../types';
+import { createMemoryHistory } from 'history';
+import { ScopedHistory } from '../scoped_history';
 
 describe('AppContainer', () => {
   const appId = 'someApp';

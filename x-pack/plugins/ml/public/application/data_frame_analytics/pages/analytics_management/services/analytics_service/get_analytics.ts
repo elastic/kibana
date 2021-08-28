@@ -4,25 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { DATA_FRAME_TASK_STATE } from '../../../../../../../common/constants/data_frame_analytics';
-import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
-import { getAnalysisType } from '../../../../../../../common/util/analytics_utils';
-import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar/stats_bar';
 import { ml } from '../../../../../services/ml_api_service';
-import type {
+import {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
 } from '../../../../../services/ml_api_service/data_frame_analytics';
-import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common/analytics';
-import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
+import {
+  getAnalysisType,
+  REFRESH_ANALYTICS_LIST_STATE,
+  refreshAnalyticsList$,
+} from '../../../../common';
+
 import {
   DATA_FRAME_MODE,
+  DataFrameAnalyticsListRow,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStats,
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
+import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { DATA_FRAME_TASK_STATE } from '../../../../../../../common/constants/data_frame_analytics';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any

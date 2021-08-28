@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { LEGACY_URL_ALIAS_TYPE } from './constants';
 import { registerCoreObjectTypes } from './registration';

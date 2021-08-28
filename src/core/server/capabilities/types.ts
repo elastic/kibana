@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Capabilities } from '../../types/capabilities';
-import { KibanaRequest } from '../http/router/request';
+
+import { Capabilities } from '../../types/capabilities';
+import { KibanaRequest } from '../http';
 
 export type { Capabilities };
 

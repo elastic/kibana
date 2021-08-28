@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 import React, { useMemo } from 'react';
-import type { Query } from '../../../../../../../data/common/query';
-import type { TimeRange } from '../../../../../../../data/common/query/timefilter/types';
-import { getHeaderActionMenuMounter } from '../../../../../kibana_services';
-import type { GetStateReturn } from '../../services/discover_state';
-import type { DiscoverLayoutProps } from '../layout/types';
+import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
+import { Query, TimeRange } from '../../../../../../../data/common/query';
+import { getHeaderActionMenuMounter } from '../../../../../kibana_services';
+import { GetStateReturn } from '../../services/discover_state';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,

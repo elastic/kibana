@@ -7,24 +7,23 @@
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   getServiceNodeName,
   SERVICE_NODE_NAME_MISSING,
 } from '../../../../common/service_nodes';
 import {
+  asDynamicBytes,
   asInteger,
   asPercent,
-} from '../../../../common/utils/formatters/formatters';
-import { asDynamicBytes } from '../../../../common/utils/formatters/size';
+} from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { truncate, unit } from '../../../utils/style';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
-import type { ITableColumn } from '../../shared/managed_table';
-import { ManagedTable } from '../../shared/managed_table';
+import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 
 const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_FIELD = 'cpu';

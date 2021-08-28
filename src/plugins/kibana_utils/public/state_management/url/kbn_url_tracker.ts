@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { History, UnregisterCallback } from 'history';
-import { createHashHistory } from 'history';
+
+import { createHashHistory, History, UnregisterCallback } from 'history';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import type { AppUpdater } from '../../../../../core/public/application/types';
-import type { ToastsSetup } from '../../../../../core/public/notifications/toasts/toasts_service';
-import { unhashUrl } from './hash_unhash_url';
+import { AppUpdater, ToastsSetup } from 'kibana/public';
 import { setStateToKbnUrl } from './kbn_url_storage';
+import { unhashUrl } from './hash_unhash_url';
 
 export interface KbnUrlTracker {
   /**

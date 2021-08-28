@@ -4,28 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+
 import { i18n } from '@kbn/i18n';
-import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import MemoryDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_memory_usage.json';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import NetworkInDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_in.json';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import NetworkOutDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_out.json';
-import MemoryJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_memory_usage.json';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import NetworkInJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_in.json';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import NetworkOutJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_out.json';
-import { bucketSpan, getJobId } from '../../../../../common/infra_ml/job_parameters';
-import type { MetricsHostsJobType } from '../../../../../common/infra_ml/metrics_hosts_ml';
-import { metricsHostsJobTypes } from '../../../../../common/infra_ml/metrics_hosts_ml';
+import { HttpHandler } from 'src/core/public';
+import { ModuleDescriptor, SetUpModuleArgs } from '../../infra_ml_module_types';
+import { cleanUpJobsAndDatafeeds } from '../../infra_ml_cleanup';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../api/ml_get_module';
 import { callSetupMlModuleAPI } from '../../api/ml_setup_module_api';
-import { cleanUpJobsAndDatafeeds } from '../../infra_ml_cleanup';
-import type { ModuleDescriptor, SetUpModuleArgs } from '../../infra_ml_module_types';
+import {
+  metricsHostsJobTypes,
+  getJobId,
+  MetricsHostsJobType,
+  bucketSpan,
+} from '../../../../../common/infra_ml';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import MemoryJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_memory_usage.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import MemoryDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_memory_usage.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkInJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_in.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkInDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_in.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkOutJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/hosts_network_out.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import NetworkOutDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_hosts/ml/datafeed_hosts_network_out.json';
 
 type JobType = 'hosts_memory_usage' | 'hosts_network_in' | 'hosts_network_out';
 const moduleId = 'metrics_ui_hosts';

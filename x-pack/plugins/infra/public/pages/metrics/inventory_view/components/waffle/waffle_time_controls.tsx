@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Moment } from 'moment';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import React, { useCallback } from 'react';
-import type { EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { withTheme } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
 interface Props {

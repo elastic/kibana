@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
-import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiButtonGroup, EuiFieldNumber, EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public/toolbar_button/toolbar_button';
-import { useDebouncedValue } from './debounced_value';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFormRow,
+  EuiButtonGroup,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiFieldNumber,
+} from '@elastic/eui';
+import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
+import { ToolbarPopover } from '../shared_components';
 import { LegendLocationSettings } from './legend_location_settings';
-import { ToolbarPopover } from './toolbar_popover';
+import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 import { TooltipWrapper } from './tooltip_wrapper';
+import { useDebouncedValue } from './debounced_value';
 
 export interface LegendSettingsPopoverProps {
   /**

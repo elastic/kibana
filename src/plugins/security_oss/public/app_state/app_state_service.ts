@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreStart } from '../../../../core/public/types';
-import type { AppState } from '../../common/app_state';
+
+import type { CoreStart } from 'src/core/public';
+
+import type { AppState } from '../../common';
 
 const DEFAULT_APP_STATE = Object.freeze({
   insecureClusterAlert: { displayAlert: false },

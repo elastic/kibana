@@ -10,8 +10,9 @@
  */
 import d3 from 'd3';
 import he from 'he';
-import type { Detector } from '../../../common/types/anomaly_detection_jobs/job';
-import type { CustomUrlAnomalyRecordDoc } from '../../../common/types/custom_urls';
+
+import { CustomUrlAnomalyRecordDoc } from '../../../common/types/custom_urls';
+import { Detector } from '../../../common/types/anomaly_detection_jobs';
 
 // Replaces all instances of dollar delimited tokens in the specified String
 // with corresponding values from the supplied object, optionally

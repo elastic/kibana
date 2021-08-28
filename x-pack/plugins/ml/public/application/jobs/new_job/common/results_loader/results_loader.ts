@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { BehaviorSubject } from 'rxjs';
-import { ES_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
-import { ANOMALY_SEVERITY } from '../../../../../../common/constants/anomalies';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
+import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
+import { TimeBuckets } from '../../../../util/time_buckets';
 import { getSeverityType } from '../../../../../../common/util/anomaly_utils';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
-import type { ModelPlotOutputResults } from '../../../../services/results_service';
-import { mlResultsService } from '../../../../services/results_service';
-import { TimeBuckets } from '../../../../util/time_buckets';
-import { ChartLoader } from '../chart_loader/chart_loader';
-import type { JobCreatorType } from '../job_creator/type_guards';
-import { isMultiMetricJobCreator } from '../job_creator/type_guards';
+import { ANOMALY_SEVERITY } from '../../../../../../common/constants/anomalies';
 import { getScoresByRecord } from './searches';
+import { ChartLoader } from '../chart_loader';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import { ES_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 
 export interface Results {
   progress: number;

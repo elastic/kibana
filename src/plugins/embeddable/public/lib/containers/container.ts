@@ -6,18 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { merge, Subscription } from 'rxjs';
-import { pairwise, startWith } from 'rxjs/operators';
 import uuid from 'uuid';
+import { merge, Subscription } from 'rxjs';
+import { startWith, pairwise } from 'rxjs/operators';
+import {
+  Embeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+  EmbeddableFactory,
+  IEmbeddable,
+} from '../embeddables';
+import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
+import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
+import { EmbeddableStart } from '../../plugin';
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
-import type { EmbeddableInput, PanelState } from '../../../common/types';
-import type { EmbeddableStart } from '../../plugin';
-import { Embeddable } from '../embeddables/embeddable';
-import type { EmbeddableFactory } from '../embeddables/embeddable_factory';
-import { ErrorEmbeddable } from '../embeddables/error_embeddable';
-import type { EmbeddableOutput, IEmbeddable } from '../embeddables/i_embeddable';
-import { EmbeddableFactoryNotFoundError, PanelNotFoundError } from '../errors';
-import type { ContainerInput, ContainerOutput, IContainer } from './i_container';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 

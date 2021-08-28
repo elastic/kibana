@@ -5,37 +5,36 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type {
-  EuiTableActionsColumnType,
-  EuiTableFieldDataColumnType,
-  QueryType,
-} from '@elastic/eui';
+
+import { ApplicationStart, IBasePath } from 'src/core/public';
+import React, { PureComponent, Fragment } from 'react';
 import {
+  EuiSearchBar,
   EuiBasicTable,
   EuiButton,
-  EuiFormErrorText,
-  EuiFormRow,
   EuiIcon,
   EuiLink,
-  EuiPopover,
-  EuiSearchBar,
   EuiSpacer,
-  EuiSwitch,
-  EuiText,
   EuiToolTip,
+  EuiFormErrorText,
+  EuiPopover,
+  EuiSwitch,
+  EuiFormRow,
+  EuiText,
+  EuiTableFieldDataColumnType,
+  EuiTableActionsColumnType,
+  QueryType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, PureComponent } from 'react';
-import type { ApplicationStart } from '../../../../../../core/public/application/types';
-import type { IBasePath } from '../../../../../../core/public/http/types';
-import type { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public/api';
-import type { SavedObjectWithMetadata } from '../../../../common/types';
-import { getDefaultTitle } from '../../../lib/get_default_title';
-import { getSavedObjectLabel } from '../../../lib/get_saved_object_label';
-import type { SavedObjectsManagementActionServiceStart } from '../../../services/action_service';
-import type { SavedObjectsManagementColumnServiceStart } from '../../../services/column_service';
-import { SavedObjectsManagementAction } from '../../../services/types/action';
+import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
+import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import { SavedObjectWithMetadata } from '../../../types';
+import {
+  SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementAction,
+  SavedObjectsManagementColumnServiceStart,
+} from '../../../services';
 
 export interface TableProps {
   taggingApi?: SavedObjectsTaggingApi;

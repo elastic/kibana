@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { ActionType } from '../types';
 import { LICENSE_TYPE } from '../../../licensing/common/types';
-import { ActionTypeId as IndexActionTypeId } from '../builtin_action_types/es_index';
-import { ActionTypeId as ServerLogActionTypeId } from '../builtin_action_types/server_log';
-import type { ActionType, ActionTypeConfig, ActionTypeParams, ActionTypeSecrets } from '../types';
+import { ServerLogActionTypeId, IndexActionTypeId } from '../builtin_action_types';
+import { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
 
 const CASE_ACTION_TYPE_ID = '.case';
 

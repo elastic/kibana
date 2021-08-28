@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
+
 import { i18n } from '@kbn/i18n';
-import type { MutableRefObject } from 'react';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { Refresh } from '../../../../index_data_visualizer/services/timefilter_refresh_service';
-import { dataVisualizerRefresh$ } from '../../../../index_data_visualizer/services/timefilter_refresh_service';
-import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
-import type { DataVisualizerKibanaReactContextValue } from '../../../../kibana_context';
-import type { FieldVisConfig } from '../../stats_table/types/field_vis_config';
+import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import { MutableRefObject } from 'react';
 import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
+import { FieldVisConfig } from '../../stats_table/types';
+import { DataVisualizerKibanaReactContextValue } from '../../../../kibana_context';
+import {
+  dataVisualizerRefresh$,
+  Refresh,
+} from '../../../../index_data_visualizer/services/timefilter_refresh_service';
 
 export function getActions(
   indexPattern: IndexPattern,

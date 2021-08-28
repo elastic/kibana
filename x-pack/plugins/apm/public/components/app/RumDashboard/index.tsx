@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public/hooks/use_track_metric';
+import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from './LocalUIFilters';
 import { RumDashboard } from './RumDashboard';
 

@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { isEqual } from 'lodash/fp';
 import React, { useEffect, useMemo, useRef } from 'react';
+import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
-import type { FilterOptions } from '../../../common/ui/types';
-import { useGetCases } from '../../containers/use_get_cases';
-import { isSubCase } from '../all_cases/helpers';
-import type { CaseDetailsHrefSchema, CasesNavigation } from '../links';
-import { CaseDetailsLink } from '../links';
-import { MarkdownRenderer } from '../markdown_editor/renderer';
-import { TruncatedText } from '../truncated_text';
+
 import { IconWithCount } from './icon_with_count';
+import * as i18n from './translations';
+import { useGetCases } from '../../containers/use_get_cases';
+import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
 import { LoadingPlaceholders } from './loading_placeholders';
 import { NoCases } from './no_cases';
-import * as i18n from './translations';
+import { isSubCase } from '../all_cases/helpers';
+import { MarkdownRenderer } from '../markdown_editor';
+import { FilterOptions } from '../../containers/types';
+import { TruncatedText } from '../truncated_text';
 
 const MarkdownContainer = styled.div`
   max-height: 150px;

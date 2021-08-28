@@ -4,20 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import type {
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
+import {
   AllCases,
   Case,
   FilterOptions,
   QueryParams,
+  SortFieldCase,
+  StatusAll,
   UpdateByKey,
-} from '../../common/ui/types';
-import { SortFieldCase, StatusAll } from '../../common/ui/types';
-import { useToasts } from '../common/lib/kibana/hooks';
-import { useOwnerContext } from '../components/owner_context/use_owner_context';
-import { getCases, patchCase } from './api';
-import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
+} from './types';
+import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
+import { getCases, patchCase } from './api';
+import { useOwnerContext } from '../components/owner_context/use_owner_context';
 
 export interface UseGetCasesState {
   data: AllCases;

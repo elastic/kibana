@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
+
+import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import React from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
-import type { ApmPluginStartDeps } from '../../../plugin';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { ApmPluginStartDeps } from '../../../plugin';
 import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
 
 /*

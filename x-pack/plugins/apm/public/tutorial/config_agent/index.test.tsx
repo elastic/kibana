@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { fireEvent, render, screen } from '@testing-library/react';
+import { HttpStart } from 'kibana/public';
 import React from 'react';
-import type { HttpStart } from '../../../../../../src/core/public/http/types';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,

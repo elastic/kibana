@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import deepEqual from 'fast-deep-equal';
-import type { Action, History, Location } from 'history';
-import type { ParsedQuery } from 'query-string';
+
+import { Action, History, Location } from 'history';
 import { Observable } from 'rxjs';
+import { ParsedQuery } from 'query-string';
+import deepEqual from 'fast-deep-equal';
 import { map } from 'rxjs/operators';
-import { distinctUntilChangedWithInitialValue } from '../../common/distinct_until_changed_with_initial_value';
 import { getQueryParams } from './get_query_params';
+import { distinctUntilChangedWithInitialValue } from '../../common';
 
 /**
  * Convert history.listen into an observable

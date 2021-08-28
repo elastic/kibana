@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiI18n } from '@elastic/eui';
-// @ts-expect-error
-import { htmlIdGenerator, keys } from '@elastic/eui/lib/services';
+
+import React, { Component, AriaAttributes } from 'react';
 import classNames from 'classnames';
-import type { AriaAttributes } from 'react';
-import React, { Component } from 'react';
-import type { IAceEditorProps } from 'react-ace';
-import AceEditor from 'react-ace';
+import AceEditor, { IAceEditorProps } from 'react-ace';
+import { EuiI18n } from '@elastic/eui';
+// @ts-ignore
+import { htmlIdGenerator, keys } from '@elastic/eui/lib/services';
+
 import './_index.scss';
 
 /**

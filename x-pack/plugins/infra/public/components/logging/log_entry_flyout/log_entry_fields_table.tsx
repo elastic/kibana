@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiInMemoryTable } from '@elastic/eui';
+
+import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
 import React, { useMemo } from 'react';
-import type { Query } from '../../../../../../../src/plugins/data/public';
-import type { LogEntryField } from '../../../../common/log_entry/log_entry';
-import type { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
-import type { TimeKey } from '../../../../common/time/time_key';
-import type { JsonScalar } from '../../../../common/typed_json';
-import { jsonScalarRT } from '../../../../common/typed_json';
+import { Query } from '../../../../../../../src/plugins/data/public';
+import { LogEntryField } from '../../../../common/log_entry';
+import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
+import { TimeKey } from '../../../../common/time';
+import { JsonScalar, jsonScalarRT } from '../../../../common/typed_json';
 import { FieldValue } from '../log_text_stream/field_value';
 
 export const LogEntryFieldsTable: React.FC<{

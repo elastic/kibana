@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import type { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
 
-import type { RouteDefinitionParams } from '..';
-import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import type { KibanaResponseFactory } from '../../../../../../src/core/server/http/router/response';
+import type { RouteDefinitionParams } from '../';
+import { OIDCAuthenticationProvider, OIDCLogin } from '../../authentication';
 import type { ProviderLoginAttempt } from '../../authentication/providers/oidc';
-import { OIDCAuthenticationProvider, OIDCLogin } from '../../authentication/providers/oidc';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';

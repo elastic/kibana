@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
-import type { Datafeed } from '../../../common/types/anomaly_detection_jobs/datafeed';
-import type { DatafeedStats } from '../../../common/types/anomaly_detection_jobs/datafeed_stats';
-import type { Job } from '../../../common/types/anomaly_detection_jobs/job';
-import type { JobStats } from '../../../common/types/anomaly_detection_jobs/job_stats';
-import type { GetGuards } from '../shared_services';
+
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import {
+  Job,
+  JobStats,
+  Datafeed,
+  DatafeedStats,
+} from '../../../common/types/anomaly_detection_jobs';
+import { GetGuards } from '../shared_services';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(

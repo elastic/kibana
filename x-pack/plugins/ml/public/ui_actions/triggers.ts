@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Trigger } from '../../../../../src/plugins/ui_actions/public/triggers/trigger';
+
+import { Trigger } from '../../../../../src/plugins/ui_actions/public';
 
 export const SWIM_LANE_SELECTION_TRIGGER = 'SWIM_LANE_SELECTION_TRIGGER';
 

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isRight } from 'fp-ts/lib/Either';
+
 import { floatRt } from './float_rt';
+import { isRight } from 'fp-ts/lib/Either';
 
 describe('floatRt', () => {
   it('does not accept empty values', () => {

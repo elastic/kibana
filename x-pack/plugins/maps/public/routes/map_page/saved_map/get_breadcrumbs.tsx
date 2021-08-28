@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { getAppTitle } from '../../../../common/i18n_getters';
 import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
+import { getAppTitle } from '../../../../common/i18n_getters';
 
 export const unsavedChangesWarning = i18n.translate(
   'xpack.maps.breadCrumbs.unsavedChangesWarning',

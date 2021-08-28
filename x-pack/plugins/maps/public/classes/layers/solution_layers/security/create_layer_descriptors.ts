@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { euiPaletteColorBlind } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import minimatch from 'minimatch';
+import { i18n } from '@kbn/i18n';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import {
+  LayerDescriptor,
+  SizeDynamicOptions,
+  VectorStylePropertiesDescriptor,
+} from '../../../../../common/descriptor_types';
 import {
   AGG_TYPE,
   COUNT_PROP_NAME,
@@ -17,20 +22,14 @@ import {
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import type { LayerDescriptor } from '../../../../../common/descriptor_types/layer_descriptor_types';
-import type {
-  SizeDynamicOptions,
-  VectorStylePropertiesDescriptor,
-} from '../../../../../common/descriptor_types/style_property_descriptor_types';
+import { VectorLayer } from '../../vector_layer';
+import { VectorStyle } from '../../../styles/vector/vector_style';
+// @ts-ignore
+import { ESSearchSource } from '../../../sources/es_search_source';
 // @ts-ignore
 import { ESPewPewSource } from '../../../sources/es_pew_pew_source';
-import { ESSearchSource } from '../../../sources/es_search_source/es_search_source';
-import { VectorStyle } from '../../../styles/vector/vector_style';
 import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
-import { VectorLayer } from '../../vector_layer/vector_layer';
-import { APM_INDEX_PATTERN_TITLE } from '../observability/create_layer_descriptor';
-
-
+import { APM_INDEX_PATTERN_TITLE } from '../observability';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 const euiVisColorPalette = euiPaletteColorBlind();

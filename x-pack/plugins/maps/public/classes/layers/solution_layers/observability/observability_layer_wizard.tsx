@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { LAYER_WIZARD_CATEGORY } from '../../../../../common/constants';
-import { getIndexPatternService } from '../../../../kibana_services';
-import type { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
-import { APM_INDEX_PATTERN_ID } from './create_layer_descriptor';
+import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { ObservabilityLayerTemplate } from './observability_layer_template';
+import { APM_INDEX_PATTERN_ID } from './create_layer_descriptor';
+import { getIndexPatternService } from '../../../../kibana_services';
 
 export const ObservabilityLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH, LAYER_WIZARD_CATEGORY.SOLUTIONS],

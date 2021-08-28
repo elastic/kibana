@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '../../../../../../../../src/core/server/elasticsearch/client/types';
-import { ElasticsearchAssetType } from '../../../../../common/types/models/epm';
+
+import type { ElasticsearchClient } from 'kibana/server';
+
+import { ElasticsearchAssetType } from '../../../../types';
 import { getAsset, getPathParts } from '../../archive';
 
 export async function installILMPolicy(paths: string[], esClient: ElasticsearchClient) {

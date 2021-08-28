@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import type { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
-import type { ISessionStorageStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage';
-import type { SeriesType } from '../../../../../../lens/common/expressions/xy_chart/series_type';
-import type { OperationType } from '../../../../../../lens/public/indexpattern_datasource/operations/definitions';
-import { URL_KEYS } from '../configurations/constants/url_constants';
-import { convertToShortUrl } from '../configurations/utils';
+
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import {
+  IKbnUrlStateStorage,
+  ISessionStorageStateStorage,
+} from '../../../../../../../../src/plugins/kibana_utils/public';
 import type {
   AppDataType,
   ReportViewType,
@@ -18,6 +17,9 @@ import type {
   UrlFilter,
   URLReportDefinition,
 } from '../types';
+import { convertToShortUrl } from '../configurations/utils';
+import { OperationType, SeriesType } from '../../../../../../lens/public';
+import { URL_KEYS } from '../configurations/constants/url_constants';
 
 export interface SeriesContextValue {
   firstSeries: SeriesUrl;

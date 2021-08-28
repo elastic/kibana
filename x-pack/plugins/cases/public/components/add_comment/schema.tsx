@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fieldValidators } from '../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
-import { FIELD_TYPES } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/constants';
-import type { FormSchema } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/types';
-import type { CommentRequestUserType } from '../../../common/api/cases/comment';
+
+import { CommentRequestUserType } from '../../../common';
+import { FIELD_TYPES, fieldValidators, FormSchema } from '../../common/shared_imports';
 import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import createContainer from 'constate';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import useInterval from 'react-use/lib/useInterval';
 import useSetState from 'react-use/lib/useSetState';
-import type { TimeKey } from '../../../../common/time/time_key';
-import { useKibanaTimefilterTime } from '../../../hooks/use_kibana_timefilter_time';
+import useInterval from 'react-use/lib/useInterval';
+import { TimeKey } from '../../../../common/time';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
+import { useKibanaTimefilterTime } from '../../../hooks/use_kibana_timefilter_time';
 
 type TimeKeyOrNull = TimeKey | null;
 

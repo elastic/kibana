@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+
+import type { PluginInitializerContext } from 'src/core/public';
 import { UsageCollectionPlugin } from './plugin';
 
+export type { UsageCollectionSetup, UsageCollectionStart } from './plugin';
 export { TrackApplicationView } from './components';
 export type { TrackApplicationViewProps } from './components';
-export type { UsageCollectionSetup, UsageCollectionStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new UsageCollectionPlugin(initializerContext);

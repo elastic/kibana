@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup } from '../../../../src/core/public/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
+
+import { Plugin, CoreSetup } from 'src/core/public';
 import { FeaturesAPIClient } from './features_api_client';
 
 export class FeaturesPlugin implements Plugin<FeaturesPluginSetup, FeaturesPluginStart> {

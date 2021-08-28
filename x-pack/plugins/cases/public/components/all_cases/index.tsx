@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import type { Owner } from '../../types';
-import type { CaseDetailsHrefSchema, CasesNavigation } from '../links';
+import { Owner } from '../../types';
+import { CaseDetailsHrefSchema, CasesNavigation } from '../links';
 import { OwnerProvider } from '../owner_context';
 import { AllCasesGeneric } from './all_cases_generic';
-
 export interface AllCasesProps extends Owner {
   caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>; // if not passed, case name is not displayed as a link (Formerly dependant on isSelector)
   configureCasesNavigation: CasesNavigation; // if not passed, header with nav is not displayed (Formerly dependant on isSelector)

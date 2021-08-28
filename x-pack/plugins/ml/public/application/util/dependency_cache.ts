@@ -4,25 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApplicationStart } from '../../../../../../src/core/public/application/types';
-import type { ChromeRecentlyAccessed } from '../../../../../../src/core/public/chrome/recently_accessed/recently_accessed_service';
-import type { ChromeStart } from '../../../../../../src/core/public/chrome/types';
-import type { DocLinksStart } from '../../../../../../src/core/public/doc_links/doc_links_service';
-import type { HttpStart, IBasePath } from '../../../../../../src/core/public/http/types';
-import type { I18nStart } from '../../../../../../src/core/public/i18n/i18n_service';
-import type { ToastsStart } from '../../../../../../src/core/public/notifications/toasts/toasts_service';
-import type { OverlayStart } from '../../../../../../src/core/public/overlays/overlay_service';
-import type { SavedObjectsClientContract } from '../../../../../../src/core/public/saved_objects/saved_objects_client';
-import type { IUiSettingsClient } from '../../../../../../src/core/public/ui_settings/types';
-import type { IndexPatternsContract } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
+
+import type { DataPublicPluginSetup } from 'src/plugins/data/public';
 import type {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../../../src/plugins/data/public/types';
-import type { SharePluginStart } from '../../../../../../src/plugins/share/public/plugin';
-import type { DataVisualizerPluginStart } from '../../../../data_visualizer/public/plugin';
-import type { MapsStartApi } from '../../../../maps/public/api/start_api';
-import type { SecurityPluginSetup } from '../../../../security/public/plugin';
+  IUiSettingsClient,
+  ChromeStart,
+  SavedObjectsClientContract,
+  ApplicationStart,
+  HttpStart,
+  I18nStart,
+  DocLinksStart,
+  ToastsStart,
+  OverlayStart,
+  ChromeRecentlyAccessed,
+  IBasePath,
+} from 'kibana/public';
+import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
+import type { SecurityPluginSetup } from '../../../../security/public';
+import type { MapsStartApi } from '../../../../maps/public';
+import type { DataVisualizerPluginStart } from '../../../../data_visualizer/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;

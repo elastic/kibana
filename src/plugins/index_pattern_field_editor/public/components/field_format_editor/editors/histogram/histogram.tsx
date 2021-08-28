@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFieldText, EuiFormRow, EuiIcon, EuiLink, EuiSelect } from '@elastic/eui';
+
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment } from 'react';
-import { FormatEditorSamples } from '../../samples/samples';
+import { EuiSelect, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 import { DefaultFormatEditor, defaultState } from '../default/default';
+import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
 
 export interface HistogramFormatEditorParams {

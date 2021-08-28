@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SetupTimeRange } from './setup_request';
+
+import { SetupTimeRange } from './setup_request';
 
 export function calculateThroughput({
   start,

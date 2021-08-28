@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { HttpStart } from '../../../../core/public/http/types';
-import type { SavedObjectsFindOptions } from '../../../../core/server/saved_objects/types';
-import type { SavedObjectWithMetadata } from '../../common/types';
+
+import { HttpStart, SavedObjectsFindOptions } from 'src/core/public';
 import { keysToCamelCaseShallow } from './case_conversion';
+import { SavedObjectWithMetadata } from '../types';
 
 interface SavedObjectsFindResponse {
   total: number;

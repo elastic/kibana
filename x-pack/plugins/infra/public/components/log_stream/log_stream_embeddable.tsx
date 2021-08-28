@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
-import type { CoreStart } from '../../../../../../src/core/public/types';
-import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
-import type { TimeRange } from '../../../../../../src/plugins/data/common/query/timefilter/types';
-import type { Query } from '../../../../../../src/plugins/data/public';
-import type { EmbeddableInput } from '../../../../../../src/plugins/embeddable/common/types';
-import type { IContainer } from '../../../../../../src/plugins/embeddable/public/lib/containers/i_container';
-import { Embeddable } from '../../../../../../src/plugins/embeddable/public/lib/embeddables/embeddable';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/public';
+import {
+  Embeddable,
+  EmbeddableInput,
+  IContainer,
+} from '../../../../../../src/plugins/embeddable/public';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { CoreProviders } from '../../apps/common_providers';
-import type { InfraClientStartDeps } from '../../types';
+import { InfraClientStartDeps } from '../../types';
 import { datemathToEpochMillis } from '../../utils/datemath';
 import { LazyLogStreamWrapper } from './lazy_log_stream_wrapper';
 

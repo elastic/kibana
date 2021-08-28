@@ -6,7 +6,7 @@
  */
 
 import createContainer from 'constate';
-import { useCallback, useState } from 'react';
+import { useState, useCallback } from 'react';
 
 export type ModuleId = 'logs_ui_analysis' | 'logs_ui_categories';
 

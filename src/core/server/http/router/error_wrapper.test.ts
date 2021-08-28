@@ -7,12 +7,9 @@
  */
 
 import Boom from '@hapi/boom';
-import type { RequestHandlerContext } from '../..';
+import { KibanaResponse, KibanaResponseFactory, kibanaResponseFactory } from './response';
 import { wrapErrors } from './error_wrapper';
-import { KibanaRequest } from './request';
-import type { KibanaResponseFactory } from './response';
-import { KibanaResponse, kibanaResponseFactory } from './response';
-import type { RequestHandler } from './router';
+import { KibanaRequest, RequestHandler, RequestHandlerContext } from 'kibana/server';
 
 const createHandler = (handler: () => any): RequestHandler<any, any, any> => () => {
   return handler();

@@ -5,35 +5,36 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { SavedObjectsPublicPlugin } from './plugin';
 
-export { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '../common';
+export {
+  OnSaveProps,
+  SavedObjectSaveModal,
+  SavedObjectSaveModalOrigin,
+  OriginSaveModalProps,
+  SaveModalState,
+  SaveResult,
+  showSaveModal,
+} from './save_modal';
 export {
   getSavedObjectFinder,
   SavedObjectFinderUi,
   SavedObjectFinderUiProps,
   SavedObjectMetaData,
 } from './finder';
-export { SavedObjectSetup, SavedObjectsStart } from './plugin';
 export {
-  checkForDuplicateTitle,
-  isErrorNonFatal,
-  SavedObjectDecorator,
-  SavedObjectDecoratorConfig,
-  SavedObjectDecoratorFactory,
   SavedObjectLoader,
   SavedObjectLoaderFindOptions,
+  checkForDuplicateTitle,
   saveWithConfirmation,
+  isErrorNonFatal,
+  SavedObjectDecorator,
+  SavedObjectDecoratorFactory,
+  SavedObjectDecoratorConfig,
 } from './saved_object';
-export {
-  OnSaveProps,
-  OriginSaveModalProps,
-  SavedObjectSaveModal,
-  SavedObjectSaveModalOrigin,
-  SaveModalState,
-  SaveResult,
-  showSaveModal,
-} from './save_modal';
-export { SavedObject, SavedObjectConfig, SavedObjectSaveOpts } from './types';
+export { SavedObjectSaveOpts, SavedObject, SavedObjectConfig } from './types';
+export { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
+export { SavedObjectsStart, SavedObjectSetup } from './plugin';
 
 export const plugin = () => new SavedObjectsPublicPlugin();

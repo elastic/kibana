@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { BehaviorSubject, Observable } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
+import { Annotation } from '../../../common/types/annotations';
+
 /*
   A TypeScript helper type to allow a given component state attribute to be either an annotation or null.
 */
-import { BehaviorSubject, Observable } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
-import type { Annotation } from '../../../common/types/annotations';
-
 export type AnnotationState = Annotation | null;
 
 /*

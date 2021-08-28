@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiCallOut, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { ElasticDocsLink } from '../../../../../../shared/Links/ElasticDocsLink';
 
 export function DroppedSpansWarning({

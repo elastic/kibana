@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
-import type { Aggregation, Field } from '../../../../../../../../../common/types/fields';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
-import { AdvancedJobCreator } from '../../../../../common/job_creator/advanced_job_creator';
+
+import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
+
 import { JobCreatorContext } from '../../../job_creator_context';
-import type { ModalPayload } from '../advanced_detector_modal/advanced_detector_modal';
-import { DetectorList } from './detector_list';
+import { AdvancedJobCreator } from '../../../../../common/job_creator';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { Aggregation, Field } from '../../../../../../../../../common/types/fields';
 import { MetricSelector } from './metric_selector';
+import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
+import { DetectorList } from './detector_list';
+import { ModalPayload } from '../advanced_detector_modal/advanced_detector_modal';
 
 interface Props {
   setIsValid: (na: boolean) => void;

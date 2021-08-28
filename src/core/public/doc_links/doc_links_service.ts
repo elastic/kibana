@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { deepFreeze } from '@kbn/std';
-import type { InjectedMetadataSetup } from '../injected_metadata/injected_metadata_service';
+import { InjectedMetadataSetup } from '../injected_metadata';
 
 interface StartDeps {
   injectedMetadata: InjectedMetadataSetup;

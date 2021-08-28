@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { parse } from 'query-string';
 import { useLocation } from 'react-router-dom';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common/constants';
-import type { TimePickerTime } from '../components/shared/date_picker';
+import { TimePickerTime } from '../components/shared/date_picker';
 import { getAbsoluteTime } from '../utils/date';
-import { useKibanaUISettings } from './use_kibana_ui_settings';
+import { UI_SETTINGS, useKibanaUISettings } from './use_kibana_ui_settings';
 import { usePluginContext } from './use_plugin_context';
 
 const getParsedParams = (search: string) => {

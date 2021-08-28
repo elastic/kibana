@@ -4,23 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { identity, pickBy, sortBy } from 'lodash';
-import type { ValuesType } from 'utility-types';
+
+import { sortBy, pickBy, identity } from 'lodash';
+import { ValuesType } from 'utility-types';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_SUBTYPE,
   SPAN_TYPE,
+  SPAN_SUBTYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import type {
+import {
   Connection,
-  ConnectionElement,
   ConnectionNode,
-  ExternalConnectionNode,
   ServiceConnectionNode,
+  ExternalConnectionNode,
+  ConnectionElement,
 } from '../../../common/service_map';
-import type { ServiceAnomaliesResponse } from './get_service_anomalies';
-import type { ConnectionsResponse, ServicesResponse } from './get_service_map';
+import { ConnectionsResponse, ServicesResponse } from './get_service_map';
+import { ServiceAnomaliesResponse } from './get_service_anomalies';
 import { groupResourceNodes } from './group_resource_nodes';
 
 function getConnectionNodeId(node: ConnectionNode): string {

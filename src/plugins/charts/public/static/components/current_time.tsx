@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { LineAnnotationStyle } from '@elastic/charts';
-import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
+
+import moment, { Moment } from 'moment';
+import React, { FC } from 'react';
+
+import { LineAnnotation, AnnotationDomainType, LineAnnotationStyle } from '@elastic/charts';
 import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
-import type { Moment } from 'moment';
-import moment from 'moment';
-import type { FC } from 'react';
-import React from 'react';
+import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
 
 interface CurrentTimeProps {
   isDarkMode: boolean;

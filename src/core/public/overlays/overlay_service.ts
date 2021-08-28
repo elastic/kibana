@@ -5,14 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { I18nStart } from '../i18n/i18n_service';
-import type { IUiSettingsClient } from '../ui_settings/types';
-import type { OverlayBannersStart } from './banners/banners_service';
-import { OverlayBannersService } from './banners/banners_service';
-import type { OverlayFlyoutStart } from './flyout/flyout_service';
-import { FlyoutService } from './flyout/flyout_service';
-import type { OverlayModalStart } from './modal/modal_service';
-import { ModalService } from './modal/modal_service';
+
+import { I18nStart } from '../i18n';
+import { IUiSettingsClient } from '../ui_settings';
+import { OverlayBannersStart, OverlayBannersService } from './banners';
+import { FlyoutService, OverlayFlyoutStart } from './flyout';
+import { ModalService, OverlayModalStart } from './modal';
 
 interface StartDeps {
   i18n: I18nStart;

@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsSerializer } from '../../../../../../src/core/server/saved_objects/serialization/serializer';
-import type { SavedObjectsFindResult } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type { SpacesPluginStart } from '../../../../spaces/server/plugin';
-import type { TaskInstance } from '../../../../task_manager/server/task';
-import { spaceIdToNamespace } from '../../lib/space_id_to_namespace';
+
+import { SavedObjectsFindResult, SavedObjectsSerializer } from 'kibana/server';
+import { spaceIdToNamespace } from '../../lib';
+import { TaskInstance } from '../../../../task_manager/server';
+import { SpacesPluginStart } from '../../../../spaces/server';
 
 interface GetRawActionTaskParamsIdFromTaskOpts {
   task: SavedObjectsFindResult<TaskInstance>;

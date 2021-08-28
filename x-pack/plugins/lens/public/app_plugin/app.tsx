@@ -5,29 +5,37 @@
  * 2.0.
  */
 
-import type { EuiBreadcrumb } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
-import { syncQueryStateWithUrl } from '../../../../../src/plugins/data/public/query/state_sync/sync_state_with_url';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
-import { withNotifyOnErrors } from '../../../../../src/plugins/kibana_utils/public/state_management/url/errors';
-import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
-import type { OnSaveProps } from '../../../../../src/plugins/saved_objects/public/save_modal/saved_object_save_modal';
-import type { LensByReferenceInput } from '../embeddable/embeddable';
-import type { Document } from '../persistence/saved_object_store';
-import { setState, useLensDispatch, useLensSelector } from '../state_management';
-import { selectSavedObjectFormat } from '../state_management/selectors';
-import type { DispatchSetState, LensAppState } from '../state_management/types';
-import type { EditorFrameInstance } from '../types';
 import './app.scss';
-import { LensTopNavMenu } from './lens_top_nav';
+
+import { isEqual } from 'lodash';
+import React, { useState, useEffect, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiBreadcrumb } from '@elastic/eui';
 import {
+  createKbnUrlStateStorage,
+  withNotifyOnErrors,
+} from '../../../../../src/plugins/kibana_utils/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
+import { syncQueryStateWithUrl } from '../../../../../src/plugins/data/public';
+import { LensAppProps, LensAppServices } from './types';
+import { LensTopNavMenu } from './lens_top_nav';
+import { LensByReferenceInput } from '../embeddable';
+import { EditorFrameInstance } from '../types';
+import { Document } from '../persistence/saved_object_store';
+import {
+  setState,
+  useLensSelector,
+  useLensDispatch,
+  LensAppState,
+  DispatchSetState,
+  selectSavedObjectFormat,
+} from '../state_management';
+import {
+  SaveModalContainer,
   getLastKnownDocWithoutPinnedFilters,
   runSaveLensVisualization,
-  SaveModalContainer,
 } from './save_modal_container';
-import type { LensAppProps, LensAppServices } from './types';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;

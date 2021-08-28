@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { lazy, Suspense } from 'react';
-import type { FieldValueSuggestionsProps } from './field_value_suggestions/types';
 import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
+import type { FieldValueSuggestionsProps } from './field_value_suggestions/types';
 
 export { createLazyObservabilityPageTemplate } from './page_template';
 export type { LazyObservabilityPageTemplateProps } from './page_template';

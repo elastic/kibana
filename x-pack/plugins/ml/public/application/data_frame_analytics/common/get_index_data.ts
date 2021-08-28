@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
-import { extractErrorMessage } from '../../../../common/util/errors/process_errors';
-import { getProcessedFields } from '../../components/data_grid/common';
-import type { EsSorting, UseDataGridReturnType } from '../../components/data_grid/types';
-import type { SavedSearchQuery } from '../../contexts/ml/ml_context';
+
+import type { estypes } from '@elastic/elasticsearch';
+import { extractErrorMessage } from '../../../../common/util/errors';
+
+import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';
 import { ml } from '../../services/ml_api_service';
+
+import { isKeywordAndTextType } from '../common/fields';
+import { SavedSearchQuery } from '../../contexts/ml';
+
 import { INDEX_STATUS } from './analytics';
-import { isKeywordAndTextType } from './fields';
+import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 
 export const getIndexData = async (
   jobConfig: DataFrameAnalyticsConfig | undefined,

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClient } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
+
+import type { SavedObjectsClient, ElasticsearchClient } from 'kibana/server';
+
 import type { FleetConfigType } from '../../common/types';
 import * as AgentService from '../services/agents';
 import { isFleetServerSetup } from '../services/fleet_server';

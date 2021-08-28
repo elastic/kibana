@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEmpty } from 'lodash';
-import type {
-  CustomLink,
+import {
   CustomLinkES,
+  CustomLink,
   Filter,
   FilterKey,
 } from '../../../../common/custom_link/custom_link_types';

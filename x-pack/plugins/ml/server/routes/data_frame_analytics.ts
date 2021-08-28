@@ -4,38 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RequestHandlerContext } from '../../../../../src/core/server';
-import type { IScopedClusterClient } from '../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import { JOB_MAP_NODE_TYPES } from '../../common/constants/data_frame_analytics';
-import type { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
-import type { Aggregation, Field } from '../../common/types/fields';
+
+import { RequestHandlerContext, IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
-import type { MlClient } from '../lib/ml_client/types';
-import { getAuthorizationHeader } from '../lib/request_authorization';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
-import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
-import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
-import type {
-  ExtendAnalyticsMapArgs,
-  GetAnalyticsMapArgs,
-} from '../models/data_frame_analytics/types';
-import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
-import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
-import type { RouteInitialization } from '../types';
+import { RouteInitialization } from '../types';
+import { JOB_MAP_NODE_TYPES } from '../../common/constants/data_frame_analytics';
+import { Field, Aggregation } from '../../common/types/fields';
 import {
-  analyticsIdSchema,
-  analyticsMapQuerySchema,
-  analyticsNewJobCapsParamsSchema,
-  analyticsNewJobCapsQuerySchema,
-  analyticsQuerySchema,
-  dataAnalyticsEvaluateSchema,
-  dataAnalyticsExplainSchema,
   dataAnalyticsJobConfigSchema,
   dataAnalyticsJobUpdateSchema,
+  dataAnalyticsEvaluateSchema,
+  dataAnalyticsExplainSchema,
+  analyticsIdSchema,
+  analyticsMapQuerySchema,
+  stopsDataFrameAnalyticsJobQuerySchema,
   deleteDataFrameAnalyticsJobSchema,
   jobsExistSchema,
-  stopsDataFrameAnalyticsJobQuerySchema,
+  analyticsQuerySchema,
+  analyticsNewJobCapsParamsSchema,
+  analyticsNewJobCapsQuerySchema,
 } from './schemas/data_analytics_schema';
+import { GetAnalyticsMapArgs, ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
+import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
+import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
+import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
+import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
+import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
+import { getAuthorizationHeader } from '../lib/request_authorization';
+import type { MlClient } from '../lib/ml_client';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);

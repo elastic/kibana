@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import type { UnwrapPromise } from '@kbn/utility-types';
-import type { ServiceStatus, ServiceStatusLevel, StatusResponse } from '../../../../types/status';
-import type { HttpSetup } from '../../../http/types';
-import type { NotificationsSetup } from '../../../notifications/notifications_service';
-import type { DataType } from './format_number';
+import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../../../types/status';
+import type { HttpSetup } from '../../../http';
+import type { NotificationsSetup } from '../../../notifications';
+import type { DataType } from '../lib';
 
 export interface Metric {
   name: string;

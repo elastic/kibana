@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useMemo } from 'react';
+
+import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
-import { CaseStatuses } from '../../../../../../cases/common/api/cases/status';
-import { StatusAll } from '../../../../../../cases/common/ui/types';
-import type { TimelineItem } from '../../../../../common/search_strategy/timeline/events/all';
-import { normalizedEventFields, useAddToCase } from '../../../../hooks/use_add_to_case';
-import * as tGridActions from '../../../../store/t_grid/actions';
-import type { TimelinesStartServices } from '../../../../types';
+import { CaseStatuses, StatusAll } from '../../../../../../cases/common';
+import { TimelineItem } from '../../../../../common/';
+import { useAddToCase, normalizedEventFields } from '../../../../hooks/use_add_to_case';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { TimelinesStartServices } from '../../../../types';
 import { CreateCaseFlyout } from './create/flyout';
+import { tGridActions } from '../../../../';
 import * as i18n from './translations';
 
 export interface AddToCaseActionProps {

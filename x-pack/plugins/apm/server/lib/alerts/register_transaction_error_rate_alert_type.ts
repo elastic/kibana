@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
-import {
+import { take } from 'rxjs/operators';
+import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
@@ -16,10 +18,12 @@ import {
   ALERT_REASON as ALERT_REASON_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
-import { take } from 'rxjs/operators';
-import { asPercent } from '../../../../observability/common/utils/formatters/formatters';
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server/utils/create_lifecycle_rule_type_factory';
-import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentEsField,
+  getEnvironmentLabel,
+} from '../../../common/environment_filter_values';
+import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   AlertType,
   ALERT_TYPES_CONFIG,
@@ -33,20 +37,17 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import {
-  ENVIRONMENT_NOT_DEFINED,
-  getEnvironmentEsField,
-  getEnvironmentLabel,
-} from '../../../common/environment_filter_values';
 import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { asDecimalOrInteger } from '../../../common/utils/formatters';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { asDecimalOrInteger } from '../../../common/utils/formatters/formatters';
-import { getDocumentTypeFilterForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-import type { RegisterRuleDependencies } from './register_apm_alerts';
+import { RegisterRuleDependencies } from './register_apm_alerts';
+import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
+import { getDocumentTypeFilterForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { asPercent } from '../../../../observability/common/utils/formatters';
 
 const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
 const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;

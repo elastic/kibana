@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
+import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
-import type { MountPoint, UnmountCallback } from '../../../types';
 import { HeaderActionMenu } from './header_action_menu';
+import { MountPoint, UnmountCallback } from '../../../types';
 
 type MockedUnmount = jest.MockedFunction<UnmountCallback>;
 

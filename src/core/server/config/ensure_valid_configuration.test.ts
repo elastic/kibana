@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CriticalError } from '../errors';
-import { ensureValidConfiguration } from './ensure_valid_configuration';
+
 import { configServiceMock } from './mocks';
+import { ensureValidConfiguration } from './ensure_valid_configuration';
+import { CriticalError } from '../errors';
 
 describe('ensureValidConfiguration', () => {
   let configService: ReturnType<typeof configServiceMock.create>;

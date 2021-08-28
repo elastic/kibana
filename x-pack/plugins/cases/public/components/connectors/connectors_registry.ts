@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { CaseConnector, CaseConnectorsRegistry } from './types';
+import { CaseConnector, CaseConnectorsRegistry } from './types';
 
 export const createCaseConnectorsRegistry = (): CaseConnectorsRegistry => {
   const connectors: Map<string, CaseConnector<any>> = new Map();

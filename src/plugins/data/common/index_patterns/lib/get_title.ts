@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsClientContract } from '../../../../../core/public/saved_objects/saved_objects_client';
-import { SimpleSavedObject } from '../../../../../core/public/saved_objects/simple_saved_object';
+
+import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../constants';
 
 export async function getTitle(

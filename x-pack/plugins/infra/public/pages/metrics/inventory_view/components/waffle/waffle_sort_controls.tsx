@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiContextMenu, EuiPopover, EuiSwitch } from '@elastic/eui';
+
+import React, { useCallback, useMemo, useState, ReactNode } from 'react';
+import { EuiSwitch, EuiContextMenuPanelDescriptor, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReactNode } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { withTheme } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { WaffleSortOption } from '../../hooks/use_waffle_options';
+import { EuiTheme, withTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { WaffleSortOption } from '../../hooks/use_waffle_options';
 import { DropdownButton } from '../dropdown_button';
 
 interface Props {

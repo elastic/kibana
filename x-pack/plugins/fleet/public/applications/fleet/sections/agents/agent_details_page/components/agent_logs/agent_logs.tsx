@@ -5,43 +5,40 @@
  * 2.0.
  */
 
+import url from 'url';
 import { stringify } from 'querystring';
 
-import url from 'url';
-
+import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
+import styled from 'styled-components';
+import { encode } from 'rison-node';
 import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiPanel,
   EuiSuperDatePicker,
+  EuiFilterGroup,
+  EuiPanel,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
-import { fromKueryExpression } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import useMeasure from 'react-use/lib/useMeasure';
-import { encode } from 'rison-node';
-import semverCoerce from 'semver/functions/coerce';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { fromKueryExpression } from '@kbn/es-query';
 import semverGte from 'semver/functions/gte';
-import styled from 'styled-components';
+import semverCoerce from 'semver/functions/coerce';
 
-import type { TimeRange } from '../../../../../../../../../../../src/plugins/data/common/query/timefilter/types';
-import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
-import { createStateContainerReactHelpers } from '../../../../../../../../../../../src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers';
-import { LazyLogStreamWrapper as LogStream } from '../../../../../../../../../infra/public/components/log_stream/lazy_log_stream_wrapper';
-import type { Agent } from '../../../../../../../../common/types/models/agent';
-import type { AgentPolicy } from '../../../../../../../../common/types/models/agent_policy';
-import { useStartServices } from '../../../../../../../hooks/use_core';
-import { useLink } from '../../../../../../../hooks/use_link';
+import { createStateContainerReactHelpers } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
+import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
+import type { TimeRange } from '../../../../../../../../../../../src/plugins/data/public';
+import { LogStream } from '../../../../../../../../../infra/public';
+import type { Agent, AgentPolicy } from '../../../../../types';
+import { useLink, useStartServices } from '../../../../../hooks';
 
-import { buildQuery } from './build_query';
 import { DEFAULT_DATE_RANGE } from './constants';
 import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
+import { buildQuery } from './build_query';
 import { SelectLogLevel } from './select_log_level';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`

@@ -5,19 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PackageInfo } from '@kbn/config';
-import type { UsageCollectionSetup } from '../../../usage_collection/public/plugin';
-import type { IndexPatternsContract } from '../../common/index_patterns/index_patterns/index_patterns';
-import type { AggsStart } from '../../common/search/aggs/types';
-import type { ISearchStartSearchSource } from '../../common/search/search_source/types';
-import type { ISearchGeneric } from '../../common/search/types';
-import type { AggsSetupDependencies, AggsStartDependencies } from './aggs/aggs_service';
-import type { AggsSetup } from './aggs/types';
-import type { SearchUsageCollector } from './collectors/types';
-import type { ISessionsClient } from './session/sessions_client';
-import type { ISessionService } from './session/session_service';
 
-export { SEARCH_EVENT_TYPE } from './collectors';
+import { PackageInfo } from 'kibana/server';
+import { SearchUsageCollector } from './collectors';
+import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
+import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
+import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { ISessionsClient, ISessionService } from './session';
+
 export { ISearchStartSearchSource, SearchUsageCollector };
 
 /**
@@ -73,6 +69,8 @@ export interface ISearchStart {
    */
   sessionsClient: ISessionsClient;
 }
+
+export { SEARCH_EVENT_TYPE } from './collectors';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {

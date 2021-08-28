@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
-import { EuiColorPalettePicker, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { PaletteOutput } from '../../../../../src/plugins/charts/common/palette';
-import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export function PalettePicker({
   palettes,

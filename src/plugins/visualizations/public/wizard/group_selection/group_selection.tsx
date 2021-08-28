@@ -5,31 +5,31 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useMemo } from 'react';
+import { orderBy } from 'lodash';
 import {
-  EuiBetaBadge,
-  EuiCard,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGrid,
   EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
+  EuiCard,
   EuiIcon,
-  EuiLink,
-  EuiModalBody,
   EuiModalHeader,
+  EuiModalBody,
   EuiModalHeaderTitle,
-  EuiSpacer,
+  EuiLink,
   EuiText,
+  EuiSpacer,
+  EuiBetaBadge,
   EuiTitle,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiDescriptionList,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { orderBy } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
-import type { DocLinksStart } from '../../../../../core/public/doc_links/doc_links_service';
-import { BaseVisType } from '../../vis_types/base_vis_type';
-import type { TypesStart } from '../../vis_types/types_service';
+import { DocLinksStart } from '../../../../../core/public';
+import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
 import './group_selection.scss';

@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PLUGIN_ID } from '../../../../common/constants/plugin';
-import { epmRouteService } from '../../../../common/services/routes';
-import type { RegistryImage } from '../../../../common/types/models/epm';
-import type {
-  PackageSpecIcon,
-  PackageSpecScreenshot,
-} from '../../../../common/types/models/package_spec';
+
 import { useStartServices } from '../../../hooks/use_core';
+import { PLUGIN_ID } from '../../../constants';
+import { epmRouteService } from '../../../services';
+import type { PackageSpecIcon, PackageSpecScreenshot, RegistryImage } from '../../../../common';
 
 const removeRelativePath = (relativePath: string): string =>
   new URL(relativePath, 'http://example.com').pathname;

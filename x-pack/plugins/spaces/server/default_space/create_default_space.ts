@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
 
-import type { SavedObjectsServiceStart } from '../../../../../src/core/server/saved_objects/saved_objects_service';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server/saved_objects/service/lib/errors';
-import type { SavedObjectsRepository } from '../../../../../src/core/server/saved_objects/service/lib/repository';
+import { i18n } from '@kbn/i18n';
+import type { Logger, SavedObjectsRepository, SavedObjectsServiceStart } from 'src/core/server';
+
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 interface Deps {

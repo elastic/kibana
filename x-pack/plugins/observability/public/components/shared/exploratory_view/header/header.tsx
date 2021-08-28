@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { useState } from 'react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
-import type { LensEmbeddableInput } from '../../../../../../lens/public/embeddable/embeddable';
-import type { TypedLensByValueInput } from '../../../../../../lens/public/embeddable/embeddable_component';
-import type { ObservabilityAppServices } from '../../../../application/types';
-import { DataViewLabels } from '../configurations/constants/constants';
-import { combineTimeRanges } from '../exploratory_view';
+import { i18n } from '@kbn/i18n';
+import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { TypedLensByValueInput, LensEmbeddableInput } from '../../../../../../lens/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { DataViewLabels } from '../configurations/constants';
+import { ObservabilityAppServices } from '../../../../application/types';
 import { useSeriesStorage } from '../hooks/use_series_storage';
+import { combineTimeRanges } from '../exploratory_view';
 
 interface Props {
   seriesId: string;

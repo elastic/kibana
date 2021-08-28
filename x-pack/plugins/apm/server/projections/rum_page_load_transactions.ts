@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery } from '../../../observability/server/utils/queries';
+
+import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
   AGENT_NAME,
-  SERVICE_LANGUAGE_NAME,
   TRANSACTION_TYPE,
+  SERVICE_LANGUAGE_NAME,
 } from '../../common/elasticsearch_fieldnames';
+import { rangeQuery } from '../../../observability/server';
 import { ProcessorEvent } from '../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
-import type { Setup, SetupTimeRange } from '../lib/helpers/setup_request';
 import { getEsFilter } from '../lib/rum_client/ui_filters/get_es_filter';
 
 export function getRumPageLoadTransactionsProjection({

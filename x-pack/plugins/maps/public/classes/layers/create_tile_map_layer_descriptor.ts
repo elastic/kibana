@@ -4,6 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import {
+  AggDescriptor,
+  ColorDynamicOptions,
+  LayerDescriptor,
+  SizeDynamicOptions,
+  VectorStylePropertiesDescriptor,
+} from '../../../common/descriptor_types';
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
@@ -14,21 +22,14 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../common/constants';
-import type { LayerDescriptor } from '../../../common/descriptor_types/layer_descriptor_types';
-import type { AggDescriptor } from '../../../common/descriptor_types/source_descriptor_types';
-import type {
-  ColorDynamicOptions,
-  SizeDynamicOptions,
-  VectorStylePropertiesDescriptor,
-} from '../../../common/descriptor_types/style_property_descriptor_types';
-import { getSourceAggKey } from '../../../common/get_agg_key';
-import { ESGeoGridSource } from '../sources/es_geo_grid_source/es_geo_grid_source';
-import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
 import { VectorStyle } from '../styles/vector/vector_style';
+import { ESGeoGridSource } from '../sources/es_geo_grid_source';
+import { VectorLayer } from './vector_layer';
+import { HeatmapLayer } from './heatmap_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
+import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
+import { getSourceAggKey } from '../../../common/get_agg_key';
 import { isMetricCountable } from '../util/is_metric_countable';
-import { HeatmapLayer } from './heatmap_layer/heatmap_layer';
-import { VectorLayer } from './vector_layer/vector_layer';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 

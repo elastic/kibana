@@ -6,34 +6,34 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import { INDEX_META_DATA_CREATED_BY } from '../../../../file_upload/common/constants';
-import type { JobMapNodeTypes } from '../../../common/constants/data_frame_analytics';
-import { JOB_MAP_NODE_TYPES } from '../../../common/constants/data_frame_analytics';
-import type {
+import { IScopedClusterClient } from 'kibana/server';
+import {
+  JOB_MAP_NODE_TYPES,
+  JobMapNodeTypes,
+} from '../../../common/constants/data_frame_analytics';
+import { TrainedModelConfigResponse } from '../../../common/types/trained_models';
+import {
   AnalyticsMapEdgeElement,
-  AnalyticsMapNodeElement,
   AnalyticsMapReturnType,
+  AnalyticsMapNodeElement,
   DataFrameAnalyticsStats,
   MapElements,
 } from '../../../common/types/data_frame_analytics';
-import type { TrainedModelConfigResponse } from '../../../common/types/trained_models';
+import { INDEX_META_DATA_CREATED_BY } from '../../../../file_upload/common';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
-import type { MlClient } from '../../lib/ml_client/types';
-import type {
+import {
   ExtendAnalyticsMapArgs,
   GetAnalyticsMapArgs,
   InitialElementsReturnType,
-  NextLinkReturnType,
-} from './types';
-import {
+  isCompleteInitialReturnType,
   isAnalyticsMapEdgeElement,
   isAnalyticsMapNodeElement,
-  isCompleteInitialReturnType,
   isIndexPatternLinkReturnType,
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
+  NextLinkReturnType,
 } from './types';
+import type { MlClient } from '../../lib/ml_client';
 
 export class AnalyticsManager {
   private _client: IScopedClusterClient;

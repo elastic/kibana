@@ -5,12 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiIcon, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
+
+import { EuiLoadingSpinner, EuiProgress, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import React from 'react';
+import classNames from 'classnames';
 import { Subscription } from 'rxjs';
-import type { HttpStart } from '../../http/types';
+
+import { HttpStart } from '../../http';
 
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;

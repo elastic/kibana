@@ -4,12 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, {
+  CSSProperties,
+  useState,
+  useRef,
+  useEffect,
+  ReactNode,
+  createContext,
+  useCallback,
+} from 'react';
 import cytoscape from 'cytoscape';
 // @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
-import type { CSSProperties, ReactNode } from 'react';
-import React, { createContext, useCallback, useEffect, useRef, useState } from 'react';
-import type { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
+import { EuiThemeType } from '../../../../components/color_range_legend';
 import { getCytoscapeOptions } from './cytoscape_options';
 
 cytoscape.use(dagre);

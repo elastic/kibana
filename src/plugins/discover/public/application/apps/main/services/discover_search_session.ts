@@ -5,12 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { History } from 'history';
+
+import { History } from 'history';
 import { filter } from 'rxjs/operators';
-import type { DataPublicPluginStart } from '../../../../../../data/public/types';
-import { getQueryParams } from '../../../../../../kibana_utils/public/history/get_query_params';
-import { createQueryParamObservable } from '../../../../../../kibana_utils/public/history/history_observable';
-import { removeQueryParam } from '../../../../../../kibana_utils/public/history/remove_query_param';
+import { DataPublicPluginStart } from '../../../../../../data/public';
+import {
+  createQueryParamObservable,
+  getQueryParams,
+  removeQueryParam,
+} from '../../../../../../kibana_utils/public';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../../../url_generator';
 
 export interface DiscoverSearchSessionManagerDeps {

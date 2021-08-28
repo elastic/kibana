@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema, Type } from '@kbn/config-schema';
-import { RUNTIME_FIELD_TYPES } from '../../../../common/index_patterns/constants';
-import type { RuntimeType } from '../../../../common/index_patterns/types';
+import { RUNTIME_FIELD_TYPES, RuntimeType } from '../../../../common';
 
 export const serializedFieldFormatSchema = schema.object({
   id: schema.maybe(schema.string()),

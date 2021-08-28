@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApiResponse } from '@elastic/elasticsearch';
-import type { BulkResponse } from '@elastic/elasticsearch/api/types';
-import type { Logger } from '@kbn/logging';
-import type { ESSearchRequest } from '../../../../../src/core/types/elasticsearch';
-import type { AlertTypeParams, AlertTypeState } from '../../../alerting/common/alert';
-import type {
+
+import { ApiResponse } from '@elastic/elasticsearch';
+import { BulkResponse } from '@elastic/elasticsearch/api/types';
+import { Logger } from '@kbn/logging';
+import { ESSearchRequest } from 'src/core/types/elasticsearch';
+import {
   AlertInstanceContext,
   AlertInstanceState,
-} from '../../../alerting/common/alert_instance';
-import type { IRuleDataClient } from '../rule_data_client/types';
-import type { AlertTypeWithExecutor } from '../types';
+  AlertTypeParams,
+  AlertTypeState,
+} from '../../../alerting/server';
+import { IRuleDataClient } from '../rule_data_client';
+import { AlertTypeWithExecutor } from '../types';
 
 export type PersistenceAlertService<
   TState extends AlertInstanceState = never,

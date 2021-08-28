@@ -5,13 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Server as HapiServer } from '@hapi/hapi';
-import type { OpsMetricsCollectorOptions } from './collectors/os';
-import { OsMetricsCollector } from './collectors/os';
-import { ProcessMetricsCollector } from './collectors/process';
-import { ServerMetricsCollector } from './collectors/server';
-import type { MetricsCollector } from './collectors/types';
-import type { OpsMetrics } from './types';
+import {
+  ProcessMetricsCollector,
+  OsMetricsCollector,
+  OpsMetricsCollectorOptions,
+  ServerMetricsCollector,
+  MetricsCollector,
+} from './collectors';
+import { OpsMetrics } from './types';
 
 export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
   private readonly processCollector: ProcessMetricsCollector;

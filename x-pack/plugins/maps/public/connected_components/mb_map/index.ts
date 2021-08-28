@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import { DRAW_MODE } from '../../../common/constants';
-import type { TileMetaFeature } from '../../../common/descriptor_types/layer_descriptor_types';
-import { setAreTilesLoaded, updateMetaFromTiles } from '../../actions/layer_actions';
-import type { MapExtentState } from '../../actions/map_actions';
+import { MbMap } from './mb_map';
 import {
   clearGoto,
   clearMouseCoordinates,
   mapDestroyed,
   mapExtentChanged,
+  MapExtentState,
   mapReady,
+  setAreTilesLoaded,
   setMapInitError,
   setMouseCoordinates,
-} from '../../actions/map_actions';
-import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
-import type { MapStoreState } from '../../reducers/store';
+  updateMetaFromTiles,
+} from '../../actions';
 import {
   getGoto,
   getLayerList,
@@ -32,7 +31,10 @@ import {
   getTimeslice,
 } from '../../selectors/map_selectors';
 import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
-import { MbMap } from './mb_map';
+import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
+import { MapStoreState } from '../../reducers/store';
+import { DRAW_MODE } from '../../../common';
+import { TileMetaFeature } from '../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {

@@ -5,96 +5,92 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
-import { isObject, omit } from 'lodash';
-import type { SavedObject, SavedObjectsMigrationVersion } from '../../../../types/saved_objects';
-import { CORE_USAGE_STATS_ID, CORE_USAGE_STATS_TYPE } from '../../../core_usage_data/constants';
-import { REPOSITORY_RESOLVE_OUTCOME_STATS } from '../../../core_usage_data/core_usage_stats_client';
-import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
+
+import { omit, isObject } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
 import {
-  isNotFoundFromUnsupportedServer,
-  isSupportedEsServer,
-} from '../../../elasticsearch/supported_server_response_check';
-import { getRootPropertiesObjects } from '../../mappings/lib/get_root_properties_objects';
-import type { IndexMapping } from '../../mappings/types';
-import type { IKibanaMigrator } from '../../migrations/kibana/kibana_migrator';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types/constants';
-import type { LegacyUrlAlias } from '../../object_types/types';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { SavedObjectsSerializer } from '../../serialization/serializer';
-import type {
+  CORE_USAGE_STATS_TYPE,
+  CORE_USAGE_STATS_ID,
+  REPOSITORY_RESOLVE_OUTCOME_STATS,
+} from '../../../core_usage_data';
+import type { ElasticsearchClient } from '../../../elasticsearch/';
+import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
+import type { Logger } from '../../../logging';
+import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
+import {
+  ISavedObjectsPointInTimeFinder,
+  PointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+} from './point_in_time_finder';
+import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
+import { getSearchDsl } from './search_dsl';
+import { includedFields } from './included_fields';
+import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
+import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
+import { IKibanaMigrator } from '../../migrations';
+import {
+  SavedObjectsSerializer,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
-} from '../../serialization/types';
-import type {
-  MutatingOperationRefreshSetting,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-} from '../../types';
-import { decodeRequestVersion } from '../../version/decode_request_version';
-import { encodeHitVersion } from '../../version/encode_hit_version';
-import { encodeVersion } from '../../version/encode_version';
-import type {
+} from '../../serialization';
+import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
-  SavedObjectsClosePointInTimeOptions,
-  SavedObjectsClosePointInTimeResponse,
   SavedObjectsCreateOptions,
-  SavedObjectsDeleteOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsClosePointInTimeResponse,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsOpenPointInTimeResponse,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsDeleteOptions,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
   SavedObjectsResolveResponse,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
 } from '../saved_objects_client';
-import { validateAndConvertAggregations } from './aggregations/validation';
-import type {
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesOptions,
-} from './collect_multi_namespace_references';
-import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
-import type { DecoratedError } from './errors';
-import { SavedObjectsErrorHelpers } from './errors';
+import {
+  SavedObject,
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+  MutatingOperationRefreshSetting,
+} from '../../types';
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { includedFields } from './included_fields';
+import { validateAndConvertAggregations } from './aggregations';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,
   getSavedObjectFromSource,
   rawDocExistsInNamespace,
 } from './internal_utils';
-import type {
-  ISavedObjectsPointInTimeFinder,
-  SavedObjectsCreatePointInTimeFinderDependencies,
-  SavedObjectsCreatePointInTimeFinderOptions,
-} from './point_in_time_finder';
-import { PointInTimeFinder } from './point_in_time_finder';
-import type { RepositoryEsClient } from './repository_es_client';
-import { createRepositoryEsClient } from './repository_es_client';
-import { getSearchDsl } from './search_dsl/search_dsl';
-import type {
-  SavedObjectsUpdateObjectsSpacesObject,
-  SavedObjectsUpdateObjectsSpacesOptions,
-} from './update_objects_spaces';
-import { updateObjectsSpaces } from './update_objects_spaces';
 import {
   ALL_NAMESPACES_STRING,
   FIND_DEFAULT_PAGE,
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
+import {
+  collectMultiNamespaceReferences,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+} from './collect_multi_namespace_references';
+import {
+  updateObjectsSpaces,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+} from './update_objects_spaces';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.

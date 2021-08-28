@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React, { Fragment, useContext, useEffect, useMemo, useState } from 'react';
-import type { AggFieldPair } from '../../../../../../../../../common/types/fields';
-import { sortFields } from '../../../../../../../../../common/util/fields_utils';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service/toast_notification_service';
-import type { LineChartData } from '../../../../../common/chart_loader/chart_loader';
-import { MultiMetricJobCreator } from '../../../../../common/job_creator/multi_metric_job_creator';
-import { defaultChartSettings, getChartSettings } from '../../../charts/common/settings';
+
+import React, { Fragment, FC, useContext, useEffect, useState, useMemo } from 'react';
+
 import { JobCreatorContext } from '../../../job_creator_context';
-import type { DropDownLabel, DropDownProps } from '../agg_select/agg_select';
-import { ChartGrid } from './chart_grid';
+import { MultiMetricJobCreator } from '../../../../../common/job_creator';
+import { LineChartData } from '../../../../../common/chart_loader';
+import { DropDownLabel, DropDownProps } from '../agg_select';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { AggFieldPair } from '../../../../../../../../../common/types/fields';
+import { sortFields } from '../../../../../../../../../common/util/fields_utils';
+import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
+import { ChartGrid } from './chart_grid';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 interface Props {
   setIsValid: (na: boolean) => void;

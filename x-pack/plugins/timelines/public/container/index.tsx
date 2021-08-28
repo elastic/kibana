@@ -4,39 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
+
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
+import { tGridActions } from '..';
+
 import {
+  DataPublicPluginStart,
   isCompleteResponse,
   isErrorResponse,
-} from '../../../../../src/plugins/data/common/search/utils';
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public/types';
+} from '../../../../../src/plugins/data/public';
+import {
+  Direction,
+  TimelineFactoryQueryTypes,
+  TimelineEventsQueries,
+  EntityType,
+} from '../../common/search_strategy';
 import type {
   DocValueFields,
   Inspect,
   PaginationInputPaginated,
-} from '../../common/search_strategy/common';
-import { Direction } from '../../common/search_strategy/common';
-import type {
-  TimelineFactoryQueryTypes,
-  TimelineRequestSortField,
   TimelineStrategyResponseType,
-} from '../../common/search_strategy/timeline';
-import { EntityType, TimelineEventsQueries } from '../../common/search_strategy/timeline/events';
-import type {
   TimelineEdges,
   TimelineEventsAllRequestOptions,
   TimelineEventsAllStrategyResponse,
   TimelineItem,
-} from '../../common/search_strategy/timeline/events/all';
+  TimelineRequestSortField,
+} from '../../common/search_strategy';
 import type { ESQuery } from '../../common/typed_json';
-import type { KueryFilterQueryKind } from '../../common/types/timeline/store';
+import type { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
-import * as tGridActions from '../store/t_grid/actions';
 import { TimelineId } from '../store/t_grid/types';
 import * as i18n from './translations';
 

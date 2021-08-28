@@ -5,15 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiSideNavItemType, EuiSideNavProps } from '@elastic/eui';
-import { EuiFlyout, EuiSideNav, useIsWithinBreakpoints } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import classNames from 'classnames';
-import type { FunctionComponent } from 'react';
-import React, { Fragment, useState } from 'react';
 import './solution_nav.scss';
-import type { KibanaPageTemplateSolutionNavAvatarProps } from './solution_nav_avatar';
-import { KibanaPageTemplateSolutionNavAvatar } from './solution_nav_avatar';
+
+import React, { FunctionComponent, useState, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import {
+  EuiFlyout,
+  EuiSideNav,
+  EuiSideNavItemType,
+  EuiSideNavProps,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
+
+import classNames from 'classnames';
+import {
+  KibanaPageTemplateSolutionNavAvatar,
+  KibanaPageTemplateSolutionNavAvatarProps,
+} from './solution_nav_avatar';
 import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
 
 export type KibanaPageTemplateSolutionNavProps = EuiSideNavProps<{}> & {

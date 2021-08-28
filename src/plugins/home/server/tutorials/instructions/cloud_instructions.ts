@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
 
+import { i18n } from '@kbn/i18n';
 export const cloudPasswordAndResetLink = i18n.translate(
   'home.tutorials.common.cloudInstructions.passwordAndResetLink',
   {

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment, FC, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { Fragment, useEffect, useState } from 'react';
+
 import { PopulationDetectors } from './metric_selection';
 import { PopulationDetectorsSummary } from './metric_selection_summary';
 import { PopulationSettings } from './settings';

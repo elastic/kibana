@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { act, waitFor } from '@testing-library/react';
 import cytoscape from 'cytoscape';
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { renderWithTheme } from '../../../utils/testHelpers';

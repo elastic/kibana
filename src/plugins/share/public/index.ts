@@ -5,30 +5,38 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SharePlugin } from './plugin';
 
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
-export { KibanaLocation, LocatorDefinition, LocatorPublic } from '../common/url_service';
-export { useLocatorUrl } from '../common/url_service/locators/use_locator_url';
-export { KibanaURL } from './kibana_url';
-export { downloadFileAs, downloadMultipleAs } from './lib/download_as';
-export type { DownloadableContent } from './lib/download_as';
+
+export { LocatorDefinition, LocatorPublic, KibanaLocation } from '../common/url_service';
+export { parseSearchParams, formatSearchParams } from './url_service';
+
+export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
+
 export { SharePluginSetup, SharePluginStart } from './plugin';
+
 export {
   ShareContext,
-  ShareContextMenuPanelItem,
-  ShareMenuItem,
   ShareMenuProvider,
+  ShareMenuItem,
   ShowShareMenuOptions,
+  ShareContextMenuPanelItem,
 } from './types';
+
 export {
-  UrlGeneratorContract,
   UrlGeneratorId,
-  UrlGeneratorsDefinition,
-  UrlGeneratorsService,
   UrlGeneratorState,
+  UrlGeneratorsDefinition,
+  UrlGeneratorContract,
+  UrlGeneratorsService,
 } from './url_generators';
-export { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
-export { formatSearchParams, parseSearchParams } from './url_service';
+
+export { useLocatorUrl } from '../common/url_service/locators/use_locator_url';
+
+import { SharePlugin } from './plugin';
+
+export { KibanaURL } from './kibana_url';
+export { downloadMultipleAs, downloadFileAs } from './lib/download_as';
+export type { DownloadableContent } from './lib/download_as';
 
 export const plugin = () => new SharePlugin();

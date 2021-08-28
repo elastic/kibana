@@ -4,36 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { URL } from 'url';
 
 import mime from 'mime-types';
-import type { Response } from 'node-fetch';
 import semverValid from 'semver/functions/valid';
+import type { Response } from 'node-fetch';
 
+import { KibanaAssetType } from '../../../types';
 import type {
   AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
   InstallSource,
   RegistryPackage,
-  RegistrySearchResult,
   RegistrySearchResults,
-} from '../../../../common/types/models/epm';
-import { KibanaAssetType } from '../../../../common/types/models/epm';
-import type { GetCategoriesRequest } from '../../../../common/types/rest_spec/epm';
+  RegistrySearchResult,
+  GetCategoriesRequest,
+} from '../../../types';
 import {
-  PackageCacheError,
+  getArchiveFilelist,
+  getPathParts,
+  unpackBufferToCache,
+  getPackageInfo,
+  setPackageInfo,
+} from '../archive';
+import { streamToBuffer } from '../streams';
+import { appContextService } from '../..';
+import {
   PackageKeyInvalidError,
   PackageNotFoundError,
+  PackageCacheError,
   RegistryResponseError,
 } from '../../../errors';
-import { appContextService } from '../../app_context';
-import { getPathParts, unpackBufferToCache } from '../archive';
-import { getArchiveFilelist, getPackageInfo, setPackageInfo } from '../archive/cache';
-import { streamToBuffer } from '../streams';
 
-import { getRegistryUrl } from './registry_url';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
+import { getRegistryUrl } from './registry_url';
 
 export interface SearchParams {
   category?: CategoryId;

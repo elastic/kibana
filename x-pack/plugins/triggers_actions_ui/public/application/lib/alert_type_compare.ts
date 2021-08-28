@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AlertTypeModel } from '../../types';
-import type { IsDisabledResult, IsEnabledResult } from './check_alert_type_enabled';
+
+import { AlertTypeModel } from '../../types';
+import { IsEnabledResult, IsDisabledResult } from './check_alert_type_enabled';
 
 export function alertTypeGroupCompare(
   left: [

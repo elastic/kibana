@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { HashedItemStore } from './hashed_item_store';
 
+import { HashedItemStore } from './hashed_item_store';
 export { HashedItemStore };
 export const hashedItemStore = new HashedItemStore(window.sessionStorage);

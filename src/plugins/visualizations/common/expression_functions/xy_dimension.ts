@@ -5,15 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../expressions/common/expression_functions/types';
+import type { ExpressionValueVisDimension } from './vis_dimension';
+
 import type {
+  ExpressionFunctionDefinition,
+  ExpressionValueBoxed,
   Datatable,
   DatatableColumn,
-} from '../../../expressions/common/expression_types/specs/datatable';
-import type { ExpressionValueBoxed } from '../../../expressions/common/expression_types/types';
-import type { SerializedFieldFormat } from '../../../expressions/common/types/common';
-import type { ExpressionValueVisDimension } from './vis_dimension';
+  SerializedFieldFormat,
+} from '../../../expressions/common';
 
 export interface DateHistogramParams {
   date: boolean;

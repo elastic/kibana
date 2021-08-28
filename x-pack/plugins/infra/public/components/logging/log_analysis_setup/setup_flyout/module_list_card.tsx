@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiCard, EuiIcon, EuiSpacer } from '@elastic/eui';
+
+import { EuiCard, EuiIcon, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
-import { mountReactNode } from '../../../../../../../../src/core/public/utils/mount';
-import type { SetupStatus } from '../../../../../common/log_analysis/log_analysis';
+import { SetupStatus } from '../../../../../common/log_analysis';
+import { CreateJobButton, RecreateJobButton } from '../../log_analysis_setup/create_job_button';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { CreateJobButton, RecreateJobButton } from '../create_job_button';
+import { mountReactNode } from '../../../../../../../../src/core/public/utils';
 
 export const LogAnalysisModuleListCard: React.FC<{
   jobId: string;

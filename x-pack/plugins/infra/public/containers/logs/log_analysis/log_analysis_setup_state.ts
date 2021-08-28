@@ -4,23 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import type { ValidationIndicesError } from '../../../../common/http_api/log_analysis/validation/log_entry_rate_indices';
-import type { DatasetFilter } from '../../../../common/log_analysis/job_parameters';
 import {
   combineDatasetFilters,
+  DatasetFilter,
   filterDatasetFilter,
-} from '../../../../common/log_analysis/job_parameters';
-import { isExampleDataIndex } from '../../../../common/log_analysis/log_analysis';
-import type {
+  isExampleDataIndex,
+} from '../../../../common/log_analysis';
+import {
   AvailableIndex,
+  ValidationIndicesError,
   ValidationUIError,
-} from '../../../components/logging/log_analysis_setup/initial_configuration_step/validation';
+} from '../../../components/logging/log_analysis_setup/initial_configuration_step';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import type { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
+import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 
 type SetupHandler = (
   indices: string[],

@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useCallback, useState } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPagination,
   EuiPopover,
+  EuiContextMenuPanel,
+  EuiPagination,
+  EuiContextMenuItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface SwimLanePaginationProps {
   fromPage: number;

@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react-hooks';
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import {
   expectTextsInDocument,
   renderWithTheme,
 } from '../../../../../utils/testHelpers';
-import type { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_error_marks';
+import { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_error_marks';
 import { ErrorMarker } from './error_marker';
 
 function Wrapper({ children }: { children?: ReactNode }) {

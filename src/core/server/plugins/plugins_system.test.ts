@@ -5,23 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import type { Logger } from '@kbn/logging';
-import { BehaviorSubject } from 'rxjs';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
-import type { CoreContext } from '../core_context';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { coreMock } from '../mocks';
-import { PluginWrapper } from './plugin';
-import { PluginsSystem } from './plugins_system';
+
 import {
   mockCreatePluginPrebootSetupContext,
   mockCreatePluginSetupContext,
   mockCreatePluginStartContext,
 } from './plugins_system.test.mocks';
-import type { PluginName } from './types';
-import { PluginType } from './types';
+
+import { BehaviorSubject } from 'rxjs';
+
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { Env } from '../config';
+import { configServiceMock, getEnvOptions } from '../config/mocks';
+import { CoreContext } from '../core_context';
+import { loggingSystemMock } from '../logging/logging_system.mock';
+
+import { PluginWrapper } from './plugin';
+import { PluginName, PluginType } from './types';
+import { PluginsSystem } from './plugins_system';
+import { coreMock } from '../mocks';
+import { Logger } from '../logging';
 
 function createPlugin(
   id: string,

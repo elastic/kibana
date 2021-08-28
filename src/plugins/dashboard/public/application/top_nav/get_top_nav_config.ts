@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '../../../../embeddable/common/types';
-import type { TopNavMenuData } from '../../../../navigation/public/top_nav_menu/top_nav_menu_data';
-import type { NavAction } from '../../types';
+import { ViewMode } from '../../services/embeddable';
 import { TopNavIds } from './top_nav_ids';
+import { NavAction } from '../../types';
+import { TopNavMenuData } from '../../../../navigation/public';
 
 /**
  * @param actions - A mapping of TopNavIds to an action function that should run when the

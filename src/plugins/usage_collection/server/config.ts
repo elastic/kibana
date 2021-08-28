@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { PluginConfigDescriptor } from '../../../core/server/plugins/types';
+
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'src/core/server';
 import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../common/constants';
 
 export const configSchema = schema.object({

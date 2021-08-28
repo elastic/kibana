@@ -4,33 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { getOr } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import type { Ecs } from '../../../../../common/ecs';
-import type { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline/events/all';
-import { TimelineTabs } from '../../../../../common/types/timeline';
-import type {
-  ActionProps,
-  ControlColumnProps,
-  RowCellRender,
-  SetEventsDeleted,
-  SetEventsLoading,
-} from '../../../../../common/types/timeline/actions';
-import type { CellValueElementProps } from '../../../../../common/types/timeline/cells';
-import type { ColumnHeaderOptions } from '../../../../../common/types/timeline/columns';
-import type { OnRowSelected } from '../../../../../common/types/timeline/store';
-import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
+import { getOr } from 'lodash/fp';
+
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
+import { OnRowSelected } from '../../types';
+
 import {
   EventsTd,
-  EventsTdContent,
-  EventsTdGroupActions,
-  EventsTdGroupData,
   EVENTS_TD_CLASS_NAME,
+  EventsTdContent,
+  EventsTdGroupData,
+  EventsTdGroupActions,
 } from '../../styles';
+
 import { StatefulCell } from './stateful_cell';
 import * as i18n from './translations';
+import {
+  SetEventsDeleted,
+  SetEventsLoading,
+  TimelineTabs,
+} from '../../../../../common/types/timeline';
+import type {
+  ActionProps,
+  CellValueElementProps,
+  ColumnHeaderOptions,
+  ControlColumnProps,
+  RowCellRender,
+} from '../../../../../common/types/timeline';
+import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
+import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
+import type { Ecs } from '../../../../../common/ecs';
 
 interface CellProps {
   _id: string;

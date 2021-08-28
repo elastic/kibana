@@ -49,22 +49,24 @@
  * given an empty migrationVersion property {} if no such property exists.
  */
 
-import { set } from '@elastic/safer-lodash-set';
 import Boom from '@hapi/boom';
-import type { Logger } from '@kbn/logging';
+import uuidv5 from 'uuid/v5';
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
-import uuidv5 from 'uuid/v5';
-import type { SavedObjectsMigrationVersion } from '../../../../types/saved_objects';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types/constants';
-import type { LegacyUrlAlias } from '../../object_types/types';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectUnsanitizedDoc } from '../../serialization/types';
-import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../service/lib/utils';
-import type { SavedObjectsNamespaceType, SavedObjectsType } from '../../types';
-import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
+import { Logger } from '../../../logging';
+import { SavedObjectUnsanitizedDoc } from '../../serialization';
+import {
+  SavedObjectsMigrationVersion,
+  SavedObjectsNamespaceType,
+  SavedObjectsType,
+} from '../../types';
 import { MigrationLogger } from './migration_logger';
-import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
+import { TransformSavedObjectDocumentError } from '.';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '../types';
+import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '../../service/lib/utils';
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 
 const DEFAULT_MINIMUM_CONVERT_VERSION = '8.0.0';
 

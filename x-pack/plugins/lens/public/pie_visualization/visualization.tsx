@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { render } from 'react-dom';
-import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
-import { layerTypes } from '../../common/constants';
-import type {
-  PieLayerState,
-  PieVisualizationState,
-} from '../../common/expressions/pie_chart/types';
-import type { AccessorConfig, OperationMetadata, Visualization } from '../types';
-import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
-import { suggestions } from './suggestions';
-import { DimensionEditor, PieToolbar } from './toolbar';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { Visualization, OperationMetadata, AccessorConfig } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
+import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
+import { layerTypes } from '../../common';
+import { suggestions } from './suggestions';
+import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
+import { DimensionEditor, PieToolbar } from './toolbar';
 
 function newLayerState(layerId: string): PieLayerState {
   return {

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { memo } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { TimeFormat } from '../../formatted_time';
-import { useFormattedTime } from '../../formatted_time';
+
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { TimeFormat, useFormattedTime } from '../../formatted_time';
 import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryTimestampColumnProps {

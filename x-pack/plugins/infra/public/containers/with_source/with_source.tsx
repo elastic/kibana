@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useContext } from 'react';
-import type { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/types';
-import type {
+
+import { IIndexPattern } from 'src/plugins/data/public';
+import {
   MetricsSourceConfigurationProperties,
   PartialMetricsSourceConfigurationProperties,
 } from '../../../common/metrics_sources';
-import type { RendererFunction } from '../../utils/typed_react';
-import { Source } from '../metrics_source/source';
+import { RendererFunction } from '../../utils/typed_react';
+import { Source } from '../metrics_source';
 
 interface WithSourceProps {
   children: RendererFunction<{

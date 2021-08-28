@@ -4,50 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from 'kibana/public';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { AppMountParameters, AppUpdater } from '../../../../src/core/public/application/types';
-import { AppStatus } from '../../../../src/core/public/application/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public/types';
-import type {
-  EmbeddableSetup,
-  EmbeddableStart,
-} from '../../../../src/plugins/embeddable/public/plugin';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public/plugin';
-import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public/plugin';
-import type { ManagementSetup } from '../../../../src/plugins/management/public/types';
-import type {
-  SharePluginSetup,
-  SharePluginStart,
-} from '../../../../src/plugins/share/public/plugin';
-import type {
-  UiActionsSetup,
-  UiActionsStart,
-} from '../../../../src/plugins/ui_actions/public/plugin';
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public/plugin';
-import type { PluginSetupContract as AlertingSetup } from '../../alerting/public/plugin';
-import type { DataVisualizerPluginStart } from '../../data_visualizer/public/plugin';
-import type { LicenseManagementUIPluginSetup } from '../../license_management/public/plugin';
-import type { LicensingPluginSetup } from '../../licensing/public/types';
-import type { MapsStartApi } from '../../maps/public/api/start_api';
-import type { SecurityPluginSetup } from '../../security/public/plugin';
-import type { SpacesPluginStart } from '../../spaces/public/plugin';
-import type {
+
+import type { ManagementSetup } from 'src/plugins/management/public';
+import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { HomePublicPluginSetup } from 'src/plugins/home/public';
+import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
+import type { SpacesPluginStart } from '../../spaces/public';
+
+import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
+
+import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { SecurityPluginSetup } from '../../security/public';
+
+import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
+import { isFullLicense, isMlEnabled } from '../common/license';
+
+import { setDependencyCache } from './application/util/dependency_cache';
+import { registerFeature } from './register_feature';
+import { MlLocatorDefinition, MlLocator } from './locator';
+import type { MapsStartApi } from '../../maps/public';
+import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public/plugin';
-import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
-import { isFullLicense, isMlEnabled } from '../common/license/ml_license';
-import type { MlLocator } from '../common/types/locator';
+} from '../../triggers_actions_ui/public';
+import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
+import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import { registerManagementSection } from './application/management';
-import { setDependencyCache } from './application/util/dependency_cache';
-import { MlLocatorDefinition } from './locator/ml_locator';
-import { registerFeature } from './register_feature';
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;

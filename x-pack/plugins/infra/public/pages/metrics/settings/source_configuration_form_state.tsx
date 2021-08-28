@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCallback, useMemo } from 'react';
-import type { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
+import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useIndicesConfigurationFormState } from './indices_configuration_form_state';
 
 export const useSourceConfigurationFormState = (

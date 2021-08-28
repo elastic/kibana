@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { ErrorThatHandlesItsOwnResponse, ElasticsearchError } from './types';
 import { getEsErrorMessage } from './es_error_parser';
-import type { ElasticsearchError, ErrorThatHandlesItsOwnResponse } from './types';
 
 export function isErrorThatHandlesItsOwnResponse(
   e: ErrorThatHandlesItsOwnResponse
@@ -13,6 +14,5 @@ export function isErrorThatHandlesItsOwnResponse(
   return typeof (e as ErrorThatHandlesItsOwnResponse).sendResponse === 'function';
 }
 
+export { ErrorThatHandlesItsOwnResponse, ElasticsearchError, getEsErrorMessage };
 export { AlertTypeDisabledError, AlertTypeDisabledReason } from './alert_type_disabled';
-export type { ErrorThatHandlesItsOwnResponse, ElasticsearchError };
-export { getEsErrorMessage };

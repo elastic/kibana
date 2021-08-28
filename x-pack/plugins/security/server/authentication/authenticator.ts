@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { LoggerFactory } from '@kbn/logging';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { IClusterClient } from '../../../../../src/core/server/elasticsearch/client/cluster_client';
-import type { IBasePath } from '../../../../../src/core/server/http/base_path_service';
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
+
+import { KibanaRequest } from '../../../../../src/core/server';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -17,34 +16,34 @@ import {
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing/license_service';
-import type { AuthenticatedUser } from '../../common/model/authenticated_user';
-import type { AuthenticationProvider } from '../../common/model/authentication_provider';
-import { shouldProviderUseLoginForm } from '../../common/model/authentication_provider';
-import { userLoginEvent } from '../audit/audit_events';
-import type { AuditServiceSetup } from '../audit/audit_service';
-import type { SecurityAuditLogger } from '../audit/security_audit_logger';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
+import { shouldProviderUseLoginForm } from '../../common/model';
+import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import { userLoginEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
-import type { SecurityFeatureUsageServiceStart } from '../feature_usage/feature_usage_service';
-import type { Session, SessionValue } from '../session_management/session';
+import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import type { Session, SessionValue } from '../session_management';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
-import { HTTPAuthorizationHeader } from './http_authentication/http_authorization_header';
-import { AnonymousAuthenticationProvider } from './providers/anonymous';
+import { HTTPAuthorizationHeader } from './http_authentication';
 import type {
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
   BaseAuthenticationProvider,
-} from './providers/base';
-import { BasicAuthenticationProvider } from './providers/basic';
-import { HTTPAuthenticationProvider } from './providers/http';
-import { KerberosAuthenticationProvider } from './providers/kerberos';
-import { OIDCAuthenticationProvider } from './providers/oidc';
-import { PKIAuthenticationProvider } from './providers/pki';
-import { SAMLAuthenticationProvider } from './providers/saml';
-import { TokenAuthenticationProvider } from './providers/token';
+} from './providers';
+import {
+  AnonymousAuthenticationProvider,
+  BasicAuthenticationProvider,
+  HTTPAuthenticationProvider,
+  KerberosAuthenticationProvider,
+  OIDCAuthenticationProvider,
+  PKIAuthenticationProvider,
+  SAMLAuthenticationProvider,
+  TokenAuthenticationProvider,
+} from './providers';
 import { Tokens } from './tokens';
 
 /**

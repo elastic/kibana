@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { EuiComboBoxProps } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
-import type { Required } from '@kbn/utility-types';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import type { IndexPatternsContract } from '../../../common/index_patterns/index_patterns/index_patterns';
+
+import { Required } from '@kbn/utility-types';
+import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+
+import { IndexPatternsContract } from 'src/plugins/data/public';
 
 export type IndexPatternSelectProps = Required<
   Omit<

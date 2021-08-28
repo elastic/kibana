@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   CATEGORICAL_DATA_TYPES,
   FIELD_ORIGIN,
   ORDINAL_DATA_TYPES,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import type { IField } from '../../fields/field';
+import { IField } from '../../fields/field';
 
 export interface StyleField {
   label: string;

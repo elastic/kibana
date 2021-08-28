@@ -6,20 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { CoreStart } from '../../../core/public/types';
-import type { OverlayRef } from '../../../core/public/overlays/types';
-import { IndexPatternField } from '../../data/common/index_patterns/fields/index_pattern_field';
-import { IndexPattern } from '../../data/common/index_patterns/index_patterns/index_pattern';
-import type { DataPublicPluginStart } from '../../data/public/types';
-import { createKibanaReactContext } from '../../kibana_react/public/context/context';
-import { toMountPoint } from '../../kibana_react/public/util/to_mount_point';
-import type { UsageCollectionStart } from '../../usage_collection/public/plugin';
-import { FieldEditorLoader } from './components/field_editor_loader';
-import { euiFlyoutClassname } from './constants';
+import { CoreStart, OverlayRef } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
+
+import {
+  createKibanaReactContext,
+  toMountPoint,
+  IndexPatternField,
+  DataPublicPluginStart,
+  IndexPattern,
+  UsageCollectionStart,
+} from './shared_imports';
+
+import type { PluginStart, InternalFieldType, CloseEditor } from './types';
 import type { ApiService } from './lib/api';
-import type { CloseEditor, InternalFieldType, PluginStart } from './types';
+import { euiFlyoutClassname } from './constants';
+import { FieldEditorLoader } from './components/field_editor_loader';
 
 export interface OpenFieldEditorOptions {
   ctx: {

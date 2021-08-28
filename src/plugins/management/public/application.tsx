@@ -8,9 +8,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { AppMountParameters } from '../../../core/public/application/types';
-import type { ManagementAppDependencies } from './components/management_app/management_app';
-import { ManagementApp } from './components/management_app/management_app';
+
+import { AppMountParameters } from 'kibana/public';
+import { ManagementApp, ManagementAppDependencies } from './components/management_app';
 
 export const renderApp = async (
   { history, appBasePath, element }: AppMountParameters,

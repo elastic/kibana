@@ -8,8 +8,7 @@
 
 import React from 'react';
 import { ComponentStrings } from '../../../i18n/components';
-import type { Props as SolutionToolbarButtonProps } from './button';
-import { SolutionToolbarButton } from './button';
+import { SolutionToolbarButton, Props as SolutionToolbarButtonProps } from './button';
 
 const { SolutionToolbar: strings } = ComponentStrings;
 

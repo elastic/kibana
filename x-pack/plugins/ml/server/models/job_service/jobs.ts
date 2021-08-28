@@ -4,54 +4,54 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
+
 import { uniq } from 'lodash';
-import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import type { RulesClient } from '../../../../alerting/server';
-import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
-import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
-import type { JobAction } from '../../../common/constants/job_actions';
+import Boom from '@hapi/boom';
+import { IScopedClusterClient } from 'kibana/server';
 import {
-  getJobActionString,
-  JOB_ACTION,
-  JOB_ACTION_TASK,
-  JOB_ACTION_TASKS,
-} from '../../../common/constants/job_actions';
-import { DATAFEED_STATE, JOB_STATE } from '../../../common/constants/states';
-import type {
-  CombinedJobWithStats,
-  DatafeedWithStats,
-} from '../../../common/types/anomaly_detection_jobs/combined_job';
-import type { Datafeed } from '../../../common/types/anomaly_detection_jobs/datafeed';
-import type { Job } from '../../../common/types/anomaly_detection_jobs/job';
-import type {
-  AuditMessage,
-  MlSummaryJob,
-} from '../../../common/types/anomaly_detection_jobs/summary_job';
-import type {
-  BulkCreateResults,
-  JobsExistResponse,
-  MlJobsResponse,
-  MlJobsStatsResponse,
-  ResetJobsResponse,
-} from '../../../common/types/job_service';
-import {
-  getEarliestDatafeedStartTime,
-  getLatestDataOrBucketTimestamp,
   getSingleMetricViewerJobErrorMessage,
   parseTimeIntervalForJob,
 } from '../../../common/util/job_utils';
-import { isPopulatedObject } from '../../../common/util/object_utils';
-import type { MlClient } from '../../lib/ml_client/types';
-import type { AuthorizationHeader } from '../../lib/request_authorization';
-import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
-import { CalendarManager } from '../calendar/calendar_manager';
-import { jobAuditMessagesProvider } from '../job_audit_messages/job_audit_messages';
-import { resultsServiceProvider } from '../results_service/results_service';
-import type { MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
-import { datafeedsProvider } from './datafeeds';
+import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
+import {
+  getJobActionString,
+  JOB_ACTION_TASK,
+  JOB_ACTION_TASKS,
+  JOB_ACTION,
+  JobAction,
+} from '../../../common/constants/job_actions';
+import {
+  MlSummaryJob,
+  AuditMessage,
+  DatafeedWithStats,
+  CombinedJobWithStats,
+  Datafeed,
+  Job,
+} from '../../../common/types/anomaly_detection_jobs';
+import {
+  MlJobsResponse,
+  MlJobsStatsResponse,
+  JobsExistResponse,
+  BulkCreateResults,
+  ResetJobsResponse,
+} from '../../../common/types/job_service';
+import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
+import { jobAuditMessagesProvider } from '../job_audit_messages';
+import { resultsServiceProvider } from '../results_service';
+import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
+import {
+  getEarliestDatafeedStartTime,
+  getLatestDataOrBucketTimestamp,
+} from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
+import type { MlClient } from '../../lib/ml_client';
+import { isPopulatedObject } from '../../../common/util/object_utils';
+import type { RulesClient } from '../../../../alerting/server';
+import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
+import { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
+import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 interface Results {
   [id: string]: {

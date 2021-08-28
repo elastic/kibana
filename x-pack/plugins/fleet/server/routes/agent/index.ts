@@ -4,36 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FleetConfigType } from '../..';
-import type { IRouter } from '../../../../../../src/core/server/http/router/router';
-import { PLUGIN_ID } from '../../../common/constants/plugin';
-import { AGENT_API_ROUTES } from '../../../common/constants/routes';
-import * as AgentService from '../../services/agents';
+
+import type { IRouter } from 'src/core/server';
+
+import { PLUGIN_ID, AGENT_API_ROUTES } from '../../constants';
 import {
-  DeleteAgentRequestSchema,
   GetAgentsRequestSchema,
-  GetAgentStatusRequestSchema,
   GetOneAgentRequestSchema,
+  UpdateAgentRequestSchema,
+  DeleteAgentRequestSchema,
   PostAgentUnenrollRequestSchema,
-  PostAgentUpgradeRequestSchema,
-  PostBulkAgentReassignRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
-  PostBulkAgentUpgradeRequestSchema,
+  GetAgentStatusRequestSchema,
   PostNewAgentActionRequestSchema,
   PutAgentReassignRequestSchema,
-  UpdateAgentRequestSchema,
-} from '../../types/rest_spec/agent';
+  PostBulkAgentReassignRequestSchema,
+  PostAgentUpgradeRequestSchema,
+  PostBulkAgentUpgradeRequestSchema,
+} from '../../types';
+import * as AgentService from '../../services/agents';
+import type { FleetConfigType } from '../..';
 
-import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import {
-  deleteAgentHandler,
-  getAgentHandler,
   getAgentsHandler,
-  getAgentStatusForAgentPolicyHandler,
-  postBulkAgentsReassignHandler,
-  putAgentsReassignHandler,
+  getAgentHandler,
   updateAgentHandler,
+  deleteAgentHandler,
+  getAgentStatusForAgentPolicyHandler,
+  putAgentsReassignHandler,
+  postBulkAgentsReassignHandler,
 } from './handlers';
+import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 

@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiEmptyPrompt, EuiHorizontalRule, EuiPageContent } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiEmptyPrompt, EuiHorizontalRule, EuiPageContent } from '@elastic/eui';
 
 interface ManagementLandingPageProps {
   version: string;

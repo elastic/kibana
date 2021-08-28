@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFormRow, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { Component } from 'react';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
+
+import { IndexPattern } from 'src/plugins/data/public';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiPanel } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
+import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
+
 import { getGeoPointFields } from '../../../index_pattern_util';
 import { GeoLineForm } from './geo_line_form';
 

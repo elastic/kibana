@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useLocation } from 'react-router-dom';
-import type { UIProcessorEvent } from '../../../../common/processor_event';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import {
+  ProcessorEvent,
+  UIProcessorEvent,
+} from '../../../../common/processor_event';
 
 /**
  * Infer the processor.event to used based on the route path

@@ -5,10 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '../../../../core/server/elasticsearch/client/types';
-import { KibanaRequest } from '../../../../core/server/http/router/request';
-import type { SavedObjectsClientContract } from '../../../../core/server/saved_objects/types';
+
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+  Logger,
+} from 'src/core/server';
 
 /** Types matching number values **/
 export type AllowedSchemaNumberTypes =

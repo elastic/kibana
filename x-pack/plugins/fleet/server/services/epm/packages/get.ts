@@ -4,31 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-} from '../../../../../../../src/core/server/saved_objects/types';
-import { installationStatuses, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common/constants/epm';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common/constants/package_policy';
-import { isPackageLimited } from '../../../../common/services/limited_package';
+
+import type { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
+
+import {
+  isPackageLimited,
+  installationStatuses,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../common';
+import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
   ArchivePackage,
-  EpmPackageAdditions,
-  Installation,
-  PackageInfo,
-  PackageUsageStats,
   RegistryPackage,
-} from '../../../../common/types/models/epm';
-import type { PackagePolicySOAttributes } from '../../../../common/types/models/package_policy';
-import type { GetCategoriesRequest } from '../../../../common/types/rest_spec/epm';
+  EpmPackageAdditions,
+  GetCategoriesRequest,
+} from '../../../../common/types';
+import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError } from '../../../errors';
-import { appContextService } from '../../app_context';
-import { normalizeKuery } from '../../saved_object';
-import { getArchivePackage } from '../archive/cache';
-import { getEsPackage } from '../archive/storage';
+import { appContextService } from '../../';
 import * as Registry from '../registry';
+import { getEsPackage } from '../archive/storage';
+import { getArchivePackage } from '../archive';
+import { normalizeKuery } from '../../saved_object';
 
-import { createInstallableFrom, isUnremovablePackage } from '.';
+import { createInstallableFrom, isUnremovablePackage } from './index';
 
 export { getFile, SearchParams } from '../registry';
 

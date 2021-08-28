@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import type { Space } from '../../../../../../../src/plugins/spaces_oss/common/types';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 interface Props {
   getActiveSpace: () => Promise<Space>;

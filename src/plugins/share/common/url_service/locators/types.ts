@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { DependencyList } from 'react';
-import type { PersistableState } from '../../../../kibana_utils/common/persistable_state/types';
+import { DependencyList } from 'react';
+import { PersistableState } from 'src/plugins/kibana_utils/common';
 
 /**
  * URL locator registry.

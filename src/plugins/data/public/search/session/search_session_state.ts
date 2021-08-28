@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
+import uuid from 'uuid';
 import deepEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
-import uuid from 'uuid';
-import { createStateContainer } from '../../../../kibana_utils/common/state_containers/create_state_container';
-import type { StateContainer } from '../../../../kibana_utils/common/state_containers/types';
-import type { SearchSessionSavedObject } from './sessions_client';
+import { createStateContainer, StateContainer } from '../../../../kibana_utils/public';
+import { SearchSessionSavedObject } from './sessions_client';
 
 /**
  * Possible state that current session can be in

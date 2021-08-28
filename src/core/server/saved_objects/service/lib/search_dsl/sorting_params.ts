@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
+
+import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import { getProperty } from '../../../mappings/lib/get_property';
-import type { IndexMapping } from '../../../mappings/types';
+import { getProperty, IndexMapping } from '../../../mappings';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
 

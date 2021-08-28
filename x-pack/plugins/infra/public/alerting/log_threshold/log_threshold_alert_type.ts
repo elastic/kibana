@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { ObservabilityRuleTypeModel } from '../../../../observability/public/rules/create_observability_rule_type_registry';
-import type { PartialAlertParams } from '../../../common/alerting/logs/log_threshold/types';
-import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../common/alerting/logs/log_threshold/types';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
+import {
+  LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+  PartialAlertParams,
+} from '../../../common/alerting/logs/log_threshold/types';
 import { formatRuleData } from './rule_data_formatters';
 import { validateExpression } from './validation';
 

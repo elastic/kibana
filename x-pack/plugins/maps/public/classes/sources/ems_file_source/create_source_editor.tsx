@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel } from '@elastic/eui';
+
 import React, { Component } from 'react';
-import type { EMSFileSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+import { EuiPanel } from '@elastic/eui';
+import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { EMSFileSelect } from '../../../components/ems_file_select';
 
 interface Props {

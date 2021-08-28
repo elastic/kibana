@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { Component } from 'react';
 
-import type { Capabilities } from '../../../../../../../../../src/core/types/capabilities';
-import type { Space } from '../../../../../../../../../src/plugins/spaces_oss/common/types';
-import type { SpacesApiUi } from '../../../../../../../../../src/plugins/spaces_oss/public/api';
-import type { Role } from '../../../../../../common/model/role';
-import type { KibanaPrivileges } from '../../../model/kibana_privileges';
-import { CollapsiblePanel } from '../../collapsible_panel/collapsible_panel';
+import type { Capabilities } from 'src/core/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
+import type { Space } from '../../../../../../../spaces/public';
+import type { Role } from '../../../../../../common/model';
+import type { KibanaPrivileges } from '../../../model';
+import { CollapsiblePanel } from '../../collapsible_panel';
 import type { RoleValidator } from '../../validate_role';
-import { SimplePrivilegeSection } from './simple_privilege_section/simple_privilege_section';
-import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section/space_aware_privilege_section';
-import { TransformErrorSection } from './transform_error_section/transform_error_section';
+import { SimplePrivilegeSection } from './simple_privilege_section';
+import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
+import { TransformErrorSection } from './transform_error_section';
 
 interface Props {
   role: Role;

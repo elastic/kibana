@@ -4,15 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Observable } from 'rxjs';
-import type { RequestHandlerContext } from '../../../../src/core/server';
-import type { IClusterClient } from '../../../../src/core/server/elasticsearch/client/cluster_client';
-import type { IRouter } from '../../../../src/core/server/http/router/router';
-import type { ILicense } from '../common/types';
-import type {
-  FeatureUsageServiceSetup,
-  FeatureUsageServiceStart,
-} from './services/feature_usage_service';
+import type { IClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
+import { ILicense } from '../common/types';
+import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
 export interface ElasticsearchError extends Error {
   status?: number;

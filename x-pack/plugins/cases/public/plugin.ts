@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
-import { ENABLE_CASE_CONNECTOR } from '../common/constants';
-import type { CasesUiConfigType } from '../common/ui/types';
-import { KibanaServices } from './common/lib/kibana/services';
-import { getCaseConnectorUi } from './components/connectors/case';
-import { getAllCasesLazy } from './methods/get_all_cases';
-import { getAllCasesSelectorModalLazy } from './methods/get_all_cases_selector_modal';
-import { getCaseViewLazy } from './methods/get_case_view';
-import { getConfigureCasesLazy } from './methods/get_configure_cases';
-import { getCreateCaseLazy } from './methods/get_create_case';
-import { getRecentCasesLazy } from './methods/get_recent_cases';
-import type { CasesUiStart, SetupPlugins, StartPlugins } from './types';
+
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CasesUiStart, SetupPlugins, StartPlugins } from './types';
+import { KibanaServices } from './common/lib/kibana';
+import { getCaseConnectorUi } from './components/connectors';
+import {
+  getAllCasesLazy,
+  getCaseViewLazy,
+  getConfigureCasesLazy,
+  getCreateCaseLazy,
+  getRecentCasesLazy,
+  getAllCasesSelectorModalLazy,
+} from './methods';
+import { CasesUiConfigType, ENABLE_CASE_CONNECTOR } from '../common';
 
 /**
  * @public

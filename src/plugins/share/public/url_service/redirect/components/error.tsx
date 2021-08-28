@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import * as React from 'react';
 import {
+  EuiEmptyPrompt,
   EuiCallOut,
   EuiCodeBlock,
-  EuiEmptyPrompt,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as React from 'react';
 
 const defaultTitle = i18n.translate('share.urlService.redirect.components.Error.title', {
   defaultMessage: 'Redirection error',

@@ -5,8 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { UiSettingsType } from '../../../../../core/types/ui_settings';
-import type { FieldSetting } from '../types';
+
+/**
+ * @param {object} advanced setting definition object
+ * @param {?} current value of the setting
+ * @returns {string} the type to use for determining the display and editor
+ */
+
+import { UiSettingsType } from 'src/core/public';
+import { FieldSetting } from '../types';
 
 export function getValType(def: Partial<FieldSetting>, value?: any): UiSettingsType {
   if (def.type) {

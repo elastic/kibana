@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiWrappingPopover } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { CoreStart } from '../../../../core/public/types';
-import type { HttpStart } from '../../../../core/public/http/types';
-import type { SecurityOssPluginStart } from '../../../security_oss/public/plugin';
+import { I18nProvider } from '@kbn/i18n/react';
+import { EuiWrappingPopover } from '@elastic/eui';
+
+import { CoreStart, HttpStart } from 'kibana/public';
 import { ShareContextMenu } from '../components/share_context_menu';
-import type { ShareMenuItem, ShowShareMenuOptions } from '../types';
-import type { ShareMenuRegistryStart } from './share_menu_registry';
+import { ShareMenuItem, ShowShareMenuOptions } from '../types';
+import { ShareMenuRegistryStart } from './share_menu_registry';
+import type { SecurityOssPluginStart } from '../../../security_oss/public';
 
 export class ShareMenuManager {
   private isOpen = false;

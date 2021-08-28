@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public/hooks/use_track_metric';
+import { useTrackPageview } from '../../../../../observability/public';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
-import { streamTitle } from '../../../translations';
 import { StreamPageContent } from './page_content';
 import { StreamPageHeader } from './page_header';
 import { LogsPageProviders } from './page_providers';
+import { streamTitle } from '../../../translations';
 
 export const StreamPage = () => {
   useTrackPageview({ app: 'infra_logs', path: 'stream' });

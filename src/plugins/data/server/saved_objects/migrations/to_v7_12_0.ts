@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectMigrationFn } from '../../../../../core/server/saved_objects/migrations/types';
+
+import type { SavedObjectMigrationFn } from 'kibana/server';
 
 /**
  * Drop the previous document's attributes, which report `averageDuration` incorrectly.

@@ -5,18 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Server } from '@hapi/hapi';
-import type { LegacyLoggingConfig } from '@kbn/legacy-logging';
-import { reconfigureLogging, setupLogging, setupLoggingRotate } from '@kbn/legacy-logging';
-import type { Logger } from '@kbn/logging';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
-import type { CoreContext } from '../core_context';
-import type { InternalHttpServiceSetup } from '../http/types';
-import { config as loggingConfig } from '../logging/logging_config';
-import type { OpsConfigType } from '../metrics/ops_config';
-import { opsConfig } from '../metrics/ops_config';
+import { Server } from '@hapi/hapi';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import {
+  reconfigureLogging,
+  setupLogging,
+  setupLoggingRotate,
+  LegacyLoggingConfig,
+} from '@kbn/legacy-logging';
+
+import { CoreContext } from '../core_context';
+import { config as loggingConfig } from '../logging';
+import { opsConfig, OpsConfigType } from '../metrics';
+import { Logger } from '../logging';
+import { InternalHttpServiceSetup } from '../http';
 
 export interface LegacyServiceSetupDeps {
   http: InternalHttpServiceSetup;

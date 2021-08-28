@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiLink, EuiPopover, EuiSpacer, EuiText } from '@elastic/eui';
+
+import { EuiLink, EuiText, EuiPopover, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 

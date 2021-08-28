@@ -8,7 +8,7 @@
 
 import SemVer from 'semver/classes/semver';
 import semverParse from 'semver/functions/parse';
-import type { TelemetrySavedObject } from './types';
+import { TelemetrySavedObject } from './types';
 
 interface GetTelemetryOptInConfig {
   telemetrySavedObject: TelemetrySavedObject;

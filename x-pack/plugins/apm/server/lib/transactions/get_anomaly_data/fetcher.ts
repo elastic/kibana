@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import type { ESSearchResponse } from '../../../../../../../src/core/types/elasticsearch';
-import { rangeQuery } from '../../../../../observability/server/utils/queries';
-import type { PromiseReturnType } from '../../../../../observability/typings/common';
+
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { ESSearchResponse } from '../../../../../../../src/core/types/elasticsearch';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
+import { rangeQuery } from '../../../../../observability/server';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import type { Setup } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 
 export type ESResponse = Exclude<
   PromiseReturnType<typeof anomalySeriesFetcher>,

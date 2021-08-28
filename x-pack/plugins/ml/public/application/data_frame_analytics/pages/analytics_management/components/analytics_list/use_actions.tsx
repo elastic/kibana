@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { EuiTableActionsColumnType } from '@elastic/eui';
 import React from 'react';
+
+import { EuiTableActionsColumnType } from '@elastic/eui';
+
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
-import { DeleteJobCheckModal } from '../../../../../components/delete_job_check_modal/delete_job_check_modal';
+
+import { DeleteJobCheckModal } from '../../../../../components/delete_job_check_modal';
+import { useCloneAction } from '../action_clone';
+import { useDeleteAction, DeleteActionModal } from '../action_delete';
+import { isEditActionFlyoutVisible, useEditAction, EditActionFlyout } from '../action_edit';
+import { useStartAction, StartActionModal } from '../action_start';
+import { useStopAction, StopActionModal } from '../action_stop';
+import { useViewAction } from '../action_view';
+import { useMapAction } from '../action_map';
+
+import { DataFrameAnalyticsListRow } from './common';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
-import { useCloneAction } from '../action_clone/use_clone_action';
-import { DeleteActionModal } from '../action_delete/delete_action_modal';
-import { useDeleteAction } from '../action_delete/use_delete_action';
-import { EditActionFlyout } from '../action_edit/edit_action_flyout';
-import { isEditActionFlyoutVisible, useEditAction } from '../action_edit/use_edit_action';
-import { useMapAction } from '../action_map/use_map_action';
-import { StartActionModal } from '../action_start/start_action_modal';
-import { useStartAction } from '../action_start/use_start_action';
-import { StopActionModal } from '../action_stop/stop_action_modal';
-import { useStopAction } from '../action_stop/use_stop_action';
-import { useViewAction } from '../action_view/use_view_action';
-import type { DataFrameAnalyticsListRow } from './common';
 
 export const useActions = (
   isManagementTable: boolean

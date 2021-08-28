@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IExternalUrlPolicy } from '../../server/external_url/external_url_config';
-import type { CoreService } from '../../types/core_service';
-import type { InjectedMetadataSetup } from '../injected_metadata/injected_metadata_service';
-import { Sha256 } from '../utils/crypto/sha256';
-import type { IExternalUrl } from './types';
+
+import { IExternalUrlPolicy } from 'src/core/server/types';
+
+import { CoreService } from 'src/core/types';
+import { IExternalUrl } from './types';
+import { InjectedMetadataSetup } from '../injected_metadata';
+import { Sha256 } from '../utils';
 
 interface SetupDeps {
   location: Pick<Location, 'origin'>;

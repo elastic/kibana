@@ -5,27 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {
-  EuiCard,
-  EuiFieldSearch,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiIcon,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiScreenReaderOnly,
-  EuiSpacer,
-} from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { orderBy } from 'lodash';
-import type { ChangeEvent } from 'react';
-import React from 'react';
+import React, { ChangeEvent } from 'react';
+
+import {
+  EuiFieldSearch,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiIcon,
+  EuiCard,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+} from '@elastic/eui';
+
 import { memoizeLast } from '../../legacy/memoize';
-import { BaseVisType } from '../../vis_types/base_vis_type';
-import type { TypesStart } from '../../vis_types/types_service';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
+import type { BaseVisType, TypesStart } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
 import './agg_based_selection.scss';
 

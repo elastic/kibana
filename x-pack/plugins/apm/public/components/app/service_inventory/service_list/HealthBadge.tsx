@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
 import React from 'react';
+import { EuiBadge } from '@elastic/eui';
 import {
   getServiceHealthStatusBadgeColor,
   getServiceHealthStatusLabel,

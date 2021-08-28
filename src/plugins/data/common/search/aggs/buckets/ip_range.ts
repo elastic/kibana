@@ -5,17 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { noop, map, omitBy, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { isNull, map, noop, omitBy } from 'lodash';
-import { KBN_FIELD_TYPES } from '../../../../common';
-import { cidrToAst } from '../../expressions/cidr_to_ast';
-import { ipRangeToAst } from '../../expressions/ip_range_to_ast';
-import type { BaseAggParams } from '../types';
+import { cidrToAst, ipRangeToAst } from '../../expressions';
+
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterIpRange } from './create_filter/ip_range';
+import { IpRangeKey, RangeIpRangeAggKey, CidrMaskIpRangeAggKey } from './lib/ip_range';
 import { aggIpRangeFnName } from './ip_range_fn';
-import type { CidrMaskIpRangeAggKey, IpRangeKey, RangeIpRangeAggKey } from './lib/ip_range';
+import { KBN_FIELD_TYPES } from '../../../../common';
+import { BaseAggParams } from '../types';
 
 const ipRangeTitle = i18n.translate('data.search.aggs.buckets.ipRangeTitle', {
   defaultMessage: 'IP Range',

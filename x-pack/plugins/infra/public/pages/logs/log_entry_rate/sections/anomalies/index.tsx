@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { TimeRange } from '../../../../../../common/time/time_range';
-import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
-import type {
+import { TimeRange } from '../../../../../../common/time/time_range';
+import { AnomaliesSwimlaneVisualisation } from './anomalies_swimlane_visualisation';
+import { AnomaliesTable } from './table';
+import {
   ChangePaginationOptions,
   ChangeSortOptions,
   FetchNextPage,
@@ -25,9 +27,8 @@ import type {
   PaginationOptions,
   SortOptions,
 } from '../../use_log_entry_anomalies_results';
-import type { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
-import { AnomaliesSwimlaneVisualisation } from './anomalies_swimlane_visualisation';
-import { AnomaliesTable } from './table';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
+import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
 
 export const AnomaliesResults: React.FunctionComponent<{
   isLoadingAnomaliesResults: boolean;

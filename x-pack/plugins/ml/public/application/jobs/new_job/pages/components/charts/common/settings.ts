@@ -7,13 +7,13 @@
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { useUiSettings } from '../../../../../../contexts/kibana/use_ui_settings_context';
-import { getTimeBucketsFromCache, TimeBuckets } from '../../../../../../util/time_buckets';
-import type { JobCreatorType } from '../../../../common/job_creator/type_guards';
 import {
+  JobCreatorType,
   isMultiMetricJobCreator,
   isPopulationJobCreator,
-} from '../../../../common/job_creator/type_guards';
+} from '../../../../common/job_creator';
+import { getTimeBucketsFromCache, TimeBuckets } from '../../../../../../util/time_buckets';
+import { useUiSettings } from '../../../../../../contexts/kibana/use_ui_settings_context';
 
 export function useChartColors() {
   const IS_DARK_THEME = useUiSettings().get('theme:darkMode');

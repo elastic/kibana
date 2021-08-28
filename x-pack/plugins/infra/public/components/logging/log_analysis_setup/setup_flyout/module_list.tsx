@@ -4,13 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useLogAnalysisCapabilitiesContext } from '../../../../containers/logs/log_analysis/log_analysis_capabilities';
-import { logEntryCategoriesModule } from '../../../../containers/logs/log_analysis/modules/log_entry_categories/module_descriptor';
-import { useLogEntryCategoriesModuleContext } from '../../../../containers/logs/log_analysis/modules/log_entry_categories/use_log_entry_categories_module';
-import { logEntryRateModule } from '../../../../containers/logs/log_analysis/modules/log_entry_rate/module_descriptor';
-import { useLogEntryRateModuleContext } from '../../../../containers/logs/log_analysis/modules/log_entry_rate/use_log_entry_rate_module';
+import { useLogAnalysisCapabilitiesContext } from '../../../../containers/logs/log_analysis';
+import {
+  logEntryCategoriesModule,
+  useLogEntryCategoriesModuleContext,
+} from '../../../../containers/logs/log_analysis/modules/log_entry_categories';
+import {
+  logEntryRateModule,
+  useLogEntryRateModuleContext,
+} from '../../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { LogAnalysisModuleListCard } from './module_list_card';
 import type { ModuleId } from './setup_flyout_state';
 

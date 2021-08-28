@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLink, EuiText } from '@elastic/eui';
+
+import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React from 'react';
-import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
+import { EuiLink, EuiText } from '@elastic/eui';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 interface Props {
   destIndex: string;

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -11,19 +12,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReactNode } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { OverviewTableContainer } from '../../../shared/overview_table_container';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import type {
+import {
+  PAGE_SIZE,
   SortDirection,
   SortField,
 } from '../service_overview_instances_chart_and_table';
-import { PAGE_SIZE } from '../service_overview_instances_chart_and_table';
+import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
 

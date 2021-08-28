@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObject } from '../../../../types/saved_objects';
-import type { SavedObjectsImportRetry } from '../types';
+
+import { SavedObject } from '../../types';
+import { SavedObjectsImportRetry } from '../types';
 
 export function createObjectsFilter(retries: SavedObjectsImportRetry[]) {
   const retryKeys = new Set<string>(retries.map((retry) => `${retry.type}:${retry.id}`));

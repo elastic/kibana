@@ -5,11 +5,24 @@
  * 2.0.
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { VectorStyleColorEditor } from './color/vector_style_color_editor';
+import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
+// @ts-expect-error
+import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
+import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
+import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
+// @ts-expect-error
+import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
+// @ts-expect-error
+import { OrientationEditor } from './orientation/orientation_editor';
+import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
+import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';
+
 import {
   LABEL_BORDER_SIZES,
   LAYER_TYPE,
@@ -17,7 +30,8 @@ import {
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import type {
+import { createStyleFieldsHelper, StyleField, StyleFieldsHelper } from '../style_fields_helper';
+import {
   ColorDynamicOptions,
   ColorStaticOptions,
   DynamicStylePropertyOptions,
@@ -30,27 +44,13 @@ import type {
   StaticStylePropertyOptions,
   StylePropertyOptions,
   VectorStylePropertiesDescriptor,
-} from '../../../../../common/descriptor_types/style_property_descriptor_types';
-import type { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
-import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';
-import { LabelBorderSizeProperty } from '../properties/label_border_size_property';
-import { StaticSizeProperty } from '../properties/static_size_property';
-import { StaticTextProperty } from '../properties/static_text_property';
-import type { IStyleProperty } from '../properties/style_property';
+} from '../../../../../common/descriptor_types';
+import { IStyleProperty } from '../properties/style_property';
 import { SymbolizeAsProperty } from '../properties/symbolize_as_property';
-import type { StyleField } from '../style_fields_helper';
-import { createStyleFieldsHelper, StyleFieldsHelper } from '../style_fields_helper';
-import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
-import { VectorStyleColorEditor } from './color/vector_style_color_editor';
-// @ts-expect-error
-import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
-import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
-// @ts-expect-error
-import { OrientationEditor } from './orientation/orientation_editor';
-import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
-import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
-// @ts-expect-error
-import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
+import { LabelBorderSizeProperty } from '../properties/label_border_size_property';
+import { StaticTextProperty } from '../properties/static_text_property';
+import { StaticSizeProperty } from '../properties/static_size_property';
+import { IVectorLayer } from '../../../layers/vector_layer';
 
 export interface StyleProperties {
   [key: string]: IStyleProperty<StylePropertyOptions>;

@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useEffect, useState } from 'react';
 
-import type { TutorialDirectoryHeaderLinkComponent } from '../../../../../../src/plugins/home/public/services/tutorials/tutorial_service';
-import { RedirectAppLinks } from '../../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
-import { useCapabilities } from '../../hooks/use_capabilities';
-import { useStartServices } from '../../hooks/use_core';
-import { useLink } from '../../hooks/use_link';
+import React, { memo, useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import type { TutorialDirectoryHeaderLinkComponent } from 'src/plugins/home/public';
+
+import { RedirectAppLinks } from '../../../../../../src/plugins/kibana_react/public';
+import { useLink, useCapabilities, useStartServices } from '../../hooks';
 
 import { tutorialDirectoryNoticeState$ } from './tutorial_directory_notice';
 

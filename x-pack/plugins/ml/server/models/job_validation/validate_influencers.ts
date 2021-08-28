@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs/combined_job';
+
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+
 import { validateJobObject } from './validate_job_object';
 
 const INFLUENCER_LOW_THRESHOLD = 0;

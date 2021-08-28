@@ -4,19 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
-import type {
-  GetOneOutputResponse,
-  GetOutputsResponse,
-} from '../../../common/types/rest_spec/output';
-import { defaultIngestErrorHandler } from '../../errors/handlers';
+import type { GetOneOutputRequestSchema, PutOutputRequestSchema } from '../../types';
+import type { GetOneOutputResponse, GetOutputsResponse } from '../../../common';
 import { outputService } from '../../services/output';
-import type {
-  GetOneOutputRequestSchema,
-  PutOutputRequestSchema,
-} from '../../types/rest_spec/output';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;

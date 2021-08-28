@@ -5,10 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableInput } from '../../../../../embeddable/common/types';
-import type { IContainer } from '../../../../../embeddable/public/lib/containers/i_container';
-import type { EmbeddableFactoryDefinition } from '../../../../../embeddable/public/lib/embeddables/embeddable_factory_definition';
+
+import {
+  EmbeddableFactoryDefinition,
+  EmbeddableInput,
+  IContainer,
+} from '../../../services/embeddable';
 import { PlaceholderEmbeddable, PLACEHOLDER_EMBEDDABLE } from './placeholder_embeddable';
 
 export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition {

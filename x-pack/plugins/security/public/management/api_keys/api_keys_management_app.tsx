@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { History } from 'history';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -13,10 +14,10 @@ import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
-import type { CoreStart, StartServicesAccessor } from '../../../../../../src/core/public/types';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context/context';
-import type { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public/utils/management_app';
-import type { AuthenticationServiceSetup } from '../../authentication/authentication_service';
+import type { CoreStart, StartServicesAccessor } from '../../../../../../src/core/public';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import type { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
+import type { AuthenticationServiceSetup } from '../../authentication';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
   Breadcrumb,

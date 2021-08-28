@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { observabilityAppId } from '../../../../../common';
+
 import {
   getCaseDetailsUrl,
   getConfigureCasesUrl,

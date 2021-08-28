@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,23 +25,29 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  Capabilities,
+  DocLinksStart,
+  FatalErrorsSetup,
+  HttpStart,
+  IHttpFetchError,
+  NotificationsStart,
+  ScopedHistory,
+} from 'src/core/public';
+import type { IndexPatternsContract } from 'src/plugins/data/public';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import type { ScopedHistory } from '../../../../../../../src/core/public/application/scoped_history';
-import type { DocLinksStart } from '../../../../../../../src/core/public/doc_links/doc_links_service';
-import type { FatalErrorsSetup } from '../../../../../../../src/core/public/fatal_errors/fatal_errors_service';
-import type { HttpStart, IHttpFetchError } from '../../../../../../../src/core/public/http/types';
-import type { NotificationsStart } from '../../../../../../../src/core/public/notifications/notifications_service';
-import type { Capabilities } from '../../../../../../../src/core/types/capabilities';
-import type { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public/react_router_navigate/react_router_navigate';
-import type { Space } from '../../../../../../../src/plugins/spaces_oss/common/types';
-import type { SpacesApiUi } from '../../../../../../../src/plugins/spaces_oss/public/api';
-import type { KibanaFeature } from '../../../../../features/common/kibana_feature';
-import type { FeaturesPluginStart } from '../../../../../features/public/plugin';
-import type { SecurityLicense } from '../../../../common/licensing/license_service';
-import type { BuiltinESPrivileges } from '../../../../common/model/builtin_es_privileges';
-import type { RawKibanaPrivileges } from '../../../../common/model/raw_kibana_privileges';
-import type { Role, RoleIndexPrivilege } from '../../../../common/model/role';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { KibanaFeature } from '../../../../../features/common';
+import type { FeaturesPluginStart } from '../../../../../features/public';
+import type { Space } from '../../../../../spaces/public';
+import type { SecurityLicense } from '../../../../common/licensing';
+import type {
+  BuiltinESPrivileges,
+  RawKibanaPrivileges,
+  Role,
+  RoleIndexPrivilege,
+} from '../../../../common/model';
 import {
   isRoleDeprecated as checkIfRoleDeprecated,
   isRoleReadOnly as checkIfRoleReadOnly,
@@ -48,15 +55,14 @@ import {
   copyRole,
   getExtendedRoleDeprecationNotice,
   prepareRoleClone,
-} from '../../../../common/model/role';
-import type { UserAPIClient } from '../../users/user_api_client';
+} from '../../../../common/model';
+import type { UserAPIClient } from '../../users';
 import type { IndicesAPIClient } from '../indices_api_client';
-import { KibanaPrivileges } from '../model/kibana_privileges';
+import { KibanaPrivileges } from '../model';
 import type { PrivilegesAPIClient } from '../privileges_api_client';
 import type { RolesAPIClient } from '../roles_api_client';
 import { DeleteRoleButton } from './delete_role_button';
-import { ElasticsearchPrivileges } from './privileges/es/elasticsearch_privileges';
-import { KibanaPrivilegesRegion } from './privileges/kibana/kibana_privileges_region';
+import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import type { RoleValidationResult } from './validate_role';
 import { RoleValidator } from './validate_role';

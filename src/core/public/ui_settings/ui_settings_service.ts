@@ -5,12 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Subject } from 'rxjs';
-import type { HttpSetup } from '../http/types';
-import type { InjectedMetadataSetup } from '../injected_metadata/injected_metadata_service';
-import type { IUiSettingsClient } from './types';
+
+import { HttpSetup } from '../http';
+import { InjectedMetadataSetup } from '../injected_metadata';
+
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
+import { IUiSettingsClient } from './types';
 
 interface UiSettingsServiceDeps {
   http: HttpSetup;

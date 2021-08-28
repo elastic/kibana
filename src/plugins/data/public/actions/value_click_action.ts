@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { Filter } from '@kbn/es-query';
-import type { Datatable } from '../../../expressions/common/expression_types/specs/datatable';
-import type { Action } from '../../../ui_actions/public/actions/action';
-import { createAction } from '../../../ui_actions/public/actions/create_action';
-import type { UiActionsStart } from '../../../ui_actions/public/plugin';
-import { APPLY_FILTER_TRIGGER } from '../triggers/apply_filter_trigger';
+import { Datatable } from 'src/plugins/expressions/public';
+import { Action, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 
 export type ValueClickActionContext = ValueClickContext;

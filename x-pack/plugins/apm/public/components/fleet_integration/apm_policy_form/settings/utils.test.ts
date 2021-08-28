@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
-import type { PackagePolicyVars } from '../typings';
-import type { SettingDefinition } from './typings';
+import { PackagePolicyVars } from '../typings';
+import { SettingDefinition } from './typings';
 import {
-  isSettingsFormValid,
   mergeNewVars,
+  isSettingsFormValid,
   validateSettingValue,
 } from './utils';
 

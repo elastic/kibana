@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
@@ -11,11 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { Role } from '../../../../../common/model/role';
-import { isRoleDeprecated } from '../../../../../common/model/role';
-import type { RoleMapping } from '../../../../../common/model/role_mapping';
-import { RoleComboBox } from '../../../role_combo_box/role_combo_box';
-import type { RolesAPIClient } from '../../../roles/roles_api_client';
+import type { Role, RoleMapping } from '../../../../../common/model';
+import { isRoleDeprecated } from '../../../../../common/model';
+import { RoleComboBox } from '../../../role_combo_box';
+import type { RolesAPIClient } from '../../../roles';
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleTemplateEditor } from './role_template_editor';
 

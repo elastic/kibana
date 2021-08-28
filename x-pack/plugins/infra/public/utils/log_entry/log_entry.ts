@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { bisector } from 'd3-array';
-import type {
-  LogColumn,
+import { compareToTimeKey, getIndexAtTimeKey, TimeKey, UniqueTimeKey } from '../../../common/time';
+import {
   LogEntry,
+  LogColumn,
+  LogTimestampColumn,
   LogFieldColumn,
   LogMessageColumn,
-  LogMessageConstantPart,
-  LogMessageFieldPart,
   LogMessagePart,
-  LogTimestampColumn,
-} from '../../../common/log_entry/log_entry';
-import type { TimeKey, UniqueTimeKey } from '../../../common/time/time_key';
-import { compareToTimeKey, getIndexAtTimeKey } from '../../../common/time/time_key';
+  LogMessageFieldPart,
+  LogMessageConstantPart,
+} from '../../../common/log_entry';
 
 export const getLogEntryKey = (entry: { cursor: TimeKey }) => entry.cursor;
 

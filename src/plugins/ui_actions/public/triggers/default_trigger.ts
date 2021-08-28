@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Trigger } from './trigger';
+
+import { Trigger } from '.';
 
 export const DEFAULT_TRIGGER = '';
 export const defaultTrigger: Trigger = {

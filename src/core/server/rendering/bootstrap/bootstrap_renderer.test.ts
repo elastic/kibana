@@ -5,20 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PackageInfo } from '@kbn/config';
-import { AuthStatus } from '../../http/auth_state_storage';
-import { httpServerMock } from '../../http/http_server.mocks';
-import { httpServiceMock } from '../../http/http_service.mock';
-import type { UiPlugins } from '../../plugins/plugins_service';
-import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
-import type { BootstrapRenderer } from './bootstrap_renderer';
-import { bootstrapRendererFactory } from './bootstrap_renderer';
+
 import {
-  getJsDependencyPathsMock,
+  renderTemplateMock,
   getPluginsBundlePathsMock,
   getThemeTagMock,
-  renderTemplateMock,
+  getJsDependencyPathsMock,
 } from './bootstrap_renderer.test.mocks';
+
+import { PackageInfo } from '@kbn/config';
+import { UiPlugins } from '../../plugins';
+import { httpServiceMock } from '../../http/http_service.mock';
+import { httpServerMock } from '../../http/http_server.mocks';
+import { AuthStatus } from '../../http';
+import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+import { bootstrapRendererFactory, BootstrapRenderer } from './bootstrap_renderer';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   branch: 'master',

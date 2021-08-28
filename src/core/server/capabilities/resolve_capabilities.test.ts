@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Capabilities } from '../../types/capabilities';
-import { httpServerMock } from '../http/http_server.mocks';
-import { KibanaRequest } from '../http/router/request';
+
+import { Capabilities } from './types';
 import { resolveCapabilities } from './resolve_capabilities';
+import { KibanaRequest } from '../http';
+import { httpServerMock } from '../http/http_server.mocks';
 
 describe('resolveCapabilities', () => {
   let defaultCaps: Capabilities;

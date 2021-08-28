@@ -7,26 +7,21 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '../../../core/public/types';
-import type { BfetchPublicSetup } from '../../bfetch/public/plugin/types';
-import type { ExpressionsSetup } from '../../expressions/public/plugin';
-import type { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/public/plugin';
-import type { Setup as InspectorSetup } from '../../inspector/public/plugin';
-import type { IStorageWrapper } from '../../kibana_utils/public/storage/types';
-import type { UiActionsSetup, UiActionsStart } from '../../ui_actions/public/plugin';
-import type {
-  UsageCollectionSetup,
-  UsageCollectionStart,
-} from '../../usage_collection/public/plugin';
-import type { IndexPatternsContract } from '../common/index_patterns/index_patterns/index_patterns';
-import { createFiltersFromRangeSelectAction } from './actions/filters/create_filters_from_range_select';
-import { createFiltersFromValueClickAction } from './actions/filters/create_filters_from_value_click';
-import type { AutocompleteSetup, AutocompleteStart } from './autocomplete/autocomplete_service';
-import type { NowProviderPublicContract } from './now_provider/now_provider';
-import type { QuerySetup, QueryStart } from './query/query_service';
-import type { ISearchSetup, ISearchStart } from './search/types';
-import type { IndexPatternSelectProps } from './ui/index_pattern_select/index_pattern_select';
-import type { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
+import { CoreStart } from 'src/core/public';
+import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
+import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
+import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
+import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
+import { ISearchSetup, ISearchStart } from './search';
+import { QuerySetup, QueryStart } from './query';
+import { IndexPatternsContract } from './index_patterns';
+import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
+import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
+import { Setup as InspectorSetup } from '../../inspector/public';
+import { NowProviderPublicContract } from './now_provider';
 
 export interface DataSetupDependencies {
   bfetch: BfetchPublicSetup;

@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
-import type { CoreVitalProps } from '../types';
-import { CoreVitalItem } from './core_vital_item';
-import { ServiceName } from './service_name';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
   CLS_HELP_LABEL,
   CLS_LABEL,
@@ -18,7 +15,10 @@ import {
   LCP_HELP_LABEL,
   LCP_LABEL,
 } from './translations';
+import { CoreVitalItem } from './core_vital_item';
 import { WebCoreVitalsTitle } from './web_core_vitals_title';
+import { ServiceName } from './service_name';
+import { CoreVitalProps } from '../types';
 
 export interface UXMetrics {
   cls: number | null;

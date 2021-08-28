@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Capabilities } from '../../../../../core/types/capabilities';
-import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { IndexPatternsContract } from '../../../../data/common/index_patterns/index_patterns/index_patterns';
+
+import type { Capabilities } from 'kibana/public';
+import { IndexPattern, IndexPatternsContract } from '../../../../data/public';
 
 async function popularizeField(
   indexPattern: IndexPattern,

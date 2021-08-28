@@ -5,12 +5,61 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
+
+/**
+ * @name SearchSource
+ *
+ * @description A promise-based stream of search results that can inherit from other search sources.
+ *
+ * Because filters/queries in Kibana have different levels of persistence and come from different
+ * places, it is important to keep track of where filters come from for when they are saved back to
+ * the savedObject store in the Kibana index. To do this, we create trees of searchSource objects
+ * that can have associated query parameters (index, query, filter, etc) which can also inherit from
+ * other searchSource objects.
+ *
+ * At query time, all of the searchSource objects that have subscribers are "flattened", at which
+ * point the query params from the searchSource are collected while traversing up the inheritance
+ * chain. At each link in the chain a decision about how to merge the query params is made until a
+ * single set of query parameters is created for each active searchSource (a searchSource with
+ * subscribers).
+ *
+ * That set of query parameters is then sent to elasticsearch. This is how the filter hierarchy
+ * works in Kibana.
+ *
+ * Visualize, starting from a new search:
+ *
+ *  - the `savedVis.searchSource` is set as the `appSearchSource`.
+ *  - The `savedVis.searchSource` would normally inherit from the `appSearchSource`, but now it is
+ *    upgraded to inherit from the `rootSearchSource`.
+ *  - Any interaction with the visualization will still apply filters to the `appSearchSource`, so
+ *    they will be stored directly on the `savedVis.searchSource`.
+ *  - Any interaction with the time filter will be written to the `rootSearchSource`, so those
+ *    filters will not be saved by the `savedVis`.
+ *  - When the `savedVis` is saved to elasticsearch, it takes with it all the filters that are
+ *    defined on it directly, but none of the ones that it inherits from other places.
+ *
+ * Visualize, starting from an existing search:
+ *
+ *  - The `savedVis` loads the `savedSearch` on which it is built.
+ *  - The `savedVis.searchSource` is set to inherit from the `saveSearch.searchSource` and set as
+ *    the `appSearchSource`.
+ *  - The `savedSearch.searchSource`, is set to inherit from the `rootSearchSource`.
+ *  - Then the `savedVis` is written to elasticsearch it will be flattened and only include the
+ *    filters created in the visualize application and will reconnect the filters from the
+ *    `savedSearch` at runtime to prevent losing the relationship
+ *
+ * Dashboard search sources:
+ *
+ *  - Each panel in a dashboard has a search source.
+ *  - The `savedDashboard` also has a searchsource, and it is set as the `appSearchSource`.
+ *  - Each panel's search source inherits from the `appSearchSource`, meaning that they inherit from
+ *    the dashboard search source.
+ *  - When a filter is added to the search box, or via a visualization, it is written to the
+ *    `appSearchSource`.
+ */
+
 import { setWith } from '@elastic/safer-lodash-set';
-import type { Filter } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
-import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, uniqWith } from 'lodash';
-import { defer, EMPTY, from, Observable } from 'rxjs';
+import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
 import {
   catchError,
   finalize,
@@ -21,31 +70,38 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { getHighlightRequest } from '../../../../field_formats/common/utils/highlight/highlight_request';
-import { fieldWildcardFilter } from '../../../../kibana_utils/common/field_wildcard';
-import { UI_SETTINGS } from '../../constants';
-import { getEsQueryConfig } from '../../es_query/get_es_query_config';
-import { IndexPatternField } from '../../index_patterns/fields/index_pattern_field';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import type { IIndexPattern } from '../../index_patterns/types';
-import { AggConfigs } from '../aggs/agg_configs';
-import type { IEsSearchResponse } from '../strategies/es_search/types';
-import { ES_SEARCH_STRATEGY } from '../strategies/es_search/types';
-import type { IKibanaSearchResponse, ISearchGeneric, ISearchOptions } from '../types';
-import { isErrorResponse, isPartialResponse } from '../utils';
-import { extractReferences } from './extract_references';
-import { getSearchParamsFromRequest } from './fetch/get_search_params';
-import { RequestFailure } from './fetch/request_error';
-import type { FetchHandlers, SearchRequest } from './fetch/types';
-import { getRequestInspectorStats, getResponseInspectorStats } from './inspect/inspector_stats';
+import { defer, EMPTY, from, Observable } from 'rxjs';
+import { estypes } from '@elastic/elasticsearch';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
-import type {
+import { fieldWildcardFilter } from '../../../../kibana_utils/common';
+import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
+import {
+  AggConfigs,
+  ES_SEARCH_STRATEGY,
   EsQuerySortValue,
+  IEsSearchResponse,
+  ISearchGeneric,
+  ISearchOptions,
+} from '../..';
+import type {
   ISearchSource,
   SearchFieldValue,
-  SearchSourceFields,
   SearchSourceOptions,
+  SearchSourceFields,
 } from './types';
+import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
+import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
+
+import {
+  getEsQueryConfig,
+  UI_SETTINGS,
+  isErrorResponse,
+  isPartialResponse,
+  IKibanaSearchResponse,
+} from '../../../common';
+import { getHighlightRequest } from '../../../../field_formats/common';
+import { extractReferences } from './extract_references';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [

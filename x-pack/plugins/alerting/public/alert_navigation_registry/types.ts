@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { JsonObject } from '@kbn/utility-types';
-import type { SanitizedAlert } from '../../common/alert';
+
+import { JsonObject } from '@kbn/utility-types';
+import { SanitizedAlert } from '../../common';
 
 /**
  * Returns information that can be used to navigate to a specific page to view the given rule.

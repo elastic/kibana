@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HTMLAttributes } from 'react';
-import React, { useState } from 'react';
-import type { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline/events/all';
+
+import React, { HTMLAttributes, useState } from 'react';
+import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
+
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import type { CellValueElementProps } from '../../../../../common/types/timeline/cells';
-import type { ColumnHeaderOptions } from '../../../../../common/types/timeline/columns';
+import type {
+  CellValueElementProps,
+  ColumnHeaderOptions,
+} from '../../../../../common/types/timeline';
 
 export interface CommonProps {
   className?: string;

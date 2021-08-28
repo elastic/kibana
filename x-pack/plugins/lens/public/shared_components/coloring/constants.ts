@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RequiredPaletteParamTypes } from '../../../common/types';
+
+import type { RequiredPaletteParamTypes } from '../../../common';
 
 export const DEFAULT_PALETTE_NAME = 'positive';
 export const FIXED_PROGRESSION = 'fixed' as const;

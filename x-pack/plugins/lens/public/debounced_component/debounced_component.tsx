@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState, useMemo, useEffect, memo, FunctionComponent } from 'react';
 import { debounce } from 'lodash';
-import type { FunctionComponent } from 'react';
-import React, { memo, useEffect, useMemo, useState } from 'react';
 
 /**
  * debouncedComponent wraps the specified React component, returning a component which

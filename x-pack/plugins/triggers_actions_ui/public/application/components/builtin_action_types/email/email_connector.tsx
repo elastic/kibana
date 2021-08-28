@@ -4,25 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useEffect } from 'react';
 import {
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiFieldNumber,
   EuiFieldPassword,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiLink,
-  EuiSpacer,
   EuiSwitch,
+  EuiFormRow,
   EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect } from 'react';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { ActionConnectorFieldsProps } from '../../../../types';
+import { EuiLink } from '@elastic/eui';
+import { ActionConnectorFieldsProps } from '../../../../types';
+import { EmailActionConnector } from '../types';
+import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
-import type { EmailActionConnector } from '../types';
 
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import type { ServiceAnomalyStats } from './anomaly_detection';
+import { ServiceAnomalyStats } from './anomaly_detection';
 
 // These should be imported, but until TypeScript 4.2 we're inlining them here.
 // All instances of "agent.name", "service.name", "service.environment", "span.type",

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useEffect } from 'react';
-import type { TimeRange } from '../../../../../../common/time/time_range';
-import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
+import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import { CategoryExampleMessage } from './category_example_message';
 
 const exampleCount = 5;

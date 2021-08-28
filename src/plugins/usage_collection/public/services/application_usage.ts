@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { Observable, fromEvent } from 'rxjs';
+import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { ApplicationUsageTracker } from '@kbn/analytics';
-import { fromEvent, Observable } from 'rxjs';
-import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '../../common/constants';
 
 /**

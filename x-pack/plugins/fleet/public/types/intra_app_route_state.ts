@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApplicationStart } from '../../../../../src/core/public/application/types';
-import type { PackagePolicy } from '../../common/types/models/package_policy';
+
+import type { ApplicationStart } from 'kibana/public';
+
+import type { PackagePolicy } from './';
 
 /**
  * Supported routing state for the create package policy page routes

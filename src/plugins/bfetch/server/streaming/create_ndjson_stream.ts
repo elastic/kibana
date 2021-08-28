@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
+
 import { Observable } from 'rxjs';
-import { PassThrough, Stream } from 'stream';
+import { Logger } from 'src/core/server';
+import { Stream, PassThrough } from 'stream';
 
 const delimiter = '\n';
 

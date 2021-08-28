@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Subject } from 'rxjs';
 import { materialize, take, toArray } from 'rxjs/operators';
+
 import { UiSettingsClient } from './ui_settings_client';
 
 let done$: Subject<unknown>;

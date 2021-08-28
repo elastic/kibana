@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { LogRecord } from '@kbn/logging';
-import type { Conversion } from './type';
+
+import { LogRecord } from '@kbn/logging';
+import { Conversion } from './type';
 
 export const PidConversion: Conversion = {
   pattern: /%pid/g,

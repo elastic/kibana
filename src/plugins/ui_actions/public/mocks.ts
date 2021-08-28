@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { CoreSetup, CoreStart } from 'src/core/public';
+import { UiActionsSetup, UiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
-import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import { coreMock } from '../../../core/public/mocks';
-import type { UiActionsSetup, UiActionsStart } from './plugin';
 
 export type Setup = jest.Mocked<UiActionsSetup>;
 export type Start = jest.Mocked<UiActionsStart>;

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { History } from 'history';
 import { useEffect } from 'react';
-
+import { History } from 'history';
 export function useUrl({
   history,
   resetSavedSearch,

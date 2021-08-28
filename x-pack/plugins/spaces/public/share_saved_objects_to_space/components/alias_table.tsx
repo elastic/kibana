@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { EuiTableComputedColumnType, Pagination } from '@elastic/eui';
 import {
   EuiCallOut,
@@ -17,7 +18,7 @@ import React, { lazy, Suspense, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { getSpaceAvatarComponent } from '../../space_avatar/space_avatar';
+import { getSpaceAvatarComponent } from '../../space_avatar';
 import type { ShareToSpaceTarget } from '../../types';
 import type { InternalLegacyUrlAliasTarget } from './types';
 

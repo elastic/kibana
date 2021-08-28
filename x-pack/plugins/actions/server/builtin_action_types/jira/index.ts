@@ -4,34 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
+
 import { curry } from 'lodash';
-import type { ActionTypeExecutorResult } from '../../../common/types';
-import type { ActionsConfigurationUtilities } from '../../actions_config';
-import type { ActionType, ActionTypeExecutorOptions } from '../../types';
-import { api } from './api';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+import { validate } from './validators';
 import {
-  ExecutorParamsSchema,
   ExternalIncidentServiceConfiguration,
   ExternalIncidentServiceSecretConfiguration,
+  ExecutorParamsSchema,
 } from './schema';
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
 import { createExternalService } from './service';
-import * as i18n from './translations';
-import type {
+import { api } from './api';
+import {
   ExecutorParams,
-  ExecutorSubActionCommonFieldsParams,
-  ExecutorSubActionGetFieldsByIssueTypeParams,
-  ExecutorSubActionGetIncidentParams,
-  ExecutorSubActionGetIssueParams,
-  ExecutorSubActionGetIssuesParams,
   ExecutorSubActionPushParams,
-  JiraExecutorResultData,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
+  JiraExecutorResultData,
+  ExecutorSubActionGetFieldsByIssueTypeParams,
+  ExecutorSubActionCommonFieldsParams,
+  ExecutorSubActionGetIssuesParams,
+  ExecutorSubActionGetIssueParams,
+  ExecutorSubActionGetIncidentParams,
 } from './types';
-import { validate } from './validators';
+import * as i18n from './translations';
+import { Logger } from '../../../../../../src/core/server';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 interface GetActionTypeParams {

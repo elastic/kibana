@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiSelectOption } from '@elastic/eui';
+
 import { padStart } from 'lodash';
-import type { DayOrdinal, MonthOrdinal } from './services/humanized_numbers';
-import { getDayName, getMonthName, getOrdinalValue } from './services/humanized_numbers';
-import type { Field, FieldToValueMap, Frequency } from './types';
+import { EuiSelectOption } from '@elastic/eui';
+
+import { DayOrdinal, MonthOrdinal, getOrdinalValue, getDayName, getMonthName } from './services';
+import { Frequency, Field, FieldToValueMap } from './types';
 
 type FieldFlags = {
   [key in Field]?: boolean;

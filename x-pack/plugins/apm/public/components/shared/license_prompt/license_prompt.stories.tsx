@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ComponentProps, ComponentType } from 'react';
-import React from 'react';
+
+import React, { ComponentProps, ComponentType } from 'react';
 import { LicensePrompt } from '.';
-import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import { ApmPluginContext } from '../../../context/apm_plugin/apm_plugin_context';
+import {
+  ApmPluginContext,
+  ApmPluginContextValue,
+} from '../../../context/apm_plugin/apm_plugin_context';
 
 const contextMock = ({
   core: { http: { basePath: { prepend: () => {} } } },

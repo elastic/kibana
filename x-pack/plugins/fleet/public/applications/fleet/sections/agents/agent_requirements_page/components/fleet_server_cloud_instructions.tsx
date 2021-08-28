@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useEffect } from 'react';
 import {
   EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
+  EuiEmptyPrompt,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiText,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect } from 'react';
 
-import { useStartServices } from '../../../../../../hooks/use_core';
-import { useFleetStatus } from '../../../../../../hooks/use_fleet_status';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { useFleetStatus, useStartServices } from '../../../../hooks';
 
 const REFRESH_INTERVAL = 10000;
 

@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import type { match as RouteMatch } from 'react-router-dom';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { inventoryModels } from '../../../common/inventory_models';
-import { RedirectToHostDetailViaIP } from './redirect_to_host_detail_via_ip';
+import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
+
 import { RedirectToNodeDetail } from './redirect_to_node_detail';
+import { RedirectToHostDetailViaIP } from './redirect_to_host_detail_via_ip';
+import { inventoryModels } from '../../../common/inventory_models';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;

@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { last } from 'lodash';
 import moment from 'moment';
-import type { Datatable } from '../../../../expressions/common/expression_types/specs/datatable';
-import type { RangeFilterParams } from '../../../common/es_query';
-import type { IFieldType } from '../../../common/index_patterns/fields/types';
-import type { AggConfigSerialized } from '../../../common/search/aggs/agg_config';
-import { esFilters } from '../../deprecated';
-import { getIndexPatterns, getSearchService } from '../../services';
+import { Datatable } from 'src/plugins/expressions';
+import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
+import { getIndexPatterns, getSearchService } from '../../../public/services';
+import { AggConfigSerialized } from '../../../common/search/aggs';
 
 /** @internal */
 export interface RangeSelectDataContext {

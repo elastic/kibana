@@ -5,91 +5,90 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
+
+import { from, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
-import { from, Observable, throwError } from 'rxjs';
-import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import type { CoreSetup, CoreStart, StartServicesAccessor } from '../../../../core/server';
-import { KibanaRequest } from '../../../../core/server/http/router/request';
-import type {
+import {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Logger,
   Plugin,
   PluginInitializerContext,
   SharedGlobalConfig,
-} from '../../../../core/server/plugins/types';
-import type { BfetchServerSetup } from '../../../bfetch/server/types';
-import type { ExpressionsServerSetup } from '../../../expressions/server/plugin';
-import type { FieldFormatsStart } from '../../../field_formats/server/types';
-import { KbnServerError } from '../../../kibana_utils/server/report_server_error';
-import type { UsageCollectionSetup } from '../../../usage_collection/server/plugin';
-import {
-  getShardDelayBucketAgg,
-  SHARD_DELAY_AGG_NAME,
-} from '../../common/search/aggs/buckets/shard_delay';
-import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
-import { cidrFunction } from '../../common/search/expressions/cidr';
-import { dateRangeFunction } from '../../common/search/expressions/date_range';
-import { esRawResponse } from '../../common/search/expressions/es_raw_response';
-import { existsFilterFunction } from '../../common/search/expressions/exists_filter';
-import { extendedBoundsFunction } from '../../common/search/expressions/extended_bounds';
-import { fieldFunction } from '../../common/search/expressions/field';
-import { geoBoundingBoxFunction } from '../../common/search/expressions/geo_bounding_box';
-import { geoPointFunction } from '../../common/search/expressions/geo_point';
-import { ipRangeFunction } from '../../common/search/expressions/ip_range';
-import { kibana } from '../../common/search/expressions/kibana';
-import { kibanaContext } from '../../common/search/expressions/kibana_context_type';
-import { kibanaFilterFunction } from '../../common/search/expressions/kibana_filter';
-import { kqlFunction } from '../../common/search/expressions/kql';
-import { luceneFunction } from '../../common/search/expressions/lucene';
-import { numericalRangeFunction } from '../../common/search/expressions/numerical_range';
-import { phraseFilterFunction } from '../../common/search/expressions/phrase_filter';
-import { queryFilterFunction } from '../../common/search/expressions/query_filter';
-import { rangeFunction } from '../../common/search/expressions/range';
-import { rangeFilterFunction } from '../../common/search/expressions/range_filter';
-import { kibanaTimerangeFunction } from '../../common/search/expressions/timerange';
-import type { SearchSourceDependencies } from '../../common/search/search_source/search_source';
-import { searchSourceRequiredUiSettings } from '../../common/search/search_source/search_source';
-import { SearchSourceService } from '../../common/search/search_source/search_source_service';
-import { EQL_SEARCH_STRATEGY } from '../../common/search/strategies/eql_search/types';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../common/search/strategies/ese_search/types';
+  StartServicesAccessor,
+} from 'src/core/server';
+import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { BfetchServerSetup } from 'src/plugins/bfetch/server';
+import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import type {
-  IEsSearchRequest,
-  IEsSearchResponse,
-} from '../../common/search/strategies/es_search/types';
-import { ES_SEARCH_STRATEGY } from '../../common/search/strategies/es_search/types';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '../../common/search/types';
-import type { ConfigSchema } from '../../config';
-import type { IndexPatternsServiceStart } from '../index_patterns/index_patterns_service';
-import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
-import { searchTelemetry } from '../saved_objects/search_telemetry';
-import { AggsService } from './aggs/aggs_service';
-import { registerUsageCollector } from './collectors/register';
-import { usageProvider } from './collectors/usage';
-import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
-import { getEsaggs } from './expressions/esaggs';
-import { getEsdsl } from './expressions/esdsl';
-import { getKibanaContext } from './expressions/kibana_context';
-import { registerBsearchRoute } from './routes/bsearch';
-import { registerMsearchRoute } from './routes/msearch';
-import { registerSearchRoute } from './routes/search';
-import { SearchSessionService } from './session/session_service';
-import type { ISearchSessionService } from './session/types';
-import { eqlSearchStrategyProvider } from './strategies/eql_search/eql_search_strategy';
-import { enhancedEsSearchStrategyProvider } from './strategies/ese_search/ese_search_strategy';
-import { esSearchStrategyProvider } from './strategies/es_search/es_search_strategy';
-import type {
-  DataRequestHandlerContext,
   IScopedSearchClient,
   ISearchSetup,
   ISearchStart,
   ISearchStrategy,
   SearchEnhancements,
   SearchStrategyDependencies,
+  DataRequestHandlerContext,
 } from './types';
+
+import { AggsService } from './aggs';
+
+import { FieldFormatsStart } from '../../../field_formats/server';
+import { IndexPatternsServiceStart } from '../index_patterns';
+import { registerMsearchRoute, registerSearchRoute } from './routes';
+import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
+import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
+import { UsageCollectionSetup } from '../../../usage_collection/server';
+import { registerUsageCollector } from './collectors/register';
+import { usageProvider } from './collectors/usage';
+import { searchTelemetry } from '../saved_objects';
+import {
+  existsFilterFunction,
+  fieldFunction,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+  cidrFunction,
+  dateRangeFunction,
+  extendedBoundsFunction,
+  geoBoundingBoxFunction,
+  geoPointFunction,
+  ipRangeFunction,
+  kibana,
+  kibanaContext,
+  kibanaTimerangeFunction,
+  kibanaFilterFunction,
+  kqlFunction,
+  luceneFunction,
+  numericalRangeFunction,
+  queryFilterFunction,
+  rangeFilterFunction,
+  rangeFunction,
+  SearchSourceDependencies,
+  searchSourceRequiredUiSettings,
+  SearchSourceService,
+  phraseFilterFunction,
+  esRawResponse,
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+} from '../../common/search';
+import { getEsaggs, getEsdsl } from './expressions';
+import {
+  getShardDelayBucketAgg,
+  SHARD_DELAY_AGG_NAME,
+} from '../../common/search/aggs/buckets/shard_delay';
+import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
+import { ConfigSchema } from '../../config';
+import { ISearchSessionService, SearchSessionService } from './session';
+import { KbnServerError } from '../../../kibana_utils/server';
+import { registerBsearchRoute } from './routes/bsearch';
+import { getKibanaContext } from './expressions/kibana_context';
+import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
+import { eqlSearchStrategyProvider } from './strategies/eql_search';
+import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ComponentType } from 'react';
-import type { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
+
+import { ComponentType } from 'react';
+import { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
 
 export interface FrameHeadingRendererProps {
   fileDetailComponent: ComponentType;

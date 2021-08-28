@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useAnnotationsContext } from '../../../../context/annotations/use_annotations_context';
-import { BreakdownChart } from '../breakdown_chart';
 import { useTransactionBreakdown } from './use_transaction_breakdown';
+import { BreakdownChart } from '../breakdown_chart';
 
 export function TransactionBreakdownChart({
   height,

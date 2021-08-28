@@ -4,32 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiSpacer, EuiForm, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import useMount from 'react-use/lib/useMount';
-import type { AlertTypeParamsExpressionProps } from '../../../triggers_actions_ui/public/types';
-import { ANOMALY_RESULT_TYPE, ANOMALY_THRESHOLD } from '../../common/constants/anomalies';
-import type {
+import { i18n } from '@kbn/i18n';
+import { JobSelectorControl } from './job_selector';
+import { useMlKibana } from '../application/contexts/kibana';
+import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
+import { HttpService } from '../application/services/http_service';
+import { SeverityControl } from '../application/components/severity_control';
+import { ResultTypeSelector } from './result_type_selector';
+import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
+import { PreviewAlertCondition } from './preview_alert_condition';
+import { ANOMALY_THRESHOLD } from '../../common';
+import {
   MlAnomalyDetectionAlertAdvancedSettings,
   MlAnomalyDetectionAlertParams,
 } from '../../common/types/alerts';
-import type { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs/combined_job';
-import { isDefined } from '../../common/types/guards';
-import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
-import { parseInterval } from '../../common/util/parse_interval';
-import { SeverityControl } from '../application/components/severity_control/severity_control';
-import { useMlKibana } from '../application/contexts/kibana/kibana_context';
-import { HttpService } from '../application/services/http_service';
-import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
-import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
-import { AdvancedSettings } from './advanced_settings';
-import { ConfigValidator } from './config_validator';
+import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
 import { InterimResultsControl } from './interim_results_control';
-import { JobSelectorControl } from './job_selector';
-import { PreviewAlertCondition } from './preview_alert_condition';
-import { ResultTypeSelector } from './result_type_selector';
+import { ConfigValidator } from './config_validator';
+import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
+import { AdvancedSettings } from './advanced_settings';
+import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
+import { isDefined } from '../../common/types/guards';
+import { AlertTypeParamsExpressionProps } from '../../../triggers_actions_ui/public';
+import { parseInterval } from '../../common/util/parse_interval';
 
 export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
 

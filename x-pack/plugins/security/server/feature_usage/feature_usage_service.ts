@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  FeatureUsageServiceSetup,
-  FeatureUsageServiceStart,
-} from '../../../licensing/server/services/feature_usage_service';
+
+import type { FeatureUsageServiceSetup, FeatureUsageServiceStart } from '../../../licensing/server';
 
 interface SetupDeps {
   featureUsage: FeatureUsageServiceSetup;

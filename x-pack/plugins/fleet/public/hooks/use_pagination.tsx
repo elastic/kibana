@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useMemo, useState } from 'react';
 
 export const PAGE_SIZE_OPTIONS: readonly number[] = [5, 20, 50];

@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
+
 import { merge } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
+import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
 import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import type {
-  TransactionGroupRequestBase,
-  TransactionGroupSetup,
-} from './fetcher';
 
 interface MetricParams {
   request: TransactionGroupRequestBase;

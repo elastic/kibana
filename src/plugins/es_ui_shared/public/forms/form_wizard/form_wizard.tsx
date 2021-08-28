@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiSpacer, EuiStepsHorizontal } from '@elastic/eui';
 import React from 'react';
-import type { Props as ProviderProps } from './form_wizard_context';
-import { FormWizardConsumer, FormWizardProvider } from './form_wizard_context';
-import type { NavTexts } from './form_wizard_nav';
-import { FormWizardNav } from './form_wizard_nav';
+import { EuiStepsHorizontal, EuiSpacer } from '@elastic/eui';
+
+import {
+  FormWizardProvider,
+  FormWizardConsumer,
+  Props as ProviderProps,
+} from './form_wizard_context';
+import { FormWizardNav, NavTexts } from './form_wizard_nav';
 
 interface Props<T extends object, S extends string> extends ProviderProps<T> {
   isSaving?: boolean;

@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { OpsMetrics } from '../types';
+
+import { OpsMetrics } from '..';
 import { getEcsOpsMetricsLog } from './get_ops_metrics_log';
 
 function createBaseOpsMetrics(): OpsMetrics {

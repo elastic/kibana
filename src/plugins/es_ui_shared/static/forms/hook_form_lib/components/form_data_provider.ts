@@ -7,8 +7,9 @@
  */
 
 import React from 'react';
-import { useFormData } from '../hooks/use_form_data';
-import type { FormData } from '../types';
+
+import { FormData } from '../types';
+import { useFormData } from '../hooks';
 
 interface Props<I> {
   children: (formData: I) => JSX.Element | null;

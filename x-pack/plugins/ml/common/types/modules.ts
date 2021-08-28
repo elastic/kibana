@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectAttributes } from '../../../../../src/core/types/saved_objects';
-import type { ErrorType } from '../util/errors/types';
-import type { Datafeed } from './anomaly_detection_jobs/datafeed';
-import type { Job } from './anomaly_detection_jobs/job';
+
+import { SavedObjectAttributes } from 'kibana/public';
+import { Datafeed, Job } from './anomaly_detection_jobs';
+import { ErrorType } from '../util/errors';
 
 export interface ModuleJob {
   id: string;

@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+
+import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { memo } from 'react';
-import type { Validation } from '../../../../../common/job_validator/job_validator';
+import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { Validation } from '../../../../../common/job_validator';
 
 interface Props {
   validation: Validation;

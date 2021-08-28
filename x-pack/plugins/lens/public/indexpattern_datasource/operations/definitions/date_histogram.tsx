@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSwitchEvent } from '@elastic/eui';
+
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiBasicTable,
   EuiCode,
@@ -15,24 +19,24 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiTextColor,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
-import type { OperationDefinition, ParamEditorProps } from '.';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common/constants';
-import type { AggregationRestrictions as IndexPatternAggRestrictions } from '../../../../../../../src/plugins/data/common/index_patterns/types';
-import type { AggFunctionsMapping } from '../../../../../../../src/plugins/data/common/search/aggs/types';
-import { extendedBoundsToAst } from '../../../../../../../src/plugins/data/common/search/expressions/extended_bounds_to_ast';
-import { search } from '../../../../../../../src/plugins/data/public';
-import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public/types';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/common/ast/build_function';
-import { HelpPopover, HelpPopoverButton } from '../../help_popover';
-import type { IndexPatternLayer } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
-import type { FieldBasedIndexPatternColumn } from './column_types';
+import { OperationDefinition, ParamEditorProps } from './index';
+import { FieldBasedIndexPatternColumn } from './column_types';
+import {
+  AggFunctionsMapping,
+  DataPublicPluginStart,
+  IndexPatternAggRestrictions,
+  search,
+  UI_SETTINGS,
+} from '../../../../../../../src/plugins/data/public';
+import { extendedBoundsToAst } from '../../../../../../../src/plugins/data/common';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
+import { HelpPopover, HelpPopoverButton } from '../../help_popover';
+import { IndexPatternLayer } from '../../types';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';

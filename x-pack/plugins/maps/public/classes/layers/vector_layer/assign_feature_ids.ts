@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Feature, FeatureCollection } from 'geojson';
 import _ from 'lodash';
+import { FeatureCollection, Feature } from 'geojson';
 import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
 
 let idCounter = 0;

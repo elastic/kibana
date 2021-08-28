@@ -5,12 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { defer, EMPTY, from, fromEvent, Observable, timer } from 'rxjs';
+
+import { from, Observable, timer, defer, fromEvent, EMPTY } from 'rxjs';
 import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
-import { AbortError } from '../../../kibana_utils/common/abort_utils';
-import type { IAsyncSearchOptions } from './strategies/ese_search/types';
-import type { IKibanaSearchResponse } from './types';
-import { isErrorResponse, isPartialResponse } from './utils';
+import type {
+  IAsyncSearchOptions,
+  IKibanaSearchResponse,
+} from '../../../../../src/plugins/data/common';
+import { isErrorResponse, isPartialResponse } from '../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ReactNode } from 'react';
-import React from 'react';
+
+import React, { ReactNode } from 'react';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ErrorStatePrompt } from '../ErrorStatePrompt';
 

@@ -4,20 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { packagePolicyRouteService } from '../../../common/services/routes';
+
+import { packagePolicyRouteService } from '../../services';
 import type {
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
-  DeletePackagePoliciesRequest,
-  DeletePackagePoliciesResponse,
-  GetOnePackagePolicyResponse,
-  GetPackagePoliciesRequest,
-  GetPackagePoliciesResponse,
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
+} from '../../types';
+import type {
+  DeletePackagePoliciesRequest,
+  DeletePackagePoliciesResponse,
+  GetPackagePoliciesRequest,
+  GetPackagePoliciesResponse,
+  GetOnePackagePolicyResponse,
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
-} from '../../../common/types/rest_spec/package_policy';
+} from '../../../common/types/rest_spec';
 
 import { sendRequest, useRequest } from './use_request';
 

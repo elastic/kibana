@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
 import Boom from '@hapi/boom';
-import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
-import type { ServerRouteRepository } from '@kbn/server-route-repository';
+import * as t from 'io-ts';
+import { KibanaRequest, RouteRegistrar } from 'src/core/server';
+import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
+import agent from 'elastic-apm-node';
+import { ServerRouteRepository } from '@kbn/server-route-repository';
+import { merge } from 'lodash';
 import {
   decodeRequestParams,
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import agent from 'elastic-apm-node';
-import * as t from 'io-ts';
-import { merge } from 'lodash';
-import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import type { RouteRegistrar } from '../../../../../../src/core/server/http/router/router';
+import { mergeRt, jsonRt } from '@kbn/io-ts-utils';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import type {
-  ApmPluginRequestHandlerContext,
+import {
   APMRouteHandlerResources,
   InspectResponse,
   TelemetryUsageCounter,
 } from '../typings';
+import type { ApmPluginRequestHandlerContext } from '../typings';
 
 const inspectRt = t.exact(
   t.partial({

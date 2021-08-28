@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Store } from 'redux';
-import type { MapState } from './map/types';
-import type { NonSerializableState } from './non_serializable_instances';
-import type { MapUiState } from './ui';
+
+import { Store } from 'redux';
+import { MapState } from './map';
+import { MapUiState } from './ui';
+import { NonSerializableState } from './non_serializable_instances';
 
 export interface MapStoreState {
   ui: MapUiState;

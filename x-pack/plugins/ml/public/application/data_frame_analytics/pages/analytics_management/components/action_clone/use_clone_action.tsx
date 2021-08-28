@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useMemo } from 'react';
-import type {
-  DataFrameAnalyticsListAction,
-  DataFrameAnalyticsListRow,
-} from '../analytics_list/common';
+
+import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
+
 import {
-  CloneActionName,
   cloneActionNameText,
   useNavigateToWizardWithClonedJob,
+  CloneActionName,
 } from './clone_action_name';
 
 export type CloneAction = ReturnType<typeof useCloneAction>;

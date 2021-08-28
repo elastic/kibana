@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { BarSectionProps } from './styles';
-import { BarSection } from './styles';
+
+import { BarSection, BarSectionProps } from './styles';
 
 export interface UtilityBarSectionProps extends BarSectionProps {
   children: React.ReactNode;

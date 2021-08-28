@@ -4,26 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSuperSelectOption } from '@elastic/eui';
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiSelect,
-  EuiSpacer,
-  EuiSuperSelect,
-  EuiText,
-} from '@elastic/eui';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { filter, map, some } from 'fp-ts/lib/Option';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiFormRow,
+  EuiFieldNumber,
+  EuiSelect,
+  EuiText,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiSuperSelectOption,
+} from '@elastic/eui';
+import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { AlertNotifyWhenType } from '../../../../../alerting/common/alert_notify_when_type';
+import { InitialAlert } from './alert_reducer';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import type { InitialAlert } from './alert_reducer';
+import { AlertNotifyWhenType } from '../../../types';
 
 const DEFAULT_NOTIFY_WHEN_VALUE: AlertNotifyWhenType = 'onActionGroupChange';
 

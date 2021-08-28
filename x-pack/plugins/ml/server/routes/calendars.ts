@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { wrapError } from '../client/error_wrapper';
-import type { MlClient } from '../lib/ml_client/types';
-import type { Calendar, FormCalendar } from '../models/calendar/calendar_manager';
-import { CalendarManager } from '../models/calendar/calendar_manager';
-import type { RouteInitialization } from '../types';
-import { calendarIdSchema, calendarIdsSchema, calendarSchema } from './schemas/calendars_schema';
+import { RouteInitialization } from '../types';
+import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
+import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
+import type { MlClient } from '../lib/ml_client';
 
 function getAllCalendars(mlClient: MlClient) {
   const cal = new CalendarManager(mlClient);

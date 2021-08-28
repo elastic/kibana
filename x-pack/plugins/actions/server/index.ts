@@ -4,55 +4,53 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { get } from 'lodash';
-import type {
-  PluginConfigDescriptor,
-  PluginInitializerContext,
-} from '../../../../src/core/server/plugins/types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
+import { ActionsPlugin } from './plugin';
+import { configSchema, ActionsConfig, CustomHostSettings } from './config';
 import { ActionsClient as ActionsClientClass } from './actions_client';
 import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
-import type { ActionsConfig, CustomHostSettings } from './config';
-import { configSchema } from './config';
-import { ActionsPlugin } from './plugin';
 
 export type ActionsClient = PublicMethodsOf<ActionsClientClass>;
 export type ActionsAuthorization = PublicMethodsOf<ActionsAuthorizationClass>;
 
 export type {
-  EmailActionParams,
+  ActionsPlugin,
+  ActionResult,
+  ActionTypeExecutorOptions,
+  ActionType,
+  PreConfiguredAction,
+  ActionsApiRequestHandlerContext,
+} from './types';
+
+export type {
   EmailActionTypeId,
-  IndexActionParams,
+  EmailActionParams,
   IndexActionTypeId,
-  JiraActionParams,
-  JiraActionTypeId,
-  PagerDutyActionParams,
+  IndexActionParams,
   PagerDutyActionTypeId,
-  ResilientActionParams,
-  ResilientActionTypeId,
-  ServerLogActionParams,
+  PagerDutyActionParams,
   ServerLogActionTypeId,
-  ServiceNowActionParams,
+  ServerLogActionParams,
+  SlackActionTypeId,
+  SlackActionParams,
+  WebhookActionTypeId,
+  WebhookActionParams,
   ServiceNowITSMActionTypeId,
   ServiceNowSIRActionTypeId,
-  SlackActionParams,
-  SlackActionTypeId,
-  TeamsActionParams,
+  ServiceNowActionParams,
+  JiraActionTypeId,
+  JiraActionParams,
+  ResilientActionTypeId,
+  ResilientActionParams,
   TeamsActionTypeId,
-  WebhookActionParams,
-  WebhookActionTypeId,
+  TeamsActionParams,
 } from './builtin_action_types';
-export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
-export { asHttpRequestExecutionSource, asSavedObjectExecutionSource } from './lib';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
-export type {
-  ActionResult,
-  ActionsApiRequestHandlerContext,
-  ActionsPlugin,
-  ActionType,
-  ActionTypeExecutorOptions,
-  PreConfiguredAction,
-} from './types';
+
+export { asSavedObjectExecutionSource, asHttpRequestExecutionSource } from './lib';
+export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
 export const plugin = (initContext: PluginInitializerContext) => new ActionsPlugin(initContext);
 

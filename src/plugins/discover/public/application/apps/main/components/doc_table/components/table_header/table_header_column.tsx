@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { SortOrder } from './helpers';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { SortOrder } from './helpers';
 import { DocViewTableScoreSortWarning } from './score_sort_warning';
 
 interface Props {

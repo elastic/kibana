@@ -4,35 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonEmpty,
-  EuiComboBox,
-  EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+
+import React, { memo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useEffect, useState } from 'react';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiButtonEmpty,
+  EuiText,
+  EuiComboBox,
+  EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 
-import { packageToPackagePolicy } from '../../../../../../common/services/package_to_package_policy';
-import type { PackagePolicyValidationResults } from '../../../../../../common/services/validate_package_policy';
-import type { AgentPolicy } from '../../../../../../common/types/models/agent_policy';
-import type { PackageInfo, RegistryVarsEntry } from '../../../../../../common/types/models/epm';
 import type {
-  NewPackagePolicy,
+  AgentPolicy,
+  PackageInfo,
   PackagePolicy,
-} from '../../../../../../common/types/models/package_policy';
-import { Loading } from '../../../../../components/loading';
-import { useStartServices } from '../../../../../hooks/use_core';
-import { pkgKeyFromPackageInfo } from '../../../../../services/pkg_key_from_package_info';
+  NewPackagePolicy,
+  RegistryVarsEntry,
+} from '../../../types';
+import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../services';
+import { Loading } from '../../../components';
+import { useStartServices } from '../../../hooks';
 
-import { PackagePolicyInputVarField } from './components/package_policy_input_var_field';
-import { isAdvancedVar } from './services/is_advanced_var';
+import { isAdvancedVar } from './services';
+import type { PackagePolicyValidationResults } from './services';
+import { PackagePolicyInputVarField } from './components';
 
 export const StepDefinePackagePolicy: React.FunctionComponent<{
   agentPolicy: AgentPolicy;

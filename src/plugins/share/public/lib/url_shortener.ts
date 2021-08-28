@@ -7,7 +7,7 @@
  */
 
 import url from 'url';
-import type { HttpStart } from '../../../../core/public/http/types';
+import { HttpStart } from 'kibana/public';
 import { CREATE_PATH, getGotoPath } from '../../common/short_url_routes';
 
 export async function shortenUrl(

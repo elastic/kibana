@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ComponentType } from 'react';
-import { PageFooter } from './page_footer/page_footer';
-import { PageSubtitle } from './page_subtitle/page_subtitle';
-import { PageTitle } from './page_title/page_title';
+
+import { ComponentType } from 'react';
+import { PageTitle } from './page_title';
+import { PageSubtitle } from './page_subtitle';
+import { PageFooter } from './page_footer';
 
 type Id =
   | 'advanced_settings_page_title'

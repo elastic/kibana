@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
 describe('savedObjects/health_check/isConfigVersionUpgradeable', function () {

@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import type { Project, ProjectID, SolutionName } from '../../../common/labs';
-import { LabsStrings } from '../../i18n/labs';
-import type { Props as ProjectListItemProps } from './project_list_item';
-import { ProjectListItem } from './project_list_item';
+import { EuiFlexGroup, EuiCallOut } from '@elastic/eui';
+
+import { SolutionName, ProjectID, Project } from '../../../common';
+import { ProjectListItem, Props as ProjectListItemProps } from './project_list_item';
+
+import { LabsStrings } from '../../i18n';
 
 const { List: strings } = LabsStrings.Components;
 

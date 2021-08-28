@@ -5,33 +5,43 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
+import type { estypes } from '@elastic/elasticsearch';
+
 import { i18n } from '@kbn/i18n';
-import { isUndefined, omitBy } from 'lodash';
-import type { IScopedClusterClient } from '../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import { KibanaRequest } from '../../../../src/core/server/http/router/request';
-import { SavedObjectsUtils } from '../../../../src/core/server/saved_objects/service/lib/utils';
-import type { SavedObjectsClientContract } from '../../../../src/core/server/saved_objects/types';
-import type { SavedObject, SavedObjectAttributes } from '../../../../src/core/types/saved_objects';
-import type { AuditLogger } from '../../security/server/audit/audit_service';
-import type { RunNowResult } from '../../task_manager/server/task_scheduling';
-import type { ActionType, ActionTypeExecutorResult } from '../common/types';
+import { omitBy, isUndefined } from 'lodash';
+import {
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  SavedObject,
+  KibanaRequest,
+  SavedObjectsUtils,
+} from '../../../../src/core/server';
+import { AuditLogger } from '../../security/server';
+import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
+import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
+import {
+  ActionResult,
+  FindActionResult,
+  RawAction,
+  PreConfiguredAction,
+  ActionTypeExecutorResult,
+} from './types';
+import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
+import { ExecuteOptions } from './lib/action_executor';
+import {
+  ExecutionEnqueuer,
+  ExecuteOptions as EnqueueExecutionOptions,
+} from './create_execute_function';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import {
-  AuthorizationMode,
   getAuthorizationModeBySource,
+  AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
-import type {
-  ExecuteOptions as EnqueueExecutionOptions,
-  ExecutionEnqueuer,
-} from './create_execute_function';
-import type { ActionExecutorContract, ExecuteOptions } from './lib/action_executor';
-import { ConnectorAuditAction, connectorAuditEvent } from './lib/audit_events';
-import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
-import { validateConfig, validateSecrets } from './lib/validate_with_schema';
-import type { ActionResult, FindActionResult, PreConfiguredAction, RawAction } from './types';
+import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
+import { RunNowResult } from '../../task_manager/server';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.

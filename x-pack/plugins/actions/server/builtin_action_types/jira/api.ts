@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ExternalServiceApi,
-  GetCommonFieldsHandlerArgs,
-  GetFieldsByIssueTypeHandlerArgs,
-  GetIncidentApiHandlerArgs,
-  GetIssueHandlerArgs,
-  GetIssuesHandlerArgs,
-  GetIssueTypesHandlerArgs,
-  HandshakeApiHandlerArgs,
-  Incident,
+
+import {
   PushToServiceApiHandlerArgs,
+  HandshakeApiHandlerArgs,
+  GetIncidentApiHandlerArgs,
+  ExternalServiceApi,
+  Incident,
+  GetFieldsByIssueTypeHandlerArgs,
+  GetIssueTypesHandlerArgs,
+  GetIssuesHandlerArgs,
   PushToServiceResponse,
+  GetIssueHandlerArgs,
+  GetCommonFieldsHandlerArgs,
 } from './types';
 
 const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};

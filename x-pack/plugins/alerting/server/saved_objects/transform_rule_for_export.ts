@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObject } from '../../../../../src/core/types/saved_objects';
+
+import { SavedObject } from 'kibana/server';
 import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
-import type { RawAlert } from '../types';
+import { RawAlert } from '../types';
 
 export function transformRulesForExport(rules: SavedObject[]): Array<SavedObject<RawAlert>> {
   const exportDate = new Date().toISOString();

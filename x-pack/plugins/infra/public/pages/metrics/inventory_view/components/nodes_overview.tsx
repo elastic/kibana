@@ -4,22 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getBreakpoint } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { NoData } from '../../../../components/empty_states/no_data';
+import { getBreakpoint } from '@elastic/eui';
+
+import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
+import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
-import type {
-  InfraFormatter,
-  InfraWaffleMapBounds,
-  InfraWaffleMapOptions,
-} from '../../../../lib/lib';
-import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
-import { TableView } from './table_view';
 import { Map } from './waffle/map';
+import { TableView } from './table_view';
+import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
+import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 
 export interface KueryFilterQuery {
   kind: 'kuery';

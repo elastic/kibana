@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { HttpStart } from 'src/core/public';
 import { get } from 'lodash';
-import type { HttpStart } from '../../../../core/public/http/types';
-import type { SavedObjectGetRelationshipsResponse } from '../../common/types';
+import { SavedObjectGetRelationshipsResponse } from '../types';
 
 export async function getRelationships(
   http: HttpStart,

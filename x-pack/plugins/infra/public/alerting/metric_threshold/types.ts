@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
-import type { MetricExpressionParams } from '../../../server/lib/alerting/metric_threshold/types';
-import type { MetricsExplorerOptions } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+
+import {
+  MetricExpressionParams,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../server/lib/alerting/metric_threshold/types';
+import { MetricsExplorerOptions } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 
 export interface AlertContextMeta {
   currentOptions?: Partial<MetricsExplorerOptions>;

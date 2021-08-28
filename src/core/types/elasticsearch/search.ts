@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { ValuesType } from 'utility-types';
 import { estypes } from '@elastic/elasticsearch';
-import type { ValuesType } from 'utility-types';
 
 type InvalidAggregationRequest = unknown;
 

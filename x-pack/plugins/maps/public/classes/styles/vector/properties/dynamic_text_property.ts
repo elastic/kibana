@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Map as MbMap } from '@kbn/mapbox-gl';
-import type { RawValue } from '../../../../../common/constants';
-import type { LabelDynamicOptions } from '../../../../../common/descriptor_types/style_property_descriptor_types';
+
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
+import { LabelDynamicOptions } from '../../../../../common/descriptor_types';
+import { RawValue } from '../../../../../common/constants';
 
 export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOptions> {
   syncTextFieldWithMb(mbLayerId: string, mbMap: MbMap) {

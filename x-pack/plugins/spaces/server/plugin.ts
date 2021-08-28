@@ -4,39 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Observable } from 'rxjs';
 
-import type { Logger } from '@kbn/logging';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from 'src/core/server';
+import type { HomeServerPluginSetup } from 'src/plugins/home/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import type { CoreSetup, CoreStart } from '../../../../src/core/server';
-import type { Plugin, PluginInitializerContext } from '../../../../src/core/server/plugins/types';
-import type { HomeServerPluginSetup } from '../../../../src/plugins/home/server/plugin';
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server/plugin';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../features/server/plugin';
-import type { LicensingPluginSetup } from '../../licensing/server/types';
-import { SpacesLicenseService } from '../common/licensing/license_service';
+} from '../../features/server';
+import type { LicensingPluginSetup } from '../../licensing/server';
+import { SpacesLicenseService } from '../common/licensing';
 import { setupCapabilities } from './capabilities';
 import type { ConfigType } from './config';
-import { DefaultSpaceService } from './default_space/default_space_service';
+import { DefaultSpaceService } from './default_space';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
-import { SpacesSavedObjectsService } from './saved_objects/saved_objects_service';
-import type {
-  SpacesClientRepositoryFactory,
-  SpacesClientWrapper,
-} from './spaces_client/spaces_client_service';
-import { SpacesClientService } from './spaces_client/spaces_client_service';
-import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service/spaces_service';
-import { SpacesService } from './spaces_service/spaces_service';
+import { SpacesSavedObjectsService } from './saved_objects';
+import type { SpacesClientRepositoryFactory, SpacesClientWrapper } from './spaces_client';
+import { SpacesClientService } from './spaces_client';
+import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+import { SpacesService } from './spaces_service';
 import type { SpacesRequestHandlerContext } from './types';
-import { registerSpacesUsageCollector } from './usage_collection/spaces_usage_collector';
-import { UsageStatsService } from './usage_stats/usage_stats_service';
+import { registerSpacesUsageCollector } from './usage_collection';
+import { UsageStatsService } from './usage_stats';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;

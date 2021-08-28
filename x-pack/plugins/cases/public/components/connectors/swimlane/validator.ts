@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ValidationConfig } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/types';
-import { SwimlaneConnectorType } from '../../../../common/api/connectors/swimlane';
-import type { CaseActionConnector } from '../../types';
+
+import { SwimlaneConnectorType } from '../../../../common';
+import { ValidationConfig } from '../../../common/shared_imports';
+import { CaseActionConnector } from '../../types';
 
 const casesRequiredFields = [
   'caseIdConfig',

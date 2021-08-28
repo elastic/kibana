@@ -5,23 +5,30 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
 import { from, Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import type { CoreSetup, CoreStart } from '../../../core/public/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
-import { DISABLE_BFETCH_COMPRESSION } from '../common/constants';
-import { removeLeadingSlash } from '../common/util/remove_leading_slash';
-import { createStreamingBatchedFunction } from './batching/create_streaming_batched_function';
-import { fetchStreaming as fetchStreamingStatic } from './streaming/fetch_streaming';
+import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './streaming';
+import { DISABLE_BFETCH_COMPRESSION, removeLeadingSlash } from '../common';
+import { createStreamingBatchedFunction, StreamingBatchedFunctionParams } from './batching';
+import { BatchedFunc } from './batching/types';
 
-import type {
-  BfetchPublicSetup,
-  BfetchPublicStart,
-  BfetchPublicSetupDependencies,
-  BfetchPublicStartDependencies,
-  BfetchPublicContract
-} from './types';
+// eslint-disable-next-line
+export interface BfetchPublicSetupDependencies {}
+
+// eslint-disable-next-line
+export interface BfetchPublicStartDependencies {}
+
+export interface BfetchPublicContract {
+  fetchStreaming: (params: FetchStreamingParams) => ReturnType<typeof fetchStreamingStatic>;
+  batchedFunction: <Payload, Result extends object>(
+    params: StreamingBatchedFunctionParams<Payload, Result>
+  ) => BatchedFunc<Payload, Result>;
+}
+
+export type BfetchPublicSetup = BfetchPublicContract;
+export type BfetchPublicStart = BfetchPublicContract;
 
 export class BfetchPublicPlugin
   implements

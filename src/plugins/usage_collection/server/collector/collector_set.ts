@@ -5,15 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
+
 import { snakeCase } from 'lodash';
-import type { ElasticsearchClient } from '../../../../core/server/elasticsearch/client/types';
-import { KibanaRequest } from '../../../../core/server/http/router/request';
-import type { SavedObjectsClientContract } from '../../../../core/server/saved_objects/types';
+import type {
+  Logger,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  KibanaRequest,
+} from 'src/core/server';
 import { Collector } from './collector';
-import type { CollectorOptions, ICollector } from './types';
-import type { UsageCollectorOptions } from './usage_collector';
-import { UsageCollector } from './usage_collector';
+import type { ICollector, CollectorOptions } from './types';
+import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 
 // Needed for the general array containing all the collectors. We don't really care about their types here
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

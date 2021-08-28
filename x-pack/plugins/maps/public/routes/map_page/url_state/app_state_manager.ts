@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Subject } from 'rxjs';
-import type { Query } from 'src/plugins/data/public';
-import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import { Filter, Query } from 'src/plugins/data/public';
 
 export interface MapsAppState {
   query?: Query | null;

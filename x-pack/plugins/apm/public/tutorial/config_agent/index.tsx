@@ -12,14 +12,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { HttpStart } from 'kibana/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import type { HttpStart } from '../../../../../../src/core/public/http/types';
-import type { APIReturnType } from '../../services/rest/createCallApmApi';
+import { APIReturnType } from '../..//services/rest/createCallApmApi';
 import { getCommands } from './commands/get_commands';
 import { CopyCommands } from './copy_commands';
-import type { PolicyOption } from './get_policy_options';
-import { getPolicyOptions } from './get_policy_options';
+import { getPolicyOptions, PolicyOption } from './get_policy_options';
 import { PolicySelector } from './policy_selector';
 
 export type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;

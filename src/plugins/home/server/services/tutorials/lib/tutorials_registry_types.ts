@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { KibanaRequest } from '../../../../../../core/server/http/router/request';
-import type { TutorialSchema } from './tutorial_schema';
 
+import type { KibanaRequest } from 'src/core/server';
+import type { TutorialSchema } from './tutorial_schema';
 export type {
+  TutorialSchema,
   ArtifactsSchema,
   DashboardSchema,
-  Instruction,
-  InstructionSetSchema,
   InstructionsSchema,
-  InstructionVariant,
   ParamsSchema,
-  TutorialSchema,
+  InstructionSetSchema,
+  InstructionVariant,
+  Instruction,
 } from './tutorial_schema';
 
 /** @public */

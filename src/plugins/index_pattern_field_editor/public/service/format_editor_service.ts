@@ -5,20 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { bytesFormatEditorFactory } from '../components/field_format_editor/editors/bytes';
-import { colorFormatEditorFactory } from '../components/field_format_editor/editors/color';
-import { dateFormatEditorFactory } from '../components/field_format_editor/editors/date';
-import { dateNanosFormatEditorFactory } from '../components/field_format_editor/editors/date_nanos';
-import { durationFormatEditorFactory } from '../components/field_format_editor/editors/duration';
-import { histogramFormatEditorFactory } from '../components/field_format_editor/editors/histogram';
-import { numberFormatEditorFactory } from '../components/field_format_editor/editors/number';
-import { percentFormatEditorFactory } from '../components/field_format_editor/editors/percent';
-import { staticLookupFormatEditorFactory } from '../components/field_format_editor/editors/static_lookup';
-import { stringFormatEditorFactory } from '../components/field_format_editor/editors/string';
-import { truncateFormatEditorFactory } from '../components/field_format_editor/editors/truncate';
-import type { FieldFormatEditorFactory } from '../components/field_format_editor/editors/types';
-import { urlFormatEditorFactory } from '../components/field_format_editor/editors/url';
-import { FieldFormatEditors } from './field_format_editors/field_format_editors';
+
+import { FieldFormatEditors } from './field_format_editors';
+
+import {
+  bytesFormatEditorFactory,
+  colorFormatEditorFactory,
+  dateFormatEditorFactory,
+  dateNanosFormatEditorFactory,
+  durationFormatEditorFactory,
+  numberFormatEditorFactory,
+  percentFormatEditorFactory,
+  staticLookupFormatEditorFactory,
+  stringFormatEditorFactory,
+  truncateFormatEditorFactory,
+  urlFormatEditorFactory,
+  histogramFormatEditorFactory,
+  FieldFormatEditorFactory,
+} from '../components';
 
 /**
  * Index patterns management service

@@ -5,23 +5,23 @@
  * 2.0.
  */
 import type {
-  EndpointOf,
-  ReturnOf,
   ServerRouteRepository,
+  ReturnOf,
+  EndpointOf,
 } from '@kbn/server-route-repository';
-import type { PickByValue } from 'utility-types';
+import { PickByValue } from 'utility-types';
 import { alertsChartPreviewRouteRepository } from './alerts/chart_preview';
 import { backendsRouteRepository } from './backends';
 import { correlationsRouteRepository } from './correlations';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { environmentsRouteRepository } from './environments';
 import { errorsRouteRepository } from './errors';
-import { fallbackToTransactionsRouteRepository } from './fallback_to_transactions';
 import { apmFleetRouteRepository } from './fleet';
 import { indexPatternRouteRepository } from './index_pattern';
 import { metricsRouteRepository } from './metrics';
 import { observabilityOverviewRouteRepository } from './observability_overview';
 import { rumRouteRepository } from './rum_client';
+import { fallbackToTransactionsRouteRepository } from './fallback_to_transactions';
 import { serviceRouteRepository } from './services';
 import { serviceMapRouteRepository } from './service_map';
 import { serviceNodeRouteRepository } from './service_nodes';
@@ -32,7 +32,7 @@ import { customLinkRouteRepository } from './settings/custom_link';
 import { sourceMapsRouteRepository } from './source_maps';
 import { traceRouteRepository } from './traces';
 import { transactionRouteRepository } from './transactions';
-import type { APMRouteHandlerResources } from './typings';
+import { APMRouteHandlerResources } from './typings';
 
 const getTypedGlobalApmServerRouteRepository = () => {
   const repository = createApmServerRouteRepository()

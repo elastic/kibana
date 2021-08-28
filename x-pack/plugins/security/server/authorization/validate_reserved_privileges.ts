@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { KibanaFeature } from '../../../features/common/kibana_feature';
+
+import type { KibanaFeature } from '../../../features/server';
 
 export function validateReservedPrivileges(features: KibanaFeature[]) {
   const seenPrivilegeIds = new Set<string>();

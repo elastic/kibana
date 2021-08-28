@@ -4,32 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { compact } from 'lodash';
 
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
-import { SO_SEARCH_LIMIT } from '../../common/constants';
-import type { PreconfigurationError } from '../../common/constants/preconfiguration';
-import { AUTO_UPDATE_PACKAGES, DEFAULT_PACKAGES } from '../../common/constants/preconfiguration';
-import type { DefaultPackagesInstallationError } from '../../common/types/models/epm';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
-import { ensureAgentActionPolicyChangeExists } from './agents/setup';
-import { agentPolicyService } from './agent_policy';
-import {
-  generateEnrollmentAPIKey,
-  hasEnrollementAPIKeysForPolicy,
-} from './api_keys/enrollment_api_key';
+import { AUTO_UPDATE_PACKAGES } from '../../common';
+import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
+import { SO_SEARCH_LIMIT, DEFAULT_PACKAGES } from '../constants';
+
 import { appContextService } from './app_context';
+import { agentPolicyService } from './agent_policy';
+import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
+import { outputService } from './output';
+
+import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
+import { settingsService } from '.';
+import { awaitIfPending } from './setup_utils';
+import { ensureAgentActionPolicyChangeExists } from './agents';
+import { awaitIfFleetServerSetupPending } from './fleet_server';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplate } from './epm/elasticsearch/template/install';
-import { getInstallations } from './epm/packages/get';
-import { installPackage, isPackageInstalled } from './epm/packages/install';
+import { getInstallations, installPackage } from './epm/packages';
+import { isPackageInstalled } from './epm/packages/install';
 import { pkgToPkgKey } from './epm/registry';
-import { awaitIfFleetServerSetupPending } from './fleet_server';
-import { outputService } from './output';
-import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
-import * as settingsService from './settings';
-import { awaitIfPending } from './setup_utils';
 
 export interface SetupStatus {
   isInitialized: boolean;

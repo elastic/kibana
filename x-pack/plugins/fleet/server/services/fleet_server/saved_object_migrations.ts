@@ -4,23 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isBoom } from '@hapi/boom';
 
-import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import { SO_SEARCH_LIMIT } from '../../../common/constants';
-import { AGENTS_INDEX, AGENT_SAVED_OBJECT_TYPE } from '../../../common/constants/agent';
-import { AGENT_POLICY_INDEX } from '../../../common/constants/agent_policy';
+import { isBoom } from '@hapi/boom';
+import type { KibanaRequest } from 'src/core/server';
+
 import {
   ENROLLMENT_API_KEYS_INDEX,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-} from '../../../common/constants/enrollment_api_key';
-import type { AgentSOAttributes, FleetServerAgent } from '../../../common/types/models/agent';
-import type { FleetServerEnrollmentAPIKey } from '../../../common/types/models/enrollment_api_key';
-import { agentPolicyService } from '../agent_policy';
-import { getEnrollmentAPIKey, listEnrollmentApiKeys } from '../api_keys/enrollment_api_key_so';
-import { invalidateAPIKeys } from '../api_keys/security';
+  AGENT_POLICY_INDEX,
+  AGENTS_INDEX,
+  AGENT_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../common';
+import type {
+  FleetServerEnrollmentAPIKey,
+  AgentSOAttributes,
+  FleetServerAgent,
+} from '../../../common';
+import { listEnrollmentApiKeys, getEnrollmentAPIKey } from '../api_keys/enrollment_api_key_so';
 import { appContextService } from '../app_context';
-import * as settingsService from '../settings';
+import { agentPolicyService } from '../agent_policy';
+import { invalidateAPIKeys } from '../api_keys';
+import { settingsService } from '..';
 
 export async function runFleetServerMigration() {
   await settingsService.settingsSetup(getInternalUserSOClient());

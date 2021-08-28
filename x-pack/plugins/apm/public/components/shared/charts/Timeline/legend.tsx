@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useTheme } from '../../../../hooks/use_theme';
 
 export enum Shape {

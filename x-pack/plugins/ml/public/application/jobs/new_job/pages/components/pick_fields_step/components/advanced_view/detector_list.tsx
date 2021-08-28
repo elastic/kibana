@@ -4,27 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
-import type { Detector } from '../../../../../../../../../common/types/anomaly_detection_jobs/job';
-import { detectorToString } from '../../../../../../../util/string_utils';
-import { AdvancedJobCreator } from '../../../../../common/job_creator/advanced_job_creator';
-import type { Validation } from '../../../../../common/job_validator/job_validator';
+import { i18n } from '@kbn/i18n';
+
+import {
+  EuiTitle,
+  EuiPanel,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiSpacer,
+  EuiCallOut,
+  EuiHorizontalRule,
+  EuiFormRow,
+} from '@elastic/eui';
+
 import { JobCreatorContext } from '../../../job_creator_context';
+import { AdvancedJobCreator } from '../../../../../common/job_creator';
+import { Validation } from '../../../../../common/job_validator';
+import { detectorToString } from '../../../../../../../util/string_utils';
+import { Detector } from '../../../../../../../../../common/types/anomaly_detection_jobs';
 
 interface Props {
   isActive: boolean;

@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import { rangeQuery, kqlQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../../observability/server/utils/queries';
-import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export interface CorrelationsOptions {
   setup: Setup & SetupTimeRange;

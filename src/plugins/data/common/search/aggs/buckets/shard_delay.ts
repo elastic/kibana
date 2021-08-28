@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { BaseAggParams } from '../types';
+
 import { BucketAggType } from './bucket_agg_type';
+import { BaseAggParams } from '../types';
 import { aggShardDelayFnName } from './shard_delay_fn';
 
 export const SHARD_DELAY_AGG_NAME = 'shard_delay';

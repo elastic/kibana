@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import type { $Keys } from 'utility-types';
-import type { QuerySuggestion } from '../query_suggestion_provider';
-import { QuerySuggestionTypes } from '../query_suggestion_provider';
-import type { KqlQuerySuggestionProvider } from './types';
+import { $Keys } from 'utility-types';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { KqlQuerySuggestionProvider } from './types';
+import {
+  QuerySuggestion,
+  QuerySuggestionTypes,
+} from '../../../../../../../src/plugins/data/public';
 
 const bothArgumentsText = (
   <FormattedMessage

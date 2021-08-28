@@ -4,26 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+
 import { i18n } from '@kbn/i18n';
+
+import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { NavigateToPath } from '../../../../../contexts/kibana';
 import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
 } from '../../../../../../../common/constants/aggregation_types';
 import {
-  DOC_COUNT,
   MLCATEGORY,
+  DOC_COUNT,
   _DOC_COUNT,
 } from '../../../../../../../common/constants/field_types';
-import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
-import type { Datafeed } from '../../../../../../../common/types/anomaly_detection_jobs/datafeed';
-import type { Detector, Job } from '../../../../../../../common/types/anomaly_detection_jobs/job';
-import type { AggFieldPair, Field } from '../../../../../../../common/types/fields';
-import { EVENT_RATE_FIELD_ID, mlCategory } from '../../../../../../../common/types/fields';
-import type { NavigateToPath } from '../../../../../contexts/kibana/use_navigate_to_path';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import {
+  EVENT_RATE_FIELD_ID,
+  Field,
+  AggFieldPair,
+  mlCategory,
+} from '../../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import type { JobCreatorType } from '../type_guards';
+import { JobCreatorType } from '../index';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {
   let field = newJobCapsService.getFieldById(id);

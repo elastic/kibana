@@ -4,58 +4,56 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
+import type {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from 'src/core/server';
+import type { SecurityOssPluginSetup } from 'src/plugins/security_oss/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import type { CoreSetup, CoreStart } from '../../../../src/core/server';
-import type { KibanaRequest } from '../../../../src/core/server/http/router/request';
-import type { Plugin, PluginInitializerContext } from '../../../../src/core/server/plugins/types';
-import type { SecurityOssPluginSetup } from '../../../../src/plugins/security_oss/server/plugin';
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server/plugin';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../features/server/plugin';
-import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server/types';
-import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server/plugin';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '../../task_manager/server/plugin';
-import type { SecurityLicense } from '../common/licensing/license_service';
-import { SecurityLicenseService } from '../common/licensing/license_service';
-import type { AuthenticatedUser } from '../common/model/authenticated_user';
-import type { AnonymousAccessServiceStart } from './anonymous_access/anonymous_access_service';
-import { AnonymousAccessService } from './anonymous_access/anonymous_access_service';
-import type { AuditServiceSetup } from './audit/audit_service';
-import { AuditService } from './audit/audit_service';
-import { SecurityAuditLogger } from './audit/security_audit_logger';
+} from '../../features/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import type { SecurityLicense } from '../common/licensing';
+import { SecurityLicenseService } from '../common/licensing';
+import type { AuthenticatedUser } from '../common/model';
+import type { AnonymousAccessServiceStart } from './anonymous_access';
+import { AnonymousAccessService } from './anonymous_access';
+import type { AuditServiceSetup } from './audit';
+import { AuditService, SecurityAuditLogger } from './audit';
 import type {
   AuthenticationServiceStart,
   InternalAuthenticationServiceStart,
-} from './authentication/authentication_service';
-import { AuthenticationService } from './authentication/authentication_service';
-import type {
-  AuthorizationServiceSetup,
-  AuthorizationServiceSetupInternal,
-} from './authorization/authorization_service';
-import { AuthorizationService } from './authorization/authorization_service';
+} from './authentication';
+import { AuthenticationService } from './authentication';
+import type { AuthorizationServiceSetup, AuthorizationServiceSetupInternal } from './authorization';
+import { AuthorizationService } from './authorization';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
-import { ElasticsearchService } from './elasticsearch/elasticsearch_service';
-import type { SecurityFeatureUsageServiceStart } from './feature_usage/feature_usage_service';
-import { SecurityFeatureUsageService } from './feature_usage/feature_usage_service';
-import { securityFeatures } from './features/security_features';
+import { ElasticsearchService } from './elasticsearch';
+import type { SecurityFeatureUsageServiceStart } from './feature_usage';
+import { SecurityFeatureUsageService } from './feature_usage';
+import { securityFeatures } from './features';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
-import type { Session } from './session_management/session';
-import { SessionManagementService } from './session_management/session_management_service';
-import { setupSpacesClient } from './spaces/setup_spaces_client';
-import { registerSecurityUsageCollector } from './usage_collector/security_usage_collector';
+import type { Session } from './session_management';
+import { SessionManagementService } from './session_management';
+import { setupSpacesClient } from './spaces';
+import { registerSecurityUsageCollector } from './usage_collector';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],

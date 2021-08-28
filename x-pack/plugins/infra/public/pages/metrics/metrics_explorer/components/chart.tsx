@@ -4,32 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { BrushEndListener, TooltipValue } from '@elastic/charts';
-import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
+
+import React, { useCallback, useMemo } from 'react';
+
+import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  Axis,
+  Chart,
+  niceTimeFormatter,
+  Position,
+  Settings,
+  TooltipValue,
+  BrushEndListener,
+} from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
-import React, { useCallback, useMemo } from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
-import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
-import type { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
-import type { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
-import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
-import type {
-  MetricsExplorerChartOptions,
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
+import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
+  MetricsExplorerYAxisMode,
+  MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
-import { MetricsExplorerYAxisMode } from '../hooks/use_metrics_explorer_options';
-import { MetricsExplorerChartContextMenu } from './chart_context_menu';
-import { ChartTitle } from './chart_title';
-import { MetricsExplorerEmptyChart } from './empty_chart';
-import { calculateDomain } from './helpers/calculate_domain';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
-import { getChartTheme } from './helpers/get_chart_theme';
-import { MetricsExplorerNoMetrics } from './no_metrics';
 import { MetricExplorerSeriesChart } from './series_chart';
+import { MetricsExplorerChartContextMenu } from './chart_context_menu';
+import { MetricsExplorerEmptyChart } from './empty_chart';
+import { MetricsExplorerNoMetrics } from './no_metrics';
+import { getChartTheme } from './helpers/get_chart_theme';
+import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
+import { calculateDomain } from './helpers/calculate_domain';
+import { useKibana, useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ChartTitle } from './chart_title';
 
 interface Props {
   title?: string | null;

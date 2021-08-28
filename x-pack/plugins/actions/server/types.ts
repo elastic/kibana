@@ -4,25 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RequestHandlerContext } from '../../../../src/core/server';
-import type { ElasticsearchClient } from '../../../../src/core/server/elasticsearch/client/types';
-import { KibanaRequest } from '../../../../src/core/server/http/router/request';
-import type { SavedObjectsClientContract } from '../../../../src/core/server/saved_objects/types';
-import type {
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '../../../../src/core/types/saved_objects';
-import type { LicenseType } from '../../licensing/common/types';
-import type { ActionTypeExecutorResult } from '../common/types';
-import { ActionsClient } from './actions_client';
-import { ActionTypeRegistry } from './action_type_registry';
-import type { PluginSetupContract, PluginStartContract } from './plugin';
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ActionTypeRegistry } from './action_type_registry';
+import { PluginSetupContract, PluginStartContract } from './plugin';
+import { ActionsClient } from './actions_client';
+import { LicenseType } from '../../licensing/common/types';
+import {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  ElasticsearchClient,
+  RequestHandlerContext,
+  SavedObjectReference,
+} from '../../../../src/core/server';
+import { ActionTypeExecutorResult } from '../common';
 export { ActionTypeExecutorResult } from '../common';
 export { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
-export { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';
 export { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
+export { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';
 export { SwimlanePublicConfigurationType } from './builtin_action_types/swimlane/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;

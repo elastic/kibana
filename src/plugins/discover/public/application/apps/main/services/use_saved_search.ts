@@ -8,20 +8,21 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { debounceTime, filter, tap } from 'rxjs/operators';
-import { SearchSource } from '../../../../../../data/common/search/search_source/search_source';
-import type { AutoRefreshDoneFn } from '../../../../../../data/public/query/timefilter/lib/auto_refresh_loop';
-import { RequestAdapter } from '../../../../../../inspector/common/adapters/request/request_adapter';
-import type { DiscoverServices } from '../../../../build_services';
-import type { ElasticSearchHit } from '../../../doc_views/doc_views_types';
+import { DiscoverServices } from '../../../../build_services';
+import { DiscoverSearchSessionManager } from './discover_search_session';
+import { SearchSource } from '../../../../../../data/common';
+import { GetStateReturn } from './discover_state';
+import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
+import { RequestAdapter } from '../../../../../../inspector/public';
+import { AutoRefreshDoneFn } from '../../../../../../data/public';
+import { validateTimeRange } from '../utils/validate_time_range';
+import { Chart } from '../components/chart/point_series';
+import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
+import { useSingleton } from '../utils/use_singleton';
 import { FetchStatus } from '../../../types';
-import type { Chart } from '../components/chart/point_series';
-import type { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
+
 import { fetchAll } from '../utils/fetch_all';
 import { useBehaviorSubject } from '../utils/use_behavior_subject';
-import { useSingleton } from '../utils/use_singleton';
-import { validateTimeRange } from '../utils/validate_time_range';
-import { DiscoverSearchSessionManager } from './discover_search_session';
-import type { GetStateReturn } from './discover_state';
 import { sendResetMsg } from './use_saved_search_messages';
 
 export interface SavedSearchData {

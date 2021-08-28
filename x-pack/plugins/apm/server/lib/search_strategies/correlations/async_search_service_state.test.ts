@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { asyncSearchServiceStateProvider } from './async_search_service_state';
 
 describe('async search service', () => {

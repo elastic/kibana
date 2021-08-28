@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
-import type { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
-import { AdvancedJobCreator } from './advanced_job_creator';
-import { CategorizationJobCreator } from './categorization_job_creator';
+
+import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
+import { AdvancedJobCreator } from './advanced_job_creator';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { CategorizationJobCreator } from './categorization_job_creator';
 import { RareJobCreator } from './rare_job_creator';
-import { SingleMetricJobCreator } from './single_metric_job_creator';
+
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export const jobCreatorFactory = (jobType: JOB_TYPE) => (
   indexPattern: IndexPattern,

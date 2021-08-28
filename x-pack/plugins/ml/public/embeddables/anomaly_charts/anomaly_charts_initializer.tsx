@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldNumber,
-  EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useState } from 'react';
+import { AnomalyChartsEmbeddableInput } from '..';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
-import type { AnomalyChartsEmbeddableInput } from '../types';
 
 export const MAX_ANOMALY_CHARTS_ALLOWED = 48;
 export interface AnomalyChartsInitializerProps {

@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '../../../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../../../src/core/server/saved_objects/types';
-import type { InstallResult } from '../../../../common/types/rest_spec/epm';
-import { appContextService } from '../../app_context';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
-import * as Registry from '../registry';
 
-import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
+import { appContextService } from '../../app_context';
+import * as Registry from '../registry';
+import { installIndexPatterns } from '../kibana/index_pattern/install';
+
+import type { InstallResult } from '../../../types';
+
 import { installPackage, isPackageVersionOrLaterInstalled } from './install';
+import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;

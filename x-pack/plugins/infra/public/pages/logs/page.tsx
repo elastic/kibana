@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { LogsPageContent } from './page_content';
 import { LogsPageProviders } from './page_providers';
 

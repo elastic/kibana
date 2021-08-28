@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment, FC, useContext } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { Fragment, useContext } from 'react';
-import { isAdvancedJobCreator } from '../../../../../common/job_creator/type_guards';
+
+import { SummaryCountField } from '../summary_count_field';
+import { CategorizationField } from '../categorization_field';
+import { CategorizationPerPartitionField } from '../categorization_partition_field';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationField } from '../categorization_field/categorization_field';
-import { CategorizationPerPartitionField } from '../categorization_partition_field/categorization_per_partition';
-import { SummaryCountField } from '../summary_count_field/summary_count_field';
+import { isAdvancedJobCreator } from '../../../../../common/job_creator';
 
 export const ExtraSettings: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);

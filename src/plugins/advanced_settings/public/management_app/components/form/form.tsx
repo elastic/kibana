@@ -5,31 +5,33 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { PureComponent, Fragment } from 'react';
+
 import {
-  EuiBottomBar,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
   EuiSplitPanel,
+  EuiLink,
+  EuiCallOut,
+  EuiSpacer,
   EuiTextColor,
-  EuiTitle,
+  EuiBottomBar,
+  EuiButton,
   EuiToolTip,
+  EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
-import type { UiCounterMetricType } from '@kbn/analytics';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
-import React, { Fragment, PureComponent } from 'react';
-import type { DocLinksStart } from '../../../../../../core/public/doc_links/doc_links_service';
-import type { ToastsStart } from '../../../../../../core/public/notifications/toasts/toasts_service';
-import { toMountPoint } from '../../../../../kibana_react/public/util/to_mount_point';
-import { getCategoryName } from '../../lib/get_category_name';
-import type { FieldSetting, FieldState, SettingsChanges } from '../../types';
-import { Field, getEditableValue } from '../field/field';
+import { i18n } from '@kbn/i18n';
+import { UiCounterMetricType } from '@kbn/analytics';
+import { toMountPoint } from '../../../../../kibana_react/public';
+import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
+
+import { getCategoryName } from '../../lib';
+import { Field, getEditableValue } from '../field';
+import { FieldSetting, SettingsChanges, FieldState } from '../../types';
 
 type Category = string;
 

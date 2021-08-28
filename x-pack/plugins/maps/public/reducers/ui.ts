@@ -6,19 +6,21 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import { DRAW_MODE } from '../../common/constants';
+
+import { getMapsCapabilities } from '../kibana_services';
+
 import {
-  HIDE_TOC_DETAILS,
-  SET_DRAW_MODE,
-  SET_FULL_SCREEN,
+  UPDATE_FLYOUT,
   SET_IS_LAYER_TOC_OPEN,
   SET_IS_TIME_SLIDER_OPEN,
-  SET_OPEN_TOC_DETAILS,
+  SET_FULL_SCREEN,
   SET_READ_ONLY,
+  SET_OPEN_TOC_DETAILS,
   SHOW_TOC_DETAILS,
-  UPDATE_FLYOUT,
-} from '../actions/ui_actions';
-import { getMapsCapabilities } from '../kibana_services';
+  HIDE_TOC_DETAILS,
+  SET_DRAW_MODE,
+} from '../actions';
+import { DRAW_MODE } from '../../common';
 
 export enum FLYOUT_STATE {
   NONE = 'NONE',

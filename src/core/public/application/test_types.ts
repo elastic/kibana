@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { AppUnmount, Mounter } from './types';
 import { ApplicationService } from './application_service';
-import type { AppUnmount, Mounter } from './types';
 
 /** @internal */
 export type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;

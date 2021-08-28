@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { Request, RequestStatistics, Response } from './types';
-import { RequestStatus } from './types';
+import { Request, RequestStatistics, RequestStatus, Response } from './types';
 
 /**
  * An API to specify information about a specific request that will be logged.

@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiSelectableOption } from '@elastic/eui';
-import { hasMinLengthArray } from '../../../validators/array/has_min_length';
-import type { ValidationError, ValidationFunc } from '../../hook_form_lib/types';
+
+import { EuiSelectableOption } from '@elastic/eui';
+
+import { ValidationFunc, ValidationError } from '../../hook_form_lib';
+import { hasMinLengthArray } from '../../../validators/array';
 import { multiSelectComponent } from '../serializers';
-import type { ERROR_CODE } from './types';
+import { ERROR_CODE } from './types';
 
 const { optionsToSelectedValue } = multiSelectComponent;
 

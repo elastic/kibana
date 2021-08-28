@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import type { Case } from '../../../common/ui/types';
-import { useDeleteCases } from '../../containers/use_delete_cases';
-import type { CaseService } from '../../containers/use_get_case_user_actions';
 import * as i18n from '../case_view/translations';
+import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
-import type { CasesNavigation } from '../links';
 import { PropertyActions } from '../property_actions';
+import { Case } from '../../../common';
+import { CaseService } from '../../containers/use_get_case_user_actions';
+import { CasesNavigation } from '../links';
 
 interface CaseViewActions {
   allCasesNavigation: CasesNavigation;

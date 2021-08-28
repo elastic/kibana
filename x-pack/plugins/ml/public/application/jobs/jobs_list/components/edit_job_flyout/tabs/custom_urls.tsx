@@ -4,40 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Component } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiPanel,
   EuiSpacer,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalFooter,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component } from 'react';
-import type { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns/types';
-import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public/context/context';
-import type { Job } from '../../../../../../../common/types/anomaly_detection_jobs/job';
-import type { UrlConfig } from '../../../../../../../common/types/custom_urls';
-import type { MlKibanaReactContextValue } from '../../../../../contexts/kibana/kibana_context';
-import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
-import { CustomUrlEditor } from '../../../../components/custom_url_editor/editor';
-import { CustomUrlList } from '../../../../components/custom_url_editor/list';
-import type { CustomUrlSettings } from '../../../../components/custom_url_editor/utils';
+
+import { i18n } from '@kbn/i18n';
+import { CustomUrlEditor, CustomUrlList } from '../../../../components/custom_url_editor';
 import {
-  buildCustomUrlFromSettings,
   getNewCustomUrlDefaults,
   getQueryEntityFieldNames,
-  getTestUrl,
   isValidCustomUrlSettings,
+  buildCustomUrlFromSettings,
+  getTestUrl,
+  CustomUrlSettings,
 } from '../../../../components/custom_url_editor/utils';
-import { loadIndexPatterns, loadSavedDashboards } from '../edit_utils';
+import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { loadSavedDashboards, loadIndexPatterns } from '../edit_utils';
+import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
+import { Job } from '../../../../../../../common/types/anomaly_detection_jobs';
+import { UrlConfig } from '../../../../../../../common/types/custom_urls';
+import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { MlKibanaReactContextValue } from '../../../../../contexts/kibana';
 
 const MAX_NUMBER_DASHBOARDS = 1000;
 const MAX_NUMBER_INDEX_PATTERNS = 1000;

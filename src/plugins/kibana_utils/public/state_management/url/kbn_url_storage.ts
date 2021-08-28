@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { History } from 'history';
-import { createBrowserHistory } from 'history';
-import { stringify } from 'query-string';
+
 import { format as formatUrl } from 'url';
-import { url as urlUtils } from '../../../common/url';
-import { decodeState, encodeState } from '../state_encoder/encode_decode_state';
-import { replaceUrlHashQuery, replaceUrlQuery } from './format';
+import { stringify } from 'query-string';
+import { createBrowserHistory, History } from 'history';
+import { decodeState, encodeState } from '../state_encoder';
 import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';
+import { replaceUrlHashQuery, replaceUrlQuery } from './format';
+import { url as urlUtils } from '../../../common';
 
 /**
  * Parses a kibana url and retrieves all the states encoded into the URL,

@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
+
+import type { HttpHandler } from 'src/core/public';
 import {
   getLogEntryAnomaliesRequestPayloadRT,
   getLogEntryAnomaliesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH,
-} from '../../../../../common/http_api/log_analysis/results/log_entry_anomalies';
-import type { Pagination } from '../../../../../common/log_analysis/log_analysis_results';
-import type { AnomaliesSort } from '../../../../../common/log_analysis/log_entry_anomalies';
+} from '../../../../../common/http_api/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { AnomaliesSort, Pagination } from '../../../../../common/log_analysis';
 
 interface RequestArgs {
   sourceId: string;

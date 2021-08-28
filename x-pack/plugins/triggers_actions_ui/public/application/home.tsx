@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { lazy, useEffect } from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
-import { Route, Switch } from 'react-router-dom';
-import { useKibana } from '../common/lib/kibana/kibana_react';
-import { HealthCheck } from './components/health_check';
-import type { Section } from './constants';
-import { routeToConnectors, routeToRules } from './constants';
-import { HealthContextProvider } from './context/health_context';
+import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
+
+import { Section, routeToConnectors, routeToRules } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
-import { hasShowActionsCapability } from './lib/capabilities';
 import { getCurrentDocTitle } from './lib/doc_title';
+import { hasShowActionsCapability } from './lib/capabilities';
+
+import { HealthCheck } from './components/health_check';
+import { HealthContextProvider } from './context/health_context';
+import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 const ActionsConnectorsList = lazy(

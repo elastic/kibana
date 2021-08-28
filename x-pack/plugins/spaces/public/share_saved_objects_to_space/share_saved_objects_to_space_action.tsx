@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
+import type { ShareToSpaceFlyoutProps, SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public/services/types/action';
-import type { SavedObjectsManagementRecord } from '../../../../../src/plugins/saved_objects_management/public/services/types/record';
-import type {
-  ShareToSpaceFlyoutProps,
-  SpacesApiUi,
-} from '../../../../../src/plugins/spaces_oss/public/api';
+import { SavedObjectsManagementAction } from '../../../../../src/plugins/saved_objects_management/public';
 
 interface WrapperProps {
   spacesApiUi: SpacesApiUi;

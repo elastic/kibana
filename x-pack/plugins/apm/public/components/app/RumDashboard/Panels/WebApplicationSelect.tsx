@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import { ServiceNameFilter } from '../URLFilter/ServiceNameFilter';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { RUM_AGENT_NAMES } from '../../../../../common/agent_name';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { ServiceNameFilter } from '../URLFilter/ServiceNameFilter';
 
 export function WebApplicationSelect() {
   const {

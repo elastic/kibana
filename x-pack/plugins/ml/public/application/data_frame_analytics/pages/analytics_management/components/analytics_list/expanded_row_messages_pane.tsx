@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { JobMessage } from '../../../../../../../common/types/audit_message';
-import { JobMessages } from '../../../../../components/job_messages/job_messages';
-import { ml } from '../../../../../services/ml_api_service';
-import { useToastNotificationService } from '../../../../../services/toast_notification_service/toast_notification_service';
-import { useRefreshAnalyticsList } from '../../../../common/analytics';
 import './expanded_row_messages_pane.scss';
+
+import React, { FC, useState, useEffect, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { ml } from '../../../../../services/ml_api_service';
+import { useRefreshAnalyticsList } from '../../../../common';
+import { JobMessages } from '../../../../../components/job_messages';
+import { JobMessage } from '../../../../../../../common/types/audit_message';
+import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 interface Props {
   analyticsId: string;

@@ -4,16 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Action, CombinedState, PreloadedState, Store } from 'redux';
-import { applyMiddleware, compose, createStore as createReduxStore } from 'redux';
+
+import {
+  Action,
+  applyMiddleware,
+  CombinedState,
+  compose,
+  createStore as createReduxStore,
+  PreloadedState,
+  Store,
+} from 'redux';
+
 import { createEpicMiddleware } from 'redux-observable';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public/storage/storage';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { TimelineState, TGridEpicDependencies } from '../../types';
 import { tGridReducer } from './reducer';
 import { getTGridByIdSelector } from './selectors';
-import type { TGridEpicDependencies, TimelineState } from './types';
 
-export * as tGridActions from './actions';
 export * from './model';
+export * as tGridActions from './actions';
 export * as tGridSelectors from './selectors';
 export * from './types';
 export { tGridReducer };

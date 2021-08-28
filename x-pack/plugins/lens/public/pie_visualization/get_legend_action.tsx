@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { LegendAction } from '@elastic/charts';
 import React from 'react';
-import type { Datatable } from '../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
-import { LegendActionPopover } from '../shared_components/legend_action_popover';
+
+import type { LegendAction } from '@elastic/charts';
+import type { Datatable } from 'src/plugins/expressions/public';
 import type { LensFilterEvent } from '../types';
+import { LegendActionPopover } from '../shared_components';
 
 export const getLegendAction = (
   table: Datatable,

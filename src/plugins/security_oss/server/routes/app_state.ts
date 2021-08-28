@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { Observable } from 'rxjs';
 import { combineLatest } from 'rxjs';
 
-import type { Logger } from '@kbn/logging';
+import type { IRouter, Logger } from 'src/core/server';
 
-import type { IRouter } from '../../../../core/server/http/router/router';
-import type { AppState } from '../../common/app_state';
+import type { AppState } from '../../common';
 import type { createClusterDataCheck } from '../check_cluster_data';
 import type { ConfigType } from '../config';
 import type { AnonymousAccessService } from '../plugin';

@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { getConfigurationMock, agentMock } from './get_apm_config.test.mocks';
 import { getApmConfig } from './get_apm_config';
-import { agentMock, getConfigurationMock } from './get_apm_config.test.mocks';
 
 const defaultApmConfig = {
   active: true,

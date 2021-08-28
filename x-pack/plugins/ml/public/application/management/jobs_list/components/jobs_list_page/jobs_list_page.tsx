@@ -4,48 +4,51 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiTabbedContentTab } from '@elastic/eui';
+
+import React, { useEffect, useState, Fragment, FC, useMemo, useCallback } from 'react';
+import { Router } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { CoreStart } from 'kibana/public';
+
 import {
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
   EuiTabbedContent,
+  EuiTabbedContentTab,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { Router } from 'react-router-dom';
-import type { CoreStart } from '../../../../../../../../../src/core/public/types';
-import type { DataPublicPluginStart } from '../../../../../../../../../src/plugins/data/public/types';
-import { RedirectAppLinks } from '../../../../../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
-import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public/context/context';
-import type { ManagementAppMountParams } from '../../../../../../../../../src/plugins/management/public/types';
-import type { SharePluginStart } from '../../../../../../../../../src/plugins/share/public/plugin';
-import type { SpacesContextProps } from '../../../../../../../../../src/plugins/spaces_oss/public/api';
-import type { UsageCollectionSetup } from '../../../../../../../../../src/plugins/usage_collection/public/plugin';
-import type { SpacesPluginStart } from '../../../../../../../spaces/public/plugin';
+
+import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { PLUGIN_ID } from '../../../../../../common/constants/app';
-import type { ListingPageUrlState } from '../../../../../../common/types/common';
-import type { JobType } from '../../../../../../common/types/saved_objects';
-import { getMlGlobalServices } from '../../../../app';
+import type { ManagementAppMountParams } from '../../../../../../../../../src/plugins/management/public';
+
 import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
-import { ExportJobsFlyout } from '../../../../components/import_export_jobs/export_jobs_flyout/export_jobs_flyout';
-import { ImportJobsFlyout } from '../../../../components/import_export_jobs/import_jobs_flyout/import_jobs_flyout';
-import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync/job_spaces_sync_flyout';
-import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list/analytics_list';
-import { getDefaultDFAListState } from '../../../../data_frame_analytics/pages/analytics_management/page';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../../../../../src/plugins/kibana_react/public';
+
+import { getDocLinks } from '../../../../util/dependency_cache';
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
-import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_list/jobs';
-import { getDocLinks } from '../../../../util/dependency_cache';
+import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
-
-
+import type { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
+import type { SpacesPluginStart } from '../../../../../../../spaces/public';
+import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
+import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_list/jobs';
+import { getMlGlobalServices } from '../../../../app';
+import { ListingPageUrlState } from '../../../../../../common/types/common';
+import { getDefaultDFAListState } from '../../../../data_frame_analytics/pages/analytics_management/page';
+import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
+import type { JobType } from '../../../../../../common/types/saved_objects';
 
 interface Tab extends EuiTabbedContentTab {
   'data-test-subj': string;

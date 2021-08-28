@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
+
 import { get, isEmpty } from 'lodash';
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import { estypes } from '@elastic/elasticsearch';
+
+import { ElasticsearchClient, Logger } from 'kibana/server';
+
 import {
   DEFAULT_ILM_POLICY_ID,
   ECS_COMPONENT_TEMPLATE_NAME,
   TECHNICAL_COMPONENT_TEMPLATE_NAME,
 } from '../../common/assets';
-import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
+import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
+
 import { IndexInfo } from './index_info';
 import { incrementIndexName } from './utils';
 

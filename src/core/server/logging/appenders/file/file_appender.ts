@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { DisposableAppender, Layout, LogRecord } from '@kbn/logging';
+import { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
 import { createWriteStream, WriteStream } from 'fs';
-import type { LayoutConfigType } from '../../layouts/layouts';
-import { Layouts } from '../../layouts/layouts';
+
+import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 
 export interface FileAppenderConfig {
   type: 'file';

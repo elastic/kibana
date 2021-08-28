@@ -6,23 +6,21 @@
  */
 
 import Boom from '@hapi/boom';
-import type { TypeOf } from '@kbn/config-schema';
-import type { IScopedClusterClient } from '../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import type { Datafeed } from '../../common/types/anomaly_detection_jobs/datafeed';
-import type { AnalysisConfig } from '../../common/types/anomaly_detection_jobs/job';
+import { IScopedClusterClient } from 'kibana/server';
+import { TypeOf } from '@kbn/config-schema';
+import { AnalysisConfig, Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
-import type { MlClient } from '../lib/ml_client/types';
-import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit/calculate_model_memory_limit';
-import { validateJob } from '../models/job_validation/job_validation';
-import { validateCardinality } from '../models/job_validation/validate_cardinality';
-import type { RouteInitialization } from '../types';
-import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
+import { RouteInitialization } from '../types';
 import {
   estimateBucketSpanSchema,
   modelMemoryLimitSchema,
   validateCardinalitySchema,
   validateJobSchema,
 } from './schemas/job_validation_schema';
+import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
+import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
+import { validateJob, validateCardinality } from '../models/job_validation';
+import type { MlClient } from '../lib/ml_client';
 
 type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 

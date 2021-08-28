@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
-import { SpanIcon } from '../../shared/span_icon';
 import { ApmMainTemplate } from './apm_main_template';
+import { SpanIcon } from '../../shared/span_icon';
 
 interface Props {
   title: string;

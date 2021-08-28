@@ -5,13 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment';
+
 import React, { Fragment } from 'react';
-import { FormatEditorSamples } from '../../samples/samples';
+import moment from 'moment';
+
+import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DefaultFormatEditor, defaultState } from '../default/default';
 import { formatId } from './constants';
+
+import { FormatEditorSamples } from '../../samples';
 
 interface DateFormatEditorFormatParams {
   pattern: string;

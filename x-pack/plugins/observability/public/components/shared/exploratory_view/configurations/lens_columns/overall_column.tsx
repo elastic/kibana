@@ -5,11 +5,13 @@
  * 2.0.
  */
 import type { TinymathAST } from '@kbn/tinymath';
-import type { OverallSumIndexPatternColumn } from '../../../../../../../lens/public/indexpattern_datasource/operations/definitions/calculations/overall_metric';
-import type { CountIndexPatternColumn } from '../../../../../../../lens/public/indexpattern_datasource/operations/definitions/count';
-import type { FormulaIndexPatternColumn } from '../../../../../../../lens/public/indexpattern_datasource/operations/definitions/formula/formula';
-import type { MathIndexPatternColumn } from '../../../../../../../lens/public/indexpattern_datasource/operations/definitions/formula/math';
-import type { DataType } from '../../../../../../../lens/public/types';
+import {
+  DataType,
+  CountIndexPatternColumn,
+  MathIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+} from '../../../../../../../lens/public';
 
 export function getDistributionInPercentageColumn({
   label,

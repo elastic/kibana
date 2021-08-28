@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect } from 'react';
-import type { InventoryMetaResponse } from '../../../../../common/http_api/inventory_meta_api';
-import { InventoryMetaResponseRT } from '../../../../../common/http_api/inventory_meta_api';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
+import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
+import {
+  InventoryMetaResponseRT,
+  InventoryMetaResponse,
+} from '../../../../../common/http_api/inventory_meta_api';
+import { InventoryItemType } from '../../../../../common/inventory_models/types';
 
 export function useInventoryMeta(
   sourceId: string,

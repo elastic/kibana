@@ -4,24 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import DateMath from '@elastic/datemath';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { useCallback, useState } from 'react';
-import type { Capabilities } from '../../../../../../../../src/core/types/capabilities';
-import type { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import type { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import { i18n } from '@kbn/i18n';
+
+import {
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiPopover,
+} from '@elastic/eui';
+import DateMath from '@elastic/datemath';
+import { Capabilities } from 'src/core/public';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
-import { useLinkProps } from '../../../../hooks/use_link_props';
-import { getNodeDetailUrl } from '../../../link_to/redirect_to_node_detail';
-import type {
-  MetricsExplorerChartOptions,
+import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
+import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
+  MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
+import { getNodeDetailUrl } from '../../../link_to/redirect_to_node_detail';
+import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { useLinkProps } from '../../../../hooks/use_link_props';
 
 export interface Props {
   options: MetricsExplorerOptions;

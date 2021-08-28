@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { TinymathAST, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
 import { isObject } from 'lodash';
-import type { GenericOperationDefinition, IndexPatternColumn, OperationDefinition } from '..';
-import { documentField } from '../../../document_field';
-import type { IndexPattern, IndexPatternLayer } from '../../../types';
-import { getColumnOrder } from '../../layer_helpers';
-import type { FormulaIndexPatternColumn } from './formula';
+import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
+import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from '../index';
+import { IndexPattern, IndexPatternLayer } from '../../../types';
 import { mathOperation } from './math';
+import { documentField } from '../../../document_field';
+import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
 import {
   filterByVisibleOperation,
   findVariables,
   getOperationParams,
   groupArgsByType,
 } from './util';
-import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
+import { FormulaIndexPatternColumn } from './formula';
+import { getColumnOrder } from '../../layer_helpers';
 
 function getManagedId(mainId: string, index: number) {
   return `${mainId}X${index}`;

@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { get, isEmpty, pick } from 'lodash';
-import type { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-import type { Span } from '../../../../typings/es_schemas/ui/span';
-import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import type { KeyValuePair } from '../../../utils/flattenObject';
-import { flattenObject } from '../../../utils/flattenObject';
-import type { Section } from './sections';
+
+import { get, pick, isEmpty } from 'lodash';
+import { Section } from './sections';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
+import { Span } from '../../../../typings/es_schemas/ui/span';
+import { flattenObject, KeyValuePair } from '../../../utils/flattenObject';
 
 export type SectionsWithRows = ReturnType<typeof getSectionsWithRows>;
 

@@ -4,32 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
-import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants/agent';
-import { isAgentUpgradeable } from '../../../common/services/is_agent_upgradeable';
-import type {
-  Agent,
-  AgentAction,
-  AgentActionSOAttributes,
-} from '../../../common/types/models/agent';
+
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
+import type { Agent, AgentAction, AgentActionSOAttributes, BulkActionResult } from '../../types';
+import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
+import { agentPolicyService } from '../../services';
 import {
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,
   IngestManagerError,
 } from '../../errors';
-import type { BulkActionResult } from '../../types';
-import { agentPolicyService } from '../agent_policy';
+import { isAgentUpgradeable } from '../../../common/services';
 import { appContextService } from '../app_context';
 
 import { bulkCreateAgentActions, createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import {
-  bulkUpdateAgents,
   getAgentDocuments,
-  getAgentPolicyForAgent,
   getAgents,
   updateAgent,
+  bulkUpdateAgents,
+  getAgentPolicyForAgent,
 } from './crud';
 import { searchHitToAgent } from './helpers';
 

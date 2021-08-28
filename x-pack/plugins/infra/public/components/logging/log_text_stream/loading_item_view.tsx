@@ -4,20 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Unit } from '@elastic/datemath';
+
 import {
-  EuiButton,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiText,
   EuiTitle,
+  EuiLoadingSpinner,
+  EuiButton,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative, FormattedTime } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { extendDatemath } from '../../../utils/datemath';
+import { Unit } from '@elastic/datemath';
+
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogTextSeparator } from './log_text_separator';
+import { extendDatemath } from '../../../utils/datemath';
 
 type Position = 'start' | 'end';
 

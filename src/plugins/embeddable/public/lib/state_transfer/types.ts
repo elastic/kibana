@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Optional } from '@kbn/utility-types';
-import type { SavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
-import type { EmbeddableInput } from '../../../common/types';
+
+import { Optional } from '@kbn/utility-types';
+import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
 
 export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 

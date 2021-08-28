@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { camelCase, mapKeys } from 'lodash';
+
+import { mapKeys, camelCase } from 'lodash';
 
 export function keysToCamelCaseShallow(object: Record<string, any>) {
   return mapKeys(object, (value, key) => camelCase(key));

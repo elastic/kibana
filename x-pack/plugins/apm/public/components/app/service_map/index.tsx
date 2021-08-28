@@ -4,28 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
 } from '@elastic/eui';
-import type { ReactNode } from 'react';
-import React from 'react';
-import type { Environment } from '../../../../common/environment_rt';
+import React, { ReactNode } from 'react';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import {
   invalidLicenseMessage,
   SERVICE_MAP_TIMEOUT_ERROR,
 } from '../../../../common/service_map';
-import { useLicenseContext } from '../../../context/license/use_license_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useServiceName } from '../../../hooks/use_service_name';
+import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { LicensePrompt } from '../../shared/license_prompt';
-import { SearchBar } from '../../shared/search_bar';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
 import { getCytoscapeDivStyle } from './cytoscape_options';
@@ -34,6 +30,10 @@ import { EmptyPrompt } from './empty_prompt';
 import { Popover } from './Popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './useRefDimensions';
+import { SearchBar } from '../../shared/search_bar';
+import { useServiceName } from '../../../hooks/use_service_name';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { Environment } from '../../../../common/environment_rt';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (

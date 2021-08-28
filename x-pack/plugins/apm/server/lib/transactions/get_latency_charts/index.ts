@@ -4,32 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
-import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../../../observability/server/utils/queries';
-import type { PromiseReturnType } from '../../../../../observability/typings/common';
+
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { environmentQuery } from '../../../../common/utils/environment_query';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
+} from '../../../lib/helpers/aggregated_transactions';
+import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
 import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
-import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
-
 export type LatencyChartsSearchResponse = PromiseReturnType<
   typeof searchLatency
 >;

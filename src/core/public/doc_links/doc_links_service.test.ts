@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+
 import { DocLinksService } from './doc_links_service';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 
 describe('DocLinksService#start()', () => {
   it('templates the doc links with the branch information from injectedMetadata', () => {

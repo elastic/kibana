@@ -6,8 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { AlertTypeParams } from '../../common/alert';
-import type { AlertTypeParamsValidator } from '../types';
+import { AlertTypeParams, AlertTypeParamsValidator } from '../types';
 
 export function validateAlertTypeParams<Params extends AlertTypeParams>(
   params: Record<string, unknown>,

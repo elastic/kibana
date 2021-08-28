@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 
-import type { CoreSetup } from '../../../../../../src/core/public/types';
-import type { HttpSetup } from '../../../../../../src/core/public/http/types';
+import { i18n } from '@kbn/i18n';
+import type { CoreSetup, HttpSetup } from 'src/core/public';
 
 interface CreateDeps {
   application: CoreSetup['application'];

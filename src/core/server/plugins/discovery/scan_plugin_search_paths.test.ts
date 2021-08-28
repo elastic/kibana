@@ -7,11 +7,11 @@
  */
 
 import mockFs from 'mock-fs';
-import { resolve } from 'path';
-import { toArray } from 'rxjs/operators';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { PluginDiscoveryError } from './plugin_discovery_error';
+import { toArray } from 'rxjs/operators';
+import { resolve } from 'path';
 import { scanPluginSearchPaths } from './scan_plugin_search_paths';
+import { PluginDiscoveryError } from './plugin_discovery_error';
 
 const KIBANA_ROOT = process.cwd();
 

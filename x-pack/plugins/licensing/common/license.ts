@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type {
-  ILicense,
-  LicenseCheck,
-  LicenseStatus,
+import {
   LicenseType,
-  PublicFeatures,
-  PublicLicense,
+  ILicense,
+  LicenseStatus,
+  LicenseCheck,
+  LICENSE_TYPE,
   PublicLicenseJSON,
+  PublicLicense,
+  PublicFeatures,
 } from './types';
-import { LICENSE_TYPE } from './types';
 
 /**
  * @public

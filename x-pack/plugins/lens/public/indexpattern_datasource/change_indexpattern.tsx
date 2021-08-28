@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSelectableProps } from '@elastic/eui';
-import { EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public/toolbar_button/toolbar_button';
-import { ToolbarButton } from '../../../../../src/plugins/kibana_react/public/toolbar_button/toolbar_button';
-import { trackUiEvent } from '../lens_ui_telemetry/factory';
-import type { IndexPatternRef } from './types';
+import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
+import { IndexPatternRef } from './types';
+import { trackUiEvent } from '../lens_ui_telemetry';
+import { ToolbarButton, ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;

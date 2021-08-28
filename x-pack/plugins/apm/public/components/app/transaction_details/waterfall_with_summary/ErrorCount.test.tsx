@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { expectTextsInDocument } from '../../../../utils/testHelpers';

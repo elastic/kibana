@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { MockedLogger } from '@kbn/logging/mocks';
-import { loggerMock } from '@kbn/logging/mocks';
-import { createConcatStream, createPromiseFromStreams } from '@kbn/utils';
-import { Readable } from 'stream';
-import type { SavedObject } from '../../../types/saved_objects';
-import { httpServerMock } from '../../http/http_server.mocks';
-import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
+
+import type { SavedObject } from '../../../types';
 import { SavedObjectsExporter } from './saved_objects_exporter';
+import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
+import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { httpServerMock } from '../../http/http_server.mocks';
+import { loggerMock, MockedLogger } from '../../logging/logger.mock';
+import { Readable } from 'stream';
+import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
 async function readStreamToCompletion(stream: Readable): Promise<Array<SavedObject<any>>> {
   return createPromiseFromStreams([stream, createConcatStream([])]);

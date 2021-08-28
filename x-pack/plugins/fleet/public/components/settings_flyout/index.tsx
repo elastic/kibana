@@ -4,41 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useEffect, useCallback } from 'react';
+import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiButton,
+  EuiFlyoutFooter,
   EuiForm,
   EuiFormRow,
+  EuiCode,
   EuiLink,
   EuiPanel,
-  EuiSpacer,
-  EuiText,
   EuiTextColor,
-  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiText } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
-import React, { useCallback, useEffect } from 'react';
-import styled from 'styled-components';
 
-import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public/code_editor';
-import { normalizeHostsForAgents } from '../../../common/services/hosts_utils';
-import { isDiffPathProtocol } from '../../../common/services/is_diff_path_protocol';
-import { useStartServices } from '../../hooks/use_core';
-import { useComboInput, useInput } from '../../hooks/use_input';
-import { sendPutOutput, useGetOutputs } from '../../hooks/use_request/outputs';
-import { sendPutSettings, useGetSettings } from '../../hooks/use_request/settings';
+import {
+  useComboInput,
+  useStartServices,
+  useGetSettings,
+  useInput,
+  sendPutSettings,
+  useGetOutputs,
+  sendPutOutput,
+} from '../../hooks';
+import { isDiffPathProtocol, normalizeHostsForAgents } from '../../../common';
+import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
-import type { SettingsConfirmModalProps } from './confirm_modal';
 import { SettingsConfirmModal } from './confirm_modal';
+import type { SettingsConfirmModalProps } from './confirm_modal';
 import { HostsInput } from './hosts_input';
 
 const CodeEditorContainer = styled.div`

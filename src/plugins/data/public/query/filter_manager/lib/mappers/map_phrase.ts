@@ -5,16 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Filter, PhraseFilter } from '@kbn/es-query';
-import {
-  FILTERS,
-  getPhraseFilterField,
-  getPhraseFilterValue,
-  isPhraseFilter,
-  isScriptedPhraseFilter,
-} from '@kbn/es-query';
+
 import { get } from 'lodash';
-import type { FilterValueFormatter } from '../../../../../common/types';
+import {
+  PhraseFilter,
+  getPhraseFilterValue,
+  getPhraseFilterField,
+  FILTERS,
+  isScriptedPhraseFilter,
+  Filter,
+  isPhraseFilter,
+} from '@kbn/es-query';
+
+import { FilterValueFormatter } from '../../../../../common';
 
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['script', 'script', 'params', 'value']);

@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,15 +20,14 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React from 'react';
-import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_selector/anomaly_results_view_selector';
-import { HelpMenu } from '../components/help_menu/help_menu';
-import { JobSelector } from '../components/job_selector/job_selector';
-import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wrapper/date_picker_wrapper';
-import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
-import { useMlKibana } from '../contexts/kibana/kibana_context';
+
+import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_selector';
+import { JobSelector } from '../components/job_selector';
+import { NavigationMenu } from '../components/navigation_menu';
+import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wrapper';
+
+import { HelpMenu } from '../components/help_menu';
+import { useMlKibana } from '../contexts/kibana';
 
 interface TimeSeriesExplorerPageProps {
   dateFormatTz: string;

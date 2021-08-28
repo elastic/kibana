@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
-} from '../../../../../../src/core/server/saved_objects/import/types';
+} from 'src/core/public';
 import type {
   FailedImport,
   ProcessedImportResponse,
-} from '../../../../../../src/plugins/saved_objects_management/public/lib/process_import_response';
+} from 'src/plugins/saved_objects_management/public';
+
 import type { SavedObjectTarget } from '../types';
 
 export interface SummarizedSavedObjectResult {

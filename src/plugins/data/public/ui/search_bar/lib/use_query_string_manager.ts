@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useEffect, useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import type { Query } from '../../..';
-import type { QueryStringContract } from '../../../query/query_string/query_string_manager';
+import { Query } from '../../..';
+import { QueryStringContract } from '../../../query/query_string';
 
 interface UseQueryStringProps {
   query?: Query;

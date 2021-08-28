@@ -5,15 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { RectAnnotationDatum, RectAnnotationStyle, TooltipValue } from '@elastic/charts';
-import { RectAnnotation } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
-import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { i18n } from '@kbn/i18n';
+
+import React, { FC } from 'react';
 import moment, { unitOfTime } from 'moment';
-import type { FC } from 'react';
-import React from 'react';
+
+import {
+  TooltipValue,
+  RectAnnotation,
+  RectAnnotationDatum,
+  RectAnnotationStyle,
+} from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
+import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
 
 interface EndzonesProps {
   isDarkMode: boolean;

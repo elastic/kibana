@@ -4,17 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+
+import React, { Fragment, Component } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component, Fragment } from 'react';
-import type { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
-import type { AggDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
-import { MetricsEditor } from '../../../components/metrics_editor/metrics_editor';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  IFieldType,
+  IndexPattern,
+  indexPatterns,
+} from '../../../../../../../src/plugins/data/public';
+import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
-import type { OnSourceChangeArgs } from '../source';
 import { GeoLineForm } from './geo_line_form';
+import { AggDescriptor } from '../../../../common/descriptor_types';
+import { OnSourceChangeArgs } from '../source';
 
 interface Props {
   indexPatternId: string;

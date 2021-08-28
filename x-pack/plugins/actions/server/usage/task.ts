@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
+
+import {
+  Logger,
+  CoreSetup,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBaseOptions,
+} from 'kibana/server';
 import moment from 'moment';
-import type { CoreSetup } from '../../../../../src/core/server';
-import type { SavedObjectsBulkGetObject } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type { SavedObjectsBaseOptions } from '../../../../../src/core/server/saved_objects/types';
-import type {
+import {
+  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server/plugin';
-import type { RunContext } from '../../../task_manager/server/task';
-import type { ActionResult } from '../types';
-import { getInUseTotalCount, getTotalCount } from './actions_telemetry';
+} from '../../../task_manager/server';
+import { ActionResult } from '../types';
+import { getTotalCount, getInUseTotalCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 

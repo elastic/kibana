@@ -6,9 +6,10 @@
  */
 
 import moment from 'moment';
-import type { HttpSetup } from '../../../../../src/core/public/http/types';
-import type { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public/storage/types';
-import { BASE_API_URL } from '../../common/constants';
+import { HttpSetup } from 'kibana/public';
+
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { BASE_API_URL } from '../../common';
 
 const STORAGE_KEY = 'lens-ui-telemetry';
 

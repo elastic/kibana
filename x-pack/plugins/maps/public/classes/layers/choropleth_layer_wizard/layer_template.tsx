@@ -4,28 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { FileLayer } from '@elastic/ems-client';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiPanel,
   EuiRadioGroup,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component } from 'react';
-import type { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { IFieldType, IndexPattern } from 'src/plugins/data/public';
+import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getGeoFields, getSourceFields, getTermsFields } from '../../../index_pattern_util';
-import { getIndexPatternSelectComponent, getIndexPatternService } from '../../../kibana_services';
 import { getEmsFileLayers } from '../../../util';
-import type { RenderWizardArguments } from '../layer_wizard_registry';
+import { getIndexPatternSelectComponent, getIndexPatternService } from '../../../kibana_services';
 import {
   createEmsChoroplethLayerDescriptor,
   createEsChoroplethLayerDescriptor,

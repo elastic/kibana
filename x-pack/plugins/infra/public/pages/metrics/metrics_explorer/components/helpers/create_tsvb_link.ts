@@ -4,26 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { set } from '@elastic/safer-lodash-set';
+
 import { encode } from 'rison-node';
 import uuid from 'uuid';
-import { Color, colorTransformer } from '../../../../../../common/color_palette';
-import type { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
-import type { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
-import type { LinkDescriptor } from '../../../../../hooks/use_link_props';
-import { InfraFormatterType } from '../../../../../lib/lib';
-import type {
-  MetricsExplorerChartOptions,
+import { set } from '@elastic/safer-lodash-set';
+import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
+import { colorTransformer, Color } from '../../../../../../common/color_palette';
+import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
+import {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,
   MetricsExplorerTimeOptions,
-} from '../../hooks/use_metrics_explorer_options';
-import {
-  MetricsExplorerChartType,
+  MetricsExplorerChartOptions,
   MetricsExplorerYAxisMode,
+  MetricsExplorerChartType,
 } from '../../hooks/use_metrics_explorer_options';
-import { createMetricLabel } from './create_metric_label';
 import { metricToFormat } from './metric_to_format';
+import { InfraFormatterType } from '../../../../../lib/lib';
+import { createMetricLabel } from './create_metric_label';
+import { LinkDescriptor } from '../../../../../hooks/use_link_props';
 
 /*
  We've recently changed the default index pattern in Metrics UI from `metricbeat-*` to

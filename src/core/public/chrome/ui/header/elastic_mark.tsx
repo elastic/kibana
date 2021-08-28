@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { HTMLAttributes } from 'react';
-import React from 'react';
+
+import React, { HTMLAttributes } from 'react';
 
 export const ElasticMark = ({ ...props }: HTMLAttributes<SVGElement>) => (
   <svg

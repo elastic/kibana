@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import type { QuerySuggestion } from '../../../../../../src/plugins/data/public/autocomplete/providers/query_suggestion_provider';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
 

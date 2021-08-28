@@ -4,45 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   SavedObjectReferenceWithContext,
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesOptions,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from '../../../../../src/core/server/saved_objects/service/lib/collect_multi_namespace_references';
-import type {
-  SavedObjectsCreatePointInTimeFinderDependencies,
-  SavedObjectsCreatePointInTimeFinderOptions,
-} from '../../../../../src/core/server/saved_objects/service/lib/point_in_time_finder';
-import type {
-  SavedObjectsUpdateObjectsSpacesObject,
-  SavedObjectsUpdateObjectsSpacesOptions,
-} from '../../../../../src/core/server/saved_objects/service/lib/update_objects_spaces';
-import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects/service/lib/utils';
-import type {
+  SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsCheckConflictsObject,
+  SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsFindOptions,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
-} from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type {
-  SavedObjectsBaseOptions,
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-} from '../../../../../src/core/server/saved_objects/types';
+} from 'src/core/server';
+
+import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import { SavedObjectAction, savedObjectEvent } from '../audit/audit_events';
-import type { AuditLogger } from '../audit/audit_service';
-import type { SecurityAuditLogger } from '../audit/security_audit_logger';
-import type { Actions } from '../authorization/actions/actions';
-import type { CheckSavedObjectsPrivileges } from '../authorization/check_saved_objects_privileges';
+import type { AuditLogger, SecurityAuditLogger } from '../audit';
+import { SavedObjectAction, savedObjectEvent } from '../audit';
+import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import type { CheckPrivilegesResponse } from '../authorization/types';
 import type { SpacesService } from '../plugin';
 import type {

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { XOR } from './common';
-import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
-import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
+
+import { DataFrameAnalyticsConfig } from './data_frame_analytics';
+import { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
+import { XOR } from './common';
 
 export interface IngestStats {
   count: number;

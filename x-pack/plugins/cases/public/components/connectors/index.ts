@@ -4,19 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { JiraFieldsType } from '../../../common/api/connectors/jira';
-import type { ResilientFieldsType } from '../../../common/api/connectors/resilient';
-import type { ServiceNowITSMFieldsType } from '../../../common/api/connectors/servicenow_itsm';
-import type { ServiceNowSIRFieldsType } from '../../../common/api/connectors/servicenow_sir';
-import type { SwimlaneFieldsType } from '../../../common/api/connectors/swimlane';
+
+import { CaseConnectorsRegistry } from './types';
 import { createCaseConnectorsRegistry } from './connectors_registry';
 import { getCaseConnector as getJiraCaseConnector } from './jira';
+import { getCaseConnector as getSwimlaneCaseConnector } from './swimlane';
 import { getCaseConnector as getResilientCaseConnector } from './resilient';
 import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from './servicenow';
-import { getCaseConnector as getSwimlaneCaseConnector } from './swimlane';
-import type { CaseConnectorsRegistry } from './types';
+import {
+  JiraFieldsType,
+  ServiceNowITSMFieldsType,
+  ServiceNowSIRFieldsType,
+  ResilientFieldsType,
+  SwimlaneFieldsType,
+} from '../../../common';
 
 export { getActionType as getCaseConnectorUi } from './case';
+
 export * from './types';
 
 interface GetCaseConnectorsReturn {

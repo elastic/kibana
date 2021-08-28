@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { DataPublicPluginStart } from '../../../data/public/types';
+
+import { DataPublicPluginStart } from '../shared_imports';
 import type { EsRuntimeField } from '../types';
 
 export interface RuntimeFieldPainlessError {

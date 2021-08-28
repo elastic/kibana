@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { mapValues } from 'lodash';
-import type { ExecutionContext } from '../../../../../expressions/common/execution/types';
-import type { AnyExpressionFunctionDefinition } from '../../../../../expressions/common/expression_functions/types';
+import { AnyExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
 
 /**
  * Takes a function spec and passes in default args,

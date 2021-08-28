@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
 import React from 'react';
-import { ForLastExpression } from '../../../../../triggers_actions_ui/public/common/expression_items';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { asInteger } from '../../../../common/utils/formatters/formatters';
+import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
+import { asInteger } from '../../../../common/utils/formatters';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import type { AlertMetadata } from '../helper';
-import { getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 export interface AlertParams {

@@ -4,26 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useCallback, useEffect, useState } from 'react';
+
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
+import type { TutorialDirectoryNoticeComponent } from 'src/plugins/home/public';
 
-import type { TutorialDirectoryNoticeComponent } from '../../../../../../src/plugins/home/public/services/tutorials/tutorial_service';
-import { RedirectAppLinks } from '../../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
-import { useCapabilities } from '../../hooks/use_capabilities';
-import { useStartServices } from '../../hooks/use_core';
-import { useLink } from '../../hooks/use_link';
-import { sendPutSettings, useGetSettings } from '../../hooks/use_request/settings';
+import { RedirectAppLinks } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  sendPutSettings,
+  useGetSettings,
+  useLink,
+  useCapabilities,
+  useStartServices,
+} from '../../hooks';
 
 const FlexItemButtonWrapper = styled(EuiFlexItem)`
   &&& {

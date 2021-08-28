@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { orderBy } from 'lodash';
-import type { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
-import type { AggregateOf as AggregationResultOf } from '../../../../../../src/core/types/elasticsearch/search';
+import {
+  AggregationOptionsByType,
+  AggregationResultOf,
+} from '../../../../../../src/core/types/elasticsearch';
 
 export interface TopSigTerm {
   fieldName: string;

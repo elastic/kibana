@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { $Values } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
-import type { $Values } from '@kbn/utility-types';
 
 export const ColorMode = Object.freeze({
   Background: 'Background' as 'Background',

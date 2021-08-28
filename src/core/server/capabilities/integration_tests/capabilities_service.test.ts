@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/dev-utils';
 import supertest from 'supertest';
-import { getEnvOptions } from '../../config/mocks';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { HttpService, InternalHttpServicePreboot, InternalHttpServiceSetup } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
-import { HttpService } from '../../http/http_service';
-import { createHttpServer } from '../../http/test_utils';
-import type { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../../http/types';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import type { CapabilitiesSetup } from '../capabilities_service';
-import { CapabilitiesService } from '../capabilities_service';
+import { Env } from '../../config';
+import { getEnvOptions } from '../../config/mocks';
+import { CapabilitiesService, CapabilitiesSetup } from '..';
+import { createHttpServer } from '../../http/test_utils';
 
 const coreId = Symbol('core');
 

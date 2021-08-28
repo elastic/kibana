@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FunctionComponent } from 'react';
-import React, { createContext, useCallback, useContext, useRef } from 'react';
 
-import { useIntraAppState } from '../../../hooks/use_intra_app_state';
-import type { IntegrationsAppBrowseRouteState } from '../../../types/intra_app_route_state';
+import type { FunctionComponent } from 'react';
+import React, { createContext, useContext, useRef, useCallback } from 'react';
+
+import type { IntegrationsAppBrowseRouteState } from '../../../types';
+import { useIntraAppState } from '../../../hooks';
 
 interface AgentPolicyContextValue {
   getId(): string | undefined;

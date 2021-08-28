@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IScopedClusterClient } from '../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
-import { fieldsServiceProvider } from '../models/fields_service/fields_service';
-import type { RouteInitialization } from '../types';
+import { RouteInitialization } from '../types';
 import {
   getCardinalityOfFieldsSchema,
   getTimeFieldRangeSchema,
 } from './schemas/fields_service_schema';
+import { fieldsServiceProvider } from '../models/fields_service';
 
 function getCardinalityOfFields(client: IScopedClusterClient, payload: any) {
   const fs = fieldsServiceProvider(client);

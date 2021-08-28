@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useMemo } from 'react';
-import { MetadataTable } from '..';
-import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { getSectionsWithRows } from '../helper';
 import { TRANSACTION_METADATA_SECTIONS } from './sections';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { getSectionsWithRows } from '../helper';
+import { MetadataTable } from '..';
 
 interface Props {
   transaction: Transaction;

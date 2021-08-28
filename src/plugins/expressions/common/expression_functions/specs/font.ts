@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { FontLabel as FontFamily } from '../../fonts';
-import { openSans } from '../../fonts';
-import type { CSSStyle, Style } from '../../types/style';
-import { FontStyle, FontWeight, TextAlignment, TextDecoration } from '../../types/style';
-import type { ExpressionFunctionDefinition } from '../types';
+import { ExpressionFunctionDefinition } from '../types';
+import { openSans, FontLabel as FontFamily } from '../../fonts';
+import { CSSStyle, FontStyle, FontWeight, Style, TextAlignment, TextDecoration } from '../../types';
 
 const dashify = (str: string) => {
   return str

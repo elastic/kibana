@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Location } from 'history';
+
 import { parse, stringify } from 'query-string';
+import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { decode, encode, RisonValue } from 'rison-node';
 import { useHistory } from 'react-router-dom';
-import type { RisonValue } from 'rison-node';
-import { decode, encode } from 'rison-node';
-import { url } from '../../../../../src/plugins/kibana_utils/common/url';
+import { url } from '../../../../../src/plugins/kibana_utils/public';
 
 export const useUrlState = <State>({
   defaultState,

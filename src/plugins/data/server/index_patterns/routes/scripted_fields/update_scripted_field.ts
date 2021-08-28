@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { StartServicesAccessor } from '../../../../../../core/server';
-import type { IRouter } from '../../../../../../core/server/http/router/router';
-import type { FieldSpec } from '../../../../common/index_patterns/types';
-import type { DataPluginStart, DataPluginStartDependencies } from '../../../plugin';
+import { FieldSpec } from 'src/plugins/data/common';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchemaFields } from '../util/schemas';
+import { IRouter, StartServicesAccessor } from '../../../../../../core/server';
+import type { DataPluginStart, DataPluginStartDependencies } from '../../../plugin';
 
 export const registerUpdateScriptedFieldRoute = (
   router: IRouter,

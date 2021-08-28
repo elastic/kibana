@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { OverlayRef } from '../../../core/public/overlays/types';
-import type { Adapters } from '../common/adapters/types';
+
+import { OverlayRef } from '../../../core/public';
+import { Adapters } from '../common';
 
 /**
  * The props interface that a custom inspector view component, that will be passed

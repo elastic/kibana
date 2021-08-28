@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
-import { createSearchUsageCollectorMock } from './collectors/mocks';
 import { searchSourceMock } from './search_source/mocks';
+import { ISearchSetup, ISearchStart } from './types';
 import { getSessionsClientMock, getSessionServiceMock } from './session/mocks';
-import type { ISearchSetup, ISearchStart } from './types';
+import { createSearchUsageCollectorMock } from './collectors/mocks';
 
 function createSetupContract(): jest.Mocked<ISearchSetup> {
   return {

@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import React from 'react';
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
-import type { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public/types';
-import type { SearchUsageCollector } from '../../../../src/plugins/data/public/search/collectors/types';
-import type {
+import moment from 'moment';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../src/plugins/data/public/types';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public/util/to_mount_point';
-import { Storage } from '../../../../src/plugins/kibana_utils/public/storage/storage';
-import type { ManagementSetup } from '../../../../src/plugins/management/public/types';
-import type { SharePluginStart } from '../../../../src/plugins/share/public/plugin';
-import type { ConfigSchema } from '../config';
+  SearchUsageCollector,
+} from '../../../../src/plugins/data/public';
+import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { SharePluginStart } from '../../../../src/plugins/share/public';
+
 import { registerSearchSessionsMgmt } from './search/sessions_mgmt';
-import { createConnectedSearchSessionIndicator } from './search/ui/connected_search_session_indicator/connected_search_session_indicator';
+import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { createConnectedSearchSessionIndicator } from './search';
+import { ConfigSchema } from '../config';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
 export interface DataEnhancedSetupDependencies {
   bfetch: BfetchPublicSetup;

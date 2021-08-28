@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { ReactText } from 'react';
 import Color from 'color';
-import { first, get, last, max, min } from 'lodash';
-import type { ReactText } from 'react';
+import { get, first, last, min, max } from 'lodash';
 import { createFormatter } from '../../../../../common/formatters';
-import type {
-  NodeDetailsDataSeries,
-  NodeDetailsMetricData,
-} from '../../../../../common/http_api/node_details_api';
-import type {
+import {
+  InventoryVisTypeRT,
   InventoryFormatterType,
   InventoryVisType,
 } from '../../../../../common/inventory_models/types';
-import { InventoryVisTypeRT } from '../../../../../common/inventory_models/types';
-import type { SeriesOverrides } from '../types';
+import { SeriesOverrides } from '../types';
+import {
+  NodeDetailsDataSeries,
+  NodeDetailsMetricData,
+} from '../../../../../common/http_api/node_details_api';
 
 /**
  * Returns a formatter

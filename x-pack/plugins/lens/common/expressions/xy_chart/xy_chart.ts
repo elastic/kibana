@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common/search/expressions/kibana_context_type';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
+import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common';
 import type { LensMultiTable } from '../../types';
-import { fittingFunctionDefinitions } from './fitting_function';
 import type { XYArgs } from './xy_args';
+import { fittingFunctionDefinitions } from './fitting_function';
 
 export interface XYChartProps {
   data: LensMultiTable;

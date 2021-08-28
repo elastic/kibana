@@ -4,18 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fold } from 'fp-ts/lib/Either';
+import { HttpSetup } from 'kibana/public';
 import { pipe } from 'fp-ts/lib/pipeable';
-import type { Errors } from 'io-ts';
-import { identity } from 'io-ts';
-import type { HttpSetup } from '../../../../../../../src/core/public/http/types';
-import type {
-  AsApiContract,
-  RewriteRequestCase,
-} from '../../../../../actions/common/rewrite_request_case';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../../alerting/common';
-import type { AlertTaskState } from '../../../../../alerting/common/alert_task_instance';
-import { alertStateSchema } from '../../../../../alerting/common/alert_task_instance';
+import { fold } from 'fp-ts/lib/Either';
+import { Errors, identity } from 'io-ts';
+import { AlertTaskState } from '../../../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { alertStateSchema } from '../../../../../alerting/common';
+import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 
 const rewriteBodyRes: RewriteRequestCase<AlertTaskState> = ({
   rule_type_state: alertTypeState,

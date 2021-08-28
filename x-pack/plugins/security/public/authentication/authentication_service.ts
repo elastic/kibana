@@ -4,19 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StartServicesAccessor } from '../../../../../src/core/public/types';
-import type { ApplicationSetup } from '../../../../../src/core/public/application/types';
-import type { FatalErrorsSetup } from '../../../../../src/core/public/fatal_errors/fatal_errors_service';
-import type { HttpSetup } from '../../../../../src/core/public/http/types';
-import type { AuthenticatedUser } from '../../common/model/authenticated_user';
+
+import type {
+  ApplicationSetup,
+  FatalErrorsSetup,
+  HttpSetup,
+  StartServicesAccessor,
+} from 'src/core/public';
+
+import type { AuthenticatedUser } from '../../common/model';
 import type { ConfigType } from '../config';
 import type { PluginStartDependencies } from '../plugin';
-import { accessAgreementApp } from './access_agreement/access_agreement_app';
-import { captureURLApp } from './capture_url/capture_url_app';
-import { loggedOutApp } from './logged_out/logged_out_app';
-import { loginApp } from './login/login_app';
-import { logoutApp } from './logout/logout_app';
-import { overwrittenSessionApp } from './overwritten_session/overwritten_session_app';
+import { accessAgreementApp } from './access_agreement';
+import { captureURLApp } from './capture_url';
+import { loggedOutApp } from './logged_out';
+import { loginApp } from './login';
+import { logoutApp } from './logout';
+import { overwrittenSessionApp } from './overwritten_session';
 
 interface SetupParams {
   application: ApplicationSetup;

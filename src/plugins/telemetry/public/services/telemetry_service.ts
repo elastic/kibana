@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '../../../../core/public/types';
-import { getTelemetryChannelEndpoint } from '../../common/telemetry_config/get_telemetry_channel_endpoint';
-import type { TelemetryPluginConfig } from '../plugin';
+import { CoreStart } from 'kibana/public';
+import { TelemetryPluginConfig } from '../plugin';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 
 interface TelemetryServiceConstructor {
   config: TelemetryPluginConfig;

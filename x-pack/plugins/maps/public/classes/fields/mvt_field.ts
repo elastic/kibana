@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { AbstractField, IField } from './field';
 import { FIELD_ORIGIN, MVT_FIELD_TYPE } from '../../../common/constants';
-import type { MVTFieldDescriptor } from '../../../common/descriptor_types/source_descriptor_types';
-import type { ITiledSingleLayerVectorSource } from '../sources/tiled_single_layer_vector_source/tiled_single_layer_vector_source';
-import type { IVectorSource } from '../sources/vector_source/vector_source';
-import type { IField } from './field';
-import { AbstractField } from './field';
+import { IVectorSource } from '../sources/vector_source';
+import { ITiledSingleLayerVectorSource } from '../sources/tiled_single_layer_vector_source';
+import { MVTFieldDescriptor } from '../../../common/descriptor_types';
 
 export class MVTField extends AbstractField implements IField {
   private readonly _source: ITiledSingleLayerVectorSource;

@@ -5,19 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import { createConcatStream, createMapStream, createPromiseFromStreams } from '@kbn/utils';
 import stringify from 'json-stable-stringify';
-import type { CoreUsageDataSetup } from '../../core_usage_data/types';
-import { KibanaRequest } from '../../http/router/request';
-import type { IRouter } from '../../http/router/router';
-import { SavedObjectsExportError } from '../export/errors';
-import type {
-  SavedObjectsExportByObjectOptions,
-  SavedObjectsExportByTypeOptions,
-} from '../export/types';
+import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
+
+import { IRouter, KibanaRequest } from '../../http';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
-import { catchAndReturnBoomErrors, validateObjects, validateTypes } from './utils';
+import {
+  SavedObjectsExportByTypeOptions,
+  SavedObjectsExportByObjectOptions,
+  SavedObjectsExportError,
+} from '../export';
+import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;

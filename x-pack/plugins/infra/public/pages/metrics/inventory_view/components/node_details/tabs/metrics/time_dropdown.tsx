@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 interface Props {
   value: number;

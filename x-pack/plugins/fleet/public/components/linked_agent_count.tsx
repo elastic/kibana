@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { memo } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo } from 'react';
 
-import { AGENT_SAVED_OBJECT_TYPE } from '../../common/constants/agent';
-import { useLink } from '../hooks/use_link';
+import { useLink } from '../hooks';
+import { AGENT_SAVED_OBJECT_TYPE } from '../constants';
 
 /**
  * Displays the provided `count` number as a link to the Agents list if it is greater than zero

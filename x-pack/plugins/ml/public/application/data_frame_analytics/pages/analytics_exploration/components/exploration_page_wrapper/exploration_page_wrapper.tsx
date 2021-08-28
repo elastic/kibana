@@ -4,30 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useCallback, useState } from 'react';
+
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import type {
-  DataFrameAnalyticsConfig,
-  DataFrameTaskStateType,
-} from '../../../../../../../common/types/data_frame_analytics';
+
 import { getAnalysisType, getDependentVar } from '../../../../../../../common/util/analytics_utils';
-import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix/use_scatterplot_field_options';
-import type { ResultsSearchQuery } from '../../../../common/analytics';
-import { defaultSearchQuery } from '../../../../common/analytics';
-import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
-import { useResultsViewConfig } from '../../../../common/use_results_view_config';
+
+import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
+
+import {
+  defaultSearchQuery,
+  getScatterplotMatrixLegendType,
+  useResultsViewConfig,
+  DataFrameAnalyticsConfig,
+} from '../../../../common';
+import { ResultsSearchQuery, ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
+
+import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
+
+import { ExpandableSectionAnalytics, ExpandableSectionSplom } from '../expandable_section';
+import { ExplorationResultsTable } from '../exploration_results_table';
+import { ExplorationQueryBar } from '../exploration_query_bar';
+import { JobConfigErrorCallout } from '../job_config_error_callout';
+import { LoadingPanel } from '../loading_panel';
+import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
-import { ExpandableSectionAnalytics } from '../expandable_section/expandable_section_analytics';
-import { ExpandableSectionSplom } from '../expandable_section/expandable_section_splom';
-import type { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
-import { ExplorationQueryBar } from '../exploration_query_bar/exploration_query_bar';
-import { ExplorationResultsTable } from '../exploration_results_table/exploration_results_table';
-import { JobConfigErrorCallout } from '../job_config_error_callout/job_config_error_callout';
-import { LoadingPanel } from '../loading_panel/loading_panel';
-import type { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
+import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 
 function getFilters(resultsField: string) {
   return {

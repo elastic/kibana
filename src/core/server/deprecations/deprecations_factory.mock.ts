@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { DeprecationsFactory } from './deprecations_factory';
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DeprecationsFactory } from './deprecations_factory';
 type DeprecationsFactoryContract = PublicMethodsOf<DeprecationsFactory>;
 
 const createDeprecationsFactoryMock = () => {

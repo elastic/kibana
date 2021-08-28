@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
+import React, { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
 import moment from 'moment';
-import type { FC } from 'react';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
-import { FullTimeRangeSelector } from '../../../../../components/full_time_range_selector/full_time_range_selector';
-import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
-import { useMlContext } from '../../../../../contexts/ml/use_ml_context';
-import type { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
-import type { LineChartPoint } from '../../../common/chart_loader/chart_loader';
-import type { TimeRange } from '../../../common/components/time_range_picker';
-import { TimeRangePicker } from '../../../common/components/time_range_picker';
-import { EventRateChart } from '../charts/event_rate_chart/event_rate_chart';
+import { WizardNav } from '../wizard_nav';
+import { StepProps, WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import type { StepProps } from '../step_types';
-import { WIZARD_STEPS } from '../step_types';
-import { WizardNav } from '../wizard_nav/wizard_nav';
+import { useMlContext } from '../../../../../contexts/ml';
+import { FullTimeRangeSelector } from '../../../../../components/full_time_range_selector';
+import { EventRateChart } from '../charts/event_rate_chart';
+import { LineChartPoint } from '../../../common/chart_loader';
+import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
+import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
+import { TimeRangePicker, TimeRange } from '../../../common/components';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { services } = useMlKibana();

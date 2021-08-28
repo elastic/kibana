@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type {
+import type { TransformRawDocs } from '../types';
+import type { SavedObjectsRawDoc } from '../../serialization';
+import {
   DocumentsTransformFailed,
   DocumentsTransformSuccess,
 } from '../../migrations/core/migrate_raw_docs';
-import type { SavedObjectsRawDoc } from '../../serialization/types';
-import type { TransformRawDocs } from '../types';
 
 /** @internal */
 export interface TransformDocsParams {

@@ -22,25 +22,27 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  ApplicationStart,
+  DocLinksStart,
+  NotificationsStart,
+  ScopedHistory,
+} from 'src/core/public';
 
-import type { ScopedHistory } from '../../../../../../../src/core/public/application/scoped_history';
-import type { ApplicationStart } from '../../../../../../../src/core/public/application/types';
-import type { DocLinksStart } from '../../../../../../../src/core/public/doc_links/doc_links_service';
-import type { NotificationsStart } from '../../../../../../../src/core/public/notifications/notifications_service';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public/react_router_navigate/react_router_navigate';
-import type { Role } from '../../../../common/model/role';
-import type { RoleMapping } from '../../../../common/model/role_mapping';
-import { DisabledBadge } from '../../badges/disabled_badge';
-import { EnabledBadge } from '../../badges/enabled_badge';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { Role, RoleMapping } from '../../../../common/model';
+import { DisabledBadge, EnabledBadge } from '../../badges';
 import { EDIT_ROLE_MAPPING_PATH, getEditRoleMappingHref } from '../../management_urls';
-import { RoleTableDisplay } from '../../role_table_display/role_table_display';
-import type { RolesAPIClient } from '../../roles/roles_api_client';
-import { DeleteProvider } from '../components/delete_provider/delete_provider';
-import { NoCompatibleRealms } from '../components/no_compatible_realms/no_compatible_realms';
-import { PermissionDenied } from '../components/permission_denied/permission_denied';
-import { SectionLoading } from '../components/section_loading/section_loading';
+import { RoleTableDisplay } from '../../role_table_display';
+import type { RolesAPIClient } from '../../roles';
+import {
+  DeleteProvider,
+  NoCompatibleRealms,
+  PermissionDenied,
+  SectionLoading,
+} from '../components';
 import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
-import { EmptyPrompt } from './empty_prompt/empty_prompt';
+import { EmptyPrompt } from './empty_prompt';
 
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;

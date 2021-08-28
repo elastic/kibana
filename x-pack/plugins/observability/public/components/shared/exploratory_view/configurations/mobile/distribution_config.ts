@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants/constants';
+
+import { ConfigProps, SeriesConfig } from '../../types';
+import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
+import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
@@ -13,8 +15,8 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../constants/elasticsearch_fieldnames';
+
 import { CPU_USAGE, MEMORY_USAGE, MOBILE_APP, RESPONSE_LATENCY } from '../constants/labels';
-import { buildPhrasesFilter } from '../utils';
 import { MobileFields } from './mobile_fields';
 
 export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {

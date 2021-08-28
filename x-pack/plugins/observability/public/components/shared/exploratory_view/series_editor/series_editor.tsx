@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { getDefaultConfigs } from '../configurations/default_configs';
-import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
-import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
-import type { SeriesConfig } from '../types';
-import { ChartEditOptions } from './chart_edit_options';
-import { DatePickerCol } from './columns/date_picker_col';
-import { SeriesActions } from './columns/series_actions';
+import { i18n } from '@kbn/i18n';
+import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { SeriesFilter } from './columns/series_filter';
+import { SeriesConfig } from '../types';
+import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
+import { getDefaultConfigs } from '../configurations/default_configs';
+import { DatePickerCol } from './columns/date_picker_col';
+import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
+import { SeriesActions } from './columns/series_actions';
+import { ChartEditOptions } from './chart_edit_options';
 
 interface EditItem {
   seriesConfig: SeriesConfig;

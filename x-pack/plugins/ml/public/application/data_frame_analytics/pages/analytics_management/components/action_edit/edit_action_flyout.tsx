@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useEffect, useState } from 'react';
+
+import { i18n } from '@kbn/i18n';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,18 +25,21 @@ import {
   EuiSelect,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
-import { DATA_FRAME_TASK_STATE } from '../../../../../../../common/constants/data_frame_analytics';
-import type { MemoryInputValidatorResult } from '../../../../../../../common/util/validators';
-import { memoryInputValidator } from '../../../../../../../common/util/validators';
-import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
+
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
-import { useToastNotificationService } from '../../../../../services/toast_notification_service/toast_notification_service';
-import type { UpdateDataFrameAnalyticsConfig } from '../../../../common/analytics';
-import { useRefreshAnalyticsList } from '../../../../common/analytics';
-import type { EditAction } from './use_edit_action';
+import { useToastNotificationService } from '../../../../../services/toast_notification_service';
+import {
+  memoryInputValidator,
+  MemoryInputValidatorResult,
+} from '../../../../../../../common/util/validators';
+import { DATA_FRAME_TASK_STATE } from '../analytics_list/common';
+import {
+  useRefreshAnalyticsList,
+  UpdateDataFrameAnalyticsConfig,
+} from '../../../../common/analytics';
+
+import { EditAction } from './use_edit_action';
 
 let mmLValidator: (value: any) => MemoryInputValidatorResult;
 

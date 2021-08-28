@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getRegistryDataStreamAssetBaseName } from '..';
-import type { ElasticsearchClient } from '../../../../../../../../src/core/server/elasticsearch/client/types';
-import type {
-  IndexTemplate,
-  IndexTemplateEntry,
-  IndexTemplateMappings,
-  RegistryDataStream,
-} from '../../../../../common/types/models/epm';
-import { FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME } from '../../../../constants/fleet_es_assets';
-import { appContextService } from '../../../app_context';
+
+import type { ElasticsearchClient } from 'kibana/server';
+
 import type { Field, Fields } from '../../fields/field';
+import type {
+  RegistryDataStream,
+  IndexTemplateEntry,
+  IndexTemplate,
+  IndexTemplateMappings,
+} from '../../../../types';
+import { appContextService } from '../../../';
+import { getRegistryDataStreamAssetBaseName } from '../index';
+import { FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME } from '../../../../constants';
 
 interface Properties {
   [key: string]: any;

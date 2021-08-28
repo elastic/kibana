@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { LogRecord } from '@kbn/logging';
-import { LogLevel } from '@kbn/logging';
-import { ConsoleAppender } from './console_appender';
 
 jest.mock('../../layouts/layouts', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -20,6 +17,10 @@ jest.mock('../../layouts/layouts', () => {
     },
   };
 });
+
+import { LogRecord, LogLevel } from '@kbn/logging';
+import { ConsoleAppender } from './console_appender';
+
 test('`configSchema` creates correct schema.', () => {
   const appenderSchema = ConsoleAppender.configSchema;
   const validConfig = { type: 'console', layout: { type: 'mock' } };

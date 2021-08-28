@@ -4,22 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { each, find, get, map, reduce, sortBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { Observable, of } from 'rxjs';
 import { catchError, map as mapObservable } from 'rxjs/operators';
-import type { TimeRange } from '../../../../../../src/plugins/data/common/query/timefilter/types';
-import type { TimefilterContract } from '../../../../../../src/plugins/data/public/query/timefilter/timefilter';
-import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
-import { DOC_COUNT, _DOC_COUNT } from '../../../common/constants/field_types';
-import type { AnomalyRecordDoc } from '../../../common/types/anomalies';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs/combined_job';
-import type { Datafeed } from '../../../common/types/anomaly_detection_jobs/datafeed';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs/job';
-import type { InfluencersFilterQuery } from '../../../common/types/es_client';
-import { isDefined } from '../../../common/types/guards';
-import type { EntityField } from '../../../common/util/anomaly_utils';
-import { getEntityFieldList } from '../../../common/util/anomaly_utils';
+import { RecordForInfluencer } from './results_service/results_service';
 import {
   isMappableJob,
   isModelPlotChartableForDetector,
@@ -27,26 +17,34 @@ import {
   isSourceDataChartableForDetector,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import { isPopulatedObject } from '../../../common/util/object_utils';
-import { parseInterval } from '../../../common/util/parse_interval';
-import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
-import { getDefaultChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
-import type { ChartType } from '../explorer/explorer_constants';
-import { CHART_TYPE } from '../explorer/explorer_constants';
-import type { ExplorerService } from '../explorer/explorer_dashboard_service';
-import type { AppStateSelectedCells, ChartRecord } from '../explorer/explorer_utils';
+import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
+import { CombinedJob, Datafeed, JobId } from '../../../common/types/anomaly_detection_jobs';
+import { MlApiServices } from './ml_api_service';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/swimlane_container';
-import { chartLimits, getChartType } from '../util/chart_utils';
-import type { TimeRangeBounds } from '../util/time_buckets';
-import type { MlApiServices } from './ml_api_service';
-import type { CriteriaField, MlResultsService } from './results_service';
-import type { RecordForInfluencer } from './results_service/results_service';
-import type {
+import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
+import { parseInterval } from '../../../common/util/parse_interval';
+import { _DOC_COUNT, DOC_COUNT } from '../../../common/constants/field_types';
+import { getChartType, chartLimits } from '../util/chart_utils';
+import { CriteriaField, MlResultsService } from './results_service';
+import { TimefilterContract, TimeRange } from '../../../../../../src/plugins/data/public';
+import { CHART_TYPE, ChartType } from '../explorer/explorer_constants';
+import type { ChartRecord } from '../explorer/explorer_utils';
+import {
   RecordsForCriteria,
   ResultResponse,
   ScheduledEventsByBucket,
 } from './results_service/result_service_rx';
-
+import { isPopulatedObject } from '../../../common/util/object_utils';
+import { AnomalyRecordDoc } from '../../../common/types/anomalies';
+import {
+  ExplorerChartsData,
+  getDefaultChartsData,
+} from '../explorer/explorer_charts/explorer_charts_container_service';
+import { TimeRangeBounds } from '../util/time_buckets';
+import { isDefined } from '../../../common/types/guards';
+import { AppStateSelectedCells } from '../explorer/explorer_utils';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
+import { ExplorerService } from '../explorer/explorer_dashboard_service';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.

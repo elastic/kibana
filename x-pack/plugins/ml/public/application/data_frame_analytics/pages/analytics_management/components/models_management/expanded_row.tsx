@@ -4,32 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiCodeBlock,
   EuiDescriptionList,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
-  EuiTextColor,
   EuiTitle,
+  EuiNotificationBadge,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiCodeBlock,
+  EuiText,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiTextColor,
+  EuiButtonEmpty,
+  EuiBadge,
 } from '@elastic/eui';
-import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
-import { isDefined } from '../../../../../../../common/types/guards';
+import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import { ModelItemFull } from './models_list';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
-import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
-import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
-import type { ModelItemFull } from './models_list';
+import { isDefined } from '../../../../../../../common/types/guards';
+import { isPopulatedObject } from '../../../../../../../common';
 
 interface ExpandedRowProps {
   item: ModelItemFull;

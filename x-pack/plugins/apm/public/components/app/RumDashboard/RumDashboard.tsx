@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useBreakPoints } from '../../../hooks/use_break_points';
-import { ClientMetrics } from './ClientMetrics';
+import { UXMetrics } from './UXMetrics';
 import { ImpactfulMetrics } from './ImpactfulMetrics';
 import { PageLoadAndViews } from './Panels/PageLoadAndViews';
 import { VisitorBreakdownsPanel } from './Panels/VisitorBreakdowns';
-import { UXMetrics } from './UXMetrics';
+import { useBreakPoints } from '../../../hooks/use_break_points';
+import { ClientMetrics } from './ClientMetrics';
 
 export function RumDashboard() {
   const { isSmall } = useBreakPoints();

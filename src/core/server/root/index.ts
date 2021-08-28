@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { RawConfigurationProvider } from '@kbn/config';
-import { Env } from '@kbn/config';
-import type { Logger, LoggerFactory } from '@kbn/logging';
+
 import { ConnectableObservable, Subscription } from 'rxjs';
-import { concatMap, first, publishReplay, switchMap, tap } from 'rxjs/operators';
-import type { LoggingConfigType } from '../logging/logging_config';
-import { LoggingSystem } from '../logging/logging_system';
+import { first, publishReplay, switchMap, concatMap, tap } from 'rxjs/operators';
+
+import { Env, RawConfigurationProvider } from '../config';
+import { Logger, LoggerFactory, LoggingConfigType, LoggingSystem } from '../logging';
 import { Server } from '../server';
 
 /**

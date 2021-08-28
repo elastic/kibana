@@ -4,42 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   EuiButton,
-  EuiCallOut,
-  EuiCode,
-  EuiCodeBlock,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiLink,
+  EuiSteps,
+  EuiCode,
+  EuiCodeBlock,
+  EuiCallOut,
+  EuiSelect,
+  EuiRadioGroup,
+  EuiFieldText,
   EuiForm,
   EuiFormErrorText,
-  EuiLink,
-  EuiRadioGroup,
-  EuiSelect,
-  EuiSpacer,
-  EuiSteps,
-  EuiText,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
-import { FLEET_SERVER_PACKAGE } from '../../../../../../../common/constants/epm';
-import type { PackagePolicy } from '../../../../../../../common/types/models/package_policy';
-import { DownloadStep } from '../../../../../../components/agent_enrollment_flyout/steps';
-import { useStartServices } from '../../../../../../hooks/use_core';
-import { useFleetStatus } from '../../../../../../hooks/use_fleet_status';
-import type { PLATFORM_TYPE } from '../../../../../../hooks/use_platform';
-import { PLATFORM_OPTIONS, usePlatform } from '../../../../../../hooks/use_platform';
-import { useGetAgentPolicies } from '../../../../../../hooks/use_request/agent_policy';
-import { sendGenerateServiceToken } from '../../../../../../hooks/use_request/app';
-import { useGetOutputs } from '../../../../../../hooks/use_request/outputs';
-import { sendPutSettings, useGetSettings } from '../../../../../../hooks/use_request/settings';
-import { sendGetFleetStatus } from '../../../../../../hooks/use_request/setup';
-import { useUrlModal } from '../../../../../../hooks/use_url_modal';
+import { DownloadStep } from '../../../../components';
+import {
+  useStartServices,
+  useGetOutputs,
+  sendGenerateServiceToken,
+  usePlatform,
+  PLATFORM_OPTIONS,
+  useGetAgentPolicies,
+  useGetSettings,
+  sendPutSettings,
+  sendGetFleetStatus,
+  useFleetStatus,
+  useUrlModal,
+} from '../../../../hooks';
+import type { PLATFORM_TYPE } from '../../../../hooks';
+import type { PackagePolicy } from '../../../../types';
+import { FLEET_SERVER_PACKAGE } from '../../../../constants';
 
 import { getInstallCommandForPlatform } from './install_command_utils';
 

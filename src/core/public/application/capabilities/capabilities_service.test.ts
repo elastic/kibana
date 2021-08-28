@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { HttpSetupMock } from '../../http/http_service.mock';
-import { httpServiceMock } from '../../http/http_service.mock';
+
+import { httpServiceMock, HttpSetupMock } from '../../http/http_service.mock';
 import { CapabilitiesService } from './capabilities_service';
 
 const mockedCapabilities = {

@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../../expressions/common/expression_functions/types';
-import type { AggConfigSerialized } from '../agg_config';
-import type { AggExpressionType } from '../types';
-import type { AggParamsShardDelay } from './shard_delay';
-import { SHARD_DELAY_AGG_NAME } from './shard_delay';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { AggExpressionType, AggConfigSerialized } from '../';
+import { AggParamsShardDelay, SHARD_DELAY_AGG_NAME } from './shard_delay';
 
 export const aggShardDelayFnName = 'aggShardDelay';
 

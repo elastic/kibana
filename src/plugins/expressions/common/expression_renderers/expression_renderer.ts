@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ExpressionRenderDefinition } from './types';
+
+import { ExpressionRenderDefinition } from './types';
 
 export class ExpressionRenderer<Config = unknown> {
   public readonly name: string;

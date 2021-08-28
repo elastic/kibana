@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Location } from 'history';
-import type { FC } from 'react';
-import React, { useEffect } from 'react';
-import type { RouteProps } from 'react-router-dom';
-import { Route, Router, useHistory, useLocation } from 'react-router-dom';
-import type { AppMountParameters } from '../../../../../../src/core/public/application/types';
-import type { ChromeBreadcrumb, ChromeStart } from '../../../../../../src/core/public/chrome/types';
-import type { IUiSettingsClient } from '../../../../../../src/core/public/ui_settings/types';
-import type { IndexPatternsContract } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
-import { useMlKibana } from '../contexts/kibana/kibana_context';
-import { useNavigateToPath } from '../contexts/kibana/use_navigate_to_path';
-import type { MlContextValue } from '../contexts/ml/ml_context';
-import { MlContext } from '../contexts/ml/ml_context';
+
+import React, { useEffect, FC } from 'react';
+import { useHistory, useLocation, Router, Route, RouteProps } from 'react-router-dom';
+import { Location } from 'history';
+
+import { AppMountParameters, IUiSettingsClient, ChromeStart } from 'kibana/public';
+import { ChromeBreadcrumb } from 'kibana/public';
+import { IndexPatternsContract } from 'src/plugins/data/public';
+
+import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
+import { MlContext, MlContextValue } from '../contexts/ml';
 import { UrlStateProvider } from '../util/url_state';
-import { MlPageWrapper } from './ml_page_wrapper';
+
 import * as routes from './routes';
+import { MlPageWrapper } from './ml_page_wrapper';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { ChangeEvent, Component } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,9 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ChangeEvent } from 'react';
-import React, { Component } from 'react';
-import type { Attribution } from '../../../../common/descriptor_types/layer_descriptor_types';
+import { Attribution } from '../../../../common/descriptor_types';
 
 interface Props {
   onChange: (attribution: Attribution) => void;

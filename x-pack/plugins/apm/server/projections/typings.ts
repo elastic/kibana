@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { estypes } from '@elastic/elasticsearch';
-import type { AggregationOptionsByType } from '../../../../../src/core/types/elasticsearch';
-import type { APMEventESSearchRequest } from '../lib/helpers/create_es_client/create_apm_event_client';
+import { AggregationOptionsByType } from '../../../../../src/core/types/elasticsearch';
+import { APMEventESSearchRequest } from '../lib/helpers/create_es_client/create_apm_event_client';
 
 export type Projection = Omit<APMEventESSearchRequest, 'body'> & {
   body: Omit<

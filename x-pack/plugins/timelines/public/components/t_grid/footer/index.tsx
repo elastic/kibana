@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiPopoverProps } from '@elastic/eui';
+
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -12,22 +12,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiPagination,
   EuiPopover,
   EuiText,
+  EuiPopoverProps,
+  EuiPagination,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import type { OnChangePage } from '../../../../common/types/timeline/store';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import * as tGridActions from '../../../store/t_grid/actions';
-import * as tGridSelectors from '../../../store/t_grid/selectors';
-import { LoadingPanel } from '../../loading';
+import { useDispatch } from 'react-redux';
+
 import { EVENTS_COUNT_BUTTON_CLASS_NAME } from '../helpers';
+
 import * as i18n from './translations';
+import { OnChangePage } from '../types';
+import { tGridActions, tGridSelectors } from '../../../store/t_grid';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import { LoadingPanel } from '../../loading';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+
+import React, { Component, ReactElement } from 'react';
 import _ from 'lodash';
-import type { ReactElement } from 'react';
-import React, { Component } from 'react';
-import type { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { Category } from './category';
+import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 const EMPTY_VALUE = '';
 

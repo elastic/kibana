@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public/types';
+import { PluginInitializerContext } from '../../../core/public';
 import { Schema, VisualizationsSetup, VisualizationsStart } from './';
 import { Schemas } from './vis_types';
 import { VisualizationsPlugin } from './plugin';

@@ -6,18 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
+import { IScopedClusterClient } from 'kibana/server';
 import { duration } from 'moment';
-import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import type {
-  Datafeed,
-  IndicesOptions,
-} from '../../../common/types/anomaly_detection_jobs/datafeed';
-import type { AggCardinality, RuntimeMappings } from '../../../common/types/fields';
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
+import { AggCardinality } from '../../../common/types/fields';
+import { isValidAggregationField } from '../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
+import { RuntimeMappings } from '../../../common/types/fields';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 /**
  * Service for carrying out queries to obtain data

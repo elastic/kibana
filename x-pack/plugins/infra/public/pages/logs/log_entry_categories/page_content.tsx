@@ -4,22 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
-import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public/components/shared/page_template/lazy_page_template';
-import { isJobStatusWithResults } from '../../../../common/log_analysis/log_analysis';
+import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
-import { MissingResultsPrivilegesPrompt } from '../../../components/logging/log_analysis_setup/missing_results_privileges_prompt';
-import { MissingSetupPrivilegesPrompt } from '../../../components/logging/log_analysis_setup/missing_setup_privileges_prompt';
-import { LogAnalysisSetupFlyout } from '../../../components/logging/log_analysis_setup/setup_flyout/setup_flyout';
-import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout/setup_flyout_state';
-import { LogAnalysisSetupStatusUnknownPrompt } from '../../../components/logging/log_analysis_setup/setup_status_unknown_prompt';
+import {
+  LogAnalysisSetupStatusUnknownPrompt,
+  MissingResultsPrivilegesPrompt,
+  MissingSetupPrivilegesPrompt,
+} from '../../../components/logging/log_analysis_setup';
+import {
+  LogAnalysisSetupFlyout,
+  useLogAnalysisSetupFlyoutStateContext,
+} from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
-import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
-import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories/use_log_entry_categories_module';
-import { LogsPageTemplate } from '../page_template';
+import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
+import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
+import { LogsPageTemplate } from '../page_template';
+import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
 
 const logCategoriesTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle', {
   defaultMessage: 'Categories',

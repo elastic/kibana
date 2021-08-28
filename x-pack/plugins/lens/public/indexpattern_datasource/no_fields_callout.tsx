@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 const defaultNoFieldsMessageCopy = i18n.translate('xpack.lens.indexPatterns.noDataLabel', {
   defaultMessage: 'There are no fields.',

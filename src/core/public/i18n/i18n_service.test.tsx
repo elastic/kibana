@@ -5,6 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { shallow } from 'enzyme';
+
 jest.mock('@elastic/eui', () => {
   return {
     EuiContext: function MockEuiContext() {
@@ -21,8 +24,8 @@ jest.mock('@kbn/i18n/react', () => {
   };
 });
 
-import { shallow } from 'enzyme';
 import React from 'react';
+
 import { I18nService } from './i18n_service';
 
 afterEach(() => {

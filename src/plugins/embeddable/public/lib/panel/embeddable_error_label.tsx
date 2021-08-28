@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import type { EmbeddableError } from '../embeddables/i_embeddable';
+import { EmbeddableError } from '../embeddables/i_embeddable';
 
 interface Props {
   error?: EmbeddableError;

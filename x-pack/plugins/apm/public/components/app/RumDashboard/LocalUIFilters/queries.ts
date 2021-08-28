@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ESFilter } from '../../../../../../../../src/core/types/elasticsearch';
+
+import { ESFilter } from 'src/core/types/elasticsearch';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,

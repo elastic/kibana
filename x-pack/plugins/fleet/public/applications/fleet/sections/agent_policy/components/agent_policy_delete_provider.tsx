@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
+
+import React, { Fragment, useRef, useState } from 'react';
+import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, useRef, useState } from 'react';
 
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../../../../common/constants/agent';
-import { useConfig } from '../../../../../hooks/use_config';
-import { useStartServices } from '../../../../../hooks/use_core';
-import { sendDeleteAgentPolicy } from '../../../../../hooks/use_request/agent_policy';
-import { sendRequest } from '../../../../../hooks/use_request/use_request';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { sendDeleteAgentPolicy, useStartServices, useConfig, sendRequest } from '../../../hooks';
 
 interface Props {
   children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;

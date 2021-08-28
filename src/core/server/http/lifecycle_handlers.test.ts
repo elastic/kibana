@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { HttpConfig } from './http_config';
-import { httpServerMock } from './http_server.mocks';
+
 import {
   createCustomHeadersPreResponseHandler,
   createVersionCheckPostAuthHandler,
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
-import type { KibanaRouteOptions } from './router/request';
-import { KibanaRequest } from './router/request';
-import type { RouteMethod } from './router/route';
+import { httpServerMock } from './http_server.mocks';
+import { HttpConfig } from './http_config';
+import { KibanaRequest, RouteMethod, KibanaRouteOptions } from './router';
 
 const createConfig = (partial: Partial<HttpConfig>): HttpConfig => partial as HttpConfig;
 

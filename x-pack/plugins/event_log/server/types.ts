@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { RequestHandlerContext } from '../../../../src/core/server';
-import { KibanaRequest } from '../../../../src/core/server/http/router/request';
-import type { IRouter } from '../../../../src/core/server/http/router/router';
-import type { IEvent } from '../generated/schemas';
-import type { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-import type { FindOptionsType } from './event_log_client';
-import type { SavedObjectProvider } from './saved_object_provider_registry';
 
-export { ECS_VERSION, EventSchema, IEvent, IValidatedEvent } from '../generated/schemas';
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+
+export { IEvent, IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/schemas';
+import { IEvent } from '../generated/schemas';
+import { FindOptionsType } from './event_log_client';
+import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 export { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+import { SavedObjectProvider } from './saved_object_provider_registry';
+
 export const SAVED_OBJECT_REL_PRIMARY = 'primary';
 
 export const ConfigSchema = schema.object({

@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import React, { useCallback } from 'react';
-import type { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import type { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
+import { IFieldType } from 'src/plugins/data/public';
+import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 
 interface Props {
   options: MetricsExplorerOptions;

@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Location } from 'history';
-import type { ParsedQuery } from 'query-string';
-import { parse } from 'query-string';
+
+import { parse, ParsedQuery } from 'query-string';
+import { Location } from 'history';
 
 export function getQueryParams(location: Location): ParsedQuery {
   const search = (location.search || '').replace(/^\?/, '');

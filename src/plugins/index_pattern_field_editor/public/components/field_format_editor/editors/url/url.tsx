@@ -5,21 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { Fragment } from 'react';
+
 import {
-  EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
   EuiLink,
   EuiSelect,
   EuiSwitch,
+  EuiFieldNumber,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment } from 'react';
-import { context as contextType } from '../../../../../../kibana_react/public/context/context';
-import { FormatEditorSamples } from '../../samples/samples';
 import { DefaultFormatEditor } from '../default/default';
-import type { FormatEditorProps } from '../types';
+
+import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
+
+import { context as contextType } from '../../../../../../kibana_react/public';
+import { FormatEditorProps } from '../types';
 
 interface OnChangeParam {
   type: string;

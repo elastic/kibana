@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+
+import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Markdown } from '../../../../kibana_react/public/markdown';
-import type { EmbeddableInput } from '../../../common/types';
-import type { IContainer } from '../containers/i_container';
+import { Markdown } from '../../../../kibana_react/public';
 import { Embeddable } from './embeddable';
-import type { EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { IContainer } from '../containers';
 
 export const ERROR_EMBEDDABLE_TYPE = 'error';
 

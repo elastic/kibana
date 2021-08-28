@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  DatasourceDimensionEditorProps,
-  DatasourceMap,
-  FramePublicAPI,
+
+import {
   Visualization,
+  FramePublicAPI,
+  DatasourceDimensionEditorProps,
   VisualizationDimensionGroupConfig,
+  DatasourceMap,
   VisualizationMap,
 } from '../../../types';
-
 export interface ConfigPanelWrapperProps {
   framePublicAPI: FramePublicAPI;
   datasourceMap: DatasourceMap;

@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { forOwn } from 'lodash';
-import { extractReferences as extractSearchSourceReferences } from '../../../../data/common/search/search_source/extract_references';
-import type { SavedObject, SavedObjectConfig } from '../../types';
-import { expandShorthand } from './field_mapping/mapping_setup';
+import { SavedObject, SavedObjectConfig } from '../../types';
+import { extractSearchSourceReferences } from '../../../../data/public';
+import { expandShorthand } from './field_mapping';
 
 export function serializeSavedObject(savedObject: SavedObject, config: SavedObjectConfig) {
   // mapping definition for the fields that this object will expose

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
+
+import { PluginInitializerContext } from '../../../../src/core/public';
 import { CloudPlugin } from './plugin';
 
-export { CloudConfigType, CloudSetup } from './plugin';
+export { CloudSetup, CloudConfigType } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new CloudPlugin(initializerContext);
 }

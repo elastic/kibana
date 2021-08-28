@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { JobFieldType } from './job_field_type';
+
+import type { JobFieldType } from './index';
 
 export interface Percentile {
   percent: number;

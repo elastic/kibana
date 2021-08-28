@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiWrappingPopover } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
+import { EuiWrappingPopover } from '@elastic/eui';
+
 import { OptionsMenu } from './options';
 
 let isOpen = false;

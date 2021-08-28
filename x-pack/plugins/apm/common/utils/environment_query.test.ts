@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { SERVICE_ENVIRONMENT } from '../elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
 import { environmentQuery } from './environment_query';

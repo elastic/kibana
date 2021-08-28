@@ -6,9 +6,10 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import type { FunctionComponent, ReactElement } from 'react';
+
+import { ReactElement, FunctionComponent } from 'react';
+import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../common/constants';
-import type { LayerDescriptor } from '../../../common/descriptor_types/layer_descriptor_types';
 
 export type RenderWizardArguments = {
   previewLayers: (layerDescriptors: LayerDescriptor[]) => void;

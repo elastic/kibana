@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import React from 'react';
-import { IndexPatternSelect } from '.';
-import type { IndexPatternsContract } from '../../../common/index_patterns/index_patterns/index_patterns';
-import type { IndexPatternSelectProps } from './index_pattern_select';
+
+import { IndexPatternsContract } from 'src/plugins/data/public';
+import { IndexPatternSelect, IndexPatternSelectProps } from './';
 
 // Takes in stateful runtime dependencies and pre-wires them to the component
 export function createIndexPatternSelect(indexPatternService: IndexPatternsContract) {

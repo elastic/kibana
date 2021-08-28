@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { JobsHealthTests } from '../types/alerts';
+import { JobsHealthTests } from '../types/alerts';
 
 export const ML_ALERT_TYPES = {
   ANOMALY_DETECTION: 'xpack.ml.anomaly_detection_alert',

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectMigrationMap } from '../../../../../src/core/server/saved_objects/migrations/types';
+
+import { SavedObjectMigrationMap } from '../../../../../src/core/server';
 
 export const migrations: SavedObjectMigrationMap = {
   '7.9.0': (doc) => doc,

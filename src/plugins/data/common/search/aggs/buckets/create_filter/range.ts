@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { buildRangeFilter } from '@kbn/es-query';
-import type { AggTypesDependencies } from '../../agg_types';
-import type { IBucketAggConfig } from '../bucket_agg_type';
+import { AggTypesDependencies } from '../../agg_types';
+import { IBucketAggConfig } from '../bucket_agg_type';
 
 /** @internal */
 export const createFilterRange = (

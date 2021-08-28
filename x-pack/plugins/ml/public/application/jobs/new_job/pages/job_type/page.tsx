@@ -4,33 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
+  EuiPage,
+  EuiPageBody,
+  EuiTitle,
+  EuiSpacer,
   EuiCallOut,
+  EuiText,
   EuiFlexGrid,
   EuiFlexItem,
   EuiLink,
-  EuiPage,
-  EuiPageBody,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useState } from 'react';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
+import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
+
+import { useMlContext } from '../../../../contexts/ml';
 import { isSavedSearchSavedObject } from '../../../../../../common/types/kibana';
-import { LinkCard } from '../../../../components/link_card/link_card';
-import { useMlKibana } from '../../../../contexts/kibana/kibana_context';
-import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
-import { useNavigateToPath } from '../../../../contexts/kibana/use_navigate_to_path';
-import { useMlContext } from '../../../../contexts/ml/use_ml_context';
-import { timeBasedIndexCheck } from '../../../../util/index_utils';
-import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
-import { CategorizationIcon } from './categorization_job_icon';
 import { DataRecognizer } from '../../../../components/data_recognizer';
+import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
+import { timeBasedIndexCheck } from '../../../../util/index_utils';
+import { LinkCard } from '../../../../components/link_card';
+import { CategorizationIcon } from './categorization_job_icon';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
 import { RareIcon } from './rare_job_icon';
+import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 
 export const Page: FC = () => {
   const {

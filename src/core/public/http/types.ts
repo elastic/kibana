@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { MaybePromise } from '@kbn/utility-types';
+
 import { Observable } from 'rxjs';
-import type { KibanaExecutionContext } from '../../types/execution_context';
+import { MaybePromise } from '@kbn/utility-types';
+import type { KibanaExecutionContext } from '../execution_context';
 
 /** @public */
 export interface HttpSetup {

@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { IUiSettingsClient } from 'src/core/public';
 import { isEqual } from 'lodash';
-import type { IUiSettingsClient } from '../../../../../../core/public/ui_settings/types';
-import { DEFAULT_COLUMNS_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE, DEFAULT_COLUMNS_SETTING } from '../../../../common';
 
 /**
  * Makes sure the current state is not referencing the source column when using the fields api

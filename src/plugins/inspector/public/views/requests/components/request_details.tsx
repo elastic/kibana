@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiTab, EuiTabs } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
+
 import React, { Component } from 'react';
-import { RequestDetailsRequest } from './details/req_details_request';
-import { RequestDetailsResponse } from './details/req_details_response';
-import { RequestDetailsStats } from './details/req_details_stats';
-import type { RequestDetailsProps } from './types';
+import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
+import { EuiTab, EuiTabs } from '@elastic/eui';
+
+import { RequestDetailsRequest, RequestDetailsResponse, RequestDetailsStats } from './details';
+import { RequestDetailsProps } from './types';
 
 interface RequestDetailsState {
   availableDetails: DetailViewData[];

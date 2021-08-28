@@ -5,24 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { Component } from 'react';
-import { ScopedHistory } from '../../../../../core/public/application/scoped_history';
-import type { HttpSetup } from '../../../../../core/public/http/types';
-import type { NotificationsStart } from '../../../../../core/public/notifications/notifications_service';
-import type { OverlayStart } from '../../../../../core/public/overlays/overlay_service';
-import type { SavedObjectsClientContract } from '../../../../../core/public/saved_objects/saved_objects_client';
-import type { Capabilities } from '../../../../../core/types/capabilities';
-import type { SavedObjectWithMetadata } from '../../../common/types';
-import { bulkGetObjects } from '../../lib/bulk_get_objects';
-import { canViewInApp } from '../../lib/in_app_url';
-import type { ISavedObjectsManagementServiceRegistry } from '../../services/service_registry';
-import type { SubmittedFormData } from '../types';
-import { Form } from './components/form';
-import { Header } from './components/header';
-import { Intro } from './components/intro';
-import { NotFoundErrors } from './components/not_found_errors';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
+import {
+  Capabilities,
+  SavedObjectsClientContract,
+  OverlayStart,
+  NotificationsStart,
+  ScopedHistory,
+  HttpSetup,
+} from '../../../../../core/public';
+import { ISavedObjectsManagementServiceRegistry } from '../../services';
+import { Header, NotFoundErrors, Intro, Form } from './components';
+import { canViewInApp, bulkGetObjects } from '../../lib';
+import { SubmittedFormData } from '../types';
+import { SavedObjectWithMetadata } from '../../types';
 
 interface SavedObjectEditionProps {
   id: string;

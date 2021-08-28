@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { composeStories } from '@storybook/testing-react';
 import {
-  act,
-  getByTestId,
-  getNodeText,
   render,
+  getNodeText,
+  getByTestId,
+  act,
   waitFor,
 } from '@testing-library/react';
 import React from 'react';

@@ -4,22 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { wrapError } from '../client/error_wrapper';
-import type { MlClient } from '../lib/ml_client/types';
-import { resultsServiceProvider } from '../models/results_service/results_service';
-import type { RouteInitialization } from '../types';
-import { jobIdSchema } from './schemas/anomaly_detectors_schema';
+import { RouteInitialization } from '../types';
 import {
   anomaliesTableDataSchema,
-  anomalySearchSchema,
   categoryDefinitionSchema,
   categoryExamplesSchema,
-  getCategorizerStatsSchema,
-  getCategorizerStoppedPartitionsSchema,
   getDatafeedResultsChartDataSchema,
   maxAnomalyScoreSchema,
   partitionFieldValuesSchema,
+  anomalySearchSchema,
 } from './schemas/results_service_schema';
+import { resultsServiceProvider } from '../models/results_service';
+import { jobIdSchema } from './schemas/anomaly_detectors_schema';
+import {
+  getCategorizerStatsSchema,
+  getCategorizerStoppedPartitionsSchema,
+} from './schemas/results_service_schema';
+import type { MlClient } from '../lib/ml_client';
 
 function getAnomaliesTableData(mlClient: MlClient, payload: any) {
   const rs = resultsServiceProvider(mlClient);

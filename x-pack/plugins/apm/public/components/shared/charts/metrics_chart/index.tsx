@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { asDuration } from '../../../../../common/utils/formatters/duration';
 import {
   asDecimal,
+  asDuration,
   asInteger,
   asPercent,
-} from '../../../../../common/utils/formatters/formatters';
-import { getFixedByteFormatter } from '../../../../../common/utils/formatters/size';
-import type { GenericMetricsChart } from '../../../../../server/lib/metrics/transform_metrics_chart';
-import type { Maybe } from '../../../../../typings/common';
+  getFixedByteFormatter,
+} from '../../../../../common/utils/formatters';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform_metrics_chart';
+import { Maybe } from '../../../../../typings/common';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { TimeseriesChart } from '../timeseries_chart';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 
 function getYTickFormatter(chart: GenericMetricsChart) {
   switch (chart.yUnit) {

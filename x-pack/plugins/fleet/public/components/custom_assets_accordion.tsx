@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React from 'react';
+import type { FunctionComponent } from 'react';
 import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLink,
+  EuiText,
   EuiNotificationBadge,
   EuiSpacer,
   EuiSplitPanel,
-  EuiText,
+  EuiLink,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
-import React from 'react';
 
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
 import { AssetTitleMap } from '../applications/integrations/sections/epm/constants';
-import { useStartServices } from '../hooks/use_core';
+import { useStartServices } from '../hooks';
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 
 export interface CustomAssetsAccordionProps {
   views: Array<{

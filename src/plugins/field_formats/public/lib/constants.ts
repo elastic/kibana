@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { baseFormatters } from '../../common/constants/base_formatters';
-import { DateNanosFormat } from '../../common/converters/date_nanos_shared';
-import { DateFormat } from './converters/date';
+
+import { baseFormatters } from '../../common';
+import { DateFormat, DateNanosFormat } from './converters';
 
 export const baseFormattersPublic = [DateFormat, DateNanosFormat, ...baseFormatters];

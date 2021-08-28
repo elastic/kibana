@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+
 import { sum } from 'lodash';
 import objectHash from 'object-hash';
-import { rangeQuery } from '../../../../../observability/server/utils/queries';
-import { NodeType } from '../../../../common/connections';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,
@@ -20,14 +23,12 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
-import { EventOutcome } from '../../../../common/event_outcome';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { rangeQuery } from '../../../../../observability/server';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import type { Setup } from '../../helpers/setup_request';
+import { EventOutcome } from '../../../../common/event_outcome';
+import { Setup } from '../../helpers/setup_request';
+import { NodeType } from '../../../../common/connections';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 
 export const getStats = async ({

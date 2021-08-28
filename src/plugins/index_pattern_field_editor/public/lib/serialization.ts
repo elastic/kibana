@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPatternField } from '../../../data/common/index_patterns/fields/index_pattern_field';
-import { IndexPattern } from '../../../data/common/index_patterns/index_patterns/index_pattern';
+
+import { IndexPatternField, IndexPattern } from '../shared_imports';
 import type { Field } from '../types';
 
 export const deserializeField = (

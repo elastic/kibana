@@ -5,17 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { Capabilities } from 'src/core/public';
 import { EuiCheckboxGroup } from '@elastic/eui';
-import type { ReactElement } from 'react';
-import React, { useState } from 'react';
-import type { Capabilities } from '../../../../../core/types/capabilities';
-import { unhashUrl } from '../../../../kibana_utils/public/state_management/url/hash_unhash_url';
-import { setStateToKbnUrl } from '../../../../kibana_utils/public/state_management/url/kbn_url_storage';
-import type { SharePluginStart } from '../../../../share/public/plugin';
-import { shareModalStrings } from '../../dashboard_strings';
-import type { DashboardSavedObject } from '../../saved_dashboards/saved_dashboard';
-import type { DashboardAppCapabilities, DashboardState } from '../../types';
+import React from 'react';
+import { ReactElement, useState } from 'react';
+import { DashboardSavedObject } from '../..';
+import { setStateToKbnUrl, unhashUrl } from '../../services/kibana_utils';
+import { SharePluginStart } from '../../services/share';
 import { dashboardUrlParams } from '../dashboard_router';
+import { shareModalStrings } from '../../dashboard_strings';
+import { DashboardAppCapabilities, DashboardState } from '../../types';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 
 const showFilterBarId = 'showFilterBar';

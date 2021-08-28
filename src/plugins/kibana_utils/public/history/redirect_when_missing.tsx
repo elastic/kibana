@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { History } from 'history';
+
 import React, { Fragment } from 'react';
+import { History } from 'history';
+import { i18n } from '@kbn/i18n';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import ReactDOM from 'react-dom';
-import type { ApplicationStart } from '../../../../core/public/application/types';
-import type { HttpStart } from '../../../../core/public/http/types';
-import type { ToastsSetup } from '../../../../core/public/notifications/toasts/toasts_service';
-import { SavedObjectNotFound } from '../../common/errors/errors';
+
+import { ApplicationStart, HttpStart, ToastsSetup } from 'kibana/public';
+import { SavedObjectNotFound } from '..';
 
 const ReactMarkdown = React.lazy(() => import('react-markdown'));
 const ErrorRenderer = (props: { children: string }) => (

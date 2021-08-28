@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { AnonymousPathsService } from './anonymous_paths_service';
 import { BasePath } from './base_path';
 

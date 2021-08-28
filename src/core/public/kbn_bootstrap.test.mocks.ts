@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { applicationServiceMock } from './application/application_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
-
 export const fatalErrorMock = fatalErrorsServiceMock.createSetupContract();
 export const coreSystemMock = {
   setup: jest.fn().mockResolvedValue({

@@ -7,19 +7,18 @@
  */
 
 import _ from 'lodash';
-import type { NotificationsStart } from '../../../../../core/public/notifications/notifications_service';
-import type { RefreshInterval } from '../../../../data/common/query/timefilter/types';
-import { esFilters } from '../../../../data/public/deprecated';
-import type { TimefilterContract } from '../../../../data/public/query/timefilter/timefilter';
-import type { SavedObjectSaveOpts } from '../../../../saved_objects/public/types';
-import type { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public/api';
-import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
+
+import { convertTimeToUTCString } from '.';
+import { NotificationsStart } from '../../services/core';
+import { DashboardSavedObject } from '../../saved_dashboards';
+import { DashboardRedirect, DashboardState } from '../../types';
+import { SavedObjectSaveOpts } from '../../services/saved_objects';
 import { dashboardSaveToastStrings } from '../../dashboard_strings';
-import type { DashboardSavedObject } from '../../saved_dashboards/saved_dashboard';
-import type { DashboardRedirect, DashboardState } from '../../types';
-import { DashboardSessionStorage } from './dashboard_session_storage';
 import { getHasTaggingCapabilitiesGuard } from './dashboard_tagging';
-import { convertTimeToUTCString } from './filter_utils';
+import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
+import { RefreshInterval, TimefilterContract, esFilters } from '../../services/data';
+import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
+import { DashboardSessionStorage } from './dashboard_session_storage';
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { stayInEditMode?: boolean };
 

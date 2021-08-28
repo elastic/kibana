@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { ProcessorEvent } from '../../../common/processor_event';
+import { Setup } from '../helpers/setup_request';
 import {
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import type { Setup } from '../helpers/setup_request';
 
 /**
  * This is used for getting *all* environments, and does not filter by range.

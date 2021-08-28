@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Observable, of } from 'rxjs';
-import { take } from 'rxjs/operators';
-import type { ServiceStatus } from '../status/types';
-import { ServiceStatusLevels } from '../status/types';
+
+import { of, Observable } from 'rxjs';
+import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { calculateStatus$ } from './status';
+import { take } from 'rxjs/operators';
 
 describe('calculateStatus$', () => {
   const expectUnavailableDueToEs = (status$: Observable<ServiceStatus>) =>

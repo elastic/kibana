@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
-import './application/index.scss';
+
+import { PluginInitializerContext } from 'src/core/public';
 import { LicenseManagementUIPlugin } from './plugin';
+import './application/index.scss';
 
 export { LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart } from './plugin';
 export const plugin = (ctx: PluginInitializerContext) => new LicenseManagementUIPlugin(ctx);

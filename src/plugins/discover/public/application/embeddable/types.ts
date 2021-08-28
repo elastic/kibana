@@ -5,18 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Filter } from '../../../../data/common/es_query';
-import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { TimeRange } from '../../../../data/common/query/timefilter/types';
-import type { Query } from '../../../../data/public';
-import type { EmbeddableInput } from '../../../../embeddable/common/types';
-import { Embeddable } from '../../../../embeddable/public/lib/embeddables/embeddable';
-import type {
+
+import {
+  Embeddable,
+  EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
-} from '../../../../embeddable/public/lib/embeddables/i_embeddable';
-import type { SavedSearch } from '../../saved_searches/types';
-import type { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
+} from 'src/plugins/embeddable/public';
+import { Filter, IndexPattern, TimeRange, Query } from '../../../../data/public';
+import { SavedSearch } from '../..';
+import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;

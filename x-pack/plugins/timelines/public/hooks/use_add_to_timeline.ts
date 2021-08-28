@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { range } from 'd3-array';
+import { interpolate } from 'd3-interpolate';
+import { useCallback } from 'react';
+import type { DraggableId, FluidDragActions, Position, SensorAPI } from 'react-beautiful-dnd';
+
 import {
   EMPTY_PROVIDERS_GROUP_CLASS_NAME,
   HIGHLIGHTED_DROP_TARGET_CLASS_NAME,
   IS_DRAGGING_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
-import { range } from 'd3-array';
-import { interpolate } from 'd3-interpolate';
-import { useCallback } from 'react';
-import type { DraggableId, FluidDragActions, Position, SensorAPI } from 'react-beautiful-dnd';
 
 let _sensorApiSingleton: SensorAPI;
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import DateMath from '@elastic/datemath';
-import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { Moment } from 'moment';
 import React from 'react';
-import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import { i18n } from '@kbn/i18n';
+import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
+import DateMath from '@elastic/datemath';
+import { Moment } from 'moment';
 import { useSeriesStorage } from '../hooks/use_series_storage';
+import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const parseAbsoluteDate = (date: string, options = {}) => {
   return DateMath.parse(date, options)!;

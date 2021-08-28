@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { EuiDataGridColumn } from '@elastic/eui';
-import { EuiScreenReaderOnly } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import { buildCellActions } from './discover_grid_cell_actions';
-import { SelectButton } from './discover_grid_document_selection';
+import { i18n } from '@kbn/i18n';
+import { EuiDataGridColumn, EuiScreenReaderOnly } from '@elastic/eui';
 import { ExpandButton } from './discover_grid_expand_button';
+import { DiscoverGridSettings } from './types';
+import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
+import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
-import type { DiscoverGridSettings } from './types';
+import { SelectButton } from './discover_grid_document_selection';
 
 export function getLeadControlColumns() {
   return [

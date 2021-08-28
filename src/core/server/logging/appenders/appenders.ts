@@ -5,20 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { DisposableAppender } from '@kbn/logging';
 import { assertNever } from '@kbn/std';
-import type { LegacyAppenderConfig } from '../../legacy/logging/appenders/legacy_appender';
-import { LegacyAppender } from '../../legacy/logging/appenders/legacy_appender';
+import { DisposableAppender } from '@kbn/logging';
+
+import {
+  LegacyAppender,
+  LegacyAppenderConfig,
+} from '../../legacy/logging/appenders/legacy_appender';
 import { Layouts } from '../layouts/layouts';
-import type { ConsoleAppenderConfig } from './console/console_appender';
-import { ConsoleAppender } from './console/console_appender';
-import type { FileAppenderConfig } from './file/file_appender';
-import { FileAppender } from './file/file_appender';
-import type { RewriteAppenderConfig } from './rewrite/rewrite_appender';
-import { RewriteAppender } from './rewrite/rewrite_appender';
-import type { RollingFileAppenderConfig } from './rolling_file/rolling_file_appender';
-import { RollingFileAppender } from './rolling_file/rolling_file_appender';
+import { ConsoleAppender, ConsoleAppenderConfig } from './console/console_appender';
+import { FileAppender, FileAppenderConfig } from './file/file_appender';
+import { RewriteAppender, RewriteAppenderConfig } from './rewrite/rewrite_appender';
+import {
+  RollingFileAppender,
+  RollingFileAppenderConfig,
+} from './rolling_file/rolling_file_appender';
 
 /**
  * Config schema for validting the shape of the `appenders` key in in {@link LoggerContextConfigType} or

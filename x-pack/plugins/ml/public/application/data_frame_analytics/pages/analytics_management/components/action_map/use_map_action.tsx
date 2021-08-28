@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useMemo } from 'react';
+import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
+import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import { useMlLocator } from '../../../../../contexts/kibana/use_create_url';
-import { useNavigateToPath } from '../../../../../contexts/kibana/use_navigate_to_path';
 import { getViewLinkStatus } from '../action_view/get_view_link_status';
-import type {
-  DataFrameAnalyticsListAction,
-  DataFrameAnalyticsListRow,
-} from '../analytics_list/common';
+
 import { mapActionButtonText, MapButton } from './map_button';
 
 export type MapAction = ReturnType<typeof useMapAction>;

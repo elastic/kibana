@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import rison from 'rison-node';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFlyoutFooter,
+  EuiFlyoutBody,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import rison from 'rison-node';
-import { SavedObjectFinderUi } from '../../../../../../../saved_objects/public/finder/saved_object_finder';
+import { SavedObjectFinderUi } from '../../../../../../../saved_objects/public';
 import { getServices } from '../../../../../kibana_services';
 
 const SEARCH_OBJECT_TYPE = 'search';

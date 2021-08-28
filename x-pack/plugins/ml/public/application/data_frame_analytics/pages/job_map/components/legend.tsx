@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
   EuiListGroupItem,
+  EuiListGroup,
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useState } from 'react';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
-import type { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
+import { EuiThemeType } from '../../../../components/color_range_legend';
 
 const getJobTypeList = () => (
   <>

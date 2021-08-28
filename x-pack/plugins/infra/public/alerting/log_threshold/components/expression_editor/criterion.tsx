@@ -4,30 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState, useMemo, useCallback } from 'react';
 import {
-  EuiButtonIcon,
-  EuiExpression,
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPopover,
   EuiPopoverTitle,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPopover,
   EuiSelect,
+  EuiFieldNumber,
+  EuiExpression,
+  EuiFieldText,
+  EuiButtonIcon,
+  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isFinite, isNumber } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
-import type { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import type { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
-import type { Criterion as CriterionType } from '../../../../../common/alerting/logs/log_threshold/types';
+import { isNumber, isFinite } from 'lodash';
+import { IFieldType } from 'src/plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
 import {
   Comparator,
+  Criterion as CriterionType,
   ComparatorToi18nMap,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 const firstCriterionFieldPrefix = i18n.translate(
   'xpack.infra.logs.alertFlyout.firstCriterionFieldPrefix',
   {

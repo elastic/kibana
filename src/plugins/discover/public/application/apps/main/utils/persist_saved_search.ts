@@ -5,12 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPattern } from '../../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { SavedObjectSaveOpts } from '../../../../../../saved_objects/public/types';
-import type { DiscoverServices } from '../../../../build_services';
-import type { SavedSearch, SortOrder } from '../../../../saved_searches/types';
-import type { AppState } from '../services/discover_state';
+
 import { updateSearchSource } from './update_search_source';
+import { IndexPattern } from '../../../../../../data/public';
+import { SavedSearch } from '../../../../saved_searches';
+import { AppState } from '../services/discover_state';
+import { SortOrder } from '../../../../saved_searches/types';
+import { SavedObjectSaveOpts } from '../../../../../../saved_objects/public';
+import { DiscoverServices } from '../../../../build_services';
 
 /**
  * Helper function to update and persist the given savedSearch

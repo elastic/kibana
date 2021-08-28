@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { EuiLoadingContentProps } from '@elastic/eui';
-import { EuiLoadingContent } from '@elastic/eui';
 import React from 'react';
+import { EuiLoadingContentProps, EuiLoadingContent } from '@elastic/eui';
 import type { EuiCodeEditorProps } from './code_editor';
 
 const Placeholder = ({ height }: { height?: string }) => {

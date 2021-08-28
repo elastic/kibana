@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { EsQueryConfig, KueryNode } from '@kbn/es-query';
-import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
+
 import { remove } from 'lodash';
-import type { RegistryAlertTypeWithAuth } from './alerting_authorization';
+import { EsQueryConfig, nodeBuilder, toElasticsearchQuery, KueryNode } from '@kbn/es-query';
+
+import { estypes } from '@elastic/elasticsearch';
+import { RegistryAlertTypeWithAuth } from './alerting_authorization';
 
 export enum AlertingAuthorizationFilterType {
   KQL = 'kql',

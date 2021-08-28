@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { VisitorBreakdownChart } from '../Charts/VisitorBreakdownChart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 export function VisitorBreakdown() {
   const { urlParams, uxUiFilters } = useUrlParams();

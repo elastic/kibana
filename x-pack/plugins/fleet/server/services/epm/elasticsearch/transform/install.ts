@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
-import type { ElasticsearchClient } from '../../../../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../../../../src/core/server/saved_objects/types';
-import type { EsAssetReference, InstallablePackage } from '../../../../../common/types/models/epm';
-import { ElasticsearchAssetType } from '../../../../../common/types/models/epm';
-import { appContextService } from '../../../app_context';
-import { getAsset, getPathParts } from '../../archive';
-import { getInstallation } from '../../packages/get';
 import { saveInstalledEsRefs } from '../../packages/install';
+import { getPathParts } from '../../archive';
+import { ElasticsearchAssetType } from '../../../../../common/types/models';
+import type { EsAssetReference, InstallablePackage } from '../../../../../common/types/models';
+import { getInstallation } from '../../packages';
+import { appContextService } from '../../../app_context';
 
-import { deleteTransformRefs, deleteTransforms } from './remove';
+import { deleteTransforms, deleteTransformRefs } from './remove';
+import { getAsset } from './common';
 
 interface TransformInstallation {
   installationName: string;

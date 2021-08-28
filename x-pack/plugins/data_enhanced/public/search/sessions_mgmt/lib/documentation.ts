@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DocLinksStart } from '../../../../../../../src/core/public/doc_links/doc_links_service';
+
+import { DocLinksStart } from 'kibana/public';
 
 export class AsyncSearchIntroDocumentation {
   private docUrl: string = '';

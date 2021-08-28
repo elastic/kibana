@@ -5,14 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
+
 import React, { useState } from 'react';
-import type { OnSaveProps } from '../../../saved_objects/public/save_modal/saved_object_save_modal';
-import { SavedObjectSaveModal } from '../../../saved_objects/public/save_modal/saved_object_save_modal';
+
+import { i18n } from '@kbn/i18n';
+
+import { OnSaveProps, SavedObjectSaveModal } from '../../../../plugins/saved_objects/public';
+
 import { pluginServices } from '../services';
-import './saved_object_save_modal_dashboard.scss';
+import { SaveModalDashboardProps } from './types';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
-import type { SaveModalDashboardProps } from './types';
+
+import './saved_object_save_modal_dashboard.scss';
 
 function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const { documentInfo, tagOptions, objectType, onClose, canSaveByReference } = props;

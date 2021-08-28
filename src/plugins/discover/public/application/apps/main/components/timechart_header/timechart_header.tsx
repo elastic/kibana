@@ -5,22 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import dateMath from '@elastic/datemath';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
-  EuiSelect,
-  EuiText,
   EuiToolTip,
+  EuiText,
+  EuiSelect,
+  EuiIconTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { DataPublicPluginStart } from '../../../../../../../data/public/types';
-import type { DataCharts$, DataChartsMessage } from '../../services/use_saved_search';
-import { useDataState } from '../../utils/use_data_state';
+import { i18n } from '@kbn/i18n';
+import dateMath from '@elastic/datemath';
 import './timechart_header.scss';
+import { DataPublicPluginStart } from '../../../../../../../data/public';
+import { DataCharts$, DataChartsMessage } from '../../services/use_saved_search';
+import { useDataState } from '../../utils/use_data_state';
 
 export interface TimechartBucketInterval {
   scaled?: boolean;

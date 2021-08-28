@@ -5,20 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { fromKueryExpression } from '@kbn/es-query';
+
+import { CoreSetup } from 'kibana/public';
+import { $Keys } from 'utility-types';
 import { flatten, uniqBy } from 'lodash';
-import type { $Keys } from 'utility-types';
-import type { CoreSetup } from '../../../../../../core/public/types';
-import type { DataPublicPluginStart } from '../../../types';
-import type {
-  QuerySuggestion,
-  QuerySuggestionGetFn,
-  QuerySuggestionGetFnArgs,
-} from '../query_suggestion_provider';
-import { setupGetConjunctionSuggestions } from './conjunction';
+import { fromKueryExpression } from '@kbn/es-query';
 import { setupGetFieldSuggestions } from './field';
-import { setupGetOperatorSuggestions } from './operator';
 import { setupGetValueSuggestions } from './value';
+import { setupGetOperatorSuggestions } from './operator';
+import { setupGetConjunctionSuggestions } from './conjunction';
+import {
+  QuerySuggestion,
+  QuerySuggestionGetFnArgs,
+  QuerySuggestionGetFn,
+  DataPublicPluginStart,
+} from '../../../../../../../src/plugins/data/public';
 
 const cursorSymbol = '@kuery-cursor@';
 

@@ -8,10 +8,10 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 // @ts-expect-error
-import turfCircle from '@turf/circle';
-// @ts-expect-error
 import turfDistance from '@turf/distance';
-import type { Feature, GeoJSON, Position } from 'geojson';
+// @ts-expect-error
+import turfCircle from '@turf/circle';
+import { Feature, GeoJSON, Position } from 'geojson';
 
 const DRAW_CIRCLE_RADIUS = 'draw-circle-radius';
 

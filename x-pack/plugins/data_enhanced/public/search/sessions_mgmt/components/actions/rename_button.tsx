@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,12 +20,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
-import type { IClickActionDescriptor } from '..';
-import type { CoreStart } from '../../../../../../../../src/core/public/types';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
+import { CoreStart } from 'kibana/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import type { UISession } from '../../types';
-import type { OnActionDismiss } from './types';
+import { IClickActionDescriptor } from '../';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { OnActionDismiss } from './types';
+import { UISession } from '../../types';
 
 interface RenameButtonProps {
   searchSession: UISession;

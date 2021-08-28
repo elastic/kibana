@@ -5,16 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import { getType } from '../../expression_types/get_type';
-import type {
-  Datatable,
-  DatatableColumn,
-  DatatableColumnType,
-} from '../../expression_types/specs/datatable';
-import type { ExpressionFunctionDefinition } from '../types';
-import type { MathArguments } from './math';
-import { math } from './math';
+import { ExpressionFunctionDefinition } from '../types';
+import { math, MathArguments } from './math';
+import { Datatable, DatatableColumn, DatatableColumnType, getType } from '../../expression_types';
 
 export type MathColumnArguments = MathArguments & {
   id: string;

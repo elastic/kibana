@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { estypes } from '@elastic/elasticsearch';
 import createContainer from 'constate';
 import { useMemo } from 'react';
+import { ModuleSourceConfiguration } from '../../log_analysis_module_types';
 import { useLogAnalysisModule } from '../../log_analysis_module';
 import { useLogAnalysisModuleConfiguration } from '../../log_analysis_module_configuration';
 import { useLogAnalysisModuleDefinition } from '../../log_analysis_module_definition';
-import type { ModuleSourceConfiguration } from '../../log_analysis_module_types';
 import { logEntryRateModule } from './module_descriptor';
 
 export const useLogEntryRateModule = ({

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Component, ChangeEvent, ReactNode } from 'react';
 // @ts-expect-error
 import { EuiFieldNumber, EuiFormRow, EuiFormRowDisplayKeys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import type { ChangeEvent, ReactNode } from 'react';
-import React, { Component } from 'react';
 
 interface State {
   value: number | string;

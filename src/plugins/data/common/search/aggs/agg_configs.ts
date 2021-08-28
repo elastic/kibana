@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { isRangeFilter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import type { Assign } from '@kbn/utility-types';
-import _, { cloneDeep } from 'lodash';
 import moment from 'moment';
-import type { RangeFilter } from '../../es_query';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import { calculateBounds, getTime } from '../../query/timefilter/get_time';
-import type { TimeRange } from '../../query/timefilter/types';
-import type { ISearchSource } from '../search_source/types';
-import type { IEsSearchResponse } from '../strategies/es_search/types';
-import type { ISearchOptions } from '../types';
-import type { AggConfigSerialized, IAggConfig } from './agg_config';
-import { AggConfig } from './agg_config';
+import _, { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { Assign } from '@kbn/utility-types';
+import { isRangeFilter } from '@kbn/es-query';
+import type { estypes } from '@elastic/elasticsearch';
+
+import {
+  IEsSearchResponse,
+  ISearchOptions,
+  ISearchSource,
+  RangeFilter,
+} from 'src/plugins/data/public';
+import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
+import { IAggType } from './agg_type';
+import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import type { IAggType } from './agg_type';
-import type { AggTypesRegistryStart } from './agg_types_registry';
-import type { IBucketAggConfig } from './buckets/bucket_agg_type';
+import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { TimeRange, getTime, calculateBounds } from '../../../common';
+import { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
 
 function removeParentAggs(obj: any) {

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FileBasedFieldVisConfig } from './types/field_vis_config';
+
+import { FileBasedFieldVisConfig } from './types';
 
 export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
   const { stats } = config;

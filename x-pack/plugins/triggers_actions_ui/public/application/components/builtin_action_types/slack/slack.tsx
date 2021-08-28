@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { lazy } from 'react';
-import type {
+import { i18n } from '@kbn/i18n';
+import {
   ActionTypeModel,
-  ConnectorValidationResult,
   GenericValidationResult,
+  ConnectorValidationResult,
 } from '../../../../types';
+import { SlackActionParams, SlackSecrets, SlackActionConnector } from '../types';
 import { isValidUrl } from '../../../lib/value_validators';
-import type { SlackActionConnector, SlackActionParams, SlackSecrets } from '../types';
 
 export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {

@@ -4,32 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHighlight,
   EuiLink,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiPopoverTitle,
   EuiText,
+  EuiListGroupItem,
+  EuiListGroup,
   EuiTitle,
+  EuiFieldSearch,
+  EuiHighlight,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { IndexPattern } from '../../../../types';
+import { tinymathFunctions } from '../util';
+import { getPossibleFunctions } from './math_completion';
+import { hasFunctionFieldArgument } from '../validation';
+
 import type {
   GenericOperationDefinition,
   IndexPatternColumn,
   OperationDefinition,
   ParamEditorProps,
-} from '../..';
-import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public/markdown';
-import type { IndexPattern } from '../../../../types';
+} from '../../index';
 import type { FormulaIndexPatternColumn } from '../formula';
-import { tinymathFunctions } from '../util';
-import { hasFunctionFieldArgument } from '../validation';
-import { getPossibleFunctions } from './math_completion';
 
 function FormulaHelp({
   indexPattern,

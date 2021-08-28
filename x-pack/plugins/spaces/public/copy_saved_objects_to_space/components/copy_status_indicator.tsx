@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type {
-  SummarizedCopyToSpaceResult,
-  SummarizedSavedObjectResult,
-} from '../lib/summarize_copy_result';
+import type { SummarizedCopyToSpaceResult, SummarizedSavedObjectResult } from '../lib';
 import type { ImportRetry } from '../types';
 
 interface Props {

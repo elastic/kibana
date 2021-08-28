@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+import { JOB_FIELD_TYPES } from '../../../../common';
+import type { IndexPatternField } from '../../../../../../../src/plugins/data/common/index_patterns/fields';
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
-import { IndexPatternField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/index_pattern_field';
-import { JOB_FIELD_TYPES } from '../../../../common/constants';
 
 export const jobTypeAriaLabels = {
   BOOLEAN: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.booleanTypeAriaLabel', {

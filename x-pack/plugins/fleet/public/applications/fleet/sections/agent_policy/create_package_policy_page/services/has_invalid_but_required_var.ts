@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { validatePackagePolicyConfig } from '../../../../../../../common/services/validate_package_policy';
-import type { RegistryVarsEntry } from '../../../../../../../common/types/models/epm';
-import type { PackagePolicyConfigRecord } from '../../../../../../../common/types/models/package_policy';
+
+import type { PackagePolicyConfigRecord, RegistryVarsEntry } from '../../../../types';
+
+import { validatePackagePolicyConfig } from './';
 
 export const hasInvalidButRequiredVar = (
   registryVars?: RegistryVarsEntry[],

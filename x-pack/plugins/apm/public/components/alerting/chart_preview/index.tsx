@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RectAnnotationDatum, TickFormatter } from '@elastic/charts';
+
 import {
   AnnotationDomainType,
   Axis,
@@ -14,12 +14,14 @@ import {
   niceTimeFormatter,
   Position,
   RectAnnotation,
+  RectAnnotationDatum,
   ScaleType,
   Settings,
+  TickFormatter,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import type { Coordinate } from '../../../../typings/timeseries';
+import { Coordinate } from '../../../../typings/timeseries';
 import { useTheme } from '../../../hooks/use_theme';
 
 interface ChartPreviewProps {

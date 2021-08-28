@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PluginInitializer } from '../../../../src/core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
+
+import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 import { Plugin } from './plugin';
-import type {
-  InfraClientSetupDeps,
+import {
   InfraClientSetupExports,
-  InfraClientStartDeps,
   InfraClientStartExports,
+  InfraClientSetupDeps,
+  InfraClientStartDeps,
 } from './types';
 
 export const plugin: PluginInitializer<
@@ -24,9 +24,10 @@ export const plugin: PluginInitializer<
 };
 
 export { FORMATTERS } from '../common/formatters';
-export type { LogStreamProps } from './components/log_stream';
-// Shared components
-export { LazyLogStreamWrapper as LogStream } from './components/log_stream/lazy_log_stream_wrapper';
 export { InfraFormatterType } from './lib/lib';
 
 export type InfraAppId = 'logs' | 'metrics';
+
+// Shared components
+export { LazyLogStreamWrapper as LogStream } from './components/log_stream/lazy_log_stream_wrapper';
+export type { LogStreamProps } from './components/log_stream';

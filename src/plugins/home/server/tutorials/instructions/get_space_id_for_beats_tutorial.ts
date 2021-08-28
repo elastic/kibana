@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+
+import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 
 /**
  * Returns valid configuration for a beat.yml file for adding the space id

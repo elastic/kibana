@@ -4,23 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { round, sum } from 'lodash';
-import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
+import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
+import { ChartBase } from '../../../types';
+import { getMetricsProjection } from '../../../../../projections/metrics';
+import { mergeProjection } from '../../../../../projections/util/merge_projection';
 import {
   AGENT_NAME,
   LABEL_NAME,
   METRIC_JAVA_GC_COUNT,
   METRIC_JAVA_GC_TIME,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
-import { getVizColorForIndex } from '../../../../../../common/viz_colors';
-import { getMetricsProjection } from '../../../../../projections/metrics';
-import { mergeProjection } from '../../../../../projections/util/merge_projection';
 import { getBucketSize } from '../../../../helpers/get_bucket_size';
-import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
-import type { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
-import type { ChartBase } from '../../../types';
+import { getVizColorForIndex } from '../../../../../../common/viz_colors';
+import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 
 export async function fetchAndTransformGcMetrics({
   environment,

@@ -5,9 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { set } from '@elastic/safer-lodash-set';
+
 import { EventEmitter } from 'events';
-import { cloneDeep, get, isEqual, isPlainObject, isString, merge, mergeWith, toPath } from 'lodash';
+
+import { set } from '@elastic/safer-lodash-set';
+import { isPlainObject, cloneDeep, get, isEqual, isString, merge, mergeWith, toPath } from 'lodash';
 
 function prepSetParams(key: PersistedStateKey, value: any, path: PersistedStatePath) {
   // key must be the value, set the entire state using it

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiDescriptionList,
@@ -11,13 +14,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import { useMlContext } from '../../../../../contexts/ml/use_ml_context';
-import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { UNSET_CONFIG_ITEM } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import {
+  State,
+  UNSET_CONFIG_ITEM,
+} from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
+import { useMlContext } from '../../../../../contexts/ml';
 import { ANALYTICS_STEPS } from '../../page';
 
 const MAX_INCLUDES_LENGTH = 5;

@@ -4,22 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import { isEmpty } from 'lodash';
-import moment from 'moment';
+import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { LazyLogStreamWrapper as LogStream } from '../../../../../infra/public/components/log_stream/lazy_log_stream_wrapper';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { LogStream } from '../../../../../infra/public';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
+
 import {
   CONTAINER_ID,
   HOSTNAME,
   POD_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 export function ServiceLogs() {
   const { serviceName } = useApmServiceContext();

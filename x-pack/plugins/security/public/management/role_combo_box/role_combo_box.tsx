@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { EuiBadge, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
@@ -11,13 +12,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { Role } from '../../../common/model/role';
-import {
-  isRoleAdmin,
-  isRoleDeprecated,
-  isRoleReserved,
-  isRoleSystem,
-} from '../../../common/model/role';
+import type { Role } from '../../../common/model';
+import { isRoleAdmin, isRoleDeprecated, isRoleReserved, isRoleSystem } from '../../../common/model';
 
 interface Props
   extends Omit<

@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ConfigDeprecationProvider } from '@kbn/config';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+
+import { schema, TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '../internal_types';
+import type { ConfigDeprecationProvider } from '../config';
 
 const migrationSchema = schema.object({
   batchSize: schema.number({ defaultValue: 1_000 }),

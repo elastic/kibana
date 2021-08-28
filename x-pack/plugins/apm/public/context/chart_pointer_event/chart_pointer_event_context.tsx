@@ -4,9 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PointerEvent } from '@elastic/charts';
-import type { Dispatch, ReactNode, SetStateAction } from 'react';
-import React, { createContext, useState } from 'react';
+
+import React, {
+  createContext,
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useState,
+} from 'react';
+
+import { PointerEvent } from '@elastic/charts';
 
 export const ChartPointerEventContext = createContext<{
   pointerEvent: PointerEvent | null;

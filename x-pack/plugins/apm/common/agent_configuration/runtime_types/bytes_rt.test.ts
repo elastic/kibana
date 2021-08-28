@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { getBytesRt } from './bytes_rt';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { getBytesRt } from './bytes_rt';
 
 describe('bytesRt', () => {
   describe('must accept any amount and unit', () => {

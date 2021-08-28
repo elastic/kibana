@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-
-import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
-import { i18n } from '@kbn/i18n';
 // There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
 // @ts-ignore
-import { TopLevelSpec } from 'vega-lite/build/vega-lite';
-import type { LegendType } from '../vega_chart/common';
-import { LEGEND_TYPES } from '../vega_chart/common';
+import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
+
+import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
+
+import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { LegendType, LEGEND_TYPES } from '../vega_chart/common';
 
 export const OUTLIER_SCORE_FIELD = 'outlier_score';
 

@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
-import { withNotifyOnErrors } from '../../../../../../../src/plugins/kibana_utils/public/state_management/url/errors';
-import { createKbnUrlStateStorage } from '../../../../../../../src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
-import { createSessionStorageStateStorage } from '../../../../../../../src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage';
-import type { TypedLensByValueInput } from '../../../../../lens/public/embeddable/embeddable_component';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { useTrackPageview } from '../../../hooks/use_track_metric';
-import type { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryView } from './exploratory_view';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { ObservabilityPublicPluginsStart } from '../../../plugin';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
+import {
+  createKbnUrlStateStorage,
+  withNotifyOnErrors,
+  createSessionStorageStateStorage,
+} from '../../../../../../../src/plugins/kibana_utils/public/';
 import { UrlStorageContextProvider } from './hooks/use_series_storage';
+import { useTrackPageview } from '../../..';
+import { TypedLensByValueInput } from '../../../../../lens/public';
 
 export function ExploratoryViewPage({
   saveAttributes,

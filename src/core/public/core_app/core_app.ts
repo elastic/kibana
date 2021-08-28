@@ -5,26 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { UnregisterCallback } from 'history';
-import type {
-  AppMountParameters,
+
+import { UnregisterCallback } from 'history';
+import {
   InternalApplicationSetup,
   InternalApplicationStart,
-} from '../application/types';
-import { AppNavLinkStatus } from '../application/types';
+  AppNavLinkStatus,
+  AppMountParameters,
+} from '../application';
+import type { HttpSetup, HttpStart } from '../http';
 import type { CoreContext } from '../core_system';
-import type { DocLinksStart } from '../doc_links/doc_links_service';
-import type { HttpSetup, HttpStart } from '../http/types';
-import type { InjectedMetadataSetup } from '../injected_metadata/injected_metadata_service';
-import type {
-  NotificationsSetup,
-  NotificationsStart,
-} from '../notifications/notifications_service';
-import type { IUiSettingsClient } from '../ui_settings/types';
-import { renderApp as renderErrorApp } from './errors/error_application';
-import { setupPublicBaseUrlConfigWarning } from './errors/public_base_url';
-import { setupUrlOverflowDetection } from './errors/url_overflow';
-import { renderApp as renderStatusApp } from './status/render_app';
+import type { NotificationsSetup, NotificationsStart } from '../notifications';
+import type { IUiSettingsClient } from '../ui_settings';
+import type { InjectedMetadataSetup } from '../injected_metadata';
+import {
+  renderApp as renderErrorApp,
+  setupPublicBaseUrlConfigWarning,
+  setupUrlOverflowDetection,
+} from './errors';
+import { renderApp as renderStatusApp } from './status';
+import { DocLinksStart } from '../doc_links';
 
 interface SetupDeps {
   application: InternalApplicationSetup;

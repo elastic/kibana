@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { IndexPatternSpec } from '../../../../../../../../src/plugins/data/common/index_patterns/types';
-import type { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public/types';
-import { FieldFormat as IFieldFormat } from '../../../../../../../../src/plugins/field_formats/common/field_format';
-import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/common/errors/errors';
-import { apmFieldFormats } from '../configurations/apm/field_formats';
+
+import type { FieldFormat as IFieldFormat } from 'src/plugins/field_formats/common';
+import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/public';
+import {
+  DataPublicPluginStart,
+  IndexPattern,
+  IndexPatternSpec,
+} from '../../../../../../../../src/plugins/data/public';
 import { rumFieldFormats } from '../configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../configurations/synthetics/field_formats';
-import type { AppDataType, FieldFormat, FieldFormatParams } from '../types';
+import { AppDataType, FieldFormat, FieldFormatParams } from '../types';
+import { apmFieldFormats } from '../configurations/apm/field_formats';
 
 const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   infra_logs: null,

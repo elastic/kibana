@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { createContext, useContext } from 'react';
-import type { CoreStart } from '../../../../../src/core/public/types';
-import { ScopedHistory } from '../../../../../src/core/public/application/scoped_history';
-import type { TelemetryPluginStart } from '../../../../../src/plugins/telemetry/public/plugin';
-import type { ILicense } from '../../../licensing/common/types';
-import type { LicensingPluginSetup } from '../../../licensing/public/types';
-import type { ClientConfigType } from '../types';
+import { ScopedHistory } from 'kibana/public';
+
+import { CoreStart } from '../../../../../src/core/public';
+import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
+import { TelemetryPluginStart } from '../../../../../src/plugins/telemetry/public';
+import { ClientConfigType } from '../types';
 import { BreadcrumbService } from './breadcrumbs';
 
 const AppContext = createContext<AppDependencies | undefined>(undefined);

@@ -5,19 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { KibanaExecutionContext } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { defer } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import type { KibanaExecutionContext } from '../../../../../../core/types/execution_context';
-import type { Adapters } from '../../../../../inspector/common/adapters/types';
-import type { Query } from '../../../../common';
-import type { Filter } from '../../../es_query';
-import { IndexPattern } from '../../../index_patterns/index_patterns/index_pattern';
-import { calculateBounds } from '../../../query/timefilter/get_time';
-import type { TimeRange } from '../../../query/timefilter/types';
-import type { IAggConfigs } from '../../aggs/agg_configs';
-import type { ISearchStartSearchSource } from '../../search_source/types';
-import { tabifyAggResponse } from '../../tabify/tabify';
+import { Adapters } from 'src/plugins/inspector/common';
+
+import { calculateBounds, Filter, IndexPattern, Query, TimeRange } from '../../../../common';
+
+import { IAggConfigs } from '../../aggs';
+import { ISearchStartSearchSource } from '../../search_source';
+import { tabifyAggResponse } from '../../tabify';
 
 /** @internal */
 export interface RequestHandlerParams {

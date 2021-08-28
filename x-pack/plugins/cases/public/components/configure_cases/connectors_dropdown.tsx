@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
+
 import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
-import type { ActionConnector } from '../../../common/api/connectors';
-import { ConnectorTypes } from '../../../common/api/connectors';
-import { useKibana } from '../../common/lib/kibana/kibana_react';
-import { getConnectorIcon } from '../utils';
+
+import { ConnectorTypes } from '../../../common';
+import { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
+import { useKibana } from '../../common/lib/kibana';
+import { getConnectorIcon } from '../utils';
 
 export interface Props {
   connectors: ActionConnector[];

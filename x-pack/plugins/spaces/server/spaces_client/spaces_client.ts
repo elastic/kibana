@@ -8,16 +8,16 @@
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 
-import type { ISavedObjectsRepository } from '../../../../../src/core/server/saved_objects/service/lib/repository';
-import type { SavedObject } from '../../../../../src/core/types/saved_objects';
-import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
-import { isReservedSpace } from '../../common/is_reserved_space';
+import type { ISavedObjectsRepository, SavedObject } from 'src/core/server';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
   LegacyUrlAliasTarget,
-} from '../../common/types';
+} from '../../common';
+import { isReservedSpace } from '../../common';
 import type { ConfigType } from '../config';
 
 const SUPPORTED_GET_SPACE_PURPOSES: GetAllSpacesPurpose[] = [

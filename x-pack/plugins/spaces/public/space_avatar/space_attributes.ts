@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 
-import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
-import { MAX_SPACE_INITIALS } from '../../common/constants';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import { MAX_SPACE_INITIALS } from '../../common';
 
 // code point for lowercase "a"
 const FALLBACK_CODE_POINT = 97;

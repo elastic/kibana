@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { ChoroplethLayerIcon } from '../icons/cloropleth_layer_icon';
-import type { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
 import { LayerTemplate } from './layer_template';
+import { ChoroplethLayerIcon } from '../icons/cloropleth_layer_icon';
 
 export const choroplethLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],

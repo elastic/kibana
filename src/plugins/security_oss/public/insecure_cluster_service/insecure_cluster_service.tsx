@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import type { CoreSetup, CoreStart } from '../../../../core/public/types';
-import type { Toast } from '../../../../core/public/notifications/toasts/toasts_api';
-import type { MountPoint } from '../../../../core/public/types';
-import type { AppStateServiceStart } from '../app_state/app_state_service';
+import type { CoreSetup, CoreStart, MountPoint, Toast } from 'src/core/public';
+
+import type { AppStateServiceStart } from '../app_state';
 import type { ConfigType } from '../config';
-import { defaultAlertText, defaultAlertTitle } from './components/default_alert';
+import { defaultAlertText, defaultAlertTitle } from './components';
 
 interface SetupDeps {
   core: Pick<CoreSetup, 'http'>;

@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+
+import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useState } from 'react';
+
+import { EuiCard, EuiIcon, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
-import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+
+import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 interface Props {
   type: AnalyticsJobType;

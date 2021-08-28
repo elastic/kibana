@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout/setup_flyout_state';
+import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories/use_log_entry_categories_module';
-import { LogEntryRateModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_rate/use_log_entry_rate_module';
+import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
+import { LogEntryRateModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
-import { useLogSourceContext } from '../../../containers/logs/log_source/log_source';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 
 export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {

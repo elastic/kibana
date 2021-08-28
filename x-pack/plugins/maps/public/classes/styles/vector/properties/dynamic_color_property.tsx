@@ -4,38 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { Map as MbMap } from '@kbn/mapbox-gl';
+import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Map as MbMap } from '@kbn/mapbox-gl';
-import React from 'react';
-import type { FieldFormatter } from '../../../../../common/constants';
+import { DynamicStyleProperty } from './dynamic_style_property';
+import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
+import {
+  getOrdinalMbColorRampStops,
+  getPercentilesMbColorRampStops,
+  getColorPalette,
+} from '../../color_palettes';
 import {
   COLOR_MAP_TYPE,
   DATA_MAPPING_FUNCTION,
+  FieldFormatter,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import type {
-  ColorDynamicOptions,
-  OrdinalColorStop,
-} from '../../../../../common/descriptor_types/style_property_descriptor_types';
-import type { IField } from '../../../fields/field';
-import type { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
-import { getOrdinalSuffix } from '../../../util/ordinal_suffix';
 import {
-  getColorPalette,
-  getOrdinalMbColorRampStops,
-  getPercentilesMbColorRampStops,
-} from '../../color_palettes';
-import {
-  getOtherCategoryLabel,
   isCategoricalStopsInvalid,
+  getOtherCategoryLabel,
   // @ts-expect-error
 } from '../components/color/color_stops_utils';
-import type { Break } from '../components/legend/breaked_legend';
-import { BreakedLegend } from '../components/legend/breaked_legend';
-import { dynamicRound, makeMbClampedNumberExpression } from '../style_util';
-import { DynamicStyleProperty } from './dynamic_style_property';
-import type { LegendProps } from './style_property';
+import { Break, BreakedLegend } from '../components/legend/breaked_legend';
+import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
+import { LegendProps } from './style_property';
+import { getOrdinalSuffix } from '../../../util/ordinal_suffix';
+import { IField } from '../../../fields/field';
+import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 
 const UP_TO = i18n.translate('xpack.maps.legend.upto', {
   defaultMessage: 'up to',

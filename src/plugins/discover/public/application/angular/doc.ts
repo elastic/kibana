@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { getAngularModule, getServices } from '../../kibana_services';
-import { Doc } from '../components/doc/doc';
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
 import html from './doc.html';
+import { Doc } from '../components/doc/doc';
 
 interface LazyScope extends ng.IScope {
   [key: string]: unknown;

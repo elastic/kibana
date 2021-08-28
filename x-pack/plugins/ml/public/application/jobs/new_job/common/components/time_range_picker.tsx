@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
+
+import React, { FC, Fragment, useEffect, useState } from 'react';
+import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
-import type { Moment } from 'moment';
-import moment from 'moment';
-import type { FC } from 'react';
-import React, { Fragment, useEffect, useState } from 'react';
-import { useMlContext } from '../../../../contexts/ml/use_ml_context';
+import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
+import { useMlContext } from '../../../../contexts/ml';
 
 const WIDTH = '512px';
 

@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+
+// @ts-ignore
+import sizeMe from 'react-sizeme';
+
 import { injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
-import type { Layout } from 'react-grid-layout';
-import ReactGridLayout from 'react-grid-layout';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-// @ts-ignore
-import sizeMe from 'react-sizeme';
 import { Subscription } from 'rxjs';
-import { ViewMode } from '../../../../../embeddable/common/types';
-import { withKibana } from '../../../../../kibana_react/public/context/context';
-import type { GridData } from '../../../../common/embeddable/types';
-import type { DashboardPanelState } from '../../../../common/types';
+import ReactGridLayout, { Layout } from 'react-grid-layout';
+import { GridData } from '../../../../common';
+import { ViewMode } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
-import type { DashboardReactContextValue } from '../dashboard_container';
-import { DashboardContainer } from '../dashboard_container';
+import { DashboardPanelState } from '../types';
+import { withKibana } from '../../../services/kibana_react';
+import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGridItem } from './dashboard_grid_item';
 
 let lastValidGridSize = 0;

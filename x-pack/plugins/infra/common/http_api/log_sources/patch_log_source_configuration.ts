@@ -6,9 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { logSourceConfigurationPropertiesRT } from '../../log_sources/log_source_configuration';
-import { badRequestErrorRT, forbiddenErrorRT } from '../shared/errors';
+import { badRequestErrorRT, forbiddenErrorRT } from '../shared';
 import { getLogSourceConfigurationSuccessResponsePayloadRT } from './get_log_source_configuration';
+import { logSourceConfigurationPropertiesRT } from '../../log_sources/log_source_configuration';
 
 /**
  * request

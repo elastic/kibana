@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DeepPartial } from '@reduxjs/toolkit';
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
-import type { TypedUseSelectorHook } from 'react-redux';
-import { useDispatch, useSelector } from 'react-redux';
-import logger from 'redux-logger';
-import { initMiddleware } from './init_middleware';
-import { lensSlice } from './lens_slice';
-import { optimizingMiddleware } from './optimizing_middleware';
-import { timeRangeMiddleware } from './time_range_middleware';
-import type { LensState, LensStoreDeps } from './types';
 
-export * from './selectors';
+import { configureStore, getDefaultMiddleware, DeepPartial } from '@reduxjs/toolkit';
+import logger from 'redux-logger';
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
+import { lensSlice } from './lens_slice';
+import { timeRangeMiddleware } from './time_range_middleware';
+import { optimizingMiddleware } from './optimizing_middleware';
+import { LensState, LensStoreDeps } from './types';
+import { initMiddleware } from './init_middleware';
 export * from './types';
+export * from './selectors';
 
 export const reducer = {
   lens: lensSlice.reducer,

@@ -5,21 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { IFieldSubType, IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
-import { KBN_FIELD_TYPES } from '..';
-import type {
-  ErrorToastOptions,
-  ToastInputFields,
-} from '../../../../core/public/notifications/toasts/toasts_api';
-import type { SavedObject } from '../../../../core/types/saved_objects';
-import type { SerializedFieldFormat } from '../../../expressions/common/types/common';
-import { FieldFormat } from '../../../field_formats/common/field_format';
-import { RUNTIME_FIELD_TYPES } from './constants';
-import { IndexPatternField } from './fields/index_pattern_field';
-import type { IFieldType } from './fields/types';
-
+import type { estypes } from '@elastic/elasticsearch';
+import type { IndexPatternFieldBase, IFieldSubType, IndexPatternBase } from '@kbn/es-query';
+import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
+import type { SavedObject } from 'src/core/server';
+import { IFieldType } from './fields';
+import { RUNTIME_FIELD_TYPES } from './constants';
+import { SerializedFieldFormat } from '../../../expressions/common';
+import { KBN_FIELD_TYPES, IndexPatternField } from '..';
+import { FieldFormat } from '../../../field_formats/common';
+
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];

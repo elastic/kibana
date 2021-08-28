@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
+
 import { from, merge } from 'rxjs';
-import { catchError, concatMap, filter, map, mergeMap, shareReplay, toArray } from 'rxjs/operators';
-import type { CoreContext } from '../../core_context';
+import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs/operators';
+import { CoreContext } from '../../core_context';
+import { Logger } from '../../logging';
 import { PluginWrapper } from '../plugin';
+import { createPluginInitializerContext, InstanceInfo } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
-import type { InstanceInfo } from '../plugin_context';
-import { createPluginInitializerContext } from '../plugin_context';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
 import { scanPluginSearchPaths } from './scan_plugin_search_paths';

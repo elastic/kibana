@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { RangeFilterParams } from '@kbn/es-query';
-import { buildRangeFilter } from '@kbn/es-query';
-import type { IBucketAggConfig } from '../bucket_agg_type';
+
+import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
 import { CidrMask } from '../lib/cidr_mask';
-import type { IpRangeKey } from '../lib/ip_range';
+import { IBucketAggConfig } from '../bucket_agg_type';
+import { IpRangeKey } from '../lib/ip_range';
 
 export const createFilterIpRange = (aggConfig: IBucketAggConfig, key: IpRangeKey) => {
   let range: RangeFilterParams;

@@ -4,19 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
+
 import { curry, find } from 'lodash';
-import {
-  AlertHistoryEsIndexConnectorId,
-  ALERT_HISTORY_PREFIX,
-  buildAlertHistoryDocument,
-} from '../../common/alert_history_schema';
-import type { ActionTypeExecutorResult } from '../../common/types';
+import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { Logger } from '../../../../../src/core/server';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { renderMustacheObject } from '../lib/mustache_renderer';
-import type { ActionType, ActionTypeExecutorOptions } from '../types';
+import { buildAlertHistoryDocument, AlertHistoryEsIndexConnectorId } from '../../common';
+import { ALERT_HISTORY_PREFIX } from '../../common/alert_history_schema';
 
 export type ESIndexActionType = ActionType<ActionTypeConfigType, {}, ActionParamsType, unknown>;
 export type ESIndexActionTypeExecutorOptions = ActionTypeExecutorOptions<

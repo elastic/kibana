@@ -7,7 +7,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { RequestHandlerWrapper } from './router';
+import { RequestHandlerWrapper } from './router';
 
 export const wrapErrors: RequestHandlerWrapper = (handler) => {
   return async (context, request, response) => {

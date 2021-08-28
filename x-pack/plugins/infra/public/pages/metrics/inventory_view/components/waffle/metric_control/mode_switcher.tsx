@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import type { EuiTheme } from '../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
-import type { CustomMetricMode } from './types';
+import { CustomMetricMode } from './types';
+import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
+import { EuiTheme, withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   theme: EuiTheme | undefined;

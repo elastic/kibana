@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
-import type { TagWithRelations } from '../../../common/types';
+
+import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
+import { TagWithRelations } from '../../../common';
 
 export type TagAction = EuiTableAction<TagWithRelations> & {
   id: string;

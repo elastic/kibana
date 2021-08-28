@@ -5,26 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiButtonEmptyProps } from '@elastic/eui';
+
+import React, { Component, Fragment } from 'react';
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
+  EuiButtonEmptyProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeaderSectionItemButton,
-  EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component, Fragment } from 'react';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import type { InternalApplicationStart } from '../../../application/types';
+
+import { InternalApplicationStart } from '../../../application';
 import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
-import type { ChromeHelpExtension } from '../../types';
+import { ChromeHelpExtension } from '../../types';
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
 

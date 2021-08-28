@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { memo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { memo } from 'react';
+
 import * as i18n from './translations';
 
 interface UserActionUsernameProps {

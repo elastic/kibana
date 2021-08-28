@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCallback, useEffect, useMemo } from 'react';
-import type { ExplorerAppState } from '../../../../common/types/locator';
-import { useTimefilter } from '../../contexts/kibana/use_timefilter';
 import { SWIMLANE_TYPE } from '../explorer_constants';
-import type { AppStateSelectedCells } from '../explorer_utils';
+import { AppStateSelectedCells } from '../explorer_utils';
+import { ExplorerAppState } from '../../../../common/types/locator';
+import { useTimefilter } from '../../contexts/kibana';
 
 export const useSelectedCells = (
   appState: ExplorerAppState,

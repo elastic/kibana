@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { createRef, Component } from 'react';
+
+import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from 'kibana/public';
 import classNames from 'classnames';
-import React, { Component, createRef } from 'react';
-import { ScopedHistory } from '../../../../../core/public/application/scoped_history';
-import type { AppMountParameters } from '../../../../../core/public/application/types';
-import type { ChromeBreadcrumb } from '../../../../../core/public/chrome/types';
-import { APP_WRAPPER_CLASS } from '../../../../../core/utils/app_wrapper_class';
-import type { Unmount } from '../../types';
-import { ManagementApp } from '../../utils/management_app';
+import { ManagementApp } from '../../utils';
+import { Unmount } from '../../types';
+import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
 
 interface ManagementSectionWrapperProps {
   app: ManagementApp;

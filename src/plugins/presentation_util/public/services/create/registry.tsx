@@ -7,8 +7,7 @@
  */
 
 import React from 'react';
-import type { PluginServiceProviders } from './provider';
-import { PluginServiceProvider } from './provider';
+import { PluginServiceProvider, PluginServiceProviders } from './provider';
 
 /**
  * A `PluginServiceRegistry` maintains a set of service providers which can be collectively

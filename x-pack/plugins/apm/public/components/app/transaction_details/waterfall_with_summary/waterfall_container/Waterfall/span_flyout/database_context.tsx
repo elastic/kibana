@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { tint } from 'polished';
@@ -11,8 +12,8 @@ import React, { Fragment } from 'react';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import sql from 'react-syntax-highlighter/dist/cjs/languages/hljs/sql';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { useTheme } from '../../../../../../../hooks/use_theme';
 import { TruncateHeightSection } from './truncate_height_section';
 

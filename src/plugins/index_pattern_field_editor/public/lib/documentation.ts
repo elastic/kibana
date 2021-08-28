@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DocLinksStart } from '../../../../core/public/doc_links/doc_links_service';
+
+import { DocLinksStart } from 'src/core/public';
 
 export const getLinks = ({ links }: DocLinksStart) => {
   return {

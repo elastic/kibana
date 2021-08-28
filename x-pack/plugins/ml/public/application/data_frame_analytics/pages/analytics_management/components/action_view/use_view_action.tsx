@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useMemo } from 'react';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
-import { getAnalysisType } from '../../../../../../../common/util/analytics_utils';
-import { useMlLocator } from '../../../../../contexts/kibana/use_create_url';
-import { useNavigateToPath } from '../../../../../contexts/kibana/use_navigate_to_path';
-import type {
-  DataFrameAnalyticsListAction,
-  DataFrameAnalyticsListRow,
-} from '../analytics_list/common';
+
+import { getAnalysisType } from '../../../../common/analytics';
+import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
+
+import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
+
 import { getViewLinkStatus } from './get_view_link_status';
 import { viewActionButtonText, ViewButton } from './view_button';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 export type ViewAction = ReturnType<typeof useViewAction>;
 export const useViewAction = () => {

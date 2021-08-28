@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { RangeFilter } from '@kbn/es-query';
-import { keys } from 'lodash';
 import moment from 'moment';
-import type { TimeRange } from '../../../../common/query/timefilter/types';
-import type { TimefilterContract } from '../timefilter';
+import { keys } from 'lodash';
+import { RangeFilter } from '@kbn/es-query';
+import { TimefilterContract } from '../../timefilter';
+import { TimeRange } from '../../../../common';
 
 export function convertRangeFilterToTimeRange(filter: RangeFilter) {
   const key = keys(filter.range)[0];

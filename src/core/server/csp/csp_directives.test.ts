@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { config as cspConfig } from './config';
+
 import { CspDirectives } from './csp_directives';
+import { config as cspConfig } from './config';
 
 describe('CspDirectives', () => {
   describe('#addDirectiveValue', () => {

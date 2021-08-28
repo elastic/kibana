@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
-import { rangeQuery } from '../../../../observability/server/utils/queries';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -16,9 +16,9 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 

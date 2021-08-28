@@ -4,39 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonGroup,
-  EuiButtonIcon,
-  EuiComboBox,
-  EuiExpression,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+
+import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
-import type { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import type { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
-import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
-import type {
-  SnapshotCustomAggregation,
-  SnapshotCustomMetricInput,
-} from '../../../../common/http_api/snapshot_api';
 import {
-  SnapshotCustomAggregationRT,
-  SnapshotCustomMetricInputRT,
-  SNAPSHOT_CUSTOM_AGGREGATIONS,
-} from '../../../../common/http_api/snapshot_api';
-
+  EuiExpression,
+  EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiComboBox,
+  EuiButtonGroup,
+  EuiSpacer,
+  EuiSelect,
+  EuiText,
+  EuiFieldText,
+} from '@elastic/eui';
+import { IFieldType } from 'src/plugins/data/public';
+import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
+import {
+  SnapshotCustomMetricInput,
+  SnapshotCustomMetricInputRT,
+  SnapshotCustomAggregation,
+  SNAPSHOT_CUSTOM_AGGREGATIONS,
+  SnapshotCustomAggregationRT,
+} from '../../../../common/http_api/snapshot_api';
 
 interface Props {
   metric?: { value: string; text: string };

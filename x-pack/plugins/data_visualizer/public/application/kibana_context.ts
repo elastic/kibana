@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart } from '../../../../../src/core/public/types';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
-import type { KibanaReactContextValue } from '../../../../../src/plugins/kibana_react/public/context/types';
+
+import { CoreStart } from 'kibana/public';
+import { KibanaReactContextValue, useKibana } from '../../../../../src/plugins/kibana_react/public';
 import type { DataVisualizerStartDependencies } from '../plugin';
 
 export type StartServices = CoreStart & DataVisualizerStartDependencies;

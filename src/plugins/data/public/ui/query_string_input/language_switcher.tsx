@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PopoverAnchorPosition } from '@elastic/eui';
+
 import {
   EuiButtonEmpty,
   EuiForm,
@@ -17,11 +17,12 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  PopoverAnchorPosition,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useKibana } from '../../../../kibana_react/public/context/context';
+import { useKibana } from '../../../../kibana_react/public';
 
 export interface QueryLanguageSwitcherProps {
   language: string;

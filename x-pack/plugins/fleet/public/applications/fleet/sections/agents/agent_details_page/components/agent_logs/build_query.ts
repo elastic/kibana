@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
+  DATASET_FIELD,
   AGENT_DATASET,
   AGENT_DATASET_PATTERN,
-  AGENT_ID_FIELD,
-  DATASET_FIELD,
   LOG_LEVEL_FIELD,
+  AGENT_ID_FIELD,
 } from './constants';
 
 export const buildQuery = ({

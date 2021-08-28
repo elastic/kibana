@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { UI_SETTINGS } from '../../../constants';
-import type { GetConfigFn } from '../../../types';
-import type { ISearchRequestParams } from '../../strategies/es_search/types';
-import type { SearchRequest } from './types';
+import { GetConfigFn } from '../../../types';
+import { ISearchRequestParams } from '../../index';
+import { SearchRequest } from './types';
 
 const sessionId = Date.now();
 

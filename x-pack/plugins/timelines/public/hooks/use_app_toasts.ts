@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AppError } from '@kbn/securitysolution-t-grid';
-import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolution-t-grid';
-import { isString } from 'lodash/fp';
+
 import { useCallback, useRef } from 'react';
-import type { NotificationsStart } from '../../../../../src/core/public/notifications/notifications_service';
-import type {
+import { isString } from 'lodash/fp';
+import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolution-t-grid';
+import type { AppError } from '@kbn/securitysolution-t-grid';
+
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import {
   ErrorToastOptions,
+  ToastsStart,
   Toast,
-} from '../../../../../src/core/public/notifications/toasts/toasts_api';
-import type { ToastsStart } from '../../../../../src/core/public/notifications/toasts/toasts_service';
-import type { IEsError } from '../../../../../src/plugins/data/public/search/errors/types';
-import { isEsError } from '../../../../../src/plugins/data/public/search/errors/types';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+  NotificationsStart,
+} from '../../../../../src/core/public';
+import { IEsError, isEsError } from '../../../../../src/plugins/data/public';
 
 export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning'> & {
   api: ToastsStart;

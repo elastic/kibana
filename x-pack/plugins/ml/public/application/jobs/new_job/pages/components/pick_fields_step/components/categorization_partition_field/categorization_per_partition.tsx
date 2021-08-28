@@ -4,18 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
-import { AdvancedJobCreator } from '../../../../../common/job_creator/advanced_job_creator';
-import { CategorizationJobCreator } from '../../../../../common/job_creator/categorization_job_creator';
-import { isCategorizationJobCreator } from '../../../../../common/job_creator/type_guards';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationPerPartitionFieldDropdown } from './categorization_per_partition_dropdown';
+import {
+  AdvancedJobCreator,
+  CategorizationJobCreator,
+  isCategorizationJobCreator,
+} from '../../../../../common/job_creator';
+
+import { Description } from './description';
+
 import { CategorizationPerPartitionSwitch } from './categorization_per_partition_switch';
 import { CategorizationPerPartitionStopOnWarnSwitch } from './categorization_stop_on_warn_switch';
-import { Description } from './description';
+import { CategorizationPerPartitionFieldDropdown } from './categorization_per_partition_dropdown';
 
 export const CategorizationPerPartitionField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);

@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../../observability/server/utils/queries';
+
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { Setup } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
-import type { Setup } from '../helpers/setup_request';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
 export async function getLatencyChartsForBackend({
   backendName,

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo } from 'react';
 
-import type { DataStream } from '../../../../../../../common/types/models/data_stream';
-import { ContextMenuActions } from '../../../../../../components/context_menu_actions';
-import { useKibanaLink } from '../../../../../../hooks/use_kibana_link';
+import type { DataStream } from '../../../../types';
+import { useKibanaLink } from '../../../../hooks';
+import { ContextMenuActions } from '../../../../components';
 
 export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastream }) => {
   const { dashboards } = datastream;

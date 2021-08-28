@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { Query } from '../../../../../../src/plugins/data/common';
-import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
-import type { TimeRange } from '../../../../../../src/plugins/data/common/query/timefilter/types';
+import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/common';
 import type { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common/search/expressions/kibana_context_type';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
-import type { ExpressionValueRender as Render } from '../../../../../../src/plugins/expressions/common/expression_types/specs/render';
-import type { RegionMapVisConfig } from './types';
-import { REGION_MAP_RENDER, REGION_MAP_VIS_TYPE } from './types';
+import type {
+  ExpressionFunctionDefinition,
+  Render,
+} from '../../../../../../src/plugins/expressions/public';
+import { REGION_MAP_RENDER, REGION_MAP_VIS_TYPE, RegionMapVisConfig } from './types';
 
 interface Arguments {
   visConfig: string;

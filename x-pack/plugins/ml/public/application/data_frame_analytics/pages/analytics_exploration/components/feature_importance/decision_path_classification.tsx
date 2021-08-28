@@ -4,11 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiTitle } from '@elastic/eui';
+
+import React, { FC, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
-import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import {
+  isDecisionPathData,
+  useDecisionPathData,
+  getStringBasedClassName,
+} from './use_classification_path_data';
 import type {
   FeatureImportance,
   FeatureImportanceBaseline,
@@ -16,11 +21,6 @@ import type {
 } from '../../../../../../../common/types/feature_importance';
 import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';
-import {
-  getStringBasedClassName,
-  isDecisionPathData,
-  useDecisionPathData,
-} from './use_classification_path_data';
 
 interface ClassificationDecisionPathProps {
   predictedValue: string | boolean;

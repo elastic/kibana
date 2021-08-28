@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useState, useEffect } from 'react';
+
 import { EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
-import { ML_APP_NAME } from '../../../../common/constants/app';
-import type { MlLocatorParams } from '../../../../common/types/locator';
-import { useMlKibana } from '../../contexts/kibana/kibana_context';
-import { useMlLocator } from '../../contexts/kibana/use_create_url';
-import { useNavigateToPath } from '../../contexts/kibana/use_navigate_to_path';
+import { TabId } from './navigation_menu';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
+import { ML_APP_NAME } from '../../../../common/constants/app';
 import './main_tabs.scss';
-import type { TabId } from './navigation_menu';
 
 export interface Tab {
   id: TabId;

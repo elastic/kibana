@@ -6,14 +6,13 @@
  */
 
 import * as t from 'io-ts';
-import { environmentRt } from '../../../common/environment_rt';
 import { getTransactionDurationChartPreview } from '../../lib/alerts/chart_preview/get_transaction_duration';
 import { getTransactionErrorCountChartPreview } from '../../lib/alerts/chart_preview/get_transaction_error_count';
 import { getTransactionErrorRateChartPreview } from '../../lib/alerts/chart_preview/get_transaction_error_rate';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../create_apm_server_route';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
-import { rangeRt } from '../default_api_types';
+import { environmentRt, rangeRt } from '../default_api_types';
 
 const alertParamsRt = t.intersection([
   t.partial({

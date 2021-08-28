@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+
+import React, { FC, useMemo, useCallback, useState } from 'react';
 import {
   EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHealth,
   EuiHighlight,
+  EuiComboBoxOptionOption,
   EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
-import type { Tag } from '../../../../../../src/plugins/saved_objects_tagging_oss/common/types';
+import { Tag } from '../../../common';
 import { testSubjFriendly } from '../../utils';
-import type { CreateModalOpener } from '../edition_modal/open_modal';
+import { CreateModalOpener } from '../edition_modal';
 
 interface CreateOption {
   type: '__create_option__';

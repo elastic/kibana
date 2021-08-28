@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { isArray } from 'lodash';
 import moment from 'moment';
-import { getTime } from '../../../query/timefilter/get_time';
-import { AggConfig } from '../agg_config';
-import type { GenericBucket } from '../agg_configs';
-import { AggConfigs } from '../agg_configs';
+import _, { isArray } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
+
 import { AggGroupNames } from '../agg_groups';
-import type { IBucketAggConfig } from '../buckets/bucket_agg_type';
+import { GenericBucket, AggConfigs, getTime, AggConfig } from '../../../../common';
+import { IBucketAggConfig } from '../buckets';
 
 /**
  * This function will transform an ES response containg a time split (using a filters aggregation before the metrics or date histogram aggregation),

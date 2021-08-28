@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
-  FEATURE_VISIBLE_PROPERTY_NAME,
   GEO_JSON_TYPE,
+  FEATURE_VISIBLE_PROPERTY_NAME,
   KBN_IS_CENTROID_FEATURE,
   KBN_METADATA_FEATURE,
 } from '../../../common/constants';
-import type { Timeslice } from '../../../common/descriptor_types/data_request_descriptor_types';
+
+import { Timeslice } from '../../../common/descriptor_types';
 
 export interface TimesliceMaskConfig {
   timesiceMaskField: string;

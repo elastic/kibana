@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { act, fireEvent, render } from '@testing-library/react';
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CustomLinkMenuSection } from '.';
-import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useFetcher from '../../../../hooks/use_fetcher';
 import {

@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Component, Fragment, ReactElement } from 'react';
 import {
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReactElement } from 'react';
-import React, { Component, Fragment } from 'react';
+import { getVectorStyleLabel, getDisabledByMessage } from './get_vector_style_label';
 import { STYLE_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
-import type { IStyleProperty } from '../properties/style_property';
-import type { StyleField } from '../style_fields_helper';
-import { getDisabledByMessage, getVectorStyleLabel } from './get_vector_style_label';
+import { IStyleProperty } from '../properties/style_property';
+import { StyleField } from '../style_fields_helper';
 
 export interface Props<StaticOptions, DynamicOptions> {
   children: ReactElement<any>;

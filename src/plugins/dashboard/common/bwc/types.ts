@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectReference } from '../../../../core/types/saved_objects';
-import type { GridData } from '../embeddable/types';
+
+import { SavedObjectReference } from 'kibana/public';
+
+import { GridData } from '../';
 
 interface SavedObjectAttributes {
   kibanaSavedObjectMeta: {

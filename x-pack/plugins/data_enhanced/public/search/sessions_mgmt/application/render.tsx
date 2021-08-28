@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { AppDependencies } from '..';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import { AppDependencies } from '../';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { SearchSessionsMgmtMain } from '../components/main';
 
 export const renderApp = (

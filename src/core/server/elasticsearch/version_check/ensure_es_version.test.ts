@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { of } from 'rxjs';
-import { delay, take } from 'rxjs/operators';
-import { TestScheduler } from 'rxjs/testing';
+
+import { mapNodesVersionCompatibility, pollEsNodesVersion, NodesInfo } from './ensure_es_version';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { elasticsearchClientMock } from '../client/mocks';
-import type { NodesInfo } from './ensure_es_version';
-import { mapNodesVersionCompatibility, pollEsNodesVersion } from './ensure_es_version';
+import { take, delay } from 'rxjs/operators';
+import { TestScheduler } from 'rxjs/testing';
+import { of } from 'rxjs';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');

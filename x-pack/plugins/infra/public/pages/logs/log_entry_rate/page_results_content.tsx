@@ -4,33 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import moment from 'moment';
 import { stringify } from 'query-string';
 import React, { useCallback, useMemo } from 'react';
-import type { RisonValue } from 'rison-node';
-import { encode } from 'rison-node';
+import { encode, RisonValue } from 'rison-node';
 import type { Query } from '../../../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
-import { useTrackPageview } from '../../../../../observability/public/hooks/use_track_metric';
-import { isJobStatusWithResults } from '../../../../common/log_analysis/log_analysis';
-import type { TimeKey } from '../../../../common/time/time_key';
-import { LogAnalysisJobProblemIndicator } from '../../../components/logging/log_analysis_job_status/log_analysis_job_problem_indicator';
-import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status/notices_section';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useTrackPageview } from '../../../../../observability/public';
+import { TimeKey } from '../../../../common/time';
+import {
+  CategoryJobNoticesSection,
+  LogAnalysisJobProblemIndicator,
+} from '../../../components/logging/log_analysis_job_status';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
-import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
-import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout/setup_flyout_state';
-import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout/log_entry_flyout';
+import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout';
+import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
-import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories/use_log_entry_categories_module';
-import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate/use_log_entry_rate_module';
+import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
+import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { useLogEntryFlyoutContext } from '../../../containers/logs/log_flyout';
-import { useLogSourceContext } from '../../../containers/logs/log_source/log_source';
-import { LogsPageTemplate } from '../page_template';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { AnomaliesResults } from './sections/anomalies';
 import { useDatasetFiltering } from './use_dataset_filtering';
 import { useLogEntryAnomaliesResults } from './use_log_entry_anomalies_results';
 import { useLogAnalysisResultsUrlState } from './use_log_entry_rate_results_url_state';
+import { isJobStatusWithResults } from '../../../../common/log_analysis';
+import { LogsPageTemplate } from '../page_template';
+import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
 
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,

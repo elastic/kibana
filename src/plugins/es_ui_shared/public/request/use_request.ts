@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { HttpSetup } from '../../../../core/public/http/types';
-import type { SendRequestConfig } from './send_request';
-import { sendRequest } from './send_request';
+
+import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
+
+import { HttpSetup } from '../../../../../src/core/public';
+import { sendRequest, SendRequestConfig } from './send_request';
 
 export interface UseRequestConfig extends SendRequestConfig {
   pollIntervalMs?: number;

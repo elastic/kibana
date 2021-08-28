@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EsContext } from './context';
+
 import { getIlmPolicy, getIndexTemplate } from './documents';
+import { EsContext } from './context';
 
 export async function initializeEs(esContext: EsContext): Promise<boolean> {
   esContext.logger.debug('initializing elasticsearch resources starting');

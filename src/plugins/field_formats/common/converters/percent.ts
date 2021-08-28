@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
-import type { TextContextTypeConvert } from '../types';
-import { FIELD_FORMAT_IDS } from '../types';
 import { NumeralFormat } from './numeral';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
 /** @public */
 export class PercentFormat extends NumeralFormat {

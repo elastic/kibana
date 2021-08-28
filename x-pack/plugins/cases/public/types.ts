@@ -4,23 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ReactElement } from 'react';
-import type { CoreStart } from '../../../../src/core/public/types';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public/types';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public/plugin';
-import { Storage } from '../../../../src/plugins/kibana_utils/public/storage/storage';
-import type { LensPublicStart } from '../../lens/public/plugin';
-import type { SecurityPluginSetup } from '../../security/public/plugin';
+
+import { CoreStart } from 'kibana/public';
+import { ReactElement } from 'react';
+
+import { LensPublicStart } from '../../lens/public';
+import { SecurityPluginSetup } from '../../security/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
-} from '../../triggers_actions_ui/public/plugin';
-import type { AllCasesProps } from './components/all_cases';
-import type { AllCasesSelectorModalProps } from './components/all_cases/selector_modal';
-import type { CaseViewProps } from './components/case_view';
-import type { ConfigureCasesProps } from './components/configure_cases';
-import type { CreateCaseProps } from './components/create';
-import type { RecentCasesProps } from './components/recent_cases';
+} from '../../triggers_actions_ui/public';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { Storage } from '../../../../src/plugins/kibana_utils/public';
+
+import { AllCasesProps } from './components/all_cases';
+import { CaseViewProps } from './components/case_view';
+import { ConfigureCasesProps } from './components/configure_cases';
+import { CreateCaseProps } from './components/create';
+import { RecentCasesProps } from './components/recent_cases';
+import { AllCasesSelectorModalProps } from './components/all_cases/selector_modal';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;

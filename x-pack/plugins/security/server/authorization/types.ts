@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+
+import type { KibanaRequest } from 'src/core/server';
 
 export interface HasPrivilegesResponseApplication {
   [resource: string]: {

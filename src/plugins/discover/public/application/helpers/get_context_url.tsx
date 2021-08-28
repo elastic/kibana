@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { stringify } from 'query-string';
 import rison from 'rison-node';
-import { esFilters } from '../../../../data/public/deprecated';
-import { FilterManager } from '../../../../data/public/query/filter_manager/filter_manager';
-import { url } from '../../../../kibana_utils/common/url';
-import type { DiscoverServices } from '../../build_services';
+import { url } from '../../../../kibana_utils/common';
+import { esFilters, FilterManager } from '../../../../data/public';
+import { DiscoverServices } from '../../build_services';
 
 /**
  * Helper function to generate an URL to a document in Discover's context view

@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { FC } from 'react';
-import React, { useLayoutEffect, useRef, useState } from 'react';
+
+import React, { FC, useRef, useLayoutEffect, useState } from 'react';
 import { Observable } from 'rxjs';
-import type { MountPoint, UnmountCallback } from '../../../types';
+import { MountPoint, UnmountCallback } from '../../../types';
 
 interface HeaderActionMenuProps {
   actionMenu$: Observable<MountPoint | undefined>;

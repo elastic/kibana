@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { StartServicesAccessor } from '../../../../../src/core/server';
-import type { SavedObjectsServiceSetup } from '../../../../../src/core/server/saved_objects/saved_objects_service';
-import type { ISavedObjectTypeRegistry } from '../../../../../src/core/server/saved_objects/saved_objects_type_registry';
-import type { ISavedObjectsRepository } from '../../../../../src/core/server/saved_objects/service/lib/repository';
-import type { SavedObjectsBaseOptions } from '../../../../../src/core/server/saved_objects/types';
-import type { SavedObject } from '../../../../../src/core/types/saved_objects';
-import type { SecurityPluginSetup } from '../../../security/server/plugin';
-import type { EncryptedSavedObjectsService } from '../crypto/encrypted_saved_objects_service';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  ISavedObjectsRepository,
+  ISavedObjectTypeRegistry,
+  SavedObject,
+  SavedObjectsBaseOptions,
+  SavedObjectsServiceSetup,
+  StartServicesAccessor,
+} from 'src/core/server';
+
+import type { SecurityPluginSetup } from '../../../security/server';
+import type { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
 

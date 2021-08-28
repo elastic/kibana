@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import type { Logger, LogMeta } from '@kbn/logging';
-import moment from 'moment';
 import * as Rx from 'rxjs';
 import * as rxOp from 'rxjs/operators';
-import type {
+import {
+  SavedObjectsRepository,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
-} from '../../../../core/server/saved_objects/saved_objects_service';
-import { SavedObjectsRepository } from '../../../../core/server/saved_objects/service/lib/repository';
+} from 'src/core/server';
+import type { Logger, LogMeta } from 'src/core/server';
+
+import moment from 'moment';
+import { CounterMetric, UsageCounter } from './usage_counter';
 import {
   registerUsageCountersSavedObjectType,
-  serializeCounterKey,
   storeCounter,
+  serializeCounterKey,
 } from './saved_objects';
-import type { CounterMetric } from './usage_counter';
-import { UsageCounter } from './usage_counter';
 
 interface UsageCountersLogMeta extends LogMeta {
   kibana: { usageCounters: { results: unknown[] } };

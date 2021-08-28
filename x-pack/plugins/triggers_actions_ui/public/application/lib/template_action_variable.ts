@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ActionVariable } from '../../../../alerting/common/alert';
+
+import { ActionVariable } from '../../../../alerting/common';
 
 export function templateActionVariable(variable: ActionVariable) {
   return variable.useWithTripleBracesInTemplates

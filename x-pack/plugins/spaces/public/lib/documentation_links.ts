@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DocLinksStart } from '../../../../../src/core/public/doc_links/doc_links_service';
+
+import type { DocLinksStart } from 'src/core/public';
 
 export class DocumentationLinksService {
   private readonly kbnPrivileges: string;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiPageContent, EuiText } from '@elastic/eui';
 import React from 'react';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText, EuiPageContent } from '@elastic/eui';
 
 export const PageLoading: React.FunctionComponent = ({ children }) => {
   return (

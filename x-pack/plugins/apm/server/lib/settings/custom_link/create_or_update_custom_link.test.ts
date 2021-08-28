@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CustomLink } from '../../../../common/custom_link/custom_link_types';
+
+import { Setup } from '../../helpers/setup_request';
 import { mockNow } from '../../../utils/test_helpers';
-import type { Setup } from '../../helpers/setup_request';
+import { CustomLink } from '../../../../common/custom_link/custom_link_types';
 import { createOrUpdateCustomLink } from './create_or_update_custom_link';
 
 describe('Create or Update Custom link', () => {

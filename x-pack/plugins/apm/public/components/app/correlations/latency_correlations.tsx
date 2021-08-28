@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBasicTableColumn } from '@elastic/eui';
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
-  EuiAccordion,
-  EuiButton,
   EuiCallOut,
   EuiCode,
   EuiEmptyPrompt,
+  EuiAccordion,
+  EuiPanel,
+  EuiIcon,
+  EuiBasicTableColumn,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
   EuiProgress,
   EuiSpacer,
   EuiText,
@@ -23,21 +26,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { enableInspectEsQueries } from '../../../../../observability/common/ui_settings_keys';
-import { useUiTracker } from '../../../../../observability/public/hooks/use_track_metric';
-import { asPreciseDecimal } from '../../../../common/utils/formatters/formatters';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTransactionLatencyCorrelationsFetcher } from '../../../hooks/use_transaction_latency_correlations_fetcher';
 import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
-import { push } from '../../shared/Links/url_helpers';
 import { CorrelationsTable } from './correlations_table';
+import { push } from '../../shared/Links/url_helpers';
+import {
+  enableInspectEsQueries,
+  useUiTracker,
+} from '../../../../../observability/public';
+import { asPreciseDecimal } from '../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { isErrorMessage } from './utils/is_error_message';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;

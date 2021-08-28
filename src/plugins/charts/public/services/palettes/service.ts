@@ -5,10 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ExpressionsSetup } from '../../../../expressions/public/plugin';
-import type { ChartsPluginSetup } from '../../plugin';
-import { LegacyColorsService } from '../legacy_colors/colors';
-import type { PaletteDefinition, PaletteRegistry } from './types';
+
+import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
+import {
+  ChartsPluginSetup,
+  PaletteDefinition,
+  PaletteRegistry,
+} from '../../../../../../src/plugins/charts/public';
+import { LegacyColorsService } from '../legacy_colors';
 
 export interface PaletteSetupPlugins {
   expressions: ExpressionsSetup;

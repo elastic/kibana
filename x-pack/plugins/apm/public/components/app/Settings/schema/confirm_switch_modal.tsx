@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState } from 'react';
 import {
+  EuiConfirmModal,
   EuiCallOut,
   EuiCheckbox,
-  EuiCodeBlock,
-  EuiConfirmModal,
   EuiSpacer,
+  EuiCodeBlock,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { useUiTracker } from '../../../../../../observability/public/hooks/use_track_metric';
+import { useUiTracker } from '../../../../../../observability/public';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 
 interface Props {

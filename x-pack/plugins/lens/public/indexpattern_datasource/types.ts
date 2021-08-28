@@ -4,37 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IFieldType } from '../../../../../src/plugins/data/common/index_patterns/fields/types';
-import type { AggregationRestrictions as IndexPatternAggRestrictions } from '../../../../../src/plugins/data/common/index_patterns/types';
-import type { DragDropIdentifier } from '../drag_drop/providers/types';
-import type { IndexPatternColumn } from './operations/definitions';
-import type { IncompleteColumn } from './operations/definitions/column_types';
+
+import { IFieldType } from 'src/plugins/data/common';
+import { IndexPatternColumn, IncompleteColumn } from './operations';
+import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
+import { DragDropIdentifier } from '../drag_drop/providers';
 
 export {
+  FieldBasedIndexPatternColumn,
+  IndexPatternColumn,
+  OperationType,
+  IncompleteColumn,
+  FiltersIndexPatternColumn,
+  RangeIndexPatternColumn,
+  TermsIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  MinIndexPatternColumn,
+  MaxIndexPatternColumn,
   AvgIndexPatternColumn,
   CardinalityIndexPatternColumn,
-  CounterRateIndexPatternColumn,
-  CountIndexPatternColumn,
-  CumulativeSumIndexPatternColumn,
-  DateHistogramIndexPatternColumn,
-  DerivativeIndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  FiltersIndexPatternColumn,
-  FormulaIndexPatternColumn,
-  IncompleteColumn,
-  IndexPatternColumn,
-  LastValueIndexPatternColumn,
-  MathIndexPatternColumn,
-  MaxIndexPatternColumn,
-  MedianIndexPatternColumn,
-  MinIndexPatternColumn,
-  MovingAverageIndexPatternColumn,
-  OperationType,
-  OverallSumIndexPatternColumn,
-  PercentileIndexPatternColumn,
-  RangeIndexPatternColumn,
   SumIndexPatternColumn,
-  TermsIndexPatternColumn,
+  MedianIndexPatternColumn,
+  PercentileIndexPatternColumn,
+  CountIndexPatternColumn,
+  LastValueIndexPatternColumn,
+  CumulativeSumIndexPatternColumn,
+  CounterRateIndexPatternColumn,
+  DerivativeIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  OverallSumIndexPatternColumn,
 } from './operations';
 
 export type DraggedField = DragDropIdentifier & {

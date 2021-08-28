@@ -4,35 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { mapValues, partition, pickBy } from 'lodash';
-import type { Query } from 'src/plugins/data/common';
-import type { CoreStart } from '../../../../../../src/core/public/types';
-import type { TimeScaleUnit } from '../../../common/expressions/time_scale/types';
-import { generateId } from '../../id_generator/id_generator';
+
+import { partition, mapValues, pickBy } from 'lodash';
+import { CoreStart } from 'kibana/public';
+import { Query } from 'src/plugins/data/common';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
   OperationMetadata,
   VisualizationDimensionGroupConfig,
 } from '../../types';
+import {
+  operationDefinitionMap,
+  operationDefinitions,
+  OperationType,
+  IndexPatternColumn,
+  RequiredReference,
+  OperationDefinition,
+  GenericOperationDefinition,
+} from './definitions';
 import type {
   IndexPattern,
   IndexPatternField,
   IndexPatternLayer,
   IndexPatternPrivateState,
 } from '../types';
-import type {
-  GenericOperationDefinition,
-  IndexPatternColumn,
-  OperationDefinition,
-  OperationType,
-  RequiredReference,
-} from './definitions';
-import { operationDefinitionMap, operationDefinitions } from './definitions';
-import type { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
-import type { FormulaIndexPatternColumn } from './definitions/formula/formula';
-import { regenerateLayerFromAst } from './definitions/formula/parse';
 import { getSortScoreByPriority } from './operations';
+import { generateId } from '../../id_generator';
+import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
+import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
+import type { TimeScaleUnit } from '../../../common/expressions';
 
 interface ColumnAdvancedParams {
   filter?: Query | undefined;

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
   EuiDescribedFormGroup,
@@ -13,12 +16,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React from 'react';
-import { TOP_N_BUCKETS_COUNT } from '../../common/constants/alerts';
-import type { MlAnomalyDetectionAlertAdvancedSettings } from '../../common/types/alerts';
+import { MlAnomalyDetectionAlertAdvancedSettings } from '../../common/types/alerts';
 import { TimeIntervalControl } from './time_interval_control';
+import { TOP_N_BUCKETS_COUNT } from '../../common/constants/alerts';
 
 interface AdvancedSettingsProps {
   value: MlAnomalyDetectionAlertAdvancedSettings;

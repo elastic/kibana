@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { Datatable } from '../../expression_types/specs/datatable';
+import { ExpressionFunctionDefinition } from '../types';
+import { Datatable } from '../../expression_types';
 import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
-import type { ExpressionFunctionDefinition } from '../types';
 
 export interface DerivativeArgs {
   by?: string[];

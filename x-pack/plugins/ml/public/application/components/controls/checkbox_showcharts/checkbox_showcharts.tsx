@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useCallback, useMemo } from 'react';
 import { EuiCheckbox, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
 import { useExplorerUrlState } from '../../../explorer/hooks/use_explorer_url_state';
 
 const SHOW_CHARTS_DEFAULT = true;

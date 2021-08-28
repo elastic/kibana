@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IBasePath } from '../../../../../../src/core/public/http/types';
-import type { TagWithRelations } from '../../../common/types';
+
+import { IBasePath } from 'src/core/public';
+import { TagWithRelations } from '../../../common/types';
 
 /**
  * Returns the url to use to redirect to the SavedObject management section with given tag

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiButtonEmpty, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import type { Attribution } from '../../../../common/descriptor_types/layer_descriptor_types';
-import type { ILayer } from '../../../classes/layers/layer';
+import { Attribution } from '../../../../common/descriptor_types';
+import { ILayer } from '../../../classes/layers/layer';
 import { AttributionPopover } from './attribution_popover';
 
 interface Props {

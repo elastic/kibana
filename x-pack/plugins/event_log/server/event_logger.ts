@@ -4,18 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
+import { Logger } from 'src/core/server';
 import { merge } from 'lodash';
+
 import { coerce } from 'semver';
-import type { IEvent, IValidatedEvent } from '../generated/schemas';
-import { ECS_VERSION, EventSchema } from '../generated/schemas';
-import type { Doc } from './es/cluster_client_adapter';
-import type { EsContext } from './es/context';
-import { EventLogService } from './event_log_service';
 import { Plugin } from './plugin';
-import type { IEventLogger, IEventLogService } from './types';
+import { EsContext } from './es';
+import { EventLogService } from './event_log_service';
+import {
+  IEvent,
+  IValidatedEvent,
+  IEventLogger,
+  IEventLogService,
+  ECS_VERSION,
+  EventSchema,
+} from './types';
 import { SAVED_OBJECT_REL_PRIMARY } from './types';
+import { Doc } from './es/cluster_client_adapter';
 
 type SystemLogger = Plugin['systemLogger'];
 

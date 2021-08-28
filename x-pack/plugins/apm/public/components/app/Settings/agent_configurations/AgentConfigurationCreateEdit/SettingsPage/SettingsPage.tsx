@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiBottomBar,
   EuiButton,
@@ -13,24 +14,24 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiHealth,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiStat,
   EuiText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUiTracker } from '../../../../../../../../observability/public/hooks/use_track_metric';
+import { useUiTracker } from '../../../../../../../../observability/public';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
-import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   filterByAgent,
   settingDefinitions,
   validateSetting,
 } from '../../../../../../../common/agent_configuration/setting_definitions';
-import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { saveConfig } from './saveConfig';

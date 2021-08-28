@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { mergeProjection } from '../../projections/util/merge_projection';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getRumErrorsProjection } from '../../projections/rum_page_load_transactions';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
@@ -12,9 +16,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
-import { getRumErrorsProjection } from '../../projections/rum_page_load_transactions';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getJSErrors({
   setup,

@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { get } from 'lodash';
-import type { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs/datafeed';
-import type { RuntimeMappings } from '../../../../../../common/types/fields';
+
 import { ml } from '../../../../services/ml_api_service';
+import { RuntimeMappings } from '../../../../../../common/types/fields';
+import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
 
 interface CategoryResults {
   success: boolean;

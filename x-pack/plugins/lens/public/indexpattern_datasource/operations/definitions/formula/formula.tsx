@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { OperationDefinition } from '..';
-import type { IndexPattern } from '../../../types';
-import { getManagedColumnsFrom } from '../../layer_helpers';
-import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { WrappedFormulaEditor } from './editor/formula_editor';
-import { generateFormula } from './generate';
-import { regenerateLayerFromAst } from './parse';
-import { filterByVisibleOperation } from './util';
+import { OperationDefinition } from '../index';
+import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
+import { WrappedFormulaEditor } from './editor';
+import { regenerateLayerFromAst } from './parse';
+import { generateFormula } from './generate';
+import { filterByVisibleOperation } from './util';
+import { getManagedColumnsFrom } from '../../layer_helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',

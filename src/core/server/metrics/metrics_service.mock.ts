@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { BehaviorSubject } from 'rxjs';
-import { MetricsService } from './metrics_service';
-import type {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import type { MetricsService } from './metrics_service';
+import {
   InternalMetricsServiceSetup,
   InternalMetricsServiceStart,
   MetricsServiceSetup,

@@ -5,15 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { Layout, LogRecord } from '@kbn/logging';
-import { DateConversion } from './conversions/date';
-import { LevelConversion } from './conversions/level';
-import { LoggerConversion } from './conversions/logger';
-import { MessageConversion } from './conversions/message';
-import { MetaConversion } from './conversions/meta';
-import { PidConversion } from './conversions/pid';
-import type { Conversion } from './conversions/type';
+import { LogRecord, Layout } from '@kbn/logging';
+
+import {
+  Conversion,
+  LoggerConversion,
+  LevelConversion,
+  MetaConversion,
+  MessageConversion,
+  PidConversion,
+  DateConversion,
+} from './conversions';
 
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.

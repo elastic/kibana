@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ErrorLike } from '../batch';
+
+import { ErrorLike } from '../batch';
 
 export const normalizeError = <E extends ErrorLike = ErrorLike>(err: any): E => {
   if (!err) {

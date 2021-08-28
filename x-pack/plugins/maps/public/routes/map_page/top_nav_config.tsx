@@ -5,30 +5,32 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { Adapters } from '../../../../../../src/plugins/inspector/common/adapters/types';
+import { i18n } from '@kbn/i18n';
+import { Adapters } from 'src/plugins/inspector/public';
+import {
+  getMapsCapabilities,
+  getIsAllowByValueEmbeddables,
+  getInspector,
+  getCoreI18n,
+  getSavedObjectsClient,
+  getCoreOverlays,
+  getSavedObjectsTagging,
+  getPresentationUtilContext,
+} from '../../kibana_services';
+import {
+  checkForDuplicateTitle,
+  SavedObjectSaveModalOrigin,
+  OnSaveProps,
+  showSaveModal,
+} from '../../../../../../src/plugins/saved_objects/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { SavedMap } from './saved_map';
+import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
-} from '../../../../../../src/plugins/presentation_util/public/components';
-import { checkForDuplicateTitle } from '../../../../../../src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title';
-import type { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal/saved_object_save_modal';
-import { SavedObjectSaveModalOrigin } from '../../../../../../src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin';
-import { showSaveModal } from '../../../../../../src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
-import {
-  getCoreI18n,
-  getCoreOverlays,
-  getInspector,
-  getIsAllowByValueEmbeddables,
-  getMapsCapabilities,
-  getPresentationUtilContext,
-  getSavedObjectsClient,
-  getSavedObjectsTagging,
-} from '../../kibana_services';
-import { SavedMap } from './saved_map/saved_map';
+} from '../../../../../../src/plugins/presentation_util/public';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 

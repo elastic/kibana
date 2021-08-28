@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { INVALID_LICENSE } from '../../../../../../common/custom_link';
-import type { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
+import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { useLicenseContext } from '../../../../../context/license/use_license_context';
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
 import { LicensePrompt } from '../../../../shared/license_prompt';

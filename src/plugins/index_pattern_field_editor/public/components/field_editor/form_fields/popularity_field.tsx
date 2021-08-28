@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { NumericField } from '../../../../../es_ui_shared/static/forms/components/fields/numeric_field';
-import { UseField } from '../../../../../es_ui_shared/static/forms/hook_form_lib/components/use_field';
+
+import { UseField, NumericField } from '../../../shared_imports';
 
 export const PopularityField = () => {
   return (

@@ -5,11 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { of, Subject } from 'rxjs';
-import type { LoggerContextConfigType } from './logging_config';
-import type { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging_service';
-import { LoggingService } from './logging_service';
+
+import {
+  LoggingService,
+  InternalLoggingServiceSetup,
+  InternalLoggingServicePreboot,
+} from './logging_service';
 import { loggingSystemMock } from './logging_system.mock';
+import { LoggerContextConfigType } from './logging_config';
 
 describe('LoggingService', () => {
   let loggingSystem: ReturnType<typeof loggingSystemMock.create>;

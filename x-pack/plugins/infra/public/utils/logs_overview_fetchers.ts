@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
+
 import { encode } from 'rison-node';
-import type {
-  FetchData,
-  FetchDataParams,
-  LogsFetchDataResponse,
-} from '../../../observability/public/typings/fetch_overview_data';
+import type { estypes } from '@elastic/elasticsearch';
+import { FetchData, FetchDataParams, LogsFetchDataResponse } from '../../../observability/public';
 import { DEFAULT_SOURCE_ID } from '../../common/constants';
-import { resolveLogSourceConfiguration } from '../../common/log_sources/resolved_log_source_configuration';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
-import type { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
+import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
+import { resolveLogSourceConfiguration } from '../../common/log_sources';
 
 interface StatsAggregation {
   buckets: Array<{

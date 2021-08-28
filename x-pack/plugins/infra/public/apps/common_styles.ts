@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/utils/app_wrapper_class';
+
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 
 export const CONTAINER_CLASSNAME = 'infra-container-element';
 

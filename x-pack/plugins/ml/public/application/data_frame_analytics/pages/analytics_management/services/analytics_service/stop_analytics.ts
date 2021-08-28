@@ -4,12 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { ml } from '../../../../../services/ml_api_service';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
-import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common/analytics';
-import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
-import { isDataFrameAnalyticsFailed } from '../../components/analytics_list/common';
+import { ml } from '../../../../../services/ml_api_service';
+
+import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
+
+import {
+  isDataFrameAnalyticsFailed,
+  DataFrameAnalyticsListRow,
+} from '../../components/analytics_list/common';
 
 export const stopAnalytics = async (d: DataFrameAnalyticsListRow) => {
   const toastNotifications = getToastNotifications();

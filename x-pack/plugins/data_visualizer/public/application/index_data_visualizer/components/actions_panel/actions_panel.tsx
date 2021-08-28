@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import React, { FC, useState, useEffect } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { DiscoverUrlGeneratorState } from '../../../../../../../../src/plugins/discover/public/url_generator';
-import { DISCOVER_APP_URL_GENERATOR } from '../../../../../../../../src/plugins/discover/public/url_generator';
-import { LinkCard } from '../../../common/components/link_card/link_card';
-import type { ResultLink } from '../../../common/components/results_links/results_links';
-import { useUrlState } from '../../../common/util/url_state';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  DISCOVER_APP_URL_GENERATOR,
+  DiscoverUrlGeneratorState,
+} from '../../../../../../../../src/plugins/discover/public';
+import type { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import { useUrlState } from '../../../common/util/url_state';
+import { LinkCard } from '../../../common/components/link_card';
+import { ResultLink } from '../../../common/components/results_links';
 
 interface Props {
   indexPattern: IndexPattern;

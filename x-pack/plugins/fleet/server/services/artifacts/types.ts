@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ListResult } from '../../../common/types/rest_spec/common';
-import type { ListWithKuery } from '../../types/rest_spec/common';
+
+import type { ListResult } from '../../../common';
+import type { ListWithKuery } from '../../types';
 
 export interface NewArtifact {
   compressionAlgorithm: 'none' | 'zlib';

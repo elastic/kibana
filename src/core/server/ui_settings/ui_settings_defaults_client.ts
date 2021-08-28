@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import type { UiSettingsParams, UserProvidedValues } from '../../types/ui_settings';
+
+import { UiSettingsParams, UserProvidedValues } from './types';
+import { Logger } from '../logging';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
 
 export interface UiSettingsDefaultsClientOptions {

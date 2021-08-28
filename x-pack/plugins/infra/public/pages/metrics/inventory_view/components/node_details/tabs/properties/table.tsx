@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
-  EuiBasicTable,
+  EuiText,
+  EuiToolTip,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiBasicTable,
   EuiSpacer,
-  EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { first } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Row {
   name: string;

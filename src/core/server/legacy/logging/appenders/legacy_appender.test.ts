@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { LegacyLoggingServer } from '@kbn/legacy-logging';
-import type { LogRecord } from '@kbn/logging';
-import { LogLevel } from '@kbn/logging';
-import { LegacyAppender } from './legacy_appender';
 
 jest.mock('@kbn/legacy-logging');
+
+import { LogRecord, LogLevel } from '../../../logging';
+import { LegacyLoggingServer } from '@kbn/legacy-logging';
+import { LegacyAppender } from './legacy_appender';
+
 afterEach(() => (LegacyLoggingServer as any).mockClear());
 
 test('`configSchema` creates correct schema.', () => {

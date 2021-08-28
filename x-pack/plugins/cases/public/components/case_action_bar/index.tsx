@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useMemo, useCallback } from 'react';
+import styled, { css } from 'styled-components';
 import {
   EuiButtonEmpty,
   EuiDescriptionList,
@@ -13,20 +16,16 @@ import {
   EuiFlexItem,
   EuiIconTip,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import styled, { css } from 'styled-components';
-import { CaseType } from '../../../common/api/cases/case';
-import { CaseStatuses } from '../../../common/api/cases/status';
-import type { Case } from '../../../common/ui/types';
-import type { CaseService } from '../../containers/use_get_case_user_actions';
-import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
-import type { OnUpdateFields } from '../case_view';
+import { Case, CaseStatuses, CaseType } from '../../../common';
 import * as i18n from '../case_view/translations';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import type { CasesNavigation } from '../links';
 import { Actions } from './actions';
-import { getStatusDate, getStatusTitle } from './helpers';
+import { CaseService } from '../../containers/use_get_case_user_actions';
 import { StatusContextMenu } from './status_context_menu';
+import { getStatusDate, getStatusTitle } from './helpers';
+import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
+import { OnUpdateFields } from '../case_view';
+import { CasesNavigation } from '../links';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`

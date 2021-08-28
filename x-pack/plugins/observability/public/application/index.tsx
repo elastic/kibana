@@ -4,25 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import type { ConfigSchema } from '..';
-import type { CoreStart } from '../../../../../src/core/public/types';
-import type { AppMountParameters } from '../../../../../src/core/public/application/types';
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/utils/app_wrapper_class';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public/context/context';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public/storage/storage';
+import { ConfigSchema } from '..';
+import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '../../../../../src/core/public';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../src/plugins/kibana_react/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { PluginContext } from '../context/plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
-import type { ObservabilityPublicPluginsStart } from '../plugin';
+import { ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes';
-import type { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
+import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 
 function App() {
   return (

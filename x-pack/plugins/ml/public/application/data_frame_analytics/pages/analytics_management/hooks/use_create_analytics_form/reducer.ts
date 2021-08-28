@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { i18n } from '@kbn/i18n';
+import { memoize, isEqual } from 'lodash';
 // @ts-ignore
 import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
-import { isEqual, memoize } from 'lodash';
-import { indexPatterns } from '../../../../../../../../../../src/plugins/data/public';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import {
-  ALLOWED_DATA_UNITS,
-  JOB_ID_MAX_LENGTH,
-} from '../../../../../../../common/constants/validation';
-import {
-  getDependentVar,
-  isClassificationAnalysis,
-  isRegressionAnalysis,
-} from '../../../../../../../common/util/analytics_utils';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
+
+import { collapseLiteralStrings } from '../../../../../../../shared_imports';
+
+import { Action, ACTION } from './actions';
+import {
+  getInitialState,
+  getFormStateFromJobConfig,
+  getJobConfigFromFormState,
+  State,
+} from './state';
 import {
   isJobIdValid,
   validateModelMemoryLimitUnits,
@@ -30,19 +30,23 @@ import {
   memoryInputValidator,
   requiredValidator,
 } from '../../../../../../../common/util/validators';
-import { collapseLiteralStrings } from '../../../../../../../shared_imports';
 import {
+  JOB_ID_MAX_LENGTH,
+  ALLOWED_DATA_UNITS,
+} from '../../../../../../../common/constants/validation';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+import {
+  getDependentVar,
   getNumTopFeatureImportanceValues,
   getTrainingPercent,
+  isRegressionAnalysis,
+  isClassificationAnalysis,
   NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
-  TRAINING_PERCENT_MAX,
   TRAINING_PERCENT_MIN,
+  TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
+import { indexPatterns } from '../../../../../../../../../../src/plugins/data/public';
 import { isAdvancedConfig } from '../../components/action_clone/clone_action_name';
-import type { Action } from './actions';
-import { ACTION } from './actions';
-import type { State } from './state';
-import { getFormStateFromJobConfig, getInitialState, getJobConfigFromFormState } from './state';
 
 const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(
   ', '

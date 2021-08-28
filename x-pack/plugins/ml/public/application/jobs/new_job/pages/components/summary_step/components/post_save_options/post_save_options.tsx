@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, Fragment, useContext, useState } from 'react';
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment, useContext, useState } from 'react';
-import { DATAFEED_STATE } from '../../../../../../../../../common/constants/states';
-import { extractErrorMessage } from '../../../../../../../../../common/util/errors/process_errors';
-import { MlAnomalyAlertFlyout } from '../../../../../../../../alerting/ml_alerting_flyout';
-import { useMlKibana } from '../../../../../../../contexts/kibana/kibana_context';
-import { JobRunner } from '../../../../../common/job_runner/job_runner';
+import { JobRunner } from '../../../../../common/job_runner';
+import { useMlKibana } from '../../../../../../../contexts/kibana';
+import { extractErrorMessage } from '../../../../../../../../../common/util/errors';
+
 import { JobCreatorContext } from '../../../job_creator_context';
+import { DATAFEED_STATE } from '../../../../../../../../../common/constants/states';
+import { MlAnomalyAlertFlyout } from '../../../../../../../../alerting/ml_alerting_flyout';
 
 interface Props {
   jobRunner: JobRunner | null;

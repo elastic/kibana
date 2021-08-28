@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility/helpers';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+
+import { stopPropagationAndPreventDefault } from '../../../../common';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
-import type { FilterValueFnArgs, HoverActionComponentProps } from './types';
+import { HoverActionComponentProps, FilterValueFnArgs } from './types';
 
 export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterForValue', {
   defaultMessage: 'Filter for value',

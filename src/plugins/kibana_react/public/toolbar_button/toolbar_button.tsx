@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { EuiButtonProps, PropsOf } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
-import classNames from 'classnames';
-import React from 'react';
 import './toolbar_button.scss';
+import React from 'react';
+import classNames from 'classnames';
+import { EuiButton, PropsOf, EuiButtonProps } from '@elastic/eui';
 
 const groupPositionToClassMap = {
   none: null,

@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { FieldFormat } from '../field_format';
-import type { FieldFormatInstanceType, TextContextTypeConvert } from '../types';
-import { FIELD_FORMAT_IDS } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS, FieldFormatInstanceType } from '../types';
 
 export const createCustomFieldFormat = (convert: TextContextTypeConvert): FieldFormatInstanceType =>
   class CustomFieldFormat extends FieldFormat {

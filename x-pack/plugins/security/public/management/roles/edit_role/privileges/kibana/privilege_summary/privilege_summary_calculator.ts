@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model/role';
-import type { KibanaPrivileges } from '../../../../model/kibana_privileges';
-import type { PrimaryFeaturePrivilege } from '../../../../model/primary_feature_privilege';
+
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { KibanaPrivileges, PrimaryFeaturePrivilege, SecuredFeature } from '../../../../model';
 import type { PrivilegeCollection } from '../../../../model/privilege_collection';
-import type { SecuredFeature } from '../../../../model/secured_feature';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 
 export interface EffectiveFeaturePrivileges {

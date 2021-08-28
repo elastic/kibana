@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MlLocatorParams } from '../../common/types/locator';
-import type { MlPluginStart } from '../plugin';
+
+import { MlPluginStart } from '../index';
+import { MlLocatorParams } from '../../common/types/locator';
 
 /**
  * Provides a URL to ML plugin page

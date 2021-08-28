@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { EuiHeaderBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import type { ChromeBreadcrumb } from '../../types';
+import { ChromeBreadcrumb } from '../../types';
 
 interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;

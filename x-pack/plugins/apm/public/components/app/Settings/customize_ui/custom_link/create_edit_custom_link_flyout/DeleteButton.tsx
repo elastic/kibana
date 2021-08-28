@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NotificationsStart } from 'kibana/public';
 import React, { useState } from 'react';
-import type { NotificationsStart } from '../../../../../../../../../../src/core/public/notifications/notifications_service';
+import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useTheme } from '../../../../../../hooks/use_theme';
-import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 
 interface Props {
   onDelete: () => void;

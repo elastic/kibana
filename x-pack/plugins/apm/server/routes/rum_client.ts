@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
 import { getJSErrors } from '../lib/rum_client/get_js_errors';

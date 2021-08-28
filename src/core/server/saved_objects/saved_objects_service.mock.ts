@@ -5,23 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { BehaviorSubject } from 'rxjs';
-import { ServiceStatusLevels } from '../status/types';
-import { savedObjectsExporterMock } from './export/saved_objects_exporter.mock';
-import { savedObjectsImporterMock } from './import/saved_objects_importer.mock';
-import { migrationMocks } from './migrations/mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
+  SavedObjectsService,
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from './saved_objects_service';
-import { SavedObjectsService } from './saved_objects_service';
-import type { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
-import { typeRegistryMock } from './saved_objects_type_registry.mock';
+
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
+import { typeRegistryMock } from './saved_objects_type_registry.mock';
+import { savedObjectsExporterMock } from './export/saved_objects_exporter.mock';
+import { savedObjectsImporterMock } from './import/saved_objects_importer.mock';
+import { migrationMocks } from './migrations/mocks';
+import { ServiceStatusLevels } from '../status';
+import { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 

@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Duration } from 'moment-timezone';
-import moment from 'moment-timezone';
+
+import moment, { Duration } from 'moment-timezone';
 import { getHighestTimeUnit } from './utils';
 
 /**

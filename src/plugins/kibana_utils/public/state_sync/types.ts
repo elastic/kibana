@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { BaseState, BaseStateContainer } from '../../common/state_containers/types';
-import type { IStateStorage } from './state_sync_state_storage/types';
+
+import { BaseState, BaseStateContainer } from '../../common/state_containers/types';
+import { IStateStorage } from './state_sync_state_storage';
 
 /**
  * Extension of {@link BaseStateContainer} with one constraint: set state should handle `null` as incoming state

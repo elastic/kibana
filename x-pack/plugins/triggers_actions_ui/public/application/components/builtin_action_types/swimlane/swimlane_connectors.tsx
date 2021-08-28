@@ -4,17 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiStepStatus } from '@elastic/eui';
-import { EuiButton, EuiForm, EuiFormRow, EuiSpacer, EuiStepsHorizontal } from '@elastic/eui';
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { ActionConnectorFieldsProps } from '../../../../types';
-import { SwimlaneConnection } from './steps/swimlane_connection';
-import { SwimlaneFields } from './steps/swimlane_fields';
-import * as i18n from './translations';
-import type { SwimlaneActionConnector, SwimlaneFieldMappingConfig } from './types';
-import { SwimlaneConnectorType } from './types';
+
+import React, { Fragment, useCallback, useMemo, useState, useEffect } from 'react';
+import {
+  EuiForm,
+  EuiSpacer,
+  EuiStepsHorizontal,
+  EuiStepStatus,
+  EuiButton,
+  EuiFormRow,
+} from '@elastic/eui';
+import { useKibana } from '../../../../common/lib/kibana';
+import { ActionConnectorFieldsProps } from '../../../../types';
+import {
+  SwimlaneActionConnector,
+  SwimlaneConnectorType,
+  SwimlaneFieldMappingConfig,
+} from './types';
+import { SwimlaneConnection, SwimlaneFields } from './steps';
 import { useGetApplication } from './use_get_application';
+import * as i18n from './translations';
 
 const SwimlaneActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<SwimlaneActionConnector>

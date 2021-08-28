@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiTabbedContent } from '@elastic/eui';
-import React from 'react';
-import { getDocViewsRegistry } from '../../../kibana_services';
-import type { DocView, DocViewRenderProps } from '../../doc_views/doc_views_types';
 import './doc_viewer.scss';
+import React from 'react';
+import { EuiTabbedContent } from '@elastic/eui';
+import { getDocViewsRegistry } from '../../../kibana_services';
 import { DocViewerTab } from './doc_viewer_tab';
+import { DocView, DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 /**
  * Rendering tabs with different views of 1 Elasticsearch hit in Discover.

@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PassThrough, Readable } from 'stream';
+
+import { Readable, PassThrough } from 'stream';
 import { SavedObjectsImportError } from '../errors';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createLimitStream } from './create_limit_stream';

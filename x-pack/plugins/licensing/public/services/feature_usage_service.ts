@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isDate } from 'lodash';
-import type { HttpStart } from '../../../../../src/core/public/http/types';
-import type { LicenseType } from '../../common/types';
+import type { HttpStart } from 'src/core/public';
+import { LicenseType } from '../../common/types';
 
 /** @public */
 export interface FeatureUsageServiceSetup {

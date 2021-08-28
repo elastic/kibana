@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { EuiButtonEmpty, EuiFieldSearch, EuiFilterGroup, EuiSpacer, EuiText } from '@elastic/eui';
-import type { ExistsFilter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { map } from 'lodash';
-import { rgba } from 'polished';
-import React, { Fragment, useState } from 'react';
+
+import React, { useState, Fragment } from 'react';
+import { EuiFieldSearch, EuiSpacer, EuiButtonEmpty, EuiFilterGroup, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import type { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { PersistableFilter } from '../../../../../../../lens/common/types';
-import { useValuesList } from '../../../../../hooks/use_values_list';
+import { rgba } from 'polished';
+import { i18n } from '@kbn/i18n';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { map } from 'lodash';
+import { ExistsFilter } from '@kbn/es-query';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import type { SeriesConfig, UrlFilter } from '../../types';
+import { SeriesConfig, UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
+import { useValuesList } from '../../../../../hooks/use_values_list';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
+import { PersistableFilter } from '../../../../../../../lens/common';
 
 interface Props {
   seriesId: string;

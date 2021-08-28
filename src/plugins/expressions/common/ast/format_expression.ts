@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { ExpressionAstExpression } from './types';
 import { format } from './format';
-import type { ExpressionAstExpression } from './types';
 
 /**
  * Given expression pipeline AST, returns formatted string.

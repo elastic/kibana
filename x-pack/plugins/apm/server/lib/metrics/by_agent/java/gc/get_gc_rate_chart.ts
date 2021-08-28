@@ -8,9 +8,9 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { METRIC_JAVA_GC_COUNT } from '../../../../../../common/elasticsearch_fieldnames';
-import type { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
-import type { ChartBase } from '../../../types';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
+import { ChartBase } from '../../../types';
 
 const series = {
   [METRIC_JAVA_GC_COUNT]: {

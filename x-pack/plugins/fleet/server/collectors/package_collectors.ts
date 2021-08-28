@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { SavedObjectsClient } from 'kibana/server';
 import _ from 'lodash';
 
-import type { SavedObjectsClient } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type { NewPackagePolicy } from '../../common/types/models/package_policy';
-import { agentPolicyService } from '../services/agent_policy';
 import { getPackageSavedObjects } from '../services/epm/packages/get';
+import { agentPolicyService } from '../services';
+import type { NewPackagePolicy } from '../types';
 
 export interface PackageUsage {
   name: string;

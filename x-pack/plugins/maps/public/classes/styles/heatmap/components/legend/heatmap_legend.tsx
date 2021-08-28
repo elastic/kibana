@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import React, { Component } from 'react';
-import type { IField } from '../../../../fields/field';
+
+import { i18n } from '@kbn/i18n';
+import { ColorGradient } from './color_gradient';
 import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
 import { HEATMAP_COLOR_RAMP_LABEL } from '../heatmap_constants';
-import { ColorGradient } from './color_gradient';
+import { IField } from '../../../../fields/field';
 
 interface Props {
   colorRampName: string;

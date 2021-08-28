@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { LogRecord } from '@kbn/logging';
-import { LogLevel } from '@kbn/logging';
+
+import { LogLevel, LogRecord } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));

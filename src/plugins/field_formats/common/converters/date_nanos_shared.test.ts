@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment-timezone';
-import { analysePatternForFract, DateNanosFormat, formatWithNanos } from './date_nanos_shared';
+import { DateNanosFormat, analysePatternForFract, formatWithNanos } from './date_nanos_shared';
 
 describe('Date Nanos Format', () => {
   let convert: Function;

@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useEffect, useState } from 'react';
+
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
-import type { JobType } from '../../../../common/types/saved_objects';
-import { useMlKibana } from '../../contexts/kibana/kibana_context';
-import { useMlApiContext } from '../../contexts/kibana/use_ml_api_context';
+import { JobType } from '../../../../common/types/saved_objects';
+import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
 
 interface Props {
   jobType?: JobType;

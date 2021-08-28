@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiEmptyPrompt, EuiPageContent, EuiSpacer } from '@elastic/eui';
+
+import { EuiSpacer, EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
 import React from 'react';
-import { APP_WRAPPER_CLASS } from '../../../../../core/utils/app_wrapper_class';
-import type { Error } from '../types';
+import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
+import { Error } from '../types';
 
 interface Props {
   title: React.ReactNode;

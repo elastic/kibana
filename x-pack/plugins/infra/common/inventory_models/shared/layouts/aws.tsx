@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { withTheme } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { ChartSectionVis } from '../../../../public/pages/metrics/metric_detail/components/chart_section_vis';
-import { GaugesSectionVis } from '../../../../public/pages/metrics/metric_detail/components/gauges_section_vis';
+import { i18n } from '@kbn/i18n';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { LayoutPropsWithTheme } from '../../../../public/pages/metrics/metric_detail/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Section } from '../../../../public/pages/metrics/metric_detail/components/section';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SubSection } from '../../../../public/pages/metrics/metric_detail/components/sub_section';
-import type { LayoutPropsWithTheme } from '../../../../public/pages/metrics/metric_detail/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { GaugesSectionVis } from '../../../../public/pages/metrics/metric_detail/components/gauges_section_vis';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ChartSectionVis } from '../../../../public/pages/metrics/metric_detail/components/chart_section_vis';
+import { withTheme } from '../../../../../../../src/plugins/kibana_react/common';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>
     <Section

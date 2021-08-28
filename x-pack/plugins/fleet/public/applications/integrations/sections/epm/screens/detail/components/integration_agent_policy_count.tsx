@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { memo } from 'react';
 
-import { useGetPackageStats } from '../../../../../../../hooks/use_request/epm';
+import { useGetPackageStats } from '../../../../../hooks';
 
 /**
  * Displays a count of Agent Policies that are using the given integration

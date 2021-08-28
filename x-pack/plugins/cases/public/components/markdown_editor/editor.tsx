@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
-import { EuiMarkdownEditor } from '@elastic/eui';
-import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
-import type { ElementRef } from 'react';
+
 import React, {
-  forwardRef,
   memo,
+  forwardRef,
   useCallback,
-  useImperativeHandle,
   useMemo,
   useRef,
   useState,
+  useImperativeHandle,
+  ElementRef,
 } from 'react';
-import type { PluggableList } from 'unified';
-import { CommentEditorContext } from './context';
+import { PluggableList } from 'unified';
+import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
+import { CommentEditorContext } from './context';
 
 interface MarkdownEditorProps {
   ariaLabel: string;

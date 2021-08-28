@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC } from 'react';
 import { EuiBadgeGroup } from '@elastic/eui';
-import type { FC } from 'react';
-import React from 'react';
-import type {
-  Tag,
-  TagAttributes,
-} from '../../../../../../src/plugins/saved_objects_tagging_oss/common/types';
+import { Tag, TagAttributes } from '../../../common/types';
 import { TagBadge } from './tag_badge';
 
 export interface TagListProps {

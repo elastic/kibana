@@ -4,26 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AnyAction, Dispatch } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import type { Query } from 'src/plugins/data/public';
-import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
-import type {
-  Attribution,
-  JoinDescriptor,
-  LayerDescriptor,
-  TileMetaFeature,
-} from '../../common/descriptor_types/layer_descriptor_types';
-import type { StyleDescriptor } from '../../common/descriptor_types/style_property_descriptor_types';
-import type { IESAggField } from '../classes/fields/agg/agg_field_types';
-import type { IField } from '../classes/fields/field';
-import type { ILayer } from '../classes/layers/layer';
-import type { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
-import type { IVectorStyle } from '../classes/styles/vector/vector_style';
-import { notifyLicensedFeatureUsage } from '../licensed_features';
-import { cancelRequest } from '../reducers/non_serializable_instances';
-import type { MapStoreState } from '../reducers/store';
-import { FLYOUT_STATE } from '../reducers/ui';
+
+import { AnyAction, Dispatch } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
+import { Query } from 'src/plugins/data/public';
+import { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
   getEditState,
@@ -34,8 +19,9 @@ import {
   getMapReady,
   getSelectedLayerId,
 } from '../selectors/map_selectors';
-import { getDrawMode } from '../selectors/ui_selectors';
-import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
+import { FLYOUT_STATE } from '../reducers/ui';
+import { cancelRequest } from '../reducers/non_serializable_instances';
+import { setDrawMode, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
   ADD_WAITING_FOR_MAP_READY_LAYER,
@@ -54,8 +40,23 @@ import {
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
+import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
-import { setDrawMode, updateFlyout } from './ui_actions';
+import {
+  Attribution,
+  JoinDescriptor,
+  LayerDescriptor,
+  StyleDescriptor,
+  TileMetaFeature,
+} from '../../common/descriptor_types';
+import { ILayer } from '../classes/layers/layer';
+import { IVectorLayer } from '../classes/layers/vector_layer';
+import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
+import { notifyLicensedFeatureUsage } from '../licensed_features';
+import { IESAggField } from '../classes/fields/agg';
+import { IField } from '../classes/fields/field';
+import { getDrawMode } from '../selectors/ui_selectors';
 
 export function trackCurrentLayerState(layerId: string) {
   return {

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React from 'react';
+
+import React, { FC } from 'react';
 import { Redirect } from 'react-router-dom';
-import type { MlRoute } from '../../router';
+
+import { MlRoute } from '../../router';
 
 export const newJobRouteFactory = (): MlRoute => ({
   path: '/jobs/new_job',

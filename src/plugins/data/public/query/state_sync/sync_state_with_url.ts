@@ -5,13 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { createStateContainer } from '../../../../kibana_utils/common/state_containers/create_state_container';
-import { syncState } from '../../../../kibana_utils/public/state_sync/state_sync';
-import type { IKbnUrlStateStorage } from '../../../../kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
-import { FilterStateStore } from '../../../common';
-import type { QuerySetup, QueryStart } from '../query_service';
+
+import {
+  createStateContainer,
+  IKbnUrlStateStorage,
+  syncState,
+} from '../../../../kibana_utils/public';
+import { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
-import type { QueryState } from './types';
+import { QueryState } from './types';
+import { FilterStateStore } from '../../../common';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 

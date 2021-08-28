@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBasicTableColumn } from '@elastic/eui';
+
 import {
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -13,19 +14,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
+import { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
 import {
   asMillisecondDuration,
+  asPercent,
   asTransactionRate,
-} from '../../../../common/utils/formatters/duration';
-import { asPercent } from '../../../../common/utils/formatters/formatters';
+} from '../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { unit } from '../../../utils/style';
 import { SparkPlot } from '../charts/spark_plot';
 import { ImpactBar } from '../ImpactBar';
-import { OverviewTableContainer } from '../overview_table_container';
 import { TableFetchWrapper } from '../table_fetch_wrapper';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { OverviewTableContainer } from '../overview_table_container';
 
 export type DependenciesItem = Omit<
   ConnectionStatsItemWithComparisonData,

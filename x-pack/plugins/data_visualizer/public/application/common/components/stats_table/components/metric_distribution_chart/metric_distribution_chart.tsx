@@ -4,14 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TooltipValue, TooltipValueFormatter } from '@elastic/charts';
-import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType, Settings } from '@elastic/charts';
+
+import React, { FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import { kibanaFieldFormat } from '../../../utils/kibana_field_format';
-import { useDataVizChartTheme } from '../../hooks/use_data_viz_chart_theme';
+
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  CurveType,
+  Position,
+  ScaleType,
+  Settings,
+  TooltipValue,
+  TooltipValueFormatter,
+} from '@elastic/charts';
+
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
+import { kibanaFieldFormat } from '../../../utils';
+import { useDataVizChartTheme } from '../../hooks';
 
 interface ChartTooltipValue extends TooltipValue {
   skipHeader?: boolean;

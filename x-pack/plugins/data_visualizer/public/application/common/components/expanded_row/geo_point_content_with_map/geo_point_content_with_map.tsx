@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import { ES_GEO_FIELD_TYPE } from '../../../../../../../maps/common/constants';
-import type { LayerDescriptor } from '../../../../../../../maps/common/descriptor_types/layer_descriptor_types';
-import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
-import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
-import { useDataVisualizerKibana } from '../../../../kibana_context';
-import { EmbeddedMapComponent } from '../../embedded_map/embedded_map';
-import { ExamplesList } from '../../examples_list/examples_list';
-import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
-import type { FieldVisConfig } from '../../stats_table/types/field_vis_config';
+import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
+import { ExamplesList } from '../../examples_list';
+import { FieldVisConfig } from '../../stats_table/types';
+import { LayerDescriptor } from '../../../../../../../maps/common/descriptor_types';
+import { useDataVisualizerKibana } from '../../../../kibana_context';
+import { JOB_FIELD_TYPES } from '../../../../../../common';
+import { ES_GEO_FIELD_TYPE } from '../../../../../../../maps/common';
+import { EmbeddedMapComponent } from '../../embedded_map';
 
 export const GeoPointContentWithMap: FC<{
   config: FieldVisConfig;

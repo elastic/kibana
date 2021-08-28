@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import path from 'path';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { identity, pickBy } from 'lodash';
-import path from 'path';
 
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
 

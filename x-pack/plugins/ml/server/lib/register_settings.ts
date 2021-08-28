@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+
+import { CoreSetup } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup } from '../../../../../src/core/server';
+import { schema } from '@kbn/config-schema';
 import {
   ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
   ANOMALY_DETECTION_ENABLE_TIME_RANGE,

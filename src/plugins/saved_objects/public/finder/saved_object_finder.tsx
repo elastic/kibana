@@ -5,7 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IconType } from '@elastic/eui';
+
+import { debounce } from 'lodash';
+import PropTypes from 'prop-types';
+import React from 'react';
+
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -22,16 +26,18 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTablePagination,
+  IconType,
 } from '@elastic/eui';
-import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
+import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
-import PropTypes from 'prop-types';
-import React from 'react';
-import type { CoreStart } from '../../../../core/public/types';
-import type { SavedObjectsStart } from '../../../../core/public/saved_objects/saved_objects_service';
-import { SimpleSavedObject } from '../../../../core/public/saved_objects/simple_saved_object';
-import type { IUiSettingsClient } from '../../../../core/public/ui_settings/types';
+
+import {
+  SimpleSavedObject,
+  CoreStart,
+  IUiSettingsClient,
+  SavedObjectsStart,
+} from 'src/core/public';
+
 import { LISTING_LIMIT_SETTING } from '../../common';
 
 export interface SavedObjectMetaData<T = unknown> {

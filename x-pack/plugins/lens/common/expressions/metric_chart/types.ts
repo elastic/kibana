@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { LayerType } from '../../types';
+
+import { LayerType } from '../../types';
 
 export interface MetricState {
   layerId: string;

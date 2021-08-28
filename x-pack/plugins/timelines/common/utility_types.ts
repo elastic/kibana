@@ -6,7 +6,7 @@
  */
 
 import * as runtimeTypes from 'io-ts';
-import type { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 // This type is for typing EuiDescriptionList
 export interface DescriptionList {

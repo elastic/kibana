@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { ReactNode, useCallback } from 'react';
 import { EuiRadioGroup } from '@elastic/eui';
-import type { ReactNode } from 'react';
-import React, { useCallback } from 'react';
-import type { ClosureType } from '../../../common/api/cases/configure';
+
+import { ClosureType } from '../../containers/configure/types';
 import * as i18n from './translations';
 
 interface ClosureRadios {

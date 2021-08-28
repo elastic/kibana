@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useMemo } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   AlertType,
   APM_SERVER_FEATURE_ID,
 } from '../../../../common/alert_types';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useServiceName } from '../../../hooks/use_service_name';
-import type { ApmPluginStartDeps } from '../../../plugin';
 import { getInitialAlertValues } from '../get_initial_alert_values';
-import type { AlertMetadata } from '../helper';
+import { ApmPluginStartDeps } from '../../../plugin';
+import { useServiceName } from '../../../hooks/use_service_name';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { AlertMetadata } from '../helper';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 interface Props {
   addFlyoutVisible: boolean;

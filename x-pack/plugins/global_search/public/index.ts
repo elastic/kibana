@@ -4,10 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PluginInitializer } from '../../../../src/core/public/plugins/plugin';
-import type { GlobalSearchPluginSetupDeps, GlobalSearchPluginStartDeps } from './plugin';
-import { GlobalSearchPlugin } from './plugin';
-import type { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
+
+import { PluginInitializer } from 'src/core/public';
+import {
+  GlobalSearchPlugin,
+  GlobalSearchPluginSetupDeps,
+  GlobalSearchPluginStartDeps,
+} from './plugin';
+import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
 
 export const plugin: PluginInitializer<
   GlobalSearchPluginSetup,
@@ -18,16 +22,16 @@ export const plugin: PluginInitializer<
 
 export {
   GlobalSearchBatchedResults,
-  GlobalSearchFindParams,
   GlobalSearchProviderFindOptions,
-  GlobalSearchProviderFindParams,
   GlobalSearchProviderResult,
   GlobalSearchProviderResultUrl,
   GlobalSearchResult,
+  GlobalSearchFindParams,
+  GlobalSearchProviderFindParams,
 } from '../common/types';
-export { GlobalSearchFindOptions } from './services/types';
 export {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
   GlobalSearchResultProvider,
 } from './types';
+export { GlobalSearchFindOptions } from './services/types';

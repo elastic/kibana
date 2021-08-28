@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SearchHit } from '../../../../../../../src/core/types/elasticsearch/search';
-import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+
+import { SearchHit } from '../../../../../../../src/core/types/elasticsearch';
+import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 
 // needed for backwards compatability
 // All settings except `transaction_sample_rate` and `transaction_max_spans` are stored as strings (they are stored as float and integer respectively)

@@ -5,55 +5,61 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { of } from 'rxjs';
+import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { duration } from 'moment';
-import { of } from 'rxjs';
-import type { CorePreboot, CoreSetup, CoreStart, StartServicesAccessor } from '.';
-import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
-import { contextServiceMock } from './context/context_service.mock';
-import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
-import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  StartServicesAccessor,
+  CorePreboot,
+} from '.';
+import { loggingSystemMock } from './logging/logging_system.mock';
+import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
-import { environmentServiceMock } from './environment/environment_service.mock';
-import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { httpResourcesMock } from './http_resources/http_resources_service.mock';
-import { i18nServiceMock } from './i18n/i18n_service.mock';
-import { loggingServiceMock } from './logging/logging_service.mock';
-import { loggingSystemMock } from './logging/logging_system.mock';
-import { metricsServiceMock } from './metrics/metrics_service.mock';
-import type { PluginInitializerContext, SharedGlobalConfig } from './plugins/types';
-import { prebootServiceMock } from './preboot/preboot_service.mock';
-import { renderingMock } from './rendering/rendering_service.mock';
+import { contextServiceMock } from './context/context_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
-import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 import { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
-import { statusServiceMock } from './status/status_service.mock';
+import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
+import { renderingMock } from './rendering/rendering_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+import { SharedGlobalConfig } from './plugins';
+import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+import { metricsServiceMock } from './metrics/metrics_service.mock';
+import { environmentServiceMock } from './environment/environment_service.mock';
+import { statusServiceMock } from './status/status_service.mock';
+import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
+import { i18nServiceMock } from './i18n/i18n_service.mock';
+import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
+import { prebootServiceMock } from './preboot/preboot_service.mock';
 
-export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 export { configServiceMock } from './config/mocks';
-export { contextServiceMock } from './context/context_service.mock';
-export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
-export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
-export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
-export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
-export { sessionStorageMock } from './http/cookie_session_storage.mocks';
 export { httpServerMock } from './http/http_server.mocks';
-export { httpServiceMock } from './http/http_service.mock';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
-export { i18nServiceMock } from './i18n/i18n_service.mock';
+export { sessionStorageMock } from './http/cookie_session_storage.mocks';
+export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
+export { httpServiceMock } from './http/http_service.mock';
 export { loggingSystemMock } from './logging/logging_system.mock';
+export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
+export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+export { migrationMocks } from './saved_objects/migrations/mocks';
+export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
+export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { metricsServiceMock } from './metrics/metrics_service.mock';
 export { renderingMock } from './rendering/rendering_service.mock';
-export { migrationMocks } from './saved_objects/migrations/mocks';
-export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
-export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
-export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { statusServiceMock } from './status/status_service.mock';
-export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
-export { savedObjectsClientMock };
+export { contextServiceMock } from './context/context_service.mock';
+export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
+export { i18nServiceMock } from './i18n/i18n_service.mock';
+export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 
@@ -266,3 +272,5 @@ export const coreMock = {
   createPluginInitializerContext: pluginInitializerContextMock,
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
+
+export { savedObjectsClientMock };

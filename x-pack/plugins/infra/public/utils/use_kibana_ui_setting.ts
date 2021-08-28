@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useMemo } from 'react';
-import { useUiSetting$ } from '../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import { useUiSetting$ } from '../../../../../src/plugins/kibana_react/public';
 
 /**
  * This hook behaves like a `useState` hook in that it provides a requested

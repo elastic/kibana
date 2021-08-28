@@ -6,22 +6,28 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { intersection } from 'lodash';
+import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
-import type { LicensingPluginSetup } from '../../licensing/server/types';
-import type { TaskManagerSetupContract } from '../../task_manager/server/plugin';
-import type { RunContext } from '../../task_manager/server/task';
-import type { AlertTypeParams, AlertTypeState } from '../common/alert';
-import type { AlertInstanceContext, AlertInstanceState } from '../common/alert_instance';
-import type { ActionGroup } from '../common/alert_type';
-import type { RecoveredActionGroupId } from '../common/builtin_action_groups';
-import { getBuiltinActionGroups, RecoveredActionGroup } from '../common/builtin_action_groups';
+import { intersection } from 'lodash';
+import { LicensingPluginSetup } from '../../licensing/server';
+import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
+import { TaskRunnerFactory } from './task_runner';
+import {
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from './types';
+import {
+  RecoveredActionGroup,
+  getBuiltinActionGroups,
+  RecoveredActionGroupId,
+  ActionGroup,
+} from '../common';
+import { ILicenseState } from './lib/license_state';
 import { getAlertTypeFeatureUsageName } from './lib/get_alert_type_feature_usage_name';
-import type { ILicenseState } from './lib/license_state';
-import { TaskRunnerFactory } from './task_runner/task_runner_factory';
-import type { AlertType } from './types';
 
 export interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;

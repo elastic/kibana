@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Action, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
+
+import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
 import { lensSlice } from './lens_slice';
 

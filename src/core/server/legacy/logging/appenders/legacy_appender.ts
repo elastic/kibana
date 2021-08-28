@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
 import { LegacyLoggingServer } from '@kbn/legacy-logging';
-import type { DisposableAppender, LogRecord } from '@kbn/logging';
+import { DisposableAppender, LogRecord } from '@kbn/logging';
 
 export interface LegacyAppenderConfig {
   type: 'legacy-appender';

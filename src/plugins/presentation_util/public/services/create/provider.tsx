@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React, { createContext, useContext } from 'react';
-import type { PluginServiceFactory } from './factory';
+import { PluginServiceFactory } from './factory';
 
 /**
  * A collection of `PluginServiceProvider` objects, keyed by the `Services` API generic.

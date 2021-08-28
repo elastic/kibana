@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { Datatable } from '../../../../expressions/common/expression_types/specs/datatable';
-import type { RowClickContext } from '../../../../ui_actions/public/triggers/row_click_trigger';
-import type { Trigger } from '../../../../ui_actions/public/triggers/trigger';
-import type { IEmbeddable } from '../embeddables/i_embeddable';
+import { Datatable } from '../../../../expressions';
+import { Trigger, RowClickContext } from '../../../../ui_actions/public';
+import { IEmbeddable } from '..';
 
 export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
   embeddable: T;

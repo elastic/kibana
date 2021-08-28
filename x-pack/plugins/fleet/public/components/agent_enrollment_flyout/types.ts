@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { EuiStepProps } from '@elastic/eui';
 
-import type { AgentPolicy } from '../../../common/types/models/agent_policy';
-import type { Settings } from '../../../common/types/models/settings';
+import type { AgentPolicy, Settings } from '../../types';
 
 export interface BaseProps {
   /**

@@ -6,14 +6,15 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import { EuiIcon } from '@elastic/eui';
-import { Map as MbMap } from '@kbn/mapbox-gl';
-import type { FeatureCollection } from 'geojson';
+
+import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
-import type { ReactElement } from 'react';
-import React from 'react';
-import type { Query } from 'src/plugins/data/public';
+import React, { ReactElement } from 'react';
+import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
+import { FeatureCollection } from 'geojson';
+import { DataRequest } from '../util/data_request';
 import {
   AGG_TYPE,
   FIELD_ORIGIN,
@@ -26,29 +27,24 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
 } from '../../../common/constants';
-import type { Timeslice } from '../../../common/descriptor_types/data_request_descriptor_types';
-import type {
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
+import {
+  AggDescriptor,
   Attribution,
+  ESTermSourceDescriptor,
   JoinDescriptor,
   LayerDescriptor,
-} from '../../../common/descriptor_types/layer_descriptor_types';
-import type { MapExtent } from '../../../common/descriptor_types/map_descriptor';
-import type {
-  AggDescriptor,
-  ESTermSourceDescriptor,
-} from '../../../common/descriptor_types/source_descriptor_types';
-import type {
+  MapExtent,
   StyleDescriptor,
+  Timeslice,
   StyleMetaDescriptor,
-} from '../../../common/descriptor_types/style_property_descriptor_types';
+} from '../../../common/descriptor_types';
+import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
+import { DataRequestContext } from '../../actions';
+import { IStyle } from '../styles/style';
 import { getJoinAggKey } from '../../../common/get_agg_key';
-import type { DataRequestContext } from '../../actions/data_request_actions';
 import { LICENSED_FEATURES } from '../../licensed_features';
-import { copyPersistentState } from '../../reducers/copy_persistent_state';
-import type { IESSource } from '../sources/es_source/es_source';
-import type { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
-import type { IStyle } from '../styles/style';
-import { DataRequest } from '../util/data_request';
+import { IESSource } from '../sources/es_source';
 
 export interface ILayer {
   getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;

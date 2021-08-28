@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { addQueryParam, encodeQuery, encodeUriQuery } from './encode_uri_query';
+
+import { encodeUriQuery, encodeQuery, addQueryParam } from './encode_uri_query';
 
 export const url = {
   encodeQuery,

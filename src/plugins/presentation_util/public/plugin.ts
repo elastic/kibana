@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup, CoreStart } from '../../../core/public/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
+
+import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { pluginServices } from './services';
 import { registry } from './services/kibana';
-import type {
+import {
   PresentationUtilPluginSetup,
-  PresentationUtilPluginSetupDeps,
   PresentationUtilPluginStart,
+  PresentationUtilPluginSetupDeps,
   PresentationUtilPluginStartDeps,
 } from './types';
 

@@ -4,33 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiDataGridColumn } from '@elastic/eui';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+
+import React, { FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React from 'react';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
-import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../../../../common/types/es_client';
+
+import { EuiDataGridColumn, EuiSpacer, EuiText } from '@elastic/eui';
+
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+
 import {
-  getAnalysisType,
   isClassificationAnalysis,
   isRegressionAnalysis,
 } from '../../../../../../../common/util/analytics_utils';
-import { ColorRangeLegend } from '../../../../../components/color_range_legend/color_range_legend';
-import { useColorRange } from '../../../../../components/color_range_legend/use_color_range';
-import { DataGrid } from '../../../../../components/data_grid/data_grid';
-import type {
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../../../../common/types/es_client';
+
+import { getToastNotifications } from '../../../../../util/dependency_cache';
+import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
+import {
+  DataGrid,
   RowCountRelation,
   UseIndexDataReturnType,
-} from '../../../../../components/data_grid/types';
-import type { SavedSearchQuery } from '../../../../../contexts/ml/ml_context';
-import { getToastNotifications } from '../../../../../util/dependency_cache';
-import { defaultSearchQuery, INDEX_STATUS, SEARCH_SIZE } from '../../../../common/analytics';
-import { IndexPatternPrompt } from '../index_pattern_prompt/index_pattern_prompt';
-import type { ExpandableSectionProps } from './expandable_section';
-import { ExpandableSection, HEADER_ITEMS_LOADING } from './expandable_section';
+} from '../../../../../components/data_grid';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
+
+import {
+  defaultSearchQuery,
+  DataFrameAnalyticsConfig,
+  INDEX_STATUS,
+  SEARCH_SIZE,
+  getAnalysisType,
+} from '../../../../common';
+
+import {
+  ExpandableSection,
+  ExpandableSectionProps,
+  HEADER_ITEMS_LOADING,
+} from '../expandable_section';
+import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',

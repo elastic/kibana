@@ -4,24 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiBadge,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
   EuiLink,
-  EuiSelect,
-  EuiSpacer,
   EuiText,
+  EuiSpacer,
   EuiTitle,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { uniqBy } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
-import type { Alert } from '../../../../../../alerting/common/alert';
+import { EuiSelect } from '@elastic/eui';
+import { uniqBy } from 'lodash';
+import { Alert } from '../../../../../../alerting/common';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 
 const ALL_TYPES = 'ALL_TYPES';

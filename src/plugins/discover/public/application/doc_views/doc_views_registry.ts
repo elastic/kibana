@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { auto } from 'angular';
 import { convertDirectiveToRenderFn } from './doc_views_helpers';
-import type { DocView, DocViewInput, DocViewInputFn, ElasticSearchHit } from './doc_views_types';
+import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_views_types';
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];

@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { EuiPageContentBody, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import type { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public/plugin';
-import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../../../src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger';
-import { GlobeIllustration } from '../../../assets/globe_illustration';
-import { DragDrop } from '../../../drag_drop/drag_drop';
+import { EuiPageContentBody, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import {
+  UiActionsStart,
+  VISUALIZE_GEO_FIELD_TRIGGER,
+} from '../../../../../../../src/plugins/ui_actions/public';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
+import { DragDrop } from '../../../drag_drop';
+import { GlobeIllustration } from '../../../assets/globe_illustration';
 import './geo_field_workspace_panel.scss';
 
 interface Props {

@@ -5,23 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Subscription } from 'rxjs';
-import type { IUiSettingsClient } from '../../../../../core/public/ui_settings/types';
-import type { ExpressionsServiceSetup } from '../../../../expressions/common/service/expressions_services';
-import type { FieldFormatsStart } from '../../../../field_formats/public/plugin';
-import type { IndexPatternsContract } from '../../../common/index_patterns/index_patterns/index_patterns';
-import { calculateBounds } from '../../../common/query/timefilter/get_time';
-import type { TimeRange } from '../../../common/query/timefilter/types';
-import type { AggsCommonStartDependencies } from '../../../common/search/aggs/aggs_service';
+
+import { IUiSettingsClient } from 'src/core/public';
+import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
+import { FieldFormatsStart } from '../../../../field_formats/public';
+import { calculateBounds, TimeRange } from '../../../common';
 import {
-  AggsCommonService,
   aggsRequiredUiSettings,
-} from '../../../common/search/aggs/aggs_service';
-import { AggConfigs } from '../../../common/search/aggs/agg_configs';
-import type { AggTypesDependencies } from '../../../common/search/aggs/agg_types';
-import type { AggsStart } from '../../../common/search/aggs/types';
-import type { NowProviderInternalContract } from '../../now_provider/now_provider';
-import type { AggsSetup } from './types';
+  AggsCommonStartDependencies,
+  AggsCommonService,
+  AggConfigs,
+  AggTypesDependencies,
+} from '../../../common/search/aggs';
+import { AggsSetup, AggsStart } from './types';
+import { IndexPatternsContract } from '../../index_patterns';
+import { NowProviderInternalContract } from '../../now_provider';
 
 /**
  * Aggs needs synchronous access to specific uiSettings. Since settings can change

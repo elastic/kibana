@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiIconProps } from '@elastic/eui';
-import type { UserConfiguredActionConnector } from '../../../types';
+
+import { EuiIconProps } from '@elastic/eui';
+import { UserConfiguredActionConnector } from '../../../types';
 
 export interface EmailActionParams {
   to: string[];

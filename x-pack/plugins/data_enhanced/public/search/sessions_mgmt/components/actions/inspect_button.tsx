@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
-import type { IClickActionDescriptor } from '..';
-import type { CoreStart } from '../../../../../../../../src/core/public/types';
-import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public/code_editor';
-import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
-import { SearchSessionsMgmtAPI } from '../../lib/api';
-import type { UISession } from '../../types';
+import { CoreStart } from 'kibana/public';
+import { UISession } from '../../types';
+import { IClickActionDescriptor } from '..';
+import {
+  CodeEditor,
+  createKibanaReactContext,
+  toMountPoint,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import './inspect_button.scss';
+import { SearchSessionsMgmtAPI } from '../../lib/api';
 
 interface InspectFlyoutProps {
   searchSession: UISession;

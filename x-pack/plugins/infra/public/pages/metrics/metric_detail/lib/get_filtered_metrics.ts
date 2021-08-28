@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { InfraMetadataFeature } from '../../../../../common/http_api/metadata_api';
+
+import { InfraMetadataFeature } from '../../../../../common/http_api/metadata_api';
+import { InventoryMetric } from '../../../../../common/inventory_models/types';
 import { metrics } from '../../../../../common/inventory_models/metrics';
-import type { InventoryMetric } from '../../../../../common/inventory_models/types';
 
 export const getFilteredMetrics = (
   requiredMetrics: InventoryMetric[],

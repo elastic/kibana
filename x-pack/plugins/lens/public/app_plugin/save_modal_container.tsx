@@ -4,26 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { METRIC_TYPE } from '@kbn/analytics';
-import { i18n } from '@kbn/i18n';
-import { partition } from 'lodash';
+
 import React, { useEffect, useState } from 'react';
-import type { ChromeStart } from '../../../../../src/core/public/chrome/types';
-import type { NotificationsStart } from '../../../../../src/core/public/notifications/notifications_service';
-import type { SavedObjectReference } from '../../../../../src/core/types/saved_objects';
-import { esFilters } from '../../../../../src/plugins/data/public/deprecated';
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public/types';
-import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title';
-import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common/constants';
-import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable/embeddable';
-import type { LensAttributeService } from '../lens_attribute_service';
-import { trackUiEvent } from '../lens_ui_telemetry/factory';
-import { injectFilterReferences } from '../persistence/filter_references';
-import type { Document } from '../persistence/saved_object_store';
-import type { LensAppState } from '../state_management/types';
-import type { SaveProps } from './app';
+import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { partition } from 'lodash';
+
+import type { ChromeStart, NotificationsStart, SavedObjectReference } from 'kibana/public';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
+import type { SaveProps } from './app';
+import { Document, injectFilterReferences } from '../persistence';
+import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
+import type { LensAttributeService } from '../lens_attribute_service';
+import { DataPublicPluginStart, esFilters } from '../../../../../src/plugins/data/public';
+import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
+import { trackUiEvent } from '../lens_ui_telemetry';
+import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
+import type { LensAppState } from '../state_management';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;

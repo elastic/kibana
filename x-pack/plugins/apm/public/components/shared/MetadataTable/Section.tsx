@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import React from 'react';
-import type { KeyValuePair } from '../../../utils/flattenObject';
+import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { EuiText } from '@elastic/eui';
 import { KeyValueTable } from '../KeyValueTable';
+import { KeyValuePair } from '../../../utils/flattenObject';
 
 interface Props {
   keyValuePairs: KeyValuePair[];

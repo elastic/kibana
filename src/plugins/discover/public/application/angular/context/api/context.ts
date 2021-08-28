@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { Filter } from '../../../../../../data/common/es_query';
-import { IndexPattern } from '../../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { IndexPatternsContract } from '../../../../../../data/common/index_patterns/index_patterns/index_patterns';
-import { getServices } from '../../../../kibana_services';
-import { convertIsoToMillis, extractNanos } from './utils/date_conversion';
+
+import type { estypes } from '@elastic/elasticsearch';
+import { Filter, IndexPatternsContract, IndexPattern } from 'src/plugins/data/public';
+import { reverseSortDir, SortDirection } from './utils/sorting';
+import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
 import { generateIntervals } from './utils/generate_intervals';
 import { getEsQuerySearchAfter } from './utils/get_es_query_search_after';
 import { getEsQuerySort } from './utils/get_es_query_sort';
-import { reverseSortDir, SortDirection } from './utils/sorting';
+import { getServices } from '../../../../kibana_services';
 
 export enum SurrDocType {
   SUCCESSORS = 'successors',

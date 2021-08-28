@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
+import React, { FC, useEffect } from 'react';
 import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
-import type { FC } from 'react';
-import React, { useEffect } from 'react';
-import type { AnnotationsTable } from '../../../common/types/annotations';
+import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '../../../common/util/date_utils';
-import { ChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
+import { AnnotationsTable } from '../../../common/types/annotations';
+import { ChartTooltipService } from '../components/chart_tooltip';
 
 export const X_AXIS_RIGHT_OVERFLOW = 50;
 export const Y_AXIS_LABEL_WIDTH = 170;

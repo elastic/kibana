@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { LegacyLoggingConfig } from '@kbn/config';
+
+import { LegacyLoggingConfig } from '@kbn/config';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
+
 import {
-  getLegacyPlatformLogsFromMock,
   getPlatformLogsFromMock,
+  getLegacyPlatformLogsFromMock,
 } from '../../logging/integration_tests/utils';
 
 function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {

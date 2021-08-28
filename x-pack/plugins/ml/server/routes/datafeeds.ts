@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { estypes } from '@elastic/elasticsearch';
 import { wrapError } from '../client/error_wrapper';
-import { getAuthorizationHeader } from '../lib/request_authorization';
-import type { RouteInitialization } from '../types';
+import { RouteInitialization } from '../types';
 import {
+  startDatafeedSchema,
   datafeedConfigSchema,
   datafeedIdSchema,
   deleteDatafeedQuerySchema,
-  startDatafeedSchema,
 } from './schemas/datafeeds_schema';
+import { getAuthorizationHeader } from '../lib/request_authorization';
 
 /**
  * Routes for datafeed service

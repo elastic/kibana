@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectConfig } from '../../../saved_objects/public/types';
+
+import { SavedObjectConfig } from '../../../saved_objects/public';
 
 /**
  * Extract the tag references from the object's attribute

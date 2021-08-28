@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ValueOf } from '..';
-import type { agentPolicyStatuses } from '../../constants/agent_policy';
 
-import type { MonitoringType } from './epm';
-import type { Output } from './output';
+import type { agentPolicyStatuses } from '../../constants';
+import type { MonitoringType, ValueOf } from '../../types';
+
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
+import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 

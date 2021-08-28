@@ -5,16 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFlyout } from '@elastic/eui';
+
 import React, {
   createContext,
-  useCallback,
   useContext,
-  useEffect,
-  useMemo,
-  useRef,
   useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
 } from 'react';
+import { EuiFlyout } from '@elastic/eui';
 
 interface Context {
   addContent: <P extends object = { [key: string]: any }>(content: Content<P>) => void;

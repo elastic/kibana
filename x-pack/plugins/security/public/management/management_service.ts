@@ -4,21 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Subscription } from 'rxjs';
 
-import type { StartServicesAccessor } from '../../../../../src/core/public/types';
-import type { FatalErrorsSetup } from '../../../../../src/core/public/fatal_errors/fatal_errors_service';
-import type { Capabilities } from '../../../../../src/core/types/capabilities';
-import type { ManagementSetup } from '../../../../../src/plugins/management/public/types';
-import type { ManagementApp } from '../../../../../src/plugins/management/public/utils/management_app';
-import type { ManagementSection } from '../../../../../src/plugins/management/public/utils/management_section';
-import type { SecurityLicense } from '../../common/licensing/license_service';
-import type { AuthenticationServiceSetup } from '../authentication/authentication_service';
+import type { Capabilities, FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
+import type {
+  ManagementApp,
+  ManagementSection,
+  ManagementSetup,
+} from 'src/plugins/management/public';
+
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticationServiceSetup } from '../authentication';
 import type { PluginStartDependencies } from '../plugin';
-import { apiKeysManagementApp } from './api_keys/api_keys_management_app';
-import { roleMappingsManagementApp } from './role_mappings/role_mappings_management_app';
-import { rolesManagementApp } from './roles/roles_management_app';
-import { usersManagementApp } from './users/users_management_app';
+import { apiKeysManagementApp } from './api_keys';
+import { roleMappingsManagementApp } from './role_mappings';
+import { rolesManagementApp } from './roles';
+import { usersManagementApp } from './users';
 
 interface SetupParams {
   management: ManagementSetup;

@@ -7,49 +7,52 @@
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import type { ConfigSchema } from '.';
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { AppMountParameters } from '../../../../src/core/public/application/types';
-import { AppNavLinkStatus } from '../../../../src/core/public/application/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
+import {
+  AppMountParameters,
+  AppNavLinkStatus,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+  PluginInitializerContext,
+} from '../../../../src/core/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../src/plugins/data/public/types';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public/plugin';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public/plugin';
-import type { UsageCollectionStart } from '../../../../src/plugins/usage_collection/public/plugin';
+} from '../../../../src/plugins/data/public';
+import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { FleetStart } from '../../fleet/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerting/public/plugin';
-import type { FeaturesPluginSetup } from '../../features/public/plugin';
-import type { FleetStart } from '../../fleet/public/plugin';
-import type { LicensingPluginSetup } from '../../licensing/public/types';
-import type { MapsStartApi } from '../../maps/public/api/start_api';
-import type { MlPluginSetup, MlPluginStart } from '../../ml/public/plugin';
-import { METRIC_TYPE } from '@kbn/analytics';
-import type {
-  ObservabilityPublicSetup,
-  ObservabilityPublicStart,
-} from '../../observability/public/plugin';
-import type {
+} from '../../alerting/public';
+import type { FeaturesPluginSetup } from '../../features/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { MapsStartApi } from '../../maps/public';
+import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import {
   FetchDataParams,
   HasDataParams,
-} from '../../observability/public/typings/fetch_overview_data';
+  METRIC_TYPE,
+  ObservabilityPublicSetup,
+  ObservabilityPublicStart,
+} from '../../observability/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public/plugin';
+} from '../../triggers_actions_ui/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
-import { getApmEnrollmentFlyoutData } from './components/fleet_integration/apm_enrollment_flyout_extension';
-import { getLazyApmAgentsTabExtension } from './components/fleet_integration/lazy_apm_agents_tab_extension';
-import { LazyApmCustomAssetsExtension } from './components/fleet_integration/lazy_apm_custom_assets_extension';
+import { featureCatalogueEntry } from './featureCatalogueEntry';
+import {
+  getApmEnrollmentFlyoutData,
+  LazyApmCustomAssetsExtension,
+} from './components/fleet_integration';
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
-import { featureCatalogueEntry } from './featureCatalogueEntry';
+import { getLazyApmAgentsTabExtension } from './components/fleet_integration/lazy_apm_agents_tab_extension';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 

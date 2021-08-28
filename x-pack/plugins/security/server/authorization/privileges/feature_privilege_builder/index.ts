@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { flatten } from 'lodash';
 
-import type { FeatureKibanaPrivileges } from '../../../../../features/common/feature_kibana_privileges';
-import type { KibanaFeature } from '../../../../../features/common/kibana_feature';
-import type { Actions } from '../../actions/actions';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
+import type { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
 import { FeaturePrivilegeApiBuilder } from './api';
 import { FeaturePrivilegeAppBuilder } from './app';
 import { FeaturePrivilegeCasesBuilder } from './cases';
 import { FeaturePrivilegeCatalogueBuilder } from './catalogue';
-import type { FeaturePrivilegeBuilder } from './feature_privilege_builder';
+import { FeaturePrivilegeBuilder } from './feature_privilege_builder';
 import { FeaturePrivilegeManagementBuilder } from './management';
 import { FeaturePrivilegeNavlinkBuilder } from './navlink';
 import { FeaturePrivilegeSavedObjectBuilder } from './saved_object';

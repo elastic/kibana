@@ -4,27 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiPortal, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import React, { useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo, useReducer, useState } from 'react';
-import type { AlertTypeParams } from '../../../../../alerting/common/alert';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import type { Alert, AlertAddProps, AlertUpdates, IErrorObject } from '../../../types';
-import { AlertFlyoutCloseReason } from '../../../types';
-import { HealthCheck } from '../../components/health_check';
-import { HealthContextProvider } from '../../context/health_context';
-import { createAlert } from '../../lib/alert_api/create';
-import { hasShowActionsCapability } from '../../lib/capabilities';
-import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
-import AlertAddFooter from './alert_add_footer';
+import {
+  Alert,
+  AlertTypeParams,
+  AlertUpdates,
+  AlertFlyoutCloseReason,
+  IErrorObject,
+  AlertAddProps,
+} from '../../../types';
 import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
-import type { InitialAlert, InitialAlertReducer } from './alert_reducer';
-import { alertReducer } from './alert_reducer';
-import { ConfirmAlertClose } from './confirm_alert_close';
+import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
+import { createAlert } from '../../lib/alert_api';
+import { HealthCheck } from '../../components/health_check';
 import { ConfirmAlertSave } from './confirm_alert_save';
+import { ConfirmAlertClose } from './confirm_alert_close';
+import { hasShowActionsCapability } from '../../lib/capabilities';
+import AlertAddFooter from './alert_add_footer';
+import { HealthContextProvider } from '../../context/health_context';
+import { useKibana } from '../../../common/lib/kibana';
 import { hasAlertChanged, haveAlertParamsChanged } from './has_alert_changed';
+import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
 const AlertAdd = ({
   consumer,

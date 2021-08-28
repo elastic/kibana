@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { debounce } from 'lodash';
-import { useEffect, useMemo, useRef, useState } from 'react';
 
 /**
  * Debounces value changes and updates inputValue on root state changes if no debounced changes

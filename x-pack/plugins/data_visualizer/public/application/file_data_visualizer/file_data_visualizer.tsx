@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React from 'react';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context/context';
-import { getCoreStart, getPluginsStart } from '../../kibana_services';
-import type { ResultLink } from '../common/components/results_links/results_links';
 import '../_index.scss';
+import React, { FC } from 'react';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { getCoreStart, getPluginsStart } from '../../kibana_services';
+
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_data_visualizer_view/index';
+import { ResultLink } from '../common/components/results_links';
 
 interface Props {
   additionalLinks?: ResultLink[];

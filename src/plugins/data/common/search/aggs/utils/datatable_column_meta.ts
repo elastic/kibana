@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DatatableColumn } from '../../../../../expressions/common/expression_types/specs/datatable';
-import { IndexPattern } from '../../../index_patterns/index_patterns/index_pattern';
-import type { CreateAggConfigParams } from '../agg_configs';
-import { AggConfigs } from '../agg_configs';
-import type { IAggType } from '../agg_type';
-import type { AggTypesRegistryStart } from '../agg_types_registry';
+
+import { DatatableColumn } from 'src/plugins/expressions/common';
+import { IndexPattern } from '../../../index_patterns';
+import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
+import { AggTypesRegistryStart } from '../agg_types_registry';
+import { IAggType } from '../agg_type';
 
 export interface MetaByColumnDeps {
   getIndexPattern: (id: string) => Promise<IndexPattern>;

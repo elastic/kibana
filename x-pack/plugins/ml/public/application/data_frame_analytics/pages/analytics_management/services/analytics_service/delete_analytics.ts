@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { extractErrorMessage } from '../../../../../../../common/util/errors/process_errors';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { ml } from '../../../../../services/ml_api_service';
-import type { ToastNotificationService } from '../../../../../services/toast_notification_service/toast_notification_service';
-import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common/analytics';
-import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
-import { isDataFrameAnalyticsFailed } from '../../components/analytics_list/common';
+import { ToastNotificationService } from '../../../../../services/toast_notification_service';
+import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
+import {
+  isDataFrameAnalyticsFailed,
+  DataFrameAnalyticsListRow,
+} from '../../components/analytics_list/common';
 
 export const deleteAnalytics = async (
   analyticsConfig: DataFrameAnalyticsListRow['config'],

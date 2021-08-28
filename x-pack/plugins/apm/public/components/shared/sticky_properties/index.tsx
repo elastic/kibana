@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { truncate } from '../../../utils/style';
 
 export interface IStickyProperty {

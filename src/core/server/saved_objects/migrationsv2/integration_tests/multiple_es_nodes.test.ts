@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
+import Fs from 'fs';
+import Util from 'util';
+import glob from 'glob';
 import { kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
-import Fs from 'fs';
-import glob from 'glob';
-import Path from 'path';
-import Util from 'util';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
+import type { ElasticsearchClient } from '../../../elasticsearch';
 import { Root } from '../../../root';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_es_nodes';

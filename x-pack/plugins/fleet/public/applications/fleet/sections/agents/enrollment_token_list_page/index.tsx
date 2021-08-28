@@ -4,37 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
 import {
+  EuiSpacer,
   EuiBasicTable,
-  EuiButton,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
+  EuiButton,
+  EuiButtonIcon,
   EuiToolTip,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 
-import { ENROLLMENT_API_KEYS_INDEX } from '../../../../../../common/constants/enrollment_api_key';
-import type { EnrollmentAPIKey } from '../../../../../../common/types/models/enrollment_api_key';
-import type { GetAgentPoliciesResponseItem } from '../../../../../../common/types/rest_spec/agent_policy';
-import { NewEnrollmentTokenModal } from '../../../../../components/new_enrollment_key_modal';
-import { useStartServices } from '../../../../../hooks/use_core';
-import { usePagination } from '../../../../../hooks/use_pagination';
-import { useGetAgentPolicies } from '../../../../../hooks/use_request/agent_policy';
+import { ENROLLMENT_API_KEYS_INDEX } from '../../../constants';
+import { NewEnrollmentTokenModal } from '../../../components';
 import {
-  sendDeleteOneEnrollmentAPIKey,
-  sendGetOneEnrollmentAPIKey,
+  useBreadcrumbs,
+  usePagination,
   useGetEnrollmentAPIKeys,
-} from '../../../../../hooks/use_request/enrollment_api_keys';
+  useGetAgentPolicies,
+  sendGetOneEnrollmentAPIKey,
+  useStartServices,
+  sendDeleteOneEnrollmentAPIKey,
+} from '../../../hooks';
+import type { EnrollmentAPIKey, GetAgentPoliciesResponseItem } from '../../../types';
 import { SearchBar } from '../../../components/search_bar';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { DefaultLayout } from '../../../layouts/default/default';
+import { DefaultLayout } from '../../../layouts';
 
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 

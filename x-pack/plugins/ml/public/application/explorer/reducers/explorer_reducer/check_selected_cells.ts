@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { SWIMLANE_TYPE } from '../../explorer_constants';
 import { getClearedSelectedAnomaliesState } from '../../explorer_utils';
-import type { ExplorerState } from './state';
+
+import { ExplorerState } from './state';
 
 interface SwimlanePoint {
   laneLabel: string;

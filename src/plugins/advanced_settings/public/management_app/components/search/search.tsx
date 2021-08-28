@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFormErrorText, EuiSearchBar, Query } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { Fragment, PureComponent } from 'react';
-import { getCategoryName } from '../../lib/get_category_name';
+import { i18n } from '@kbn/i18n';
+import { EuiSearchBar, EuiFormErrorText, Query } from '@elastic/eui';
+
+import { getCategoryName } from '../../lib';
 
 export const CATEGORY_FIELD = 'category';
 

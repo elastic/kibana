@@ -7,32 +7,32 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { i18n } from '@kbn/i18n';
-import { createRouter, RouterProvider } from '@kbn/typed-react-router-config';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route as ReactRouterRoute } from 'react-router-dom';
-import type { DefaultTheme } from 'styled-components';
-import { ThemeProvider } from 'styled-components';
-import type { ConfigSchema } from '..';
-import type { CoreStart } from '../../../../../src/core/public/types';
-import type { AppMountParameters } from '../../../../../src/core/public/application/types';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public/context/context';
-import { useUiSetting$ } from '../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
-import { useBreadcrumbs } from '../../../observability/public/hooks/use_breadcrumbs';
-import type { ObservabilityRuleTypeRegistry } from '../../../observability/public/rules/create_observability_rule_type_registry';
+import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
+import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+  useUiSetting$,
+} from '../../../../../src/plugins/kibana_react/public';
+import { APMRouteDefinition } from '../application/routes';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
 import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
-import { redirectTo } from '../components/routing/redirect_to';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
-import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
-import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import { ConfigSchema } from '../index';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
-import type { APMRouteDefinition } from './routes';
+import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
+import { redirectTo } from '../components/routing/redirect_to';
+import { useBreadcrumbs } from '../../../observability/public';
+import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 export const uxRoutes: APMRouteDefinition[] = [
   {

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DataHandler, ObservabilityFetchDataPlugins } from './typings/fetch_overview_data';
+
+import { DataHandler, ObservabilityFetchDataPlugins } from './typings/fetch_overview_data';
 
 const dataHandlers: Partial<Record<ObservabilityFetchDataPlugins, DataHandler>> = {};
 

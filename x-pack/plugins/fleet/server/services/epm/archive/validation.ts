@@ -10,24 +10,24 @@ import { pick, uniq } from 'lodash';
 
 import type {
   ArchivePackage,
+  RegistryPolicyTemplate,
   RegistryDataStream,
   RegistryInput,
-  RegistryPolicyTemplate,
   RegistryStream,
   RegistryVarsEntry,
-} from '../../../../common/types/models/epm';
+  PackageSpecManifest,
+} from '../../../../common/types';
 import {
-  RegistryDataStreamKeys,
   RegistryInputKeys,
+  RegistryVarsEntryKeys,
   RegistryPolicyTemplateKeys,
   RegistryStreamKeys,
-  RegistryVarsEntryKeys,
-} from '../../../../common/types/models/epm';
-import type { PackageSpecManifest } from '../../../../common/types/models/package_spec';
+  RegistryDataStreamKeys,
+} from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { pkgToPkgKey } from '../registry';
 
-import { unpackBufferEntries } from '.';
+import { unpackBufferEntries } from './index';
 
 const MANIFESTS: Record<string, Buffer> = {};
 const MANIFEST_NAME = 'manifest.yml';

@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectReference } from '../../../../../src/core/types/saved_objects';
-import type { LayerDescriptor } from '../descriptor_types/layer_descriptor_types';
-import type { MapSavedObjectAttributes } from '../map_saved_object_type';
 
 // Can not use public Layer classes to extract references since this logic must run in both client and server.
+
+import { SavedObjectReference } from '../../../../../src/core/types';
+import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import { LayerDescriptor } from '../descriptor_types';
 
 interface IndexPatternReferenceDescriptor {
   indexPatternId?: string;

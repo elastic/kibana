@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -14,16 +18,13 @@ import {
   EuiRange,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common/constants';
-import type { IFieldFormat } from '../../../../../../../../src/plugins/field_formats/common/types';
-import { useDebounceWithOptions } from '../../../../shared_components/helpers';
-import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
+import type { IFieldFormat } from 'src/plugins/field_formats/common';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
+import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
-import { MIN_HISTOGRAM_BARS, MODES, TYPING_DEBOUNCE_TIME } from './constants';
-import type { MODES_TYPES, RangeColumnParams, UpdateParamsFnType } from './ranges';
+import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
+import { useDebounceWithOptions } from '../../../../shared_components';
+import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 
 const GranularityHelpPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

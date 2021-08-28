@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableInput } from '../../../../../src/plugins/embeddable/common/types';
-import { ViewMode } from '../../../../../src/plugins/embeddable/common/types';
-import { Embeddable } from '../../../../../src/plugins/embeddable/public/lib/embeddables/embeddable';
-import { createAction } from '../../../../../src/plugins/ui_actions/public/actions/create_action';
+import {
+  Embeddable,
+  EmbeddableInput,
+  ViewMode,
+} from '../../../../../src/plugins/embeddable/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { createAction } from '../../../../../src/plugins/ui_actions/public';
 
 export const FILTER_BY_MAP_EXTENT = 'FILTER_BY_MAP_EXTENT';
 

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AlertInstanceContext, AlertInstanceState } from '../../common/alert_instance';
+
+import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { AlertInstance } from './alert_instance';
 
 export function createAlertInstanceFactory<

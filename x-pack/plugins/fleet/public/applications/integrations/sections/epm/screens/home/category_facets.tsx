@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
 import React from 'react';
 
-import type {
-  CategorySummaryItem,
-  CategorySummaryList,
-} from '../../../../../../../common/types/models/epm';
-import { Loading } from '../../../../../../components/loading';
+import { Loading } from '../../../../components';
+import type { CategorySummaryItem, CategorySummaryList } from '../../../../types';
 
 export function CategoryFacets({
   isLoading,

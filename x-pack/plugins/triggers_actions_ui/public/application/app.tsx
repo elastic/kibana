@@ -4,28 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { I18nProvider } from '@kbn/i18n/react';
+
 import React, { lazy } from 'react';
+import { Switch, Route, Redirect, Router } from 'react-router-dom';
+import { ChromeBreadcrumb, CoreStart, ScopedHistory } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Redirect, Route, Router, Switch } from 'react-router-dom';
+import { I18nProvider } from '@kbn/i18n/react';
 import useObservable from 'react-use/lib/useObservable';
-import type { CoreStart } from '../../../../../src/core/public/types';
-import { ScopedHistory } from '../../../../../src/core/public/application/scoped_history';
-import type { ChromeBreadcrumb } from '../../../../../src/core/public/chrome/types';
-import type { ChartsPluginStart } from '../../../../../src/plugins/charts/public/types';
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public/types';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public/context/context';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public/storage/storage';
-import type { SpacesOssPluginStart } from '../../../../../src/plugins/spaces_oss/public/types';
-import type { PluginStartContract as AlertingStart } from '../../../alerting/public/plugin';
-import { KibanaFeature } from '../../../features/common/kibana_feature';
-import type { SpacesPluginStart } from '../../../spaces/public/plugin';
-import { setSavedObjectsClient } from '../common/lib/data_apis';
-import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
-import type { Section } from './constants';
-import { legacyRouteToRuleDetails, routeToRuleDetails } from './constants';
+import { KibanaFeature } from '../../../features/common';
+import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
+import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
+import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { PluginStartContract as AlertingStart } from '../../../alerting/public';
+import type { SpacesPluginStart } from '../../../spaces/public';
+import type { SpacesOssPluginStart } from '../../../../../src/plugins/spaces_oss/public';
+
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+
+import { setSavedObjectsClient } from '../common/lib/data_apis';
+import { KibanaContextProvider } from '../common/lib/kibana';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const AlertDetailsRoute = lazy(

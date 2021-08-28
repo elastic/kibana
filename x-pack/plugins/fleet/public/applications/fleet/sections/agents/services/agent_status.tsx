@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { SimplifiedAgentStatus } from '../../../../../../common/types/models/agent';
+import type { SimplifiedAgentStatus } from '../../../types';
 
 const visColors = euiPaletteColorBlindBehindText();
 const colorToHexMap = {

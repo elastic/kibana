@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { VALIDATION_STATUS } from '../constants/validation';
 
 // get the most severe status level from a list of messages

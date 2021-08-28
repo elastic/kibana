@@ -8,8 +8,8 @@
 
 import uuidv1 from 'uuid/v1';
 import uuidv5 from 'uuid/v5';
-import type { SavedObjectsFindOptions } from '../../types';
-import type { SavedObjectsFindResponse } from '../saved_objects_client';
+import { SavedObjectsFindOptions } from '../../types';
+import { SavedObjectsFindResponse } from '..';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
 export const ALL_NAMESPACES_STRING = '*';

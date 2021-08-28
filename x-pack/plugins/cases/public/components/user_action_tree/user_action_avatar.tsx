@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiAvatar } from '@elastic/eui';
+
 import React, { memo } from 'react';
+import { EuiAvatar } from '@elastic/eui';
+
 import * as i18n from './translations';
 
 interface UserActionAvatarProps {

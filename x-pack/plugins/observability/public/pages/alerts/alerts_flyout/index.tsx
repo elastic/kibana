@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiFlyoutProps } from '@elastic/eui';
+
 import {
   EuiButton,
   EuiDescriptionList,
@@ -14,34 +14,34 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFlyoutProps,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
+  ALERT_UUID as ALERT_UUID_TYPED,
   ALERT_RULE_CATEGORY as ALERT_RULE_CATEGORY_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
-  ALERT_UUID as ALERT_UUID_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
+  ALERT_UUID as ALERT_UUID_NON_TYPED,
   ALERT_RULE_CATEGORY as ALERT_RULE_CATEGORY_NON_TYPED,
   ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
-  ALERT_UUID as ALERT_UUID_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
-import type { TopAlert } from '..';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
-import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
-import { asDuration } from '../../../../common/utils/formatters/duration';
+import type { TopAlert } from '../';
+import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+import { asDuration } from '../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import { parseAlert } from '../parse_alert';
 

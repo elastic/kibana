@@ -8,9 +8,10 @@
 import classNames from 'classnames';
 import { scaleTime } from 'd3-scale';
 import * as React from 'react';
-import type { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api/log_entries/summary_highlights';
-import type { LogEntryTime } from '../../../../common/log_entry/log_entry';
+
+import { LogEntryTime } from '../../../../common/log_entry';
 import { SearchMarker } from './search_marker';
+import { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api';
 
 interface SearchMarkersProps {
   buckets: LogEntriesSummaryHighlightsBucket[];

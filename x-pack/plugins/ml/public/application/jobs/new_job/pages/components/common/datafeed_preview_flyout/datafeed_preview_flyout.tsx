@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment, FC, useState, useContext } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
+  EuiButtonEmpty,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment, useContext, useState } from 'react';
+
 import { JobCreatorContext } from '../../job_creator_context';
 import { DatafeedPreview } from './datafeed_preview';
 

@@ -5,17 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { MapsEmsPluginSetup, MapsEmsPluginStart } from '.';
-import type { CoreSetup, CoreStart } from '../../../core/public/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
-import type { MapsEmsConfig } from '../config';
-import { setKibanaVersion, setMapsEmsConfig } from './kibana_services';
-import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
 
 // @ts-ignore
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 // @ts-ignore
+import { setKibanaVersion, setMapsEmsConfig } from './kibana_services';
 // @ts-ignore
+import { MapsEmsPluginSetup, MapsEmsPluginStart } from './index';
+import type { MapsEmsConfig } from '../config';
+import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
 
 /**
  * These are the interfaces with your public contracts. You should export these

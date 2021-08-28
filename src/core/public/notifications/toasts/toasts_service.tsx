@@ -8,12 +8,12 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { I18nStart } from '../../i18n/i18n_service';
-import type { OverlayStart } from '../../overlays/overlay_service';
-import type { IUiSettingsClient } from '../../ui_settings/types';
+
+import { I18nStart } from '../../i18n';
+import { IUiSettingsClient } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
-import type { IToasts } from './toasts_api';
-import { ToastsApi } from './toasts_api';
+import { ToastsApi, IToasts } from './toasts_api';
+import { OverlayStart } from '../../overlays';
 
 interface SetupDeps {
   uiSettings: IUiSettingsClient;

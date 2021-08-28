@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiExpression, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { useState } from 'react';
-import type {
+import { i18n } from '@kbn/i18n';
+import { EuiFlexItem, EuiFlexGroup, EuiPopover, EuiSelect, EuiExpression } from '@elastic/eui';
+import {
   PartialCriteria,
   ThresholdType,
+  isRatioAlert,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { isRatioAlert } from '../../../../../common/alerting/logs/log_threshold/types';
 import { ExpressionLike } from './editor';
 
 const typePrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdTypePrefix', {

@@ -7,7 +7,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import type { TimeRange } from '../../../../common/query/timefilter/types';
+import { TimeRange } from '../../../../common';
 
 export function validateTimeRange(time?: TimeRange): boolean {
   if (!time) return false;

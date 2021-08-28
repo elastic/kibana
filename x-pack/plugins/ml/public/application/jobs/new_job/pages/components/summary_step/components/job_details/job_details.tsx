@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import type { FC } from 'react';
-import React, { useContext } from 'react';
-import { useMlContext } from '../../../../../../../contexts/ml/use_ml_context';
-import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
+import { JobCreatorContext } from '../../../job_creator_context';
 import {
-  isAdvancedJobCreator,
   isMultiMetricJobCreator,
   isPopulationJobCreator,
-} from '../../../../../common/job_creator/type_guards';
-import { JobCreatorContext } from '../../../job_creator_context';
-import type { ListItems } from '../common';
-import { defaultLabel, falseLabel, Italic, trueLabel } from '../common';
+  isAdvancedJobCreator,
+} from '../../../../../common/job_creator';
+import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
+import { ListItems, falseLabel, trueLabel, defaultLabel, Italic } from '../common';
+import { useMlContext } from '../../../../../../../contexts/ml';
 
 export const JobDetails: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);

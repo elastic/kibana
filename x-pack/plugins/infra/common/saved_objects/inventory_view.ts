@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsType } from '../../../../../src/core/server/saved_objects/types';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsType } from 'src/core/server';
+
 export const inventoryViewSavedObjectName = 'inventory-view';
 
 export const inventoryViewSavedObjectType: SavedObjectsType = {

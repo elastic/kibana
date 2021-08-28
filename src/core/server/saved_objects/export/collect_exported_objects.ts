@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import type { SavedObject } from '../../../types/saved_objects';
-import { KibanaRequest } from '../../http/router/request';
-import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import type { SavedObjectsClientContract, SavedObjectsExportablePredicate } from '../types';
-import { applyExportTransforms } from './apply_export_transforms';
+
+import type { SavedObject } from '../../../types';
+import type { KibanaRequest } from '../../http';
+import type { Logger } from '../../logging';
+import { SavedObjectsClientContract, SavedObjectsExportablePredicate } from '../types';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';
+import { applyExportTransforms } from './apply_export_transforms';
 
 interface CollectExportedObjectOptions {
   savedObjectsClient: SavedObjectsClientContract;

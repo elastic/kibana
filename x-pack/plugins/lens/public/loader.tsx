@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState, useEffect, useRef } from 'react';
 import { EuiProgress } from '@elastic/eui';
-import React, { useEffect, useRef, useState } from 'react';
 
 /**
  * Executes the specified load function any time loadDeps changes. Ensures the load

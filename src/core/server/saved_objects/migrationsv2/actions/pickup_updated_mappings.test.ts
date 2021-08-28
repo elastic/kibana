@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+jest.mock('./catch_retryable_es_client_errors');
+import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
 
-jest.mock('./catch_retryable_es_client_errors');
 describe('pickupUpdatedMappings', () => {
   beforeEach(() => {
     jest.clearAllMocks();

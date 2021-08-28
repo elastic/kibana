@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaExecutionContext } from '../../../../../core/types/execution_context';
-import type { EmbeddableInput } from '../../../../embeddable/common/types';
-import type { ContainerOutput } from '../../../../embeddable/public/lib/containers/i_container';
+import _ from 'lodash';
+import type { KibanaExecutionContext } from 'src/core/public';
+import { DashboardSavedObject } from '../../saved_dashboards';
+import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
 import {
-  ErrorEmbeddable,
-  isErrorEmbeddable,
-} from '../../../../embeddable/public/lib/embeddables/error_embeddable';
-import { EmbeddableFactoryNotFoundError } from '../../../../embeddable/public/lib/errors';
-import type { EmbeddablePackageState } from '../../../../embeddable/public/lib/state_transfer/types';
-import type { DashboardSavedObject } from '../../saved_dashboards/saved_dashboard';
-import type {
-  DashboardAppServices,
   DashboardBuildContext,
-  DashboardContainerInput,
   DashboardState,
+  DashboardContainerInput,
+  DashboardAppServices,
 } from '../../types';
-import { DASHBOARD_CONTAINER_TYPE } from '../embeddable/dashboard_constants';
-import { DashboardContainer } from '../embeddable/dashboard_container';
-import { stateToDashboardContainerInput } from './convert_dashboard_state';
 import {
   enableDashboardSearchSessions,
   getSearchSessionIdFromURL,
-} from './dashboard_session_restoration';
+  stateToDashboardContainerInput,
+} from '.';
+import {
+  ContainerOutput,
+  EmbeddableFactoryNotFoundError,
+  EmbeddableInput,
+  EmbeddablePackageState,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
+} from '../../services/embeddable';
 
 type BuildDashboardContainerProps = DashboardBuildContext & {
   data: DashboardAppServices['data']; // the whole data service is required here because it is required by getUrlGeneratorState

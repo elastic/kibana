@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { MB_LOOKUP_FUNCTION, VECTOR_SHAPE_TYPE, VECTOR_STYLES } from '../../../../common/constants';
-import type { Category } from '../../../../common/descriptor_types/style_property_descriptor_types';
+import { Category } from '../../../../common/descriptor_types';
 
 export function getOtherCategoryLabel() {
   return i18n.translate('xpack.maps.styles.categorical.otherCategoryLabel', {

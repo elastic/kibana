@@ -6,15 +6,14 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { RouteProps } from 'react-router-dom';
 import { Redirect, Route } from 'react-router-dom';
+import type { RouteProps } from 'react-router-dom';
 
-import type { CoreStart } from '../../../../../../src/core/public/types';
-import type { AppMountParameters } from '../../../../../../src/core/public/application/types';
-import type { FleetConfigType } from '../../../common/types';
-import { licenseService } from '../../hooks/use_license';
-import type { FleetStartServices } from '../../plugin';
-import type { UIExtensionsStorage } from '../../types/ui_extensions';
+import type { CoreStart, AppMountParameters } from 'src/core/public';
+
+import type { FleetConfigType, FleetStartServices } from '../../plugin';
+import { licenseService } from '../../hooks';
+import type { UIExtensionsStorage } from '../../types';
 
 import { AppRoutes, IntegrationsAppContext, WithPermissionsAndSetup } from './app';
 

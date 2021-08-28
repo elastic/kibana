@@ -5,22 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Query } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-import { parse } from 'query-string';
+
 import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { CoreStart } from '../../../../core/public/types';
-import type { ChromeBreadcrumb } from '../../../../core/public/chrome/types';
-import type { DataPublicPluginStart } from '../../../data/public/types';
-import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public/api';
-import type { SpacesContextProps } from '../../../spaces_oss/public/api';
-import type { SpacesAvailableStartContract } from '../../../spaces_oss/public/types';
-import type { SavedObjectsManagementActionServiceStart } from '../services/action_service';
-import type { SavedObjectsManagementColumnServiceStart } from '../services/column_service';
-import type { ISavedObjectsManagementServiceRegistry } from '../services/service_registry';
-import { SavedObjectsTable } from './objects_table/saved_objects_table';
+import { get } from 'lodash';
+import { Query } from '@elastic/eui';
+import { parse } from 'query-string';
+import { i18n } from '@kbn/i18n';
+import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
+import type {
+  SpacesAvailableStartContract,
+  SpacesContextProps,
+} from 'src/plugins/spaces_oss/public';
+import { DataPublicPluginStart } from '../../../data/public';
+import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import {
+  ISavedObjectsManagementServiceRegistry,
+  SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementColumnServiceStart,
+} from '../services';
+import { SavedObjectsTable } from './objects_table';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 

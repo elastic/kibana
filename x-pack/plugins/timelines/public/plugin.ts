@@ -4,29 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Store } from 'redux';
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
-import { Storage } from '../../../../src/plugins/kibana_utils/public/storage/storage';
-import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
-import { getHoverActions } from './components/hover_actions';
-import type { LastUpdatedAtProps } from './components/last_updated';
-import type { LoadingPanelProps } from './components/loading';
-import type { FieldBrowserProps } from './components/t_grid/toolbar/fields_browser/types';
-import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
+
+import { Store } from 'redux';
+
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import type {
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  CoreStart,
+} from '../../../../src/core/public';
+import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from './components';
 import {
-  getAddToCaseLazy,
-  getAddToCasePopoverLazy,
-  getAddToExistingCaseButtonLazy,
-  getAddToNewCaseButtonLazy,
-  getFieldsBrowserLazy,
   getLastUpdatedLazy,
   getLoadingPanelLazy,
   getTGridLazy,
+  getFieldsBrowserLazy,
+  getAddToCaseLazy,
+  getAddToExistingCaseButtonLazy,
+  getAddToNewCaseButtonLazy,
+  getAddToCasePopoverLazy,
 } from './methods';
+import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
-import type { TGridProps, TimelinesStartPlugins, TimelinesUIStart } from './types';
+import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
+import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
+import { getHoverActions } from './components/hover_actions';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}

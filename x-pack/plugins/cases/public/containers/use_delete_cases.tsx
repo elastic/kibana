@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useReducer, useRef } from 'react';
-import type { DeleteCase } from '../../common/ui/types';
-import { useToasts } from '../common/lib/kibana/hooks';
-import { deleteCases, deleteSubCases } from './api';
+
+import { useCallback, useReducer, useRef, useEffect } from 'react';
 import * as i18n from './translations';
+import { deleteCases, deleteSubCases } from './api';
+import { DeleteCase } from './types';
+import { useToasts } from '../common/lib/kibana';
 
 interface DeleteState {
   isDisplayConfirmDeleteModal: boolean;

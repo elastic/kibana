@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { EventEmitter } from 'events';
 import uuid from 'uuid/v4';
 import { RequestResponder } from './request_responder';
-import type { Request, RequestParams } from './types';
-import { RequestStatus } from './types';
+import { Request, RequestParams, RequestStatus } from './types';
 
 /**
  * An generic inspector adapter to log requests.

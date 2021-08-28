@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { CommonProps } from '@elastic/eui';
-import classNames from 'classnames';
-import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
-import React from 'react';
 import './field_button.scss';
+import classNames from 'classnames';
+import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
+import { CommonProps } from '@elastic/eui';
 
 export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   /**

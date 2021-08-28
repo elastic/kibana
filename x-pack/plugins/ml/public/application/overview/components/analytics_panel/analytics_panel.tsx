@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,17 +19,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import type { AnalyticStatsBarStats } from '../../../components/stats_bar/stats_bar';
-import { StatsBar } from '../../../components/stats_bar/stats_bar';
-import { useMlLocator } from '../../../contexts/kibana/use_create_url';
-import { useNavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
-import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_management/components/source_selection/source_selection';
-import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service/get_analytics';
+
 import { AnalyticsTable } from './table';
+import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
+import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
+import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_management/components/source_selection';
 
 interface Props {
   jobCreationDisabled: boolean;

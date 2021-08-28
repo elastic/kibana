@@ -4,25 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { CaseStatuses } from '../../../common/api/cases/status';
-import type { ActionConnector, CaseConnector } from '../../../common/api/connectors';
-import type { Case } from '../../../common/ui/types';
+
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import type { CaseServices } from '../../containers/use_get_case_user_actions';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import type { CasesNavigation } from '../links';
 import { CaseCallOut } from './callout';
-import type { ErrorMessage } from './callout/types';
 import {
-  getCaseClosedInfo,
+  getLicenseError,
+  getKibanaConfigError,
   getConnectorMissingInfo,
   getDeletedConnectorError,
-  getKibanaConfigError,
-  getLicenseError,
+  getCaseClosedInfo,
 } from './helpers';
 import * as i18n from './translations';
+import { Case, CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
+import { CaseServices } from '../../containers/use_get_case_user_actions';
+import { CasesNavigation } from '../links';
+import { ErrorMessage } from './callout/types';
 
 export interface UsePushToService {
   caseId: string;

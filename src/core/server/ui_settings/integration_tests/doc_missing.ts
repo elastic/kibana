@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { chance } from './lib/chance';
-import { getServices } from './lib/servers';
+
+import { getServices, chance } from './lib';
 
 export const docMissingSuite = (savedObjectsIndex: string) => () => {
   // ensure the kibana index has no documents

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import './spaces_menu.scss';
+
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -18,15 +20,12 @@ import React, { Component, lazy, Suspense } from 'react';
 
 import type { InjectedIntl } from '@kbn/i18n/react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import type { ApplicationStart, Capabilities } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { ApplicationStart } from '../../../../../../src/core/public/application/types';
-import type { Capabilities } from '../../../../../../src/core/types/capabilities';
-import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
-import { ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common/constants';
-import { addSpaceIdToPath } from '../../../common/lib/spaces_url_parser';
-import { getSpaceAvatarComponent } from '../../space_avatar/space_avatar';
+import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
+import { getSpaceAvatarComponent } from '../../space_avatar';
 import { ManageSpacesButton } from './manage_spaces_button';
-import './spaces_menu.scss';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>

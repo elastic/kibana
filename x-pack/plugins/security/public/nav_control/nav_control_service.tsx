@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { sortBy } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -11,9 +12,10 @@ import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import type { CoreStart } from '../../../../../src/core/public/types';
-import type { SecurityLicense } from '../../common/licensing/license_service';
-import type { AuthenticationServiceSetup } from '../authentication/authentication_service';
+import type { CoreStart } from 'src/core/public';
+
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticationServiceSetup } from '../authentication';
 import type { UserMenuLink } from './nav_control_component';
 import { SecurityNavControl } from './nav_control_component';
 

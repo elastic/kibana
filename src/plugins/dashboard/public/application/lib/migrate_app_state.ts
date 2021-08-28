@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
-import { i18n } from '@kbn/i18n';
 import semverSatisfies from 'semver/functions/satisfies';
-import type { UsageCollectionSetup } from '../../../../usage_collection/public/plugin';
-import { migratePanelsTo730 } from '../../../common/migrate_to_730_panels';
-import type {
-  SavedDashboardPanel,
+import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
+
+import { UsageCollectionSetup } from '../../services/usage_collection';
+import { RawDashboardState, SavedDashboardPanel } from '../../types';
+import {
+  migratePanelsTo730,
+  SavedDashboardPanelTo60,
+  SavedDashboardPanel730ToLatest,
   SavedDashboardPanel610,
-  SavedDashboardPanel620,
   SavedDashboardPanel630,
   SavedDashboardPanel640To720,
-  SavedDashboardPanel730ToLatest,
-  SavedDashboardPanelTo60,
-} from '../../../common/types';
-import type { RawDashboardState } from '../../types';
+  SavedDashboardPanel620,
+} from '../../../common';
 
 /**
  * Attempts to migrate the state stored in the URL into the latest version of it.

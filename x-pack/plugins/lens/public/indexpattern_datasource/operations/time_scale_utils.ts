@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TimeScaleUnit } from '../../../common/expressions/time_scale/types';
+
 import { unitSuffixesLong } from '../../../common/suffix_formatter';
+import type { TimeScaleUnit } from '../../../common/expressions';
 import type { IndexPatternLayer } from '../types';
 import type { IndexPatternColumn } from './definitions';
 

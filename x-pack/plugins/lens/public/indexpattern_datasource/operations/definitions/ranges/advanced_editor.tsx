@@ -5,35 +5,34 @@
  * 2.0.
  */
 
+import './advanced_editor.scss';
+
+import React, { useState, MouseEventHandler, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
+  EuiFieldNumber,
   EuiLink,
-  EuiPopover,
   EuiText,
+  EuiPopover,
   EuiToolTip,
   htmlIdGenerator,
   keys,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { MouseEventHandler } from 'react';
-import React, { useEffect, useState } from 'react';
-import type { IFieldFormat } from '../../../../../../../../src/plugins/field_formats/common/types';
-import { useDebounceWithOptions } from '../../../../shared_components/helpers';
-import { isValidNumber } from '../helpers';
+import { useDebounceWithOptions } from '../../../../shared_components';
+import { IFieldFormat } from '../../../../../../../../src/plugins/field_formats/common';
+import { RangeTypeLens, isValidRange } from './ranges';
+import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import {
+  NewBucketButton,
   DragDropBuckets,
   DraggableBucketContainer,
-  NewBucketButton,
-} from '../shared_components/buckets';
-import { LabelInput } from '../shared_components/label_input';
-import './advanced_editor.scss';
-import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
-import type { RangeTypeLens } from './ranges';
-import { isValidRange } from './ranges';
+  LabelInput,
+} from '../shared_components';
+import { isValidNumber } from '../helpers';
 
 const generateId = htmlIdGenerator();
 

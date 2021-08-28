@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { darken } from 'polished';
 import React from 'react';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type {
+
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import {
   InfraFormatter,
+  InfraWaffleMapRuleOperator,
   InfraWaffleMapStepLegend,
   InfraWaffleMapStepRule,
 } from '../../../../../lib/lib';
-import { InfraWaffleMapRuleOperator } from '../../../../../lib/lib';
 
 const OPERATORS = {
   [InfraWaffleMapRuleOperator.gte]: '>=',

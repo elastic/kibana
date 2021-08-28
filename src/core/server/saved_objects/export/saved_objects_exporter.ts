@@ -5,24 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { createListStream } from '@kbn/utils';
-import type { SavedObject } from '../../../types/saved_objects';
-import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import type { SavedObjectsFindResult } from '../service/saved_objects_client';
-import type { SavedObjectsClientContract } from '../types';
-import { collectExportedObjects } from './collect_exported_objects';
-import { SavedObjectsExportError } from './errors';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { Logger } from '../../logging';
+import { SavedObject, SavedObjectsClientContract } from '../types';
+import { SavedObjectsFindResult } from '../service';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { sortObjects } from './sort_objects';
-import type {
+import {
+  SavedObjectsExportResultDetails,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-  SavedObjectsExportResultDetails,
 } from './types';
-import type { SavedObjectComparator } from './utils';
-import { byIdAscComparator, getPreservedOrderComparator } from './utils';
+import { SavedObjectsExportError } from './errors';
+import { collectExportedObjects } from './collect_exported_objects';
+import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
 
 /**
  * @public

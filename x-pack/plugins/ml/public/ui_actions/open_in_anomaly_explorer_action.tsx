@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { createAction } from '../../../../../src/plugins/ui_actions/public/actions/create_action';
+import { SerializableRecord } from '@kbn/utility-types';
+import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import { MlCoreSetup } from '../plugin';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
-import type { ExplorerAppState } from '../../common/types/locator';
-import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-} from '../embeddables/constants';
-import type {
   AnomalyChartsFieldSelectionContext,
+  isAnomalyExplorerEmbeddable,
+  isSwimLaneEmbeddable,
   SwimLaneDrilldownContext,
-} from '../embeddables/types';
-import { isAnomalyExplorerEmbeddable, isSwimLaneEmbeddable } from '../embeddables/types';
-import type { MlCoreSetup } from '../plugin';
+} from '../embeddables';
+import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
+import { ExplorerAppState } from '../../common/types/locator';
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 

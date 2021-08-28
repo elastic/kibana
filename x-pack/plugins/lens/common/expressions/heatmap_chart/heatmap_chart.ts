@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { PaletteOutput } from '../../../../../../src/plugins/charts/common/palette';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
-import type { CustomPaletteParams, LensMultiTable } from '../../types';
-import type { HeatmapGridConfigResult } from './heatmap_grid';
-import { HEATMAP_GRID_FUNCTION } from './heatmap_grid';
-import type { HeatmapLegendConfigResult } from './heatmap_legend';
-import { HEATMAP_LEGEND_FUNCTION } from './heatmap_legend';
+import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type { PaletteOutput } from '../../../../../../src/plugins/charts/common';
+import type { LensMultiTable, CustomPaletteParams } from '../../types';
+import { HeatmapGridConfigResult, HEATMAP_GRID_FUNCTION } from './heatmap_grid';
+import { HeatmapLegendConfigResult, HEATMAP_LEGEND_FUNCTION } from './heatmap_legend';
 
 export const HEATMAP_FUNCTION = 'lens_heatmap';
 export const HEATMAP_FUNCTION_RENDERER = 'lens_heatmap_renderer';

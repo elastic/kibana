@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiHealth } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { getFormattedSeverityScore } from '../../../../../ml/common/util/anomaly_utils';
-import {
-  getSeverityCategoryForScore,
-  ML_SEVERITY_COLORS,
-} from '../../../../common/log_analysis/log_analysis_results';
+import { getFormattedSeverityScore } from '../../../../../ml/public';
+import { getSeverityCategoryForScore, ML_SEVERITY_COLORS } from '../../../../common/log_analysis';
 
 export const AnomalySeverityIndicator: React.FunctionComponent<{
   anomalyScore: number;

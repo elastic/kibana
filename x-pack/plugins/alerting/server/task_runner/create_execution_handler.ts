@@ -4,21 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import { asSavedObjectExecutionSource } from '../../../actions/server/lib/action_execution_source';
-import type { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server/plugin';
-import type { IEvent } from '../../../event_log/generated/schemas';
-import type { IEventLogger } from '../../../event_log/server/types';
-import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server/types';
-import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server/task_running/errors';
-import type { AlertAction, AlertTypeParams, AlertTypeState } from '../../common/alert';
-import type { AlertInstanceContext, AlertInstanceState } from '../../common/alert_instance';
-import { EVENT_LOG_ACTIONS } from '../plugin';
-import type { NormalizedAlertType } from '../rule_type_registry';
-import type { RawAlert } from '../types';
-import { injectActionParams } from './inject_action_params';
+import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
+import {
+  asSavedObjectExecutionSource,
+  PluginStartContract as ActionsPluginStartContract,
+} from '../../../actions/server';
+import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { EVENT_LOG_ACTIONS } from '../plugin';
+import { injectActionParams } from './inject_action_params';
+import {
+  AlertAction,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  RawAlert,
+} from '../types';
+import { NormalizedAlertType } from '../rule_type_registry';
+import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 
 export interface CreateExecutionHandlerOptions<
   Params extends AlertTypeParams,

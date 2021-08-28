@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import type { SavedObjectsServiceStart } from '../../../../../../core/server/saved_objects/saved_objects_service';
+
+import { Logger, SavedObjectsServiceStart } from 'kibana/server';
 
 const SAVED_OBJECT_ID = 'sample-data-telemetry';
 

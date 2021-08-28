@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useMemo } from 'react';
-import { CaseType } from '../../../../common/api/cases/case';
+
+import React, { memo, useMemo, useCallback } from 'react';
+import { CaseType } from '../../../../common';
 import {
-  DEFAULT_FILTER_OPTIONS,
-  DEFAULT_QUERY_PARAMS,
   useGetCases,
+  DEFAULT_QUERY_PARAMS,
+  DEFAULT_FILTER_OPTIONS,
 } from '../../../containers/use_get_cases';
 import { useCreateCaseModal } from '../../use_create_case_modal';
-import { ADD_CASE_BUTTON_ID, CasesDropdown } from './cases_dropdown';
+import { CasesDropdown, ADD_CASE_BUTTON_ID } from './cases_dropdown';
 
 interface ExistingCaseProps {
   selectedCase: string | null;

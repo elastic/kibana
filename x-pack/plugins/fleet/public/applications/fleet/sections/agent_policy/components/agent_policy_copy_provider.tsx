@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiConfirmModal, EuiFieldText, EuiFormRow } from '@elastic/eui';
+
+import React, { Fragment, useRef, useState } from 'react';
+import { EuiConfirmModal, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, useRef, useState } from 'react';
 
-import type { AgentPolicy } from '../../../../../../common/types/models/agent_policy';
-import { useStartServices } from '../../../../../hooks/use_core';
-import { sendCopyAgentPolicy } from '../../../../../hooks/use_request/agent_policy';
+import type { AgentPolicy } from '../../../types';
+import { sendCopyAgentPolicy, useStartServices } from '../../../hooks';
 
 interface Props {
   children: (copyAgentPolicy: CopyAgentPolicy) => React.ReactElement;

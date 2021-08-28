@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { TestScheduler } from 'rxjs/testing';
+import { ServiceStatus, ServiceStatusLevels } from './types';
 import { getOverallStatusChanges } from './log_overall_status';
-import type { ServiceStatus } from './types';
-import { ServiceStatusLevels } from './types';
 
 const getTestScheduler = () =>
   new TestScheduler((actual, expected) => {

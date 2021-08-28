@@ -4,20 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '../../../../../src/core/server/http/router/router';
-import { BASE_ALERTING_API_PATH } from '../../common';
-import type { AlertTypeParams } from '../../common/alert';
-import type { AlertNotifyWhenType } from '../../common/alert_notify_when_type';
-import { validateNotifyWhenType } from '../../common/alert_notify_when_type';
-import { validateDurationSchema } from '../../common/parse_duration';
-import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
-import type { ILicenseState } from '../lib/license_state';
-import type { UpdateOptions } from '../rules_client/rules_client';
-import type { AlertingRequestHandlerContext, PartialAlert } from '../types';
-import { handleDisabledApiKeysError } from './lib/error_handler';
-import type { RewriteRequestCase, RewriteResponseCase } from './lib/rewrite_request_case';
-import { verifyAccessAndContext } from './lib/verify_access_and_context';
+import { IRouter } from 'kibana/server';
+import { ILicenseState, AlertTypeDisabledError, validateDurationSchema } from '../lib';
+import { AlertNotifyWhenType } from '../../common';
+import { UpdateOptions } from '../rules_client';
+import {
+  verifyAccessAndContext,
+  RewriteResponseCase,
+  RewriteRequestCase,
+  handleDisabledApiKeysError,
+} from './lib';
+import {
+  AlertTypeParams,
+  AlertingRequestHandlerContext,
+  BASE_ALERTING_API_PATH,
+  validateNotifyWhenType,
+  PartialAlert,
+} from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),

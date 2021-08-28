@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { EuiBetaBadge } from '@elastic/eui';
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
-import type { ChromeBadge } from '../../types';
+
+import { ChromeBadge } from '../../types';
 
 interface Props {
   badge$: Rx.Observable<ChromeBadge | undefined>;

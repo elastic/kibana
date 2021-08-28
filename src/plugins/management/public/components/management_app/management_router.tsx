@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React, { memo } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
-import { ScopedHistory } from '../../../../../core/public/application/scoped_history';
-import type { AppMountParameters } from '../../../../../core/public/application/types';
-import type { ChromeBreadcrumb } from '../../../../../core/public/chrome/types';
-import { ManagementSection } from '../../utils/management_section';
-import { ManagementLandingPage } from '../landing/landing';
-import { ManagementAppWrapper } from '../management_app_wrapper/management_app_wrapper';
-import type { ManagementAppDependencies } from './management_app';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
+import { ManagementAppWrapper } from '../management_app_wrapper';
+import { ManagementLandingPage } from '../landing';
+import { ManagementAppDependencies } from './management_app';
+import { ManagementSection } from '../../utils';
 
 interface ManagementRouterProps {
   history: AppMountParameters['history'];

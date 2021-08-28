@@ -7,13 +7,9 @@
  */
 
 import dateMath from '@elastic/datemath';
-import type { FieldFilter, Filter } from '@kbn/es-query';
-import type { IFieldType } from '../../../../../common/index_patterns/fields/types';
-import { isFilterable } from '../../../../../common/index_patterns/fields/utils';
-import type { IIndexPattern } from '../../../../../common/index_patterns/types';
-import { IpAddress } from '../../../../../common/search/aggs/utils/ip_address';
-import type { Operator } from './filter_operators';
-import { FILTER_OPERATORS } from './filter_operators';
+import { Filter, FieldFilter } from '@kbn/es-query';
+import { FILTER_OPERATORS, Operator } from './filter_operators';
+import { isFilterable, IIndexPattern, IFieldType, IpAddress } from '../../../../../common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
   return indexPattern.fields.find((field) => field.name === filter.meta.key);

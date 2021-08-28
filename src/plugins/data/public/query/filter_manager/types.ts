@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Filter } from '../../../common/es_query';
+
+import { Filter } from '../../../common';
 
 export interface PartitionedFilters {
   globalFilters: Filter[];

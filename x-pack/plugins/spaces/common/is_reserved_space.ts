@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { get } from 'lodash';
 
-import type { Space } from '../../../../src/plugins/spaces_oss/common/types';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
 /**
  * Returns whether the given Space is reserved or not.

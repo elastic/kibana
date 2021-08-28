@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import deepEqual from 'fast-deep-equal';
+
 import { uniqBy } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import { Observable, pipe } from 'rxjs';
-import { distinctUntilChanged, filter, map, mapTo, switchMap } from 'rxjs/operators';
-import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { IndexPatternsContract } from '../../../../data/common/index_patterns/index_patterns/index_patterns';
-import { isErrorEmbeddable } from '../../../../embeddable/public/lib/embeddables/error_embeddable';
-import { DashboardContainer } from '../embeddable/dashboard_container';
+import { distinctUntilChanged, switchMap, filter, mapTo, map } from 'rxjs/operators';
+
+import { DashboardContainer } from '..';
+import { isErrorEmbeddable } from '../../services/embeddable';
+import { IndexPattern, IndexPatternsContract } from '../../services/data';
 
 interface SyncDashboardIndexPatternsProps {
   dashboardContainer: DashboardContainer;

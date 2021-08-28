@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFilterButton, hexToRgb } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import FieldValueSuggestions from '../../../field_value_suggestions';
+import { EuiFilterButton, hexToRgb } from '@elastic/eui';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useSeriesFilters } from '../../hooks/use_series_filters';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
+import { useSeriesFilters } from '../../hooks/use_series_filters';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import FieldValueSuggestions from '../../../field_value_suggestions';
 
 interface Props {
   value: string;

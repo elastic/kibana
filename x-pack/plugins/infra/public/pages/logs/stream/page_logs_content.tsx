@@ -4,31 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useCallback, useMemo, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { Query } from '../../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { LogEntry } from '../../../../common/log_entry/log_entry';
-import type { TimeKey } from '../../../../common/time/time_key';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { LogEntry } from '../../../../common/log_entry';
+import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
-import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout/log_entry_flyout';
-import { LogMinimap } from '../../../components/logging/log_minimap/log_minimap';
-import type { LogEntryStreamItem } from '../../../components/logging/log_text_stream/item';
-import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream/scrollable_log_text_stream_view';
+import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
+import { LogMinimap } from '../../../components/logging/log_minimap';
+import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
+import { LogEntryStreamItem } from '../../../components/logging/log_text_stream/item';
 import { PageContent } from '../../../components/page';
-import { LogFilterState } from '../../../containers/logs/log_filter/log_filter_state';
+import { LogFilterState } from '../../../containers/logs/log_filter';
 import {
   useLogEntryFlyoutContext,
   WithFlyoutOptionsUrlState,
 } from '../../../containers/logs/log_flyout';
-import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
-import { LogPositionState } from '../../../containers/logs/log_position/log_position_state';
-import { useLogSourceContext } from '../../../containers/logs/log_source/log_source';
+import { LogHighlightsState } from '../../../containers/logs/log_highlights';
+import { LogPositionState } from '../../../containers/logs/log_position';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useLogStreamContext } from '../../../containers/logs/log_stream';
-import { WithSummary } from '../../../containers/logs/log_summary/with_summary';
+import { WithSummary } from '../../../containers/logs/log_summary';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
-import { ViewLogInContext } from '../../../containers/logs/view_log_in_context/view_log_in_context';
+import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 import { LogsToolbar } from './page_toolbar';

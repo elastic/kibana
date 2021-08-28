@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Location } from 'history';
 import React from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Location } from 'history';
+import { Redirect, useLocation, RouteComponentProps } from 'react-router-dom';
 
 /**
  * Function that returns a react component to redirect to a given pathname removing hash-based URLs

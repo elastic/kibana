@@ -5,20 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { duration } from 'moment';
+
+import { MockClusterClient } from './elasticsearch_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { Env } from '../config';
 import { configServiceMock, getEnvOptions } from '../config/mocks';
-import type { CoreContext } from '../core_context';
-import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
+import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { elasticsearchClientMock } from './client/mocks';
+import { httpServiceMock } from '../http/http_service.mock';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
-import { MockClusterClient } from './elasticsearch_service.test.mocks';
+import { elasticsearchClientMock } from './client/mocks';
+import { duration } from 'moment';
 
 const delay = async (durationMs: number) =>
   await new Promise((resolve) => setTimeout(resolve, durationMs));

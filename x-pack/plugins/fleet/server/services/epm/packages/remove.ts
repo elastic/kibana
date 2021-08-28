@@ -4,32 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import Boom from '@hapi/boom';
 
-import type { ElasticsearchClient } from '../../../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../../../src/core/server/saved_objects/types';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common/constants/epm';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common/constants/package_policy';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import { ElasticsearchAssetType } from '../../../types';
 import type {
   AssetReference,
   AssetType,
   EsAssetReference,
-  Installation,
   KibanaAssetReference,
-} from '../../../../common/types/models/epm';
-import { ElasticsearchAssetType } from '../../../../common/types/models/epm';
-import { appContextService } from '../../app_context';
-import { packagePolicyService } from '../../package_policy';
-import { deletePackageCache } from '../archive';
-import { removeArchiveEntries } from '../archive/storage';
-import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
-import { deletePipeline } from '../elasticsearch/ingest_pipeline/remove';
-import { deleteTransforms } from '../elasticsearch/transform/remove';
+  Installation,
+} from '../../../types';
+import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
+import { deleteTransforms } from '../elasticsearch/transform/remove';
+import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey } from '../registry';
+import { deletePackageCache } from '../archive';
+import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
+import { removeArchiveEntries } from '../archive/storage';
 
-import { savedObjectTypes } from '.';
-import { getInstallation } from './get';
+import { getInstallation, savedObjectTypes } from './index';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;

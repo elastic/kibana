@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
-import type { MlJobsResponse } from '../../../common/types/job_service';
-import type { MlClient } from '../../lib/ml_client/types';
-import { CalendarManager } from '../calendar/calendar_manager';
+import { MlJobsResponse } from '../../../common/types/job_service';
+import type { MlClient } from '../../lib/ml_client';
 
 export interface Group {
   id: string;

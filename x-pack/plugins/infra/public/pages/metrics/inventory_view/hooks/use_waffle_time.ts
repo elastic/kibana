@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import DateMath from '@elastic/datemath';
-import createContainer from 'constate';
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
-import { useCallback, useEffect, useState } from 'react';
-import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
-import { useUrlState } from '../../../../utils/use_url_state';
 
+import { useCallback, useState, useEffect } from 'react';
+import * as rt from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import DateMath from '@elastic/datemath';
+import { constant, identity } from 'fp-ts/lib/function';
+import createContainer from 'constate';
+import { useUrlState } from '../../../../utils/use_url_state';
+import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
   currentTime: Date.now(),
   isAutoReloading: false,

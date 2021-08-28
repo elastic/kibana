@@ -4,27 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty, isEqual, pick } from 'lodash/fp';
-import memoizeOne from 'memoize-one';
+
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { isEmpty, isEqual, pick } from 'lodash/fp';
 import { Subscription } from 'rxjs/internal/Subscription';
-import type { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/types';
+
+import memoizeOne from 'memoize-one';
 import {
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../src/plugins/data/common/search/utils';
-import type { DataPublicPluginStart } from '../../../../../../src/plugins/data/public/types';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public/context/context';
-import type { DocValueFields } from '../../../common/search_strategy/common';
-import type {
   BrowserField,
   BrowserFields,
+  DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-} from '../../../common/search_strategy/index_fields';
-import { useAppToasts } from '../../hooks/use_app_toasts';
+} from '../../../common';
 import * as i18n from './translations';
+
+import {
+  IIndexPattern,
+  DataPublicPluginStart,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../src/plugins/data/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };

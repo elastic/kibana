@@ -5,32 +5,30 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
+import _ from 'lodash';
 import React, { Component } from 'react';
-import { Observable } from 'rxjs';
+import classNames from 'classnames';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
-import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button';
-import type {
-  Action,
-  ActionExecutionContext,
-} from '../../../../../../src/plugins/ui_actions/public/actions/action';
-import type { RawValue } from '../../../common/constants';
-import type { ILayer } from '../../classes/layers/layer';
-import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
-import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { getCoreChrome } from '../../kibana_services';
-import type { MapSettings } from '../../reducers/map/types';
-import { FLYOUT_STATE } from '../../reducers/ui';
-import { AddLayerPanel } from '../add_layer_panel';
-import { EditLayerPanel } from '../edit_layer_panel';
-import { MapSettingsPanel } from '../map_settings_panel';
+import { Filter } from 'src/plugins/data/public';
+import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { Observable } from 'rxjs';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
+import { EditLayerPanel } from '../edit_layer_panel';
+import { AddLayerPanel } from '../add_layer_panel';
+import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
+import { getCoreChrome } from '../../kibana_services';
+import { RawValue } from '../../../common/constants';
+import { FLYOUT_STATE } from '../../reducers/ui';
+import { MapSettings } from '../../reducers/map';
+import { MapSettingsPanel } from '../map_settings_panel';
+import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
+import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import { ILayer } from '../../classes/layers/layer';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 

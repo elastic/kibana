@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { History } from 'history';
+
+import { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { SpanFlyout } from './span_flyout';
 import { TransactionFlyout } from './transaction_flyout';
-import type { IWaterfall } from './waterfall_helpers/waterfall_helpers';
+import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
 
 interface Props {
   waterfallItemId?: string;

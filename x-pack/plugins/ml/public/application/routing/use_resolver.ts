@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { useEffect, useState } from 'react';
-import type { IUiSettingsClient } from '../../../../../../src/core/public/ui_settings/types';
-import { ML_PAGES } from '../../../common/constants/locator';
-import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
-import { useNotifications } from '../contexts/kibana/use_notifications_context';
-import type { MlContextValue } from '../contexts/ml/ml_context';
-import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
-import type { IndexPatternAndSavedSearch } from '../util/index_utils';
+import { IUiSettingsClient } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
-  getIndexPatternAndSavedSearch,
   getIndexPatternById,
   getIndexPatternsContract,
+  getIndexPatternAndSavedSearch,
+  IndexPatternAndSavedSearch,
 } from '../util/index_utils';
-import type { ResolverResults, Resolvers } from './resolvers';
+import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
+import { ResolverResults, Resolvers } from './resolvers';
+import { MlContextValue } from '../contexts/ml';
+import { useNotifications } from '../contexts/kibana';
+import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
+import { ML_PAGES } from '../../../common/constants/locator';
 
 /**
  * Hook to resolve route specific requirements

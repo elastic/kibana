@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EmbeddableInput } from '../types';
+
+import { EmbeddableInput } from '../types';
 
 export interface SavedObjectEmbeddableInput extends EmbeddableInput {
   savedObjectId: string;

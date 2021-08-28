@@ -4,23 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { range } from 'lodash';
-import type { ElasticsearchClient } from '../../../../../../../src/core/server/elasticsearch/client/types';
-import type { ApmIndicesConfig } from '../../../../../observability/common/typings';
+import type { ElasticsearchClient } from 'src/core/server';
 import type {
-  SearchServiceFetchParams,
   SearchServiceParams,
+  SearchServiceFetchParams,
 } from '../../../../common/search_strategies/correlations/types';
+import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import {
+  fetchTransactionDurationFieldCandidates,
+  fetchTransactionDurationFieldValuePairs,
+  fetchTransactionDurationFractions,
+  fetchTransactionDurationPercentiles,
+  fetchTransactionDurationHistograms,
+  fetchTransactionDurationHistogramRangeSteps,
+  fetchTransactionDurationRanges,
+} from './queries';
+import { computeExpectationsAndRanges } from './utils';
 import { asyncSearchServiceLogProvider } from './async_search_service_log';
 import { asyncSearchServiceStateProvider } from './async_search_service_state';
-import { fetchTransactionDurationFieldCandidates } from './queries/query_field_candidates';
-import { fetchTransactionDurationFieldValuePairs } from './queries/query_field_value_pairs';
-import { fetchTransactionDurationFractions } from './queries/query_fractions';
-import { fetchTransactionDurationHistograms } from './queries/query_histograms_generator';
-import { fetchTransactionDurationHistogramRangeSteps } from './queries/query_histogram_range_steps';
-import { fetchTransactionDurationPercentiles } from './queries/query_percentiles';
-import { fetchTransactionDurationRanges } from './queries/query_ranges';
-import { computeExpectationsAndRanges } from './utils/compute_expectations_and_ranges';
 
 export const asyncSearchServiceProvider = (
   esClient: ElasticsearchClient,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { isoToEpochRt } from '@kbn/io-ts-utils';
 
 export { environmentRt } from '../../common/environment_rt';
 

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFilterButton, EuiFilterGroup, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFilterGroup, EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 
 interface SolutionFilterProps {
   solutions: Map<string, string>;

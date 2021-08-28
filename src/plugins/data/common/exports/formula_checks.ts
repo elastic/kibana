@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { startsWith } from 'lodash';
-import type { Datatable } from '../../../expressions/common/expression_types/specs/datatable';
+import { Datatable } from 'src/plugins/expressions';
 import { CSV_FORMULA_CHARS } from './constants';
 
 export const cellHasFormulas = (val: string) =>

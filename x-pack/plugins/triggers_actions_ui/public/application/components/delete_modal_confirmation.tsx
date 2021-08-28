@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import type { HttpSetup } from '../../../../../../src/core/public/http/types';
-import { useKibana } from '../../common/lib/kibana/kibana_react';
+import { HttpSetup } from 'kibana/public';
+import { useKibana } from '../../common/lib/kibana';
 
 export const DeleteModalConfirmation = ({
   idsToDelete,

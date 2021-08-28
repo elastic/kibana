@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { InventoryMetrics } from '../../types';
+
+import { InventoryMetrics } from '../../types';
 import { cpu } from './snapshot/cpu';
 import { memory } from './snapshot/memory';
 import { rx } from './snapshot/rx';
 import { tx } from './snapshot/tx';
-import { containerCpuKernel } from './tsvb/container_cpu_kernel';
+
+import { containerOverview } from './tsvb/container_overview';
 import { containerCpuUsage } from './tsvb/container_cpu_usage';
+import { containerCpuKernel } from './tsvb/container_cpu_kernel';
 import { containerDiskIOOps } from './tsvb/container_diskio_ops';
 import { containerDiskIOBytes } from './tsvb/container_disk_io_bytes';
 import { containerMemory } from './tsvb/container_memory';
 import { containerNetworkTraffic } from './tsvb/container_network_traffic';
-import { containerOverview } from './tsvb/container_overview';
 
 export const metrics: InventoryMetrics = {
   tsvb: {

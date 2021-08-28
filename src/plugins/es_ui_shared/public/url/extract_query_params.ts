@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ParsedQuery } from 'query-string';
-import { parse } from 'query-string';
+
+import { parse, ParsedQuery } from 'query-string';
 
 export function extractQueryParams(queryString: string = ''): ParsedQuery<string> {
   const hrefSplit = queryString.split('?');

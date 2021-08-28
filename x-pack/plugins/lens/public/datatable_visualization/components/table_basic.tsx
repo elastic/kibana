@@ -5,28 +5,34 @@
  * 2.0.
  */
 
-import type {
-  EuiDataGridColumn,
+import './table_basic.scss';
+
+import React, { useCallback, useMemo, useRef, useState, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
+import {
+  EuiButtonIcon,
+  EuiDataGrid,
   EuiDataGridControlColumn,
+  EuiDataGridColumn,
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
-import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
-import type { LensGridDirection } from '../../../common/expressions/datatable/datatable_column';
-import { getFinalSummaryConfiguration } from '../../../common/expressions/datatable/summary';
-import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
-import type { FormatFactory } from '../../../common/types';
-import { LensIconChartDatatable } from '../../assets/chart_datatable';
-import { CUSTOM_PALETTE } from '../../shared_components/coloring/constants';
-import { findMinMaxByColumnId } from '../../shared_components/coloring/utils';
-import { EmptyPlaceholder } from '../../shared_components/empty_placeholder';
 import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
+import type { FormatFactory } from '../../../common';
+import { LensGridDirection } from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
-import { createGridCell } from './cell_value';
+import { EmptyPlaceholder, findMinMaxByColumnId } from '../../shared_components';
+import { LensIconChartDatatable } from '../../assets/chart_datatable';
+import type {
+  DataContextType,
+  DatatableRenderProps,
+  LensSortAction,
+  LensResizeAction,
+  LensToggleAction,
+} from './types';
 import { createGridColumns } from './columns';
+import { createGridCell } from './cell_value';
 import {
   createGridFilterHandler,
   createGridHideHandler,
@@ -34,14 +40,8 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import './table_basic.scss';
-import type {
-  DataContextType,
-  DatatableRenderProps,
-  LensResizeAction,
-  LensSortAction,
-  LensToggleAction,
-} from './types';
+import { CUSTOM_PALETTE } from '../../shared_components/coloring/constants';
+import { getOriginalId, getFinalSummaryConfiguration } from '../../../common/expressions';
 
 export const DataContext = React.createContext<DataContextType>({});
 

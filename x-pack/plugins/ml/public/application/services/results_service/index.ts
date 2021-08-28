@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MlApiServices } from '../ml_api_service';
-import { ml } from '../ml_api_service';
-import { resultsServiceProvider } from './results_service';
+
 import { resultsServiceRxProvider } from './result_service_rx';
+import { resultsServiceProvider } from './results_service';
+import { ml, MlApiServices } from '../ml_api_service';
 
 export type MlResultsService = typeof mlResultsService;
 

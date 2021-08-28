@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { getColorRampCenterColor, getColorPalette } from '../../../color_palettes';
 import { COLOR_MAP_TYPE, STYLE_TYPE } from '../../../../../../common/constants';
-import type {
+import {
   ColorDynamicOptions,
   ColorStylePropertyDescriptor,
-} from '../../../../../../common/descriptor_types/style_property_descriptor_types';
-import { getColorPalette, getColorRampCenterColor } from '../../../color_palettes';
+} from '../../../../../../common/descriptor_types';
 
 export function extractColorFromStyleProperty(
   colorStyleProperty: ColorStylePropertyDescriptor | undefined,

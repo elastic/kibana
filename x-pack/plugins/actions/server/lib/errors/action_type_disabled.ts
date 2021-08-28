@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { KibanaResponseFactory } from '../../../../../../src/core/server/http/router/response';
-import type { ErrorThatHandlesItsOwnResponse } from './types';
+
+import { KibanaResponseFactory } from '../../../../../../src/core/server';
+import { ErrorThatHandlesItsOwnResponse } from './types';
 
 export type ActionTypeDisabledReason =
   | 'config'

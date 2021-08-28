@@ -8,9 +8,9 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { pick } from 'lodash';
+import { isActiveGoldLicense } from '../../../common/license_check';
 import { INVALID_LICENSE } from '../../../common/custom_link';
 import { FILTER_OPTIONS } from '../../../common/custom_link/custom_link_filter_options';
-import { isActiveGoldLicense } from '../../../common/license_check';
 import { notifyFeatureUsage } from '../../feature';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_or_update_custom_link';

@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   EuiIcon,
-  EuiImage,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
   EuiSpacer,
+  EuiPageContent,
+  EuiPageBody,
+  EuiPage,
+  EuiImage,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
-import React from 'react';
-import type { HttpStart } from '../../../../../../core/public/http/types';
-import type { IUiSettingsClient } from '../../../../../../core/public/ui_settings/types';
+import { IUiSettingsClient, HttpStart } from 'kibana/public';
 import { emptyScreenStrings } from '../../../dashboard_strings';
 
 export interface DashboardEmptyScreenProps {

@@ -4,38 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RequestHandlerContext } from '../../../../src/core/server';
-import type { IScopedClusterClient } from '../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import { KibanaRequest } from '../../../../src/core/server/http/router/request';
-import type { IRouter } from '../../../../src/core/server/http/router/router';
-import type { SavedObjectsClientContract } from '../../../../src/core/server/saved_objects/types';
-import type {
+import { PublicAlertInstance } from './alert_instance';
+import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
+import { PluginSetupContract, PluginStartContract } from './plugin';
+import { RulesClient } from './rules_client';
+export * from '../common';
+import {
+  IScopedClusterClient,
+  KibanaRequest,
   SavedObjectAttributes,
-  SavedObjectReference,
-} from '../../../../src/core/types/saved_objects';
-import type { LicenseType } from '../../licensing/common/types';
-import type {
-  ActionVariable,
+  SavedObjectsClientContract,
+} from '../../../../src/core/server';
+import {
   Alert,
   AlertActionParams,
-  AlertExecutionStatuses,
-  AlertsHealth,
+  ActionGroup,
   AlertTypeParams,
   AlertTypeState,
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertExecutionStatuses,
+  AlertExecutionStatusErrorReasons,
+  AlertsHealth,
+  AlertNotifyWhenType,
+  WithoutReservedActionGroups,
+  ActionVariable,
   SanitizedRuleConfig,
-} from '../common/alert';
-import { AlertExecutionStatusErrorReasons } from '../common/alert';
-import type { AlertInstanceContext, AlertInstanceState } from '../common/alert_instance';
-import type { AlertNotifyWhenType } from '../common/alert_notify_when_type';
-import type { ActionGroup } from '../common/alert_type';
-import type { WithoutReservedActionGroups } from '../common/builtin_action_groups';
-import type { PublicAlertInstance } from './alert_instance/alert_instance';
-import type { PluginSetupContract, PluginStartContract } from './plugin';
-import { RulesClient } from './rules_client/rules_client';
-import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
+} from '../common';
+import { LicenseType } from '../../licensing/server';
 
-export * from '../common';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;

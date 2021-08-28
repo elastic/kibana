@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import React, { useEffect, useState } from 'react';
-import type { ActionParamsProps } from '../../../../types';
+import { i18n } from '@kbn/i18n';
+import { ActionParamsProps } from '../../../../types';
+import { SlackActionParams } from '../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
-import type { SlackActionParams } from '../types';
 
 const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionParams>> = ({
   actionParams,

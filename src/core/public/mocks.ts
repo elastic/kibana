@@ -5,30 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { createMemoryHistory } from 'history';
+
+// Only import types from '.' to avoid triggering default Jest mocks.
+import { CoreContext, PluginInitializerContext, AppMountParameters } from '.';
+// Import values from their individual modules instead.
+import { ScopedHistory } from './application';
+
 import { applicationServiceMock } from './application/application_service.mock';
-import { ScopedHistory } from './application/scoped_history';
-import type { AppMountParameters } from './application/types';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import type { CoreContext } from './core_system';
-import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
-import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
-import type { PluginInitializerContext } from './plugins/plugin_context';
-import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
+import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 
-// Only import types from '.' to avoid triggering default Jest mocks.
-// Import values from their individual modules instead.
-export { applicationServiceMock } from './application/application_service.mock';
-export { scopedHistoryMock } from './application/scoped_history.mock';
 export { chromeServiceMock } from './chrome/chrome_service.mock';
-export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 export { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
@@ -36,8 +34,11 @@ export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 export { notificationServiceMock } from './notifications/notifications_service.mock';
 export { overlayServiceMock } from './overlays/overlay_service.mock';
-export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+export { scopedHistoryMock } from './application/scoped_history.mock';
+export { applicationServiceMock } from './application/application_service.mock';
+export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 
 function createCoreSetupMock({
   basePath = '',

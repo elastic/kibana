@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { I18nProvider } from '@kbn/i18n/react';
+
 import React, { useEffect, useRef } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { MountPoint } from '../types';
+import { I18nProvider } from '@kbn/i18n/react';
+import { MountPoint } from '../types';
 
 const defaultWrapperClass = 'kbnMountWrapper';
 

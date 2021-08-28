@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PointerEvent } from '@elastic/charts';
-import type { Datatable } from '../../../../expressions/common/expression_types/specs/datatable';
+import type { Datatable } from '../../../../expressions/public';
 
 /** @public **/
 export type ActiveCursorSyncOption = DateHistogramSyncOption | DatatablesSyncOption;

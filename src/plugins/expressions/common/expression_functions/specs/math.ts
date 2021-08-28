@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { map, zipObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { evaluate } from '@kbn/tinymath';
-import { map, zipObject } from 'lodash';
-import type { Datatable } from '../../expression_types/specs/datatable';
-import { isDatatable } from '../../expression_types/specs/datatable';
-import type { ExpressionFunctionDefinition } from '../types';
+import { ExpressionFunctionDefinition } from '../types';
+import { Datatable, isDatatable } from '../../expression_types';
 
 export type MathArguments = {
   expression: string;

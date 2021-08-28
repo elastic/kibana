@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
-import { getLogSourceConfigurationPath } from '../../../../../common/http_api/log_sources/common';
-import { getLogSourceConfigurationSuccessResponsePayloadRT } from '../../../../../common/http_api/log_sources/get_log_source_configuration';
-import { FetchLogSourceConfigurationError } from '../../../../../common/log_sources/errors';
+
+import type { HttpHandler } from 'src/core/public';
+import {
+  getLogSourceConfigurationPath,
+  getLogSourceConfigurationSuccessResponsePayloadRT,
+} from '../../../../../common/http_api/log_sources';
+import { FetchLogSourceConfigurationError } from '../../../../../common/log_sources';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export const callFetchLogSourceConfigurationAPI = async (sourceId: string, fetch: HttpHandler) => {

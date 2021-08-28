@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
+
 import type {
+  ExpressionFunctionDefinition,
   Datatable,
   DatatableColumn,
-} from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+} from '../../../../../../src/plugins/expressions/common';
 
 export interface FormatColumnArgs {
   format: string;

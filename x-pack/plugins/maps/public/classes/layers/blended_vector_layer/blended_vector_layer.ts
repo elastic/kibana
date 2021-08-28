@@ -4,50 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+import { IVectorLayer, VectorLayer } from '../vector_layer';
+import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
+import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
+import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { IStyleProperty } from '../../styles/vector/properties/style_property';
 import {
-  AGG_TYPE,
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
-  FIELD_ORIGIN,
-  LAYER_STYLE_TYPE,
   LAYER_TYPE,
+  AGG_TYPE,
   RENDER_AS,
   STYLE_TYPE,
   VECTOR_STYLES,
+  LAYER_STYLE_TYPE,
+  FIELD_ORIGIN,
 } from '../../../../common/constants';
-import type {
-  Timeslice,
-  VectorSourceRequestMeta,
-} from '../../../../common/descriptor_types/data_request_descriptor_types';
-import type {
-  LayerDescriptor,
-  VectorLayerDescriptor,
-} from '../../../../common/descriptor_types/layer_descriptor_types';
-import type {
-  DynamicStylePropertyOptions,
-  SizeDynamicOptions,
-  StylePropertyOptions,
-  VectorStyleDescriptor,
-  VectorStylePropertiesDescriptor,
-} from '../../../../common/descriptor_types/style_property_descriptor_types';
-import type { DataRequestContext } from '../../../actions/data_request_actions';
-import { LICENSED_FEATURES } from '../../../licensed_features';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_source';
-import { ESSearchSource } from '../../sources/es_search_source/es_search_source';
-import type { IESSource } from '../../sources/es_source/es_source';
-import { isSearchSourceAbortError } from '../../sources/es_source/es_source';
-import type { ISource } from '../../sources/source';
-import type { IVectorSource } from '../../sources/vector_source/vector_source';
-import type { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
-import type { IStyleProperty } from '../../styles/vector/properties/style_property';
-import type { IVectorStyle } from '../../styles/vector/vector_style';
-import { VectorStyle } from '../../styles/vector/vector_style';
-import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
+import { IESSource } from '../../sources/es_source';
+import { ISource } from '../../sources/source';
+import { DataRequestContext } from '../../../actions';
 import { DataRequestAbortError } from '../../util/data_request';
-import type { IVectorLayer } from '../vector_layer/vector_layer';
-import { VectorLayer } from '../vector_layer/vector_layer';
+import {
+  VectorStyleDescriptor,
+  SizeDynamicOptions,
+  DynamicStylePropertyOptions,
+  StylePropertyOptions,
+  LayerDescriptor,
+  Timeslice,
+  VectorLayerDescriptor,
+  VectorSourceRequestMeta,
+  VectorStylePropertiesDescriptor,
+} from '../../../../common/descriptor_types';
+import { IVectorSource } from '../../sources/vector_source';
+import { LICENSED_FEATURES } from '../../../licensed_features';
+import { ESSearchSource } from '../../sources/es_search_source/es_search_source';
+import { isSearchSourceAbortError } from '../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 

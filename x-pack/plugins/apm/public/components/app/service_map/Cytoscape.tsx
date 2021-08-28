@@ -8,8 +8,15 @@
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 import { isEqual } from 'lodash';
-import type { CSSProperties, ReactNode } from 'react';
-import React, { createContext, memo, useEffect, useRef, useState } from 'react';
+import React, {
+  createContext,
+  CSSProperties,
+  memo,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTheme } from '../../../hooks/use_theme';
 import { getCytoscapeOptions } from './cytoscape_options';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';

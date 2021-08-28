@@ -4,20 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useCallback } from 'react';
+
 import {
-  EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiFieldPassword,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
-import type { ActionConnectorFieldsProps } from '../../../../types';
-import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+
+import { ActionConnectorFieldsProps } from '../../../../types';
+
 import * as i18n from './translations';
-import type { JiraActionConnector } from './types';
+import { JiraActionConnector } from './types';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnector>> = ({
   action,

@@ -4,14 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { SecuredFeature } from '../../../../model/secured_feature';
-import type { SubFeaturePrivilege } from '../../../../model/sub_feature_privilege';
-import type { SubFeaturePrivilegeGroup } from '../../../../model/sub_feature_privilege_group';
+import type {
+  SecuredFeature,
+  SubFeaturePrivilege,
+  SubFeaturePrivilegeGroup,
+} from '../../../../model';
 import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
 
 interface Props {

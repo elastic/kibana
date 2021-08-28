@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsType } from '../../../../core/server/saved_objects/types';
+
+import { SavedObjectsType } from 'kibana/server';
 
 export const querySavedObjectType: SavedObjectsType = {
   name: 'query',

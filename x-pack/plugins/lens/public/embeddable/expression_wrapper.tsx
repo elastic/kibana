@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import classNames from 'classnames';
 import React from 'react';
-import type { KibanaExecutionContext } from '../../../../../src/core/types/execution_context';
-import type { ExecutionContextSearch } from '../../../../../src/plugins/data/common/search/expressions/kibana_context_type';
-import type { DefaultInspectorAdapters } from '../../../../../src/plugins/expressions/common/execution/types';
-import type { RenderMode } from '../../../../../src/plugins/expressions/common/expression_renderers/types';
-import type {
-  ReactExpressionRendererProps,
+import { I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  ExpressionRendererEvent,
   ReactExpressionRendererType,
-} from '../../../../../src/plugins/expressions/public/react_expression_renderer';
-import type { ExpressionRendererEvent } from '../../../../../src/plugins/expressions/public/render';
+  ReactExpressionRendererProps,
+} from 'src/plugins/expressions/public';
+import type { KibanaExecutionContext } from 'src/core/public';
+import { ExecutionContextSearch } from 'src/plugins/data/public';
+import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
+import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
-import type { ErrorMessage } from '../editor_frame_service/types';
+import { ErrorMessage } from '../editor_frame_service/types';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;

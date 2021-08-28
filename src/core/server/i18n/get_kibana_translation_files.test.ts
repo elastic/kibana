@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
 import { getTranslationPaths } from './get_translation_paths';
 

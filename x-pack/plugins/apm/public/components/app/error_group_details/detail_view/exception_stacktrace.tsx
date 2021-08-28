@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
-import type { Exception } from '../../../../../typings/es_schemas/raw/error_raw';
+import { Exception } from '../../../../../typings/es_schemas/raw/error_raw';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import { CauseStacktrace } from '../../../shared/Stacktrace/cause_stacktrace';
 

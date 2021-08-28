@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Stream } from 'stream';
-import type { ResponseHeaders } from './headers';
+import { ResponseHeaders } from './headers';
 
 /**
  * Additional data to provide error details.

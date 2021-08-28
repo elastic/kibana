@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import createContainer from 'constate';
+
+import { useEffect, useMemo, useCallback } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { useCallback, useEffect, useMemo } from 'react';
-import type { HttpHandler } from '../../../../../../src/core/public/http/types';
-import type { ToastInput } from '../../../../../../src/core/public/notifications/toasts/toasts_api';
-import type {
-  MetricsSourceConfiguration,
+import createContainer from 'constate';
+import { HttpHandler } from 'src/core/public';
+import { ToastInput } from 'src/core/public';
+import {
+  metricsSourceConfigurationResponseRT,
   MetricsSourceConfigurationResponse,
+  MetricsSourceConfiguration,
 } from '../../../common/metrics_sources';
-import { metricsSourceConfigurationResponseRT } from '../../../common/metrics_sources';
-import { createPlainError, throwErrors } from '../../../common/runtime_types';
 import { useHTTPRequest } from '../../hooks/use_http_request';
+import { throwErrors, createPlainError } from '../../../common/runtime_types';
 
 export const pickIndexPattern = (
   source: MetricsSourceConfiguration | undefined,

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
-import { KQLSyntaxError } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import type { RenderErrorFunc } from '../resettable_error_boundary';
-import { ResettableErrorBoundary } from '../resettable_error_boundary';
+import { KQLSyntaxError } from '@kbn/es-query';
+import { RenderErrorFunc, ResettableErrorBoundary } from '../resettable_error_boundary';
 
 export const LogStreamErrorBoundary: React.FC<{ resetOnChange: any }> = ({
   children,

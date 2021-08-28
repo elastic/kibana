@@ -5,10 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { mapValues } from 'lodash';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common/expression_functions/types';
-import { typeSpecs } from '../../../../expressions/common/expression_types/specs';
-import type { ExpressionValueBoxed } from '../../../../expressions/common/expression_types/types';
+import {
+  ExpressionValueBoxed,
+  typeSpecs,
+  ExpressionFunctionDefinition,
+} from '../../../../expressions/common';
 
 type DefaultFnResultType = typeof typeSpecs[number] &
   ExpressionFunctionDefinition<

@@ -6,16 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { IndexNotFound, RequestEntityTooLargeException, TargetIndexHadWriteBlock } from '.';
-import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
-import type { SavedObjectsRawDoc } from '../../serialization/types';
-import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import { errors as esErrors, estypes } from '@elastic/elasticsearch';
+import { ElasticsearchClient } from '../../../elasticsearch';
+import type { SavedObjectsRawDoc } from '../../serialization';
+import {
+  catchRetryableEsClientErrors,
+  RetryableEsClientError,
+} from './catch_retryable_es_client_errors';
+import { isWriteBlockException, isIndexNotFoundException } from './es_errors';
 import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
-import { isIndexNotFoundException, isWriteBlockException } from './es_errors';
+import type {
+  TargetIndexHadWriteBlock,
+  RequestEntityTooLargeException,
+  IndexNotFound,
+} from './index';
 
 /** @internal */
 export interface BulkOverwriteTransformedDocumentsParams {

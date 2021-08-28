@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
+import { i18n } from '@kbn/i18n';
+import {
+  AggDescriptor,
+  ColorDynamicOptions,
+  LayerDescriptor,
+  SizeDynamicOptions,
+  StylePropertyField,
+  VectorStylePropertiesDescriptor,
+} from '../../../../../common/descriptor_types';
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
@@ -18,24 +26,16 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import type { LayerDescriptor } from '../../../../../common/descriptor_types/layer_descriptor_types';
-import type { AggDescriptor } from '../../../../../common/descriptor_types/source_descriptor_types';
-import type {
-  ColorDynamicOptions,
-  SizeDynamicOptions,
-  StylePropertyField,
-  VectorStylePropertiesDescriptor,
-} from '../../../../../common/descriptor_types/style_property_descriptor_types';
 import { getJoinAggKey, getSourceAggKey } from '../../../../../common/get_agg_key';
-import { EMSFileSource } from '../../../sources/ems_file_source/ems_file_source';
-import { ESGeoGridSource } from '../../../sources/es_geo_grid_source/es_geo_grid_source';
-import { VectorStyle } from '../../../styles/vector/vector_style';
-import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
-import { HeatmapLayer } from '../../heatmap_layer/heatmap_layer';
-import { VectorLayer } from '../../vector_layer/vector_layer';
-import { DISPLAY } from './display_select';
 import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { OBSERVABILITY_METRIC_TYPE } from './metric_select';
+import { DISPLAY } from './display_select';
+import { VectorStyle } from '../../../styles/vector/vector_style';
+import { EMSFileSource } from '../../../sources/ems_file_source';
+import { ESGeoGridSource } from '../../../sources/es_geo_grid_source';
+import { VectorLayer } from '../../vector_layer';
+import { HeatmapLayer } from '../../heatmap_layer';
+import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
 
 // redefining APM constant to avoid making maps app depend on APM plugin
 export const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { BarText } from './styles';
 
 export interface UtilityBarTextProps {

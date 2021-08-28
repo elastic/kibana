@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Feature } from 'geojson';
 import _ from 'lodash';
-import type { Dispatch } from 'redux';
-import { FEATURE_ID_PROPERTY_NAME } from '../../common/constants';
-import type { TooltipState } from '../../common/descriptor_types/map_descriptor';
-import type { MapStoreState } from '../reducers/store';
+import { Dispatch } from 'redux';
+import { Feature } from 'geojson';
 import { getOpenTooltips } from '../selectors/map_selectors';
 import { SET_OPEN_TOOLTIPS } from './map_action_constants';
+import { FEATURE_ID_PROPERTY_NAME } from '../../common/constants';
+import { TooltipState } from '../../common/descriptor_types';
+import { MapStoreState } from '../reducers/store';
 
 export function closeOnClickTooltip(tooltipId: string) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {

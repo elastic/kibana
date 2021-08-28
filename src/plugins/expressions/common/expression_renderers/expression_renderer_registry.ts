@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IRegistry } from '../types/registry';
+
+import { IRegistry } from '../types';
 import { ExpressionRenderer } from './expression_renderer';
-import type { AnyExpressionRenderDefinition } from './types';
+import { AnyExpressionRenderDefinition } from './types';
 
 export class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer> {
   private readonly renderers: Map<string, ExpressionRenderer> = new Map<

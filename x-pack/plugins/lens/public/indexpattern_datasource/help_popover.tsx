@@ -4,11 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
-import { EuiIcon, EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
-import type { ReactNode } from 'react';
-import React, { useEffect } from 'react';
-import { trackUiEvent } from '../lens_ui_telemetry/factory';
+
+import React, { ReactNode, useEffect } from 'react';
+import {
+  EuiIcon,
+  EuiLink,
+  EuiLinkButtonProps,
+  EuiPopover,
+  EuiPopoverProps,
+  EuiPopoverTitle,
+  EuiText,
+} from '@elastic/eui';
+import { trackUiEvent } from '../lens_ui_telemetry';
 import './help_popover.scss';
 
 export const HelpPopoverButton = ({

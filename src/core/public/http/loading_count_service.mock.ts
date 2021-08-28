@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import { LoadingCountSetup, LoadingCountService } from './loading_count_service';
 import { BehaviorSubject } from 'rxjs';
-import type { LoadingCountSetup } from './loading_count_service';
-import { LoadingCountService } from './loading_count_service';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<LoadingCountSetup> = {

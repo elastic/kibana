@@ -5,72 +5,71 @@
  * 2.0.
  */
 
+import React from 'react';
+import type {
+  Map as MbMap,
+  AnyLayer as MbLayer,
+  GeoJSONSource as MbGeoJSONSource,
+} from '@kbn/mapbox-gl';
+import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
+import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AnyLayer as MbLayer } from '@kbn/mapbox-gl';
-import { GeoJSONSource as MbGeoJSONSource, Map as MbMap } from '@kbn/mapbox-gl';
-import type { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
-import _ from 'lodash';
-import React from 'react';
-import type { FieldFormatter } from '../../../../common/constants';
+import { AbstractLayer } from '../layer';
+import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
-  EMPTY_FEATURE_COLLECTION,
   FEATURE_ID_PROPERTY_NAME,
-  FEATURE_VISIBLE_PROPERTY_NAME,
-  FIELD_ORIGIN,
-  KBN_IS_TILE_COMPLETE,
-  KBN_METADATA_FEATURE,
-  KBN_TOO_MANY_FEATURES_IMAGE_ID,
-  LAYER_TYPE,
-  SOURCE_FORMATTERS_DATA_REQUEST_ID,
   SOURCE_META_DATA_REQUEST_ID,
+  SOURCE_FORMATTERS_DATA_REQUEST_ID,
+  FEATURE_VISIBLE_PROPERTY_NAME,
+  EMPTY_FEATURE_COLLECTION,
+  KBN_METADATA_FEATURE,
+  LAYER_TYPE,
+  FIELD_ORIGIN,
+  KBN_TOO_MANY_FEATURES_IMAGE_ID,
+  FieldFormatter,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
+  KBN_IS_TILE_COMPLETE,
 } from '../../../../common/constants';
-import type {
-  MapFilters,
-  Timeslice,
-  VectorJoinSourceRequestMeta,
-  VectorSourceRequestMeta,
-  VectorStyleRequestMeta,
-} from '../../../../common/descriptor_types/data_request_descriptor_types';
-import type { VectorLayerDescriptor } from '../../../../common/descriptor_types/layer_descriptor_types';
-import type { MapQuery } from '../../../../common/descriptor_types/map_descriptor';
-import type {
-  DynamicStylePropertyOptions,
-  StyleMetaDescriptor,
-} from '../../../../common/descriptor_types/style_property_descriptor_types';
-import type { PropertiesMap } from '../../../../common/elasticsearch_util/es_agg_utils';
-import type { DataRequestContext } from '../../../actions/data_request_actions';
-import type { IField } from '../../fields/field';
-import { InnerJoin } from '../../joins/inner_join';
-import type { IESSource } from '../../sources/es_source/es_source';
-import type { ISource } from '../../sources/source';
-import type { ITermJoinSource } from '../../sources/term_join_source/term_join_source';
-import type { IVectorSource } from '../../sources/vector_source/vector_source';
-import type { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
-import type { IVectorStyle } from '../../styles/vector/vector_style';
-import { VectorStyle } from '../../styles/vector/vector_style';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
-import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { DataRequestAbortError } from '../../util/data_request';
 import {
-  canSkipFormattersUpdate,
   canSkipSourceUpdate,
   canSkipStyleMetaUpdate,
+  canSkipFormattersUpdate,
 } from '../../util/can_skip_fetch';
-import { DataRequestAbortError } from '../../util/data_request';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
-import type { TimesliceMaskConfig } from '../../util/mb_filter_expressions';
 import {
   getCentroidFilterExpression,
   getFillFilterExpression,
   getLineFilterExpression,
   getPointFilterExpression,
+  TimesliceMaskConfig,
 } from '../../util/mb_filter_expressions';
-import type { CustomIconAndTooltipContent, ILayer } from '../layer';
-import { AbstractLayer } from '../layer';
-import type { JoinState } from './perform_inner_joins';
-import { performInnerJoins } from './perform_inner_joins';
+import {
+  DynamicStylePropertyOptions,
+  MapFilters,
+  MapQuery,
+  StyleMetaDescriptor,
+  Timeslice,
+  VectorJoinSourceRequestMeta,
+  VectorLayerDescriptor,
+  VectorSourceRequestMeta,
+  VectorStyleRequestMeta,
+} from '../../../../common/descriptor_types';
+import { ISource } from '../../sources/source';
+import { IVectorSource } from '../../sources/vector_source';
+import { CustomIconAndTooltipContent, ILayer } from '../layer';
+import { InnerJoin } from '../../joins/inner_join';
+import { IField } from '../../fields/field';
+import { DataRequestContext } from '../../../actions';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { IESSource } from '../../sources/es_source';
+import { PropertiesMap } from '../../../../common/elasticsearch_util';
+import { ITermJoinSource } from '../../sources/term_join_source';
 import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
+import { JoinState, performInnerJoins } from './perform_inner_joins';
 
 export interface VectorLayerArguments {
   source: IVectorSource;

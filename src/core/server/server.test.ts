@@ -5,31 +5,34 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { BehaviorSubject } from 'rxjs';
-import { getEnvOptions, rawConfigServiceMock } from './config/mocks';
-import { loggingSystemMock } from './logging/logging_system.mock';
-import { mockRenderingService } from './rendering/__mocks__/rendering_service';
-import { Server } from './server';
+
 import {
-  mockConfigService,
-  mockContextService,
-  mockDeprecationService,
   mockElasticsearchService,
-  mockEnsureValidConfiguration,
-  mockEnvironmentService,
   mockHttpService,
-  mockI18nService,
   mockLegacyService,
-  mockLoggingService,
-  mockMetricsService,
   mockPluginsService,
-  mockPrebootService,
+  mockConfigService,
   mockSavedObjectsService,
-  mockStatusService,
+  mockContextService,
+  mockEnsureValidConfiguration,
   mockUiSettingsService,
+  mockRenderingService,
+  mockMetricsService,
+  mockStatusService,
+  mockLoggingService,
+  mockI18nService,
+  mockEnvironmentService,
+  mockPrebootService,
+  mockDeprecationService,
 } from './server.test.mocks';
+
+import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
+import { Env } from './config';
+import { Server } from './server';
+
+import { loggingSystemMock } from './logging/logging_system.mock';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const logger = loggingSystemMock.create();

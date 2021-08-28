@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectLoader } from '../../../saved_objects/public/saved_object/saved_object_loader';
+import { SavedObjectLoader } from '../../../saved_objects/public';
 
 export interface SavedObjectsManagementServiceRegistryEntry {
   id: string;

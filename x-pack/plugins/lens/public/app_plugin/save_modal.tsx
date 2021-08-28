@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public/types';
-import type { DashboardSaveProps } from './tags_saved_object_save_modal_dashboard_wrapper';
-import { TagEnhancedSavedObjectSaveModalDashboard } from './tags_saved_object_save_modal_dashboard_wrapper';
-import type { OriginSaveProps } from './tags_saved_object_save_modal_origin_wrapper';
-import { TagEnhancedSavedObjectSaveModalOrigin } from './tags_saved_object_save_modal_origin_wrapper';
+import { i18n } from '@kbn/i18n';
+import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+
+import {
+  TagEnhancedSavedObjectSaveModalOrigin,
+  OriginSaveProps,
+} from './tags_saved_object_save_modal_origin_wrapper';
+import {
+  TagEnhancedSavedObjectSaveModalDashboard,
+  DashboardSaveProps,
+} from './tags_saved_object_save_modal_dashboard_wrapper';
 
 export type SaveProps = OriginSaveProps | DashboardSaveProps;
 

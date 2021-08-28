@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery } from '../../../../observability/server/utils/queries';
+
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
   AGENT_NAME,
   SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeQuery } from '../../../../observability/server';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 interface ServiceAgent {
   agent?: {

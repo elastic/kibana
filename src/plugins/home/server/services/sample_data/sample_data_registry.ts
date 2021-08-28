@@ -5,24 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup } from '../../../../../core/server';
-import type { PluginInitializerContext } from '../../../../../core/server/plugins/types';
-import type { SavedObject } from '../../../../../core/types/saved_objects';
-import type { UsageCollectionSetup } from '../../../../usage_collection/server/plugin';
-import { ecommerceSpecProvider } from './data_sets/ecommerce';
-import { flightsSpecProvider } from './data_sets/flights';
-import { logsSpecProvider } from './data_sets/logs';
-import type {
-  SampleDatasetDashboardPanel,
+
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { SavedObject } from 'src/core/public';
+import {
   SampleDatasetProvider,
+  SampleDatasetSchema,
+  AppLinkSchema,
+  SampleDatasetDashboardPanel,
 } from './lib/sample_dataset_registry_types';
-import type { AppLinkSchema, SampleDatasetSchema } from './lib/sample_dataset_schema';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
-import { createInstallRoute } from './routes/install';
-import { createListRoute } from './routes/list';
+
+import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
+import { createListRoute, createInstallRoute } from './routes';
+import { UsageCollectionSetup } from '../../../../usage_collection/server';
+import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
-import { makeSampleDataUsageCollector } from './usage/collector';
-import { usage } from './usage/usage';
 
 const flightsSampleDataset = flightsSpecProvider();
 const logsSampleDataset = logsSpecProvider();

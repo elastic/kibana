@@ -5,11 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EnvironmentName, Project, ProjectID, SolutionName } from '../../../common/labs';
-import { getProjectIDs, projectIDs, projects } from '../../../common/labs';
-import type { PluginServiceFactory } from '../create/factory';
-import type { PresentationLabsService } from '../labs';
-import { applyProjectStatus, isEnabledByStorageValue } from '../labs';
+
+import {
+  projects,
+  projectIDs,
+  ProjectID,
+  EnvironmentName,
+  getProjectIDs,
+  Project,
+  SolutionName,
+} from '../../../common';
+import { PluginServiceFactory } from '../create';
+import { PresentationLabsService, isEnabledByStorageValue, applyProjectStatus } from '../labs';
 
 export type LabsServiceFactory = PluginServiceFactory<PresentationLabsService>;
 

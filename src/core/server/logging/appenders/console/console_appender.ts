@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { DisposableAppender, Layout, LogRecord } from '@kbn/logging';
-import type { LayoutConfigType } from '../../layouts/layouts';
-import { Layouts } from '../../layouts/layouts';
+import { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
+import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 
 const { literal, object } = schema;
 

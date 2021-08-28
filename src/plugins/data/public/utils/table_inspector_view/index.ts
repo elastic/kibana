@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { IUiSettingsClient } from '../../../../../core/public/ui_settings/types';
-import type { DatatableColumn } from '../../../../expressions/common/expression_types/specs/datatable';
-import type { FieldFormatsStart } from '../../../../field_formats/public/plugin';
-import type { Adapters } from '../../../../inspector/common/adapters/types';
-import type { InspectorViewDescription } from '../../../../inspector/public/types';
-import type { UiActionsStart } from '../../../../ui_actions/public/plugin';
+import { IUiSettingsClient } from 'kibana/public';
+import { Adapters, InspectorViewDescription } from '../../../../inspector/public';
 import { getDataViewComponentWrapper } from './components/data_view_wrapper';
+import { UiActionsStart } from '../../../../ui_actions/public';
+import { FieldFormatsStart } from '../../../../field_formats/public';
+import { DatatableColumn } from '../../../../expressions/common/expression_types/specs';
 
 export const getTableViewDescription = (
   getStartServices: () => {

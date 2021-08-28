@@ -4,23 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useCallback } from 'react';
+
 import {
-  EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLink,
+  EuiFieldPassword,
   EuiSpacer,
+  EuiLink,
   EuiTitle,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback } from 'react';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { ActionConnectorFieldsProps } from '../../../../types';
-import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import { ActionConnectorFieldsProps } from '../../../../types';
+
 import * as i18n from './translations';
-import type { ServiceNowActionConnector } from './types';
+import { ServiceNowActionConnector } from './types';
+import { useKibana } from '../../../../common/lib/kibana';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>

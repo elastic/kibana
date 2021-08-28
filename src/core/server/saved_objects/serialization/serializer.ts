@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { LEGACY_URL_ALIAS_TYPE } from '../object_types/constants';
-import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { decodeVersion } from '../version/decode_version';
-import { encodeVersion } from '../version/encode_version';
-import type {
-  SavedObjectSanitizedDoc,
+
+import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
+import { decodeVersion, encodeVersion } from '../version';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import {
   SavedObjectsRawDoc,
+  SavedObjectSanitizedDoc,
   SavedObjectsRawDocParseOptions,
 } from './types';
 

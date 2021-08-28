@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { OperationDefinition } from '..';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common/constants';
-import type { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/common/search/aggs/types';
-import { extendedBoundsToAst } from '../../../../../../../../src/plugins/data/common/search/expressions/extended_bounds_to_ast';
-import { numericalRangeToAst } from '../../../../../../../../src/plugins/data/common/search/expressions/numerical_range_to_ast';
-import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/common/ast/build_function';
-import type { Range } from '../../../../../../../../src/plugins/expressions/common/expression_types/specs/range';
-import { supportedFormats } from '../../../../../common/expressions/format_column';
-import type { IndexPattern, IndexPatternField } from '../../../types';
-import { updateColumnParam } from '../../layer_helpers';
-import type { FieldBasedIndexPatternColumn } from '../column_types';
-import { getInvalidFieldMessage, isValidNumber } from '../helpers';
-import { AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, MODES, SLICES } from './constants';
+import { i18n } from '@kbn/i18n';
+
+import { AggFunctionsMapping, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
+import {
+  extendedBoundsToAst,
+  numericalRangeToAst,
+} from '../../../../../../../../src/plugins/data/common';
+import {
+  buildExpressionFunction,
+  Range,
+} from '../../../../../../../../src/plugins/expressions/public';
 import { RangeEditor } from './range_editor';
+import { OperationDefinition } from '../index';
+import { FieldBasedIndexPatternColumn } from '../column_types';
+import { updateColumnParam } from '../../layer_helpers';
+import { supportedFormats } from '../../../../../common/expressions';
+import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
+import { IndexPattern, IndexPatternField } from '../../../types';
+import { getInvalidFieldMessage, isValidNumber } from '../helpers';
 
 type RangeType = Omit<Range, 'type'>;
 // Try to cover all possible serialized states for ranges

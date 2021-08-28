@@ -7,40 +7,33 @@
 
 import Boom from '@hapi/boom';
 
-import type { ISavedObjectTypeRegistry } from '../../../../../src/core/server/saved_objects/saved_objects_type_registry';
 import type {
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesOptions,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from '../../../../../src/core/server/saved_objects/service/lib/collect_multi_namespace_references';
-import type {
-  SavedObjectsCreatePointInTimeFinderDependencies,
-  SavedObjectsCreatePointInTimeFinderOptions,
-} from '../../../../../src/core/server/saved_objects/service/lib/point_in_time_finder';
-import type {
-  SavedObjectsUpdateObjectsSpacesObject,
-  SavedObjectsUpdateObjectsSpacesOptions,
-} from '../../../../../src/core/server/saved_objects/service/lib/update_objects_spaces';
-import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects/service/lib/utils';
-import type {
+  ISavedObjectTypeRegistry,
+  SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsCheckConflictsObject,
+  SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsFindOptions,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
-} from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type {
-  SavedObjectsBaseOptions,
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-} from '../../../../../src/core/server/saved_objects/types';
+} from 'src/core/server';
+
+import { SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID } from '../../common/constants';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
-import type { ISpacesClient } from '../spaces_client/spaces_client';
+import type { ISpacesClient } from '../spaces_client';
 import type { SpacesServiceStart } from '../spaces_service/spaces_service';
 
 interface SpacesSavedObjectsClientOptions {

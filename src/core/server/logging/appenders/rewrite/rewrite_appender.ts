@@ -5,11 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { Appender, DisposableAppender, LogRecord } from '@kbn/logging';
-import type { RewritePolicyConfig } from './policies';
-import { createRewritePolicy, rewritePolicyConfigSchema } from './policies';
-import type { RewritePolicy } from './policies/policy';
+import { LogRecord, Appender, DisposableAppender } from '@kbn/logging';
+import {
+  createRewritePolicy,
+  rewritePolicyConfigSchema,
+  RewritePolicy,
+  RewritePolicyConfig,
+} from './policies';
 
 export interface RewriteAppenderConfig {
   type: 'rewrite';

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { createContext, useMemo } from 'react';
-import { useApmParams } from '../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
-import type { APIReturnType } from '../../services/rest/createCallApmApi';
+import { useApmParams } from '../../hooks/use_apm_params';
+import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { useUrlParams } from '../url_params_context/use_url_params';
 
 export const ApmBackendContext = createContext<

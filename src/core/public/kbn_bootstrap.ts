@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import { ApmSystem } from './apm_system';
 import { CoreSystem } from './core_system';
+import { ApmSystem } from './apm_system';
 
 /** @internal */
 export async function __kbnBootstrap__() {

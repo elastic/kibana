@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useState } from 'react';
+
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useState } from 'react';
-import { useRefreshAnalyticsList } from '../../../../common/analytics';
+import { useRefreshAnalyticsList } from '../../../../common';
 
 export const RefreshAnalyticsListButton: FC = () => {
   const [isLoading, setIsLoading] = useState(false);

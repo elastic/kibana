@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsClientContract } from '../../../../core/public/saved_objects/saved_objects_client';
-import type {
+
+import {
+  SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
-} from '../../../../core/server/saved_objects/types';
-import type { SavedObjectReference } from '../../../../core/types/saved_objects';
-import type { SavedObject } from '../types';
+  SavedObjectReference,
+} from 'kibana/public';
+import { SavedObject } from '../types';
 import { StringUtils } from './helpers/string_utils';
 
 export interface SavedObjectLoaderFindOptions {

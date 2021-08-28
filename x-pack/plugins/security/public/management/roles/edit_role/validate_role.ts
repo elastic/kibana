@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 
 import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
-import type { Role, RoleIndexPrivilege } from '../../../../common/model/role';
+import type { Role, RoleIndexPrivilege } from '../../../../common/model';
 
 interface RoleValidatorOptions {
   shouldValidate?: boolean;

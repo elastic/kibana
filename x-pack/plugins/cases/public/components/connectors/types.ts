@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IconType } from '@elastic/eui';
+
+import { IconType } from '@elastic/eui';
 import React from 'react';
-import type { ConnectorTypeFields } from '../../../common/api/connectors';
-import type {
+
+import {
   ActionType as ThirdPartySupportedActions,
   CaseField,
-} from '../../../common/api/connectors/mappings';
-import type { CaseActionConnector } from '../types';
+  ConnectorTypeFields,
+} from '../../../common';
+import { CaseActionConnector } from '../types';
 
 export { ThirdPartyField as AllThirdPartyFields } from '../../../common';
 

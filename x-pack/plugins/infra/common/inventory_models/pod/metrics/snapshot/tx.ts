@@ -4,6 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { networkTraffic } from '../../../shared/metrics/snapshot/network_traffic';
 
+import { networkTraffic } from '../../../shared/metrics/snapshot/network_traffic';
 export const tx = networkTraffic('tx', 'kubernetes.pod.network.tx.bytes');

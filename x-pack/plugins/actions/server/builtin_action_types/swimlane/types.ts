@@ -6,9 +6,8 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { TypeOf } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
-import type { ActionsConfigurationUtilities } from '../../actions_config';
+import { TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/logging';
 import {
   ConfigMappingSchema,
   ExecutorParamsSchema,
@@ -16,6 +15,7 @@ import {
   SwimlaneSecretsConfigurationSchema,
   SwimlaneServiceConfigurationSchema,
 } from './schema';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 export type SwimlanePublicConfigurationType = TypeOf<typeof SwimlaneServiceConfigurationSchema>;
 export type SwimlaneSecretConfigurationType = TypeOf<typeof SwimlaneSecretsConfigurationSchema>;

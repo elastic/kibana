@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
@@ -12,11 +13,13 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
-import type { TableOptions } from './service_overview_instances_table';
-import { ServiceOverviewInstancesTable } from './service_overview_instances_table';
+import {
+  ServiceOverviewInstancesTable,
+  TableOptions,
+} from './service_overview_instances_table';
 
 interface ServiceOverviewInstancesChartAndTableProps {
   chartHeight: number;

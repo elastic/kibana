@@ -5,12 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiButtonProps } from '@elastic/eui';
-import { EuiButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import type { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
+
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { IndexPatternRef } from './types';
+import {
+  EuiButton,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiButtonProps,
+} from '@elastic/eui';
+import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
+import { IndexPatternRef } from './types';
 
 export type ChangeIndexPatternTriggerProps = EuiButtonProps & {
   label: string;

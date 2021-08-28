@@ -5,15 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ConfigService, Env } from '@kbn/config';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { fromRoot, REPO_ROOT } from '@kbn/utils';
-import { duration } from 'moment';
+
 import { take } from 'rxjs/operators';
+import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions, rawConfigServiceMock } from '../config/mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { Server } from '../server';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
+import { REPO_ROOT } from '@kbn/utils';
+import { loggingSystemMock } from '../logging/logging_system.mock';
+import { duration } from 'moment';
+import { fromRoot } from '@kbn/utils';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { Server } from '../server';
 
 describe('Legacy config', () => {
   let env: Env;

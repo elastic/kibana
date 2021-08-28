@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { MessageImporter } from './message_importer';
 import { NdjsonImporter } from './ndjson_importer';
-import type { ImportFactoryOptions } from './types';
+import { ImportFactoryOptions } from './types';
 
 export function importerFactory(format: string, options: ImportFactoryOptions) {
   switch (format) {

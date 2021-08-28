@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { set } from '@elastic/safer-lodash-set';
+import { get, cloneDeep } from 'lodash';
 import * as esKuery from '@kbn/es-query';
-import { cloneDeep, get } from 'lodash';
-import type { IndexMapping } from '../../mappings/types';
 import { SavedObjectsErrorHelpers } from './errors';
+import { IndexMapping } from '../../mappings';
 
 type KueryNode = any;
 

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { SpacesServiceStart } from '../../../spaces_service/spaces_service';
 import type { SpacesRouter } from '../../../types';
 import { initGetActiveSpaceApi } from './get_active_space';

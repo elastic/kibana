@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useMemo } from 'react';
 import { useFormElement } from './form_elements';
-import type { FormValidationError } from './validation_errors';
-import { validateStringNotEmpty } from './validation_errors';
+import { FormValidationError, validateStringNotEmpty } from './validation_errors';
 
 export const useNameFormElement = (initialValue: string) => {
   const nameFormElement = useFormElement<string, FormValidationError>({

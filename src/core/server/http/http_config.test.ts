@@ -7,9 +7,9 @@
  */
 
 import uuid from 'uuid';
-import { config as cspConfig } from '../csp/config';
-import { ExternalUrlConfig } from '../external_url/external_url_config';
 import { config, HttpConfig } from './http_config';
+import { config as cspConfig } from '../csp';
+import { ExternalUrlConfig } from '../external_url';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
 const invalidHostnames = ['asdf$%^', '0'];

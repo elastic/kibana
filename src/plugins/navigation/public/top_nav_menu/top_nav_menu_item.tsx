@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiButton, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
-import { isFunction, upperFirst } from 'lodash';
-import type { MouseEvent } from 'react';
-import React from 'react';
-import type { TopNavMenuData } from './top_nav_menu_data';
+
+import { upperFirst, isFunction } from 'lodash';
+import React, { MouseEvent } from 'react';
+import { EuiToolTip, EuiButton, EuiHeaderLink } from '@elastic/eui';
+import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
   function isDisabled(): boolean {

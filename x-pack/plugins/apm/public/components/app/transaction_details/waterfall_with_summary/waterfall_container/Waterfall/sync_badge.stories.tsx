@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type { SyncBadgeProps } from './sync_badge';
-import { SyncBadge } from './sync_badge';
+import { SyncBadge, SyncBadgeProps } from './sync_badge';
 
 export default {
   title: 'app/TransactionDetails/SyncBadge',

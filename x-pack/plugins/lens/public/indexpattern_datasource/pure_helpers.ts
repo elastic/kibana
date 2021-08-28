@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { keyBy } from 'lodash';
-import type { IndexPatternField, IndexPatternPrivateState } from './types';
+import { IndexPatternField, IndexPatternPrivateState } from './types';
 
 export function fieldExists(
   existingFields: IndexPatternPrivateState['existingFields'],

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { ValidLayer } from '../../../common/expressions/xy_chart/layer_config';
-import { ToolbarPopover } from '../../shared_components/toolbar_popover';
-import { TooltipWrapper } from '../../shared_components/tooltip_wrapper';
-import type { FramePublicAPI } from '../../types';
-import { hasHistogramSeries } from '../state_helpers';
-import type { XYState } from '../types';
-import { FillOpacityOption } from './fill_opacity_option';
-import { LineCurveOption } from './line_curve_option';
+import { i18n } from '@kbn/i18n';
+import { ToolbarPopover, TooltipWrapper } from '../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
+import { LineCurveOption } from './line_curve_option';
+import { FillOpacityOption } from './fill_opacity_option';
+import { XYState } from '../types';
+import { hasHistogramSeries } from '../state_helpers';
+import { ValidLayer } from '../../../common/expressions';
+import type { FramePublicAPI } from '../../types';
 
 function getValueLabelDisableReason({
   isAreaPercentage,

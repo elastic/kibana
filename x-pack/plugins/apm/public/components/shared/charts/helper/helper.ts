@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { XYBrushArea } from '@elastic/charts';
-import type { History } from 'history';
-import type { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+
+import { XYBrushArea } from '@elastic/charts';
+import { History } from 'history';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { fromQuery, toQuery } from '../../Links/url_helpers';
 
 export const onBrushEnd = ({

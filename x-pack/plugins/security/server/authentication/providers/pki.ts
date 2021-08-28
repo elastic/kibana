@@ -8,12 +8,13 @@
 import Boom from '@hapi/boom';
 import type { DetailedPeerCertificate } from 'tls';
 
-import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
+import type { KibanaRequest } from 'src/core/server';
+
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication/http_authorization_header';
+import { HTTPAuthorizationHeader } from '../http_authentication';
 import { Tokens } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 

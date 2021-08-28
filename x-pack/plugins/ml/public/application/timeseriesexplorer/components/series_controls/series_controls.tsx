@@ -4,29 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSelectProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { debounce } from 'lodash';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { EntityFieldType } from '../../../../../common/types/anomalies';
-import type { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
-import type {
+import { EntityControl } from '../entity_control';
+import { mlJobService } from '../../../services/job_service';
+import { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
+import { useMlKibana } from '../../../contexts/kibana';
+import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
+import {
+  ComboBoxOption,
+  EMPTY_FIELD_VALUE_LABEL,
+  EntityControlProps,
+} from '../entity_control/entity_control';
+import { getControlsForDetector } from '../../get_controls_for_detector';
+import {
+  ML_ENTITY_FIELDS_CONFIG,
   PartitionFieldConfig,
   PartitionFieldsConfig,
 } from '../../../../../common/types/storage';
-import { ML_ENTITY_FIELDS_CONFIG } from '../../../../../common/types/storage';
-import { useMlKibana } from '../../../contexts/kibana/kibana_context';
 import { useStorage } from '../../../contexts/ml/use_storage';
-import { mlJobService } from '../../../services/job_service';
-import type { FieldDefinition } from '../../../services/results_service/result_service_rx';
-import { getControlsForDetector } from '../../get_controls_for_detector';
-import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
+import { EntityFieldType } from '../../../../../common/types/anomalies';
+import { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
-import type { ComboBoxOption, EntityControlProps } from '../entity_control/entity_control';
-import { EMPTY_FIELD_VALUE_LABEL, EntityControl } from '../entity_control/entity_control';
-import { PlotByFunctionControls } from '../plot_function_controls/plot_function_controls';
+import { PlotByFunctionControls } from '../plot_function_controls';
 
 function getEntityControlOptions(fieldValues: FieldDefinition['values']): ComboBoxOption[] {
   if (!Array.isArray(fieldValues)) {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import type { ApplicationStart } from '../../../../../core/public/application/types';
-import { KbnError } from '../../../../kibana_utils/common/errors/errors';
-import type { IEsError } from './types';
+import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import { ApplicationStart } from 'kibana/public';
+import { KbnError } from '../../../../kibana_utils/common';
+import { IEsError } from './types';
 import { getRootCause } from './utils';
 
 export class EsError extends KbnError {

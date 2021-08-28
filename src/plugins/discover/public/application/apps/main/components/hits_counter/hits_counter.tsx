@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import './hits_counter.scss';
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { DataTotalHits$, DataTotalHitsMsg } from '../../services/use_saved_search';
 import { FetchStatus } from '../../../../types';
-import type { DataTotalHits$, DataTotalHitsMsg } from '../../services/use_saved_search';
 import { useDataState } from '../../utils/use_data_state';
-import './hits_counter.scss';
 
 export interface HitsCounterProps {
   /**

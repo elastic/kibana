@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isString, mapValues } from 'lodash';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { FieldMappingSpec, MappingObject } from './types';
+
+import { mapValues, isString } from 'lodash';
+import { FieldMappingSpec, MappingObject } from './types';
 
 // import from ./common/types to prevent circular dependency of kibana_utils <-> data plugin
+import { ES_FIELD_TYPES } from '../../../../../data/public';
+
 /** @private */
 type ShorthandFieldMapObject = FieldMappingSpec | ES_FIELD_TYPES | 'json';
 

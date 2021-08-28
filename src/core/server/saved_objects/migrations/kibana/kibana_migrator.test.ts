@@ -5,16 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { errors as esErrors, estypes } from '@elastic/elasticsearch';
+
 import { take } from 'rxjs/operators';
+import { estypes, errors as esErrors } from '@elastic/elasticsearch';
+
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectsType } from '../../types';
+import { SavedObjectsType } from '../../types';
 import { DocumentMigrator } from '../core/document_migrator';
-import type { KibanaMigratorOptions } from './kibana_migrator';
-import { KibanaMigrator } from './kibana_migrator';
-
 jest.mock('../core/document_migrator', () => {
   return {
     // Create a mock for spying on the constructor

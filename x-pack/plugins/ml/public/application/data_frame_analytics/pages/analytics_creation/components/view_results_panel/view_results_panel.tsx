@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
+import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
-import { useMlLink } from '../../../../../contexts/kibana/use_create_url';
-
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 interface Props {
   jobId: string;
   analysisType: DataFrameAnalysisConfigType;

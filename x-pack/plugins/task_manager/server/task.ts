@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { schema, TypeOf } from '@kbn/config-schema';
+import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { isErr, tryAsResult } from './lib/result_type';
+
 /*
  * Type definitions and validations for tasks.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { Interval } from './lib/intervals';
-import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
-import { isErr, tryAsResult } from './lib/result_type';
 
 /**
  * Require

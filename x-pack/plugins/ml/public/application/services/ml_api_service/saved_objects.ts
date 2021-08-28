@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { basePath } from '.';
-import type {
-  CanDeleteJobResponse,
-  InitializeSavedObjectResponse,
-  JobsSpacesResponse,
-  JobType,
-  SavedObjectResult,
-  SyncSavedObjectResponse,
-} from '../../../../common/types/saved_objects';
-import { HttpService } from '../http_service';
 
 // Service for managing job saved objects
+
+import { HttpService } from '../http_service';
+
+import { basePath } from './index';
+import {
+  JobType,
+  CanDeleteJobResponse,
+  SyncSavedObjectResponse,
+  InitializeSavedObjectResponse,
+  SavedObjectResult,
+  JobsSpacesResponse,
+} from '../../../../common/types/saved_objects';
+
 export const savedObjectsApiProvider = (httpService: HttpService) => ({
   jobsSpaces() {
     return httpService.http<JobsSpacesResponse>({

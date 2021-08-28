@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import type { IHttpFetchError } from '../../../../../src/core/public/http/types';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+import { IHttpFetchError } from 'src/core/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
-import type { AutoAbortedAPMClient } from '../services/rest/createCallApmApi';
-import { callApmApi } from '../services/rest/createCallApmApi';
+import {
+  AutoAbortedAPMClient,
+  callApmApi,
+} from '../services/rest/createCallApmApi';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',

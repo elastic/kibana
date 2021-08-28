@@ -5,27 +5,29 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  EuiComboBox,
-  EuiExpression,
-  EuiFormHelpText,
-  EuiFormRow,
-  EuiPopover,
-  EuiPopoverTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import type { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
+import {
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiExpression,
+  EuiFormRow,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFormHelpText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { IFieldType } from 'src/plugins/data/public';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../common/constants';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { ValidatedNumberInput } from '../../../../components/validated_number_input';
+
 import { getTermsFields } from '../../../../index_pattern_util';
 import {
-  getIndexPatternSelectComponent,
   getIndexPatternService,
+  getIndexPatternSelectComponent,
 } from '../../../../kibana_services';
 import type { JoinField } from '../join_editor';
 

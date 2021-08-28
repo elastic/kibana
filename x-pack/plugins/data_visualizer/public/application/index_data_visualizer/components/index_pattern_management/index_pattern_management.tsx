@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import type { Refresh } from '../../services/timefilter_refresh_service';
-import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
+import { dataVisualizerRefresh$, Refresh } from '../../services/timefilter_refresh_service';
 
 export interface DataVisualizerIndexPatternManagementProps {
   /**

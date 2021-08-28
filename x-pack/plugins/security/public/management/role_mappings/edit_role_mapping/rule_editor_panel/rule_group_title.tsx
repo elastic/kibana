@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiConfirmModal,
   EuiContextMenuItem,
@@ -16,12 +17,8 @@ import React, { useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AllRule } from '../../model/all_rule';
-import { AnyRule } from '../../model/any_rule';
-import { ExceptAllRule } from '../../model/except_all_rule';
-import { ExceptAnyRule } from '../../model/except_any_rule';
-import { FieldRule } from '../../model/field_rule';
-import type { RuleGroup } from '../../model/rule_group';
+import type { RuleGroup } from '../../model';
+import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 
 interface Props {
   rule: RuleGroup;

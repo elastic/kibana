@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsBulkCreateObject } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type { SavedObjectsClientContract } from '../../../../../../../../src/core/server/saved_objects/types';
-import type { SavedObject } from '../../../../../../../../src/core/types/saved_objects';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants/epm';
-import type { AssetParts, AssetReference, AssetType } from '../../../../../common/types/models/epm';
-import { KibanaAssetType, KibanaSavedObjectType } from '../../../../../common/types/models/epm';
+
+import type {
+  SavedObject,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsClientContract,
+} from 'src/core/server';
+
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
+import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
+import type { AssetType, AssetReference, AssetParts } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes } from '../index_pattern/install';
 

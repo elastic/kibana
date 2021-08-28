@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { TextField } from '../../../../../es_ui_shared/static/forms/components/fields/text_field';
-import { UseField } from '../../../../../es_ui_shared/static/forms/hook_form_lib/components/use_field';
+
+import { UseField, TextField } from '../../../shared_imports';
 
 export const CustomLabelField = () => {
   return <UseField path="customLabel" component={TextField} />;

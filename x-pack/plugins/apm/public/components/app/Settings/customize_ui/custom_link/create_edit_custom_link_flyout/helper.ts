@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { get, isEmpty } from 'lodash';
 import Mustache from 'mustache';
+import { isEmpty, get } from 'lodash';
 import { FILTER_OPTIONS } from '../../../../../../../common/custom_link/custom_link_filter_options';
-import type {
+import {
   Filter,
   FilterKey,
 } from '../../../../../../../common/custom_link/custom_link_types';
-import type { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 
 interface FilterSelectOption {
   value: 'DEFAULT' | FilterKey;

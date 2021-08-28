@@ -4,27 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useMemo } from 'react';
 import {
-  EuiEmptyPrompt,
+  EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiEmptyPrompt,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
 
-import { doesPackageHaveIntegrations } from '../../../../../../common/services/packages_with_integrations';
-import { getStreamsForInputType } from '../../../../../../common/services/package_to_package_policy';
-import type { PackagePolicyValidationResults } from '../../../../../../common/services/validate_package_policy';
-import type { PackageInfo } from '../../../../../../common/types/models/epm';
-import type {
-  NewPackagePolicy,
-  NewPackagePolicyInput,
-} from '../../../../../../common/types/models/package_policy';
-import { Loading } from '../../../../../components/loading';
+import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../types';
+import { Loading } from '../../../components';
+import { getStreamsForInputType, doesPackageHaveIntegrations } from '../../../services';
 
-import { PackagePolicyInputPanel } from './components/package_policy_input_panel';
+import type { PackagePolicyValidationResults } from './services';
+import { PackagePolicyInputPanel } from './components';
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
   packageInfo: PackageInfo;

@@ -5,28 +5,32 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup, CoreStart } from '../../../core/public/types';
-import type { ApplicationStart } from '../../../core/public/application/types';
-import type { HttpStart } from '../../../core/public/http/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+
 import type {
-  SavedObjectsBatchResponse,
+  Plugin,
+  CoreStart,
+  CoreSetup,
+  HttpStart,
+  PluginInitializerContext,
   SavedObjectsClientContract,
-} from '../../../core/public/saved_objects/saved_objects_client';
-import type { ScreenshotModePluginSetup } from '../../screenshot_mode/public/types';
-import { PRIVACY_STATEMENT_URL } from '../common/constants';
-import { getTelemetryAllowChangingOptInStatus } from '../common/telemetry_config/get_telemetry_allow_changing_opt_in_status';
-import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
-import { getTelemetryOptIn } from '../common/telemetry_config/get_telemetry_opt_in';
-import { getTelemetrySendUsageFrom } from '../common/telemetry_config/get_telemetry_send_usage_from';
+  SavedObjectsBatchResponse,
+  ApplicationStart,
+} from 'src/core/public';
+
+import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+
+import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
-  TelemetrySavedObject,
   TelemetrySavedObjectAttributes,
+  TelemetrySavedObject,
 } from '../common/telemetry_config/types';
-import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
-import { TelemetrySender } from './services/telemetry_sender';
-import { TelemetryService } from './services/telemetry_service';
+import {
+  getTelemetryAllowChangingOptInStatus,
+  getTelemetryOptIn,
+  getTelemetrySendUsageFrom,
+} from '../common/telemetry_config';
+import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
+import { PRIVACY_STATEMENT_URL } from '../common/constants';
 
 /**
  * Publicly exposed APIs from the Telemetry Service

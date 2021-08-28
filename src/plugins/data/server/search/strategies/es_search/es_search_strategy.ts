@@ -5,19 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
+
 import { from, Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
-import type { SharedGlobalConfig } from '../../../../../../core/server/plugins/types';
-import {
-  getKbnServerError,
-  KbnServerError,
-} from '../../../../../kibana_utils/server/report_server_error';
-import type { SearchUsage } from '../../collectors/usage';
-import { searchUsageObserver } from '../../collectors/usage';
+import type { Logger, SharedGlobalConfig } from 'kibana/server';
 import type { ISearchStrategy } from '../../types';
+import type { SearchUsage } from '../../collectors';
 import { getDefaultSearchParams, getShardTimeout, shimAbortSignal } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
+import { searchUsageObserver } from '../../collectors/usage';
+import { getKbnServerError, KbnServerError } from '../../../../../kibana_utils/server';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,

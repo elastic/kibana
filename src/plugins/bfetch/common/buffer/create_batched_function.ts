@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ItemBufferParams } from './item_buffer';
-import type { TimedItemBufferParams } from './timed_item_buffer';
-import { TimedItemBuffer } from './timed_item_buffer';
+
+import { ItemBufferParams } from './item_buffer';
+import { TimedItemBufferParams, TimedItemBuffer } from './timed_item_buffer';
 
 type Fn = (...args: any) => any;
 

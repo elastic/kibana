@@ -5,28 +5,30 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ByteSizeValue, schema } from '@kbn/config-schema';
-import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { mkdtemp, readFile, rmdir, writeFile } from 'fs/promises';
+
 import { Server } from 'http';
-import { omit } from 'lodash';
-import moment from 'moment';
-import { join } from 'path';
-import { of } from 'rxjs';
-import { Readable } from 'stream';
+import { rmdir, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
-import type { RequestHandlerContext } from '..';
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import { omit } from 'lodash';
+import { join } from 'path';
+
+import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
-import { HttpServer } from './http_server';
-import { KibanaRequest } from './router/request';
-import type { KibanaResponseFactory } from './router/response';
-import type { RequestHandler } from './router/router';
-import { Router } from './router/router';
-import type {
-  RouteValidationFunction,
+import {
+  Router,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandler,
   RouteValidationResultFactory,
-} from './router/validator/validator';
+  RouteValidationFunction,
+} from './router';
+import { loggingSystemMock } from '../logging/logging_system.mock';
+import { HttpServer } from './http_server';
+import { Readable } from 'stream';
+import { RequestHandlerContext } from 'kibana/server';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import moment from 'moment';
+import { of } from 'rxjs';
 
 const cookieOptions = {
   name: 'sid',

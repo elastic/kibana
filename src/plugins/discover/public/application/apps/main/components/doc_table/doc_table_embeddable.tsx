@@ -5,17 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { memo, useCallback, useMemo } from 'react';
-import { SAMPLE_SIZE_SETTING } from '../../../../../../common';
-import { getServices } from '../../../../../kibana_services';
-import { TotalDocuments } from '../total_documents/total_documents';
-import { ToolBarPagination } from './components/pager/tool_bar_pagination';
-import type { DocTableProps, DocTableRenderProps } from './doc_table_wrapper';
-import { DocTableWrapper } from './doc_table_wrapper';
 import './index.scss';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { SAMPLE_SIZE_SETTING } from '../../../../../../common';
 import { usePager } from './lib/use_pager';
+import { ToolBarPagination } from './components/pager/tool_bar_pagination';
+import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
+import { TotalDocuments } from '../total_documents/total_documents';
+import { getServices } from '../../../../../kibana_services';
 
 export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount: number;

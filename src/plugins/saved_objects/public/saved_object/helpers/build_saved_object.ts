@@ -5,20 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { once } from 'lodash';
-import type {
+import { hydrateIndexPattern } from './hydrate_index_pattern';
+import { intializeSavedObject } from './initialize_saved_object';
+import { serializeSavedObject } from './serialize_saved_object';
+
+import {
   EsResponse,
   SavedObject,
   SavedObjectConfig,
   SavedObjectKibanaServices,
   SavedObjectSaveOpts,
 } from '../../types';
-import type { SavedObjectDecorator } from '../decorators/types';
 import { applyESResp } from './apply_es_resp';
-import { hydrateIndexPattern } from './hydrate_index_pattern';
-import { intializeSavedObject } from './initialize_saved_object';
 import { saveSavedObject } from './save_saved_object';
-import { serializeSavedObject } from './serialize_saved_object';
+import { SavedObjectDecorator } from '../decorators';
 
 const applyDecorators = (
   object: SavedObject,

@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  FieldVisStats,
-  Percentile,
-} from '../../../../../../common/types/field_request_config';
-import type { JobFieldType } from '../../../../../../common/types/job_field_type';
+
+import type { Percentile, JobFieldType, FieldVisStats } from '../../../../../../common/types';
 
 export interface MetricFieldVisStats {
   avg?: number;

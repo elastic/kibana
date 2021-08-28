@@ -5,29 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import { merge } from '@kbn/std';
+
 import { Observable, Subject } from 'rxjs';
 import { first, map, shareReplay, takeUntil } from 'rxjs/operators';
-import type { CoreService } from '../../types/core_service';
-import type { CoreContext } from '../core_context';
-import type {
-  IExecutionContext,
-  InternalExecutionContextSetup,
-} from '../execution_context/execution_context_service';
-import type { GetAuthHeaders } from '../http/auth_headers_storage';
-import type { InternalHttpServiceSetup } from '../http/types';
-import type { ElasticsearchClientConfig } from './client/client_config';
-import { ClusterClient } from './client/cluster_client';
-import type { ElasticsearchConfigType } from './elasticsearch_config';
-import { ElasticsearchConfig } from './elasticsearch_config';
-import { calculateStatus$ } from './status';
-import type {
+import { merge } from '@kbn/std';
+
+import { CoreService } from '../../types';
+import { CoreContext } from '../core_context';
+import { Logger } from '../logging';
+
+import { ClusterClient, ElasticsearchClientConfig } from './client';
+import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
+import type { InternalHttpServiceSetup, GetAuthHeaders } from '../http';
+import type { InternalExecutionContextSetup, IExecutionContext } from '../execution_context';
+import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from './types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
+import { calculateStatus$ } from './status';
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;

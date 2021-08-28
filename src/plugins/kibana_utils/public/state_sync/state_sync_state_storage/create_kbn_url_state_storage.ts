@@ -5,16 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { History } from 'history';
+
 import { Observable, of } from 'rxjs';
 import { catchError, map, share } from 'rxjs/operators';
-import type { IKbnUrlControls } from '../../state_management/url/kbn_url_storage';
+import { History } from 'history';
+import { IStateStorage } from './types';
 import {
   createKbnUrlControls,
   getStateFromKbnUrl,
+  IKbnUrlControls,
   setStateToKbnUrl,
-} from '../../state_management/url/kbn_url_storage';
-import type { IStateStorage } from './types';
+} from '../../state_management/url';
 
 /**
  * KbnUrlStateStorage is a state storage for {@link syncState} utility which:

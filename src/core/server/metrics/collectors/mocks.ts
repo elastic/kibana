@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { MetricsCollector } from './types';
+
+import { MetricsCollector } from './types';
 
 const createMock = () => {
   const mocked: jest.Mocked<MetricsCollector<any>> = {

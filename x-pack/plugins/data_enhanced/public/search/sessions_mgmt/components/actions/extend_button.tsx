@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment';
 import React, { useState } from 'react';
-import type { IClickActionDescriptor } from '..';
-import type { CoreStart } from '../../../../../../../../src/core/public/types';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
-import extendSessionIcon from '../../icons/extend_session.svg';
+import moment from 'moment';
+import { CoreStart } from 'kibana/public';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import type { UISession } from '../../types';
-import type { OnActionDismiss } from './types';
+import { IClickActionDescriptor } from '../';
+import { OnActionDismiss } from './types';
+import { UISession } from '../../types';
+import extendSessionIcon from '../../icons/extend_session.svg';
 
 interface ExtendButtonProps {
   searchSession: UISession;

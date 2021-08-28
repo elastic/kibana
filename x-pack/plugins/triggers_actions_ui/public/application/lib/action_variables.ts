@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { ActionVariable } from '../../../../alerting/common/alert';
-import type { ActionVariables } from '../../types';
+import { ActionVariables } from '../../types';
+import { ActionVariable } from '../../../../alerting/common';
 
 // return a "flattened" list of action variables for an alertType
 export function transformActionVariables(actionVariables: ActionVariables): ActionVariable[] {

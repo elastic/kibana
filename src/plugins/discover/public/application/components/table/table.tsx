@@ -5,17 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiInMemoryTable } from '@elastic/eui';
+
 import React, { useCallback, useMemo, useState } from 'react';
-import { IndexPatternField } from '../../../../../data/common/index_patterns/fields/index_pattern_field';
-import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import { EuiInMemoryTable } from '@elastic/eui';
+import { IndexPattern, IndexPatternField } from '../../../../../data/public';
 import { SHOW_MULTIFIELDS } from '../../../../common';
 import { getServices } from '../../../kibana_services';
 import { isNestedFieldParent } from '../../apps/main/utils/nested_fields';
-import type {
+import {
   DocViewFilterFn,
-  DocViewRenderProps,
   ElasticSearchHit,
+  DocViewRenderProps,
 } from '../../doc_views/doc_views_types';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 

@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPattern } from '../../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { SortPairArr } from '../components/doc_table/lib/get_sort';
-import { getSortArray } from '../components/doc_table/lib/get_sort';
+
+import { IndexPattern } from '../../../../kibana_services';
+import { getSortArray, SortPairArr } from '../components/doc_table/lib/get_sort';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next

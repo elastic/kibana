@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
-import type { ExternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
-import { createLicensedRouteHandler } from '../../lib/licensed_route_handler';
+import { createLicensedRouteHandler } from '../../lib';
+import type { ExternalRouteDeps } from './';
 
 export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
   const { externalRouter, getSpacesService, usageStatsServicePromise } = deps;

@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type { SecurityLicense } from '../../common/licensing/license_service';
+
+import type { KibanaRequest } from 'src/core/server';
+
+import type { SecurityLicense } from '../../common/licensing';
 
 export interface AuthorizationMode {
   useRbacForRequest(request: KibanaRequest): boolean;

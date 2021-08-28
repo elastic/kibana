@@ -4,32 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IRouter } from '../../../../../../src/core/server/http/router/router';
-import { PLUGIN_ID } from '../../../common/constants/plugin';
-import { EPM_API_ROUTES } from '../../../common/constants/routes';
+
+import type { IRouter } from 'src/core/server';
+
+import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
 import {
-  BulkUpgradePackagesFromRegistryRequestSchema,
-  DeletePackageRequestSchema,
   GetCategoriesRequestSchema,
+  GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  GetPackagesRequestSchema,
-  GetStatsRequestSchema,
-  InstallPackageByUploadRequestSchema,
   InstallPackageFromRegistryRequestSchema,
-} from '../../types/rest_spec/epm';
+  InstallPackageByUploadRequestSchema,
+  DeletePackageRequestSchema,
+  BulkUpgradePackagesFromRegistryRequestSchema,
+  GetStatsRequestSchema,
+} from '../../types';
 
 import {
-  bulkInstallPackagesFromRegistryHandler,
-  deletePackageHandler,
   getCategoriesHandler,
+  getListHandler,
+  getLimitedListHandler,
   getFileHandler,
   getInfoHandler,
-  getLimitedListHandler,
-  getListHandler,
-  getStatsHandler,
-  installPackageByUploadHandler,
   installPackageFromRegistryHandler,
+  installPackageByUploadHandler,
+  deletePackageHandler,
+  bulkInstallPackagesFromRegistryHandler,
+  getStatsHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB

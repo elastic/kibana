@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
+
 import { useMemo } from 'react';
-import type { TypedLensByValueInput } from '../../../../../../lens/public/embeddable/embeddable_component';
-import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
-import { getDefaultConfigs } from '../configurations/default_configs';
-import type { LayerConfig } from '../configurations/lens_attributes';
-import { LensAttributes } from '../configurations/lens_attributes';
-import type { SeriesUrl, UrlFilter } from '../types';
-import { useAppIndexPatternContext } from './use_app_index_pattern';
+import { isEmpty } from 'lodash';
+import { TypedLensByValueInput } from '../../../../../../lens/public';
+import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { useSeriesStorage } from './use_series_storage';
+import { getDefaultConfigs } from '../configurations/default_configs';
+
+import { SeriesUrl, UrlFilter } from '../types';
+import { useAppIndexPatternContext } from './use_app_index_pattern';
+import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
 
 export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
   return Object.entries(reportDefinitions ?? {})

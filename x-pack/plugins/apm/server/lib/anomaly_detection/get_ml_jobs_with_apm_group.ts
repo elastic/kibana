@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MlPluginSetup } from '../../../../ml/server/plugin';
+
+import { MlPluginSetup } from '../../../../ml/server';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { APM_ML_JOB_GROUP } from './constants';
 

@@ -6,12 +6,12 @@
  */
 
 import * as t from 'io-ts';
-import { getEnvironments } from '../lib/environments/get_environments';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
+import { getEnvironments } from '../lib/environments/get_environments';
+import { rangeRt } from './default_api_types';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { rangeRt } from './default_api_types';
 
 const environmentsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/environments',

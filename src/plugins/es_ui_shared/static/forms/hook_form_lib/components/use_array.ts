@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useFormContext } from '../form_context';
+
+import { useEffect, useRef, useCallback, useMemo } from 'react';
+
+import { FormHook, FieldConfig } from '../types';
 import { getFieldValidityAndErrorMessage } from '../helpers';
-import type { InternalFieldConfig } from '../hooks/use_field';
-import { useField } from '../hooks/use_field';
-import type { FieldConfig, FormHook } from '../types';
+import { useFormContext } from '../form_context';
+import { useField, InternalFieldConfig } from '../hooks';
 
 interface Props {
   path: string;

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Doc } from '../../common/types';
+
 import { Importer } from './importer';
-import type { CreateDocsResponse, ImportFactoryOptions } from './types';
+import { Doc } from '../../common';
+import { CreateDocsResponse, ImportFactoryOptions } from './types';
 
 export class MessageImporter extends Importer {
   private _excludeLinesRegex: RegExp | null;

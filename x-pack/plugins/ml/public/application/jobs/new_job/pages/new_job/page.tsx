@@ -4,45 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useEffect, Fragment } from 'react';
 import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiTitle,
+  EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment, useEffect } from 'react';
+import { Wizard } from './wizard';
+import { WIZARD_STEPS } from '../components/step_types';
+import { getJobCreatorTitle } from '../../common/job_creator/util/general';
 import {
-  DEFAULT_BUCKET_SPAN,
-  DEFAULT_MODEL_MEMORY_LIMIT,
-  JOB_TYPE,
-} from '../../../../../../common/constants/new_job';
-import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
-import { getTimeFilterRange } from '../../../../components/full_time_range_selector/full_time_range_selector_service';
-import { useMlContext } from '../../../../contexts/ml/use_ml_context';
-import type { ExistingJobsAndGroups } from '../../../../services/job_service';
-import { mlJobService } from '../../../../services/job_service';
-import { getNewJobDefaults } from '../../../../services/ml_server_info';
-import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { useToastNotificationService } from '../../../../services/toast_notification_service/toast_notification_service';
-import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
-import { ChartLoader } from '../../common/chart_loader/chart_loader';
-import { jobCreatorFactory } from '../../common/job_creator/job_creator_factory';
-import {
+  jobCreatorFactory,
   isAdvancedJobCreator,
   isCategorizationJobCreator,
   isRareJobCreator,
-} from '../../common/job_creator/type_guards';
-import { getJobCreatorTitle } from '../../common/job_creator/util/general';
-import { JobValidator } from '../../common/job_validator/job_validator';
-import { ResultsLoader } from '../../common/results_loader/results_loader';
-import { WIZARD_STEPS } from '../components/step_types';
-import { Wizard } from './wizard';
+} from '../../common/job_creator';
+import {
+  JOB_TYPE,
+  DEFAULT_MODEL_MEMORY_LIMIT,
+  DEFAULT_BUCKET_SPAN,
+} from '../../../../../../common/constants/new_job';
+import { ChartLoader } from '../../common/chart_loader';
+import { ResultsLoader } from '../../common/results_loader';
+import { JobValidator } from '../../common/job_validator';
+import { useMlContext } from '../../../../contexts/ml';
+import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
+import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
+import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
+import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
+import { getNewJobDefaults } from '../../../../services/ml_server_info';
+import { useToastNotificationService } from '../../../../services/toast_notification_service';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;

@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EMPTY, from, Observable } from 'rxjs';
+
+import { Observable, from, EMPTY } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import type { HttpStart } from '../../../../../src/core/public/http/types';
-import type { GlobalSearchProviderFindParams, GlobalSearchResult } from '../../common/types';
-import type { GlobalSearchFindOptions } from './types';
+import { HttpStart } from 'src/core/public';
+import { GlobalSearchResult, GlobalSearchProviderFindParams } from '../../common/types';
+import { GlobalSearchFindOptions } from './types';
 
 interface ServerFetchResponse {
   results: GlobalSearchResult[];

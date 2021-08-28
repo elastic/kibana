@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { jsonRt } from '@kbn/io-ts-utils';
-import type { Logger } from '@kbn/logging';
-import type { ServerRoute } from '@kbn/server-route-repository';
 import { createServerRouteRepository } from '@kbn/server-route-repository';
+import { ServerRoute } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
-import { registerRoutes } from '.';
-import type { APMConfig } from '../..';
-import type { CoreSetup } from '../../../../../../src/core/server';
-import type {
-  APMRouteCreateOptions,
-  APMRouteHandlerResources,
-} from '../typings';
+import { CoreSetup, Logger } from 'src/core/server';
+import { APMConfig } from '../..';
+import { APMRouteCreateOptions, APMRouteHandlerResources } from '../typings';
+import { registerRoutes } from './index';
 
 type RegisterRouteDependencies = Parameters<typeof registerRoutes>[0];
 

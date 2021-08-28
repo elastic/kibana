@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { I18nStart } from '../../../../../../../../core/public/i18n/i18n_service';
+import { I18nStart } from 'kibana/public';
 import { OpenSearchPanel } from './open_search_panel';
 
 let isOpen = false;

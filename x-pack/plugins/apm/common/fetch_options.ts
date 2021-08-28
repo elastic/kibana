@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpFetchOptions } from '../../../../src/core/public/http/types';
+
+import { HttpFetchOptions } from 'kibana/public';
 
 export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   pathname: string;

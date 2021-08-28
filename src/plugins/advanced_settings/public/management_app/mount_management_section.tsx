@@ -6,19 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
-import type { LocationDescriptor } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { RouteChildrenProps } from 'react-router-dom';
-import { Redirect, Route, Router, Switch } from 'react-router-dom';
-import type { StartServicesAccessor } from '../../../../core/public/types';
-import { url } from '../../../kibana_utils/common/url';
-import type { ManagementAppMountParams } from '../../../management/public/types';
-import type { UsageCollectionSetup } from '../../../usage_collection/public/plugin';
-import { ComponentRegistry } from '../component_registry/component_registry';
+import { Router, Switch, Route, Redirect, RouteChildrenProps } from 'react-router-dom';
+
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
+
+import { LocationDescriptor } from 'history';
+import { url } from '../../../kibana_utils/public';
+import { ManagementAppMountParams } from '../../../management/public';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { StartServicesAccessor } from '../../../../core/public';
+
 import { AdvancedSettings, QUERY } from './advanced_settings';
+import { ComponentRegistry } from '../types';
+
 import './index.scss';
 
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {

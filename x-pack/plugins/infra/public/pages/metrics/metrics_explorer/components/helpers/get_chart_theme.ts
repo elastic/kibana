@@ -4,8 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PartialTheme, Theme } from '@elastic/charts';
-import { DARK_THEME, LIGHT_THEME, mergeWithDefaultTheme } from '@elastic/charts';
+
+import {
+  Theme,
+  PartialTheme,
+  LIGHT_THEME,
+  DARK_THEME,
+  mergeWithDefaultTheme,
+} from '@elastic/charts';
 
 export function getChartTheme(isDarkMode: boolean): Theme {
   return isDarkMode ? DARK_THEME : LIGHT_THEME;

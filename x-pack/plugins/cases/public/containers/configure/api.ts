@@ -4,26 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEmpty } from 'lodash/fp';
-import type {
-  CasesConfigurationsResponse,
+import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
+import {
+  ActionConnector,
+  ActionTypeConnector,
+  CASE_CONFIGURE_CONNECTORS_URL,
+  CASE_CONFIGURE_URL,
   CasesConfigurePatch,
   CasesConfigureRequest,
   CasesConfigureResponse,
-} from '../../../common/api/cases/configure';
-import type { ActionConnector, ActionTypeConnector } from '../../../common/api/connectors';
-import { getCaseConfigurationDetailsUrl } from '../../../common/api/helpers';
-import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
-import type { ApiProps } from '../../../common/ui/types';
-import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
-import { KibanaServices } from '../../common/lib/kibana/services';
+  CasesConfigurationsResponse,
+  getCaseConfigurationDetailsUrl,
+} from '../../../common';
+import { KibanaServices } from '../../common/lib/kibana';
+
+import { ApiProps } from '../types';
 import {
   convertArrayToCamelCase,
   convertToCamelCase,
   decodeCaseConfigurationsResponse,
   decodeCaseConfigureResponse,
 } from '../utils';
-import type { CaseConfigure } from './types';
+import { CaseConfigure } from './types';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
   const response = await KibanaServices.get().http.fetch(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`, {

@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { IndexPattern } from '../../../kibana_services';
 
 export interface GridContext {
   expanded: ElasticSearchHit | undefined;

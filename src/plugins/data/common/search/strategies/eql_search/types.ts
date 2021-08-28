@@ -5,9 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
-import type { ApiResponse, TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
+
+import { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
+import { ApiResponse, TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+
+import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
 export const EQL_SEARCH_STRATEGY = 'eql';
 

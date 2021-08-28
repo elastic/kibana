@@ -4,17 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
-import type { RouteOptions } from '..';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import type { AlertTypeParams, SanitizedAlert } from '../../../common/alert';
-import type { AlertNotifyWhenType } from '../../../common/alert_notify_when_type';
-import { validateNotifyWhenType } from '../../../common/alert_notify_when_type';
-import { validateDurationSchema } from '../../../common/parse_duration';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { countUsageOfPredefinedIds } from '../lib/count_usage_of_predefined_ids';
-import { handleDisabledApiKeysError } from '../lib/error_handler';
+import { validateDurationSchema } from '../../lib';
+import { handleDisabledApiKeysError } from './../lib/error_handler';
+import {
+  SanitizedAlert,
+  AlertNotifyWhenType,
+  AlertTypeParams,
+  LEGACY_BASE_ALERT_API_PATH,
+  validateNotifyWhenType,
+} from '../../types';
+import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { RouteOptions } from '..';
+import { countUsageOfPredefinedIds } from '../lib';
 
 export const bodySchema = schema.object({
   name: schema.string(),

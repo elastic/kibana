@@ -5,17 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
-import { loggerMock } from '@kbn/logging/mocks';
+
 import { Stream } from 'stream';
+import Boom from '@hapi/boom';
 import supertest from 'supertest';
+import { schema } from '@kbn/config-schema';
+
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { HttpService } from '../http_service';
-import { Router } from '../router/router';
 import { createHttpServer } from '../test_utils';
+import { HttpService } from '../http_service';
+import { Router } from '../router';
+import { loggerMock } from '@kbn/logging/mocks';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;

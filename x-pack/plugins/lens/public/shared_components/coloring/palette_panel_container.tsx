@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import './palette_panel_container.scss';
+
+import { i18n } from '@kbn/i18n';
+import React, { useState, useEffect, MutableRefObject } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
+  EuiTitle,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiFocusTrap,
   EuiOutsideClickDetector,
   EuiPortal,
-  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { MutableRefObject } from 'react';
-import React, { useEffect, useState } from 'react';
-import './palette_panel_container.scss';
 
 export function PalettePanelContainer({
   isOpen,

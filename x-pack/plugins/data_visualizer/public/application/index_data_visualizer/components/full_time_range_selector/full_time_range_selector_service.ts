@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
-import { estypes } from '@elastic/elasticsearch';
 import moment from 'moment';
-import type { Query } from 'src/plugins/data/public';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { TimefilterContract } from '../../../../../../../../src/plugins/data/public/query/timefilter/timefilter';
-import type { GetTimeFieldRangeResponse } from '../../../../../common/types/time_field_request';
+import { estypes } from '@elastic/elasticsearch';
+import { Query, TimefilterContract } from 'src/plugins/data/public';
+import dateMath from '@elastic/datemath';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { getTimeFieldRange } from '../../services/time_field_range';
+import { GetTimeFieldRangeResponse } from '../../../../../common/types/time_field_request';
 
 export interface TimeRange {
   from: number;

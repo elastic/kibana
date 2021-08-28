@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert } from '../types';
-import { FIELD_FORMAT_IDS } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 /** @public */
 export class RelativeDateFormat extends FieldFormat {

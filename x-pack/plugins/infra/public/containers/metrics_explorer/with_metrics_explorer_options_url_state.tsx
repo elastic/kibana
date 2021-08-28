@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { set } from '@elastic/safer-lodash-set';
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import React, { useContext, useMemo } from 'react';
-import type {
-  MetricsExplorerChartOptions,
-  MetricsExplorerOptions,
-  MetricsExplorerTimeOptions,
-} from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { UrlStateContainer } from '../../utils/url_state';
 import {
+  MetricsExplorerOptions,
+  MetricsExplorerOptionsContainer,
+  MetricsExplorerTimeOptions,
+  MetricsExplorerChartOptions,
   metricExplorerOptionsRT,
   metricsExplorerChartOptionsRT,
-  MetricsExplorerOptionsContainer,
   metricsExplorerTimeOptionsRT,
 } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { UrlStateContainer } from '../../utils/url_state';
 
 interface MetricsExplorerUrlState {
   timerange?: MetricsExplorerTimeOptions;

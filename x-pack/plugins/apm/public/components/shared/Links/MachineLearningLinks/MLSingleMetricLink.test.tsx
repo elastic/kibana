@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Location } from 'history';
+
+import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLSingleMetricLink } from './MLSingleMetricLink';

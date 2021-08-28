@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
-  DeprecationsClient,
-  DeprecationsServiceSetup,
-  InternalDeprecationsServiceSetup,
-  InternalDeprecationsServiceStart,
-} from './deprecations_service';
-import { DeprecationsService } from './deprecations_service';
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import {
+  DeprecationsService,
+  InternalDeprecationsServiceSetup,
+  DeprecationsServiceSetup,
+  InternalDeprecationsServiceStart,
+  DeprecationsClient,
+} from './deprecations_service';
 type DeprecationsServiceContract = PublicMethodsOf<DeprecationsService>;
 
 const createSetupContractMock = () => {

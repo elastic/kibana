@@ -5,27 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { METRIC_TYPE } from '@kbn/analytics';
+
+import React, { useCallback, useState, useMemo } from 'react';
+import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
-import type { CoreStart } from '../../../../core/public/types';
-import type { DocLinksStart } from '../../../../core/public/doc_links/doc_links_service';
-import type { NotificationsStart } from '../../../../core/public/notifications/notifications_service';
-import { IndexPatternField } from '../../../data/common/index_patterns/fields/index_pattern_field';
-import { IndexPattern } from '../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { RuntimeType } from '../../../data/common/index_patterns/types';
-import type { DataPublicPluginStart } from '../../../data/public/types';
-import type { UsageCollectionStart } from '../../../usage_collection/public/plugin';
+import { METRIC_TYPE } from '@kbn/analytics';
+
+import {
+  IndexPatternField,
+  IndexPattern,
+  DataPublicPluginStart,
+  RuntimeType,
+  UsageCollectionStart,
+} from '../shared_imports';
+import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
-import type { ApiService } from '../lib/api';
-import { getLinks } from '../lib/documentation';
-import { getRuntimeFieldValidator } from '../lib/runtime_field_validation';
-import { deserializeField } from '../lib/serialization';
-import type { Field, InternalFieldType, PluginStart } from '../types';
+import { deserializeField, getRuntimeFieldValidator, getLinks, ApiService } from '../lib';
+import {
+  FieldEditorFlyoutContent,
+  Props as FieldEditorFlyoutContentProps,
+} from './field_editor_flyout_content';
 import { FieldEditorProvider } from './field_editor_context';
-import type { Props as FieldEditorFlyoutContentProps } from './field_editor_flyout_content';
-import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
-import { FieldPreviewProvider } from './preview/field_preview_context';
+import { FieldPreviewProvider } from './preview';
 
 export interface Props {
   /** Handler for the "save" footer button */

@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiErrorBoundary } from '@elastic/eui';
-import type { History } from 'history';
-import { createBrowserHistory } from 'history';
+import { createBrowserHistory, History } from 'history';
+import { AppMountParameters } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { RouteProps } from 'react-router-dom';
-import { Route, Router, Switch } from 'react-router-dom';
-import type { AppMountParameters } from '../../../../../src/core/public/application/types';
+import { Route, RouteProps, Router, Switch } from 'react-router-dom';
 
 // This exists purely to facilitate legacy app/infra URL redirects.
 // It will be removed in 8.0.0.

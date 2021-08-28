@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PLUGIN_ID } from '../../common/constants/plugin';
-import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../constants/page_paths';
-import { pagePathGetters } from '../constants/page_paths';
 
-import { useStartServices } from './use_core';
+import { pagePathGetters, PLUGIN_ID } from '../constants';
+import type { StaticPage, DynamicPage, DynamicPagePathValues } from '../constants';
+
+import { useStartServices } from './';
 
 const getSeparatePaths = (
   page: StaticPage | DynamicPage,

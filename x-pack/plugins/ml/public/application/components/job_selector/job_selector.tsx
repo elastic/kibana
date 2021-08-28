@@ -4,21 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlyout } from '@elastic/eui';
+
+import React, { useState, useEffect, useCallback } from 'react';
+
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiFlyout } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs/summary_job';
-import type { Dictionary } from '../../../../common/types/common';
-import type { ApplyTimeRangeConfig } from '../../../../common/types/storage';
-import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
-import { useStorage } from '../../contexts/ml/use_storage';
+
+import { Dictionary } from '../../../../common/types/common';
 import { useUrlState } from '../../util/url_state';
 // @ts-ignore
 import { IdBadges } from './id_badges/index';
-import type { JobSelectorFlyoutProps } from './job_selector_flyout';
-import { BADGE_LIMIT, JobSelectorFlyoutContent } from './job_selector_flyout';
-
-
+import {
+  BADGE_LIMIT,
+  JobSelectorFlyoutContent,
+  JobSelectorFlyoutProps,
+} from './job_selector_flyout';
+import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import { useStorage } from '../../contexts/ml/use_storage';
+import { ApplyTimeRangeConfig, ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 
 interface GroupObj {
   groupId: string;

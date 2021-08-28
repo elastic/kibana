@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { either } from 'fp-ts/lib/Either';
 import moment, { unitOfTime } from 'moment';
-import type { AmountAndUnit } from '../amount_and_unit';
-import { amountAndUnitToObject } from '../amount_and_unit';
+import { amountAndUnitToObject, AmountAndUnit } from '../amount_and_unit';
 import { getRangeTypeMessage } from './get_range_type_message';
 
 function toMilliseconds({ amount, unit }: AmountAndUnit) {

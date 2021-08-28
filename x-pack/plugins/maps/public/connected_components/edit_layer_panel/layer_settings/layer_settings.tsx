@@ -4,25 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSwitchEvent } from '@elastic/eui';
+
+import React, { ChangeEvent, Fragment } from 'react';
 import {
-  EuiFieldText,
-  EuiFormRow,
+  EuiTitle,
   EuiPanel,
+  EuiFormRow,
+  EuiFieldText,
   EuiSpacer,
   EuiSwitch,
-  EuiTitle,
+  EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ChangeEvent } from 'react';
-import React, { Fragment } from 'react';
-import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public/validated_range/validated_dual_range';
+import { Attribution } from '../../../../common/descriptor_types';
 import { MAX_ZOOM } from '../../../../common/constants';
-import type { Attribution } from '../../../../common/descriptor_types/layer_descriptor_types';
-import type { ILayer } from '../../../classes/layers/layer';
 import { AlphaSlider } from '../../../components/alpha_slider';
+import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public';
+import { ILayer } from '../../../classes/layers/layer';
 import { AttributionFormRow } from './attribution_form_row';
 
 export interface Props {

@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Readable } from 'stream';
-import type { SavedObject } from '../../../types/saved_objects';
+import { SavedObject } from '../types';
 
 /**
  * Describes a retry operation for importing a saved object.

@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server/saved_objects/service/lib/errors';
 
 // This module provides a helper to perform retries on a function if the
 // function ends up throwing a SavedObject 409 conflict.  This can happen
 // when alert SO's are updated in the background, and will avoid having to
 // have the caller make explicit conflict checks, where the conflict was
 // caused by a background update.
+
+import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+
 type RetryableForConflicts<T> = () => Promise<T>;
 
 // number of times to retry when conflicts occur

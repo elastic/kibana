@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
+import './discover_field_search.scss';
+
+import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonGroup,
   EuiFieldSearch,
-  EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiOutsideClickDetector,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelect,
-  EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
+  EuiForm,
+  EuiFormRow,
+  EuiButtonGroup,
+  EuiOutsideClickDetector,
+  EuiFilterButton,
+  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { OptionHTMLAttributes, ReactNode } from 'react';
-import React, { useState } from 'react';
-import './discover_field_search.scss';
 
 export interface State {
   searchable: string;

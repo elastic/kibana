@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isIosAgentName, isJavaAgentName, isRumAgentName } from './agent_name';
+
+import { isJavaAgentName, isRumAgentName, isIosAgentName } from './agent_name';
 
 describe('agent name helpers', () => {
   describe('isJavaAgentName', () => {

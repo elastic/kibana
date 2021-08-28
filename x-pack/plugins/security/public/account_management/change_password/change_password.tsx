@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import React, { Component } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { NotificationsSetup } from 'src/core/public';
 
-import type { NotificationsSetup } from '../../../../../../src/core/public/notifications/notifications_service';
-import type { AuthenticatedUser } from '../../../common/model/authenticated_user';
-import { canUserChangePassword } from '../../../common/model/authenticated_user';
-import { ChangePasswordForm } from '../../management/users/components/change_password_form/change_password_form';
-import type { UserAPIClient } from '../../management/users/user_api_client';
+import type { AuthenticatedUser } from '../../../common/model';
+import { canUserChangePassword } from '../../../common/model';
+import type { UserAPIClient } from '../../management/users';
+import { ChangePasswordForm } from '../../management/users/components/change_password_form';
 
 export interface ChangePasswordProps {
   user: AuthenticatedUser;

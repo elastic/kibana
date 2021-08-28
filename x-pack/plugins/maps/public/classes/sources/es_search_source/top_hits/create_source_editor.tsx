@@ -4,18 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel } from '@elastic/eui';
+
 import React, { Component } from 'react';
-import type { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import { SortDirection } from '../../../../../../../../src/plugins/data/common/search/search_source/types';
+import { EuiPanel } from '@elastic/eui';
+
 import { SCALING_TYPES } from '../../../../../common/constants';
-import type { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types/source_descriptor_types';
 import { GeoFieldSelect } from '../../../../components/geo_field_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
-import { getGeoFields, getSortFields, getTermsFields } from '../../../../index_pattern_util';
-import type { OnSourceChangeArgs } from '../../source';
+import { getGeoFields, getTermsFields, getSortFields } from '../../../../index_pattern_util';
+import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
+import {
+  IndexPattern,
+  IFieldType,
+  SortDirection,
+} from '../../../../../../../../src/plugins/data/common';
 import { TopHitsForm } from './top_hits_form';
+import { OnSourceChangeArgs } from '../../source';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<ESSearchSourceDescriptor> | null) => void;

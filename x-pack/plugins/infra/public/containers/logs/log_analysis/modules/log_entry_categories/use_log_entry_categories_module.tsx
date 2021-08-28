@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import createContainer from 'constate';
+import { estypes } from '@elastic/elasticsearch';
 import { useMemo } from 'react';
 import { useLogAnalysisModule } from '../../log_analysis_module';
 import { useLogAnalysisModuleConfiguration } from '../../log_analysis_module_configuration';
 import { useLogAnalysisModuleDefinition } from '../../log_analysis_module_definition';
-import type { ModuleSourceConfiguration } from '../../log_analysis_module_types';
+import { ModuleSourceConfiguration } from '../../log_analysis_module_types';
 import { logEntryCategoriesModule } from './module_descriptor';
 import { useLogEntryCategoriesQuality } from './use_log_entry_categories_quality';
 

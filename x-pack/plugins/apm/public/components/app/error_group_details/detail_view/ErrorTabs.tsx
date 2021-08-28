@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 
 export interface ErrorTab {
   key: 'log_stacktrace' | 'exception_stacktrace' | 'metadata';

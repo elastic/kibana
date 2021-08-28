@@ -5,48 +5,49 @@
  * 2.0.
  */
 
-import type { EuiListGroupItemProps } from '@elastic/eui';
-import {
-  EuiCallOut,
-  EuiFieldText,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiListGroup,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import './dimension_editor.scss';
+import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
-import { trackUiEvent } from '../../lens_ui_telemetry/factory';
-import { useDebouncedValue } from '../../shared_components/debounced_value';
-import type { FieldBasedIndexPatternColumn, IndexPatternColumn } from '../operations/definitions';
-import { operationDefinitionMap } from '../operations/definitions';
 import {
-  canTransition,
+  EuiListGroup,
+  EuiFormRow,
+  EuiFieldText,
+  EuiSpacer,
+  EuiListGroupItemProps,
+  EuiFormLabel,
+  EuiToolTip,
+  EuiText,
+  EuiTabs,
+  EuiTab,
+  EuiCallOut,
+} from '@elastic/eui';
+import { IndexPatternDimensionEditorProps } from './dimension_panel';
+import { OperationSupportMatrix } from './operation_support';
+import { IndexPatternColumn } from '../indexpattern';
+import {
+  operationDefinitionMap,
+  getOperationDisplay,
   insertOrReplaceColumn,
   replaceColumn,
-  resetIncomplete,
   updateColumnParam,
-} from '../operations/layer_helpers';
-import { getOperationDisplay } from '../operations/operations';
-import { DEFAULT_TIME_SCALE } from '../operations/time_scale_utils';
+  resetIncomplete,
+  FieldBasedIndexPatternColumn,
+  canTransition,
+  DEFAULT_TIME_SCALE,
+} from '../operations';
 import { mergeLayer } from '../state_helpers';
-import type { IndexPattern, IndexPatternLayer } from '../types';
-import { fieldIsInvalid, hasField } from '../utils';
-import { AdvancedOptions } from './advanced_options';
-import { BucketNestingEditor } from './bucket_nesting_editor';
-import './dimension_editor.scss';
-import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { FieldSelect } from './field_select';
-import { defaultFilter, Filtering, setFilter } from './filtering';
+import { hasField, fieldIsInvalid } from '../utils';
+import { BucketNestingEditor } from './bucket_nesting_editor';
+import { IndexPattern, IndexPatternLayer } from '../types';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
-import type { OperationSupportMatrix } from './operation_support';
 import { ReferenceEditor } from './reference_editor';
 import { setTimeScaling, TimeScaling } from './time_scaling';
+import { defaultFilter, Filtering, setFilter } from './filtering';
+import { AdvancedOptions } from './advanced_options';
 import { setTimeShift, TimeShift } from './time_shift';
+import { useDebouncedValue } from '../../shared_components';
 
 const operationPanels = getOperationDisplay();
 

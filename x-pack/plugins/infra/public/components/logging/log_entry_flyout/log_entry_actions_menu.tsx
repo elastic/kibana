@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
-import { getApmTraceUrl } from '../../../../../observability/public/utils/get_apm_trace_url';
-import type { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
-import type { LinkDescriptor } from '../../../hooks/use_link_props';
-import { useLinkProps } from '../../../hooks/use_link_props';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
+import { getApmTraceUrl } from '../../../../../observability/public';
+import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
+import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 

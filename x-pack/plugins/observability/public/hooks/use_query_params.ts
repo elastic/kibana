@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parse } from 'query-string';
-import { useMemo } from 'react';
+
 import { useLocation } from 'react-router-dom';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common/constants';
-import type { TimePickerTime } from '../components/shared/date_picker';
+import { useMemo } from 'react';
+import { parse } from 'query-string';
+import { UI_SETTINGS, useKibanaUISettings } from './use_kibana_ui_settings';
+import { TimePickerTime } from '../components/shared/date_picker';
 import { getAbsoluteTime } from '../utils/date';
-import { useKibanaUISettings } from './use_kibana_ui_settings';
 
 const getParsedParams = (search: string) => {
   return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import type { ILicenseState } from '../../lib/license_state';
 import type { AlertingRouter } from '../../types';
-import { handleDisabledApiKeysError } from '../lib/error_handler';
+import { ILicenseState } from '../../lib/license_state';
+import { verifyApiAccess } from '../../lib/license_api_access';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
+import { handleDisabledApiKeysError } from './../lib/error_handler';
+import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 
 const paramSchema = schema.object({
   id: schema.string(),

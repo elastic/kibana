@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSelectableOption } from '@elastic/eui';
+
+import React, { FormEvent, useEffect, useState } from 'react';
 import {
+  EuiText,
   EuiButton,
   EuiFilterButton,
-  EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiText,
+  EuiSelectableOption,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEqual, map } from 'lodash';
-import type { FormEvent } from 'react';
-import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { FieldValueSelectionProps, ListItem } from './types';
+import { isEqual, map } from 'lodash';
+import { FieldValueSelectionProps, ListItem } from './types';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 const Counter = euiStyled.div`
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};

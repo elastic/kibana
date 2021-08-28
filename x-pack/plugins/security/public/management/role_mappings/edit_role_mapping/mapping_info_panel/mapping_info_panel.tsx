@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -22,11 +23,11 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DocLinksStart } from 'src/core/public';
 
-import type { DocLinksStart } from '../../../../../../../../src/core/public/doc_links/doc_links_service';
-import type { RoleMapping } from '../../../../../common/model/role_mapping';
-import type { RolesAPIClient } from '../../../roles/roles_api_client';
-import { RoleSelector } from '../role_selector/role_selector';
+import type { RoleMapping } from '../../../../../common/model';
+import type { RolesAPIClient } from '../../../roles';
+import { RoleSelector } from '../role_selector';
 import {
   validateRoleMappingName,
   validateRoleMappingRoles,

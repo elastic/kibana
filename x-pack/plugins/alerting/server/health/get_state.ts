@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
-import { defer, interval, Observable, of, throwError, timer } from 'rxjs';
+import { defer, of, interval, Observable, throwError, timer } from 'rxjs';
 import { catchError, mergeMap, retryWhen, startWith, switchMap } from 'rxjs/operators';
-import type { SavedObjectsServiceStart } from '../../../../../src/core/server/saved_objects/saved_objects_service';
-import type { ServiceStatus } from '../../../../../src/core/server/status/types';
-import { ServiceStatusLevels } from '../../../../../src/core/server/status/types';
-import type { TaskManagerStartContract } from '../../../task_manager/server/plugin';
-import { HealthStatus } from '../../common/alert';
-import type { AlertsConfig } from '../config';
-import { getAlertingHealthStatus } from './get_health';
+import {
+  Logger,
+  SavedObjectsServiceStart,
+  ServiceStatus,
+  ServiceStatusLevels,
+} from '../../../../../src/core/server';
+import { TaskManagerStartContract } from '../../../task_manager/server';
 import { HEALTH_TASK_ID, scheduleAlertingHealthCheck } from './task';
+import { HealthStatus } from '../types';
+import { getAlertingHealthStatus } from './get_health';
+import { AlertsConfig } from '../config';
 
 export const MAX_RETRY_ATTEMPTS = 3;
 const HEALTH_STATUS_INTERVAL = 60000 * 5; // Five minutes

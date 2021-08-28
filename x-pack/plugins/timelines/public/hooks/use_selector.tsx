@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import deepEqual from 'fast-deep-equal';
+
 import { shallowEqual, useSelector } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
 export type TypedUseSelectorHook = <TSelected, TState = unknown>(
   selector: (state: TState) => TSelected,

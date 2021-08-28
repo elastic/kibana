@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';
 import { PolygonIcon } from './polygon_icon';

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+
+import { IndexPattern, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
 export interface GenericValidationError {
   type: 'generic';

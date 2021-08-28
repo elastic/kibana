@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObject } from '../../../../src/core/types/saved_objects';
-import type {
-  Tag,
-  TagAttributes,
-} from '../../../../src/plugins/saved_objects_tagging_oss/common/types';
+
+import { SavedObject } from 'src/core/types';
+import type { Tag, TagAttributes } from '../../../../src/plugins/saved_objects_tagging_oss/common';
 
 export type TagSavedObject = SavedObject<TagAttributes>;
 
@@ -21,8 +19,8 @@ export type TagWithRelations = Tag & {
 
 // re-export types from oss definition
 export type {
-  GetAllTagsOptions,
-  ITagsClient,
   Tag,
   TagAttributes,
+  GetAllTagsOptions,
+  ITagsClient,
 } from '../../../../src/plugins/saved_objects_tagging_oss/common';

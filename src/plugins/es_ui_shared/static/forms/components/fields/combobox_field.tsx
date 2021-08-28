@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { VALIDATION_TYPES } from '../../hook_form_lib/constants';
-import type { FieldHook, FieldValidateResponse } from '../../hook_form_lib/types';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+
+import { FieldHook, VALIDATION_TYPES, FieldValidateResponse } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;

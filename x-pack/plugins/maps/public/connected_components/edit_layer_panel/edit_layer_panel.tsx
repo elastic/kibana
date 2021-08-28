@@ -4,36 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Component, Fragment } from 'react';
+
 import {
-  EuiAccordion,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiIcon,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
+  EuiFlexItem,
   EuiTitle,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
+  EuiSpacer,
+  EuiAccordion,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Component, Fragment } from 'react';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context/context';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public/storage/storage';
-import { LAYER_TYPE } from '../../../common/constants';
-import type { IField } from '../../classes/fields/field';
-import type { ILayer } from '../../classes/layers/layer';
-import type { IVectorLayer } from '../../classes/layers/vector_layer/vector_layer';
-import type { ImmutableSourceProperty, OnSourceChangeArgs } from '../../classes/sources/source';
-import { getCore, getData } from '../../kibana_services';
 import { FilterEditor } from './filter_editor';
+import { JoinEditor, JoinField } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
-import { JoinEditor } from './join_editor';
-import type { JoinField } from './join_editor/join_editor';
 import { LayerSettings } from './layer_settings';
 import { StyleSettings } from './style_settings';
+
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { LAYER_TYPE } from '../../../common/constants';
+import { getData, getCore } from '../../kibana_services';
+import { ILayer } from '../../classes/layers/layer';
+import { IVectorLayer } from '../../classes/layers/vector_layer';
+import { ImmutableSourceProperty, OnSourceChangeArgs } from '../../classes/sources/source';
+import { IField } from '../../classes/fields/field';
 
 const localStorage = new Storage(window.localStorage);
 

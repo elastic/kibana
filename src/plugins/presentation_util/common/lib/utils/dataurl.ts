@@ -7,6 +7,7 @@
  */
 
 import { fromByteArray } from 'base64-js';
+
 // @ts-expect-error @types/mime doesn't resolve mime/lite for some reason.
 import mime from 'mime/lite';
 

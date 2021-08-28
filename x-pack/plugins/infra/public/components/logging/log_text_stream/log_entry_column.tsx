@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useMemo } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { TextScale } from '../../../../common/log_text_scale/log_text_scale';
-import type { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
+
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { TextScale } from '../../../../common/log_text_scale';
 import {
-  columnWidthToCSS,
-  isMessageColumnRenderConfiguration,
+  LogColumnRenderConfiguration,
   isTimestampColumnRenderConfiguration,
+  isMessageColumnRenderConfiguration,
+  columnWidthToCSS,
 } from '../../../utils/log_column_render_configuration';
-import type { TimeFormat } from '../../formatted_time';
-import { useFormattedTime } from '../../formatted_time';
+import { useFormattedTime, TimeFormat } from '../../formatted_time';
 import { useMeasuredCharacterDimensions } from './text_styles';
 
 const DATE_COLUMN_SLACK_FACTOR = 1.1;

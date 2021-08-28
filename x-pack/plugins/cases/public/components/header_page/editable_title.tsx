@@ -4,22 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState, useCallback, ChangeEvent } from 'react';
+import styled, { css } from 'styled-components';
+
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiFieldText,
+  EuiButtonIcon,
   EuiLoadingSpinner,
+  EuiFormRow,
 } from '@elastic/eui';
-import type { ChangeEvent } from 'react';
-import React, { useCallback, useState } from 'react';
-import styled, { css } from 'styled-components';
-import { MAX_TITLE_LENGTH } from '../../../common/constants';
-import { Title } from './title';
+
+import { MAX_TITLE_LENGTH } from '../../../common';
 import * as i18n from './translations';
+import { Title } from './title';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   ${({ theme }) => css`

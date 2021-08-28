@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { EuiSideNavItemType } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { sortBy } from 'lodash';
 import React from 'react';
-import type { AppMountParameters } from '../../../../../core/public/application/types';
-import { reactRouterNavigate } from '../../../../kibana_react/public/react_router_navigate/react_router_navigate';
-import { ManagementApp } from '../../utils/management_app';
+import { sortBy } from 'lodash';
+
+import { EuiIcon, EuiSideNavItemType, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { AppMountParameters } from 'kibana/public';
+import { ManagementApp, ManagementSection } from '../../utils';
+
 import { ManagementItem } from '../../utils/management_item';
-import { ManagementSection } from '../../utils/management_section';
+import { reactRouterNavigate } from '../../../../kibana_react/public';
 
 interface ManagementSidebarNavProps {
   sections: ManagementSection[];

@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiSpacer, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { useEffect, useState } from 'react';
-import type { ActionType } from '../../../../../actions/common/types';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import type { ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
-import { SectionLoading } from '../../components/section_loading';
-import { loadActionTypes } from '../../lib/action_connector_api/connector_types';
+import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
+import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import { useKibana } from '../../../common/lib/kibana';
+import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../..';
+import { SectionLoading } from '../../components/section_loading';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;

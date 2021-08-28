@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
+
+import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import * as Index from './elastic_index';

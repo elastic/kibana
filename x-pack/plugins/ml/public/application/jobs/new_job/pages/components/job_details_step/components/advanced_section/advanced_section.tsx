@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, Fragment, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiAccordion,
   EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { Fragment, useContext } from 'react';
-import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
-import { ModelMemoryLimitInput } from '../../../common/model_memory_limit/model_memory_limit_input';
+import { ModelPlotSwitch } from './components/model_plot';
+import { AnnotationsSwitch } from './components/annotations';
+import { DedicatedIndexSwitch } from './components/dedicated_index';
+import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { AnnotationsSwitch } from './components/annotations/annotations_switch';
-import { DedicatedIndexSwitch } from './components/dedicated_index/dedicated_index_switch';
-import { ModelPlotSwitch } from './components/model_plot/model_plot_switch';
+import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 
 const buttonContent = i18n.translate(
   'xpack.ml.newJob.wizard.jobDetailsStep.advancedSectionButton',

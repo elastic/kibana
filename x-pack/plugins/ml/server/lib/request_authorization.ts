@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+
+import { KibanaRequest } from 'kibana/server';
 
 export interface AuthorizationHeader {
   headers?: { 'es-secondary-authorization': string | string[] };

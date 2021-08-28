@@ -5,44 +5,48 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { EmbeddableStateTransfer } from '../../../../../../../src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer';
-import type { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public/save_modal/saved_object_save_modal';
+import { i18n } from '@kbn/i18n';
+import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
+import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import type { LayerDescriptor } from '../../../../common/descriptor_types/layer_descriptor_types';
-import type { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { replaceLayerList, setHiddenLayers } from '../../../actions/layer_actions';
-import { setGotoWithCenter, setMapSettings } from '../../../actions/map_actions';
-import { setIsLayerTOCOpen, setOpenTOCDetails } from '../../../actions/ui_actions';
-import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
-import type { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
+import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
+import {
+  getTimeFilters,
+  getMapZoom,
+  getMapCenter,
+  getLayerListRaw,
+  getQuery,
+  getFilters,
+  getMapSettings,
+  getLayerListConfigOnly,
+} from '../../../selectors/map_selectors';
+import {
+  setGotoWithCenter,
+  setMapSettings,
+  replaceLayerList,
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
+  setHiddenLayers,
+} from '../../../actions';
+import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
+import { getMapAttributeService } from '../../../map_attribute_service';
+import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
+import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
 import {
   getCoreChrome,
+  getToasts,
   getIsAllowByValueEmbeddables,
   getSavedObjectsTagging,
   getTimeFilter,
-  getToasts,
 } from '../../../kibana_services';
-import { whenLicenseInitialized } from '../../../licensed_features';
-import { getMapAttributeService } from '../../../map_attribute_service';
-import { copyPersistentState } from '../../../reducers/copy_persistent_state';
-import type { MapStore, MapStoreState } from '../../../reducers/store';
-import { createMapStore } from '../../../reducers/store';
-import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { goToSpecifiedPath } from '../../../render_app';
-import {
-  getFilters,
-  getLayerListConfigOnly,
-  getLayerListRaw,
-  getMapCenter,
-  getMapSettings,
-  getMapZoom,
-  getQuery,
-  getTimeFilters,
-} from '../../../selectors/map_selectors';
-import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
+import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { getBreadcrumbs } from './get_breadcrumbs';
+import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
+import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
+import { whenLicenseInitialized } from '../../../licensed_features';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;

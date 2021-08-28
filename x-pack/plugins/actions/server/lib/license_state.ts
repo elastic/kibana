@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { assertNever } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Observable, Subscription } from 'rxjs';
-import type { ILicense } from '../../../licensing/common/types';
-import type { LicensingPluginStart } from '../../../licensing/server/types';
+import { assertNever } from '@kbn/std';
+import { ILicense } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
-import type { ActionType } from '../types';
-import { ActionTypeDisabledError } from './errors/action_type_disabled';
+import { ActionType } from '../types';
+import { ActionTypeDisabledError } from './errors';
+import { LicensingPluginStart } from '../../../licensing/server';
 import { getActionTypeFeatureUsageName } from './get_action_type_feature_usage_name';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;

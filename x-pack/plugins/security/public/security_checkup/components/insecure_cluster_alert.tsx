@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButton,
   EuiCheckbox,
@@ -17,9 +18,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-
-import type { DocLinksStart } from '../../../../../../src/core/public/doc_links/doc_links_service';
-import type { MountPoint } from '../../../../../../src/core/public/types';
+import type { DocLinksStart, MountPoint } from 'src/core/public';
 
 export const insecureClusterAlertTitle = i18n.translate(
   'xpack.security.checkup.insecureClusterTitle',

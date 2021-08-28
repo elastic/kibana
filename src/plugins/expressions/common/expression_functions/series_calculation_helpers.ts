@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { Datatable, DatatableRow } from '../expression_types/specs/datatable';
+import { Datatable, DatatableRow } from '../expression_types';
 
 /**
  * Returns a string identifying the group of a row by a list of columns to group by

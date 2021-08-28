@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SearchParamsMock } from '../../utils/test_helpers';
-import { inspectSearchParams } from '../../utils/test_helpers';
+
 import { getTraceItems } from './get_trace_items';
+import {
+  SearchParamsMock,
+  inspectSearchParams,
+} from '../../utils/test_helpers';
 
 describe('trace queries', () => {
   let mock: SearchParamsMock;

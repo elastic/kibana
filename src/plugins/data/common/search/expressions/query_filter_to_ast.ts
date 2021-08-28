@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { buildExpression } from '../../../../expressions/common/ast/build_expression';
-import { buildExpressionFunction } from '../../../../expressions/common/ast/build_function';
-import type { ExpressionFunctionQueryFilter, QueryFilter } from './query_filter';
+
+import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
+import { ExpressionFunctionQueryFilter, QueryFilter } from './query_filter';
 import { queryToAst } from './query_to_ast';
 
 export const queryFilterToAst = ({ input, label }: QueryFilter) => {

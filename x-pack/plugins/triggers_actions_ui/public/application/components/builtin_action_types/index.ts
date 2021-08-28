@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ActionTypeModel } from '../../../types';
+
+import { getServerLogActionType } from './server_log';
+import { getSlackActionType } from './slack';
+import { getEmailActionType } from './email';
+import { getIndexActionType } from './es_index';
+import { getPagerDutyActionType } from './pagerduty';
+import { getSwimlaneActionType } from './swimlane';
+import { getWebhookActionType } from './webhook';
 import { TypeRegistry } from '../../type_registry';
-import { getActionType as getEmailActionType } from './email/email';
-import { getActionType as getIndexActionType } from './es_index/es_index';
-import { getActionType as getJiraActionType } from './jira/jira';
-import { getActionType as getPagerDutyActionType } from './pagerduty/pagerduty';
-import { getActionType as getResilientActionType } from './resilient/resilient';
-import { getActionType as getServerLogActionType } from './server_log/server_log';
-import { getServiceNowITSMActionType, getServiceNowSIRActionType } from './servicenow/servicenow';
-import { getActionType as getSlackActionType } from './slack/slack';
-import { getActionType as getSwimlaneActionType } from './swimlane/swimlane';
-import { getActionType as getTeamsActionType } from './teams/teams';
-import { getActionType as getWebhookActionType } from './webhook/webhook';
+import { ActionTypeModel } from '../../../types';
+import { getServiceNowITSMActionType, getServiceNowSIRActionType } from './servicenow';
+import { getJiraActionType } from './jira';
+import { getResilientActionType } from './resilient';
+import { getTeamsActionType } from './teams';
 
 export function registerBuiltInActionTypes({
   actionTypeRegistry,

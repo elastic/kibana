@@ -9,11 +9,12 @@
 import React from 'react';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { I18nStart } from '../../i18n/i18n_service';
-import type { MountPoint } from '../../types';
-import type { IUiSettingsClient } from '../../ui_settings/types';
-import { BannersList } from './banners_list';
+
 import { PriorityMap } from './priority_map';
+import { BannersList } from './banners_list';
+import { IUiSettingsClient } from '../../ui_settings';
+import { I18nStart } from '../../i18n';
+import { MountPoint } from '../../types';
 import { UserBannerService } from './user_banner_service';
 
 /** @public */

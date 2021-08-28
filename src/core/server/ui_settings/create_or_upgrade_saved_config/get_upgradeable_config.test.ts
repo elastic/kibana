@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
+
 import { getUpgradeableConfig } from './get_upgradeable_config';
+import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
 
 describe('getUpgradeableConfig', () => {
   it('finds saved objects with type "config"', async () => {

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
-import { isEqual } from 'lodash';
 import React from 'react';
-import { KibanaContextProvider } from '../../../../../kibana_react/public/context/context';
-import { getServices } from '../../../kibana_services';
-import type { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
-import { DocViewerError } from './doc_viewer_render_error';
+import { isEqual } from 'lodash';
+import { I18nProvider } from '@kbn/i18n/react';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
+import { DocViewerError } from './doc_viewer_render_error';
+import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { getServices } from '../../../kibana_services';
+import { KibanaContextProvider } from '../../../../../kibana_react/public';
 
 interface Props {
   id: number;

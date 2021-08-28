@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ReactNode } from 'react';
-import React from 'react';
+
+import React, { ReactNode } from 'react';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../../common/elasticsearch_fieldnames';
-import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverLink } from './DiscoverLink';
 
 export function getDiscoverQuery(transaction: Transaction) {

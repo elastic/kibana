@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+
+import React, { useContext, useState, useCallback, useMemo } from 'react';
+import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { InfraMetadata } from '../../../../../common/http_api/metadata_api';
+import { InfraMetadata } from '../../../../../common/http_api';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { MetadataContext } from '../containers/metadata_context';
 
 interface FieldDef {

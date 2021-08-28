@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Route, RouteMatch } from '@kbn/typed-react-router-config';
-import { useMatchRoutes } from '@kbn/typed-react-router-config';
+import {
+  Route,
+  RouteMatch,
+  useMatchRoutes,
+} from '@kbn/typed-react-router-config';
+import { ChromeBreadcrumb } from 'kibana/public';
 import { compact, isEqual } from 'lodash';
 import React, { createContext, useMemo, useState } from 'react';
-import type { ChromeBreadcrumb } from '../../../../../../src/core/public/chrome/types';
-import { useBreadcrumbs } from '../../../../observability/public/hooks/use_breadcrumbs';
+import { useBreadcrumbs } from '../../../../observability/public';
 
 export interface Breadcrumb {
   title: string;

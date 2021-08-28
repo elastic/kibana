@@ -6,12 +6,12 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import type { Query } from 'src/plugins/data/public';
-import type { Filter } from '../../../../../src/plugins/data/common/es_query';
-import type { TimeRange } from '../../../../../src/plugins/data/common/query/timefilter/types';
-import { SortDirection } from '../../../../../src/plugins/data/common/search/search_source/types';
+
+import { Query } from 'src/plugins/data/public';
+import { SortDirection } from 'src/plugins/data/common/search';
 import { RENDER_AS, SCALING_TYPES } from '../constants';
-import type { MapExtent, MapQuery } from './map_descriptor';
+import { MapExtent, MapQuery } from './map_descriptor';
+import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
 
 export type Timeslice = {
   from: number;

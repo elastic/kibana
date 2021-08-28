@@ -6,21 +6,24 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiRadio,
   EuiIconTip,
   EuiPanel,
-  EuiRadio,
   EuiSpacer,
+  EuiCheckbox,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import type { DashboardPickerProps } from './dashboard_picker';
-import DashboardPicker from './dashboard_picker';
+
+import DashboardPicker, { DashboardPickerProps } from './dashboard_picker';
+
 import './saved_object_save_modal_dashboard.scss';
 
 export interface SaveModalDashboardSelectorProps {

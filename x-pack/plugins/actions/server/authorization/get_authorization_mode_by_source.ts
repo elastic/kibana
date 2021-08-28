@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
+
+import { SavedObjectsClientContract } from 'src/core/server';
+import { ActionExecutionSource, isSavedObjectExecutionSource } from '../lib';
 import { ALERT_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
-import type { ActionExecutionSource } from '../lib/action_execution_source';
-import { isSavedObjectExecutionSource } from '../lib/action_execution_source';
 
 const LEGACY_VERSION = 'pre-7.10.0';
 

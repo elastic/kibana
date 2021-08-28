@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
-import type { APMLinkExtendProps } from './APMLink';
-import { getAPMHref } from './APMLink';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { APMLinkExtendProps, getAPMHref } from './APMLink';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;

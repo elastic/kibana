@@ -5,35 +5,33 @@
  * 2.0.
  */
 
-import { Position } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { uniq } from 'lodash';
 import React from 'react';
+import { uniq } from 'lodash';
 import { render } from 'react-dom';
-import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
-import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public/plugin';
-import { layerTypes } from '../../common/constants';
-import type { XYLayerConfig } from '../../common/expressions/xy_chart/layer_config';
-import type { SeriesType } from '../../common/expressions/xy_chart/series_type';
-import type { LayerType } from '../../common/types';
-import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
-import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
-import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
+import { Position } from '@elastic/charts';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { PaletteRegistry } from 'src/plugins/charts/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { getSuggestions } from './xy_suggestions';
+import { XyToolbar, DimensionEditor, LayerHeader } from './xy_config_panel';
 import type {
+  Visualization,
+  OperationMetadata,
+  VisualizationType,
   AccessorConfig,
   DatasourcePublicAPI,
-  OperationMetadata,
-  Visualization,
-  VisualizationType,
 } from '../types';
+import { State, visualizationTypes, XYState } from './types';
+import { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { LayerType, layerTypes } from '../../common';
+import { isHorizontalChart } from './state_helpers';
+import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
+import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
+import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
+import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
-import { getColumnToLabelMap, isHorizontalChart } from './state_helpers';
-import { getSortedAccessors, toExpression, toPreviewExpression } from './to_expression';
-import type { State, XYState } from './types';
-import { visualizationTypes } from './types';
-import { DimensionEditor, LayerHeader, XyToolbar } from './xy_config_panel';
-import { getSuggestions } from './xy_suggestions';
+import { getColumnToLabelMap } from './state_helpers';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';

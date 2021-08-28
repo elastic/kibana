@@ -4,25 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { useReducer } from 'react';
-import { DuplicateIndexPatternError } from '../../../../../../../../../../src/plugins/data/common/index_patterns/errors/duplicate_index_pattern';
-import type { DeepReadonly } from '../../../../../../../common/types/common';
-import type { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
-import { extractErrorMessage } from '../../../../../../../common/util/errors/process_errors';
-import { useMlContext } from '../../../../../contexts/ml/use_ml_context';
+
+import { i18n } from '@kbn/i18n';
+
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
-import { useRefreshAnalyticsList } from '../../../../common/analytics';
-import { ANALYTICS_STEPS } from '../../../analytics_creation/page';
-import {
-  extractCloningConfig,
-  isAdvancedConfig,
-} from '../../components/action_clone/clone_action_name';
-import type { ActionDispatchers } from './actions';
-import { ACTION } from './actions';
+import { useMlContext } from '../../../../../contexts/ml';
+import { DuplicateIndexPatternError } from '../../../../../../../../../../src/plugins/data/public';
+
+import { useRefreshAnalyticsList, DataFrameAnalyticsConfig } from '../../../../common';
+import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
+
+import { ActionDispatchers, ACTION } from './actions';
 import { reducer } from './reducer';
-import type { FormMessage, SourceIndexMap, State } from './state';
-import { getFormStateFromJobConfig, getInitialState, getJobConfigFromFormState } from './state';
+import {
+  getInitialState,
+  getJobConfigFromFormState,
+  FormMessage,
+  State,
+  SourceIndexMap,
+  getFormStateFromJobConfig,
+} from './state';
+
+import { ANALYTICS_STEPS } from '../../../analytics_creation/page';
 
 export interface AnalyticsCreationStep {
   number: ANALYTICS_STEPS;

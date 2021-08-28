@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,8 +13,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
-import type { CSSProperties, MouseEvent } from 'react';
 import React, {
+  CSSProperties,
+  MouseEvent,
   useCallback,
   useContext,
   useEffect,
@@ -24,7 +26,7 @@ import {
   SERVICE_NAME,
   SPAN_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
-import type { Environment } from '../../../../../common/environment_rt';
+import { Environment } from '../../../../../common/environment_rt';
 import { useTheme } from '../../../../hooks/use_theme';
 import { CytoscapeContext } from '../Cytoscape';
 import { getAnimationOptions, popoverWidth } from '../cytoscape_options';

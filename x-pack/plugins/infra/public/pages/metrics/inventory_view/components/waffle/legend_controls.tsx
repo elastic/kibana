@@ -4,36 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSwitchEvent } from '@elastic/eui';
+
 import {
-  EuiButton,
   EuiButtonEmpty,
+  EuiButton,
   EuiButtonIcon,
   EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiPopover,
   EuiPopoverTitle,
-  EuiRange,
-  EuiSelect,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
+  EuiSelect,
+  EuiRange,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
 import { first, last } from 'lodash';
-import type { SyntheticEvent } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { InfraWaffleMapBounds, InventoryColorPalette } from '../../../../../lib/lib';
-import { PALETTES } from '../../../../../lib/lib';
-import type { WaffleLegendOptions } from '../../hooks/use_waffle_options';
-import { convertBoundsToPercents } from '../../lib/convert_bounds_to_percents';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { InfraWaffleMapBounds, InventoryColorPalette, PALETTES } from '../../../../../lib/lib';
+import { WaffleLegendOptions } from '../../hooks/use_waffle_options';
 import { getColorPalette } from '../../lib/get_color_palette';
-import { PalettePreview } from './palette_preview';
+import { convertBoundsToPercents } from '../../lib/convert_bounds_to_percents';
 import { SwatchLabel } from './swatch_label';
+import { PalettePreview } from './palette_preview';
 
 interface Props {
   onChange: (options: {

@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TimeRange } from '../../../../../../src/plugins/data/common/query/timefilter/types';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs/combined_job';
-import type { Datafeed } from '../../../common/types/anomaly_detection_jobs/datafeed';
-import type { Job } from '../../../common/types/anomaly_detection_jobs/job';
-import type { Calendar } from '../../../common/types/calendars';
+
+import { estypes } from '@elastic/elasticsearch';
+
+import { TimeRange } from 'src/plugins/data/common/query/timefilter/types';
+import { CombinedJob, Datafeed, Job } from '../../../common/types/anomaly_detection_jobs';
+import { Calendar } from '../../../common/types/calendars';
 
 export interface ExistingJobsAndGroups {
   jobIds: string[];

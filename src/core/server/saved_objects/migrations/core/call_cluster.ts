@@ -5,8 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { IndexMapping } from '../../mappings/types';
+
+/**
+ * This file is nothing more than type signatures for the subset of
+ * elasticsearch.js that migrations use. There is no actual logic /
+ * funcationality contained here.
+ */
+
+import type { estypes } from '@elastic/elasticsearch';
+import { IndexMapping } from '../../mappings';
 
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;

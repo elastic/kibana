@@ -4,12 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { SearchStrategyDependencies } from '../../../../../../../src/plugins/data/server/search/types';
-import type { ApmIndicesConfig } from '../../../../../observability/common/typings';
+
+import type { estypes } from '@elastic/elasticsearch';
+
+import { SearchStrategyDependencies } from 'src/plugins/data/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import type { PartialSearchRequest } from './search_strategy';
-import { apmCorrelationsSearchStrategyProvider } from './search_strategy';
+
+import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+
+import {
+  apmCorrelationsSearchStrategyProvider,
+  PartialSearchRequest,
+} from './search_strategy';
 
 // helper to trigger promises in the async search service
 const flushPromises = () => new Promise(setImmediate);

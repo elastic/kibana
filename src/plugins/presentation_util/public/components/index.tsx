@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiErrorBoundary, EuiLoadingSpinner } from '@elastic/eui';
-import type { ComponentType, ReactElement, Ref } from 'react';
-import React, { Suspense } from 'react';
+
+import React, { Suspense, ComponentType, ReactElement, Ref } from 'react';
+import { EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 
 /**
  * A HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors.

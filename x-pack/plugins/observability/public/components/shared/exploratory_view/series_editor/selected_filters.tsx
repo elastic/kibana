@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import React, { Fragment } from 'react';
-import { FilterLabel } from '../components/filter_label';
-import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
-import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
-import { useSeriesFilters } from '../hooks/use_series_filters';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import type { SeriesConfig, UrlFilter } from '../types';
+import { FilterLabel } from '../components/filter_label';
+import { SeriesConfig, UrlFilter } from '../types';
+import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
+import { useSeriesFilters } from '../hooks/use_series_filters';
+import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
 
 interface Props {
   seriesId: string;

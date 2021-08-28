@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { PublicMethodsOf } from '@kbn/utility-types';
 import type { Layout } from '@kbn/logging';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { RollingFileContext } from './rolling_file_context';
+import type { RollingFileManager } from './rolling_file_manager';
 import type { TriggeringPolicy } from './policies/policy';
-import { RollingFileContext } from './rolling_file_context';
-import { RollingFileManager } from './rolling_file_manager';
 import type { RollingStrategy } from './strategies/strategy';
 
 const createContextMock = (filePath: string) => {

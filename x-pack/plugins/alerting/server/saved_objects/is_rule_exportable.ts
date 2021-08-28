@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import type { SavedObject } from '../../../../../src/core/types/saved_objects';
+
+import { Logger, SavedObject } from 'kibana/server';
+import { RawAlert } from '../types';
 import { RuleTypeRegistry } from '../rule_type_registry';
-import type { RawAlert } from '../types';
 
 export function isRuleExportable(
   rule: SavedObject,

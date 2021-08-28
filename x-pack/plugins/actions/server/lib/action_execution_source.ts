@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type { SavedObjectReference } from '../../../../../src/core/types/saved_objects';
+
+import { KibanaRequest, SavedObjectReference } from 'src/core/server';
 
 export enum ActionExecutionSourceType {
   SAVED_OBJECT = 'SAVED_OBJECT',

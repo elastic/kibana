@@ -4,25 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 
-import type { ElasticsearchClient } from '../../../../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../../../../src/core/server/saved_objects/types';
-import type {
-  EsAssetReference,
-  InstallablePackage,
-  RegistryDataStream,
-} from '../../../../../common/types/models/epm';
-import { ElasticsearchAssetType } from '../../../../../common/types/models/epm';
+import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
+import { ElasticsearchAssetType } from '../../../../types';
+import type { EsAssetReference, RegistryDataStream, InstallablePackage } from '../../../../types';
+import { getAsset, getPathParts } from '../../archive';
+import type { ArchiveEntry } from '../../archive';
+import { saveInstalledEsRefs } from '../../packages/install';
+import { getInstallationObject } from '../../packages';
 import {
   FLEET_FINAL_PIPELINE_CONTENT,
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
-} from '../../../../constants/fleet_es_assets';
-import type { ArchiveEntry } from '../../archive';
-import { getAsset, getPathParts } from '../../archive';
-import { getInstallationObject } from '../../packages/get';
-import { saveInstalledEsRefs } from '../../packages/install';
+} from '../../../../constants';
 
 import { deletePipelineRefs } from './remove';
 

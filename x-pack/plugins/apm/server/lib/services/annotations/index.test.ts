@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+
+import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../../../src/core/types/elasticsearch';
-import type { SearchParamsMock } from '../../../utils/test_helpers';
-import { inspectSearchParams } from '../../../utils/test_helpers';
+import {
+  inspectSearchParams,
+  SearchParamsMock,
+} from '../../../utils/test_helpers';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import multipleVersions from './__fixtures__/multiple_versions.json';
 import noVersions from './__fixtures__/no_versions.json';

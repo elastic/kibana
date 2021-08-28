@@ -4,19 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiCallOut, EuiForm, EuiSpacer } from '@elastic/eui';
-import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
-import type { ValidationIndicesError } from '../../../../../common/http_api/log_analysis/validation/log_entry_rate_indices';
-import { validationIndicesErrorRT } from '../../../../../common/http_api/log_analysis/validation/log_entry_rate_indices';
-import type { SetupStatus } from '../../../../../common/log_analysis/log_analysis';
-import type { QualityWarning } from '../../../../../common/log_analysis/log_analysis_quality';
+import { QualityWarning, SetupStatus } from '../../../../../common/log_analysis';
 import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
-import type { AvailableIndex, TimeRangeValidationError, ValidationUIError } from './validation';
-import { timeRangeValidationErrorRT } from './validation';
+import {
+  AvailableIndex,
+  TimeRangeValidationError,
+  timeRangeValidationErrorRT,
+  ValidationIndicesError,
+  validationIndicesErrorRT,
+  ValidationUIError,
+} from './validation';
 
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;

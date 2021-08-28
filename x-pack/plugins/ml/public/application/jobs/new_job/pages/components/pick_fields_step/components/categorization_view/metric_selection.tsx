@@ -4,24 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../../../../common/constants/categorization_job';
-import type {
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+
+import { JobCreatorContext } from '../../../job_creator_context';
+import { CategorizationJobCreator } from '../../../../../common/job_creator';
+import { CategorizationField } from '../categorization_field';
+import { CategorizationDetector } from '../categorization_detector';
+import { CategorizationPerPartitionField } from '../categorization_partition_field';
+
+import { FieldExamples } from './field_examples';
+import { ExamplesValidCallout } from './examples_valid_callout';
+import { InvalidCssVersionCallout } from './invalid_ccs_version_valid_callout';
+import {
   CategoryFieldExample,
   FieldExampleCheck,
 } from '../../../../../../../../../common/types/categories';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service/toast_notification_service';
-import { CategorizationJobCreator } from '../../../../../common/job_creator/categorization_job_creator';
-import { LoadingWrapper } from '../../../charts/loading_wrapper/loading_wrapper';
-import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationDetector } from '../categorization_detector/categorization_detector';
-import { CategorizationField } from '../categorization_field/categorization_field';
-import { CategorizationPerPartitionField } from '../categorization_partition_field/categorization_per_partition';
-import { ExamplesValidCallout } from './examples_valid_callout';
-import { FieldExamples } from './field_examples';
-import { InvalidCssVersionCallout } from './invalid_ccs_version_valid_callout';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../../../../common/constants/categorization_job';
+import { LoadingWrapper } from '../../../charts/loading_wrapper';
 
 interface Props {
   setIsValid: (na: boolean) => void;

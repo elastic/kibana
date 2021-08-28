@@ -4,21 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
-  EuiContextMenuItem,
+  EuiButtonEmpty,
   EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo } from 'react';
+
 import styled from 'styled-components';
-import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility/helpers';
+import { stopPropagationAndPreventDefault } from '../../../../common';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
-import type { HoverActionComponentProps } from './types';
+import { HoverActionComponentProps } from './types';
 
 export const MORE_ACTIONS = i18n.translate('xpack.timelines.hoverActions.moreActions', {
   defaultMessage: 'More actions',

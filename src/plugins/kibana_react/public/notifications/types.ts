@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import type { Toast } from '../../../../core/public/notifications/toasts/toasts_api';
+import { Toast } from '../../../../core/public';
 
 export interface ToastInput {
   title?: React.ReactNode;

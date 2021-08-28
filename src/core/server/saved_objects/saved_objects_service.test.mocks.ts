@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
-import { typeRegistryMock } from './saved_objects_type_registry.mock';
 import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
+import { typeRegistryMock } from './saved_objects_type_registry.mock';
 
 export const migratorInstanceMock = mockKibanaMigrator.create();
 export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);

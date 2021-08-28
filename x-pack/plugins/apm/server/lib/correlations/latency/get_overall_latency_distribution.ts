@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { dropRightWhile } from 'lodash';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { withApmSpan } from '../../../utils/with_apm_span';
-import type { CorrelationsOptions } from '../get_filters';
-import { getCorrelationsFilters } from '../get_filters';
 import { getMaxLatency } from './get_max_latency';
+import { withApmSpan } from '../../../utils/with_apm_span';
+import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
 
 export const INTERVAL_BUCKETS = 15;
 

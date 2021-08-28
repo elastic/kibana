@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { FC } from 'react';
-import React from 'react';
+
+import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import type { ChromeUserBanner } from '../../types';
+import { ChromeUserBanner } from '../../types';
 import { HeaderExtension } from './header_extension';
 
 export interface HeaderTopBannerProps {

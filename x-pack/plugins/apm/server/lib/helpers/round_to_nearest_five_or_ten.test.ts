@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { roundToNearestFiveOrTen } from './round_to_nearest_five_or_ten';
 
 describe('roundToNearestFiveOrTen', () => {

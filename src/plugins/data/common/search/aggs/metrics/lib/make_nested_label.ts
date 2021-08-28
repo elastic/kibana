@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { startCase } from 'lodash';
-import type { IMetricAggConfig } from '../metric_agg_type';
+import { IMetricAggConfig } from '../metric_agg_type';
 
 export const makeNestedLabel = (aggConfig: IMetricAggConfig, label: string) => {
   const uppercaseLabel = startCase(label);

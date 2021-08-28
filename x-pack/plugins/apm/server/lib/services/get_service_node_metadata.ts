@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
-  CONTAINER_ID,
   HOST_NAME,
+  CONTAINER_ID,
 } from '../../../common/elasticsearch_fieldnames';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { getServiceNodesProjection } from '../../projections/service_nodes';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getServiceNodesProjection } from '../../projections/service_nodes';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 export async function getServiceNodeMetadata({
   kuery,

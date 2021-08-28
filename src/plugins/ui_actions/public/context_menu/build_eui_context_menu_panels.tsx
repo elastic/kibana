@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
 import * as React from 'react';
-import { uiToReactComponent } from '../../../kibana_react/public/adapters/ui_to_react_component';
-import type { Action, ActionExecutionContext } from '../actions/action';
-import type { Trigger } from '../triggers/trigger';
+import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { uiToReactComponent } from '../../../kibana_react/public';
+import { Action, ActionExecutionContext } from '../actions';
+import { Trigger } from '../triggers';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',

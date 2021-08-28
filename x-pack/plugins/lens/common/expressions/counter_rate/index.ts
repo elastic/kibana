@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import {
-  buildResultColumns,
   getBucketIdentifier,
-} from '../../../../../../src/plugins/expressions/common/expression_functions/series_calculation_helpers';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
-import type { Datatable } from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+  buildResultColumns,
+} from '../../../../../../src/plugins/expressions/common';
+import type {
+  ExpressionFunctionDefinition,
+  Datatable,
+} from '../../../../../../src/plugins/expressions/common';
 
 export interface CounterRateArgs {
   by?: string[];

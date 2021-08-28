@@ -5,22 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { omit } from 'lodash';
+
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import supertest from 'supertest';
-import { ContextService } from '../../../context/context_service';
-import { contextServiceMock } from '../../../context/context_service.mock';
-import { executionContextServiceMock } from '../../../execution_context/execution_context_service.mock';
-import { HttpService } from '../../../http/http_service';
+import { omit } from 'lodash';
+
 import { createCoreContext, createHttpServer } from '../../../http/test_utils';
-import type { InternalHttpServiceSetup } from '../../../http/types';
+import { ContextService } from '../../../context';
 import { metricsServiceMock } from '../../../metrics/metrics_service.mock';
-import type { MetricsServiceSetup } from '../../../metrics/types';
-import { statusServiceMock } from '../../status_service.mock';
-import type { ServiceStatus } from '../../types';
-import { ServiceStatusLevels } from '../../types';
+import { MetricsServiceSetup } from '../../../metrics';
+import { HttpService, InternalHttpServiceSetup } from '../../../http';
+
 import { registerStatusRoute } from '../status';
+import { ServiceStatus, ServiceStatusLevels } from '../../types';
+import { statusServiceMock } from '../../status_service.mock';
+import { executionContextServiceMock } from '../../../execution_context/execution_context_service.mock';
+import { contextServiceMock } from '../../../context/context_service.mock';
 
 const coreId = Symbol('core');
 

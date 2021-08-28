@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { ServiceStatus, ServiceStatusLevels } from './types';
 import { getSummaryStatus } from './get_summary_status';
-import type { ServiceStatus } from './types';
-import { ServiceStatusLevels } from './types';
 
 describe('getSummaryStatus', () => {
   const available: ServiceStatus = { level: ServiceStatusLevels.available, summary: 'Available' };

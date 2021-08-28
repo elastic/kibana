@@ -5,16 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { buildEsQuery } from '@kbn/es-query';
+
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common/expression_functions/types';
-import { RequestAdapter } from '../../../../inspector/common/adapters/request/request_adapter';
-import type { RequestStatistics } from '../../../../inspector/common/adapters/request/types';
-import { getEsQueryConfig } from '../../es_query/get_es_query_config';
-import type { UiSettingsCommon } from '../../index_patterns/types';
-import type { ISearchGeneric } from '../types';
-import type { EsRawResponse } from './es_raw_response';
-import type { KibanaContext } from './kibana_context_type';
+import { buildEsQuery } from '@kbn/es-query';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+
+import { EsRawResponse } from './es_raw_response';
+import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
+import { ISearchGeneric, KibanaContext } from '..';
+import { getEsQueryConfig } from '../../es_query';
+import { UiSettingsCommon } from '../../index_patterns';
 
 const name = 'esdsl';
 

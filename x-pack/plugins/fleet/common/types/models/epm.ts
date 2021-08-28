@@ -4,31 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { estypes } from '@elastic/elasticsearch';
-
-import type { ValueOf } from '..';
-import type {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '../../../../../../src/core/types/saved_objects';
-import type {
-  agentAssetTypes,
-  ASSETS_SAVED_OBJECT_TYPE,
-  dataTypes,
-  installationStatuses,
-  monitoringTypes,
-} from '../../constants/epm';
-
-import type {
-  PackageSpecCategory,
-  PackageSpecIcon,
-  PackageSpecManifest,
-  PackageSpecScreenshot,
-} from './package_spec';
-
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
+import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
+
+import type {
+  ASSETS_SAVED_OBJECT_TYPE,
+  agentAssetTypes,
+  dataTypes,
+  monitoringTypes,
+  installationStatuses,
+} from '../../constants';
+import type { ValueOf } from '../../types';
+
+import type {
+  PackageSpecManifest,
+  PackageSpecIcon,
+  PackageSpecScreenshot,
+  PackageSpecCategory,
+} from './package_spec';
+
 export type InstallationStatus = typeof installationStatuses;
 
 export enum InstallStatus {

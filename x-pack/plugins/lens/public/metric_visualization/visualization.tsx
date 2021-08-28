@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { Ast } from '@kbn/interpreter/common';
-import { layerTypes } from '../../common/constants';
-import type { MetricState } from '../../common/expressions/metric_chart/types';
-import { LensIconChartMetric } from '../assets/chart_metric';
-import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../types';
+import { Ast } from '@kbn/interpreter/common';
 import { getSuggestions } from './metric_suggestions';
+import { LensIconChartMetric } from '../assets/chart_metric';
+import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
+import type { MetricState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 
 const toExpression = (
   state: MetricState,

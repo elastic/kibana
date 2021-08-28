@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
 
-import type { SecuredFeature } from '../../../../model/secured_feature';
+import type { SecuredFeature } from '../../../../model';
 
 interface Props {
   feature: SecuredFeature;

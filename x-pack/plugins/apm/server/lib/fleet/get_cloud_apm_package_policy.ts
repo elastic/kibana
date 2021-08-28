@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
-import type { AgentPolicy } from '../../../../fleet/common/types/models/agent_policy';
-import type { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
+
+import { SavedObjectsClientContract } from 'kibana/server';
+import { Maybe } from '../../../typings/common';
+import { AgentPolicy, PackagePolicy } from '../../../../fleet/common';
+import { APMPluginStartDependencies } from '../../types';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
-import type { Maybe } from '../../../typings/common';
-import type { APMPluginStartDependencies } from '../../types';
 
 export const APM_PACKAGE_NAME = 'apm';
 

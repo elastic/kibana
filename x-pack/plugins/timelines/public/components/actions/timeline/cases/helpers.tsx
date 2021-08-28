@@ -7,12 +7,11 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import type { Toast } from '../../../../../../../../src/core/public/notifications/toasts/toasts_api';
-import type { ToastsStart } from '../../../../../../../../src/core/public/notifications/toasts/toasts_service';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
-import type { Case } from '../../../../../../cases/common/ui/types';
 import { ToasterContent } from './toaster_content';
 import * as i18n from './translations';
+import type { Case } from '../../../../../../cases/common';
+import type { ToastsStart, Toast } from '../../../../../../../../src/core/public';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const LINE_CLAMP = 3;
 

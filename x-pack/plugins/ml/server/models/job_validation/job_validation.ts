@@ -6,23 +6,23 @@
  */
 
 import Boom from '@hapi/boom';
-import type { TypeOf } from '@kbn/config-schema';
-import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import type { JobValidationMessage, MessageId } from '../../../common/constants/messages';
-import { getMessages } from '../../../common/constants/messages';
+import { IScopedClusterClient } from 'kibana/server';
+import { TypeOf } from '@kbn/config-schema';
+import { fieldsServiceProvider } from '../fields_service';
+import { getMessages, MessageId, JobValidationMessage } from '../../../common/constants/messages';
 import { VALIDATION_STATUS } from '../../../common/constants/validation';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs/combined_job';
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+
 import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
-import type { MlClient } from '../../lib/ml_client/types';
-import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
-import { fieldsServiceProvider } from '../fields_service/fields_service';
 // @ts-expect-error importing js file
 import { validateBucketSpan } from './validate_bucket_span';
 import { validateCardinality } from './validate_cardinality';
 import { validateInfluencers } from './validate_influencers';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
-import { isValidTimeField, validateTimeRange } from './validate_time_range';
+import { validateTimeRange, isValidTimeField } from './validate_time_range';
+import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { MlClient } from '../../lib/ml_client';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 

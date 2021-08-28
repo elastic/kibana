@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCallOut } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
-import { RareJobCreator } from '../../../../../common/job_creator/rare_job_creator';
+import React, { FC, useContext, useEffect, useState } from 'react';
+import { EuiCallOut } from '@elastic/eui';
+
 import { JobCreatorContext } from '../../../job_creator_context';
+import { RareJobCreator } from '../../../../../common/job_creator';
 import { RARE_DETECTOR_TYPE } from './rare_view';
 
 interface Props {

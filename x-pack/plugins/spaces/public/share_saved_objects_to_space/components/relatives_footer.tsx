@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import type { SavedObjectReferenceWithContext } from '../../../../../../src/core/server/saved_objects/service/lib/collect_multi_namespace_references';
-import type { ShareToSpaceSavedObjectTarget } from '../../../../../../src/plugins/spaces_oss/public/api';
+import type { SavedObjectReferenceWithContext } from 'src/core/public';
+import type { ShareToSpaceSavedObjectTarget } from 'src/plugins/spaces_oss/public';
 
 interface Props {
   savedObjectTarget: ShareToSpaceSavedObjectTarget;

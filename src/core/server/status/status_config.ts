@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import type { ServiceConfigDescriptor } from '../internal_types';
+
+import { schema, TypeOf } from '@kbn/config-schema';
+import { ServiceConfigDescriptor } from '../internal_types';
 
 const statusConfigSchema = schema.object({
   allowAnonymous: schema.boolean({ defaultValue: false }),

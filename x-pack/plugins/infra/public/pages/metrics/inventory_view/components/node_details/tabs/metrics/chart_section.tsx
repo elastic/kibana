@@ -4,22 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ChartSizeArray,
+
+import {
+  Axis,
+  Settings,
+  Position,
+  Chart,
   PointerUpdateListener,
   TickFormatter,
   TooltipValue,
+  ChartSizeArray,
 } from '@elastic/charts';
-import { Axis, Chart, Position, Settings } from '@elastic/charts';
-import moment from 'moment';
 import React from 'react';
-import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
-import type { MetricsExplorerSeries } from '../../../../../../../../common/http_api/metrics_explorer';
-import { getTimelineChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
+import moment from 'moment';
+import { MetricsExplorerSeries } from '../../../../../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
-import type { MetricsExplorerOptionsMetric } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { MetricsExplorerChartType } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
+import {
+  MetricsExplorerChartType,
+  MetricsExplorerOptionsMetric,
+} from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { ChartHeader } from './chart_header';
+import { getTimelineChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
+import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 
 const CHART_SIZE: ChartSizeArray = ['100%', 160];
 

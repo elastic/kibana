@@ -4,56 +4,57 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import { isEmpty, mapValues } from 'lodash';
+
 import { combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import type { APMConfig, APMXPackConfig } from '.';
-import { mergeConfigs } from '.';
-import type { CoreSetup, CoreStart } from '../../../../src/core/server';
-import { KibanaRequest } from '../../../../src/core/server/http/router/request';
-import type {
+import {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Logger,
   Plugin,
   PluginInitializerContext,
-} from '../../../../src/core/server/plugins/types';
-import { SavedObjectsClient } from '../../../../src/core/server/saved_objects/service/saved_objects_client';
-import { UI_SETTINGS } from '../../../../src/plugins/data/common/constants';
+} from 'src/core/server';
+import { isEmpty, mapValues } from 'lodash';
+import { SavedObjectsClient } from '../../../../src/core/server';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { Dataset } from '../../rule_registry/server/rule_data_plugin_service/index_options';
-import { APM_SERVER_FEATURE_ID } from '../common/alert_types';
+import { Dataset } from '../../rule_registry/server';
+import { APMConfig, APMXPackConfig, APM_SERVER_FEATURE_ID } from '.';
+import { mergeConfigs } from './index';
+import { UI_SETTINGS } from '../../../../src/plugins/data/common';
+import { APM_FEATURE, registerFeaturesUsage } from './feature';
+import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
+import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_callbacks';
+import { createApmTelemetry } from './lib/apm_telemetry';
+import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
+import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
+import { apmCorrelationsSearchStrategyProvider } from './lib/search_strategies/correlations';
+import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
+import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
+import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
+import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
+import type {
+  ApmPluginRequestHandlerContext,
+  APMRouteHandlerResources,
+} from './routes/typings';
+import {
+  APMPluginSetup,
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies,
+} from './types';
+import { registerRoutes } from './routes/register_routes';
+import { getGlobalApmServerRouteRepository } from './routes/get_global_apm_server_route_repository';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
-import { FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY } from '../common/search_strategies/failure_correlations/constants';
-import { APM_FEATURE, registerFeaturesUsage } from './feature';
-import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
-import { createApmTelemetry } from './lib/apm_telemetry';
-import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_callbacks';
-import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
-import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
-import { apmCorrelationsSearchStrategyProvider } from './lib/search_strategies/correlations/search_strategy';
-import { apmFailedTransactionsCorrelationsSearchStrategyProvider } from './lib/search_strategies/failed_transactions_correlations/search_strategy';
-import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
-import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
-import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
-import { getGlobalApmServerRouteRepository } from './routes/get_global_apm_server_route_repository';
-import { registerRoutes } from './routes/register_routes';
-import type {
-  ApmPluginRequestHandlerContext,
-  APMRouteHandlerResources,
-} from './routes/typings';
-import { apmIndices } from './saved_objects/apm_indices';
-import { apmServerSettings } from './saved_objects/apm_server_settings';
-import { apmTelemetry } from './saved_objects/apm_telemetry';
 import { tutorialProvider } from './tutorial';
-import type {
-  APMPluginSetup,
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from './types';
+import {
+  apmFailedTransactionsCorrelationsSearchStrategyProvider,
+  FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
+} from './lib/search_strategies/failed_transactions_correlations';
 
 export class APMPlugin
   implements

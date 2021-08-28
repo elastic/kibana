@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Serializable, SerializableRecord } from '@kbn/utility-types';
-import type { SavedObjectReference } from '../../../../../src/core/types/saved_objects';
-import type { EmbeddableStateWithType } from '../../../../../src/plugins/embeddable/common/types';
-import type { EmbeddableRegistryDefinition } from '../../../../../src/plugins/embeddable/server/types';
+
+import { SerializableRecord, Serializable } from '@kbn/utility-types';
+import { SavedObjectReference } from 'src/core/types';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 
 export type LensEmbeddablePersistableState = EmbeddableStateWithType & {
   attributes: SerializableRecord;

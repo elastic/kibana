@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
+
 import { lazy } from 'react';
-import type { Adapters } from '../../../common/adapters/types';
-import type { InspectorViewDescription } from '../../types';
+import { InspectorViewDescription } from '../../types';
+import { Adapters } from '../../../common';
 
 const RequestsViewComponent = lazy(() => import('./components/requests_view'));
 

@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { contextMock } from './container/context.mock';
 
 export const MockContextConstructor = jest.fn(contextMock.create);

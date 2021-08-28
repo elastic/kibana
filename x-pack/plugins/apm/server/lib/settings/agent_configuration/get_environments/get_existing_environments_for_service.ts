@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
+
+import { Setup } from '../../../helpers/setup_request';
 import {
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
 } from '../../../../../common/elasticsearch_fieldnames';
-import type { Setup } from '../../../helpers/setup_request';
+import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 
 export async function getExistingEnvironmentsForService({
   serviceName,

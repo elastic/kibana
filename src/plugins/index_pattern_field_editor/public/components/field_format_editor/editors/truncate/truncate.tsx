@@ -5,13 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { Fragment } from 'react';
-import { FormatEditorSamples } from '../../samples/samples';
+
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DefaultFormatEditor, defaultState } from '../default/default';
-import { formatId } from './constants';
+
+import { FormatEditorSamples } from '../../samples';
+
 import { sample } from './sample';
+import { formatId } from './constants';
 
 interface TruncateFormatEditorFormatParams {
   fieldLength: number;

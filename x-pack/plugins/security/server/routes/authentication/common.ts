@@ -4,16 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '..';
+import type { RouteDefinitionParams } from '../';
 import { parseNext } from '../../../common/parse_next';
-import { canRedirectRequest } from '../../authentication/can_redirect_request';
-import { BasicAuthenticationProvider } from '../../authentication/providers/basic';
-import { OIDCAuthenticationProvider, OIDCLogin } from '../../authentication/providers/oidc';
-import { SAMLAuthenticationProvider, SAMLLogin } from '../../authentication/providers/saml';
-import { TokenAuthenticationProvider } from '../../authentication/providers/token';
+import {
+  BasicAuthenticationProvider,
+  canRedirectRequest,
+  OIDCAuthenticationProvider,
+  OIDCLogin,
+  SAMLAuthenticationProvider,
+  SAMLLogin,
+  TokenAuthenticationProvider,
+} from '../../authentication';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';

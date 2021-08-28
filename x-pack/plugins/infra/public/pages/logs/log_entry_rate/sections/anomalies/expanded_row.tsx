@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useMount from 'react-use/lib/useMount';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { LogEntryAnomaly } from '../../../../../../common/log_analysis/log_entry_anomalies';
-import { isCategoryAnomaly } from '../../../../../../common/log_analysis/log_entry_anomalies';
-import type { TimeRange } from '../../../../../../common/time/time_range';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { LogEntryAnomaly, isCategoryAnomaly } from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
-import { useLogSourceContext } from '../../../../../containers/logs/log_source/log_source';
+import { useLogSourceContext } from '../../../../../containers/logs/log_source';
 import { useLogEntryExamples } from '../../use_log_entry_examples';
 import { LogEntryExampleMessage, LogEntryExampleMessageHeaders } from './log_entry_example';
 

@@ -5,77 +5,60 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { render } from 'react-dom';
-import type { CoreStart } from '../../../../../src/core/public/types';
-import type { SavedObjectReference } from '../../../../../src/core/types/saved_objects';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public/types';
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public/types';
-import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public/plugin';
-import type { PluginStart as IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public/types';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public/context/context';
-import type { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public/storage/types';
-import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public/plugin';
-import type { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public/types';
-import type { DraggingIdentifier } from '../drag_drop/providers/types';
-import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
+import { I18nProvider } from '@kbn/i18n/react';
+import type { CoreStart, SavedObjectReference } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
+import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 import type {
-  Datasource,
-  DatasourceDataPanelProps,
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
-  DatasourceLayerPanelProps,
-  InitializationOptions,
+  DatasourceDataPanelProps,
   Operation,
+  DatasourceLayerPanelProps,
   PublicAPIProps,
-  StateSetter,
+  InitializationOptions,
 } from '../types';
-import { IndexPatternDataPanel } from './datapanel';
 import {
-  IndexPatternDimensionEditor,
-  IndexPatternDimensionTrigger,
-} from './dimension_panel/dimension_panel';
-import { getDropProps } from './dimension_panel/droppable/get_drop_props';
-import { onDrop } from './dimension_panel/droppable/on_drop_handler';
-import {
-  getDatasourceSuggestionsForField,
-  getDatasourceSuggestionsForVisualizeField,
-  getDatasourceSuggestionsFromCurrentState,
-} from './indexpattern_suggestions';
-import { LayerPanel } from './layerpanel';
-import {
+  loadInitialState,
   changeIndexPattern,
   changeLayerIndexPattern,
   extractReferences,
-  loadInitialState,
 } from './loader';
-import type { IndexPatternColumn } from './operations/definitions';
-import { deleteColumn, getErrorMessages, isReferenced } from './operations/layer_helpers';
-import { mergeLayer } from './state_helpers';
-import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { toExpression } from './to_expression';
-import type {
-  IndexPatternField,
-  IndexPatternPersistedState,
-  IndexPatternPrivateState,
-} from './types';
-import { isDraggedField, normalizeOperationDataType } from './utils';
+import {
+  IndexPatternDimensionTrigger,
+  IndexPatternDimensionEditor,
+  getDropProps,
+  onDrop,
+} from './dimension_panel';
+import { IndexPatternDataPanel } from './datapanel';
+import {
+  getDatasourceSuggestionsForField,
+  getDatasourceSuggestionsFromCurrentState,
+  getDatasourceSuggestionsForVisualizeField,
+} from './indexpattern_suggestions';
 
-export {
-  counterRate,
-  CounterRateArgs,
-  ExpressionFunctionCounterRate,
-  formatColumn,
-  FormatColumnArgs,
-  getTimeScale,
-  renameColumns,
-  supportedFormats,
-  TimeScaleArgs,
-} from '../../common/expressions';
-export { getSuffixFormatter, unitSuffixesLong } from '../../common/suffix_formatter';
-export { deleteColumn, IndexPatternColumn, OperationType } from './operations';
+import { isDraggedField, normalizeOperationDataType } from './utils';
+import { LayerPanel } from './layerpanel';
+import { IndexPatternColumn, getErrorMessages } from './operations';
+import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
+import { mergeLayer } from './state_helpers';
+import { Datasource, StateSetter } from '../types';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { deleteColumn, isReferenced } from './operations';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
+import { DraggingIdentifier } from '../drag_drop';
+import { getStateTimeShiftWarningMessages } from './time_shift_utils';
+
+export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
@@ -86,6 +69,16 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
     label: uniqueLabel || label,
   };
 }
+
+export {
+  CounterRateArgs,
+  ExpressionFunctionCounterRate,
+  counterRate,
+} from '../../common/expressions';
+export { FormatColumnArgs, supportedFormats, formatColumn } from '../../common/expressions';
+export { getSuffixFormatter, unitSuffixesLong } from '../../common/suffix_formatter';
+export { getTimeScale, TimeScaleArgs } from '../../common/expressions';
+export { renameColumns } from '../../common/expressions';
 
 export function getIndexPatternDatasource({
   core,

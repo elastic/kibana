@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import { IndexPattern } from '../../../../../../../../data/public';
 
 export type SortPairObj = Record<string, string>;
 export type SortPairArr = [string, string];

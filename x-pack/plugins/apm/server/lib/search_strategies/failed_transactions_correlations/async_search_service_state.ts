@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
+
+import { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
 
 interface Progress {
   started: number;

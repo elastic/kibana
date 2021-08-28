@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { InlineScript, QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import Boom from '@hapi/boom';
-import type { EsQueryConfig, Filter } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
-import type { EcsEventOutcome, Logger } from '@kbn/logging';
-import type { STATUS_VALUES } from '@kbn/rule-data-utils';
-import {
+import { estypes } from '@elastic/elasticsearch';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
+import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import type {
   getEsQueryConfig as getEsQueryConfigTyped,
   getSafeSortIds as getSafeSortIdsTyped,
   isValidFeatureId as isValidFeatureIdTyped,
   mapConsumerToIndexName as mapConsumerToIndexNameTyped,
+  STATUS_VALUES,
 } from '@kbn/rule-data-utils';
 import {
   getEsQueryConfig as getEsQueryConfigNonTyped,
@@ -24,26 +23,25 @@ import {
   mapConsumerToIndexName as mapConsumerToIndexNameNonTyped,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
-import type { AlertTypeParams } from '../../../alerting/common/alert';
+
+import { InlineScript, QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { AlertTypeParams, AlertingAuthorizationFilterType } from '../../../alerting/server';
 import {
-  AlertingAuthorization,
-  AlertingAuthorizationEntity,
   ReadOperations,
+  AlertingAuthorization,
   WriteOperations,
-} from '../../../alerting/server/authorization/alerting_authorization';
-import { AlertingAuthorizationFilterType } from '../../../alerting/server/authorization/alerting_authorization_kuery';
-import type { AuditLogger } from '../../../security/server/audit/audit_service';
-import type { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+  AlertingAuthorizationEntity,
+} from '../../../alerting/server';
+import { Logger, ElasticsearchClient, EcsEventOutcome } from '../../../../../src/core/server';
+import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
+import { AuditLogger } from '../../../security/server';
 import {
+  ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
-  ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
-import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 
 const getEsQueryConfig: typeof getEsQueryConfigTyped = getEsQueryConfigNonTyped;
 const getSafeSortIds: typeof getSafeSortIdsTyped = getSafeSortIdsNonTyped;

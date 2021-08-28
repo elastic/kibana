@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
+
 import React, { useCallback, useMemo, useState } from 'react';
-import { useUiTracker } from '../../../../../observability/public/hooks/use_track_metric';
-import type { CorrelationsTerm } from '../../../../common/search_strategies/failure_correlations/types';
+import { debounce } from 'lodash';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
+import { CorrelationsTerm } from '../../../../common/search_strategies/failure_correlations/types';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 

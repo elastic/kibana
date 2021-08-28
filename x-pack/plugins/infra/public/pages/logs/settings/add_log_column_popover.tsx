@@ -4,13 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiBadge, EuiButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+
+import {
+  EuiBadge,
+  EuiButton,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiSelectableOption,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { LogColumnConfiguration } from '../../../utils/source_configuration';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
 
 interface SelectableColumnOption {

@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EVENT_KIND as EVENT_KIND_TYPED } from '@kbn/rule-data-utils';
+
+import type { EVENT_KIND as EVENT_KIND_TYPED } from '@kbn/rule-data-utils';
 // @ts-expect-error
 import { EVENT_KIND as EVENT_KIND_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
-import { rangeQuery } from '../../../../observability/server/utils/queries';
-import type { IRuleDataClient } from '../../../../rule_registry/server/rule_data_client/types';
+import { IRuleDataClient } from '../../../../rule_registry/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
+import { rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
-
 
 const EVENT_KIND: typeof EVENT_KIND_TYPED = EVENT_KIND_NON_TYPED;
 

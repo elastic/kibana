@@ -5,49 +5,86 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+/**
+ * The Kibana Core APIs for server-side plugins.
+ *
+ * A plugin requires a `kibana.json` file at it's root directory that follows
+ * {@link PluginManifest | the manfiest schema} to define static plugin
+ * information required to load the plugin.
+ *
+ * A plugin's `server/index` file must contain a named import, `plugin`, that
+ * implements {@link PluginInitializer} which returns an object that implements
+ * {@link Plugin}.
+ *
+ * The plugin integrates with the core system via lifecycle events: `setup`,
+ * `start`, and `stop`. In each lifecycle method, the plugin will receive the
+ * corresponding core services available (either {@link CoreSetup} or
+ * {@link CoreStart}) and any interfaces returned by dependency plugins'
+ * lifecycle method. Anything returned by the plugin's lifecycle method will be
+ * exposed to downstream dependencies when their corresponding lifecycle methods
+ * are invoked.
+ *
+ * @packageDocumentation
+ */
+
 import { Type } from '@kbn/config-schema';
-import type { CapabilitiesSetup, CapabilitiesStart } from './capabilities/capabilities_service';
-import type { ContextSetup } from './context/context_service';
-import type {
+import {
+  ElasticsearchServiceSetup,
+  configSchema as elasticsearchConfigSchema,
+  ElasticsearchServiceStart,
+  IScopedClusterClient,
+  ElasticsearchServicePreboot,
+} from './elasticsearch';
+import { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http';
+import { HttpResources } from './http_resources';
+
+import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
+import { ContextSetup } from './context';
+import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
+import { SavedObjectsClientContract } from './saved_objects/types';
+import {
+  ISavedObjectTypeRegistry,
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+  ISavedObjectsExporter,
+  ISavedObjectsImporter,
+  SavedObjectsClientProviderOptions,
+} from './saved_objects';
+import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
+import { StatusServiceSetup } from './status';
+import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
+import { CoreUsageDataStart } from './core_usage_data';
+import { I18nServiceSetup } from './i18n';
+import { DeprecationsServiceSetup, DeprecationsClient } from './deprecations';
+// Because of #79265 we need to explicitly import, then export these types for
+// scripts/telemetry_check.js to work as expected
+import {
+  CoreUsageStats,
+  CoreUsageData,
+  CoreConfigUsageData,
   ConfigUsageData,
+  CoreEnvironmentUsageData,
+  CoreServicesUsageData,
+} from './core_usage_data';
+import { PrebootServicePreboot } from './preboot';
+
+export type { PrebootServicePreboot } from './preboot';
+
+export type {
+  CoreUsageStats,
+  CoreUsageData,
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
-  CoreUsageData,
-  CoreUsageStats,
-} from './core_usage_data/types';
-import type {
-  DeprecationsClient,
-} from './deprecations/deprecations_service';
-import type { IScopedClusterClient } from './elasticsearch/client/scoped_cluster_client';
-import { configSchema as elasticsearchConfigSchema } from './elasticsearch/elasticsearch_config';
-import type {
-  ElasticsearchServicePreboot,
-} from './elasticsearch/types';
-import type {
-  ExecutionContextSetup,
-  ExecutionContextStart,
-} from './execution_context/execution_context_service';
-import type { HttpServicePreboot } from './http/types';
-import type { HttpResources } from './http_resources/types';
-import type { AppenderConfigType } from './logging/appenders/appenders';
-import { appendersSchema } from './logging/appenders/appenders';
-import type { PluginsServiceSetup, PluginsServiceStart } from './plugins/plugins_service';
-import type { PluginOpaqueId } from './plugins/types';
-import type { PrebootServicePreboot } from './preboot/types';
-import type { ISavedObjectsExporter } from './saved_objects/export/saved_objects_exporter';
-import type { ISavedObjectsImporter } from './saved_objects/import/saved_objects_importer';
-import type { ISavedObjectTypeRegistry } from './saved_objects/saved_objects_type_registry';
-import type { SavedObjectsClientProviderOptions } from './saved_objects/service/lib/scoped_client_provider';
-import type { SavedObjectsClientContract } from './saved_objects/types';
-import type {
-  IUiSettingsClient,
-} from './ui_settings/types';
+  ConfigUsageData,
+};
 
-// Because of #79265 we need to explicitly import, then export these types for
-// scripts/telemetry_check.js to work as expected
-export type { AppCategory } from '../types';
-export { APP_WRAPPER_CLASS, DEFAULT_APP_CATEGORIES } from '../utils';
+import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+
+export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
+
 export { bootstrap } from './bootstrap';
 export type {
   Capabilities,
@@ -56,74 +93,66 @@ export type {
   ResolveCapabilitiesOptions,
 } from './capabilities';
 export type {
-  AddConfigDeprecation,
-  ConfigDeprecation,
-  ConfigDeprecationFactory,
-  ConfigDeprecationProvider,
   ConfigPath,
   ConfigService,
+  ConfigDeprecation,
+  ConfigDeprecationProvider,
+  ConfigDeprecationFactory,
+  AddConfigDeprecation,
   EnvironmentMode,
   PackageInfo,
 } from './config';
 export type {
-  HandlerContextType,
-  HandlerFunction,
-  HandlerParameters,
   IContextContainer,
   IContextProvider,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
 } from './context';
 export type { CoreId } from './core_context';
-export type { CoreUsageDataStart } from './core_usage_data';
+
 export { CspConfig } from './csp';
 export type { ICspConfig } from './csp';
-export type {
-  DeprecationsClient,
-  DeprecationsDetails,
-  DeprecationsServiceSetup,
-  GetDeprecationsContext,
-  RegisterDeprecationsConfig,
-} from './deprecations';
+
 export { ElasticsearchConfig } from './elasticsearch';
 export type {
-  CountResponse,
-  DeleteDocumentResponse,
-  ElasticsearchClient,
-  ElasticsearchClientConfig,
-  ElasticsearchConfigPreboot,
   ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
+  NodesVersionCompatibility,
   FakeRequest,
-  GetResponse,
+  ScopeableRequest,
+  ElasticsearchClient,
   IClusterClient,
   ICustomClusterClient,
+  ElasticsearchClientConfig,
   IScopedClusterClient,
-  NodesVersionCompatibility,
-  ScopeableRequest,
   SearchResponse,
+  CountResponse,
   ShardsInfo,
   ShardsResponse,
+  GetResponse,
+  DeleteDocumentResponse,
+  ElasticsearchConfigPreboot,
 } from './elasticsearch';
-export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
+
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
-export { KibanaRequest, kibanaResponseFactory, validBodyOutput } from './http';
 export type {
-  Authenticated,
   AuthenticationHandler,
   AuthHeaders,
-  AuthNotHandled,
+  AuthResultParams,
+  AuthStatus,
+  AuthToolkit,
   AuthRedirected,
   AuthRedirectedParams,
   AuthResult,
-  AuthResultParams,
   AuthResultType,
-  AuthStatus,
-  AuthToolkit,
+  Authenticated,
+  AuthNotHandled,
   BasePath,
+  IBasePath,
   CustomHttpResponseOptions,
-  DestructiveRouteMethod,
-  ErrorHttpResponseOptions,
   GetAuthHeaders,
   GetAuthState,
   Headers,
@@ -134,253 +163,254 @@ export type {
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
-  IBasePath,
-  IKibanaResponse,
+  ErrorHttpResponseOptions,
   IKibanaSocket,
-  IRouter,
   IsAuthenticated,
   KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
-  KibanaResponseFactory,
-  KnownHeaders,
+  IKibanaResponse,
   LifecycleResponseFactory,
-  OnPostAuthHandler,
-  OnPostAuthToolkit,
+  KnownHeaders,
   OnPreAuthHandler,
   OnPreAuthToolkit,
-  OnPreResponseExtensions,
-  OnPreResponseHandler,
-  OnPreResponseInfo,
-  OnPreResponseRender,
-  OnPreResponseToolkit,
   OnPreRoutingHandler,
   OnPreRoutingToolkit,
+  OnPostAuthHandler,
+  OnPostAuthToolkit,
+  OnPreResponseHandler,
+  OnPreResponseToolkit,
+  OnPreResponseRender,
+  OnPreResponseExtensions,
+  OnPreResponseInfo,
   RedirectResponseOptions,
   RequestHandler,
+  RequestHandlerWrapper,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
-  RequestHandlerWrapper,
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
+  KibanaResponseFactory,
   RouteConfig,
+  IRouter,
+  RouteRegistrar,
+  RouteMethod,
   RouteConfigOptions,
   RouteConfigOptionsBody,
   RouteContentType,
-  RouteMethod,
-  RouteRegistrar,
-  RouteValidationError,
-  RouteValidationFunction,
-  RouteValidationResultFactory,
-  RouteValidationSpec,
   RouteValidatorConfig,
-  RouteValidatorFullConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
   RouteValidatorOptions,
-  SafeRouteMethod,
-  SessionCookieValidationResult,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+  RouteValidationError,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionCookieValidationResult,
   SessionStorageFactory,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
 } from './http';
+
+export { KibanaRequest, kibanaResponseFactory, validBodyOutput } from './http';
+
 export type {
   HttpResourcesRenderOptions,
-  HttpResourcesRequestHandler,
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
+  HttpResourcesRequestHandler,
 } from './http_resources';
-export type { I18nServiceSetup } from './i18n';
+
+export type { IRenderOptions } from './rendering';
 export type {
-  AppenderConfigType,
+  Logger,
+  LoggerFactory,
   Ecs,
   EcsEventCategory,
   EcsEventKind,
   EcsEventOutcome,
   EcsEventType,
-  Logger,
-  LoggerConfigType,
-  LoggerContextConfigInput,
-  LoggerFactory,
-  LoggingServiceSetup,
-  LogLevel,
   LogMeta,
   LogRecord,
+  LogLevel,
+  LoggingServiceSetup,
+  LoggerContextConfigInput,
+  LoggerConfigType,
+  AppenderConfigType,
 } from './logging';
-export type {
-  MetricsServiceSetup,
-  MetricsServiceStart,
-  OpsMetrics,
-  OpsOsMetrics,
-  OpsProcessMetrics,
-  OpsServerMetrics,
-} from './metrics';
+
 export { PluginType } from './plugins';
+
 export type {
-  AsyncPlugin,
   DiscoveredPlugin,
-  MakeUsageFromSchema,
+  PrebootPlugin,
   Plugin,
+  AsyncPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
   PluginInitializer,
   PluginInitializerContext,
   PluginManifest,
   PluginName,
-  PrebootPlugin,
   SharedGlobalConfig,
+  MakeUsageFromSchema,
 } from './plugins';
-export type { PrebootServicePreboot } from './preboot';
-export type { IRenderOptions } from './rendering';
+
 export {
   SavedObjectsClient,
   SavedObjectsErrorHelpers,
   SavedObjectsSerializer,
-  SavedObjectsUtils,
   SavedObjectTypeRegistry,
+  SavedObjectsUtils,
 } from './saved_objects';
+
 export type {
-  ISavedObjectsExporter,
-  ISavedObjectsImporter,
-  ISavedObjectsPointInTimeFinder,
-  ISavedObjectsRepository,
-  ISavedObjectTypeRegistry,
-  SavedObjectExportBaseOptions,
-  SavedObjectMigrationContext,
-  SavedObjectMigrationFn,
-  SavedObjectMigrationMap,
-  SavedObjectReferenceWithContext,
-  SavedObjectSanitizedDoc,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
-  SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
+  SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
-  SavedObjectsClientFactory,
-  SavedObjectsClientFactoryProvider,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
+  SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsClosePointInTimeResponse,
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesOptions,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-  SavedObjectsCreateOptions,
+  ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsDeleteByNamespaceOptions,
-  SavedObjectsDeleteOptions,
-  SavedObjectsExportByObjectOptions,
-  SavedObjectsExportByTypeOptions,
-  SavedObjectsExporter,
-  SavedObjectsExportError,
-  SavedObjectsExportExcludedObject,
+  SavedObjectsCreateOptions,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
   SavedObjectsExportResultDetails,
-  SavedObjectsExportTransform,
-  SavedObjectsExportTransformContext,
-  SavedObjectsFieldMapping,
-  SavedObjectsFindResponse,
+  SavedObjectsExportExcludedObject,
   SavedObjectsFindResult,
-  SavedObjectsImportActionRequiredWarning,
-  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
-  SavedObjectsImporter,
-  SavedObjectsImportError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportFailure,
-  SavedObjectsImportHook,
-  SavedObjectsImportHookResult,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportOptions,
   SavedObjectsImportResponse,
   SavedObjectsImportRetry,
-  SavedObjectsImportSimpleWarning,
   SavedObjectsImportSuccess,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsImportWarning,
-  SavedObjectsIncrementCounterField,
-  SavedObjectsIncrementCounterOptions,
-  SavedObjectsMappingProperties,
+  SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
-  SavedObjectsNamespaceType,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsOpenPointInTimeResponse,
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
-  SavedObjectsRemoveReferencesToOptions,
-  SavedObjectsRemoveReferencesToResponse,
-  SavedObjectsRepository,
+  SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsResolveResponse,
-  SavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-  SavedObjectStatusMeta,
-  SavedObjectsType,
-  SavedObjectsTypeManagementDefinition,
-  SavedObjectsTypeMappingDefinition,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
-  SavedObjectTypeExcludeFromUpgradeFilterHook,
-  SavedObjectUnsanitizedDoc,
+  SavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
+  SavedObjectStatusMeta,
+  SavedObjectsDeleteOptions,
+  ISavedObjectsRepository,
+  SavedObjectsRepository,
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsIncrementCounterOptions,
+  SavedObjectsIncrementCounterField,
+  SavedObjectsFieldMapping,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsMappingProperties,
+  ISavedObjectTypeRegistry,
+  SavedObjectsNamespaceType,
+  SavedObjectsType,
+  SavedObjectsTypeManagementDefinition,
+  SavedObjectMigrationMap,
+  SavedObjectMigrationFn,
+  SavedObjectsExporter,
+  ISavedObjectsExporter,
+  SavedObjectExportBaseOptions,
+  SavedObjectsExportByObjectOptions,
+  SavedObjectsExportByTypeOptions,
+  SavedObjectsExportError,
+  SavedObjectsExportTransform,
+  SavedObjectsExportTransformContext,
+  SavedObjectsImporter,
+  ISavedObjectsImporter,
+  SavedObjectsImportError,
+  SavedObjectsImportHook,
+  SavedObjectsImportHookResult,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
 } from './saved_objects';
-export { ServiceStatusLevels } from './status';
-export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
+
 export type {
-  MutatingOperationRefreshSetting,
+  IUiSettingsClient,
+  UiSettingsParams,
+  PublicUiSettingsParams,
+  UiSettingsType,
+  UiSettingsServiceSetup,
+  UiSettingsServiceStart,
+  UserProvidedValues,
+  DeprecationSettings,
+} from './ui_settings';
+
+export type {
+  OpsMetrics,
+  OpsOsMetrics,
+  OpsServerMetrics,
+  OpsProcessMetrics,
+  MetricsServiceSetup,
+  MetricsServiceStart,
+} from './metrics';
+
+export type { I18nServiceSetup } from './i18n';
+export type {
+  DeprecationsDetails,
+  RegisterDeprecationsConfig,
+  GetDeprecationsContext,
+  DeprecationsServiceSetup,
+  DeprecationsClient,
+} from './deprecations';
+
+export type { AppCategory } from '../types';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
+
+export type {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
-  SavedObjectsMigrationVersion,
   SavedObjectsPitParams,
+  SavedObjectsMigrationVersion,
 } from './types';
-export type {
-  DeprecationSettings,
-  IUiSettingsClient,
-  PublicUiSettingsParams,
-  UiSettingsParams,
-  UiSettingsServiceSetup,
-  UiSettingsServiceStart,
-  UiSettingsType,
-  UserProvidedValues,
-} from './ui_settings';
-export type {
-  CoreUsageStats,
-  CoreUsageData,
-  CoreConfigUsageData,
-  CoreEnvironmentUsageData,
-  CoreServicesUsageData,
-  ConfigUsageData,
-};
-export type {
-  CapabilitiesSetup,
-  CapabilitiesStart,
-  ContextSetup,
-  ExecutionContextSetup,
-  ExecutionContextStart,
-  HttpResources,
-  PluginsServiceSetup,
-  PluginsServiceStart,
-  PluginOpaqueId,
-};
 
-export type {
-  CoreStart,
-  CoreSetup
-} from './plugin_contract';
+export { ServiceStatusLevels } from './status';
+export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
+
+export type { CoreUsageDataStart } from './core_usage_data';
 
 /**
  * Plugin specific context passed to a route handler.
@@ -430,6 +460,96 @@ export interface CorePreboot {
   /** {@link PrebootServicePreboot} */
   preboot: PrebootServicePreboot;
 }
+
+/**
+ * Context passed to the `setup` method of `standard` plugins.
+ *
+ * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
+ *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
+ * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
+ *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
+ * @public
+ */
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+  /** {@link CapabilitiesSetup} */
+  capabilities: CapabilitiesSetup;
+  /** {@link ContextSetup} */
+  context: ContextSetup;
+  /** {@link ElasticsearchServiceSetup} */
+  elasticsearch: ElasticsearchServiceSetup;
+  /** {@link ExecutionContextSetup} */
+  executionContext: ExecutionContextSetup;
+  /** {@link HttpServiceSetup} */
+  http: HttpServiceSetup & {
+    /** {@link HttpResources} */
+    resources: HttpResources;
+  };
+  /** {@link I18nServiceSetup} */
+  i18n: I18nServiceSetup;
+  /** {@link LoggingServiceSetup} */
+  logging: LoggingServiceSetup;
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
+  /** {@link SavedObjectsServiceSetup} */
+  savedObjects: SavedObjectsServiceSetup;
+  /** {@link StatusServiceSetup} */
+  status: StatusServiceSetup;
+  /** {@link UiSettingsServiceSetup} */
+  uiSettings: UiSettingsServiceSetup;
+  /** {@link DeprecationsServiceSetup} */
+  deprecations: DeprecationsServiceSetup;
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+}
+
+/**
+ * Allows plugins to get access to APIs available in start inside async handlers.
+ * Promise will not resolve until Core and plugin dependencies have completed `start`.
+ * This should only be used inside handlers registered during `setup` that will only be executed
+ * after `start` lifecycle.
+ *
+ * @public
+ */
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+/**
+ * Context passed to the plugins `start` method.
+ *
+ * @public
+ */
+export interface CoreStart {
+  /** {@link CapabilitiesStart} */
+  capabilities: CapabilitiesStart;
+  /** {@link ElasticsearchServiceStart} */
+  elasticsearch: ElasticsearchServiceStart;
+  /** {@link ExecutionContextStart} */
+  executionContext: ExecutionContextStart;
+  /** {@link HttpServiceStart} */
+  http: HttpServiceStart;
+  /** {@link MetricsServiceStart} */
+  metrics: MetricsServiceStart;
+  /** {@link SavedObjectsServiceStart} */
+  savedObjects: SavedObjectsServiceStart;
+  /** {@link UiSettingsServiceStart} */
+  uiSettings: UiSettingsServiceStart;
+  /** @internal {@link CoreUsageDataStart} */
+  coreUsageData: CoreUsageDataStart;
+}
+
+export type {
+  CapabilitiesSetup,
+  CapabilitiesStart,
+  ContextSetup,
+  ExecutionContextSetup,
+  ExecutionContextStart,
+  HttpResources,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginOpaqueId,
+};
 
 /**
  * Config schemas for the platform services.

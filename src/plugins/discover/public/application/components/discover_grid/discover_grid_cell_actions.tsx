@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { useContext } from 'react';
-import { IndexPatternField } from '../../../../../data/common/index_patterns/fields/index_pattern_field';
+import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { IndexPatternField } from '../../../../../data/common/index_patterns/fields';
 import { DiscoverGridContext } from './discover_grid_context';
 
 export const FilterInBtn = ({

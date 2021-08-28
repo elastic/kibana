@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,25 +22,22 @@ import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { ScopedHistory } from '../../../../../../src/core/public/application/scoped_history';
-import type { NotificationsStart } from '../../../../../../src/core/public/notifications/notifications_service';
-import type { Capabilities } from '../../../../../../src/core/types/capabilities';
-import { SectionLoading } from '../../../../../../src/plugins/es_ui_shared/public/components/section_loading/section_loading';
-import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
-import type { KibanaFeature } from '../../../../features/common/kibana_feature';
-import type { FeaturesPluginStart } from '../../../../features/public/plugin';
-import { isReservedSpace } from '../../../common/is_reserved_space';
+import { SectionLoading } from '../../../../../../src/plugins/es_ui_shared/public';
+import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
+import { isReservedSpace } from '../../../common';
 import { getSpacesFeatureDescription } from '../../constants';
-import { getSpaceColor, getSpaceInitials } from '../../space_avatar/space_attributes';
-import type { SpacesManager } from '../../spaces_manager/spaces_manager';
-import { UnauthorizedPrompt } from '../components/unauthorized_prompt/unauthorized_prompt';
-import { toSpaceIdentifier } from '../lib/space_identifier_utils';
+import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
+import type { SpacesManager } from '../../spaces_manager';
+import { UnauthorizedPrompt } from '../components';
+import { toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
-import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal/confirm_alter_active_space_modal';
-import { CustomizeSpace } from './customize_space/customize_space';
+import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
+import { CustomizeSpace } from './customize_space';
 import { DeleteSpacesButton } from './delete_spaces_button';
-import { EnabledFeatures } from './enabled_features/enabled_features';
+import { EnabledFeatures } from './enabled_features';
 
 export interface FormValues extends Partial<Space> {
   customIdentifier?: boolean;

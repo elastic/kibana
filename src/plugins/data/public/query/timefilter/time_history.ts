@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import moment from 'moment';
-import type { IStorageWrapper } from '../../../../kibana_utils/public/storage/types';
-import type { TimeRange } from '../../../common/query/timefilter/types';
-import { PersistedLog } from '../persisted_log/persisted_log';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { PersistedLog } from '../persisted_log';
+import { TimeRange } from '../../../common';
 
 export class TimeHistory {
   private history: PersistedLog<TimeRange>;

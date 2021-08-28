@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
+import { GeoBoundingBox, geoBoundingBoxToAst } from '../../expressions';
+
+import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { KBN_FIELD_TYPES } from '../../../../common';
-import type { GeoBoundingBox } from '../../expressions/geo_bounding_box';
-import { geoBoundingBoxToAst } from '../../expressions/geo_bounding_box_to_ast';
-import type { BaseAggParams } from '../types';
-import type { IBucketAggConfig } from './bucket_agg_type';
-import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggGeoHashFnName } from './geo_hash_fn';
+import { BaseAggParams } from '../types';
 
 const defaultBoundingBox = {
   top_left: { lat: 1, lon: 1 },

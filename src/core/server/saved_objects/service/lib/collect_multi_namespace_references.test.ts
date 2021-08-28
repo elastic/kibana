@@ -5,25 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { mockRawDocExistsInNamespace } from './collect_multi_namespace_references.test.mock';
+
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types/constants';
-import type { LegacyUrlAlias } from '../../object_types/types';
+import type { ElasticsearchClient } from 'src/core/server/elasticsearch';
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
+import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import { SavedObjectsSerializer } from '../../serialization/serializer';
+import { SavedObjectsSerializer } from '../../serialization';
 import type {
   CollectMultiNamespaceReferencesParams,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
 } from './collect_multi_namespace_references';
 import { collectMultiNamespaceReferences } from './collect_multi_namespace_references';
-import { mockRawDocExistsInNamespace } from './collect_multi_namespace_references.test.mock';
-import { SavedObjectsErrorHelpers } from './errors';
-import { PointInTimeFinder } from './point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
-import type { ISavedObjectsRepository } from './repository';
 import { savedObjectsRepositoryMock } from './repository.mock';
+import { PointInTimeFinder } from './point_in_time_finder';
+import { ISavedObjectsRepository } from './repository';
+import { SavedObjectsErrorHelpers } from './errors';
 
 const SPACES = ['default', 'another-space'];
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };

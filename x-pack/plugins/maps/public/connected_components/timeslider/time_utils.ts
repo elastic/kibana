@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import moment from 'moment-timezone';
-import { calcAutoIntervalNear } from '../../../../../../src/plugins/data/common/search/aggs/buckets/lib/time_buckets/calc_auto_interval';
+import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { calcAutoIntervalNear } from '../../../../../../src/plugins/data/common';
 import { getUiSettings } from '../../kibana_services';
 
 function getTimezone() {

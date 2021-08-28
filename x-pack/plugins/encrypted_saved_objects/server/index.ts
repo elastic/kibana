@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PluginInitializerContext } from '../../../../src/core/server/plugins/types';
+
+import type { PluginInitializerContext } from 'src/core/server';
+
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
 
-export type { IsMigrationNeededPredicate } from './create_migration';
 export { EncryptedSavedObjectTypeRegistration, EncryptionError } from './crypto';
 export { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
 export { EncryptedSavedObjectsClient } from './saved_objects';
+export type { IsMigrationNeededPredicate } from './create_migration';
 
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>

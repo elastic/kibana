@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { Observable, Subscription } from 'rxjs';
-import type { ILicense } from '../../licensing/common/types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ILicense } from '../../licensing/common/types';
 
 export type LicenseState = { valid: false; message: string } | { valid: true };
 

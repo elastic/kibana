@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiMarkdownEditorProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+
 import React, { forwardRef } from 'react';
 import styled from 'styled-components';
-import { getFieldValidityAndErrorMessage } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/helpers';
-import type { FieldHook } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/types';
-import type { MarkdownEditorRef } from './editor';
-import { MarkdownEditor } from './editor';
+import { EuiMarkdownEditorProps, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../common/shared_imports';
+import { MarkdownEditor, MarkdownEditorRef } from './editor';
 
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;

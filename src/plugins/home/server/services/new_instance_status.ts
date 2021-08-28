@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IScopedClusterClient } from '../../../../core/server/elasticsearch/client/scoped_cluster_client';
-import type { SavedObjectsClientContract } from '../../../../core/server/saved_objects/types';
-import type { IndexPatternSavedObjectAttrs } from '../../../data/common/index_patterns/index_patterns/index_patterns';
+
+import type { IScopedClusterClient, SavedObjectsClientContract } from '../../../../core/server';
+import type { IndexPatternSavedObjectAttrs } from '../../../data/common/index_patterns/index_patterns';
 
 const LOGS_INDEX_PATTERN = 'logs-*';
 const METRICS_INDEX_PATTERN = 'metrics-*';

@@ -4,27 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup } from '../../../../../src/core/public/types';
-import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public/lib/triggers/triggers';
-import type { UiActionsSetup } from '../../../../../src/plugins/ui_actions/public/plugin';
-import type { MlPluginStart, MlStartDependencies } from '../plugin';
-import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_action';
-import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
-import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
-import { createClearSelectionAction } from './clear_selection_action';
-import { createEditAnomalyChartsPanelAction } from './edit_anomaly_charts_panel_action';
+
+import { CoreSetup } from 'kibana/public';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
 import { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
+import { UiActionsSetup } from '../../../../../src/plugins/ui_actions/public';
+import { MlPluginStart, MlStartDependencies } from '../plugin';
+import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
+import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
 import {
   entityFieldSelectionTrigger,
   EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
-  swimLaneSelectionTrigger,
   SWIM_LANE_SELECTION_TRIGGER,
+  swimLaneSelectionTrigger,
 } from './triggers';
-
-export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
+import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
+import { createClearSelectionAction } from './clear_selection_action';
+import { createEditAnomalyChartsPanelAction } from './edit_anomaly_charts_panel_action';
+import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_action';
 export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { EDIT_SWIMLANE_PANEL_ACTION } from './edit_swimlane_panel_action';
+export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
 export { OPEN_IN_ANOMALY_EXPLORER_ACTION } from './open_in_anomaly_explorer_action';
 export { SWIM_LANE_SELECTION_TRIGGER };
 /**

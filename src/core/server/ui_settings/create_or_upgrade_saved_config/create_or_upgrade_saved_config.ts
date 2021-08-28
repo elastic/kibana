@@ -5,10 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger, LogMeta } from '@kbn/logging';
+
 import { defaults } from 'lodash';
-import { SavedObjectsErrorHelpers } from '../../saved_objects/service/lib/errors';
-import type { SavedObjectsClientContract } from '../../saved_objects/types';
+
+import { SavedObjectsClientContract } from '../../saved_objects/types';
+import { SavedObjectsErrorHelpers } from '../../saved_objects/';
+import { Logger, LogMeta } from '../../logging';
+
 import { getUpgradeableConfig } from './get_upgradeable_config';
 
 interface ConfigLogMeta extends LogMeta {

@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiButton } from '@elastic/eui';
 import type { CSSProperties } from 'react';
 import React, { Component } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import type { ApplicationStart } from '../../../../../../src/core/public/application/types';
-import type { Capabilities } from '../../../../../../src/core/types/capabilities';
+import type { ApplicationStart, Capabilities } from 'src/core/public';
 
 interface Props {
   isDisabled?: boolean;

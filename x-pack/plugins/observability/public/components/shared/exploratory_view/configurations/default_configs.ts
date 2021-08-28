@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { AppDataType, ReportViewType } from '../types';
-import { getMobileDeviceDistributionConfig } from './mobile/device_distribution_config';
-import { getMobileKPIDistributionConfig } from './mobile/distribution_config';
-import { getMobileKPIConfig } from './mobile/kpi_over_time_config';
-import { getCoreWebVitalsConfig } from './rum/core_web_vitals_config';
+
+import { AppDataType, ReportViewType } from '../types';
 import { getRumDistributionConfig } from './rum/data_distribution_config';
-import { getKPITrendsLensConfig } from './rum/kpi_over_time_config';
 import { getSyntheticsDistributionConfig } from './synthetics/data_distribution_config';
 import { getSyntheticsKPIConfig } from './synthetics/kpi_over_time_config';
+import { getKPITrendsLensConfig } from './rum/kpi_over_time_config';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { getCoreWebVitalsConfig } from './rum/core_web_vitals_config';
+import { getMobileKPIConfig } from './mobile/kpi_over_time_config';
+import { getMobileKPIDistributionConfig } from './mobile/distribution_config';
+import { getMobileDeviceDistributionConfig } from './mobile/device_distribution_config';
 
 interface Props {
   reportType: ReportViewType;

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { first, last, sortBy } from 'lodash';
-import type { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
-import type { WaffleSortOption } from '../hooks/use_waffle_options';
+
+import { sortBy, last, first } from 'lodash';
+import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
+import { WaffleSortOption } from '../hooks/use_waffle_options';
 
 const SORT_PATHS = {
   name: (node: SnapshotNode) => last(node.path),

@@ -4,29 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
-import type { OperationDefinition, ParamEditorProps } from '..';
-import { useDebounceWithOptions } from '../../../../shared_components/helpers';
-import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
-import type { IndexPatternLayer } from '../../../types';
-import { updateColumnParam } from '../../layer_helpers';
-import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
-import type {
-  FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from '../column_types';
-import { getFilter, getFormatFromPreviousColumn, isValidNumber } from '../helpers';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { useDebounceWithOptions } from '../../../../shared_components';
+import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { IndexPatternLayer } from '../../../types';
 import {
   buildLabelFunction,
-  checkForDataLayerType,
   checkForDateHistogram,
-  dateBasedOperationToExpression,
   getErrorsForDateReference,
+  dateBasedOperationToExpression,
   hasDateField,
+  checkForDataLayerType,
 } from './utils';
+import { updateColumnParam } from '../../layer_helpers';
+import { getFormatFromPreviousColumn, isValidNumber, getFilter } from '../helpers';
+import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
+import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
+import type { OperationDefinition, ParamEditorProps } from '..';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.movingAverageOf', {

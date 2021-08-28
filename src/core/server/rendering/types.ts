@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EnvironmentMode, PackageInfo } from '@kbn/config';
+
 import { i18n } from '@kbn/i18n';
-import type { UserProvidedValues } from '../../types/ui_settings';
-import type { ICspConfig } from '../csp/csp_config';
-import type { IExternalUrlPolicy } from '../external_url/external_url_config';
-import { KibanaRequest } from '../http/router/request';
-import type { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http/types';
-import type { UiPlugins } from '../plugins/plugins_service';
-import type { DiscoveredPlugin } from '../plugins/types';
-import type { InternalStatusServiceSetup } from '../status/types';
-import type { IUiSettingsClient } from '../ui_settings/types';
+
+import { EnvironmentMode, PackageInfo } from '../config';
+import { ICspConfig } from '../csp';
+import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } from '../http';
+import { UiPlugins, DiscoveredPlugin } from '../plugins';
+import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
+import type { InternalStatusServiceSetup } from '../status';
+import { IExternalUrlPolicy } from '../external_url';
 
 /** @internal */
 export interface RenderingMetadata {

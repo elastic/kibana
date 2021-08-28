@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { KibanaServerError } from '../../../../kibana_utils/common/errors/types';
+import type { estypes } from '@elastic/elasticsearch';
+import { KibanaServerError } from '../../../../kibana_utils/common';
 
 export interface FailedShard {
   shard: number;

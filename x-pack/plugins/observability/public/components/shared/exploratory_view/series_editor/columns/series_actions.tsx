@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React from 'react';
-import { useSeriesStorage } from '../../hooks/use_series_storage';
-import type { SeriesUrl } from '../../types';
 import { RemoveSeries } from './remove_series';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
+import { SeriesUrl } from '../../types';
 
 interface Props {
   seriesId: string;

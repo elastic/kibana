@@ -5,12 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { decodeRequestVersion } from './decode_request_version';
-import { decodeVersion } from './decode_version';
 
 jest.mock('./decode_version', () => ({
   decodeVersion: jest.fn().mockReturnValue({ _seq_no: 1, _primary_term: 2 }),
 }));
+
+import { decodeRequestVersion } from './decode_request_version';
+import { decodeVersion } from './decode_version';
+
 it('renames decodeVersion() return value to use if_seq_no and if_primary_term', () => {
   expect(decodeRequestVersion('foobar')).toMatchInlineSnapshot(`
 Object {

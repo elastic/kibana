@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
-import { getLogSourceConfigurationPath } from '../../../../../common/http_api/log_sources/common';
-import type { LogSourceConfigurationPropertiesPatch } from '../../../../../common/http_api/log_sources/patch_log_source_configuration';
+
+import type { HttpHandler } from 'src/core/public';
 import {
-  patchLogSourceConfigurationRequestBodyRT,
+  getLogSourceConfigurationPath,
   patchLogSourceConfigurationSuccessResponsePayloadRT,
-} from '../../../../../common/http_api/log_sources/patch_log_source_configuration';
-import { PatchLogSourceConfigurationError } from '../../../../../common/log_sources/errors';
+  patchLogSourceConfigurationRequestBodyRT,
+  LogSourceConfigurationPropertiesPatch,
+} from '../../../../../common/http_api/log_sources';
+import { PatchLogSourceConfigurationError } from '../../../../../common/log_sources';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export const callPatchLogSourceConfigurationAPI = async (

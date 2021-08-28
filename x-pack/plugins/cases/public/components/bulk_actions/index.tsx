@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
-import { CaseStatuses } from '../../../common/api/cases/status';
-import type { Case, CaseStatusWithAllStatus } from '../../../common/ui/types';
-import { statuses } from '../status/config';
+import { EuiContextMenuItem } from '@elastic/eui';
+
+import { CaseStatuses, CaseStatusWithAllStatus } from '../../../common';
+import { statuses } from '../status';
 import * as i18n from './translations';
+import { Case } from '../../containers/types';
 
 interface GetBulkItems {
   caseStatus: CaseStatusWithAllStatus;

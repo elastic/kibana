@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from '../../types/execution_context';
+
+import type { KibanaExecutionContext } from '../../types';
 import type {
-  ExecutionContextSetup,
   IExecutionContext,
   InternalExecutionContextSetup,
+  ExecutionContextSetup,
 } from './execution_context_service';
 
 // attempted removal of any: unsuccessful! In theory, replaceable with <R>/R

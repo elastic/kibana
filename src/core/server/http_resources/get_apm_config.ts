@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getConfiguration } from '@kbn/apm-config-loader';
 import agent from 'elastic-apm-node';
+import { getConfiguration } from '@kbn/apm-config-loader';
 
 export const getApmConfig = (requestPath: string) => {
   const baseConfig = getConfiguration('kibana-frontend');

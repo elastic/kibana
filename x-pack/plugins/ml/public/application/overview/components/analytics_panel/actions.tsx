@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+
+import React, { FC, useMemo } from 'react';
+import { EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import type { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
-import { getAnalysisType } from '../../../../../common/util/analytics_utils';
-import { useMlLink } from '../../../contexts/kibana/use_create_url';
+import { useMlLink } from '../../../contexts/kibana';
+import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
+import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { getViewLinkStatus } from '../../../data_frame_analytics/pages/analytics_management/components/action_view/get_view_link_status';
-import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
 
 interface Props {
   item: DataFrameAnalyticsListRow;

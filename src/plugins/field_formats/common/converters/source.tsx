@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { escape, keys } from 'lodash';
 import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom/server';
-import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
+import { escape, keys } from 'lodash';
+import { shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
-import { FIELD_FORMAT_IDS } from '../types';
-import { shortenDottedString } from '../utils/shorten_dotted_string';
+import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
 interface Props {
   defPairs: Array<[string, string]>;

@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
-import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 type ServiceDetailsReturnType = APIReturnType<'GET /api/apm/services/{serviceName}/metadata/details'>;
 

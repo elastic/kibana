@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, useMemo, useRef, useState } from 'react';
 
-import { AGENT_SAVED_OBJECT_TYPE } from '../../common/constants/agent';
-import { AGENT_API_ROUTES } from '../../common/constants/routes';
-import type { AgentPolicy } from '../../common/types/models/agent_policy';
-import { useConfig } from '../hooks/use_config';
-import { useStartServices } from '../hooks/use_core';
-import { sendDeletePackagePolicy } from '../hooks/use_request/package_policy';
-import { sendRequest } from '../hooks/use_request/use_request';
+import { useStartServices, sendRequest, sendDeletePackagePolicy, useConfig } from '../hooks';
+import { AGENT_API_ROUTES, AGENT_SAVED_OBJECT_TYPE } from '../../common/constants';
+import type { AgentPolicy } from '../types';
 
 interface Props {
   agentPolicy: AgentPolicy;

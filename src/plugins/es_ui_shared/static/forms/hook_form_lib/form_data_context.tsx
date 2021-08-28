@@ -5,9 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React, { createContext, useContext, useMemo } from 'react';
-import { Subject } from './lib/subject';
-import type { FormData, FormHook } from './types';
+
+import { FormData, FormHook } from './types';
+import { Subject } from './lib';
 
 export interface Context<T extends FormData = FormData, I extends FormData = T> {
   getFormData$: () => Subject<FormData>;

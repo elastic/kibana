@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import numeral from '@elastic/numeral';
+import querystring from 'querystring';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
-import type { Logger, LogMeta } from '@kbn/logging';
-import querystring from 'querystring';
+import numeral from '@elastic/numeral';
+import { LogMeta } from '@kbn/logging';
+import { Logger } from '../../logging';
 import { getResponsePayloadBytes } from './get_payload_size';
 
 const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie'];

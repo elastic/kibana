@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { getTransactionBreakdown } from '.';
-import type { APMConfig } from '../../..';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import * as constants from './constants';
-import dataResponse from './mock_responses/data.json';
 import noDataResponse from './mock_responses/no_data.json';
+import dataResponse from './mock_responses/data.json';
+import { APMConfig } from '../../..';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const mockIndices = {
   /* eslint-disable @typescript-eslint/naming-convention */

@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiHighlight, EuiMark } from '@elastic/eui';
+
 import React, { useMemo } from 'react';
+import { EuiMark } from '@elastic/eui';
+import { EuiHighlight } from '@elastic/eui';
 
 const createContext = () =>
   document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D;

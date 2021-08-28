@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import type { JobValidationMessage, MessageId } from '../../../common/constants/messages';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs/combined_job';
-import type { Detector } from '../../../common/types/anomaly_detection_jobs/job';
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
-import { isValidAggregationField } from '../../../common/util/validation_utils';
-import { DataVisualizer } from '../data_visualizer/data_visualizer';
+
+import { IScopedClusterClient } from 'kibana/server';
+import { DataVisualizer } from '../data_visualizer';
+
 import { validateJobObject } from './validate_job_object';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { Detector } from '../../../common/types/anomaly_detection_jobs';
+import { MessageId, JobValidationMessage } from '../../../common/constants/messages';
+import { isValidAggregationField } from '../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 
 function isValidCategorizationConfig(job: CombinedJob, fieldName: string): boolean {
   return (

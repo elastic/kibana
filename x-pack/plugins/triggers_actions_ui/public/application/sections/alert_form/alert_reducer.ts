@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { SavedObjectAttribute } from 'kibana/public';
 import { isEqual } from 'lodash';
-import type { Reducer } from 'react';
-import type { SavedObjectAttribute } from '../../../../../../../src/core/types/saved_objects';
-import type {
-  AlertAction,
-  AlertActionParam,
-  IntervalSchedule,
-} from '../../../../../alerting/common/alert';
-import type { Alert } from '../../../types';
+import { Reducer } from 'react';
+import { AlertActionParam, IntervalSchedule } from '../../../../../alerting/common';
+import { Alert, AlertAction } from '../../../types';
 
 export type InitialAlert = Partial<Alert> &
   Pick<Alert, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;

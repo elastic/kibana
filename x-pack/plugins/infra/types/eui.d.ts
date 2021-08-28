@@ -4,9 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import '@elastic/eui';
-import type { IconType } from '@elastic/eui';
-import type { CommonProps } from '@elastic/eui/src/components/common';
+
+/**
+ *  /!\  These type definitions are temporary until the upstream @elastic/eui
+ *       package includes them.
+ */
+
+import { IconType, ToolTipPositions } from '@elastic/eui';
+import { CommonProps } from '@elastic/eui/src/components/common';
 
 declare module '@elastic/eui' {
   interface EuiFormControlLayoutIconProps {

@@ -5,20 +5,30 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
-import type { ReactElement } from 'react';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import rison from 'rison-node';
-import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-import type { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { TimeRange } from '../../../../../../../src/plugins/data/common/query/timefilter/types';
-import type { SortDirectionNumeric } from '../../../../../../../src/plugins/data/common/search/search_source/types';
-import { SortDirection } from '../../../../../../../src/plugins/data/common/search/search_source/types';
-import { esFilters } from '../../../../../../../src/plugins/data/public/deprecated';
-import type { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters/types';
+import { i18n } from '@kbn/i18n';
+import type { Filter, IFieldType, IndexPattern } from 'src/plugins/data/public';
+import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { AbstractESSource } from '../es_source';
+import {
+  getHttp,
+  getSearchService,
+  getSecurityService,
+  getTimeFilter,
+} from '../../../kibana_services';
+import {
+  addFieldToDSL,
+  getField,
+  hitsToGeoJson,
+  isTotalHitsGreaterThan,
+  PreIndexedShape,
+  TotalHits,
+} from '../../../../common/elasticsearch_util';
+// @ts-expect-error
+import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   ES_GEO_FIELD_TYPE,
@@ -31,54 +41,38 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import type {
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getSourceFields } from '../../../index_pattern_util';
+import { loadIndexSettings } from './util/load_index_settings';
+import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
+import { ESDocField } from '../../fields/es_doc_field';
+import { registerSource } from '../source_registry';
+import {
   DataMeta,
+  ESSearchSourceDescriptor,
   Timeslice,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
-} from '../../../../common/descriptor_types/data_request_descriptor_types';
-import type { ESSearchSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
-import { hitsToGeoJson } from '../../../../common/elasticsearch_util/elasticsearch_geo_utils';
-import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util/es_agg_utils';
-import type { TotalHits } from '../../../../common/elasticsearch_util/total_hits';
-import { isTotalHitsGreaterThan } from '../../../../common/elasticsearch_util/total_hits';
-import type { PreIndexedShape } from '../../../../common/elasticsearch_util/types';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { getSourceFields } from '../../../index_pattern_util';
-import {
-  getHttp,
-  getSearchService,
-  getSecurityService,
-  getTimeFilter,
-} from '../../../kibana_services';
-import { ESDocField } from '../../fields/es_doc_field';
-import type { IField } from '../../fields/field';
-import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+} from '../../../../common/descriptor_types';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { TimeRange } from '../../../../../../../src/plugins/data/common';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { IField } from '../../fields/field';
+import { GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
+import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
+import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { AbstractESSource } from '../es_source/es_source';
-import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { registerSource } from '../source_registry';
-import type {
-  ITiledSingleLayerMvtParams,
-  ITiledSingleLayerVectorSource,
-} from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
-import type { GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source/vector_source';
-import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
-import { TopHitsUpdateSourceEditor } from './top_hits/update_source_editor';
-// @ts-expect-error
-import { UpdateSourceEditor } from './update_source_editor';
+import { TopHitsUpdateSourceEditor } from './top_hits';
+import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
+import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 import {
   addFeatureToIndex,
   deleteFeatureFromIndex,
   getIsDrawLayer,
   getMatchingIndexes,
 } from './util/feature_edit';
-import type { ScriptField } from './util/get_docvalue_source_fields';
-import { getDocValueAndSourceFields } from './util/get_docvalue_source_fields';
-import { loadIndexSettings } from './util/load_index_settings';
-
-
 
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
   const timeRangeBounds = getTimeFilter().calculateBounds(timerange);

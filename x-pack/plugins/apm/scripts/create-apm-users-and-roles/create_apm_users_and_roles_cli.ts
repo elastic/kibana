@@ -6,9 +6,10 @@
  */
 
 /* eslint-disable no-console */
+
 import { argv } from 'yargs';
-import { createApmUsersAndRoles } from './create_apm_users_and_roles';
 import { AbortError, isAxiosError } from './helpers/call_kibana';
+import { createApmUsersAndRoles } from './create_apm_users_and_roles';
 import { getKibanaVersion } from './helpers/get_version';
 
 async function init() {

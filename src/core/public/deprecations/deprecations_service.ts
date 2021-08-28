@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DomainDeprecationDetails } from '../../server/deprecations/types';
-import type { CoreService } from '../../types/core_service';
-import type { HttpStart } from '../http/types';
-import type { ResolveDeprecationResponse } from './deprecations_client';
-import { DeprecationsClient } from './deprecations_client';
+
+import type { CoreService } from '../../types';
+import type { HttpStart } from '../http';
+import { DeprecationsClient, ResolveDeprecationResponse } from './deprecations_client';
+import type { DomainDeprecationDetails } from '../../server/types';
 
 /**
  * DeprecationsService provides methods to fetch domain deprecation details from

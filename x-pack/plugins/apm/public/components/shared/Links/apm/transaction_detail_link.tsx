@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
-import { identity, pickBy } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { pickKeys } from '../../../../../common/utils/pick_keys';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { EuiLink } from '@elastic/eui';
+import { pickBy, identity } from 'lodash';
+import { getAPMHref, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import type { APMQueryParams } from '../url_helpers';
-import type { APMLinkExtendProps } from './APMLink';
-import { getAPMHref } from './APMLink';
+import { pickKeys } from '../../../../../common/utils/pick_keys';
+import { APMQueryParams } from '../url_helpers';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;

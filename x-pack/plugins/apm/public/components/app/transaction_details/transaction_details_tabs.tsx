@@ -4,17 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { XYBrushArea } from '@elastic/charts';
-import { EuiPanel, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { omit } from 'lodash';
+
 import React, { useCallback, useEffect, useState } from 'react';
+
+import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { maybe } from '../../../../common/utils/maybe';
+
+import { XYBrushArea } from '@elastic/charts';
+import { EuiPanel, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
+
+import { maybe } from '../../../../common/utils/maybe';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { fromQuery, push, toQuery } from '../../shared/Links/url_helpers';
+
 import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';
 import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { traceSamplesTab } from './trace_samples_tab';

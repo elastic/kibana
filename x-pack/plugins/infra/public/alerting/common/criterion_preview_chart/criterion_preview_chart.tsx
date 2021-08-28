@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Theme, TooltipValue } from '@elastic/charts';
-import { DARK_THEME, LIGHT_THEME, niceTimeFormatter } from '@elastic/charts';
-import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { max as getMax, min as getMin, sum } from 'lodash';
-import moment from 'moment';
+
 import React, { useMemo } from 'react';
+import { niceTimeFormatter, TooltipValue } from '@elastic/charts';
+import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { sum, min as getMin, max as getMax } from 'lodash';
+import moment from 'moment';
+import { i18n } from '@kbn/i18n';
+import { EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { formatNumber } from '../../../../common/formatters/number';
-import type { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../common/http_api/log_alerts/chart_preview_data';
+import { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../common/http_api';
 
 type Series = GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series'];
 

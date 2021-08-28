@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { configServiceMock, rawConfigServiceMock } from '../config/mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
 
+import { loggingSystemMock } from '../logging/logging_system.mock';
 export const logger = loggingSystemMock.create();
 jest.doMock('../logging/logging_system', () => ({
   LoggingSystem: jest.fn(() => logger),
 }));
 
 const realKbnConfig = jest.requireActual('@kbn/config');
+
+import { configServiceMock, rawConfigServiceMock } from '../config/mocks';
 export const configService = configServiceMock.create();
 export const rawConfigService = rawConfigServiceMock.create();
 jest.doMock('@kbn/config', () => ({

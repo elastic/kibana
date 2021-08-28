@@ -4,25 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import type { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
-import type {
-  DataFrameAnalysisConfigType,
+
+import { RuntimeMappings } from '../../../../../../../common/types/fields';
+import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
+import { mlNodesAvailable } from '../../../../../ml_nodes_check';
+import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
+
+import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
+import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
+import {
   DataFrameAnalyticsConfig,
   DataFrameAnalyticsId,
+  DataFrameAnalysisConfigType,
   FeatureProcessor,
 } from '../../../../../../../common/types/data_frame_analytics';
-import type { RuntimeMappings } from '../../../../../../../common/types/fields';
-import {
-  getAnalysisType,
-  isClassificationAnalysis,
-} from '../../../../../../../common/util/analytics_utils';
-import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
-import { checkPermission } from '../../../../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../../../../ml_nodes_check/check_ml_nodes';
-import { defaultSearchQuery } from '../../../../common/analytics';
-import type { CloneDataFrameAnalyticsConfig } from '../../components/action_clone/clone_action_name';
-
+import { isClassificationAnalysis } from '../../../../../../../common/util/analytics_utils';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
   outlier_detection = '50mb',

@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { UnwrapPromise } from '@kbn/utility-types';
-import supertest from 'supertest';
-import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { CoreUsageStatsClient } from '../../../core_usage_data/core_usage_stats_client';
-import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+
 import { mockUuidv4 } from '../../import/lib/__mocks__';
-import { SavedObjectsImporter } from '../../import/saved_objects_importer';
-import { SavedObjectConfig } from '../../saved_objects_config';
-import { SavedObjectsErrorHelpers } from '../../service/lib/errors';
-import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
+import supertest from 'supertest';
+import { UnwrapPromise } from '@kbn/utility-types';
 import { registerImportRoute } from '../import';
-import { createExportableType, setupServer } from '../test_utils';
+import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
+import { SavedObjectConfig } from '../../saved_objects_config';
+import { setupServer, createExportableType } from '../test_utils';
+import { SavedObjectsErrorHelpers, SavedObjectsImporter } from '../..';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 

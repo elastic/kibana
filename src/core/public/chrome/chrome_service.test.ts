@@ -5,19 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { shallow } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
+import { App, PublicAppInfo } from '../application';
 import { applicationServiceMock } from '../application/application_service.mock';
-import type { App, PublicAppInfo } from '../application/types';
-import { getAppInfo } from '../application/utils/get_app_info';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
+import { getAppInfo } from '../application/utils';
 
 class FakeApp implements App {
   public title = `${this.id} App`;

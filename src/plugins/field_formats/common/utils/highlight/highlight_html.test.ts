@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getHighlightHtml } from './highlight_html';
+
 import { highlightTags } from './highlight_tags';
 import { htmlTags } from './html_tags';
+import { getHighlightHtml } from './highlight_html';
 
 describe('getHighlightHtml', function () {
   const text =

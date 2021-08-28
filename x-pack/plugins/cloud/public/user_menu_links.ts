@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { UserMenuLink } from '../../security/public/nav_control/nav_control_component';
-import type { CloudConfigType } from './plugin';
+import { UserMenuLink } from '../../security/public';
+import { CloudConfigType } from '.';
 import { getFullCloudUrl } from './utils';
 
 export const createUserMenuLinks = (config: CloudConfigType): UserMenuLink[] => {

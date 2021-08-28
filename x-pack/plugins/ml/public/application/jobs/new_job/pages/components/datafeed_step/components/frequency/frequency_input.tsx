@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useState, useContext, useEffect } from 'react';
 import { EuiFieldText } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
-import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../../common/util/job_utils';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { useStringifiedValue } from '../hooks';
 import { Description } from './description';
+import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../../common/util/job_utils';
+import { useStringifiedValue } from '../hooks';
 
 export const FrequencyInput: FC = () => {
   const {

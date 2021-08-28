@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { Alert } from '../../../../alerting/common/alert';
+import { useTrackPageview } from '../..';
+import { Alert } from '../../../../alerting/common';
 import { EmptySections } from '../../components/app/empty_sections';
-import { ObservabilityHeaderMenu } from '../../components/app/header/header_menu';
+import { ObservabilityHeaderMenu } from '../../components/app/header';
 import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
@@ -19,8 +21,7 @@ import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { useTrackPageview } from '../../hooks/use_track_metric';
-import type { RouteParams } from '../../routes';
+import { RouteParams } from '../../routes';
 import { getNewsFeed } from '../../services/get_news_feed';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { DataSections } from './data_sections';

@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useRef } from 'react';
-import { IndexPattern } from '../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { OpenFieldDeleteModalOptions } from '../open_delete_modal';
-import type { CloseEditor } from '../types';
+
+import React, { useCallback, useRef, useEffect } from 'react';
+
+import { IndexPattern } from '../shared_imports';
+import { OpenFieldDeleteModalOptions } from '../open_delete_modal';
+import { CloseEditor } from '../types';
 
 type DeleteFieldFunc = (fieldName: string | string[]) => void;
 export interface Props {

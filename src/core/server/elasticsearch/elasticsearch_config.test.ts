@@ -5,13 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { getDeprecationsFor } from '../config/test_utils';
-import { config, ElasticsearchConfig } from './elasticsearch_config';
+
 import {
   mockReadFileSync,
   mockReadPkcs12Keystore,
   mockReadPkcs12Truststore,
 } from './elasticsearch_config.test.mocks';
+
+import { ElasticsearchConfig, config } from './elasticsearch_config';
+import { getDeprecationsFor } from '../config/test_utils';
 
 const CONFIG_PATH = 'elasticsearch';
 

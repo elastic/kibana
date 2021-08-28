@@ -5,17 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router, Switch } from 'react-router-dom';
-import type { CoreSetup } from '../../../../core/public/types';
-import type { ManagementAppMountParams } from '../../../management/public/types';
-import { getAllowedTypes } from '../lib/get_allowed_types';
-import type { SavedObjectsManagementPluginStart, StartDependencies } from '../plugin';
-import type { ISavedObjectsManagementServiceRegistry } from '../services/service_registry';
+import { Router, Switch, Route } from 'react-router-dom';
+import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { CoreSetup } from 'src/core/public';
+import { ManagementAppMountParams } from '../../../management/public';
+import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
+import { ISavedObjectsManagementServiceRegistry } from '../services';
+import { getAllowedTypes } from './../lib';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;

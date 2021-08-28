@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { combineLatest, Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
-import type { ServiceStatus } from '../status/types';
-import { ServiceStatusLevels } from '../status/types';
-import type { KibanaMigratorStatus } from './migrations/kibana/kibana_migrator';
-import type { SavedObjectStatusMeta } from './types';
+
+import { Observable, combineLatest } from 'rxjs';
+import { startWith, map } from 'rxjs/operators';
+import { ServiceStatus, ServiceStatusLevels } from '../status';
+import { SavedObjectStatusMeta } from './types';
+import { KibanaMigratorStatus } from './migrations/kibana';
 
 export const calculateStatus$ = (
   rawMigratorStatus$: Observable<KibanaMigratorStatus>,

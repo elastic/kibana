@@ -6,22 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
+import React, { PureComponent } from 'react';
+import { EuiScreenReaderOnly, keys } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { ChromeStart } from '../../../../core/public';
+
 export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
   chrome: ChromeStart;
 }
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiScreenReaderOnly,
-  EuiText,
-  keys,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { PureComponent } from 'react';
-import type { ChromeStart } from '../../../../core/public/chrome/types';
 import './index.scss';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {

@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { PluginsServiceSetup } from './plugins_service';
-import { PluginsService } from './plugins_service';
+import { PluginsService, PluginsServiceSetup } from './plugins_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<PluginsServiceSetup> = {

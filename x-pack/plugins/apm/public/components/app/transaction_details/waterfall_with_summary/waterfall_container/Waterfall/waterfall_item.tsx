@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReactNode } from 'react';
-import React from 'react';
-import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import React, { ReactNode } from 'react';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
-import { asDuration } from '../../../../../../../common/utils/formatters/duration';
-import type { Margins } from '../../../../../shared/charts/Timeline';
+import { asDuration } from '../../../../../../../common/utils/formatters';
+import { Margins } from '../../../../../shared/charts/Timeline';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
 import { ErrorCount } from '../../ErrorCount';
 import { SyncBadge } from './sync_badge';
-import type { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
+import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span' | 'error';
 

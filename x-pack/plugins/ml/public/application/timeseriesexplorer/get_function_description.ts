@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs/combined_job';
 import { mlResultsService } from '../services/results_service';
-import type { ToastNotificationService } from '../services/toast_notification_service/toast_notification_service';
+import { ToastNotificationService } from '../services/toast_notification_service';
 import { getControlsForDetector } from './get_controls_for_detector';
 import { getCriteriaFields } from './get_criteria_fields';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 
 export function isMetricDetector(selectedJob: CombinedJob, selectedDetectorIndex: number) {

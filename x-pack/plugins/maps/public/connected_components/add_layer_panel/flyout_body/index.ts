@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { connect } from 'react-redux';
-import type { MapStoreState } from '../../../reducers/store';
-import { getMapColors } from '../../../selectors/map_selectors';
 import { FlyoutBody } from './flyout_body';
+import { MapStoreState } from '../../../reducers/store';
+import { getMapColors } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {

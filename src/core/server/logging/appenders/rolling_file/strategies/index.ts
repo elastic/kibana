@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { schema } from '@kbn/config-schema';
-import { RollingFileContext } from '../rolling_file_context';
-import type { NumericRollingStrategyConfig } from './numeric/numeric_strategy';
+import { RollingStrategy } from './strategy';
 import {
   NumericRollingStrategy,
+  NumericRollingStrategyConfig,
   numericRollingStrategyConfigSchema,
-} from './numeric/numeric_strategy';
-import type { RollingStrategy } from './strategy';
+} from './numeric';
+import { RollingFileContext } from '../rolling_file_context';
 
 export type { RollingStrategy } from './strategy';
 export type RollingStrategyConfig = NumericRollingStrategyConfig;

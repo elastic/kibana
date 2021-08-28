@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type {
-  SavedObjectSanitizedDoc,
-  SavedObjectUnsanitizedDoc,
-} from '../../saved_objects/serialization/types';
+
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from 'kibana/server';
 
 export const migrations = {
   '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({

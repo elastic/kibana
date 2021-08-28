@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
-import type { ColumnHeaderOptions } from '../../../../../common/types/timeline/columns';
-import type { OnUpdateColumns } from '../../../../../common/types/timeline/store';
-import * as tGridActions from '../../../../store/t_grid/actions';
+import { useDispatch } from 'react-redux';
+
 import { Category } from './category';
 import { getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH, TABLE_HEIGHT } from './helpers';
+
 import * as i18n from './translations';
+import type { BrowserFields, ColumnHeaderOptions, OnUpdateColumns } from '../../../../../common';
+import { tGridActions } from '../../../../store/t_grid';
 
 const NoFieldsPanel = styled.div`
   background-color: ${(props) => props.theme.eui.euiColorLightestShade};

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { EuiCheckboxProps } from '@elastic/eui';
 import {
   EuiAccordion,
@@ -23,10 +24,10 @@ import type { ChangeEvent, ReactElement } from 'react';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { AppCategory } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { AppCategory } from '../../../../../../../src/core/types/app_category';
-import type { Space } from '../../../../../../../src/plugins/spaces_oss/common/types';
-import type { KibanaFeatureConfig } from '../../../../../features/common/kibana_feature';
+import type { KibanaFeatureConfig } from '../../../../../features/public';
 import { getEnabledFeatures } from '../../lib/feature_utils';
 
 interface Props {

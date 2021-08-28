@@ -5,59 +5,57 @@
  * 2.0.
  */
 
+import './suggestion_panel.scss';
+
+import { camelCase, pick } from 'lodash';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButtonEmpty,
+  EuiIcon,
+  EuiTitle,
+  EuiPanel,
+  EuiIconTip,
+  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiIconTip,
-  EuiPanel,
-  EuiTitle,
-  EuiToolTip,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import type { IconType } from '@elastic/eui/src/components/icon/icon';
+import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { Ast } from '@kbn/interpreter/common';
-import { toExpression } from '@kbn/interpreter/common';
 import classNames from 'classnames';
-import { camelCase, pick } from 'lodash';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { ExecutionContextSearch } from '../../../../../../src/plugins/data/common/search/expressions/kibana_context_type';
-import type {
+import { ExecutionContextSearch } from 'src/plugins/data/public';
+import {
+  Datasource,
+  Visualization,
+  FramePublicAPI,
+  DatasourcePublicAPI,
+  DatasourceMap,
+  VisualizationMap,
+} from '../../types';
+import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
+import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
-} from '../../../../../../src/plugins/expressions/public/react_expression_renderer';
-import { trackSuggestionEvent, trackUiEvent } from '../../lens_ui_telemetry/factory';
+} from '../../../../../../src/plugins/expressions/public';
+import { prependDatasourceExpression } from './expression_helpers';
+import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
+import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
 import {
   rollbackSuggestion,
+  selectExecutionContextSearch,
   submitSuggestion,
   useLensDispatch,
   useLensSelector,
-} from '../../state_management';
-import {
-  selectActiveData,
-  selectActiveDatasourceId,
-  selectCurrentDatasourceStates,
   selectCurrentVisualization,
-  selectDatasourceStates,
-  selectExecutionContextSearch,
+  selectCurrentDatasourceStates,
+  DatasourceStates,
   selectIsFullscreenDatasource,
   selectSearchSessionId,
-} from '../../state_management/selectors';
-import type { DatasourceStates } from '../../state_management/types';
-import type {
-  Datasource,
-  DatasourceMap,
-  DatasourcePublicAPI,
-  FramePublicAPI,
-  Visualization,
-  VisualizationMap,
-} from '../../types';
-import { prependDatasourceExpression } from './expression_helpers';
-import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
-import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import './suggestion_panel.scss';
+  selectActiveDatasourceId,
+  selectActiveData,
+  selectDatasourceStates,
+} from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 

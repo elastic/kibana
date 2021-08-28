@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Datafeed } from '../../../../../../../common/types/anomaly_detection_jobs/datafeed';
-import type { Job } from '../../../../../../../common/types/anomaly_detection_jobs/job';
+
 import type { RuntimeMappings } from '../../../../../../../common/types/fields';
+import type { Datafeed, Job } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
 
 interface Response {

@@ -4,9 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
-import type { ListResult } from '../../../common/types/rest_spec/common';
+import type { ElasticsearchClient } from 'kibana/server';
+
+import type { ListResult } from '../../../common';
+
 import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
+
+import type {
+  Artifact,
+  ArtifactsClientCreateOptions,
+  ArtifactEncodedMetadata,
+  ArtifactsClientInterface,
+  NewArtifact,
+  ListArtifactsProps,
+} from './types';
+import { relativeDownloadUrlFromArtifact } from './mappings';
 
 import {
   createArtifact,
@@ -16,15 +28,6 @@ import {
   getArtifact,
   listArtifacts,
 } from './artifacts';
-import { relativeDownloadUrlFromArtifact } from './mappings';
-import type {
-  Artifact,
-  ArtifactEncodedMetadata,
-  ArtifactsClientCreateOptions,
-  ArtifactsClientInterface,
-  ListArtifactsProps,
-  NewArtifact,
-} from './types';
 
 /**
  * Exposes an interface for access artifacts from within the context of a single integration (`packageName`)

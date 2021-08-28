@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsFindResponse } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
-import { SO_SEARCH_LIMIT } from '../../common/constants';
-import type { ListWithKuery } from '../types/rest_spec/common';
+
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
+
+import { SO_SEARCH_LIMIT } from '../constants';
+import type { ListWithKuery } from '../types';
 
 /**
  * Escape a value with double quote to use with saved object search

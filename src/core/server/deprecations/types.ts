@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IScopedClusterClient } from '../elasticsearch/client/scoped_cluster_client';
+
 import type { SavedObjectsClientContract } from '../saved_objects/types';
+import type { IScopedClusterClient } from '../elasticsearch';
 
 type MaybePromise<T> = T | Promise<T>;
 

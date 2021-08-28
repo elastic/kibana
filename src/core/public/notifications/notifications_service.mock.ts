@@ -5,10 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import type { NotificationsSetup, NotificationsStart } from './notifications_service';
-import { NotificationsService } from './notifications_service';
+import {
+  NotificationsService,
+  NotificationsSetup,
+  NotificationsStart,
+} from './notifications_service';
 import { toastsServiceMock } from './toasts/toasts_service.mock';
 
 const createSetupContractMock = () => {

@@ -7,9 +7,8 @@
  */
 
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
-import type { RouteConfigOptions } from '../router/route';
-import type { IRouter } from '../router/router';
-import type { HttpAuth } from '../types';
+import { IRouter, RouteConfigOptions } from '../router';
+import { HttpAuth } from '../types';
 
 describe('http auth', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;

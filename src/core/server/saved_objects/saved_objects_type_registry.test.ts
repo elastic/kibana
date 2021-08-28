@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
-import type { SavedObjectsType } from './types';
+import { SavedObjectsType } from './types';
 
 const createType = (type: Partial<SavedObjectsType>): SavedObjectsType => ({
   name: 'unknown',

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EuiIconProps } from '@elastic/eui';
 import * as React from 'react';
+import { EuiIconProps } from '@elastic/eui';
 
 export const GlobeIllustration = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
   <svg width="176" height="176" viewBox="0 0 176 176" xmlns="http://www.w3.org/2000/svg">

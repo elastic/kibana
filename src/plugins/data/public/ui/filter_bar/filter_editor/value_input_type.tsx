@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
-import type { InjectedIntl } from '@kbn/i18n/react';
-import { injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { validateParams } from './lib/filter_editor_utils';

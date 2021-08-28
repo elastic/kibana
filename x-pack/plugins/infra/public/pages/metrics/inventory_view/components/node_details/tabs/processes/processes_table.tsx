@@ -4,33 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiLink,
-  EuiLoadingChart,
-  EuiTable,
-  EuiTableBody,
-  EuiTableHeader,
-  EuiTableHeaderCell,
-  EuiTableRowCell,
-  EuiText,
-  LEFT_ALIGNMENT,
-  RIGHT_ALIGNMENT,
-  SortableProperties,
-} from '@elastic/eui';
+
+import React, { useMemo, useState, useCallback } from 'react';
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { omit } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import {
+  EuiTable,
+  EuiTableHeader,
+  EuiTableBody,
+  EuiTableHeaderCell,
+  EuiTableRowCell,
+  EuiLoadingChart,
+  EuiEmptyPrompt,
+  EuiText,
+  EuiLink,
+  EuiButton,
+  SortableProperties,
+  LEFT_ALIGNMENT,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
+import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
 import { FORMATTERS } from '../../../../../../../../common/formatters';
-import type { ProcessListAPIResponse } from '../../../../../../../../common/http_api/host_details/process_list';
-import type { SortBy } from '../../../../hooks/use_process_list';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { SortBy } from '../../../../hooks/use_process_list';
+import { Process } from './types';
 import { ProcessRow } from './process_row';
-import { STATE_ORDER } from './states';
 import { StateBadge } from './state_badge';
-import type { Process } from './types';
+import { STATE_ORDER } from './states';
 
 interface TableProps {
   processList: ProcessListAPIResponse['processList'];

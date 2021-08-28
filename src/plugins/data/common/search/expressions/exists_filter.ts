@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { buildFilter, FILTERS } from '@kbn/es-query';
+
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common/expression_functions/types';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import type { KibanaField, KibanaFilter } from './kibana_context_type';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { buildFilter, FILTERS } from '@kbn/es-query';
+import { KibanaField, KibanaFilter } from './kibana_context_type';
+import { IndexPattern } from '../../index_patterns/index_patterns';
 
 interface Arguments {
   field: KibanaField;

@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { useState } from 'react';
-import type { ConfusionMatrix } from '../../../../common/analytics';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiDataGridControlColumn,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
+import { ConfusionMatrix } from '../../../../common/analytics';
 
 const COL_INITIAL_WIDTH = 165; // in pixels
 

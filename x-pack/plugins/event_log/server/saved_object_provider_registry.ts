@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+
 import { fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { KibanaRequest } from '../../../../src/core/server/http/router/request';
-import type { SavedObjectsClientContract } from '../../../../src/core/server/saved_objects/types';
 
 export type SavedObjectGetter = (
   ...params: Parameters<SavedObjectsClientContract['get']>

@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Position } from '@elastic/charts';
+
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
-import type { PaletteOutput } from '../../../../../src/plugins/charts/common/palette';
-import { layerTypes } from '../../common/constants';
-import type { XYLayerConfig } from '../../common/expressions/xy_chart/layer_config';
-import type { SeriesType } from '../../common/expressions/xy_chart/series_type';
-import type {
+import { Position } from '@elastic/charts';
+import { PaletteOutput } from 'src/plugins/charts/public';
+import {
   SuggestionRequest,
-  TableChangeType,
-  TableSuggestion,
-  TableSuggestionColumn,
   VisualizationSuggestion,
+  TableSuggestionColumn,
+  TableSuggestion,
+  TableChangeType,
 } from '../types';
+import { State, XYState, visualizationTypes } from './types';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
-import type { State, XYState } from './types';
-import { visualizationTypes } from './types';
 
 const columnSortOrder = {
   document: 0,

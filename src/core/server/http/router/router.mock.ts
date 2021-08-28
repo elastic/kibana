@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IRouter } from './router';
+
+import { IRouter } from './router';
 
 export type RouterMock = jest.Mocked<IRouter<any>>;
 

@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { CoreStart } from '../../../../../core/public/types';
-import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
+import { CoreStart } from 'kibana/public';
+import { toMountPoint } from '../../../../kibana_react/public';
 
 let bannerId: string;
 

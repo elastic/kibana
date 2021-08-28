@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ConfigDeprecationProvider } from '@kbn/config';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+
+import { schema, TypeOf } from '@kbn/config-schema';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
+import { Duration } from 'moment';
 import { readFileSync } from 'fs';
-import type { Duration } from 'moment';
-import type { ServiceConfigDescriptor } from '../internal_types';
+import { ConfigDeprecationProvider } from 'src/core/server';
+import { ServiceConfigDescriptor } from '../internal_types';
 import { getReservedHeaders } from './default_headers';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });

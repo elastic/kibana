@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import ipaddr, { IPv4, IPv6 } from 'ipaddr.js';
 
 function isIPv6(value: IPv4 | IPv6): value is IPv6 {

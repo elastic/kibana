@@ -4,10 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+
+import React, { FC, useContext, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonIcon,
   EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -16,17 +20,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
-import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
-import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
-import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
-import type { Calendar } from '../../../../../../../../../../../common/types/calendars';
-import { useMlKibana } from '../../../../../../../../../contexts/kibana/kibana_context';
-import { ml } from '../../../../../../../../../services/ml_api_service';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
+import { ml } from '../../../../../../../../../services/ml_api_service';
+import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
+import { Calendar } from '../../../../../../../../../../../common/types/calendars';
+import { useMlKibana } from '../../../../../../../../../contexts/kibana';
+import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
+import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
 
 export const CalendarsSelection: FC = () => {
   const {

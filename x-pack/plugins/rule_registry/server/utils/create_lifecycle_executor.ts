@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Logger } from '@kbn/logging';
 import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
-import type { Mutable } from 'utility-types';
+import { Mutable } from 'utility-types';
 import { v4 } from 'uuid';
-import type { AlertTypeParams, AlertTypeState } from '../../../alerting/common/alert';
-import type {
+import {
+  AlertExecutorOptions,
+  AlertInstance,
   AlertInstanceContext,
   AlertInstanceState,
-} from '../../../alerting/common/alert_instance';
-import type { PublicAlertInstance as AlertInstance } from '../../../alerting/server/alert_instance/alert_instance';
-import type { AlertExecutorOptions } from '../../../alerting/server/types';
-import type { ParsedTechnicalFields } from '../../common/parse_technical_fields';
-import { parseTechnicalFields } from '../../common/parse_technical_fields';
+  AlertTypeParams,
+  AlertTypeState,
+} from '../../../alerting/server';
+import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_DURATION,
   ALERT_END,
@@ -35,8 +36,8 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
-import type { IRuleDataClient } from '../rule_data_client/types';
-import type { AlertExecutorOptionsWithExtraServices } from '../types';
+import { IRuleDataClient } from '../rule_data_client';
+import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { getRuleData } from './get_rule_executor_data';
 
 export type LifecycleAlertService<

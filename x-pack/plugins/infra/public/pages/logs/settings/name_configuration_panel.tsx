@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -14,9 +15,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
-import type { FormElement } from './form_elements';
+import { FormElement } from './form_elements';
 import { getFormRowProps, getStringInputFieldProps } from './form_field_props';
-import type { FormValidationError } from './validation_errors';
+import { FormValidationError } from './validation_errors';
 
 export const NameConfigurationPanel = React.memo<{
   isLoading: boolean;

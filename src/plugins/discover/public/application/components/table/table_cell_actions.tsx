@@ -7,12 +7,12 @@
  */
 
 import React from 'react';
-import { IndexPatternField } from '../../../../../data/common/index_patterns/fields/index_pattern_field';
-import type { DocViewFilterFn } from '../../doc_views/doc_views_types';
-import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
-import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
+import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
+import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
+import { IndexPatternField } from '../../../../../data/public';
+import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 
 interface TableActionsProps {
   field: string;

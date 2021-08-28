@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery } from '../../../../observability/server/utils/queries';
+
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
+import { rangeQuery } from '../../../../observability/server';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getServiceTransactionTypes({
   setup,

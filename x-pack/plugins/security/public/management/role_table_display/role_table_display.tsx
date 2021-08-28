@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
-import type { ApplicationStart } from '../../../../../../src/core/public/application/types';
-import type { Role } from '../../../common/model/role';
-import { getExtendedRoleDeprecationNotice, isRoleDeprecated } from '../../../common/model/role';
+import type { ApplicationStart } from 'src/core/public';
+
+import type { Role } from '../../../common/model';
+import { getExtendedRoleDeprecationNotice, isRoleDeprecated } from '../../../common/model';
 
 interface Props {
   role: Role | string;

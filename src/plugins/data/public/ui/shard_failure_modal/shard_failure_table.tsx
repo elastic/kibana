@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
+
+import React, { useState, ReactElement } from 'react';
+// @ts-ignore
+import { EuiInMemoryTable, EuiButtonIcon } from '@elastic/eui';
+// @ts-ignore
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
-import type { ReactElement } from 'react';
-import React, { useState } from 'react';
 import { ShardFailureDescription } from './shard_failure_description';
+import { ShardFailure } from './shard_failure_types';
 import { getFailureSummaryText } from './shard_failure_description_header';
-import type { ShardFailure } from './shard_failure_types';
-
-// @ts-ignore
-// @ts-ignore
 
 export interface ListItem extends ShardFailure {
   id: string;

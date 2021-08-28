@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { OnRefreshProps } from '@elastic/eui';
-import { EuiSuperDatePicker } from '@elastic/eui';
-import { debounce } from 'lodash';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common/constants';
-import type { TimeRange } from '../../../../../../../../src/plugins/data/common/query/timefilter/types';
-import type { TimeHistoryContract } from '../../../../../../../../src/plugins/data/public/query/timefilter/time_history';
-import { useMlKibana } from '../../../contexts/kibana/kibana_context';
+import { debounce } from 'lodash';
+
+import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
+import { TimeHistoryContract, TimeRange } from 'src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
+
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useUrlState } from '../../../util/url_state';
+import { useMlKibana } from '../../../contexts/kibana';
 
 interface TimePickerQuickRange {
   from: string;

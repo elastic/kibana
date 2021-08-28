@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MVTFieldDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+
+import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 
 export interface MVTSingleLayerVectorSourceConfig {
   urlTemplate: string;

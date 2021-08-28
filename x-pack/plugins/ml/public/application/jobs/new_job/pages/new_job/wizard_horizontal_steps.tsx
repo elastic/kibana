@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiStepsHorizontal } from '@elastic/eui';
+
+import React, { FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+
+import { EuiStepsHorizontal } from '@elastic/eui';
 import { WIZARD_STEPS } from '../components/step_types';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 interface Props {
   currentStep: WIZARD_STEPS;

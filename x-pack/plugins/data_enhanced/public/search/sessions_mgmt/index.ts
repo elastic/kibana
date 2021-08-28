@@ -4,22 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, CoreStart } from '../../../../../../src/core/public/types';
-import type { HttpStart } from '../../../../../../src/core/public/http/types';
-import type { I18nStart } from '../../../../../../src/core/public/i18n/i18n_service';
-import type { IUiSettingsClient } from '../../../../../../src/core/public/ui_settings/types';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../../../../src/plugins/data/public/search/session/constants';
-import type {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../../../src/plugins/data/public/types';
-import type { ManagementSetup } from '../../../../../../src/plugins/management/public/types';
-import type { SharePluginStart } from '../../../../../../src/plugins/share/public/plugin';
+import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from 'kibana/public';
+import { CoreSetup } from 'kibana/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
+import type { ManagementSetup } from 'src/plugins/management/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
 import type { ConfigSchema } from '../../../config';
 import type { DataEnhancedStartDependencies } from '../../plugin';
-import { SearchSessionsMgmtAPI } from './lib/api';
-import { AsyncSearchIntroDocumentation } from './lib/documentation';
+import type { SearchSessionsMgmtAPI } from './lib/api';
+import type { AsyncSearchIntroDocumentation } from './lib/documentation';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../../../../src/plugins/data/public';
 
 export interface IManagementSectionsPluginsSetup {
   data: DataPublicPluginSetup;

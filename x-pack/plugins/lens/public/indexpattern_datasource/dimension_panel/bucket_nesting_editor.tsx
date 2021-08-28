@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { IndexPatternColumn } from '../operations/definitions';
-import type { IndexPatternField, IndexPatternLayer } from '../types';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiSwitch, EuiSelect } from '@elastic/eui';
+import { IndexPatternLayer, IndexPatternField } from '../types';
 import { hasField } from '../utils';
+import { IndexPatternColumn } from '../operations';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
   const result = columnOrder.filter((c) => c !== inner);

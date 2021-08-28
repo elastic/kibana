@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { FeatureCollection } from 'geojson';
 import { i18n } from '@kbn/i18n';
-import type { FeatureCollection } from 'geojson';
 import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../../common/constants';
-import type { PropertiesMap } from '../../../../common/elasticsearch_util/es_agg_utils';
-import type { DataRequestContext } from '../../../actions/data_request_actions';
+import { DataRequestContext } from '../../../actions';
 import { InnerJoin } from '../../joins/inner_join';
+import { PropertiesMap } from '../../../../common/elasticsearch_util';
 
 interface SourceResult {
   refreshed: boolean;

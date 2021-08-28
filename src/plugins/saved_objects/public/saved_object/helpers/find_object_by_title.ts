@@ -5,9 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsClientContract } from '../../../../../core/public/saved_objects/saved_objects_client';
-import { SimpleSavedObject } from '../../../../../core/public/saved_objects/simple_saved_object';
-import type { SavedObjectAttributes } from '../../../../../core/types/saved_objects';
+
+import {
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+  SavedObjectAttributes,
+} from '../../../../../core/public';
 
 /**
  * Returns an object matching a given title

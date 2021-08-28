@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart } from '../../../core/public/types';
-import type { Plugin } from '../../../core/public/plugins/plugin';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { ApmOssPluginSetup, ApmOssPluginStart } from './types';
 
 export class ApmOssPlugin implements Plugin<ApmOssPluginSetup, ApmOssPluginStart> {

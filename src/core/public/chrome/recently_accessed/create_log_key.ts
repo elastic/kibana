@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Sha256 } from '../../utils/crypto/sha256';
 
+import { Sha256 } from '../../utils/';
 export async function createLogKey(type: string, optionalIdentifier?: string) {
   const baseKey = `kibana.history.${type}`;
 

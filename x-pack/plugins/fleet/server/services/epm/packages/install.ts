@@ -4,45 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type Boom from '@hapi/boom';
+
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
+import type Boom from '@hapi/boom';
+import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
-import type { ElasticsearchClient } from '../../../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../../../src/core/server/saved_objects/types';
-import type { SavedObject } from '../../../../../../../src/core/types/saved_objects';
-import {
-  MAX_TIME_COMPLETE_INSTALL,
-  PACKAGES_SAVED_OBJECT_TYPE,
-} from '../../../../common/constants/epm';
-import type {
-  AssetType,
-  EsAssetReference,
-  InstallablePackage,
-  Installation,
-  InstallSource,
-  InstallType,
-} from '../../../../common/types/models/epm';
-import type { KibanaAssetType } from '../../../../common/types/models/epm';
-import type { BulkInstallPackageInfo, InstallResult } from '../../../../common/types/rest_spec/epm';
+import { generateESIndexPatterns } from '../elasticsearch/template/template';
+
+import type { BulkInstallPackageInfo, InstallablePackage, InstallSource } from '../../../../common';
 import {
   IngestManagerError,
   PackageOperationNotSupportedError,
   PackageOutdatedError,
 } from '../../../errors';
+import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
+import type { KibanaAssetType } from '../../../types';
+import type {
+  Installation,
+  AssetType,
+  EsAssetReference,
+  InstallType,
+  InstallResult,
+} from '../../../types';
 import { appContextService } from '../../app_context';
-import { unpackBufferToCache } from '../archive';
-import { setPackageInfo } from '../archive/cache';
-import { parseAndVerifyArchiveBuffer as parseAndVerifyArchiveEntries } from '../archive/validation';
-import { generateESIndexPatterns } from '../elasticsearch/template/template';
-import type { ArchiveAsset } from '../kibana/assets/install';
-import { toAssetReference } from '../kibana/assets/install';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
+import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
+import { toAssetReference } from '../kibana/assets/install';
+import type { ArchiveAsset } from '../kibana/assets/install';
+import { installIndexPatterns } from '../kibana/index_pattern/install';
 
-import { isUnremovablePackage } from '.';
-import { getInstallation, getInstallationObject, getPackageSavedObjects } from './get';
+import { isUnremovablePackage, getInstallation, getInstallationObject } from './index';
 import { removeInstallation } from './remove';
+import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 
 export async function isPackageInstalled(options: {

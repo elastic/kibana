@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Geometry, Position } from 'geojson';
+
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import { Geometry, Position } from 'geojson';
 import {
-  addNewFeatureToIndex,
-  deleteFeatureFromIndex,
-  updateEditShape,
-} from '../../../../actions/map_actions';
-import type { MapStoreState } from '../../../../reducers/store';
+  DrawFeatureControl,
+  ReduxDispatchProps,
+  ReduxStateProps,
+  OwnProps,
+} from './draw_feature_control';
+import { addNewFeatureToIndex, deleteFeatureFromIndex, updateEditShape } from '../../../../actions';
+import { MapStoreState } from '../../../../reducers/store';
 import { getEditState, getLayerById } from '../../../../selectors/map_selectors';
 import { getDrawMode } from '../../../../selectors/ui_selectors';
-import type { OwnProps, ReduxDispatchProps, ReduxStateProps } from './draw_feature_control';
-import { DrawFeatureControl } from './draw_feature_control';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {
   const editState = getEditState(state);

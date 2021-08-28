@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AgentPolicy } from '../types/models/agent_policy';
-import type { PackageInfo } from '../types/models/epm';
-import type { PackagePolicy } from '../types/models/package_policy';
+
+import type { PackageInfo, AgentPolicy, PackagePolicy } from '../types';
 
 export const isPackageLimited = (packageInfo: PackageInfo): boolean => {
   return (packageInfo.policy_templates || []).some(

@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObject } from '../../../../types/saved_objects';
-import { SavedObjectsErrorHelpers } from '../../service/lib/errors';
-import type { CreatedObject } from '../types';
+
+import { SavedObject } from '../../types';
 import { extractErrors } from './extract_errors';
+import { SavedObjectsErrorHelpers } from '../../service';
+import { CreatedObject } from '../types';
 
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {

@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
 
+import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSwitch, EuiFormRow, EuiSpacer } from '@elastic/eui';
 interface Props {
   startDatafeed: boolean;
   setStartDatafeed(start: boolean): void;

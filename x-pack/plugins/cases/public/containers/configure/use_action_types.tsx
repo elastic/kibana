@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ActionTypeConnector } from '../../../common/api/connectors';
-import { useToasts } from '../../common/lib/kibana/hooks';
+
+import { useState, useEffect, useCallback, useRef } from 'react';
+
 import * as i18n from '../translations';
 import { fetchActionTypes } from './api';
+import { ActionTypeConnector } from './types';
+import { useToasts } from '../../common/lib/kibana';
 
 export interface UseActionTypesResponse {
   loading: boolean;

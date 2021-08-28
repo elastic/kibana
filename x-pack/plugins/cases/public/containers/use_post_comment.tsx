@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useReducer, useRef } from 'react';
-import type { CommentRequest } from '../../common/api/cases/comment';
-import type { Case } from '../../common/ui/types';
-import { useToasts } from '../common/lib/kibana/hooks';
+
+import { useReducer, useCallback, useRef, useEffect } from 'react';
+import { CommentRequest } from '../../common';
+
 import { postComment } from './api';
 import * as i18n from './translations';
+import { Case } from './types';
+import { useToasts } from '../common/lib/kibana';
 
 interface NewCommentState {
   isLoading: boolean;

@@ -4,52 +4,56 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSearchBarProps, SearchFilterConfig } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
-import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+
+import React, { FC, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
-import { ModelsTableToConfigMapping } from '.';
-import { BUILT_IN_MODEL_TAG } from '../../../../../../../common/constants/data_frame_analytics';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import type { ListingPageUrlState } from '../../../../../../../common/types/common';
-import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
-import type {
-  ModelPipelines,
+import {
+  EuiInMemoryTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiButton,
+  EuiSpacer,
+  EuiButtonIcon,
+  EuiBadge,
+  SearchFilterConfig,
+  EuiSearchBarProps,
+} from '@elastic/eui';
+
+import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import { StatsBar, ModelsBarStats } from '../../../../../components/stats_bar';
+import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
+import { ModelsTableToConfigMapping } from './index';
+import { DeleteModelsModal } from './delete_models_modal';
+import {
+  useMlKibana,
+  useMlLocator,
+  useNavigateToPath,
+  useNotifications,
+} from '../../../../../contexts/kibana';
+import { ExpandedRow } from './expanded_row';
+
+import {
   TrainedModelConfigResponse,
+  ModelPipelines,
   TrainedModelStat,
 } from '../../../../../../../common/types/trained_models';
-import { getAnalysisType } from '../../../../../../../common/util/analytics_utils';
-import { timeFormatter } from '../../../../../../../common/util/date_utils';
-import type { ModelsBarStats } from '../../../../../components/stats_bar/stats_bar';
-import { StatsBar } from '../../../../../components/stats_bar/stats_bar';
-import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
-import { useMlLocator } from '../../../../../contexts/kibana/use_create_url';
-import { useNavigateToPath } from '../../../../../contexts/kibana/use_navigate_to_path';
-import { useNotifications } from '../../../../../contexts/kibana/use_notifications_context';
-import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
-import { usePageUrlState } from '../../../../../util/url_state';
 import {
-  refreshAnalyticsList$,
+  getAnalysisType,
   REFRESH_ANALYTICS_LIST_STATE,
+  refreshAnalyticsList$,
   useRefreshAnalyticsList,
-} from '../../../../common/analytics';
+} from '../../../../common';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { timeFormatter } from '../../../../../../../common/util/date_utils';
+import { ListingPageUrlState } from '../../../../../../../common/types/common';
+import { usePageUrlState } from '../../../../../util/url_state';
+import { BUILT_IN_MODEL_TAG } from '../../../../../../../common/constants/data_frame_analytics';
 import { useTableSettings } from '../analytics_list/use_table_settings';
-import { DeleteModelsModal } from './delete_models_modal';
-import { ExpandedRow } from './expanded_row';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 

@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiLoadingChart, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 interface InfraLoadingProps {
   text: string | JSX.Element;

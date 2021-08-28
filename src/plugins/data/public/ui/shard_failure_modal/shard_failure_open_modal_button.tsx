@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { EuiButton, EuiTextAlign } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButton, EuiTextAlign } from '@elastic/eui';
+import type { estypes } from '@elastic/elasticsearch';
+
 import { getOverlays } from '../../services';
+import { toMountPoint } from '../../../../kibana_react/public';
 import { ShardFailureModal } from './shard_failure_modal';
-import type { ShardFailureRequest } from './shard_failure_types';
+import { ShardFailureRequest } from './shard_failure_types';
 
 // @internal
 export interface ShardFailureOpenModalButtonProps {

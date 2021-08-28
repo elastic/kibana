@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { RouteValidatorFullConfig } from './validator/validator';
+
+import { RouteValidatorFullConfig } from './validator';
 
 export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
   return method === 'get' || method === 'options';

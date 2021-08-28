@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { InternalTagDecoratedSavedObject } from './types';
+
+import { InternalTagDecoratedSavedObject } from './types';
 
 /**
  * Enhance the object with tag accessors

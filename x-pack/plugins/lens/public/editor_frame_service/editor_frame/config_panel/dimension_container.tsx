@@ -5,22 +5,24 @@
  * 2.0.
  */
 
+import './dimension_container.scss';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
+  EuiTitle,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiFocusTrap,
   EuiOutsideClickDetector,
-  EuiTitle,
   EuiWindowEvent,
   keys,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
-import './dimension_container.scss';
 
 export function DimensionContainer({
   isOpen,

@@ -4,35 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useMemo, useCallback } from 'react';
 import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
+import { first, last } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { first, last } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
-import type { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/types';
+import { IIndexPattern } from 'src/plugins/data/public';
+import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
-import type {
-  MetricsExplorerAggregation,
-  MetricsExplorerRow,
-} from '../../../../common/http_api/metrics_explorer';
-import type { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
-import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
-import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
+import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
+import { MetricExpression } from '../types';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
+import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
+import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
+import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import {
   ChartContainer,
-  getChartTheme,
   LoadingState,
   NoDataState,
   TIME_LABELS,
   tooltipProps,
+  getChartTheme,
 } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { ThresholdAnnotations } from '../../common/criterion_preview_chart/threshold_annotations';
-import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
-import type { MetricExpression } from '../types';
 
 interface Props {
   expression: MetricExpression;

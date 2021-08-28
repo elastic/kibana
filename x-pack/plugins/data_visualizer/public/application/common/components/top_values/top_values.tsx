@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,14 +14,13 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import classNames from 'classnames';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
-import type { FieldVisStats } from '../../../../../common/types/field_request_config';
-import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header/expanded_row_field_header';
-import { kibanaFieldFormat } from '../utils/kibana_field_format';
-import { roundToDecimalPlace } from '../utils/round_to_decimal_place';
+import { roundToDecimalPlace, kibanaFieldFormat } from '../utils';
+import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
+import { FieldVisStats } from '../../../../../common/types';
 
 interface Props {
   stats: FieldVisStats | undefined;

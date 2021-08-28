@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import { UiSettingsParams } from 'kibana/server';
 // @ts-ignore untyped module
 import numeralLanguages from '@elastic/numeral/languages';
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import type { UiSettingsParams } from '../../../core/types/ui_settings';
-import { FORMATS_UI_SETTINGS } from '../common/constants/ui_settings';
+import { FORMATS_UI_SETTINGS } from '../common';
 
 // We add the `en` key manually here, since that's not a real numeral locale, but the
 // default fallback in case the locale is not found.

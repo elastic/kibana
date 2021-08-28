@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '../../../../../src/core/server/http/router/router';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../common';
-import type { ILicenseState } from '../lib/license_state';
-import type { AggregateOptions, AggregateResult } from '../rules_client/rules_client';
-import type { AlertingRequestHandlerContext } from '../types';
-import type { RewriteRequestCase, RewriteResponseCase } from './lib/rewrite_request_case';
-import { verifyAccessAndContext } from './lib/verify_access_and_context';
+import { ILicenseState } from '../lib';
+import { AggregateResult, AggregateOptions } from '../rules_client';
+import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 // config definition
 const querySchema = schema.object({

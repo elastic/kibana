@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { INDEX_SOURCE_API_PATH } from '../../../../common/constants';
-import type { CreateDocSourceResp, IndexSourceMappings } from '../../../../common/types';
+
 import { getHttp } from '../../../kibana_services';
+import {
+  CreateDocSourceResp,
+  INDEX_SOURCE_API_PATH,
+  IndexSourceMappings,
+} from '../../../../common';
 
 export const createNewIndexAndPattern = async ({
   indexName,

@@ -5,6 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -12,10 +16,7 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import type { InspectorViewDescription } from '../types';
+import { InspectorViewDescription } from '../types';
 
 interface Props {
   views: InspectorViewDescription[];

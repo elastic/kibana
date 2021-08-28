@@ -7,14 +7,16 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
-import type { IndexMapping } from '../../mappings/types';
-import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
-import { DEFAULT_TIMEOUT } from './constants';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { ElasticsearchClient } from '../../../elasticsearch';
+import { IndexMapping } from '../../mappings';
+import {
+  catchRetryableEsClientErrors,
+  RetryableEsClientError,
+} from './catch_retryable_es_client_errors';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
+import { DEFAULT_TIMEOUT } from './constants';
 
 /** @internal */
 export interface UpdateAndPickupMappingsResponse {

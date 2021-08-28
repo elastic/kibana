@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { Job, JobId } from '../../../common/types/anomaly_detection_jobs/job';
-import { HttpService } from './http_service';
+import { Job, JobId } from '../../../common/types/anomaly_detection_jobs';
 import { basePath } from './ml_api_service';
+import { HttpService } from './http_service';
 
 export class AnomalyDetectorService {
   private readonly apiBasePath = basePath() + '/anomaly_detectors';

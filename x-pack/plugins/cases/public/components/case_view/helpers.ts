@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEmpty } from 'lodash';
-import { CommentType } from '../../../common/api/cases/comment';
-import type { Comment } from '../../../common/ui/types';
+import { CommentType } from '../../../common';
+import { Comment } from '../../containers/types';
 
 export const getManualAlertIdsWithNoRuleId = (comments: Comment[]): string[] => {
   const dedupeAlerts = comments.reduce((alertIds, comment: Comment) => {

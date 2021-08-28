@@ -4,12 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import type { VectorSource as MbVectorSource } from '@kbn/mapbox-gl';
-import { GeoJSONSource as MbGeoJSONSource, Map as MbMap } from '@kbn/mapbox-gl';
-import type { Feature } from 'geojson';
-import { parse as parseUrl } from 'url';
+
+import type {
+  Map as MbMap,
+  GeoJSONSource as MbGeoJSONSource,
+  VectorSource as MbVectorSource,
+} from '@kbn/mapbox-gl';
+import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
+import { parse as parseUrl } from 'url';
+import { i18n } from '@kbn/i18n';
+import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
   KBN_FEATURE_COUNT,
   KBN_IS_TILE_COMPLETE,
@@ -17,25 +22,24 @@ import {
   LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
 } from '../../../../common/constants';
-import type {
+import {
+  VectorLayer,
+  VectorLayerArguments,
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
+} from '../vector_layer';
+import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
+import { DataRequestContext } from '../../../actions';
+import {
   Timeslice,
-  VectorSourceRequestMeta,
-} from '../../../../common/descriptor_types/data_request_descriptor_types';
-import type {
-  TileMetaFeature,
+  StyleMetaDescriptor,
   VectorLayerDescriptor,
-} from '../../../../common/descriptor_types/layer_descriptor_types';
-import type { StyleMetaDescriptor } from '../../../../common/descriptor_types/style_property_descriptor_types';
-import type { DataRequestContext } from '../../../actions/data_request_actions';
-import type { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
-import type { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source/tiled_single_layer_vector_source';
-import type { IVectorStyle } from '../../styles/vector/vector_style';
-import { VectorStyle } from '../../styles/vector/vector_style';
+  VectorSourceRequestMeta,
+  TileMetaFeature,
+} from '../../../../common/descriptor_types';
+import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { isRefreshOnlyQuery } from '../../util/is_refresh_only_query';
-import type { CustomIconAndTooltipContent } from '../layer';
-import type { VectorLayerArguments } from '../vector_layer/vector_layer';
-import { NO_RESULTS_ICON_AND_TOOLTIPCONTENT, VectorLayer } from '../vector_layer/vector_layer';
+import { CustomIconAndTooltipContent } from '../layer';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;

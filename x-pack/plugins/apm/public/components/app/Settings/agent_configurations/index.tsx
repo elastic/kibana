@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { EuiToolTip } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
   EuiTitle,
-  EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { AgentConfigurationList } from './List';
 

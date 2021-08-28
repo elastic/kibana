@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectReference } from '../../../../../core/types/saved_objects';
-import type { SearchSourceFields } from './types';
+
+import { SavedObjectReference } from 'src/core/types';
+import { SearchSourceFields } from './types';
 
 export const injectReferences = (
   searchSourceFields: SearchSourceFields & { indexRefName: string },

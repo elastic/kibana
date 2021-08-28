@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { History } from 'history';
+
 import { parse as _parseUrl } from 'url';
+import { History } from 'history';
 
 export const parseUrl = (url: string) => _parseUrl(url, true);
 export const parseUrlHash = (url: string) => {

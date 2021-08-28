@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import type { EMSFileSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
-import { getEMSSettings } from '../../../kibana_services';
-import { EMSBoundariesLayerIcon } from '../../layers/icons/ems_boundaries_layer_icon';
-import type { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+import { i18n } from '@kbn/i18n';
+import { VectorLayer } from '../../layers/vector_layer';
+import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { EMSFileSource, getSourceTitle } from './ems_file_source';
 
 // @ts-ignore
+import { getEMSSettings } from '../../../kibana_services';
+import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import { EMSBoundariesLayerIcon } from '../../layers/icons/ems_boundaries_layer_icon';
 
 function getDescription() {
   const emsSettings = getEMSSettings();

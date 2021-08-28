@@ -5,10 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiPopover,
+} from '@elastic/eui';
 
 export interface PanelOptionsMenuProps {
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;

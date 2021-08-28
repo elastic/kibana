@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+
+import { IndexPattern } from 'src/plugins/data/public';
+import { IESAggSource } from '../../sources/es_agg_source';
+import { IVectorSource } from '../../sources/vector_source';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
-import type { IESAggSource } from '../../sources/es_agg_source/es_agg_source';
-import type { IVectorSource } from '../../sources/vector_source/vector_source';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../../tooltips/es_agg_tooltip_property';
-import type { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { TooltipProperty } from '../../tooltips/tooltip_property';
-import type { CountAggFieldParams, IESAggField } from './agg_field_types';
+import { IESAggField, CountAggFieldParams } from './agg_field_types';
 
 // Agg without field. Essentially a count-aggregation.
 export class CountAggField implements IESAggField {

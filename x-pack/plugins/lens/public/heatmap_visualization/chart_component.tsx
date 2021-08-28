@@ -4,25 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+
+import React, { FC, useEffect, useMemo, useState } from 'react';
+import {
+  Chart,
   ElementClickListener,
+  Heatmap,
   HeatmapBrushEvent,
   HeatmapElementEvent,
   HeatmapSpec,
+  ScaleType,
+  Settings,
 } from '@elastic/charts';
-import { Chart, Heatmap, ScaleType, Settings } from '@elastic/charts';
-import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
-import type { CustomPaletteState } from '../../../../../src/plugins/charts/common/palette';
-import { LensIconChartHeatmap } from '../assets/chart_heatmap';
-import { defaultPaletteParams } from '../shared_components/coloring/constants';
-import { applyPaletteParams, findMinMaxByColumnId } from '../shared_components/coloring/utils';
-import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
-import type { LensBrushEvent, LensFilterEvent } from '../types';
+import type { CustomPaletteState } from 'src/plugins/charts/public';
 import { VisualizationContainer } from '../visualization_container';
-import { DEFAULT_PALETTE_NAME } from './constants';
-import './index.scss';
 import type { HeatmapRenderProps } from './types';
+import './index.scss';
+import type { LensBrushEvent, LensFilterEvent } from '../types';
+import {
+  applyPaletteParams,
+  defaultPaletteParams,
+  EmptyPlaceholder,
+  findMinMaxByColumnId,
+} from '../shared_components';
+import { LensIconChartHeatmap } from '../assets/chart_heatmap';
+import { DEFAULT_PALETTE_NAME } from './constants';
 
 declare global {
   interface Window {

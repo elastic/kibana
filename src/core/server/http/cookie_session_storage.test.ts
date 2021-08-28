@@ -6,20 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { Env } from '@kbn/config';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/dev-utils';
 import request from 'request';
-import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { BehaviorSubject } from 'rxjs';
+
+import { CoreContext } from '../core_context';
+import { HttpService } from './http_service';
+import { Env } from '../config';
+
 import { contextServiceMock } from '../context/context_service.mock';
-import type { CoreContext } from '../core_context';
 import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { createCookieSessionStorageFactory } from './cookie_session_storage';
+import { getEnvOptions, configServiceMock } from '../config/mocks';
 import { httpServerMock } from './http_server.mocks';
-import { HttpService } from './http_service';
+
+import { createCookieSessionStorageFactory } from './cookie_session_storage';
 
 let server: HttpService;
 

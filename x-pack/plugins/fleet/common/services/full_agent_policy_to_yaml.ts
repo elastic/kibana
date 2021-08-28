@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { safeDump } from 'js-yaml';
 
-import type { FullAgentPolicy } from '../types/models/agent_policy';
+import type { FullAgentPolicy } from '../types';
 
 const POLICY_KEYS_ORDER = [
   'id',

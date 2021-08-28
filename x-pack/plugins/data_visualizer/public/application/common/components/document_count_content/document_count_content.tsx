@@ -4,14 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React from 'react';
-import type {
-  FieldVisConfig,
-  FileBasedFieldVisConfig,
-} from '../stats_table/types/field_vis_config';
-import type { DocumentCountChartPoint } from './document_count_chart/document_count_chart';
-import { DocumentCountChart } from './document_count_chart/document_count_chart';
+
+import React, { FC } from 'react';
+import { DocumentCountChart, DocumentCountChartPoint } from './document_count_chart';
+import { FieldVisConfig, FileBasedFieldVisConfig } from '../stats_table/types';
 import { TotalCountHeader } from './total_count_header';
 
 export interface Props {

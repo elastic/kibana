@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCallback, useMemo } from 'react';
-import { useUiTracker } from '../../../../../observability/public/hooks/use_track_metric';
-import type { DatasetFilter } from '../../../../common/log_analysis/job_parameters';
+import { DatasetFilter } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
-import type { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
+import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
+import { useUiTracker } from '../../../../../observability/public';
 
 export const useLogAnalysisModule = <JobType extends string>({
   sourceConfiguration,

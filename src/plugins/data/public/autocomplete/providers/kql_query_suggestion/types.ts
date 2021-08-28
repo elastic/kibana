@@ -5,10 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KueryNode } from '@kbn/es-query';
-import type { CoreSetup } from '../../../../../../core/public/types';
-import type { DataPublicPluginStart } from '../../../types';
-import type { QuerySuggestionBasic, QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
+
+import { KueryNode } from '@kbn/es-query';
+import { CoreSetup } from 'kibana/public';
+import {
+  DataPublicPluginStart,
+  QuerySuggestionBasic,
+  QuerySuggestionGetFnArgs,
+} from '../../../../../../../src/plugins/data/public';
 
 export type KqlQuerySuggestionProvider<T = QuerySuggestionBasic> = (
   core: CoreSetup<object, DataPublicPluginStart>

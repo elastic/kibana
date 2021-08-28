@@ -28,7 +28,7 @@ import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
-import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public/types';
+import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';

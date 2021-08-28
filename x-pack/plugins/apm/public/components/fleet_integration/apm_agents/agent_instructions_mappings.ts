@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
-  createDjangoAgentInstructions,
   createDotNetAgentInstructions,
+  createDjangoAgentInstructions,
   createFlaskAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
   createJsAgentInstructions,
   createNodeAgentInstructions,
   createPhpAgentInstructions,
-  createRackAgentInstructions,
   createRailsAgentInstructions,
+  createRackAgentInstructions,
 } from '../../../../common/tutorial/instructions/apm_agent_instructions';
-import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 
 export type CreateAgentInstructions = (
   apmServerUrl?: string,

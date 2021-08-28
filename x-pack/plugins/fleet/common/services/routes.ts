@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
-  AGENTS_SETUP_API_ROUTES,
-  AGENT_API_ROUTES,
-  AGENT_POLICY_API_ROUTES,
-  APP_API_ROUTES,
-  DATA_STREAM_API_ROUTES,
-  ENROLLMENT_API_KEY_ROUTES,
   EPM_API_ROOT,
   EPM_API_ROUTES,
-  OUTPUT_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
-  SETTINGS_API_ROUTES,
+  AGENT_POLICY_API_ROUTES,
+  DATA_STREAM_API_ROUTES,
+  AGENTS_SETUP_API_ROUTES,
+  AGENT_API_ROUTES,
+  ENROLLMENT_API_KEY_ROUTES,
   SETUP_API_ROUTE,
-} from '../constants/routes';
+  OUTPUT_API_ROUTES,
+  SETTINGS_API_ROUTES,
+  APP_API_ROUTES,
+} from '../constants';
 
 export const epmRouteService = {
   getCategoriesPath: () => {

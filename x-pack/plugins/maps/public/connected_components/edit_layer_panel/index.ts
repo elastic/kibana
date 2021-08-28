@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import { LAYER_TYPE } from '../../../common/constants';
-import { updateSourceProp } from '../../actions/layer_actions';
-import type { MapStoreState } from '../../reducers/store';
-import { getSelectedLayer } from '../../selectors/map_selectors';
 import { EditLayerPanel } from './edit_layer_panel';
+import { LAYER_TYPE } from '../../../common/constants';
+import { getSelectedLayer } from '../../selectors/map_selectors';
+import { updateSourceProp } from '../../actions';
+import { MapStoreState } from '../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   const selectedLayer = getSelectedLayer(state);

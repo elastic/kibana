@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, Fragment } from 'react';
 import { EuiCallOut, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
-import { ExamplesList } from '../../../examples_list/examples_list';
+import { i18n } from '@kbn/i18n';
+
 import type { FieldDataRowProps } from '../../types/field_data_row';
+import { ExamplesList } from '../../../examples_list';
 import { ExpandedRowContent } from './expanded_row_content';
 
 export const TextContent: FC<FieldDataRowProps> = ({ config }) => {

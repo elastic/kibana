@@ -5,30 +5,29 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiCallOut,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+
+import type { Field, EsRuntimeField } from '../types';
+import { RuntimeFieldPainlessError } from '../lib';
 import { euiFlyoutClassname } from '../constants';
-import type { RuntimeFieldPainlessError } from '../lib/runtime_field_validation';
-import type { EsRuntimeField, Field } from '../types';
-import { ModifiedFieldModal } from './confirm_modals/modified_field_modal';
-import { SaveFieldTypeOrNameChangedModal } from './confirm_modals/save_field_type_or_name_changed_modal';
-import type { FieldEditorFormState } from './field_editor/field_editor';
-import { FieldEditor } from './field_editor/field_editor';
-import { useFieldEditorContext } from './field_editor_context';
 import { FlyoutPanels } from './flyout_panels';
-import { FieldPreview } from './preview/field_preview';
-import { useFieldPreviewContext } from './preview/field_preview_context';
+import { useFieldEditorContext } from './field_editor_context';
+import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
+import { FieldPreview, useFieldPreviewContext } from './preview';
+import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
 
 const i18nTexts = {
   cancelButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCancelButtonLabel', {

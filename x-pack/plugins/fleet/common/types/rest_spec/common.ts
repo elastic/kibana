@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpFetchQuery } from '../../../../../../src/core/public/http/types';
+
+import type { HttpFetchQuery } from 'src/core/public';
 
 export interface ListWithKuery extends HttpFetchQuery {
   page?: number;

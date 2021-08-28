@@ -6,19 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import type { NotificationsStart } from '../../../../../core/public/notifications/notifications_service';
-import type { Toast } from '../../../../../core/public/notifications/toasts/toasts_api';
-import type { SavedObjectEmbeddableInput } from '../../../../embeddable/common/lib/saved_object_embeddable';
-import type { EmbeddableInput } from '../../../../embeddable/common/types';
-import type { IContainer } from '../../../../embeddable/public/lib/containers/i_container';
-import type {
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { NotificationsStart, Toast } from 'src/core/public';
+import { DashboardPanelState } from '../embeddable';
+import {
+  EmbeddableInput,
   EmbeddableOutput,
+  EmbeddableStart,
+  IContainer,
   IEmbeddable,
-} from '../../../../embeddable/public/lib/embeddables/i_embeddable';
-import type { EmbeddableStart } from '../../../../embeddable/public/plugin';
-import type { DashboardPanelState } from '../../../common/types';
+  SavedObjectEmbeddableInput,
+} from '../../services/embeddable';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';
 
 interface Props {

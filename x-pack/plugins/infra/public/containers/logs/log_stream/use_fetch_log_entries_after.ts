@@ -4,28 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { JsonObject } from '@kbn/utility-types';
+
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
-import type { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/common/search/types';
-import type { LogEntryAfterCursor } from '../../../../common/log_entry/log_entry_cursor';
-import type { LogSourceColumnConfiguration } from '../../../../common/log_sources/log_source_configuration';
+import { JsonObject } from '@kbn/utility-types';
+import { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/public';
+import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
+import { LogEntryAfterCursor } from '../../../../common/log_entry';
 import { decodeOrThrow } from '../../../../common/runtime_types';
-import type {
-  LogEntriesSearchRequestQuery,
-  LogEntriesSearchResponsePayload,
-} from '../../../../common/search_strategies/log_entries/log_entries';
 import {
   logEntriesSearchRequestParamsRT,
+  LogEntriesSearchRequestQuery,
+  LogEntriesSearchResponsePayload,
   logEntriesSearchResponsePayloadRT,
   LOG_ENTRIES_SEARCH_STRATEGY,
 } from '../../../../common/search_strategies/log_entries/log_entries';
-import { flattenDataSearchResponseDescriptor } from '../../../utils/data_search/flatten_data_search_response';
-import { normalizeDataSearchResponses } from '../../../utils/data_search/normalize_data_search_responses';
-import type { ParsedDataSearchRequestDescriptor } from '../../../utils/data_search/types';
-import { useDataSearch } from '../../../utils/data_search/use_data_search_request';
-import { useDataSearchResponseState } from '../../../utils/data_search/use_data_search_response_state';
+import {
+  flattenDataSearchResponseDescriptor,
+  normalizeDataSearchResponses,
+  ParsedDataSearchRequestDescriptor,
+  useDataSearch,
+  useDataSearchResponseState,
+} from '../../../utils/data_search';
 import { useOperator } from '../../../utils/use_observable';
 
 export const useLogEntriesAfterRequest = ({

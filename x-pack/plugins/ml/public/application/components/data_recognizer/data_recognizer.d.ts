@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import type { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/types';
-import type { SavedSearchSavedObject } from '../../../../common/types/kibana';
+
+import { FC } from 'react';
+import { SavedSearchSavedObject } from '../../../../common/types/kibana';
+import type { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 declare const DataRecognizer: FC<{
   indexPattern: IIndexPattern;

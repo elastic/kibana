@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
 import React from 'react';
+import { EuiIcon } from '@elastic/eui';
 import { getSpanIcon } from './get_span_icon';
 
 interface Props {

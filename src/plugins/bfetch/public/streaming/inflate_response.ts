@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { unzlibSync, strFromU8 } from 'fflate';
 import { toByteArray } from 'base64-js';
-import { strFromU8, unzlibSync } from 'fflate';
 
 export function inflateResponse<Result extends object>(response: string) {
   const buff = toByteArray(response);

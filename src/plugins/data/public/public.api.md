@@ -9,7 +9,7 @@ import { Action } from 'history';
 import { Adapters as Adapters_2 } from 'src/plugins/inspector/common';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { Assign } from '@kbn/utility-types';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public/types';
+import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { CoreSetup } from 'src/core/public';

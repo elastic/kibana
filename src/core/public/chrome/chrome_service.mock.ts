@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { BehaviorSubject } from 'rxjs';
-import { ChromeService } from './chrome_service';
-import type { ChromeBadge, ChromeBreadcrumb, InternalChromeStart } from './types';
+import { ChromeBadge, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {

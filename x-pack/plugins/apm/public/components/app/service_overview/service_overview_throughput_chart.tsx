@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
   EuiPanel,
   EuiTitle,
+  EuiIconTip,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { asExactTransactionRate } from '../../../../common/utils/formatters/duration';
+import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';

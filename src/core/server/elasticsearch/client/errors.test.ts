@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ApiResponse } from '@elastic/elasticsearch';
+
 import {
-  ConfigurationError,
-  ConnectionError,
   ResponseError,
+  ConnectionError,
+  ConfigurationError,
 } from '@elastic/elasticsearch/lib/errors';
+import { ApiResponse } from '@elastic/elasticsearch';
 import { isResponseError, isUnauthorizedError } from './errors';
 
 const createApiResponseError = ({

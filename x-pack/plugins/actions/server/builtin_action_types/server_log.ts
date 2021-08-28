@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import type { Logger, LogMeta } from '@kbn/logging';
+
 import { curry } from 'lodash';
-import type { ActionTypeExecutorResult } from '../../common/types';
-import type { ActionType, ActionTypeExecutorOptions } from '../types';
+import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+import { Logger, LogMeta } from '../../../../../src/core/server';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { withoutControlCharacters } from './lib/string_utils';
 
 export type ServerLogActionType = ActionType<{}, {}, ActionParamsType>;

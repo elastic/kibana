@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { orderBy } from 'lodash';
-import type { ValuesType } from 'utility-types';
-import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../../../observability/server/utils/queries';
-import type { PromiseReturnType } from '../../../../../observability/typings/common';
+import { ValuesType } from 'utility-types';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_GROUP_ID,
@@ -23,7 +21,7 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getErrorName } from '../../helpers/get_error_name';
-import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export type ServiceErrorGroupItem = ValuesType<
   PromiseReturnType<typeof getServiceErrorGroups>

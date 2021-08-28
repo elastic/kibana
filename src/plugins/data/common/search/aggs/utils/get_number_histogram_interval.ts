@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DatatableColumn } from '../../../../../expressions/common/expression_types/specs/datatable';
+
+import { DatatableColumn } from 'src/plugins/expressions/common';
+import type { AggParamsHistogram } from '../buckets';
 import { BUCKET_TYPES } from '../buckets/bucket_agg_types';
-import type { AggParamsHistogram } from '../buckets/histogram';
 
 /**
  * Helper function returning the used interval for data table column created by the histogramm agg type.

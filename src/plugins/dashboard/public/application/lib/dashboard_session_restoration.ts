@@ -5,17 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { History } from 'history';
-import { noSearchSessionStorageCapabilityMessage } from '../../../../data/public/search/session/i18n';
-import type { DataPublicPluginStart } from '../../../../data/public/types';
-import { getQueryParams } from '../../../../kibana_utils/public/history/get_query_params';
-import { createQueryParamObservable } from '../../../../kibana_utils/public/history/history_observable';
-import { DashboardConstants } from '../../dashboard_constants';
+
+import { History } from 'history';
+import { DashboardConstants } from '../..';
+import { DashboardState } from '../../types';
 import { getDashboardTitle } from '../../dashboard_strings';
-import type { DashboardSavedObject } from '../../saved_dashboards/saved_dashboard';
-import type { DashboardState } from '../../types';
-import type { DashboardUrlGeneratorState } from '../../url_generator';
-import { DASHBOARD_APP_URL_GENERATOR } from '../../url_generator';
+import { DashboardSavedObject } from '../../saved_dashboards';
+import { getQueryParams } from '../../services/kibana_utils';
+import { createQueryParamObservable } from '../../../../kibana_utils/public';
+import { DASHBOARD_APP_URL_GENERATOR, DashboardUrlGeneratorState } from '../../url_generator';
+import {
+  DataPublicPluginStart,
+  noSearchSessionStorageCapabilityMessage,
+} from '../../services/data';
 import { stateToRawDashboardState } from './convert_dashboard_state';
 
 export const getSearchSessionIdFromURL = (history: History): string | undefined =>

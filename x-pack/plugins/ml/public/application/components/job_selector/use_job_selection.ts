@@ -4,13 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { difference } from 'lodash';
 import { useEffect, useMemo } from 'react';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs/summary_job';
-import { useNotifications } from '../../contexts/kibana/use_notifications_context';
+
+import { i18n } from '@kbn/i18n';
+
+import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+
 import { useUrlState } from '../../util/url_state';
+
 import { getTimeRangeFromSelection } from './job_select_service_utils';
+import { useNotifications } from '../../contexts/kibana';
 
 // check that the ids read from the url exist by comparing them to the
 // jobs loaded via mlJobsService.

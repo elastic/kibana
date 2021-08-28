@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Trigger } from './trigger';
+
+import { Trigger } from '.';
 
 export const VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_TRIGGER';
 export const visualizeFieldTrigger: Trigger = {

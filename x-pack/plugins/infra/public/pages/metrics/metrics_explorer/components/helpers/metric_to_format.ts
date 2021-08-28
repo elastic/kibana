@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { last } from 'lodash';
-import type { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
-import { InfraFormatterType } from '../../../../../lib/lib';
 
+import { last } from 'lodash';
+import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
+import { InfraFormatterType } from '../../../../../lib/lib';
 export const metricToFormat = (metric?: MetricsExplorerMetric) => {
   if (metric && metric.field) {
     const suffix = last(metric.field.split(/\./));

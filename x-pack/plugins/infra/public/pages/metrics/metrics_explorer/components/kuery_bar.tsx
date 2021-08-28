@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+
 import React, { useEffect, useState } from 'react';
-import type { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/types';
-import type { QuerySuggestion } from '../../../../../../../../src/plugins/data/public/autocomplete/providers/query_suggestion_provider';
-import { esKuery } from '../../../../../../../../src/plugins/data/public/deprecated';
-import { AutocompleteField } from '../../../../components/autocomplete_field/autocomplete_field';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
+import { AutocompleteField } from '../../../../components/autocomplete_field';
+import {
+  esKuery,
+  IIndexPattern,
+  QuerySuggestion,
+} from '../../../../../../../../src/plugins/data/public';
 
 type LoadSuggestionsFn = (
   e: string,

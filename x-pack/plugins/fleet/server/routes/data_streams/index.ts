@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IRouter } from '../../../../../../src/core/server/http/router/router';
-import { PLUGIN_ID } from '../../../common/constants/plugin';
-import { DATA_STREAM_API_ROUTES } from '../../../common/constants/routes';
+
+import type { IRouter } from 'src/core/server';
+
+import { PLUGIN_ID, DATA_STREAM_API_ROUTES } from '../../constants';
 
 import { getListHandler } from './handlers';
 

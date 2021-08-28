@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+import { ProcessorEvent } from './processor_event';
 import {
   PROCESSOR_EVENT,
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from './elasticsearch_fieldnames';
-import { ProcessorEvent } from './processor_event';
 import { environmentQuery } from './utils/environment_query';
 
 export const kueryBarPlaceholder = i18n.translate(

@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EsHitRecord, EsHitRecordList } from '../context';
-import { SurrDocType } from '../context';
+
+import { SurrDocType, EsHitRecordList, EsHitRecord } from '../context';
 
 export type EsQuerySearchAfter = [string | number, string | number];
 

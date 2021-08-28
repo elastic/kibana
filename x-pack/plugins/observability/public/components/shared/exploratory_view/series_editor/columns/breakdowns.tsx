@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants/constants';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import type { SeriesConfig } from '../../types';
+import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
+import { SeriesConfig } from '../../types';
 
 interface Props {
   seriesId: string;

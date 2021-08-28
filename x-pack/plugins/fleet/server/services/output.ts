@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
-import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../../common/constants/output';
-import { decodeCloudId } from '../../common/services/decode_cloud_id';
-import { normalizeHostsForAgents } from '../../common/services/hosts_utils';
-import type { NewOutput, Output, OutputSOAttributes } from '../../common/types/models/output';
+
+import type { SavedObjectsClientContract } from 'src/core/server';
+
+import type { NewOutput, Output, OutputSOAttributes } from '../types';
+import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
+import { decodeCloudId, normalizeHostsForAgents } from '../../common';
 
 import { appContextService } from './app_context';
 

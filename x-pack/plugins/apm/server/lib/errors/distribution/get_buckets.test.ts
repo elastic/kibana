@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { APMConfig } from '../../..';
-import { ProcessorEvent } from '../../../../common/processor_event';
+
 import { getBuckets } from './get_buckets';
+import { APMConfig } from '../../..';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 describe('get buckets', () => {
   let clientSpy: jest.Mock;

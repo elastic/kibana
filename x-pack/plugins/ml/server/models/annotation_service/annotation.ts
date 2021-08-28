@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { each, get } from 'lodash';
-import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+import { IScopedClusterClient } from 'kibana/server';
+
+import { estypes } from '@elastic/elasticsearch';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '../../../common/constants/index_patterns';
-import type {
+
+import {
   Annotation,
   Annotations,
-  EsAggregationResult,
-} from '../../../common/types/annotations';
-import {
-  getAnnotationFieldName,
-  getAnnotationFieldValue,
   isAnnotation,
   isAnnotations,
+  getAnnotationFieldName,
+  getAnnotationFieldValue,
+  EsAggregationResult,
 } from '../../../common/types/annotations';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs/job';
+import { JobId } from '../../../common/types/anomaly_detection_jobs';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions

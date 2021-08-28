@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { ReactElement, useEffect, useState } from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ReactElement } from 'react';
-import React, { useEffect, useState } from 'react';
-import { useKibana } from '../../../../kibana_react/public/context/context';
-import type { IStorageWrapper } from '../../../../kibana_utils/public/storage/types';
+import { useKibana } from '../../../../kibana_react/public';
 
 const AUTOCOMPLETE_FTUE_POPOVER_STORAGE_KEY = 'data.autocompleteFtuePopover';
 

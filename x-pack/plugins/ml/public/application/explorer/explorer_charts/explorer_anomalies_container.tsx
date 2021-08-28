@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React from 'react';
-import type { TimefilterContract } from '../../../../../../../src/plugins/data/public/query/timefilter/timefilter';
-import type { MlLocator } from '../../../../common/types/locator';
-import type { EntityFieldOperation } from '../../../../common/util/anomaly_utils';
-import type { TableSeverity } from '../../components/controls/select_severity/select_severity';
-import { SelectSeverityUI } from '../../components/controls/select_severity/select_severity';
-import { TimeBuckets } from '../../util/time_buckets';
 // @ts-ignore
 import { ExplorerChartsContainer } from './explorer_charts_container';
+import {
+  SelectSeverityUI,
+  TableSeverity,
+} from '../../components/controls/select_severity/select_severity';
+import type { TimeBuckets } from '../../util/time_buckets';
+import type { TimefilterContract } from '../../../../../../../src/plugins/data/public';
+import type { EntityFieldOperation } from '../../../../common/util/anomaly_utils';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
-
-
+import type { MlLocator } from '../../../../common/types/locator';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;

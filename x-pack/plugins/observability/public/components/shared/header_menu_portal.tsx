@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useEffect, useMemo } from 'react';
 import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
-import type { HeaderMenuPortalProps } from './types';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { HeaderMenuPortalProps } from './types';
 
 // eslint-disable-next-line import/no-default-export
 export default function HeaderMenuPortal({ children, setHeaderActionMenu }: HeaderMenuPortalProps) {

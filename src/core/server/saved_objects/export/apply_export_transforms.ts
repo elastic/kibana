@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObject } from '../../../types/saved_objects';
-import { KibanaRequest } from '../../http/router/request';
+
+import { SavedObject } from '../../../types';
+import { KibanaRequest } from '../../http';
 import { SavedObjectsExportError } from './errors';
-import type { SavedObjectsExportTransform, SavedObjectsExportTransformContext } from './types';
-import type { SavedObjectComparator } from './utils';
-import { getObjKey } from './utils';
+import { SavedObjectsExportTransform, SavedObjectsExportTransformContext } from './types';
+import { getObjKey, SavedObjectComparator } from './utils';
 
 interface ApplyExportTransformsOptions {
   objects: SavedObject[];

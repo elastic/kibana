@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React, { useContext, useEffect, useState } from 'react';
-import type { LineChartPoint } from '../../../../../common/chart_loader/chart_loader';
-import { CategorizationJobCreator } from '../../../../../common/job_creator/categorization_job_creator';
-import type { Anomaly, Results } from '../../../../../common/results_loader/results_loader';
-import { EventRateChart } from '../../../charts/event_rate_chart/event_rate_chart';
+
+import React, { FC, useContext, useEffect, useState } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { CategoryStoppedPartitions } from './category_stopped_partitions';
+import { CategorizationJobCreator } from '../../../../../common/job_creator';
+import { Results, Anomaly } from '../../../../../common/results_loader';
+import { LineChartPoint } from '../../../../../common/chart_loader';
+import { EventRateChart } from '../../../charts/event_rate_chart';
 import { TopCategories } from './top_categories';
+import { CategoryStoppedPartitions } from './category_stopped_partitions';
 
 const DTR_IDX = 0;
 

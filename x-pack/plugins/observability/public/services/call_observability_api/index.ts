@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 // @ts-expect-error
 import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
-import { formatRequest as formatRequestType } from '@kbn/server-route-repository/target_types/format_request';
-import type { HttpSetup } from '../../../../../../src/core/public/http/types';
+import type { formatRequest as formatRequestType } from '@kbn/server-route-repository/target_types/format_request';
+import type { HttpSetup } from 'kibana/public';
 import type { AbstractObservabilityClient, ObservabilityClient } from './types';
-
 
 export let callObservabilityApi: ObservabilityClient = () => {
   throw new Error('callObservabilityApi has not been initialized via createCallObservabilityApi');

@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { useKibana } from '../context/context';
+import { useKibana } from '../context';
 
 /**
  * Returns the current UI-settings value.

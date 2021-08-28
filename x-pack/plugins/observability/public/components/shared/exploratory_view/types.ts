@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ExistsFilter } from '@kbn/es-query';
-import type { PaletteOutput } from '../../../../../../../src/plugins/charts/common/palette';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { YConfig } from '../../../../../lens/common/expressions/xy_chart/axis_config';
-import type { SeriesType } from '../../../../../lens/common/expressions/xy_chart/series_type';
-import type { PersistableFilter } from '../../../../../lens/common/types';
-import type {
+
+import { PaletteOutput } from 'src/plugins/charts/public';
+import { ExistsFilter } from '@kbn/es-query';
+import {
+  LastValueIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
   FieldBasedIndexPatternColumn,
+  SeriesType,
   OperationType,
-} from '../../../../../lens/public/indexpattern_datasource/operations/definitions';
-import type { DateHistogramIndexPatternColumn } from '../../../../../lens/public/indexpattern_datasource/operations/definitions/date_histogram';
-import type { LastValueIndexPatternColumn } from '../../../../../lens/public/indexpattern_datasource/operations/definitions/last_value';
+  YConfig,
+} from '../../../../../lens/public';
+
+import { PersistableFilter } from '../../../../../lens/common';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',

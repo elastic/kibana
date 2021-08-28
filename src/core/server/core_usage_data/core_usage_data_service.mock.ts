@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { CoreUsageDataService } from './core_usage_data_service';
 import { coreUsageStatsClientMock } from './core_usage_stats_client.mock';
-import type { CoreUsageData, CoreUsageDataSetup, CoreUsageDataStart } from './types';
+import { CoreUsageData, CoreUsageDataSetup, CoreUsageDataStart } from './types';
 
 const createSetupContractMock = (usageStatsClient = coreUsageStatsClientMock.create()) => {
   const setupContract: jest.Mocked<CoreUsageDataSetup> = {

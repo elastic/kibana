@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { SavedObjectFindOptionsRt } from '../saved_object';
+
 import { UserRT } from '../user';
 
 /**

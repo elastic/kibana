@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiStepStatus } from '@elastic/eui';
+
+import React, { FC, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,23 +15,24 @@ import {
   EuiPageContent,
   EuiSpacer,
   EuiSteps,
+  EuiStepStatus,
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
-import type { DataFrameAnalyticsId } from '../../../../../common/types/data_frame_analytics';
-import { useMlContext } from '../../../contexts/ml/use_ml_context';
+import { useMlContext } from '../../../contexts/ml';
 import { ml } from '../../../services/ml_api_service';
-import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form/use_create_analytics_form';
-import { AdvancedStep } from './components/advanced_step/advanced_step';
-import { ConfigurationStep } from './components/configuration_step/configuration_step';
-import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor/create_analytics_advanced_editor';
-import { CreateStep } from './components/create_step/create_step';
-import { DetailsStep } from './components/details_step/details_step';
-import { ValidationStepWrapper } from './components/validation_step/validation_step_wrapper';
+import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
+import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
+import {
+  AdvancedStep,
+  ConfigurationStep,
+  CreateStep,
+  DetailsStep,
+  ValidationStepWrapper,
+} from './components';
+import { DataFrameAnalyticsId } from '../../../../../common/types/data_frame_analytics';
 
 export enum ANALYTICS_STEPS {
   CONFIGURATION,

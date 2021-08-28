@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useState } from 'react';
-import type { LogEntriesSummaryResponse } from '../../../../common/http_api/log_entries/summary';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+
 import { useCancellableEffect } from '../../../utils/cancellable_effect';
 import { fetchLogSummary } from './api/fetch_log_summary';
+import { LogEntriesSummaryResponse } from '../../../../common/http_api';
 import { useBucketSize } from './bucket_size';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export type LogSummaryBuckets = LogEntriesSummaryResponse['data']['buckets'];
 

@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Map as MbMap } from '@kbn/mapbox-gl';
 import React from 'react';
-import { GRID_RESOLUTION, LAYER_STYLE_TYPE } from '../../../../common/constants';
-import type {
-  HeatmapStyleDescriptor,
-  StyleDescriptor,
-} from '../../../../common/descriptor_types/style_property_descriptor_types';
-import type { IField } from '../../fields/field';
-import { DEFAULT_HEATMAP_COLOR_RAMP_NAME, getOrdinalMbColorRampStops } from '../color_palettes';
-import type { IStyle } from '../style';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { i18n } from '@kbn/i18n';
+import { EuiIcon } from '@elastic/eui';
+import { IStyle } from '../style';
 import { HeatmapStyleEditor } from './components/heatmap_style_editor';
 import { HeatmapLegend } from './components/legend/heatmap_legend';
+import { DEFAULT_HEATMAP_COLOR_RAMP_NAME, getOrdinalMbColorRampStops } from '../color_palettes';
+import { LAYER_STYLE_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
+import { HeatmapStyleDescriptor, StyleDescriptor } from '../../../../common/descriptor_types';
+import { IField } from '../../fields/field';
 
 // The heatmap range chosen hear runs from 0 to 1. It is arbitrary.
 // Weighting is on the raw count/sum values.

@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Unit } from '@elastic/datemath';
+
+import { Unit } from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 
 export class InvalidEsCalendarIntervalError extends Error {

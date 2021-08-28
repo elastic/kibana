@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React, { Fragment } from 'react';
-import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../common';
-import { getServices } from '../../../../../../kibana_services';
+import { getServices, IndexPattern } from '../../../../../../kibana_services';
 
 interface Props {
   defPairs: Array<[string, unknown]>;

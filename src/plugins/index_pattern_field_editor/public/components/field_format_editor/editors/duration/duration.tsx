@@ -5,16 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { Fragment } from 'react';
-import { DurationFormat } from '../../../../../../field_formats/common/converters/duration';
-import { FormatEditorSamples } from '../../samples/samples';
-import type { FormatEditorState } from '../default/default';
-import { DefaultFormatEditor, defaultState } from '../default/default';
-import type { FormatEditorProps } from '../types';
+import { DurationFormat } from 'src/plugins/field_formats/common';
+
+import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { DefaultFormatEditor, defaultState, FormatEditorState } from '../default/default';
+
+import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
+import { FormatEditorProps } from '../types';
 
 interface DurationFormatEditorState {
   hasDecimalError: boolean;

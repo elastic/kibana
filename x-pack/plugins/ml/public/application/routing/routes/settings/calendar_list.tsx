@@ -4,21 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React from 'react';
+
+import React, { FC } from 'react';
+
+import { NavigateToPath } from '../../../contexts/kibana';
+
+import { MlRoute, PageLoader, PageProps } from '../../router';
+import { useResolver } from '../../use_resolver';
+
+import { useTimefilter } from '../../../contexts/kibana';
+import { checkFullLicense } from '../../../license';
 import {
   checkGetJobsCapabilitiesResolver,
   checkPermission,
 } from '../../../capabilities/check_capabilities';
-import type { NavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
-import { useTimefilter } from '../../../contexts/kibana/use_timefilter';
-import { checkFullLicense } from '../../../license/check_license';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
+import { CalendarsList } from '../../../settings/calendars';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import type { MlRoute, PageProps } from '../../router';
-import { PageLoader } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { CalendarsList } from '../../../settings/calendars/list/calendars_list';
 
 export const calendarListRouteFactory = (
   navigateToPath: NavigateToPath,

@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 import { BaseVisType } from './base_vis_type';
-import type { VisTypeDefinition } from './types';
+import { VisTypeDefinition } from './types';
 import { VisGroups } from './vis_groups_enum';
-import type { VisTypeAlias } from './vis_type_alias_registry';
-import { visTypeAliasRegistry } from './vis_type_alias_registry';
 
 /**
  * Vis Types Service

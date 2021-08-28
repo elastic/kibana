@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Observable, of } from 'rxjs';
 import { map, share, switchMap } from 'rxjs/operators';
+import { inflateResponse } from '.';
 import { fromStreamingXhr } from './from_streaming_xhr';
-import { inflateResponse } from './inflate_response';
 import { split } from './split';
 
 export interface FetchStreamingParams {

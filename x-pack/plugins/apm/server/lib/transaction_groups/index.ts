@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
-import type { TopTraceOptions } from './fetcher';
-import { topTransactionGroupsFetcher } from './fetcher';
+
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { topTransactionGroupsFetcher, TopTraceOptions } from './fetcher';
 
 export async function getTopTransactionGroupList(
   options: TopTraceOptions,

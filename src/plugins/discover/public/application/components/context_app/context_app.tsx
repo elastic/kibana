@@ -5,29 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiPage, EuiPageContent, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import classNames from 'classnames';
-import { cloneDeep } from 'lodash';
-import React, { Fragment, memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { IndexPatternField } from '../../../../../data/common/index_patterns/fields/index_pattern_field';
-import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import { SortDirection } from '../../../../../data/common/search/search_source/types';
-import { esFilters } from '../../../../../data/public/deprecated';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
-import { getServices } from '../../../kibana_services';
-import { SurrDocType } from '../../angular/context/api/context';
-import { LoadingStatus } from '../../angular/context_query_state';
-import type { AppState } from '../../angular/context_state';
-import { isEqualFilters } from '../../angular/context_state';
-import type { DocViewFilterFn } from '../../doc_views/doc_views_types';
-import { popularizeField } from '../../helpers/popularize_field';
-import { useDataGridColumns } from '../../helpers/use_data_grid_columns';
-import { ContextErrorMessage } from '../context_error_message/context_error_message';
+
+import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
 import './context_app.scss';
-import { ContextAppContent } from './context_app_content';
-import { useContextAppFetch } from './use_context_app_fetch';
+import classNames from 'classnames';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
+import { cloneDeep } from 'lodash';
+import { esFilters, SortDirection } from '../../../../../data/public';
+import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { ContextErrorMessage } from '../context_error_message';
+import { IndexPattern, IndexPatternField } from '../../../../../data/common';
+import { LoadingStatus } from '../../angular/context_query_state';
+import { getServices } from '../../../kibana_services';
+import { AppState, isEqualFilters } from '../../angular/context_state';
+import { useDataGridColumns } from '../../helpers/use_data_grid_columns';
 import { useContextAppState } from './use_context_app_state';
+import { useContextAppFetch } from './use_context_app_fetch';
+import { popularizeField } from '../../helpers/popularize_field';
+import { ContextAppContent } from './context_app_content';
+import { SurrDocType } from '../../angular/context/api/context';
+import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 

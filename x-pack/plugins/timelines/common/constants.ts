@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AlertStatus } from './types/timeline/actions';
+
+import { AlertStatus } from './types/timeline/actions';
 
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';

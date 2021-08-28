@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
-import type { RecentCasesProps } from '../components/recent_cases';
+import { RecentCasesProps } from '../components/recent_cases';
 
 const RecentCasesLazy = lazy(() => import('../components/recent_cases'));
 export const getRecentCasesLazy = (props: RecentCasesProps) => (

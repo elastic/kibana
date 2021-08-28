@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
+
 import { NumberFormat } from './number';
+import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
 describe('NumberFormat', () => {
   const config: Record<string, any> = {};

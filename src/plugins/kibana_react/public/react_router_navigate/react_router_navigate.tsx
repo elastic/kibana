@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { History } from 'history';
-import { parsePath } from 'history';
-import { ScopedHistory } from '../../../../core/public/application/scoped_history';
+
+import { ScopedHistory } from 'kibana/public';
+import { History, parsePath } from 'history';
 
 interface LocationObject {
   pathname?: string;

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -11,7 +12,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ContentsProps } from '.';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import {
   SPAN_SUBTYPE,
   SPAN_TYPE,

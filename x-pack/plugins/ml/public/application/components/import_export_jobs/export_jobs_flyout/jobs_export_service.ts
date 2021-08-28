@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
-import type { Datafeed } from '../../../../../common/types/anomaly_detection_jobs/datafeed';
-import type { Job } from '../../../../../common/types/anomaly_detection_jobs/job';
-import type { DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
-import type { JobType } from '../../../../../common/types/saved_objects';
 import type { MlApiServices } from '../../../services/ml_api_service';
-
+import type { JobType } from '../../../../../common/types/saved_objects';
+import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
+import type { DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
+import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
 
 export type JobDependencies = Array<{ jobId: string; calendarIds: string[]; filterIds: string[] }>;
 export type FiltersPerJob = Array<{ jobId: string; filterIds: string[] }>;

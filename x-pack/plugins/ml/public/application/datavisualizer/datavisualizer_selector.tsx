@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, Fragment } from 'react';
+
 import {
   EuiButton,
   EuiCard,
@@ -17,15 +20,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
-import { HelpMenu } from '../components/help_menu/help_menu';
-import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
-import { useMlKibana } from '../contexts/kibana/kibana_context';
-import { useNavigateToPath } from '../contexts/kibana/use_navigate_to_path';
-import { useTimefilter } from '../contexts/kibana/use_timefilter';
-import { isFullLicense } from '../license/check_license';
+import { isFullLicense } from '../license';
+import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
+import { NavigationMenu } from '../components/navigation_menu';
+import { HelpMenu } from '../components/help_menu';
 
 function startTrialDescription() {
   return (

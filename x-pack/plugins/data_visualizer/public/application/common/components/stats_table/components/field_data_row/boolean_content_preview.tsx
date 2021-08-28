@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useMemo } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
-import type { FieldDataRowProps } from '../../types/field_data_row';
 import { getTFPercentage } from '../../utils';
 import { ColumnChart } from './column_chart';
 import type { OrdinalChartData } from './field_histograms';
+import type { FieldDataRowProps } from '../../types';
 
 export const BooleanContentPreview: FC<FieldDataRowProps> = ({ config }) => {
   const chartData = useMemo(() => {

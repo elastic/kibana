@@ -5,93 +5,97 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Assign } from '@kbn/utility-types';
-import type { DatatableColumn } from '../../../../expressions/common/expression_types/specs/datatable';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import type { AggConfigSerialized } from './agg_config';
-import { AggConfig } from './agg_config';
-import type { CreateAggConfigParams } from './agg_configs';
-import { AggConfigs } from './agg_configs';
-import type { AggTypesRegistrySetup, AggTypesRegistryStart } from './agg_types_registry';
-import { AggTypesRegistry } from './agg_types_registry';
-import { BUCKET_TYPES } from './buckets/bucket_agg_types';
-import type { AggParamsDateHistogram } from './buckets/date_histogram';
-import { aggDateHistogram } from './buckets/date_histogram_fn';
-import type { AggParamsDateRange } from './buckets/date_range';
-import { aggDateRange } from './buckets/date_range_fn';
-import type { AggParamsFilter } from './buckets/filter';
-import type { AggParamsFilters } from './buckets/filters';
-import { aggFilters } from './buckets/filters_fn';
-import { aggFilter } from './buckets/filter_fn';
-import type { AggParamsGeoHash } from './buckets/geo_hash';
-import { aggGeoHash } from './buckets/geo_hash_fn';
-import type { AggParamsGeoTile } from './buckets/geo_tile';
-import { aggGeoTile } from './buckets/geo_tile_fn';
-import type { AggParamsHistogram } from './buckets/histogram';
-import { aggHistogram } from './buckets/histogram_fn';
-import type { AggParamsIpRange } from './buckets/ip_range';
-import { aggIpRange } from './buckets/ip_range_fn';
-import type { AggParamsRange } from './buckets/range';
-import { aggRange } from './buckets/range_fn';
-import type { AggParamsSignificantTerms } from './buckets/significant_terms';
-import { aggSignificantTerms } from './buckets/significant_terms_fn';
-import type { AggParamsTerms } from './buckets/terms';
-import { aggTerms } from './buckets/terms_fn';
-import type { AggParamsAvg } from './metrics/avg';
-import { aggAvg } from './metrics/avg_fn';
-import type { AggParamsBucketAvg } from './metrics/bucket_avg';
-import { aggBucketAvg } from './metrics/bucket_avg_fn';
-import type { AggParamsBucketMax } from './metrics/bucket_max';
-import { aggBucketMax } from './metrics/bucket_max_fn';
-import type { AggParamsBucketMin } from './metrics/bucket_min';
-import { aggBucketMin } from './metrics/bucket_min_fn';
-import type { AggParamsBucketSum } from './metrics/bucket_sum';
-import { aggBucketSum } from './metrics/bucket_sum_fn';
-import type { AggParamsCardinality } from './metrics/cardinality';
-import { aggCardinality } from './metrics/cardinality_fn';
-import { aggCount } from './metrics/count_fn';
-import type { AggParamsCumulativeSum } from './metrics/cumulative_sum';
-import { aggCumulativeSum } from './metrics/cumulative_sum_fn';
-import type { AggParamsDerivative } from './metrics/derivative';
-import { aggDerivative } from './metrics/derivative_fn';
-import type { AggParamsFilteredMetric } from './metrics/filtered_metric';
-import { aggFilteredMetric } from './metrics/filtered_metric_fn';
-import type { AggParamsGeoBounds } from './metrics/geo_bounds';
-import { aggGeoBounds } from './metrics/geo_bounds_fn';
-import type { AggParamsGeoCentroid } from './metrics/geo_centroid';
-import { aggGeoCentroid } from './metrics/geo_centroid_fn';
-import type { AggParamsMax } from './metrics/max';
-import { aggMax } from './metrics/max_fn';
-import type { AggParamsMedian } from './metrics/median';
-import { aggMedian } from './metrics/median_fn';
-import { METRIC_TYPES } from './metrics/metric_agg_types';
-import type { AggParamsMin } from './metrics/min';
-import { aggMin } from './metrics/min_fn';
-import type { AggParamsMovingAvg } from './metrics/moving_avg';
-import { aggMovingAvg } from './metrics/moving_avg_fn';
-import type { AggParamsPercentiles } from './metrics/percentiles';
-import { aggPercentiles } from './metrics/percentiles_fn';
-import type { AggParamsPercentileRanks } from './metrics/percentile_ranks';
-import { aggPercentileRanks } from './metrics/percentile_ranks_fn';
-import type { AggParamsSerialDiff } from './metrics/serial_diff';
-import { aggSerialDiff } from './metrics/serial_diff_fn';
-import type { AggParamsSinglePercentile } from './metrics/single_percentile';
-import { aggSinglePercentile } from './metrics/single_percentile_fn';
-import type { AggParamsStdDeviation } from './metrics/std_deviation';
-import { aggStdDeviation } from './metrics/std_deviation_fn';
-import type { AggParamsSum } from './metrics/sum';
-import { aggSum } from './metrics/sum_fn';
-import type { AggParamsTopHit } from './metrics/top_hit';
-import { aggTopHit } from './metrics/top_hit_fn';
-import { getCalculateAutoTimeExpression } from './utils/calculate_auto_time_expression';
 
-export { AggConfigSerialized, IAggConfig } from './agg_config';
+import { Assign } from '@kbn/utility-types';
+import { DatatableColumn } from 'src/plugins/expressions';
+import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import {
+  aggAvg,
+  aggBucketAvg,
+  aggBucketMax,
+  aggBucketMin,
+  aggBucketSum,
+  aggCardinality,
+  AggConfigs,
+  AggConfigSerialized,
+  aggCount,
+  aggCumulativeSum,
+  aggDateHistogram,
+  aggDateRange,
+  aggDerivative,
+  aggFilter,
+  aggFilters,
+  aggGeoBounds,
+  aggGeoCentroid,
+  aggGeoHash,
+  aggGeoTile,
+  aggHistogram,
+  aggIpRange,
+  aggMax,
+  aggMedian,
+  aggMin,
+  aggMovingAvg,
+  AggParamsAvg,
+  AggParamsBucketAvg,
+  AggParamsBucketMax,
+  AggParamsBucketMin,
+  AggParamsBucketSum,
+  AggParamsFilteredMetric,
+  AggParamsCardinality,
+  AggParamsCumulativeSum,
+  AggParamsDateHistogram,
+  AggParamsDateRange,
+  AggParamsDerivative,
+  AggParamsFilter,
+  AggParamsFilters,
+  AggParamsGeoBounds,
+  AggParamsGeoCentroid,
+  AggParamsGeoHash,
+  AggParamsGeoTile,
+  AggParamsHistogram,
+  AggParamsIpRange,
+  AggParamsMax,
+  AggParamsMedian,
+  AggParamsSinglePercentile,
+  AggParamsMin,
+  AggParamsMovingAvg,
+  AggParamsPercentileRanks,
+  AggParamsPercentiles,
+  AggParamsRange,
+  AggParamsSerialDiff,
+  AggParamsSignificantTerms,
+  AggParamsStdDeviation,
+  AggParamsSum,
+  AggParamsTerms,
+  AggParamsTopHit,
+  aggPercentileRanks,
+  aggPercentiles,
+  aggRange,
+  aggSerialDiff,
+  aggSignificantTerms,
+  aggStdDeviation,
+  aggSum,
+  aggTerms,
+  aggTopHit,
+  AggTypesRegistry,
+  AggTypesRegistrySetup,
+  AggTypesRegistryStart,
+  BUCKET_TYPES,
+  CreateAggConfigParams,
+  getCalculateAutoTimeExpression,
+  METRIC_TYPES,
+  AggConfig,
+  aggFilteredMetric,
+  aggSinglePercentile,
+} from './';
+
+export { IAggConfig, AggConfigSerialized } from './agg_config';
 export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
-export { AggParam, AggParamOption } from './agg_params';
 export { IAggType } from './agg_type';
-export { IpRangeKey } from './buckets/lib/ip_range';
-export { IMetricAggType } from './metrics/metric_agg_type';
+export { AggParam, AggParamOption } from './agg_params';
 export { IFieldParamType } from './param_types';
+export { IMetricAggType } from './metrics/metric_agg_type';
+export { IpRangeKey } from './buckets/lib/ip_range';
 export { OptionedValueProp } from './param_types/optioned';
 
 /** @internal */

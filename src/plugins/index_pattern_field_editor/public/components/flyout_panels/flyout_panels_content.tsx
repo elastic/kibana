@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect } from 'react';
+
 import { useFlyoutPanelContext } from './flyout_panel';
 
 export const PanelContent: React.FC = (props) => {

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { getSeverity } from '../../../../common/anomaly_detection';
 import { getServiceHealthStatus } from '../../../../common/service_health_status';
 import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
-import type { ServicesItemsSetup } from './get_services_items';
+import { ServicesItemsSetup } from './get_services_items';
 
 interface AggregationParams {
   environment: string;

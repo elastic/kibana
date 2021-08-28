@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/public/plugin';
 import { PLUGIN_ID } from '../../../common/constants/app';
-import type { MlUsageEvent } from '../../../common/constants/usage_collection';
+import { MlUsageEvent } from '../../../common/constants/usage_collection';
 
 export function mlUsageCollectionProvider(usageCollection?: UsageCollectionSetup) {
   if (usageCollection === undefined) {

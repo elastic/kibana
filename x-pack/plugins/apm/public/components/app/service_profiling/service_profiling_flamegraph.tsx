@@ -4,8 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Datum, PrimitiveValue, TooltipInfo } from '@elastic/charts';
-import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
+import {
+  Chart,
+  Datum,
+  Partition,
+  PartitionLayout,
+  PrimitiveValue,
+  Settings,
+  TooltipInfo,
+} from '@elastic/charts';
 import {
   EuiCheckbox,
   EuiFieldText,
@@ -22,17 +29,19 @@ import { find, sumBy } from 'lodash';
 import { rgba } from 'polished';
 import React, { useMemo, useState } from 'react';
 import seedrandom from 'seedrandom';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { useChartTheme } from '../../../../../observability/public/hooks/use_chart_theme';
-import type { ProfileNode } from '../../../../common/profiling';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useChartTheme } from '../../../../../observability/public';
 import {
   getValueTypeConfig,
+  ProfileNode,
   ProfilingValueType,
   ProfilingValueTypeUnit,
 } from '../../../../common/profiling';
-import { asDuration } from '../../../../common/utils/formatters/duration';
-import { asInteger } from '../../../../common/utils/formatters/formatters';
-import { asDynamicBytes } from '../../../../common/utils/formatters/size';
+import {
+  asDuration,
+  asDynamicBytes,
+  asInteger,
+} from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { unit } from '../../../utils/style';

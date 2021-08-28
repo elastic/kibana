@@ -4,20 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RequestHandlerContext } from '../../../../../src/core/server';
-import type { IScopedClusterClient } from '../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type { KibanaResponseFactory } from '../../../../../src/core/server/http/router/response';
-import type { RequestHandler } from '../../../../../src/core/server/http/router/router';
-import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
-import type { AlertingApiRequestHandlerContext } from '../../../alerting/server/types';
-import type { SecurityPluginSetup } from '../../../security/server/plugin';
-import type { SpacesPluginSetup } from '../../../spaces/server/plugin';
-import { MlLicense } from '../../common/license/ml_license';
-import type { JobSavedObjectService } from '../saved_objects/service';
-import { jobSavedObjectServiceFactory } from '../saved_objects/service';
-import { getMlClient } from './ml_client/ml_client';
-import type { MlClient } from './ml_client/types';
+
+import {
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandlerContext,
+  IScopedClusterClient,
+  RequestHandler,
+  SavedObjectsClientContract,
+} from 'kibana/server';
+import { SpacesPluginSetup } from '../../../spaces/server';
+import type { SecurityPluginSetup } from '../../../security/server';
+
+import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
+import { MlLicense } from '../../common/license';
+
+import { MlClient, getMlClient } from '../lib/ml_client';
+import type { AlertingApiRequestHandlerContext } from '../../../alerting/server';
 
 type MLRequestHandlerContext = RequestHandlerContext & {
   alerting?: AlertingApiRequestHandlerContext;

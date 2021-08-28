@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { ExpressionAstExpression } from './types';
 import { parse } from './parse';
-import type { ExpressionAstExpression } from './types';
 
 /**
  * Given expression pipeline string, returns parsed AST.

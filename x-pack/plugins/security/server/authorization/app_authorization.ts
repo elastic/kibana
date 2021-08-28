@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
 
-import type { HttpServiceSetup } from '../../../../../src/core/server/http/types';
-import type { PluginSetupContract as FeaturesPluginSetup } from '../../../features/server/plugin';
+import type { HttpServiceSetup, Logger } from 'src/core/server';
+
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../../features/server';
 import type { AuthorizationServiceSetup } from './authorization_service';
 
 class ProtectedApplications {

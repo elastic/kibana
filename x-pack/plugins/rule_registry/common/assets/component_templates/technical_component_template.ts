@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { mappingFromFieldMap } from '../../mapping_from_field_map';
-import type { ClusterPutComponentTemplateBody } from '../../types';
+import { ClusterPutComponentTemplateBody } from '../../types';
 import { technicalRuleFieldMap } from '../field_maps/technical_rule_field_map';
 
 export const technicalComponentTemplate: ClusterPutComponentTemplateBody = {

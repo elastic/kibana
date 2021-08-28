@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpSetup } from '../../../../../../src/core/public/http/types';
-import type {
-  AssignableObject,
-  FindAssignableObjectsOptions,
+
+import { HttpSetup } from 'src/core/public';
+import {
   UpdateTagAssignmentsOptions,
+  FindAssignableObjectsOptions,
+  AssignableObject,
 } from '../../../common/assignments';
-import type {
+import {
   FindAssignableObjectResponse,
   GetAssignableTypesResponse,
 } from '../../../common/http_api_types';

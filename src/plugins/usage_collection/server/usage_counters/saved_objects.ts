@@ -5,10 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import type {
+  SavedObject,
+  SavedObjectsRepository,
+  SavedObjectAttributes,
+  SavedObjectsServiceSetup,
+} from 'kibana/server';
 import moment from 'moment';
-import type { SavedObjectsServiceSetup } from '../../../../core/server/saved_objects/saved_objects_service';
-import { SavedObjectsRepository } from '../../../../core/server/saved_objects/service/lib/repository';
-import type { SavedObject, SavedObjectAttributes } from '../../../../core/types/saved_objects';
 import type { CounterMetric } from './usage_counter';
 
 /**

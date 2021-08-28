@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { History } from 'history';
+
+import { History } from 'history';
 import { parse, stringify } from 'query-string';
-import { url } from '../../../../../../../src/plugins/kibana_utils/common/url';
-import type { UxLocalUIFilterName } from '../../../../common/ux_ui_filter';
+import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+import { UxLocalUIFilterName } from '../../../../common/ux_ui_filter';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? parse(search.slice(1), { sort: false }) : {};

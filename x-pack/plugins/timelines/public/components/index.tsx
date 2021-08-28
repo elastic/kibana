@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { I18nProvider } from '@kbn/i18n/react';
 import type { Store } from 'redux';
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public/types';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public/storage/storage';
+
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { createStore } from '../store/t_grid';
-import { initialTGridState } from '../store/t_grid/reducer';
+
+import { TGrid as TGridComponent } from './tgrid';
 import type { TGridProps } from '../types';
 import { DragDropContextWrapper } from './drag_and_drop';
-import { TGrid as TGridComponent } from './tgrid';
+import { initialTGridState } from '../store/t_grid/reducer';
 import type { TGridIntegratedProps } from './t_grid/integrated';
 
 const EMPTY_BROWSER_FIELDS = {};
@@ -50,9 +52,10 @@ export const TGrid = (props: TGridComponent) => {
 };
 
 // eslint-disable-next-line import/no-default-export
-export * from './draggables';
+export { TGrid as default };
+
 export * from './drag_and_drop';
-export * from './fields_browser';
+export * from './draggables';
 export * from './last_updated';
 export * from './loading';
-export { TGrid as default };
+export * from './fields_browser';

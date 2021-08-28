@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
+import { EuiEmptyPrompt } from '@elastic/eui';
 
 interface Props {
   title: string;

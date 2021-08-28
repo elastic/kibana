@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '../../../../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../../../../src/core/server/saved_objects/types';
-import type { FieldSpec } from '../../../../../../../../src/plugins/data/common/index_patterns/types';
-import { dataTypes, installationStatuses } from '../../../../../common/constants/epm';
-import type { ValueOf } from '../../../../../common/types';
+
+import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import type { FieldSpec } from 'src/plugins/data/common';
+
+import { loadFieldsFromYaml } from '../../fields/field';
+import type { Fields, Field } from '../../fields/field';
+import { dataTypes, installationStatuses } from '../../../../../common/constants';
 import type {
   ArchivePackage,
-  DataType,
   Installation,
   InstallSource,
-  RegistryPackage,
-} from '../../../../../common/types/models/epm';
-import { appContextService } from '../../../app_context';
-import type { Field, Fields } from '../../fields/field';
-import { loadFieldsFromYaml } from '../../fields/field';
+  ValueOf,
+} from '../../../../../common/types';
+import { appContextService } from '../../../../services';
+import type { RegistryPackage, DataType } from '../../../../types';
 import { getInstallation, getPackageFromSource, getPackageSavedObjects } from '../../packages/get';
 
 interface FieldFormatMap {

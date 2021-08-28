@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import type { UiSettingsParams } from '../../../../src/core/types/ui_settings';
+import { UiSettingsParams } from '../../../../src/core/types';
 import { observabilityFeatureId } from '../common';
 import { enableInspectEsQueries } from '../common/ui_settings_keys';
 

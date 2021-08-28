@@ -7,11 +7,10 @@
  */
 
 import React from 'react';
-import { IndexPattern } from '../../../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import { getDefaultSort } from '../../lib/get_default_sort';
-import type { SortOrder } from './helpers';
-import { getDisplayedColumns } from './helpers';
+import { IndexPattern } from '../../../../../../../kibana_services';
 import { TableHeaderColumn } from './table_header_column';
+import { SortOrder, getDisplayedColumns } from './helpers';
+import { getDefaultSort } from '../../lib/get_default_sort';
 
 interface Props {
   columns: string[];

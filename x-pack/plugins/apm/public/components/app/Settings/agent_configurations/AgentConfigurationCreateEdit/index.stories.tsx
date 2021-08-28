@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { AgentConfigurationCreateEdit } from '.';
-import type { CoreStart } from '../../../../../../../../../src/core/public/types';
-import type { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
-import type { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
-import { ApmPluginContext } from '../../../../../context/apm_plugin/apm_plugin_context';
+import { CoreStart } from 'kibana/public';
+import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../../services/rest/createCallApmApi';
+import { AgentConfigurationCreateEdit } from './index';
+import {
+  ApmPluginContext,
+  ApmPluginContextValue,
+} from '../../../../../context/apm_plugin/apm_plugin_context';
 
 storiesOf(
   'app/Settings/AgentConfigurations/AgentConfigurationCreateEdit',

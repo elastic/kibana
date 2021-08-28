@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import React from 'react';
-import { CodeEditor } from '../../../../../../kibana_react/public/code_editor';
+import { EuiFlexItem, EuiFlexGroup, EuiCopy, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+
+import { CodeEditor } from '../../../../../../kibana_react/public';
 
 interface RequestCodeViewerProps {
   json: string;

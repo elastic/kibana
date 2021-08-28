@@ -5,21 +5,18 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../../../observability/server/utils/queries';
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
+import { Coordinate } from '../../../../typings/timeseries';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import type { Coordinate } from '../../../../typings/timeseries';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getServiceErrorGroupDetailedStatistics({
   kuery,

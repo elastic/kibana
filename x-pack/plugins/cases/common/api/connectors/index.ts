@@ -6,7 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import type { ActionResult, ActionType } from '../../../../actions/common/types';
+
+import { ActionResult, ActionType } from '../../../../actions/common';
 import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
@@ -14,10 +15,10 @@ import { ServiceNowSIRFieldsRT } from './servicenow_sir';
 import { SwimlaneFieldsRT } from './swimlane';
 
 export * from './jira';
-export * from './mappings';
-export * from './resilient';
 export * from './servicenow_itsm';
 export * from './servicenow_sir';
+export * from './resilient';
+export * from './mappings';
 export * from './swimlane';
 
 export type ActionConnector = ActionResult;

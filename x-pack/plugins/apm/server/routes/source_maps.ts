@@ -5,20 +5,20 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
+import { SavedObjectsClientContract } from 'kibana/server';
+import { jsonRt } from '@kbn/io-ts-utils';
 import {
   createApmArtifact,
   deleteApmArtifact,
-  getCleanedBundleFilePath,
   listArtifacts,
   updateSourceMapsOnFleetPolicies,
+  getCleanedBundleFilePath,
 } from '../lib/fleet/source_maps';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
-import { stringFromBufferRt } from '../utils/string_from_buffer_rt';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { stringFromBufferRt } from '../utils/string_from_buffer_rt';
 
 export const sourceMapRt = t.intersection([
   t.type({

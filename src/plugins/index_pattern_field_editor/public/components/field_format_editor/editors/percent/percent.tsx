@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { defaultState } from '../default/default';
+
 import { NumberFormatEditor } from '../number/number';
+import { defaultState } from '../default';
 import { formatId } from './constants';
 
 export class PercentFormatEditor extends NumberFormatEditor {

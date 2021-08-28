@@ -5,10 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { HttpSetup } from 'kibana/public';
 import React, { createContext, useContext } from 'react';
-import type { HttpSetup } from '../../../../../core/public/http/types';
-import { useRequest } from '../../../public/request/use_request';
-import type { Error as CustomError, Privileges } from '../types';
+
+import { useRequest } from '../../../public/request';
+
+import { Privileges, Error as CustomError } from '../types';
 
 interface Authorization {
   isLoading: boolean;

@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { isObject } from 'lodash';
-import type { SavedObjectsClientContract } from '../../../../../core/public/saved_objects/saved_objects_client';
-import type { SavedObjectAttributes } from '../../../../../core/types/saved_objects';
-import type { SavedQuery, SavedQueryAttributes, SavedQueryService } from './types';
+import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
+import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
 
 type SerializedSavedQueryAttributes = SavedObjectAttributes &
   SavedQueryAttributes & {

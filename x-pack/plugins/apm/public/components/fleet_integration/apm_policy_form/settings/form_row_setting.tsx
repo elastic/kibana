@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
-  EuiComboBox,
   EuiFieldNumber,
   EuiFieldText,
   EuiIcon,
   EuiSwitch,
   EuiTextArea,
+  EuiComboBox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { FormRowOnChange } from './settings_form';
-import type { SettingDefinition } from './typings';
+import { FormRowOnChange } from './settings_form';
+import { SettingDefinition } from './typings';
 
 interface Props {
   setting: SettingDefinition;

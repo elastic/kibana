@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { EMSTermJoinConfig } from '../../../../../../../../maps/public/ems_autosuggest/ems_autosuggest';
-import { useDataVisualizerKibana } from '../../../../../kibana_context';
-import { TopValues } from '../../../top_values/top_values';
+
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
-import { ChoroplethMap } from './choropleth_map';
+import { TopValues } from '../../../top_values';
+import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
+import { useDataVisualizerKibana } from '../../../../../kibana_context';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
+import { ChoroplethMap } from './choropleth_map';
 
 export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
   const [EMSSuggestion, setEMSSuggestion] = useState<EMSTermJoinConfig | null | undefined>();

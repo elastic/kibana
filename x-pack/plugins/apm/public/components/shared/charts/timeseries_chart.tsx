@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { LegendItemListener, YDomainRange } from '@elastic/charts';
+
 import {
   AnnotationDomainType,
   AreaSeries,
   Axis,
   Chart,
   CurveType,
+  LegendItemListener,
   LineAnnotation,
   LineSeries,
   niceTimeFormatter,
@@ -18,22 +19,25 @@ import {
   RectAnnotation,
   ScaleType,
   Settings,
+  YDomainRange,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Suspense, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { LazyAlertsFlyout } from '../../../../../observability/public';
-import { useChartTheme } from '../../../../../observability/public/hooks/use_chart_theme';
-import { asAbsoluteDateTime } from '../../../../common/utils/formatters/datetime';
-import type {
+import {
+  LazyAlertsFlyout,
+  useChartTheme,
+} from '../../../../../observability/public';
+import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
+import {
   Coordinate,
   RectCoordinate,
   TimeSeries,
 } from '../../../../typings/timeseries';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import type { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
+import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';

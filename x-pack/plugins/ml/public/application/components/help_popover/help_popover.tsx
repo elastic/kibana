@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+
+import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ReactNode } from 'react';
-import React from 'react';
+import {
+  EuiButtonIcon,
+  EuiLinkButtonProps,
+  EuiPopover,
+  EuiPopoverProps,
+  EuiPopoverTitle,
+  EuiText,
+} from '@elastic/eui';
 import './help_popover.scss';
 
 export const HelpPopoverButton = ({ onClick }: { onClick: EuiLinkButtonProps['onClick'] }) => {

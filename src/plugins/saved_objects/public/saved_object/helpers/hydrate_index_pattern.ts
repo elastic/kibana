@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IndexPatternsContract } from '../../../../data/common/index_patterns/index_patterns/index_patterns';
-import type { SavedObject, SavedObjectConfig } from '../../types';
+
+import { SavedObject, SavedObjectConfig } from '../../types';
+import { IndexPatternsContract } from '../../../../data/public';
 
 /**
  * After creation or fetching from ES, ensure that the searchSources index indexPattern

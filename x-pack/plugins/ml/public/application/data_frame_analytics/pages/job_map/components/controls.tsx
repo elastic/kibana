@@ -4,6 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useEffect, useState, useContext, useCallback } from 'react';
+import cytoscape from 'cytoscape';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment-timezone';
 import {
   EuiButton,
   EuiCodeBlock,
@@ -13,33 +19,27 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFlyoutBody,
   EuiPopover,
   EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
-import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import cytoscape from 'cytoscape';
-import moment from 'moment-timezone';
-import type { FC } from 'react';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import { CytoscapeContext } from './cytoscape';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { DeleteJobCheckModal } from '../../../../components/delete_job_check_modal/delete_job_check_modal';
-import { useMlLocator } from '../../../../contexts/kibana/use_create_url';
-import { useNavigateToPath } from '../../../../contexts/kibana/use_navigate_to_path';
-import { useNotifications } from '../../../../contexts/kibana/use_notifications_context';
+import { useMlLocator, useNotifications, useNavigateToPath } from '../../../../contexts/kibana';
 import { getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
-import { DeleteActionModal } from '../../analytics_management/components/action_delete/delete_action_modal';
-import { useDeleteAction } from '../../analytics_management/components/action_delete/use_delete_action';
-import { CytoscapeContext } from './cytoscape';
+import {
+  useDeleteAction,
+  DeleteActionModal,
+} from '../../analytics_management/components/action_delete';
+import { DeleteJobCheckModal } from '../../../../components/delete_job_check_modal';
 
 interface Props {
   details: any;

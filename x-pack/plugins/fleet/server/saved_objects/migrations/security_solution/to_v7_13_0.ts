@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectMigrationFn } from '../../../../../../../src/core/server/saved_objects/migrations/types';
-import type { PackagePolicy } from '../../../../common/types/models/package_policy';
+
+import type { SavedObjectMigrationFn } from 'kibana/server';
+
+import type { PackagePolicy } from '../../../../common';
 import { relativeDownloadUrlFromArtifact } from '../../../services/artifacts/mappings';
-import type { ArtifactElasticsearchProperties } from '../../../services/artifacts/types';
+import type { ArtifactElasticsearchProperties } from '../../../services';
 
 type ArtifactManifestList = Record<
   string,

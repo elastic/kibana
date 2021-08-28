@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
-import { isFinite, isNumber } from 'lodash';
-import type { IErrorObject, ValidationResult } from '../../../../triggers_actions_ui/public/types';
-import type {
-  PartialCountCriteria,
-  PartialCriteria,
-  PartialRequiredAlertParams,
-} from '../../../common/alerting/logs/log_threshold/types';
+import { isNumber, isFinite } from 'lodash';
+import { IErrorObject, ValidationResult } from '../../../../triggers_actions_ui/public';
 import {
-  getDenominator,
-  getNumerator,
+  PartialCountCriteria,
   isRatioAlert,
+  getNumerator,
+  getDenominator,
+  PartialRequiredAlertParams,
+  PartialCriteria,
 } from '../../../common/alerting/logs/log_threshold/types';
 
 export const criterionErrorRT = rt.type({

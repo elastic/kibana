@@ -6,9 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import type { ValidationIndicesError } from '../../../../../common/http_api/log_analysis/validation/log_entry_rate_indices';
-import { validationIndicesErrorRT } from '../../../../../common/http_api/log_analysis/validation/log_entry_rate_indices';
-import type { DatasetFilter } from '../../../../../common/log_analysis/job_parameters';
+import { ValidationIndicesError, validationIndicesErrorRT } from '../../../../../common/http_api';
+import { DatasetFilter } from '../../../../../common/log_analysis';
 
 export { ValidationIndicesError, validationIndicesErrorRT };
 

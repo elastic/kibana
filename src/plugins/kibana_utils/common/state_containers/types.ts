@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Ensure } from '@kbn/utility-types';
-import type { ComponentType, FC } from 'react';
+
 import { Observable } from 'rxjs';
+import { Ensure } from '@kbn/utility-types';
+import { FC, ComponentType } from 'react';
 
 /**
  * Base {@link StateContainer} state shape

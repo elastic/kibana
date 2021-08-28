@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
-import {
-  AGENT_TYPE_EPHEMERAL,
-  AGENT_TYPE_PERMANENT,
-  AGENT_TYPE_TEMPORARY,
-} from '../../../common/constants/agent';
+import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../../common';
 
 export const AgentTypeSchema = schema.oneOf([
   schema.literal(AGENT_TYPE_EPHEMERAL),

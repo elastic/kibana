@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsClientContract } from '../types';
+
+import { SavedObjectsClientContract } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 import { savedObjectsPointInTimeFinderMock } from './lib/point_in_time_finder.mock';
 

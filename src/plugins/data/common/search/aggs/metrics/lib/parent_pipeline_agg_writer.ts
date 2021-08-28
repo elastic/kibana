@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IAggConfigs } from '../../agg_configs';
-import type { IMetricAggConfig } from '../metric_agg_type';
+
+import { IAggConfigs } from '../../agg_configs';
+import { IMetricAggConfig } from '../metric_agg_type';
 
 export const parentPipelineAggWriter = (
   agg: IMetricAggConfig,

@@ -5,46 +5,51 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public */
 type IFieldFormatsRegistry = PublicMethodsOf<FieldFormatsRegistry>;
 
+export { FieldFormatsRegistry, IFieldFormatsRegistry };
+export { FieldFormat } from './field_format';
 export { baseFormatters } from './constants/base_formatters';
-export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
-export { FORMATS_UI_SETTINGS } from './constants/ui_settings';
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
 export {
   BoolFormat,
   BytesFormat,
   ColorFormat,
   DurationFormat,
-  HistogramFormat,
   IpFormat,
   NumberFormat,
   PercentFormat,
   RelativeDateFormat,
   SourceFormat,
   StaticLookupFormat,
+  UrlFormat,
   StringFormat,
   TruncateFormat,
-  UrlFormat,
+  HistogramFormat,
 } from './converters';
-export * from './errors';
-export { FieldFormat } from './field_format';
+
+export { getHighlightRequest } from './utils';
+
+export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
+export { FORMATS_UI_SETTINGS } from './constants/ui_settings';
+export { FIELD_FORMAT_IDS } from './types';
+export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
+
 export {
+  FieldFormatsGetConfigFn,
+  FieldFormatsContentType,
   FieldFormatConfig,
   FieldFormatId,
+  SerializedFieldFormat,
+  FormatFactory,
   // Used in field format plugin only
   FieldFormatInstanceType,
-  FieldFormatsContentType,
-  FieldFormatsGetConfigFn,
-  FieldFormatsStartCommon,
-  FIELD_FORMAT_IDS,
-  FormatFactory,
   IFieldFormat,
-  SerializedFieldFormat,
+  FieldFormatsStartCommon,
 } from './types';
-export { getHighlightRequest } from './utils';
-export { FieldFormatsRegistry, IFieldFormatsRegistry };
+
+export * from './errors';

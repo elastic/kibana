@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common/constants';
-import { ML_PAGES } from '../../../../../../ml/common/constants/locator';
-import { useMlHref } from '../../../../../../ml/public/locator/use_ml_href';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import type { TimePickerRefreshInterval } from '../../DatePicker/typings';
+import { TimePickerRefreshInterval } from '../../DatePicker/typings';
 
 interface Props {
   children?: React.ReactNode;

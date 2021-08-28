@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RisonValue } from 'rison-node';
-import rison from 'rison-node';
-import type { ExistsFilter } from '../../../../../../../../src/plugins/data/common/es_query';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import { esFilters } from '../../../../../../../../src/plugins/data/public/deprecated';
-import type { PersistableFilter } from '../../../../../../lens/common/types';
-import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
+import rison, { RisonValue } from 'rison-node';
 import type { SeriesUrl, UrlFilter } from '../types';
+import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { esFilters, ExistsFilter } from '../../../../../../../../src/plugins/data/public';
 import { URL_KEYS } from './constants/url_constants';
+import { PersistableFilter } from '../../../../../../lens/common';
 
 export function convertToShortUrl(series: SeriesUrl) {
   const {

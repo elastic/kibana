@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { BarGroupProps } from './styles';
-import { BarGroup } from './styles';
+
+import { BarGroup, BarGroupProps } from './styles';
 
 export interface UtilityBarGroupProps extends BarGroupProps {
   children: React.ReactNode;

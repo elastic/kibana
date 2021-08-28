@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '..';
+import type { RouteDefinitionParams } from '../';
 import {
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';
-import { shouldProviderUseLoginForm } from '../../../common/model/authentication_provider';
+import { shouldProviderUseLoginForm } from '../../../common/model';
 import { parseNext } from '../../../common/parse_next';
 
 /**

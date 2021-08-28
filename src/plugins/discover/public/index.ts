@@ -5,15 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+
+import { PluginInitializerContext } from 'kibana/public';
 import { DiscoverPlugin } from './plugin';
 
-export { ISearchEmbeddable, SearchInput, SEARCH_EMBEDDABLE_TYPE } from './application/embeddable';
-export { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';
 export { DiscoverSetup, DiscoverStart } from './plugin';
-export { createSavedSearchesLoader, SavedSearch, SavedSearchLoader } from './saved_searches';
-export { loadSharingDataHelpers } from './shared';
-export { DiscoverUrlGeneratorState, DISCOVER_APP_URL_GENERATOR } from './url_generator';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DiscoverPlugin(initializerContext);
 }
+
+export { SavedSearch, SavedSearchLoader, createSavedSearchesLoader } from './saved_searches';
+export { ISearchEmbeddable, SEARCH_EMBEDDABLE_TYPE, SearchInput } from './application/embeddable';
+export { loadSharingDataHelpers } from './shared';
+
+export { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from './url_generator';
+export { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';

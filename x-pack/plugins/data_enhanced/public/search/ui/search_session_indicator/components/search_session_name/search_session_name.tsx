@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { useEffect } from 'react';
+import { EuiButtonEmpty, EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 export interface SearchSessionNameProps {
   name: string;

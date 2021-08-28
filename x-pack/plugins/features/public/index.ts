@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PluginInitializer } from '../../../../src/core/public/plugins/plugin';
-import type { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
-import { FeaturesPlugin } from './plugin';
+
+import { PluginInitializer } from 'src/core/public';
+import { FeaturesPlugin, FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 
 export {
-  FeatureKibanaPrivileges,
   KibanaFeature,
   KibanaFeatureConfig,
+  FeatureKibanaPrivileges,
   SubFeatureConfig,
   SubFeaturePrivilegeConfig,
 } from '../common';
+
 export { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<FeaturesPluginSetup, FeaturesPluginStart> = () =>

@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
-import { parse } from 'query-string';
+
 import React, { useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
-import type { CoreStart } from '../../../../core/public/types';
-import { ScopedHistory } from '../../../../core/public/application/scoped_history';
-import type { ChromeBreadcrumb } from '../../../../core/public/chrome/types';
-import { RedirectAppLinks } from '../../../kibana_react/public/app_links/redirect_app_link';
-import type { ISavedObjectsManagementServiceRegistry } from '../services/service_registry';
-import { SavedObjectEdition } from './object_view/saved_object_view';
+import { useParams, useLocation } from 'react-router-dom';
+import { parse } from 'query-string';
+import { i18n } from '@kbn/i18n';
+import { CoreStart, ChromeBreadcrumb, ScopedHistory } from 'src/core/public';
+import { RedirectAppLinks } from '../../../kibana_react/public';
+import { ISavedObjectsManagementServiceRegistry } from '../services';
+import { SavedObjectEdition } from './object_view';
 
 const SavedObjectsEditionPage = ({
   coreStart,

@@ -4,47 +4,58 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiCommentProps } from '@elastic/eui';
-import { EuiCommentList, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiCommentList,
+  EuiCommentProps,
+} from '@elastic/eui';
 import classNames from 'classnames';
-import { isRight } from 'fp-ts/Either';
 import { isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { isRight } from 'fp-ts/Either';
+
+import * as i18n from './translations';
+
+import { useUpdateComment } from '../../containers/use_update_comment';
+import { useCurrentUser } from '../../common/lib/kibana';
+import { AddComment } from '../add_comment';
 import {
+  ActionConnector,
   ActionsCommentRequestRt,
   AlertCommentRequestRt,
+  Case,
+  CaseUserActions,
   CommentType,
   ContextTypeUserRt,
-} from '../../../common/api/cases/comment';
-import type { ActionConnector } from '../../../common/api/connectors';
-import type { Case, CaseUserActions, Ecs } from '../../../common/ui/types';
-import { useCurrentUser } from '../../common/lib/kibana/hooks';
-import type { CaseServices } from '../../containers/use_get_case_user_actions';
-import { useUpdateComment } from '../../containers/use_update_comment';
+  Ecs,
+} from '../../../common';
+import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
-import { AddComment } from '../add_comment';
-import type { OnUpdateFields } from '../case_view';
-import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
-import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
-import type { ActionsNavigation, RuleDetailsNavigation } from './helpers';
+import { OnUpdateFields } from '../case_view';
 import {
-  getActionAttachment,
-  getAlertAttachment,
   getConnectorLabelTitle,
-  getGeneratedAlertsAttachment,
   getLabelTitle,
   getPushedServiceLabelTitle,
   getPushInfo,
   getUpdateAction,
+  getAlertAttachment,
+  getGeneratedAlertsAttachment,
+  RuleDetailsNavigation,
+  ActionsNavigation,
+  getActionAttachment,
 } from './helpers';
-import * as i18n from './translations';
 import { UserActionAvatar } from './user_action_avatar';
-import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
+import { UserActionContentToolbar } from './user_action_content_toolbar';
+import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
+import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Feature } from 'geojson';
+
+import { Feature } from 'geojson';
 import { RENDER_AS } from '../constants';
 
 export function convertCompositeRespToGeoJson(esResponse: any, renderAs: RENDER_AS): Feature[];

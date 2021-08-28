@@ -5,28 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { useEffect, useState, useCallback } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
   EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiButton,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEqual, sortBy } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
-import type {
-  SavedQuery,
-  SavedQueryAttributes,
-  SavedQueryService,
-} from '../../query/saved_query/types';
+import { sortBy, isEqual } from 'lodash';
+import { SavedQuery, SavedQueryService } from '../..';
+import { SavedQueryAttributes } from '../../query';
 
 interface Props {
   savedQuery?: SavedQueryAttributes;

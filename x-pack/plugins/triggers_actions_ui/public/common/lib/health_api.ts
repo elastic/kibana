@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpSetup } from '../../../../../../src/core/public/http/types';
+
+import { HttpSetup } from 'kibana/public';
 
 const TRIGGERS_ACTIONS_UI_API_ROOT = '/api/triggers_actions_ui';
 

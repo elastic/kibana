@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fromKueryExpression } from '@kbn/es-query';
-import React, { useEffect, useMemo, useState } from 'react';
 
-import type { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import { QueryStringInput } from '../../../../../../../src/plugins/data/public/ui/query_string_input';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../../common/constants/agent';
-import { INDEX_NAME } from '../../../constants';
-import { useStartServices } from '../../../hooks/use_core';
+import React, { useState, useEffect, useMemo } from 'react';
+
+import { fromKueryExpression } from '@kbn/es-query';
+
+import type { IFieldType } from '../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import { useStartServices } from '../hooks';
+import { INDEX_NAME, AGENT_SAVED_OBJECT_TYPE } from '../constants';
 
 const HIDDEN_FIELDS = [`${AGENT_SAVED_OBJECT_TYPE}.actions`, '_id', '_index'];
 

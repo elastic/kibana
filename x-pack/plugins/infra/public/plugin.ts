@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { AppMountParameters } from '../../../../src/core/public/application/types';
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { createInventoryMetricAlertType } from './alerting/inventory';
-import { createLogThresholdAlertType } from './alerting/log_threshold/log_threshold_alert_type';
+import { createLogThresholdAlertType } from './alerting/log_threshold';
 import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
-import type {
+import {
   InfraClientCoreSetup,
   InfraClientCoreStart,
   InfraClientPluginClass,

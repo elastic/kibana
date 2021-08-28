@@ -5,12 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { AnyExpressionFunctionDefinition } from '../expression_functions/types';
-import type { ExpressionAstFunctionBuilder, InferFunctionDefinition } from './build_function';
-import { buildExpressionFunction } from './build_function';
+
+import { AnyExpressionFunctionDefinition } from '../expression_functions/types';
+import { ExpressionAstExpression, ExpressionAstFunction } from './types';
+import {
+  buildExpressionFunction,
+  ExpressionAstFunctionBuilder,
+  InferFunctionDefinition,
+} from './build_function';
 import { format } from './format';
 import { parse } from './parse';
-import type { ExpressionAstExpression, ExpressionAstFunction } from './types';
 
 /**
  * Type guard that checks whether a given value is an

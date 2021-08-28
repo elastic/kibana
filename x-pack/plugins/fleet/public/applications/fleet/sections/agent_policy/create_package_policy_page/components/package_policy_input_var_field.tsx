@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiCodeBlock,
-  EuiFieldPassword,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
+
+import React, { useState, memo, useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useMemo, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import {
+  EuiFormRow,
+  EuiSwitch,
+  EuiFieldText,
+  EuiText,
+  EuiFieldPassword,
+  EuiCodeBlock,
+} from '@elastic/eui';
 
-import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public/code_editor';
-import type { RegistryVarsEntry } from '../../../../../../../common/types/models/epm';
+import type { RegistryVarsEntry } from '../../../../types';
+import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 import { MultiTextInput } from './multi_text_input';
 

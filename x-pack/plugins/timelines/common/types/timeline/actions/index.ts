@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
-import type { ComponentType, JSXElementConstructor } from 'react';
-import { TimelineTabs } from '..';
-import type { Ecs } from '../../../ecs';
-import type { BrowserFields } from '../../../search_strategy/index_fields';
-import type { TimelineNonEcsData } from '../../../search_strategy/timeline/events/all';
-import type { ColumnHeaderOptions } from '../columns';
-import type { OnRowSelected, SortColumnTimeline } from '../store';
+import { ComponentType, JSXElementConstructor } from 'react';
+import { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
+
+import { OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';
+import { BrowserFields } from '../../../search_strategy/index_fields';
+import { ColumnHeaderOptions } from '../columns';
+import { TimelineNonEcsData } from '../../../search_strategy';
+import { Ecs } from '../../../ecs';
 
 export interface ActionProps {
   ariaRowindex: number;

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Agent, AgentAction, NewAgentAction } from '../models/agent';
+
+import type { Agent, AgentAction, NewAgentAction } from '../models';
 
 export interface GetAgentsRequest {
   query: {

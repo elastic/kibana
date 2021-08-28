@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+
 import React, { useContext, useEffect } from 'react';
-import type { IUiSettingsClient } from '../../../../../../src/core/public/ui_settings/types';
-import type { ColumnConfig } from '../../../common/expressions/datatable/datatable_column';
-import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
-import type { FormatFactory } from '../../../common/types';
-import { getContrastColor, getNumericValue } from '../../shared_components/coloring/utils';
+import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { IUiSettingsClient } from 'kibana/public';
+import type { FormatFactory } from '../../../common';
+import { getOriginalId } from '../../../common/expressions';
+import type { ColumnConfig } from '../../../common/expressions';
 import type { DataContextType } from './types';
+import { getContrastColor, getNumericValue } from '../../shared_components/coloring/utils';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,

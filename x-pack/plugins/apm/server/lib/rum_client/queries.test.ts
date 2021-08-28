@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import type { SearchParamsMock } from '../../utils/test_helpers';
-import { inspectSearchParams } from '../../utils/test_helpers';
+
+import {
+  SearchParamsMock,
+  inspectSearchParams,
+} from '../../utils/test_helpers';
 import { getClientMetrics } from './get_client_metrics';
-import { getJSErrors } from './get_js_errors';
-import { getLongTaskMetrics } from './get_long_task_metrics';
-import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getPageViewTrends } from './get_page_view_trends';
+import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getRumServices } from './get_rum_services';
+import { getLongTaskMetrics } from './get_long_task_metrics';
 import { getWebCoreVitals } from './get_web_core_vitals';
+import { getJSErrors } from './get_js_errors';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('rum client dashboard queries', () => {
   let mock: SearchParamsMock;

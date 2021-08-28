@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { Writable } from '@kbn/utility-types';
 import moment from 'moment';
-import type { ISavedObjectsRepository } from '../../../../core/server/saved_objects/service/lib/repository';
+import { Writable } from '@kbn/utility-types';
+import { ISavedObjectsRepository } from 'src/core/server';
+import { ApplicationUsageReport } from './schema';
 import { getDailyId } from '../../common/application_usage';
-import type { ApplicationUsageReport } from './schema';
 
 type WritableApplicationUsageReport = Writable<ApplicationUsageReport>;
 

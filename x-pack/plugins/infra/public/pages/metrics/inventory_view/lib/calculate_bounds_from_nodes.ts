@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { first, isFinite, max, min } from 'lodash';
-import type { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
-import type { InfraWaffleMapBounds } from '../../../../lib/lib';
+
+import { first, min, max, isFinite } from 'lodash';
+import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
+import { InfraWaffleMapBounds } from '../../../../lib/lib';
 
 export const calculateBoundsFromNodes = (nodes: SnapshotNode[]): InfraWaffleMapBounds => {
   const values = nodes.map((node) => {

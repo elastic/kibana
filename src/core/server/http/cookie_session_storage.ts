@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { Request, Server } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
-import type { Request } from '@hapi/hapi';
-import { Server } from '@hapi/hapi';
-import type { Logger } from '@kbn/logging';
-import { ensureRawRequest, KibanaRequest } from './router/request';
-import type { SessionStorage, SessionStorageFactory } from './session_storage';
+
+import { KibanaRequest, ensureRawRequest } from './router';
+import { SessionStorageFactory, SessionStorage } from './session_storage';
+import { Logger } from '..';
 
 /**
  * Configuration used to create HTTP session storage based on top of cookie mechanism.

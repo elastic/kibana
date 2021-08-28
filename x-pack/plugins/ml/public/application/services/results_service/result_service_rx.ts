@@ -4,25 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { each, get } from 'lodash';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import type { CriteriaField } from '.';
-import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
-import type { Datafeed } from '../../../../common/types/anomaly_detection_jobs/datafeed';
-import type { JobId } from '../../../../common/types/anomaly_detection_jobs/job';
-import type { Dictionary } from '../../../../common/types/common';
-import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import type { EntityField } from '../../../../common/util/anomaly_utils';
-import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
-import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
-import type { ErrorType } from '../../../../common/util/errors/types';
-import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
-import { isPopulatedObject } from '../../../../common/util/object_utils';
-import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
-import { findAggField } from '../../../../common/util/validation_utils';
-import type { MlApiServices } from '../ml_api_service';
-import type { RecordForInfluencer } from './results_service';
 
 // Queries Elasticsearch to obtain metric aggregation results.
 // index can be a String, or String[], of index names to search.
@@ -31,6 +12,23 @@ import type { RecordForInfluencer } from './results_service';
 // Extra query object can be supplied, or pass null if no additional query
 // to that built from the supplied entity fields.
 // Returned response contains a results property containing the requested aggregation.
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { each, get } from 'lodash';
+import { Dictionary } from '../../../../common/types/common';
+import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
+import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
+import { MlApiServices } from '../ml_api_service';
+import { CriteriaField } from './index';
+import { findAggField } from '../../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
+import { aggregationTypeTransform, EntityField } from '../../../../common/util/anomaly_utils';
+import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
+import { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import { RecordForInfluencer } from './results_service';
+import { isRuntimeMappings } from '../../../../common';
+import { ErrorType } from '../../../../common/util/errors';
 
 export interface ResultResponse {
   success: boolean;

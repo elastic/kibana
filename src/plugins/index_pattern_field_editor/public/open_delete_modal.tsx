@@ -7,15 +7,19 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '../../../core/public/types';
-import type { OverlayRef } from '../../../core/public/overlays/types';
-import { IndexPattern } from '../../data/common/index_patterns/index_patterns/index_pattern';
-import type { DataPublicPluginStart } from '../../data/public/types';
-import { toMountPoint } from '../../kibana_react/public/util/to_mount_point';
-import type { UsageCollectionStart } from '../../usage_collection/public/plugin';
+import { CoreStart, OverlayRef } from 'src/core/public';
+
+import {
+  toMountPoint,
+  DataPublicPluginStart,
+  IndexPattern,
+  UsageCollectionStart,
+} from './shared_imports';
+
+import { CloseEditor } from './types';
+
 import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
 import { removeFields } from './lib/remove_fields';
-import type { CloseEditor } from './types';
 
 export interface OpenFieldDeleteModalOptions {
   ctx: {

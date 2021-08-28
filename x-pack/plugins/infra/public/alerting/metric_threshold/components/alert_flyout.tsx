@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useContext, useMemo } from 'react';
-import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics/types';
-import type { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
-import { useAlertPrefillContext } from '../../use_alert_prefill';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
+import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
+import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { useAlertPrefillContext } from '../../../alerting/use_alert_prefill';
 
 interface Props {
   visible?: boolean;

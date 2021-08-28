@@ -4,15 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup } from '../../../../../../../../src/core/public/types';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../common/constants/field_histograms';
+
+import { CoreSetup } from 'src/core/public';
+
+import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
+
+import { SavedSearchQuery } from '../../../contexts/ml';
 import { OMIT_FIELDS } from '../../../../../common/constants/field_types';
-import type { RuntimeMappings } from '../../../../../common/types/fields';
-import type { IndexPatternTitle } from '../../../../../common/types/kibana';
-import type { SavedSearchQuery } from '../../../contexts/ml/ml_context';
+import { IndexPatternTitle } from '../../../../../common/types/kibana';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../common/constants/field_histograms';
+
 import { ml } from '../../../services/ml_api_service';
-import type { FieldHistogramRequestConfig } from '../common/request';
+import { FieldHistogramRequestConfig } from '../common/request';
+import { RuntimeMappings } from '../../../../../common/types/fields';
 
 // Maximum number of examples to obtain for text type fields.
 const MAX_EXAMPLES_DEFAULT: number = 10;

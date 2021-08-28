@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { QueryState } from '../../../../../../../src/plugins/data/public/query/state_sync/types';
+
+import { QueryState } from 'src/plugins/data/public';
 import { getUiSettings } from '../../../kibana_services';
 
 export function getInitialTimeFilters({

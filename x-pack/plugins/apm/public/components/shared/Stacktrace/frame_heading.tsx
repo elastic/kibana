@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ComponentType } from 'react';
-import React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import type { FrameHeadingRendererProps } from './frame_heading_renderers';
-import { CSharpFrameHeadingRenderer } from './frame_heading_renderers/c_sharp_frame_heading_renderer';
-import { DefaultFrameHeadingRenderer } from './frame_heading_renderers/default_frame_heading_renderer';
-import { JavaFrameHeadingRenderer } from './frame_heading_renderers/java_frame_heading_renderer';
-import { JavaScriptFrameHeadingRenderer } from './frame_heading_renderers/java_script_frame_heading_renderer';
-import { RubyFrameHeadingRenderer } from './frame_heading_renderers/ruby_frame_heading_renderer';
+
+import React, { ComponentType } from 'react';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import {
+  CSharpFrameHeadingRenderer,
+  DefaultFrameHeadingRenderer,
+  FrameHeadingRendererProps,
+  JavaFrameHeadingRenderer,
+  JavaScriptFrameHeadingRenderer,
+  RubyFrameHeadingRenderer,
+} from './frame_heading_renderers';
 
 const FileDetails = euiStyled.div`
   color: ${({ theme }) => theme.eui.euiColorDarkShade};

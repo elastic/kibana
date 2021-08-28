@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { ValidationFunc } from '../../hook_form_lib';
+import { containsChars } from '../../../validators/string';
+import { ERROR_CODE } from './types';
+
 import { indexPatterns } from '../../../../../data/public';
-import { containsChars } from '../../../validators/string/contains_chars';
-import type { ValidationFunc } from '../../hook_form_lib/types';
-import type { ERROR_CODE } from './types';
 
 export const indexPatternField = (i18n: any) => (
   ...args: Parameters<ValidationFunc>

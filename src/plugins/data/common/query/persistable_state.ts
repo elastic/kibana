@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Filter } from '@kbn/es-query';
-import type { SerializableRecord } from '@kbn/utility-types';
 import uuid from 'uuid';
-import type { SavedObjectReference } from '../../../../core/types/saved_objects';
+import { Filter } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from '../../../../core/types';
 
 export const extract = (filters: Filter[]) => {
   const references: SavedObjectReference[] = [];

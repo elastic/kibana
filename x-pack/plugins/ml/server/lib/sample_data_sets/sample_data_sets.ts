@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import { MlLicense } from '../../../common/license/ml_license';
-import type { PluginsSetup } from '../../types';
+import { MlLicense } from '../../../common/license';
+import { PluginsSetup } from '../../types';
 
 export function initSampleDataSets(mlLicense: MlLicense, plugins: PluginsSetup) {
   if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {

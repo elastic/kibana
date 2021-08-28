@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { RouteComponentProps } from 'react-router-dom';
-import { Redirect, Route, Router, Switch } from 'react-router-dom';
-import type { AppMountParameters } from '../../../../src/core/public/application/types';
-import { withNotifyOnErrors } from '../../../../src/plugins/kibana_utils/public/state_management/url/errors';
-import type { IKbnUrlStateStorage } from '../../../../src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
-import { createKbnUrlStateStorage } from '../../../../src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
-import { APP_ID } from '../common/constants';
-import type { MapByReferenceInput, MapByValueInput } from './embeddable/types';
+import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { AppMountParameters } from 'kibana/public';
 import {
   getCoreChrome,
   getCoreI18n,
-  getDocLinks,
-  getEmbeddableService,
   getMapsCapabilities,
   getToasts,
+  getEmbeddableService,
+  getDocLinks,
 } from './kibana_services';
-import { LoadListAndRender as ListPage } from './routes/list_page/load_list_and_render';
-import { MapPage } from './routes/map_page/map_page';
+import {
+  createKbnUrlStateStorage,
+  withNotifyOnErrors,
+  IKbnUrlStateStorage,
+} from '../../../../src/plugins/kibana_utils/public';
+import { ListPage, MapPage } from './routes';
+import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
+import { APP_ID } from '../common/constants';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;

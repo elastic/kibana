@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiContextMenuItem } from '@elastic/eui';
+
 import React, { memo } from 'react';
+import { EuiContextMenuItem } from '@elastic/eui';
+
 import { useAddToCase } from '../../../../hooks/use_add_to_case';
-import type { AddToCaseActionProps } from './add_to_case_action';
+import { AddToCaseActionProps } from './add_to_case_action';
 import * as i18n from './translations';
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({

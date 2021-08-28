@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFieldNumber } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { useState } from 'react';
-import { useDebounceWithOptions } from '../../../../shared_components/helpers';
+import { i18n } from '@kbn/i18n';
+import { EuiFieldNumber } from '@elastic/eui';
+import { useDebounceWithOptions } from '../../../../shared_components';
 
 export const ValuesInput = ({
   value,

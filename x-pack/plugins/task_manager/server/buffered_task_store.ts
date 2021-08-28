@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { BufferOptions, Operation } from './lib/bulk_operation_buffer';
-import { createBuffer } from './lib/bulk_operation_buffer';
-import { unwrapPromise } from './lib/result_type';
-import type { ConcreteTaskInstance } from './task';
-import type { Updatable } from './task_running/task_runner';
+
 import { TaskStore } from './task_store';
+import { ConcreteTaskInstance } from './task';
+import { Updatable } from './task_running';
+import { createBuffer, Operation, BufferOptions } from './lib/bulk_operation_buffer';
+import { unwrapPromise } from './lib/result_type';
 
 // by default allow updates to be buffered for up to 50ms
 const DEFAULT_BUFFER_MAX_DURATION = 50;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import './space_result_details.scss';
+
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -19,16 +21,15 @@ import moment from 'moment';
 import React, { Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-
 import type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
-} from '../../../../../../src/core/server/saved_objects/import/types';
-import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
-import type { SummarizedCopyToSpaceResult } from '../lib/summarize_copy_result';
+} from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
 import { CopyStatusIndicator } from './copy_status_indicator';
-import './space_result_details.scss';
 
 interface Props {
   summarizedCopyResult: SummarizedCopyToSpaceResult;

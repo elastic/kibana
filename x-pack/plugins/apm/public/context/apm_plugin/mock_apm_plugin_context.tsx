@@ -4,22 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RouterProvider } from '@kbn/typed-react-router-config';
-import type { History } from 'history';
-import { createMemoryHistory } from 'history';
-import type { ReactNode } from 'react';
-import React, { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+
+import React, { ReactNode, useMemo } from 'react';
 import { Observable, of } from 'rxjs';
-import type { ConfigSchema } from '../..';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common/constants';
-import { UrlService } from '../../../../../../src/plugins/share/common/url_service/url_service';
-import { MlLocatorDefinition } from '../../../../ml/public/locator/ml_locator';
-import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public/rules/observability_rule_type_registry_mock';
-import { apmRouter } from '../../components/routing/apm_route_config';
+import { RouterProvider } from '@kbn/typed-react-router-config';
+import { useHistory } from 'react-router-dom';
+import { createMemoryHistory, History } from 'history';
+import { UrlService } from '../../../../../../src/plugins/share/common/url_service';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
+import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
+import { ConfigSchema } from '../..';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
-import type { ApmPluginContextValue } from './apm_plugin_context';
-import { ApmPluginContext } from './apm_plugin_context';
+import { apmRouter } from '../../components/routing/apm_route_config';
+import { MlLocatorDefinition } from '../../../../ml/public';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [

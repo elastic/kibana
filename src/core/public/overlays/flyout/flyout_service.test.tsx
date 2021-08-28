@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
+
 import { mount } from 'enzyme';
 import { i18nServiceMock } from '../../i18n/i18n_service.mock';
-import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
-import type { OverlayRef } from '../types';
-import type { OverlayFlyoutStart } from './flyout_service';
-import { FlyoutService } from './flyout_service';
+import { FlyoutService, OverlayFlyoutStart } from './flyout_service';
+import { OverlayRef } from '../types';
 
 const i18nMock = i18nServiceMock.createStartContract();
 

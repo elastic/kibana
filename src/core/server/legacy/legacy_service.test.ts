@@ -5,21 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Config } from '@kbn/config';
-import { Env, ObjectToConfigAdapter } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import moment from 'moment';
-import { BehaviorSubject } from 'rxjs';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
-import { httpServiceMock } from '../http/http_service.mock';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import type { LegacyServiceSetupDeps } from './legacy_service';
-import { LegacyService } from './legacy_service';
+
 import {
-  reconfigureLoggingMock,
   setupLoggingMock,
   setupLoggingRotateMock,
+  reconfigureLoggingMock,
 } from './legacy_service.test.mocks';
+
+import { BehaviorSubject } from 'rxjs';
+import moment from 'moment';
+import { REPO_ROOT } from '@kbn/dev-utils';
+
+import { Config, Env, ObjectToConfigAdapter } from '../config';
+
+import { getEnvOptions, configServiceMock } from '../config/mocks';
+import { loggingSystemMock } from '../logging/logging_system.mock';
+import { httpServiceMock } from '../http/http_service.mock';
+import { LegacyService, LegacyServiceSetupDeps } from './legacy_service';
 
 let coreId: symbol;
 let env: Env;

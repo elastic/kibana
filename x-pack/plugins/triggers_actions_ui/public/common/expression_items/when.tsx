@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiExpression, EuiPopover, EuiSelect } from '@elastic/eui';
+
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
-import { builtInAggregationTypes } from '../constants/aggregation_types';
-import type { AggregationType } from '../types';
-import { ClosablePopoverTitle } from './components/closable_popover_title';
+import { EuiExpression, EuiPopover, EuiSelect } from '@elastic/eui';
+import { builtInAggregationTypes } from '../constants';
+import { AggregationType } from '../types';
+import { ClosablePopoverTitle } from './components';
 
 export interface WhenExpressionProps {
   aggType: string;

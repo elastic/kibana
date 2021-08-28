@@ -6,14 +6,13 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { keyBy, keys, merge } from 'lodash';
+import type { RequestHandler, SavedObjectsBulkGetObject } from 'src/core/server';
 
-import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
-import type { SavedObjectsBulkGetObject } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type { DataStream } from '../../../common/types/models/data_stream';
-import { KibanaSavedObjectType } from '../../../common/types/models/epm';
-import type { GetDataStreamsResponse } from '../../../common/types/rest_spec/data_stream';
-import { defaultIngestErrorHandler } from '../../errors/handlers';
+import type { DataStream } from '../../types';
+import { KibanaSavedObjectType } from '../../../common';
+import type { GetDataStreamsResponse } from '../../../common';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
+import { defaultIngestErrorHandler } from '../../errors';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 

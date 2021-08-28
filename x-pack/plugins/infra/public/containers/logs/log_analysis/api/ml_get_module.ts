@@ -6,8 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
-import { jobCustomSettingsRT } from '../../../../../common/log_analysis/job_parameters';
+import type { HttpHandler } from 'src/core/public';
+
+import { jobCustomSettingsRT } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export const callGetMlModuleAPI = async (moduleId: string, fetch: HttpHandler) => {

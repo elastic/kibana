@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiLink,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
 
-import { useStartServices } from '../hooks/use_core';
+import { useStartServices } from '../hooks';
 
 interface Props {
   onClose: () => void;

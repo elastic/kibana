@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchError, ElasticsearchErrorCausedByObject } from './types';
 
 // import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { ElasticsearchError, ElasticsearchErrorCausedByObject } from './types';
+
 const getEsCause = (
   obj: ElasticsearchErrorCausedByObject = {},
   causes: string[] = []

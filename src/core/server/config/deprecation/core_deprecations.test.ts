@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { getDeprecationsForGlobalSettings } from '../test_utils';
 import { coreDeprecationProvider } from './core_deprecations';
-
 const initialEnv = { ...process.env };
 
 const applyCoreDeprecations = (settings?: Record<string, any>) =>

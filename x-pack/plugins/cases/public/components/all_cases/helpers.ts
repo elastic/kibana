@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { filter } from 'lodash/fp';
-import { CaseType } from '../../../common/api/cases/case';
-import { AssociationType } from '../../../common/api/cases/comment';
-import { CaseStatuses } from '../../../common/api/cases/status';
-import type { Case, SubCase } from '../../../common/ui/types';
-import { statuses } from '../status/config';
+import { AssociationType, CaseStatuses, CaseType } from '../../../common';
+import { Case, SubCase } from '../../containers/types';
+import { statuses } from '../status';
 
 export const isSelectedCasesIncludeCollections = (selectedCases: Case[]) =>
   selectedCases.length > 0 &&

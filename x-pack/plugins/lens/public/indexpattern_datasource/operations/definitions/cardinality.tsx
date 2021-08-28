@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { OperationDefinition } from '.';
-import type { AggFunctionsMapping } from '../../../../../../../src/plugins/data/common/search/aggs/types';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/common/ast/build_function';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import type { FieldBasedIndexPatternColumn, FormattedIndexPatternColumn } from './column_types';
+import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
+import { OperationDefinition } from './index';
+import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+
 import {
-  getFilter,
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
+  getFilter,
 } from './helpers';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 
 const supportedTypes = new Set([
   'string',

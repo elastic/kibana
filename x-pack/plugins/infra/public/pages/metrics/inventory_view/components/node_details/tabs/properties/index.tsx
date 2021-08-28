@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLoadingChart } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import React, { useCallback, useContext, useMemo } from 'react';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { i18n } from '@kbn/i18n';
+import { EuiLoadingChart } from '@elastic/eui';
+import { TabContent, TabProps } from '../shared';
+import { Source } from '../../../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../../../common/inventory_models';
-import type { InventoryItemType } from '../../../../../../../../common/inventory_models/types';
-import { Source } from '../../../../../../../containers/metrics_source/source';
+import { InventoryItemType } from '../../../../../../../../common/inventory_models/types';
 import { useMetadata } from '../../../../../metric_detail/hooks/use_metadata';
-import { useWaffleFiltersContext } from '../../../../hooks/use_waffle_filters';
-import { useWaffleTimeContext } from '../../../../hooks/use_waffle_time';
-import type { TabProps } from '../shared';
-import { TabContent } from '../shared';
 import { getFields } from './build_fields';
+import { useWaffleTimeContext } from '../../../../hooks/use_waffle_time';
 import { Table } from './table';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { useWaffleFiltersContext } from '../../../../hooks/use_waffle_filters';
 
 const TabComponent = (props: TabProps) => {
   const nodeId = props.node.id;

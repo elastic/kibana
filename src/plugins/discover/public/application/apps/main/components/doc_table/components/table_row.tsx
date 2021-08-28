@@ -5,20 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
+
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import { FilterManager } from '../../../../../../../../data/public/query/filter_manager/filter_manager';
+import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DocViewer } from '../../../../../components/doc_viewer/doc_viewer';
+import { FilterManager, IndexPattern } from '../../../../../../../../data/public';
+import { TableCell } from './table_row/table_cell';
+import { ElasticSearchHit, DocViewFilterFn } from '../../../../../doc_views/doc_views_types';
 import { trimAngularSpan } from '../../../../../components/table/table_helper';
-import type { DocViewFilterFn, ElasticSearchHit } from '../../../../../doc_views/doc_views_types';
 import { getContextUrl } from '../../../../../helpers/get_context_url';
 import { getSingleDocUrl } from '../../../../../helpers/get_single_doc_url';
-import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
-import { TableCell } from './table_row/table_cell';
 import { TableRowDetails } from './table_row_details';
+import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;

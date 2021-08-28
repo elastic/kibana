@@ -4,23 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import { Observable, Subject } from 'rxjs';
-import { map, tap, throttleTime } from 'rxjs/operators';
-import type { RequestHandlerContext } from '../../../../../src/core/server';
-import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
-import type {
+
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-} from '../../../../../src/core/server/http/router/response';
-import type { IRouter } from '../../../../../src/core/server/http/router/router';
-import type { ServiceStatus } from '../../../../../src/core/server/status/types';
-import { ServiceStatusLevels } from '../../../../../src/core/server/status/types';
-import type { TaskManagerConfig } from '../config';
-import { calculateHealthStatus } from '../lib/calculate_health_status';
+} from 'kibana/server';
+import { Observable, Subject } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
+import { throttleTime } from 'rxjs/operators';
+import { Logger, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
+import {
+  MonitoringStats,
+  summarizeMonitoringStats,
+  HealthStatus,
+  RawMonitoringStats,
+} from '../monitoring';
+import { TaskManagerConfig } from '../config';
 import { logHealthMetrics } from '../lib/log_health_metrics';
-import type { MonitoringStats, RawMonitoringStats } from '../monitoring/monitoring_stats_stream';
-import { HealthStatus, summarizeMonitoringStats } from '../monitoring/monitoring_stats_stream';
+import { calculateHealthStatus } from '../lib/calculate_health_status';
 
 export type MonitoredHealth = RawMonitoringStats & {
   id: string;

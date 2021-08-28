@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import './login_form.scss';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -29,14 +31,9 @@ import ReactMarkdown from 'react-markdown';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
 
-import type {
-  HttpStart,
-  IHttpFetchError,
-} from '../../../../../../../../src/core/public/http/types';
-import type { NotificationsStart } from '../../../../../../../../src/core/public/notifications/notifications_service';
 import type { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
-import './login_form.scss';
 import { LoginValidator } from './validate_login';
 
 interface Props {

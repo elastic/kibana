@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Logger } from '@kbn/logging';
-import type { UiSettingsParams } from '../../types/ui_settings';
-import { SavedObjectsErrorHelpers } from '../saved_objects/service/lib/errors';
-import type { SavedObjectsClientContract } from '../saved_objects/types';
-import { BaseUiSettingsClient } from './base_ui_settings_client';
-import { Cache } from './cache';
-import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config/create_or_upgrade_saved_config';
+
+import { SavedObjectsErrorHelpers } from '../saved_objects';
+import { SavedObjectsClientContract } from '../saved_objects/types';
+import { Logger } from '../logging';
+import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
+import { UiSettingsParams } from './types';
 import { CannotOverrideError } from './ui_settings_errors';
+import { Cache } from './cache';
+import { BaseUiSettingsClient } from './base_ui_settings_client';
 
 export interface UiSettingsServiceOptions {
   type: string;

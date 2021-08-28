@@ -7,18 +7,16 @@
  */
 
 import supertest from 'supertest';
-import { ContextService } from '../../../context/context_service';
-import { contextServiceMock } from '../../../context/context_service.mock';
-import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { CoreUsageStatsClient } from '../../../core_usage_data/core_usage_stats_client';
-import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
-import { executionContextServiceMock } from '../../../execution_context/execution_context_service.mock';
-import { HttpService } from '../../../http/http_service';
-import { createCoreContext, createHttpServer } from '../../../http/test_utils';
-import type { InternalHttpServiceSetup } from '../../../http/types';
-import { coreMock } from '../../../mocks';
-import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
 import { registerResolveRoute } from '../resolve';
+import { ContextService } from '../../../context';
+import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
+import { executionContextServiceMock } from '../../../execution_context/execution_context_service.mock';
+import { HttpService, InternalHttpServiceSetup } from '../../../http';
+import { createHttpServer, createCoreContext } from '../../../http/test_utils';
+import { contextServiceMock, coreMock } from '../../../mocks';
 
 const coreId = Symbol('core');
 

@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SortDirection } from '../../../../../../../data/common/search/search_source/types';
+
+import { SortDirection } from '../../../../../../../data/public';
 import { SurrDocType } from '../context';
 
 export type IntervalValue = number | null;

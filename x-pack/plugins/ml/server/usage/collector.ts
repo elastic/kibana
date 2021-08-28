@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server/plugin';
+
+import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import type { AnomalyResultType } from '../../common/types/anomalies';
+import { AnomalyResultType } from '../../common/types/anomalies';
 
 export interface MlUsageData {
   alertRules: {

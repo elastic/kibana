@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IRouter } from '../../http/router/router';
-import type { IKibanaMigrator } from '../migrations/kibana/kibana_migrator';
+
+import { IRouter } from '../../http';
+import { IKibanaMigrator } from '../migrations';
 import { catchAndReturnBoomErrors } from './utils';
 
 export const registerMigrateRoute = (

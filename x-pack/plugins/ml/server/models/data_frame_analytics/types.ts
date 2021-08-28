@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { JobMapNodeTypes } from '../../../common/constants/data_frame_analytics';
-import type {
-  AnalyticsMapEdgeElement,
-  AnalyticsMapNodeElement,
-  MapElements,
-} from '../../../common/types/data_frame_analytics';
 
-export {
-  AnalyticsMapEdgeElement,
-  AnalyticsMapNodeElement,
-  AnalyticsMapReturnType,
+import { JobMapNodeTypes } from '../../../common/constants/data_frame_analytics';
+import {
   MapElements,
+  AnalyticsMapNodeElement,
+  AnalyticsMapEdgeElement,
+} from '../../../common/types/data_frame_analytics';
+export {
+  MapElements,
+  AnalyticsMapReturnType,
+  AnalyticsMapNodeElement,
+  AnalyticsMapEdgeElement,
 } from '../../../common/types/data_frame_analytics';
 
 interface AnalyticsMapArg {

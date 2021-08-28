@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { HttpSetup } from '../../../../../core/public/http/types';
-import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib/errors';
-import type {
+
+import { HttpSetup } from 'src/core/public';
+import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib';
+import {
   GetFieldsOptions,
-  GetFieldsOptionsTimePattern,
   IIndexPatternsApiClient,
+  GetFieldsOptionsTimePattern,
 } from '../../../common/index_patterns/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import './space_cards.scss';
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
 
-import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
 import { SpaceCard } from './space_card';
-import './space_cards.scss';
 
 interface Props {
   spaces: Space[];

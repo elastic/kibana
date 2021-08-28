@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { ReactNode, Suspense, lazy } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
-import type { ReactNode } from 'react';
-import React, { lazy, Suspense } from 'react';
-import type { IInterpreterRenderHandlers } from '../../../expressions/common/expression_renderers/types';
+
+import { IInterpreterRenderHandlers } from '../../../expressions/common';
 
 export interface VisualizationContainerProps {
   'data-test-subj'?: string;

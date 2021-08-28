@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SessionStorage, SessionStorageFactory } from './session_storage';
+
+import { SessionStorageFactory, SessionStorage } from './session_storage';
 
 const createSessionStorageMock = <T>(): jest.Mocked<SessionStorage<T>> => ({
   get: jest.fn().mockResolvedValue({}),

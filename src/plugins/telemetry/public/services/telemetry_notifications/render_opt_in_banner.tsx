@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '../../../../../core/public/types';
-import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
+import { CoreStart } from 'kibana/public';
 import { OptInBanner } from '../../components/opt_in_banner';
+import { toMountPoint } from '../../../../kibana_react/public';
 
 interface RenderBannerConfig {
   overlays: CoreStart['overlays'];

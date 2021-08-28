@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectsImportWarning } from '../../../../../src/core/server/saved_objects/import/types';
-import type { SavedObject } from '../../../../../src/core/types/saved_objects';
-import type { RawAction } from '../types';
+import { SavedObject, SavedObjectsImportWarning } from 'kibana/server';
+import { RawAction } from '../types';
 
 export function getImportWarnings(
   connectors: Array<SavedObject<RawAction>>

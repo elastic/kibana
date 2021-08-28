@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import * as Either from 'fp-ts/lib/Either';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 
 const retryResponseStatuses = [
   503, // ServiceUnavailable

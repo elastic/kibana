@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { BarProps } from './styles';
-import { Bar } from './styles';
+
+import { Bar, BarProps } from './styles';
 
 interface UtilityBarProps extends BarProps {
   children: React.ReactNode;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut } from '@elastic/eui';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { getOverlays } from '../util/dependency_cache';
 
 let expiredLicenseBannerId: string;

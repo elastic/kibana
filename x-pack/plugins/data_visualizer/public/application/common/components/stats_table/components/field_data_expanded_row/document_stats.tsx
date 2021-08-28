@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC, ReactNode } from 'react';
-import React from 'react';
-import { roundToDecimalPlace } from '../../../utils/round_to_decimal_place';
-import type { FieldDataRowProps } from '../../types/field_data_row';
-import { ExpandedRowFieldHeader } from '../expanded_row_field_header/expanded_row_field_header';
+import React, { FC, ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
+import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+import { FieldDataRowProps } from '../../types';
+import { roundToDecimalPlace } from '../../../utils';
 
 const metaTableColumns = [
   {

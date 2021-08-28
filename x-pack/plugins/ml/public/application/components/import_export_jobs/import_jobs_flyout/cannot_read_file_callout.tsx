@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC } from 'react';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
+
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 export const CannotReadFileCallout: FC = () => {
   return (

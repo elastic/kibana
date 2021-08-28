@@ -5,22 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { UiCounterMetricType } from '@kbn/analytics';
-import type { ApplicationStart } from '../../../../core/public/application/types';
-import type { ChromeStart } from '../../../../core/public/chrome/types';
-import type { DocLinksStart } from '../../../../core/public/doc_links/doc_links_service';
-import type { HttpStart } from '../../../../core/public/http/types';
-import type { NotificationsSetup } from '../../../../core/public/notifications/notifications_service';
-import type { OverlayStart } from '../../../../core/public/overlays/overlay_service';
-import type { SavedObjectsClientContract } from '../../../../core/public/saved_objects/saved_objects_client';
-import type { IUiSettingsClient } from '../../../../core/public/ui_settings/types';
-import type { TelemetryPluginStart } from '../../../telemetry/public/plugin';
-import type { UrlForwardingStart } from '../../../url_forwarding/public/plugin';
-import type { ConfigSchema } from '../../config';
-import { AddDataService } from '../services/add_data/add_data_service';
-import { EnvironmentService } from '../services/environment/environment';
-import { FeatureCatalogueRegistry } from '../services/feature_catalogue/feature_catalogue_registry';
-import { TutorialService } from '../services/tutorials/tutorial_service';
+
+import {
+  ChromeStart,
+  DocLinksStart,
+  HttpStart,
+  NotificationsSetup,
+  OverlayStart,
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+  ApplicationStart,
+} from 'kibana/public';
+import { UiCounterMetricType } from '@kbn/analytics';
+import { TelemetryPluginStart } from '../../../telemetry/public';
+import { UrlForwardingStart } from '../../../url_forwarding/public';
+import { TutorialService } from '../services/tutorials';
+import { AddDataService } from '../services/add_data';
+import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
+import { EnvironmentService } from '../services/environment';
+import { ConfigSchema } from '../../config';
 
 export interface HomeKibanaServices {
   indexPatternService: any;

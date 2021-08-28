@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AggConfigs } from '../../../common/search/aggs/agg_configs';
-import type {
+
+import {
+  AggConfigs,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
-} from '../../../common/search/aggs/agg_types_registry';
-import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers/mock_agg_types_registry';
-import type { AggsStart } from '../../../common/search/aggs/types';
-import { getCalculateAutoTimeExpression } from '../../../common/search/aggs/utils/calculate_auto_time_expression';
-import type { AggsSetup } from './types';
+  getCalculateAutoTimeExpression,
+} from '../../../common';
+import { AggsSetup, AggsStart } from './types';
+
+import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
 
 const getConfig = jest.fn();
 

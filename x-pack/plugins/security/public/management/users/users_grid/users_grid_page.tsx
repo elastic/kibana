@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
@@ -22,19 +23,14 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ApplicationStart, NotificationsStart, ScopedHistory } from 'src/core/public';
 
-import type { ScopedHistory } from '../../../../../../../src/core/public/application/scoped_history';
-import type { ApplicationStart } from '../../../../../../../src/core/public/application/types';
-import type { NotificationsStart } from '../../../../../../../src/core/public/notifications/notifications_service';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public/react_router_navigate/react_router_navigate';
-import type { Role } from '../../../../common/model/role';
-import type { User } from '../../../../common/model/user';
-import { DeprecatedBadge } from '../../badges/deprecated_badge';
-import { DisabledBadge } from '../../badges/disabled_badge';
-import { ReservedBadge } from '../../badges/reserved_badge';
-import { RoleTableDisplay } from '../../role_table_display/role_table_display';
-import type { RolesAPIClient } from '../../roles/roles_api_client';
-import { ConfirmDeleteUsers } from '../components/confirm_delete_users/confirm_delete_users';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { Role, User } from '../../../../common/model';
+import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
+import { RoleTableDisplay } from '../../role_table_display';
+import type { RolesAPIClient } from '../../roles';
+import { ConfirmDeleteUsers } from '../components';
 import type { UserAPIClient } from '../user_api_client';
 import { getExtendedUserDeprecationNotice, isUserDeprecated, isUserReserved } from '../user_utils';
 

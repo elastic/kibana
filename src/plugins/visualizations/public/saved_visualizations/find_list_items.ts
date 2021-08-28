@@ -7,17 +7,15 @@
  */
 
 import _ from 'lodash';
-import type { SavedObjectsClientContract } from '../../../../core/public/saved_objects/saved_objects_client';
-import type {
-  SavedObjectsFindOptions,
+import {
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
   SavedObjectsFindOptionsReference,
-} from '../../../../core/server/saved_objects/types';
-import type { SavedObjectAttributes } from '../../../../core/types/saved_objects';
-import { SavedObjectLoader } from '../../../saved_objects/public/saved_object/saved_object_loader';
-import type {
-  VisTypeAlias,
-  VisualizationsAppExtension,
-} from '../vis_types/vis_type_alias_registry';
+  SavedObjectsFindOptions,
+} from '../../../../core/public';
+import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
+import type { VisTypeAlias } from '../vis_types';
+import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 
 /**
  * Search for visualizations and convert them into a list display-friendly format.

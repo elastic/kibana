@@ -4,22 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { htmlIdGenerator } from '@elastic/eui';
+
 import React, { useEffect, useRef, useState } from 'react';
-import { ViewMode } from '../../../../../../../../src/plugins/embeddable/common/types';
-import type { EmbeddableFactory } from '../../../../../../../../src/plugins/embeddable/public/lib/embeddables/embeddable_factory';
+
+import { htmlIdGenerator } from '@elastic/eui';
+import { LayerDescriptor } from '../../../../../../maps/common/descriptor_types';
+import { INITIAL_LOCATION } from '../../../../../../maps/common/constants';
 import {
-  ErrorEmbeddable,
-  isErrorEmbeddable,
-} from '../../../../../../../../src/plugins/embeddable/public/lib/embeddables/error_embeddable';
-import { INITIAL_LOCATION, MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
-import type { LayerDescriptor } from '../../../../../../maps/common/descriptor_types/layer_descriptor_types';
-import type { RenderTooltipContentParams } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
-import { MapEmbeddable } from '../../../../../../maps/public/embeddable/map_embeddable';
-import type {
+  MapEmbeddable,
   MapEmbeddableInput,
   MapEmbeddableOutput,
-} from '../../../../../../maps/public/embeddable/types';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../maps/public/embeddable';
+import { MAP_SAVED_OBJECT_TYPE, RenderTooltipContentParams } from '../../../../../../maps/public';
+import {
+  EmbeddableFactory,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
+  ViewMode,
+} from '../../../../../../../../src/plugins/embeddable/public';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 export function EmbeddedMapComponent({

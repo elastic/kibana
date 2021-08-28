@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public/context/context';
-import type { SeriesType } from '../../../../../../../lens/common/expressions/xy_chart/series_type';
-import { useFetcher } from '../../../../../hooks/use_fetcher';
-import type { ObservabilityPublicPluginsStart } from '../../../../../plugin';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
+import { useFetcher } from '../../../../..';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
+import { SeriesType } from '../../../../../../../lens/public';
 
 const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.label', {
   defaultMessage: 'Chart type',

@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type {
-  SavedObjectReference,
-  SavedObjectsMigrationVersion,
-} from '../../../types/saved_objects';
+
+import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
 
 /**
  * A raw document as represented directly in the saved object index.

@@ -4,12 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiRangeProps } from '@elastic/eui';
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRange } from '@elastic/eui';
+
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
-import { ANOMALY_THRESHOLD } from '../../../../common/constants/anomalies';
+import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiRange,
+  EuiRangeProps,
+} from '@elastic/eui';
+import { ANOMALY_THRESHOLD } from '../../../../common';
 import './styles.scss';
 
 export interface SeveritySelectorProps {

@@ -6,10 +6,10 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
+
+import React, { Component, ChangeEvent } from 'react';
 import _ from 'lodash';
-import type { ChangeEvent } from 'react';
-import React, { Component } from 'react';
+import { EuiFormRow, EuiFieldText, EuiPanel } from '@elastic/eui';
 
 export type XYZTMSSourceConfig = {
   urlTemplate: string;

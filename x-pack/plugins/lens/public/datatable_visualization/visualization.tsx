@@ -5,27 +5,25 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
-import type { Ast } from '@kbn/interpreter/common';
 import React from 'react';
 import { render } from 'react-dom';
-import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
-import { layerTypes } from '../../common/constants';
-import type { SortingState } from '../../common/expressions/datatable/datatable';
-import type { ColumnState } from '../../common/expressions/datatable/datatable_column';
-import { getDefaultSummaryLabel } from '../../common/expressions/datatable/summary';
-import type { LayerType } from '../../common/types';
-import { LensIconChartDatatable } from '../assets/chart_datatable';
-import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
-import { getStopsForFixedMode } from '../shared_components/coloring/utils';
+import { Ast } from '@kbn/interpreter/common';
+import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type {
-  DatasourcePublicAPI,
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
+  DatasourcePublicAPI,
 } from '../types';
+import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
+import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
+import { getStopsForFixedMode } from '../shared_components';
+import { LayerType, layerTypes } from '../../common';
+import { getDefaultSummaryLabel } from '../../common/expressions';
+import type { ColumnState, SortingState } from '../../common/expressions';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];

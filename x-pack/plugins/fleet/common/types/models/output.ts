@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ValueOf } from '..';
-import type { outputType } from '../../constants/output';
+
+import type { outputType } from '../../constants';
+import type { ValueOf } from '../index';
 
 export type OutputType = typeof outputType;
 

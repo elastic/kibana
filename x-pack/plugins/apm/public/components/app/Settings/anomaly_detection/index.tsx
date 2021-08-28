@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+
 import React, { useState } from 'react';
+import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
 import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useLicenseContext } from '../../../../context/license/use_license_context';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { LicensePrompt } from '../../../shared/license_prompt';
-import { AddEnvironments } from './add_environments';
 import { JobsList } from './jobs_list';
+import { AddEnvironments } from './add_environments';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { LicensePrompt } from '../../../shared/license_prompt';
+import { useLicenseContext } from '../../../../context/license/use_license_context';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection/jobs'>;
 

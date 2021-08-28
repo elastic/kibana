@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery } from '../../../../observability/server/utils/queries';
-import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
+
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
+import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
+import { rangeQuery } from '../../../../observability/server';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { calculateThroughput } from '../helpers/calculate_throughput';
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getTransactionsPerMinute({
   setup,

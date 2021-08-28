@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FileLayer } from '@elastic/ems-client';
+
+import type { FileLayer } from '@elastic/ems-client';
 import { getEmsFileLayers } from '../util';
 
 export interface SampleValuesConfig {

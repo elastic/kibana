@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DataType } from '../types';
-import type { IndexPatternColumn } from './operations/definitions';
-import { operationDefinitionMap } from './operations/definitions';
+
+import { DataType } from '../types';
+import { IndexPattern, IndexPatternLayer, DraggedField } from './types';
 import type {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
-import { isQueryValid } from './operations/definitions/filters/filters';
+import { operationDefinitionMap, IndexPatternColumn } from './operations';
+
 import { getInvalidFieldMessage } from './operations/definitions/helpers';
-import type { DraggedField, IndexPattern, IndexPatternLayer } from './types';
+import { isQueryValid } from './operations/definitions/filters';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations

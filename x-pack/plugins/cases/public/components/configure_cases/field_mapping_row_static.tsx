@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
-import { capitalize } from 'lodash/fp';
+
 import React, { useMemo } from 'react';
-import type {
-  ActionType,
-  CaseField,
-  ThirdPartyField,
-} from '../../../common/api/connectors/mappings';
+import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+
+import { capitalize } from 'lodash/fp';
+import { CaseField, ActionType, ThirdPartyField } from '../../containers/configure/types';
 
 export interface RowProps {
   isLoading: boolean;

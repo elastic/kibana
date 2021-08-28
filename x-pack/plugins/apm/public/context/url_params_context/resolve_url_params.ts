@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Location } from 'history';
+
+import { Location } from 'history';
+import { uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import { uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { toQuery } from '../../components/shared/Links/url_helpers';
 import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
 import {
@@ -18,7 +19,7 @@ import {
   toNumber,
   toString,
 } from './helpers';
-import type { IUrlParams } from './types';
+import { IUrlParams } from './types';
 
 type TimeUrlParams = Pick<
   IUrlParams,

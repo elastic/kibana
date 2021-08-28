@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -13,9 +14,9 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import type { UIProcessorEvent } from '../../../../common/processor_event';
+import { UIProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import type { IUrlParams } from '../../../context/url_params_context/types';
+import { IUrlParams } from '../../../context/url_params_context/types';
 
 export function getBoolFilter({
   groupId,

@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment-timezone';
-import type { UiSettingsParams } from '../../../types/ui_settings';
+import { UiSettingsParams } from '../../../types';
 import { getDateFormatSettings } from './date_formats';
 
 describe('accessibility settings', () => {

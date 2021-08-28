@@ -9,55 +9,50 @@ import path from 'path';
 
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
+import type { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
 
 import type {
-  KnownHeaders,
-  ResponseHeaders,
-} from '../../../../../../src/core/server/http/router/headers';
-import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
-import type {
-  BulkInstallPackageInfo,
-  BulkInstallPackagesResponse,
+  GetInfoResponse,
+  InstallPackageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
-  GetInfoResponse,
-  GetLimitedPackagesResponse,
   GetPackagesResponse,
-  GetStatsResponse,
+  GetLimitedPackagesResponse,
+  BulkInstallPackageInfo,
+  BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
-  InstallPackageResponse,
-} from '../../../common/types/rest_spec/epm';
-import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors/handlers';
-import { getArchiveEntry } from '../../services/epm/archive/cache';
-import { getAsset } from '../../services/epm/archive/storage';
-import {
-  bulkInstallPackages,
-  isBulkInstallError,
-} from '../../services/epm/packages/bulk_install_packages';
-import {
-  getCategories,
-  getInstallation,
-  getLimitedPackages,
-  getPackageInfo,
-  getPackages,
-  getPackageUsageStats,
-} from '../../services/epm/packages/get';
-import type { BulkInstallResponse } from '../../services/epm/packages/install';
-import { installPackage } from '../../services/epm/packages/install';
-import { removeInstallation } from '../../services/epm/packages/remove';
-import { getFile, splitPkgKey } from '../../services/epm/registry';
-import { licenseService } from '../../services/license';
+  GetStatsResponse,
+} from '../../../common';
 import type {
-  BulkUpgradePackagesFromRegistryRequestSchema,
-  DeletePackageRequestSchema,
   GetCategoriesRequestSchema,
+  GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  GetPackagesRequestSchema,
-  GetStatsRequestSchema,
-  InstallPackageByUploadRequestSchema,
   InstallPackageFromRegistryRequestSchema,
-} from '../../types/rest_spec/epm';
+  InstallPackageByUploadRequestSchema,
+  DeletePackageRequestSchema,
+  BulkUpgradePackagesFromRegistryRequestSchema,
+  GetStatsRequestSchema,
+} from '../../types';
+import {
+  bulkInstallPackages,
+  getCategories,
+  getPackages,
+  getFile,
+  getPackageInfo,
+  isBulkInstallError,
+  installPackage,
+  removeInstallation,
+  getLimitedPackages,
+  getInstallation,
+} from '../../services/epm/packages';
+import type { BulkInstallResponse } from '../../services/epm/packages';
+import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
+import { splitPkgKey } from '../../services/epm/registry';
+import { licenseService } from '../../services';
+import { getArchiveEntry } from '../../services/epm/archive/cache';
+import { getAsset } from '../../services/epm/archive/storage';
+import { getPackageUsageStats } from '../../services/epm/packages/get';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,

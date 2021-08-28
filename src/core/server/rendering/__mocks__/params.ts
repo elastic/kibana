@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { mockCoreContext } from '../../core_context.mock';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { pluginServiceMock } from '../../plugins/plugins_service.mock';

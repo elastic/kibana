@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
+
+import type { KibanaRequest } from 'src/core/server';
+
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { BasicHTTPAuthorizationHeaderCredentials } from '../http_authentication/basic_http_authorization_header_credentials';
-import { HTTPAuthorizationHeader } from '../http_authentication/http_authorization_header';
+import {
+  BasicHTTPAuthorizationHeaderCredentials,
+  HTTPAuthorizationHeader,
+} from '../http_authentication';
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 

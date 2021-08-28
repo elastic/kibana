@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
-import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis/log_analysis_results';
+
+import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis';
 
 type DatasetOptionProps = EuiComboBoxOptionOption<string>;
 

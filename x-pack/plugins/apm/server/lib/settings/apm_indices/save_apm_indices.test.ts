@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '../../../../../../../src/core/server/saved_objects/types';
+
 import { saveApmIndices } from './save_apm_indices';
+import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
 
 describe('saveApmIndices', () => {
   it('should trim and strip empty settings', async () => {

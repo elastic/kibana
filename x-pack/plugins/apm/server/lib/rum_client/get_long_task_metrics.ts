@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import type { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const LONG_TASK_SUM_FIELD = 'transaction.experience.longtask.sum';
 const LONG_TASK_COUNT_FIELD = 'transaction.experience.longtask.count';

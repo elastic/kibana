@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import type { SearchParamsMock } from '../../../utils/test_helpers';
-import { inspectSearchParams } from '../../../utils/test_helpers';
-import type { Setup } from '../../helpers/setup_request';
+  inspectSearchParams,
+  SearchParamsMock,
+} from '../../../utils/test_helpers';
 import { getTransaction } from './get_transaction';
+import { Setup } from '../../helpers/setup_request';
+import {
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_NAME,
+} from '../../../../common/elasticsearch_fieldnames';
 
 describe('custom link get transaction', () => {
   let mock: SearchParamsMock;

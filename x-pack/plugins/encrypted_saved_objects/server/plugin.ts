@@ -7,19 +7,19 @@
 
 import nodeCrypto from '@elastic/node-crypto';
 
-import type { Logger } from '@kbn/logging';
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 
-import type { CoreSetup } from '../../../../src/core/server';
-import type { Plugin, PluginInitializerContext } from '../../../../src/core/server/plugins/types';
-import type { SecurityPluginSetup } from '../../security/server/plugin';
-import { EncryptedSavedObjectsAuditLogger } from './audit/audit_logger';
+import type { SecurityPluginSetup } from '../../security/server';
+import { EncryptedSavedObjectsAuditLogger } from './audit';
 import type { ConfigType } from './config';
 import type { CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
 import { getCreateMigration } from './create_migration';
-import type { EncryptedSavedObjectTypeRegistration } from './crypto/encrypted_saved_objects_service';
-import { EncryptedSavedObjectsService } from './crypto/encrypted_saved_objects_service';
-import { EncryptionError } from './crypto/encryption_error';
-import { EncryptionKeyRotationService } from './crypto/encryption_key_rotation_service';
+import type { EncryptedSavedObjectTypeRegistration } from './crypto';
+import {
+  EncryptedSavedObjectsService,
+  EncryptionError,
+  EncryptionKeyRotationService,
+} from './crypto';
 import { defineRoutes } from './routes';
 import type { ClientInstanciator } from './saved_objects';
 import { setupSavedObjects } from './saved_objects';

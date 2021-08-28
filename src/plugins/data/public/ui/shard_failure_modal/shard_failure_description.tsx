@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiCodeBlock, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
-import { getFlattenedObject } from '@kbn/std';
 import React from 'react';
+import { getFlattenedObject } from '@kbn/std';
+import { EuiCodeBlock, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
+import { ShardFailure } from './shard_failure_types';
 import { ShardFailureDescriptionHeader } from './shard_failure_description_header';
-import type { ShardFailure } from './shard_failure_types';
 
 /**
  * Provides pretty formatting of a given key string

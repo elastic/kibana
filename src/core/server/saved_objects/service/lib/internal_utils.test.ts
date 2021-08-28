@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import type { SavedObjectsRawDoc } from '../../serialization/types';
-import { encodeHitVersion } from '../../version/encode_hit_version';
+import type { SavedObjectsRawDoc } from '../../serialization';
+import { encodeHitVersion } from '../../version';
 import {
   getBulkOperationError,
   getSavedObjectFromSource,

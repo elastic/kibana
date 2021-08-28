@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import type { TimeKey } from '../time/time_key';
+import { TimeKey } from '../time';
 import { jsonArrayRT } from '../typed_json';
 import { logEntryCursorRT } from './log_entry_cursor';
 

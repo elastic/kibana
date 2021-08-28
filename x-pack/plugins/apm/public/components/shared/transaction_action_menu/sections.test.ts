@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Location } from 'history';
-import type { IBasePath } from '../../../../../../../src/core/public/http/types';
-import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+
+import { Location } from 'history';
+import { IBasePath } from 'kibana/public';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
 
 describe('Transaction action menu', () => {

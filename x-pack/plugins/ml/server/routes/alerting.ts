@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import { alertingServiceProvider } from '../lib/alerts/alerting_service';
-import { datafeedsProvider } from '../models/job_service/datafeeds';
-import type { RouteInitialization } from '../types';
 import { mlAnomalyDetectionAlertPreviewRequest } from './schemas/alerting_schema';
+import { datafeedsProvider } from '../models/job_service/datafeeds';
 
 export function alertingRoutes({ router, routeGuard }: RouteInitialization) {
   /**

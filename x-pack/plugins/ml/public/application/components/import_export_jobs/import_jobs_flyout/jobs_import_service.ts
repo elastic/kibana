@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Datafeed } from '../../../../../common/types/anomaly_detection_jobs/datafeed';
-import type { Job } from '../../../../../common/types/anomaly_detection_jobs/job';
-import type { DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
-import type { Filter } from '../../../../../common/types/filters';
+
 import type { JobType } from '../../../../../common/types/saved_objects';
+import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Filter } from '../../../../../common/types/filters';
+import type { DataFrameAnalyticsConfig } from '../../../data_frame_analytics/common';
 
 export interface ImportedAdJob {
   job: Job;

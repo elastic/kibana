@@ -4,41 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-import type { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import type { TimeRange } from '../../../../../../../src/plugins/data/common/query/timefilter/types';
-import type { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source/types';
-import type { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters/types';
-import type { FieldFormatter } from '../../../../common/constants';
-import type {
-  VectorJoinSourceRequestMeta,
-  VectorSourceRequestMeta,
-} from '../../../../common/descriptor_types/data_request_descriptor_types';
-import type { MapExtent, MapQuery } from '../../../../common/descriptor_types/map_descriptor';
-import type {
-  AbstractESSourceDescriptor,
-  AbstractSourceDescriptor,
-} from '../../../../common/descriptor_types/source_descriptor_types';
-import type { DynamicStylePropertyOptions } from '../../../../common/descriptor_types/style_property_descriptor_types';
-import { createExtentFilter } from '../../../../common/elasticsearch_util/spatial_filter_utils';
-import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
+import { Filter, IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
+import { AbstractVectorSource, BoundsFilters } from '../vector_source';
 import {
   getAutocompleteService,
   getIndexPatternService,
-  getSearchService,
   getTimeFilter,
+  getSearchService,
 } from '../../../kibana_services';
+import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
-import type { IField } from '../../fields/field';
-import type { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
-import type { IVectorStyle } from '../../styles/vector/vector_style';
 import { DataRequestAbortError } from '../../util/data_request';
+import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
+import { IVectorSource } from '../vector_source';
+import { TimeRange } from '../../../../../../../src/plugins/data/common';
+import {
+  AbstractESSourceDescriptor,
+  AbstractSourceDescriptor,
+  DynamicStylePropertyOptions,
+  MapExtent,
+  MapQuery,
+  VectorJoinSourceRequestMeta,
+  VectorSourceRequestMeta,
+} from '../../../../common/descriptor_types';
+import { IVectorStyle } from '../../styles/vector/vector_style';
+import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { IField } from '../../fields/field';
+import { FieldFormatter } from '../../../../common/constants';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import type { BoundsFilters, IVectorSource } from '../vector_source/vector_source';
-import { AbstractVectorSource } from '../vector_source/vector_source';
 
 export function isSearchSourceAbortError(error: Error) {
   return error.name === 'AbortError';

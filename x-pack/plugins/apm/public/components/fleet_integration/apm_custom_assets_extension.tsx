@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public/context/context';
-import type { CustomAssetsAccordionProps } from '../../../../fleet/public/components/custom_assets_accordion';
-import { CustomAssetsAccordion } from '../../../../fleet/public/components/custom_assets_accordion';
-import type { ApmPluginStartDeps } from '../../plugin';
+import { i18n } from '@kbn/i18n';
+
+import {
+  CustomAssetsAccordionProps,
+  CustomAssetsAccordion,
+} from '../../../../fleet/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { ApmPluginStartDeps } from '../../plugin';
 
 export function ApmCustomAssetsExtension() {
   const { http } = useKibana<ApmPluginStartDeps>().services;

@@ -4,19 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PaletteOutput } from '../../../../../src/plugins/charts/common/palette';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public/types';
-import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
-import type { HeatmapGridConfigResult } from '../../common/expressions/heatmap_chart/heatmap_grid';
-import type { HeatmapLegendConfigResult } from '../../common/expressions/heatmap_chart/heatmap_legend';
-import type {
-  CustomPaletteParams,
-  FormatFactory,
-  LayerType,
-  LensMultiTable,
-} from '../../common/types';
+
+import type { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import type { LensBrushEvent, LensFilterEvent } from '../types';
+import type { LensMultiTable, FormatFactory, CustomPaletteParams, LayerType } from '../../common';
+import type { HeatmapGridConfigResult, HeatmapLegendConfigResult } from '../../common/expressions';
 import { CHART_SHAPES, LENS_HEATMAP_RENDERER } from './constants';
+import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 
 export type ChartShapes = typeof CHART_SHAPES[keyof typeof CHART_SHAPES];
 

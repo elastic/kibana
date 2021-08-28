@@ -5,19 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
-import type { Logger } from '@kbn/logging';
+import type {
+  Capabilities,
+  CoreSetup,
+  KibanaRequest,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from 'src/core/server';
 
-import type { CoreSetup } from '../../../core/server';
-import type { KibanaRequest } from '../../../core/server/http/router/request';
-import type { Plugin, PluginInitializerContext } from '../../../core/server/plugins/types';
-import type { Capabilities } from '../../../core/types/capabilities';
 import { createClusterDataCheck } from './check_cluster_data';
 import type { ConfigType } from './config';
-import { setupAnonymousAccessCapabilitiesRoute } from './routes/anonymous_access_capabilities';
-import { setupAppStateRoute } from './routes/app_state';
+import { setupAnonymousAccessCapabilitiesRoute, setupAppStateRoute } from './routes';
 
 export interface SecurityOssPluginSetup {
   /**

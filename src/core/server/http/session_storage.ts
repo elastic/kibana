@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { KibanaRequest } from './router/request';
 
+import { KibanaRequest } from './router';
 /**
  * Provides an interface to store and retrieve data across requests.
  * @public

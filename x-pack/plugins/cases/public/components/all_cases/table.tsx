@@ -4,17 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBasicTableProps, EuiTableSelectionType } from '@elastic/eui';
-import { EuiBasicTable as _EuiBasicTable, EuiEmptyPrompt, EuiLoadingContent } from '@elastic/eui';
+
+import React, { FunctionComponent, MutableRefObject } from 'react';
+import {
+  EuiEmptyPrompt,
+  EuiLoadingContent,
+  EuiTableSelectionType,
+  EuiBasicTable as _EuiBasicTable,
+  EuiBasicTableProps,
+} from '@elastic/eui';
 import classnames from 'classnames';
-import type { FunctionComponent, MutableRefObject } from 'react';
-import React from 'react';
 import styled from 'styled-components';
-import type { AllCases, Case, FilterOptions } from '../../../common/ui/types';
-import type { CasesNavigation } from '../links';
-import { LinkButton } from '../links';
-import * as i18n from './translations';
+
 import { CasesTableUtilityBar } from './utility_bar';
+import { CasesNavigation, LinkButton } from '../links';
+import { AllCases, Case, FilterOptions } from '../../../common';
+import * as i18n from './translations';
 
 interface CasesTableProps {
   columns: EuiBasicTableProps<Case>['columns']; //  CasesColumns[];

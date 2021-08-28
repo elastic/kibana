@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { activemqLogsSpecProvider } from './activemq_logs';
 import { activemqMetricsSpecProvider } from './activemq_metrics';
 import { aerospikeMetricsSpecProvider } from './aerospike_metrics';
@@ -40,9 +41,9 @@ import { envoyproxyMetricsSpecProvider } from './envoyproxy_metrics';
 import { etcdMetricsSpecProvider } from './etcd_metrics';
 import { f5LogsSpecProvider } from './f5_logs';
 import { fortinetLogsSpecProvider } from './fortinet_logs';
+import { golangMetricsSpecProvider } from './golang_metrics';
 import { gcpLogsSpecProvider } from './gcp_logs';
 import { gcpMetricsSpecProvider } from './gcp_metrics';
-import { golangMetricsSpecProvider } from './golang_metrics';
 import { gsuiteLogsSpecProvider } from './gsuite_logs';
 import { haproxyLogsSpecProvider } from './haproxy_logs';
 import { haproxyMetricsSpecProvider } from './haproxy_metrics';
@@ -91,9 +92,9 @@ import { prometheusMetricsSpecProvider } from './prometheus_metrics';
 import { rabbitmqLogsSpecProvider } from './rabbitmq_logs';
 import { rabbitmqMetricsSpecProvider } from './rabbitmq_metrics';
 import { radwareLogsSpecProvider } from './radware_logs';
-import { redisenterpriseMetricsSpecProvider } from './redisenterprise_metrics';
 import { redisLogsSpecProvider } from './redis_logs';
 import { redisMetricsSpecProvider } from './redis_metrics';
+import { redisenterpriseMetricsSpecProvider } from './redisenterprise_metrics';
 import { santaLogsSpecProvider } from './santa_logs';
 import { sonicwallLogsSpecProvider } from './sonicwall_logs';
 import { sophosLogsSpecProvider } from './sophos_logs';

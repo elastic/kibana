@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
+import { EuiSuperSelect } from '@elastic/eui';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import type { SeriesConfig } from '../types';
+import { SeriesConfig } from '../types';
 
 interface Props {
   seriesId: string;

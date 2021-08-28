@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { APMRouteHandlerResources } from '../../routes/typings';
+
+import { APMRouteHandlerResources } from '../../routes/typings';
 
 export function getApmIndexPatternTitle(
   config: APMRouteHandlerResources['config']

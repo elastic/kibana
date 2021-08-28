@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup } from '../../../../core/server';
-import type { Plugin, PluginInitializerContext } from '../../../../core/server/plugins/types';
-import type { ConfigSchema } from '../../config';
+
+import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { registerRoutes } from './routes';
+import { ConfigSchema } from '../../config';
 
 export class AutocompleteService implements Plugin<void> {
   private valueSuggestionsEnabled: boolean = true;

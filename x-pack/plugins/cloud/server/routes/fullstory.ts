@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { PackageInfo } from '@kbn/config';
-import { createHash } from 'crypto';
-import fs from 'fs/promises';
-import { once } from 'lodash';
 import path from 'path';
-import type { HttpResponseOptions } from '../../../../../src/core/server/http/router/response';
-import type { HttpResources } from '../../../../../src/core/server/http_resources/types';
+import fs from 'fs/promises';
+import { createHash } from 'crypto';
+import { once } from 'lodash';
+import { HttpResources, HttpResponseOptions, PackageInfo } from '../../../../../src/core/server';
 
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;

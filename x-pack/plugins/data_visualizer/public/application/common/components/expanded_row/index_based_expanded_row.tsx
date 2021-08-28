@@ -6,20 +6,22 @@
  */
 
 import React from 'react';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
-import { JOB_FIELD_TYPES } from '../../../../../common/constants';
-import type { CombinedQuery } from '../../../index_data_visualizer/types/combined_query';
-import { LoadingIndicator } from '../loading_indicator/loading_indicator';
-import { NotInDocsContent } from '../not_in_docs_content/not_in_docs_context';
-import { BooleanContent } from '../stats_table/components/field_data_expanded_row/boolean_content';
-import { DateContent } from '../stats_table/components/field_data_expanded_row/date_content';
-import { IpContent } from '../stats_table/components/field_data_expanded_row/ip_content';
-import { KeywordContent } from '../stats_table/components/field_data_expanded_row/keyword_content';
-import { NumberContent } from '../stats_table/components/field_data_expanded_row/number_content';
-import { OtherContent } from '../stats_table/components/field_data_expanded_row/other_content';
-import { TextContent } from '../stats_table/components/field_data_expanded_row/text_content';
-import type { FieldVisConfig } from '../stats_table/types/field_vis_config';
-import { GeoPointContentWithMap } from './geo_point_content_with_map/geo_point_content_with_map';
+import { GeoPointContentWithMap } from './geo_point_content_with_map';
+import { JOB_FIELD_TYPES } from '../../../../../common';
+import {
+  BooleanContent,
+  DateContent,
+  IpContent,
+  KeywordContent,
+  NumberContent,
+  OtherContent,
+  TextContent,
+} from '../stats_table/components/field_data_expanded_row';
+import { NotInDocsContent } from '../not_in_docs_content';
+import { FieldVisConfig } from '../stats_table/types';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { CombinedQuery } from '../../../index_data_visualizer/types/combined_query';
+import { LoadingIndicator } from '../loading_indicator';
 
 export const IndexBasedDataVisualizerExpandedRow = ({
   item,

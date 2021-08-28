@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IUiSettingsClient } from '../../../../core/public/ui_settings/types';
+
+import { IUiSettingsClient } from 'kibana/public';
 
 export function buildCSS(maxHeight = 0, truncateGradientHeight = 15) {
   return `

@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsMigrationLogger } from './core/migration_logger';
-import type { SavedObjectMigrationContext } from './types';
+
+import { SavedObjectMigrationContext } from './types';
+import { SavedObjectsMigrationLogger } from './core';
 
 export const createSavedObjectsMigrationLoggerMock = (): jest.Mocked<SavedObjectsMigrationLogger> => {
   const mock = {

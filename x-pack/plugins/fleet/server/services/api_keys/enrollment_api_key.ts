@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import Boom from '@hapi/boom';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import uuid from 'uuid';
+import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
-import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+
 import type { ESSearchResponse as SearchResponse } from '../../../../../../src/core/types/elasticsearch';
-import { ENROLLMENT_API_KEYS_INDEX } from '../../../common/constants/enrollment_api_key';
-import type {
-  EnrollmentAPIKey,
-  FleetServerEnrollmentAPIKey,
-} from '../../../common/types/models/enrollment_api_key';
+import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { IngestManagerError } from '../../errors';
+import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
 

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest/ems_autosuggest';
+
+import { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
 
 export async function suggestEMSTermJoinConfig(

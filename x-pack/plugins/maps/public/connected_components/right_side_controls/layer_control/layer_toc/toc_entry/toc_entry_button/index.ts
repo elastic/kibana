@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { connect } from 'react-redux';
-import type { MapStoreState } from '../../../../../../reducers/store';
+import { MapStoreState } from '../../../../../../reducers/store';
 import { getMapZoom, isUsingSearch } from '../../../../../../selectors/map_selectors';
-import type { OwnProps, ReduxStateProps } from './toc_entry_button';
-import { TOCEntryButton } from './toc_entry_button';
+import { TOCEntryButton, ReduxStateProps, OwnProps } from './toc_entry_button';
 
 function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStateProps {
   return {

@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Observable } from 'rxjs';
-import type { OpsOsMetrics, OpsProcessMetrics, OpsServerMetrics } from './collectors/types';
+import { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
 
 /**
  * APIs to retrieves metrics gathered and exposed by the core platform.

@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { JsonObject } from '@kbn/utility-types';
-import type { TimelineRequestOptionsPaginated } from '../..';
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common/search/strategies/es_search/types';
+
+import { JsonObject } from '@kbn/utility-types';
+
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import type { Ecs } from '../../../../ecs';
 import type { CursorType, Inspect, Maybe, PaginationInputPaginated } from '../../../common';
+import type { TimelineRequestOptionsPaginated } from '../..';
 
 export interface TimelineEdges {
   node: TimelineItem;

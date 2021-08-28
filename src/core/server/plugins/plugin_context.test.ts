@@ -5,22 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ConfigService, Env } from '@kbn/config';
-import { ByteSizeValue, schema } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { fromRoot } from '@kbn/utils';
+
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
-import { configServiceMock, getEnvOptions, rawConfigServiceMock } from '../config/mocks';
-import type { CoreContext } from '../core_context';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { fromRoot } from '@kbn/utils';
+import {
+  createPluginInitializerContext,
+  createPluginPrebootSetupContext,
+  InstanceInfo,
+} from './plugin_context';
+import { CoreContext } from '../core_context';
+import { Env } from '../config';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { coreMock } from '../mocks';
+import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '../config/mocks';
+import { PluginManifest, PluginType } from './types';
 import { Server } from '../server';
+import { schema, ByteSizeValue } from '@kbn/config-schema';
+import { ConfigService } from '@kbn/config';
 import { PluginWrapper } from './plugin';
-import type { InstanceInfo } from './plugin_context';
-import { createPluginInitializerContext, createPluginPrebootSetupContext } from './plugin_context';
-import type { PluginManifest } from './types';
-import { PluginType } from './types';
+import { coreMock } from '../mocks';
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {

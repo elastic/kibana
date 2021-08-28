@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '../../../../../src/core/public/saved_objects/saved_objects_client';
-import type {
+
+import {
   SavedObjectAttributes,
+  SavedObjectsClientContract,
   SavedObjectReference,
-} from '../../../../../src/core/types/saved_objects';
-import type { Query } from '../../../../../src/plugins/data/public';
-import { DOC_TYPE } from '../../common/constants';
-import type { PersistableFilter } from '../../common/types';
+} from 'kibana/public';
+import { Query } from '../../../../../src/plugins/data/public';
+import { DOC_TYPE, PersistableFilter } from '../../common';
 
 export interface Document {
   savedObjectId?: string;

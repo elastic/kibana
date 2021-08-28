@@ -4,23 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { OperationDefinition } from '..';
-import type { IndexPatternLayer } from '../../../types';
-import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
-import type {
-  FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from '../column_types';
-import { getFilter, getFormatFromPreviousColumn } from '../helpers';
+import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { IndexPatternLayer } from '../../../types';
 import {
   buildLabelFunction,
-  checkForDataLayerType,
+  getErrorsForDateReference,
   checkForDateHistogram,
   dateBasedOperationToExpression,
-  getErrorsForDateReference,
   hasDateField,
+  checkForDataLayerType,
 } from './utils';
+import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
+import { OperationDefinition } from '..';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {

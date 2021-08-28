@@ -11,13 +11,13 @@
  * elasticsearch indices.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
-import type { SavedObjectsMigrationVersion } from '../../../../types/saved_objects';
-import type { IndexMapping } from '../../mappings/types';
-import type { SavedObjectsRawDocSource } from '../../serialization/types';
-import type { AliasAction, RawDoc } from './call_cluster';
-import type { MigrationEsClient } from './migration_es_client';
+import { estypes } from '@elastic/elasticsearch';
+import { MigrationEsClient } from './migration_es_client';
+import { IndexMapping } from '../../mappings';
+import { SavedObjectsMigrationVersion } from '../../types';
+import { AliasAction, RawDoc } from './call_cluster';
+import { SavedObjectsRawDocSource } from '../../serialization';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
 

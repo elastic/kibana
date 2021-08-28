@@ -5,25 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
-import type { MapsEmsConfig } from '../config';
+
+import { PluginInitializerContext } from 'kibana/public';
 import { MapsEmsPlugin } from './plugin';
-import type { IServiceSettings } from './service_settings/service_settings_types';
+import { IServiceSettings } from './service_settings';
+import type { MapsEmsConfig } from '../config';
 
 /** @public */
-export * from '../common';
-export type { LayerConfig, MapsEmsConfig } from '../config';
 export {
-  FileLayer,
-  FileLayerField,
-  IServiceSettings,
-  TmsLayer,
   VectorLayer,
+  FileLayerField,
+  FileLayer,
+  TmsLayer,
+  IServiceSettings,
 } from './service_settings';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
 }
+
+export type { MapsEmsConfig, LayerConfig } from '../config';
+
+export * from '../common';
 
 export interface MapsEmsPluginSetup {
   config: MapsEmsConfig;

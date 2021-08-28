@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
-import type { LinkIconProps } from '../link_icon';
-import { LinkIcon } from '../link_icon';
-import type { SubtitleProps } from '../subtitle';
-import { Subtitle } from '../subtitle';
-import { Title } from './title';
-import type { BadgeOptions, TitleProp } from './types';
 
+import { LinkIcon, LinkIconProps } from '../link_icon';
+import { Subtitle, SubtitleProps } from '../subtitle';
+import { Title } from './title';
+import { BadgeOptions, TitleProp } from './types';
 interface HeaderProps {
   border?: boolean;
   isLoading?: boolean;

@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ContextService } from '../../context/context_service';
-import { contextServiceMock } from '../../context/context_service.mock';
+
+import { ContextService } from '../../context';
+import { createHttpServer, createCoreContext } from '../../http/test_utils';
+import { contextServiceMock, coreMock } from '../../mocks';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
-import { createCoreContext, createHttpServer } from '../../http/test_utils';
-import { coreMock } from '../../mocks';
-import type { SavedObjectsType } from '../types';
+import { SavedObjectsType } from '../types';
 
 const defaultCoreId = Symbol('core');
 

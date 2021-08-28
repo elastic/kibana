@@ -4,10 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IconType } from '@elastic/eui';
-import { EuiButton, EuiCard, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { MouseEventHandler, ReactNode } from 'react';
-import React, { useMemo } from 'react';
+
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  IconType,
+  EuiCard,
+} from '@elastic/eui';
+import React, { MouseEventHandler, ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`

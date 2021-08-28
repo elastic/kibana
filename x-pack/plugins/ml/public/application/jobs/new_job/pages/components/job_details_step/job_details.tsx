@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { isAdvancedJobCreator } from '../../../common/job_creator/type_guards';
-import { EDITOR_MODE, JsonEditorFlyout } from '../common/json_editor_flyout/json_editor_flyout';
+import { WizardNav } from '../wizard_nav';
+import { JobIdInput } from './components/job_id';
+import { JobDescriptionInput } from './components/job_description';
+import { GroupsInput } from './components/groups';
+import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import type { StepProps } from '../step_types';
-import { WIZARD_STEPS } from '../step_types';
-import { WizardNav } from '../wizard_nav/wizard_nav';
-import { AdditionalSection } from './components/additional_section/additional_section';
-import { AdvancedSection } from './components/advanced_section/advanced_section';
-import { GroupsInput } from './components/groups/groups_input';
-import { JobDescriptionInput } from './components/job_description/job_description_input';
-import { JobIdInput } from './components/job_id/job_id_input';
+import { AdvancedSection } from './components/advanced_section';
+import { AdditionalSection } from './components/additional_section';
+import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import { isAdvancedJobCreator } from '../../../common/job_creator';
 
 interface Props extends StepProps {
   advancedExpanded: boolean;

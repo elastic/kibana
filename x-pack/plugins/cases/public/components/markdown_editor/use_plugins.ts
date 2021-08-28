@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
 import { useMemo } from 'react';
-import { KibanaServices } from '../../common/lib/kibana/services';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
+import { TemporaryProcessingPluginsType } from './types';
+import { KibanaServices } from '../../common/lib/kibana';
 import * as lensMarkdownPlugin from './plugins/lens';
-import type { TemporaryProcessingPluginsType } from './types';
 
 export const usePlugins = () => {
   const kibanaConfig = KibanaServices.getConfig();

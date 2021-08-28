@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson as pkg } from '@kbn/utils';
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 import Util from 'util';
+import { kibanaPackageJson as pkg } from '@kbn/utils';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
+import type { ElasticsearchClient } from '../../../elasticsearch';
 import { Root } from '../../../root';
 
 const logFilePath = Path.join(__dirname, 'migration_test_kibana.log');

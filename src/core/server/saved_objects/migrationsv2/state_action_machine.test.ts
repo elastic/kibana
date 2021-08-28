@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import * as E from 'fp-ts/lib/Either';
+
 import { stateActionMachine } from './state_action_machine';
+import * as E from 'fp-ts/lib/Either';
 
 describe('state action machine', () => {
   const state = { controlState: 'INIT', count: 1 };

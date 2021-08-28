@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IconType } from '@elastic/eui';
-import type {
-  FieldConfig,
-  ValidationConfig,
-} from '../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/types';
-import { ConnectorTypes } from '../../common/api/connectors';
-import type { StartPlugins } from '../types';
+
+import { IconType } from '@elastic/eui';
+import { ConnectorTypes } from '../../common';
+import { FieldConfig, ValidationConfig } from '../common/shared_imports';
+import { StartPlugins } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
-import type { CaseActionConnector } from './types';
+import { CaseActionConnector } from './types';
 
 export const getConnectorById = (
   id: string,

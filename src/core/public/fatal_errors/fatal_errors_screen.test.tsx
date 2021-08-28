@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { EuiCallOut } from '@elastic/eui';
 import testSubjSelector from '@kbn/test-subj-selector';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import * as Rx from 'rxjs';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+
 import { FatalErrorsScreen } from './fatal_errors_screen';
 
 describe('FatalErrorsScreen', () => {

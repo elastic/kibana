@@ -4,20 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useCallback } from 'react';
+import { isEmpty } from 'lodash/fp';
+
 import {
-  EuiAvatar,
   EuiButtonIcon,
+  EuiText,
+  EuiHorizontalRule,
+  EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
-import React, { useCallback } from 'react';
+
 import styled, { css } from 'styled-components';
-import type { ElasticUser } from '../../../common/ui/types';
+
+import { ElasticUser } from '../../containers/types';
 import * as i18n from './translations';
 
 interface UserListProps {

@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
+
 import { readFileSync } from 'fs';
 import { cloneDeep } from 'lodash';
-import type { ActionsConfig, CustomHostSettings } from '../config';
+import { Logger } from '../../../../../src/core/server';
+import { ActionsConfig, CustomHostSettings } from '../config';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 

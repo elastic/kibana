@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { IInterpreterRenderHandlers } from '../common/expression_renderers/types';
+import { RenderErrorHandlerFnType, ExpressionRenderError } from './types';
 import { getNotifications } from './services';
-import type { ExpressionRenderError, RenderErrorHandlerFnType } from './types';
+import { IInterpreterRenderHandlers } from '../common';
 
 export const renderErrorHandler: RenderErrorHandlerFnType = (
   element: HTMLElement,

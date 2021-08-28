@@ -4,30 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+
+import React, { useState, useEffect } from 'react';
 import {
-  EuiComboBox,
   EuiFormRow,
+  EuiSwitch,
+  EuiSpacer,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiSelect,
+  EuiTitle,
   EuiIconTip,
   EuiLink,
-  EuiSelect,
-  EuiSpacer,
-  EuiSwitch,
-  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { ActionConnectorFieldsProps } from '../../../../types';
+import { EsIndexActionConnector } from '.././types';
+import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
 import {
   firstFieldOption,
   getFields,
   getIndexOptions,
   getIndexPatterns,
 } from '../../../../common/index_controls';
-import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { ActionConnectorFieldsProps } from '../../../../types';
-import type { EsIndexActionConnector } from '../types';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface TimeFieldOptions {
   value: string;

@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFieldSearch, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { isEqual } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { CaseStatuses } from '../../../common/api/cases/status';
-import type { CaseStatusWithAllStatus, FilterOptions } from '../../../common/ui/types';
-import { StatusAll } from '../../../common/ui/types';
-import { useGetReporters } from '../../containers/use_get_reporters';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
+
+import { CaseStatuses, CaseStatusWithAllStatus, StatusAll } from '../../../common';
+import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
 import { StatusFilter } from './status_filter';
-import * as i18n from './translations';
 
+import * as i18n from './translations';
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;

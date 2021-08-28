@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiCheckbox,
+  EuiIcon,
+  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiScreenReaderOnly,
-  EuiToolTip,
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
-import React from 'react';
 import styled from 'styled-components';
-import type { BrowserField } from '../../../../../common/search_strategy/index_fields';
-import type { ColumnHeaderOptions } from '../../../../../common/types/timeline/columns';
+
 import { getEmptyValue } from '../../../empty_value';
-import { TruncatableText } from '../../../truncatable_text';
 import { getExampleText, getIconFromType } from '../../../utils/helpers';
+import type { ColumnHeaderOptions, BrowserField } from '../../../../../common';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../body/constants';
+import { TruncatableText } from '../../../truncatable_text';
 import { FieldName } from './field_name';
-import { getAlertColumnHeader } from './helpers';
 import * as i18n from './translations';
+import { getAlertColumnHeader } from './helpers';
 
 const TypeIcon = styled(EuiIcon)`
   margin: 0 4px;

@@ -15,7 +15,7 @@ import { AbortError } from '../../../../kibana_utils/public';
 import { SearchTimeoutError, PainlessError, TimeoutErrorMode, EsError } from '../errors';
 import { ISessionService, SearchSessionState } from '../';
 import { bfetchPluginMock } from '../../../../bfetch/public/mocks';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public/types';
+import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';

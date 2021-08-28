@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { omit } from 'lodash';
 import React from 'react';
-import type { ConnectedComponent, InferableComponentEnhancerWithProps } from 'react-redux';
+import { InferableComponentEnhancerWithProps, ConnectedComponent } from 'react-redux';
 
 export type RendererResult = React.ReactElement<any> | null;
 export type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;

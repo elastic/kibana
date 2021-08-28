@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 interface Props {
   onRefresh: () => void;

@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObject } from '../../../../types/saved_objects';
-import type { SavedObjectsClientContract } from '../../types';
+
+import { SavedObject, SavedObjectsClientContract } from '../../types';
+import { SavedObjectsImportFailure, SavedObjectsImportRetry } from '../types';
 import { SavedObjectsImportError } from '../errors';
-import type { SavedObjectsImportFailure, SavedObjectsImportRetry } from '../types';
 
 const REF_TYPES_TO_VALIDATE = ['index-pattern', 'search'];
 

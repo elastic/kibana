@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+
+import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../../src/core/types/elasticsearch';
-import type { AlertServices } from '../../../../alerting/server/types';
+import { AlertServices } from '../../../../alerting/server';
 
 export async function alertingEsClient<TParams extends ESSearchRequest>({
   scopedClusterClient,

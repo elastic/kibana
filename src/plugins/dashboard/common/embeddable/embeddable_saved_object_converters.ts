@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { omit } from 'lodash';
-import type { SavedObjectEmbeddableInput } from '../../../embeddable/common/lib/saved_object_embeddable';
-import type { EmbeddableInput } from '../../../embeddable/common/types';
-import type { DashboardPanelState, SavedDashboardPanel } from '../types';
+import { DashboardPanelState, SavedDashboardPanel } from '../types';
+import { EmbeddableInput, SavedObjectEmbeddableInput } from '../../../embeddable/common/';
 
 export function convertSavedDashboardPanelToPanelState<
   TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput

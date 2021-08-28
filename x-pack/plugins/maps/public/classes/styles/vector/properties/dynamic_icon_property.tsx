@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { EuiTextColor } from '@elastic/eui';
-import { Map as MbMap } from '@kbn/mapbox-gl';
 import _ from 'lodash';
 import React from 'react';
-import type { IconDynamicOptions } from '../../../../../common/descriptor_types/style_property_descriptor_types';
-import { BreakedLegend } from '../components/legend/breaked_legend';
-import { assignCategoriesToPalette, getOtherCategoryLabel } from '../style_util';
+import { EuiTextColor } from '@elastic/eui';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { DynamicStyleProperty } from './dynamic_style_property';
 // @ts-expect-error
 import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
-import { DynamicStyleProperty } from './dynamic_style_property';
-import type { LegendProps } from './style_property';
-
-
+import { BreakedLegend } from '../components/legend/breaked_legend';
+import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
+import { LegendProps } from './style_property';
+import { IconDynamicOptions } from '../../../../../common/descriptor_types';
 
 export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions> {
   isOrdinal() {

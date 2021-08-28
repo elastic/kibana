@@ -5,29 +5,30 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Server } from '@hapi/hapi';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { configMock } from '../config/mocks';
-import { CspConfig } from '../csp/csp_config';
-import { ExternalUrlConfig } from '../external_url/external_url_config';
-import { AuthStatus } from './auth_state_storage';
-import { sessionStorageMock } from './cookie_session_storage.mocks';
-import { HttpService } from './http_service';
-import type { AuthToolkit } from './lifecycle/auth';
-import type { OnPostAuthToolkit } from './lifecycle/on_post_auth';
-import type { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
-import type { OnPreResponseToolkit } from './lifecycle/on_pre_response';
-import type { OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
-import type { RouterMock } from './router/router.mock';
-import { mockRouter } from './router/router.mock';
-import type {
+
+import { CspConfig } from '../csp';
+import { mockRouter, RouterMock } from './router/router.mock';
+import {
+  InternalHttpServicePreboot,
   HttpServicePreboot,
+  InternalHttpServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
-  InternalHttpServicePreboot,
-  InternalHttpServiceSetup,
   InternalHttpServiceStart,
 } from './types';
+import { HttpService } from './http_service';
+import { AuthStatus } from './auth_state_storage';
+import { OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
+import { AuthToolkit } from './lifecycle/auth';
+import { sessionStorageMock } from './cookie_session_storage.mocks';
+import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
+import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
+import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
+import { configMock } from '../config/mocks';
+import { ExternalUrlConfig } from '../external_url';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;

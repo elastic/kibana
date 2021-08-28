@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { ApplicationStart } from '../../../../../core/public/application/types';
-import type { NotificationsStart } from '../../../../../core/public/notifications/notifications_service';
-import type { EmbeddableInput, PanelState } from '../../../../embeddable/common/types';
-import { ViewMode } from '../../../../embeddable/common/types';
-import { isErrorEmbeddable } from '../../../../embeddable/public/lib/embeddables/error_embeddable';
-import type { IEmbeddable } from '../../../../embeddable/public/lib/embeddables/i_embeddable';
-import { PanelNotFoundError } from '../../../../embeddable/public/lib/errors';
-import { isReferenceOrValueEmbeddable } from '../../../../embeddable/public/lib/reference_or_value_embeddable/types';
-import type { Action } from '../../../../ui_actions/public/actions/action';
-import { IncompatibleActionError } from '../../../../ui_actions/public/actions/incompatible_action_error';
-import type { DashboardPanelState } from '../../../common/types';
+import _ from 'lodash';
+
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
+import {
+  ViewMode,
+  PanelState,
+  IEmbeddable,
+  PanelNotFoundError,
+  EmbeddableInput,
+  isReferenceOrValueEmbeddable,
+  isErrorEmbeddable,
+} from '../../services/embeddable';
+import { ApplicationStart, NotificationsStart } from '../../services/core';
 import { dashboardAddToLibraryAction } from '../../dashboard_strings';
-import { DASHBOARD_CONTAINER_TYPE } from '../embeddable/dashboard_constants';
-import { DashboardContainer } from '../embeddable/dashboard_container';
+import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 

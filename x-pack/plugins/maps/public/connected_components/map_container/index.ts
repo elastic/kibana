@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import { cancelAllInFlightRequests } from '../../actions/data_request_actions';
-import { exitFullScreen } from '../../actions/ui_actions';
-import type { MapStoreState } from '../../reducers/store';
+import { MapContainer } from './map_container';
+import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
+import { cancelAllInFlightRequests, exitFullScreen } from '../../actions';
 import {
   areLayersLoaded,
   getLayerList,
@@ -17,8 +18,7 @@ import {
   getMapSettings,
   getQueryableUniqueIndexPatternIds,
 } from '../../selectors/map_selectors';
-import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
-import { MapContainer } from './map_container';
+import { MapStoreState } from '../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {

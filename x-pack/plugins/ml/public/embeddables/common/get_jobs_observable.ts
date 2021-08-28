@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEqual } from 'lodash';
+
 import { Observable, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, pluck, switchMap } from 'rxjs/operators';
-import { parseInterval } from '../../../common/util/parse_interval';
-import type { ExplorerJob } from '../../application/explorer/explorer_utils';
+import { isEqual } from 'lodash';
+import { AnomalyChartsEmbeddableInput, AnomalySwimlaneEmbeddableInput } from '../types';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import type { AnomalyChartsEmbeddableInput, AnomalySwimlaneEmbeddableInput } from '../types';
+import { ExplorerJob } from '../../application/explorer/explorer_utils';
+import { parseInterval } from '../../../common/util/parse_interval';
 
 export function getJobsObservable(
   embeddableInput: Observable<AnomalyChartsEmbeddableInput | AnomalySwimlaneEmbeddableInput>,

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiStat } from '@elastic/eui';
-import type { FC } from 'react';
-import React from 'react';
+
+import React, { FC } from 'react';
+import { EuiStat, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EMPTY_STAT } from '../../../../common/analytics';
 
 interface Props {

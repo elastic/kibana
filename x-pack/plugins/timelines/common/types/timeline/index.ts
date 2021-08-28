@@ -6,13 +6,15 @@
  */
 
 import * as runtimeTypes from 'io-ts';
-import type { Maybe } from '../../search_strategy/common';
-import { Direction } from '../../search_strategy/common';
+
 import { stringEnum, unionWithNullType } from '../../utility_types';
-import type { NoteResult, NoteSavedObject } from './note';
-import { NoteSavedObjectToReturnRuntimeType } from './note';
-import type { PinnedEvent, PinnedEventSavedObject } from './pinned_event';
-import { PinnedEventToReturnSavedObjectRuntimeType } from './pinned_event';
+import { NoteResult, NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
+import {
+  PinnedEventToReturnSavedObjectRuntimeType,
+  PinnedEventSavedObject,
+  PinnedEvent,
+} from './pinned_event';
+import { Direction, Maybe } from '../../search_strategy';
 
 export * from './actions';
 export * from './cells';

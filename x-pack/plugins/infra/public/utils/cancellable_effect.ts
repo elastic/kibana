@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DependencyList } from 'react';
-import { useEffect } from 'react';
+
+import { DependencyList, useEffect } from 'react';
 
 export const createCancellationSignal = () => {
   const cancellationSignal = {

@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '..';
-import { canUserChangePassword } from '../../../common/model/authenticated_user';
-import { BasicHTTPAuthorizationHeaderCredentials } from '../../authentication/http_authentication/basic_http_authorization_header_credentials';
-import { HTTPAuthorizationHeader } from '../../authentication/http_authentication/http_authorization_header';
+import type { RouteDefinitionParams } from '../';
+import { canUserChangePassword } from '../../../common/model';
+import {
+  BasicHTTPAuthorizationHeaderCredentials,
+  HTTPAuthorizationHeader,
+} from '../../authentication';
 import { getErrorStatusCode, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 

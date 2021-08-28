@@ -4,27 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { memo, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { useUiTracker } from '../../../../../observability/public/hooks/use_track_metric';
-import type { LogColumn, LogEntry } from '../../../../common/log_entry/log_entry';
-import type { TextScale } from '../../../../common/log_text_scale/log_text_scale';
-import type { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
-import {
-  isFieldColumnRenderConfiguration,
-  isMessageColumnRenderConfiguration,
-  isTimestampColumnRenderConfiguration,
-} from '../../../utils/log_column_render_configuration';
-import { isTimestampColumn } from '../../../utils/log_entry/log_entry';
-import type { LogEntryColumnWidths } from './log_entry_column';
-import { iconColumnId, LogEntryColumn } from './log_entry_column';
-import { LogEntryContextMenu } from './log_entry_context_menu';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useUiTracker } from '../../../../../observability/public';
+import { isTimestampColumn } from '../../../utils/log_entry';
+import { TextScale } from '../../../../common/log_text_scale';
+import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
 import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
-import { highlightedContentStyle, hoveredContentStyle, monospaceTextStyle } from './text_styles';
+import { monospaceTextStyle, hoveredContentStyle, highlightedContentStyle } from './text_styles';
+import { LogEntry, LogColumn } from '../../../../common/log_entry';
+import { LogEntryContextMenu } from './log_entry_context_menu';
+import {
+  LogColumnRenderConfiguration,
+  isTimestampColumnRenderConfiguration,
+  isMessageColumnRenderConfiguration,
+  isFieldColumnRenderConfiguration,
+} from '../../../utils/log_column_render_configuration';
 
 const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
   defaultMessage: 'View actions for line',

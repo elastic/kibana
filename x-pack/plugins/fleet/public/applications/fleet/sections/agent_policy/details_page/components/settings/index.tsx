@@ -4,31 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { memo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   EuiBottomBar,
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 
-import type { AgentPolicy } from '../../../../../../../../common/types/models/agent_policy';
-import { useAgentPolicyRefresh } from '../../../../../../../hooks/use_agent_policy_refresh';
-import { useCapabilities } from '../../../../../../../hooks/use_capabilities';
-import { useConfig } from '../../../../../../../hooks/use_config';
-import { useStartServices } from '../../../../../../../hooks/use_core';
-import { useLink } from '../../../../../../../hooks/use_link';
-import { sendGetAgentStatus } from '../../../../../../../hooks/use_request/agents';
-import { sendUpdateAgentPolicy } from '../../../../../../../hooks/use_request/agent_policy';
-import { useBreadcrumbs } from '../../../../../hooks/use_breadcrumbs';
-import { AgentPolicyForm, agentPolicyFormValidation } from '../../../components/agent_policy_form';
-import { ConfirmDeployAgentPolicyModal } from '../../../components/confirm_deploy_modal';
+import type { AgentPolicy } from '../../../../../types';
+import {
+  useLink,
+  useStartServices,
+  useCapabilities,
+  sendUpdateAgentPolicy,
+  useConfig,
+  sendGetAgentStatus,
+  useAgentPolicyRefresh,
+  useBreadcrumbs,
+} from '../../../../../hooks';
+import {
+  AgentPolicyForm,
+  agentPolicyFormValidation,
+  ConfirmDeployAgentPolicyModal,
+} from '../../../components';
 
 const FormWrapper = styled.div`
   max-width: 800px;

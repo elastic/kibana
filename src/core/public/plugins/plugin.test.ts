@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DiscoveredPlugin } from '../../server/plugins/types';
-import { PluginType } from '../../server/plugins/types';
+
+import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
+
+import { DiscoveredPlugin, PluginType } from '../../server';
 import { coreMock } from '../mocks';
 import { PluginWrapper } from './plugin';
-import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
 function createManifest(
   id: string,

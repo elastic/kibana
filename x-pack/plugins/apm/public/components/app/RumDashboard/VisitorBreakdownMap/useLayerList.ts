@@ -4,6 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import {
+  EMSFileSourceDescriptor,
+  ESTermSourceDescriptor,
+  LayerDescriptor as BaseLayerDescriptor,
+  VectorLayerDescriptor as BaseVectorLayerDescriptor,
+  VectorStyleDescriptor,
+} from '../../../../../../maps/common/descriptor_types';
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
@@ -13,22 +21,14 @@ import {
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
 } from '../../../../../../maps/common/constants';
-import type {
-  LayerDescriptor as BaseLayerDescriptor,
-  VectorLayerDescriptor as BaseVectorLayerDescriptor,
-} from '../../../../../../maps/common/descriptor_types/layer_descriptor_types';
-import type {
-  EMSFileSourceDescriptor,
-  ESTermSourceDescriptor,
-} from '../../../../../../maps/common/descriptor_types/source_descriptor_types';
-import type { VectorStyleDescriptor } from '../../../../../../maps/common/descriptor_types/style_property_descriptor_types';
+
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
   type: SOURCE_TYPES.ES_TERM_SOURCE,

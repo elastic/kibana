@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectReference } from '../../../../core/types/saved_objects';
-import type {
+
+import {
   EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
-} from '../../../embeddable/common/types';
-import type { DashboardContainerStateWithType, DashboardPanelState } from '../types';
+} from '../../../embeddable/common';
+import { SavedObjectReference } from '../../../../core/types';
+import { DashboardContainerStateWithType, DashboardPanelState } from '../types';
 
 const getPanelStatePrefix = (state: DashboardPanelState) => `${state.explicitInput.id}:`;
 

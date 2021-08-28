@@ -6,18 +6,19 @@
  */
 
 // utility functions for handling custom URLs
-import { flow, get } from 'lodash';
+
+import { get, flow } from 'lodash';
 import moment from 'moment';
-import type { RisonObject, RisonValue } from 'rison-node';
-import rison from 'rison-node';
-import type { AnomalyRecordDoc } from '../../../common/types/anomalies';
-import type {
-  CustomUrlAnomalyRecordDoc,
-  KibanaUrlConfig,
-  UrlConfig,
-} from '../../../common/types/custom_urls';
+import rison, { RisonObject, RisonValue } from 'rison-node';
+
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
+import {
+  UrlConfig,
+  KibanaUrlConfig,
+  CustomUrlAnomalyRecordDoc,
+} from '../../../common/types/custom_urls';
+import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.

@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { findKey, get, isPlainObject, keys } from 'lodash';
+
+import { get, isPlainObject, keys, findKey } from 'lodash';
 import moment from 'moment';
-import type { IAggConfig } from '../aggs/agg_config';
-import type { AggResponseBucket, TabbedRangeFilterParams, TimeRangeInformation } from './types';
+import { IAggConfig } from '../aggs';
+import { AggResponseBucket, TabbedRangeFilterParams, TimeRangeInformation } from './types';
 
 type AggParams = IAggConfig['params'] & {
   drop_partials: boolean;

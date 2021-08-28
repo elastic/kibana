@@ -5,35 +5,36 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { History } from 'history';
-import { cloneDeep, isEqual } from 'lodash';
-import type { NotificationsStart } from '../../../../../../../core/public/notifications/notifications_service';
-import type { IUiSettingsClient } from '../../../../../../../core/public/ui_settings/types';
-import type { Filter } from '../../../../../../data/common/es_query';
-import { IndexPattern } from '../../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { Query } from '../../../../../../data/public';
-import { esFilters } from '../../../../../../data/public/deprecated';
-import { FilterManager } from '../../../../../../data/public/query/filter_manager/filter_manager';
-import { connectToQueryState } from '../../../../../../data/public/query/state_sync/connect_to_query_state';
-import { syncQueryStateWithUrl } from '../../../../../../data/public/query/state_sync/sync_state_with_url';
-import type { SearchSessionInfoProvider } from '../../../../../../data/public/search/session/session_service';
-import type { DataPublicPluginStart } from '../../../../../../data/public/types';
-import { createStateContainer } from '../../../../../../kibana_utils/common/state_containers/create_state_container';
-import type {
+import { History } from 'history';
+import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
+import {
+  createKbnUrlStateStorage,
+  createStateContainer,
+  IKbnUrlStateStorage,
   ReduxLikeStateContainer,
   StateContainer,
-} from '../../../../../../kibana_utils/common/state_containers/types';
-import { withNotifyOnErrors } from '../../../../../../kibana_utils/public/state_management/url/errors';
-import { syncState } from '../../../../../../kibana_utils/public/state_sync/state_sync';
-import type { IKbnUrlStateStorage } from '../../../../../../kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
-import { createKbnUrlStateStorage } from '../../../../../../kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
-import type { SavedSearch } from '../../../../saved_searches/types';
-import type { DiscoverUrlGeneratorState } from '../../../../url_generator';
-import { DISCOVER_APP_URL_GENERATOR } from '../../../../url_generator';
-import { handleSourceColumnState } from '../../../angular/helpers/state_helpers';
-import type { DiscoverGridSettings } from '../../../components/discover_grid/types';
+  syncState,
+  withNotifyOnErrors,
+} from '../../../../../../kibana_utils/public';
+import {
+  connectToQueryState,
+  DataPublicPluginStart,
+  esFilters,
+  Filter,
+  FilterManager,
+  IndexPattern,
+  Query,
+  SearchSessionInfoProvider,
+  syncQueryStateWithUrl,
+} from '../../../../../../data/public';
 import { migrateLegacyQuery } from '../../../helpers/migrate_legacy_query';
+import { DiscoverGridSettings } from '../../../components/discover_grid/types';
+import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
+import { SavedSearch } from '../../../../saved_searches';
+import { handleSourceColumnState } from '../../../angular/helpers';
 
 export interface AppState {
   /**

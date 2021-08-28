@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { RequestHandlerContext } from '../../../../../../core/server';
-import type { RouteMethod } from '../../../../../../core/server/http/router/route';
-import type { RequestHandler } from '../../../../../../core/server/http/router/router';
+
+import type { RequestHandler, RouteMethod, RequestHandlerContext } from 'src/core/server';
 import { ErrorIndexPatternNotFound } from '../../error';
 
 interface ErrorResponseBody {

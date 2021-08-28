@@ -5,16 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { BehaviorSubject } from 'rxjs';
-import { configServiceMock } from '../config/mocks';
-import { mockCoreContext } from '../core_context.mock';
-import { httpServiceMock } from '../http/http_service.mock';
-import { I18nService } from './i18n_service';
+
 import {
   getKibanaTranslationFilesMock,
   initTranslationsMock,
   registerRoutesMock,
 } from './i18n_service.test.mocks';
+
+import { BehaviorSubject } from 'rxjs';
+import { I18nService } from './i18n_service';
+
+import { configServiceMock } from '../config/mocks';
+import { mockCoreContext } from '../core_context.mock';
+import { httpServiceMock } from '../mocks';
 
 const getConfigService = (locale = 'en') => {
   const configService = configServiceMock.create();

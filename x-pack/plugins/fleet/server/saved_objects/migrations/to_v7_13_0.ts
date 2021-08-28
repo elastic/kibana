@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectMigrationFn } from '../../../../../../src/core/server/saved_objects/migrations/types';
-import type { Output } from '../../../common/types/models/output';
-import type { PackagePolicy } from '../../../common/types/models/package_policy';
-import type { Settings } from '../../../common/types/models/settings';
 
-import { migrateEndpointPackagePolicyToV7130 } from './security_solution/to_v7_13_0';
+import type { SavedObjectMigrationFn } from 'kibana/server';
+
+import type { Settings } from '../../types';
+
+import type { Output, PackagePolicy } from '../../../common';
+
+import { migrateEndpointPackagePolicyToV7130 } from './security_solution';
 
 export const migrateSettingsToV7130: SavedObjectMigrationFn<
   Settings & {

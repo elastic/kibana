@@ -5,18 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { DependencyList } from 'react';
-import type { SavedObjectReference } from '../../../../../core/types/saved_objects';
-import type { PersistableState } from '../../../../kibana_utils/common/persistable_state/types';
-import type {
-  KibanaLocation,
-  LocatorDefinition,
-  LocatorGetUrlParams,
-  LocatorNavigationParams,
-  LocatorPublic,
-} from './types';
+import type { SavedObjectReference } from 'kibana/server';
+import { DependencyList } from 'react';
+import type { PersistableState } from 'src/plugins/kibana_utils/common';
 import { useLocatorUrl } from './use_locator_url';
+import type {
+  LocatorDefinition,
+  LocatorPublic,
+  KibanaLocation,
+  LocatorNavigationParams,
+  LocatorGetUrlParams,
+} from './types';
 
 export interface LocatorDependencies {
   /**

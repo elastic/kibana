@@ -6,9 +6,9 @@
  */
 
 import _ from 'lodash';
-import type { LicenseType } from '../../../licensing/common/types';
-import type { FeatureKibanaPrivileges } from '../../common/feature_kibana_privileges';
-import { KibanaFeature } from '../../common/kibana_feature';
+
+import type { FeatureKibanaPrivileges, KibanaFeature } from '../';
+import type { LicenseType } from '../../../licensing/server';
 import { subFeaturePrivilegeIterator } from './sub_feature_privilege_iterator';
 
 /**

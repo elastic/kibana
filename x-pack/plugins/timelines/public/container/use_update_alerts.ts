@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
-import type { CoreStart } from '../../../../../src/core/public/types';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+
+import type { estypes } from '@elastic/elasticsearch';
+import { CoreStart } from '../../../../../src/core/public';
+
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { AlertStatus } from '../../../timelines/common';
 import { RAC_ALERTS_BULK_UPDATE_URL } from '../../common/constants';
-import type { AlertStatus } from '../../common/types/timeline/actions';
 
 /**
  * Update alert status by query

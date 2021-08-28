@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Observable } from 'rxjs';
-import type { Headers } from '../http/router/headers';
-import { KibanaRequest } from '../http/router/request';
-import type { ServiceStatus } from '../status/types';
-import type { ElasticsearchClientConfig } from './client/client_config';
-import type { IClusterClient, ICustomClusterClient } from './client/cluster_client';
+import { Headers } from '../http/router';
+import { KibanaRequest } from '../http';
 import { ElasticsearchConfig } from './elasticsearch_config';
-import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import { IClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
+import { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import { ServiceStatus } from '../status';
 
 /**
  * @public

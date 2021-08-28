@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import React, { FC, MouseEvent } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FC, MouseEvent } from 'react';
-import React from 'react';
-import type { CoreStart } from '../../../../../core/public/types';
-import { RedirectAppLinks } from '../../app_links/redirect_app_link';
-import { useKibana } from '../../context/context';
-import { useUiSetting$ } from '../../ui_settings/use_ui_setting';
+import { i18n } from '@kbn/i18n';
+import { CoreStart } from 'kibana/public';
+import { RedirectAppLinks } from '../../app_links';
+import { useKibana } from '../../context';
+import { useUiSetting$ } from '../../ui_settings';
 
 interface Props {
   addBasePath: (path: string) => string;

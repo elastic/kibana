@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Observable } from 'rxjs';
-import type { Adapters } from '../../../../inspector/common/adapters/types';
-import type { EmbeddableInput } from '../../../common/types';
-import type { IContainer } from '../containers/i_container';
+import { Adapters } from '../types';
+import { IContainer } from '../containers/i_container';
+import { EmbeddableInput } from '../../../common/types';
 
 export interface EmbeddableError {
   name: string;

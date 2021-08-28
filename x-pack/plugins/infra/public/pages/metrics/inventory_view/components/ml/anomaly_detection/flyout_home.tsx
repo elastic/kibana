@@ -4,33 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiIcon,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import React, { useState, useCallback, useEffect } from 'react';
+import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import moment from 'moment';
-import React, { useCallback, useEffect, useState } from 'react';
-import { LoadingPrompt } from '../../../../../../components/loading_page';
-import { MissingResultsPrivilegesPrompt } from '../../../../../../components/logging/log_analysis_setup/missing_results_privileges_prompt';
-import { MissingSetupPrivilegesPrompt } from '../../../../../../components/logging/log_analysis_setup/missing_setup_privileges_prompt';
+import { EuiTabs } from '@elastic/eui';
+import { EuiTab } from '@elastic/eui';
 import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
+import {
+  MissingResultsPrivilegesPrompt,
+  MissingSetupPrivilegesPrompt,
+} from '../../../../../../components/logging/log_analysis_setup';
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
+import { LoadingPrompt } from '../../../../../../components/loading_page';
 import { useLinkProps } from '../../../../../../hooks/use_link_props';
 import { AnomaliesTable } from './anomalies_table/anomalies_table';
 

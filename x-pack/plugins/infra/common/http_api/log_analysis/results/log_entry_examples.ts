@@ -6,10 +6,13 @@
  */
 
 import * as rt from 'io-ts';
-import { logEntryExampleRT } from '../../../log_analysis/log_entry_examples';
-import { timeRangeRT } from '../../../time/time_range';
-import { badRequestErrorRT, forbiddenErrorRT } from '../../shared/errors';
-import { routeTimingMetadataRT } from '../../shared/timing';
+import { logEntryExampleRT } from '../../../log_analysis';
+import {
+  badRequestErrorRT,
+  forbiddenErrorRT,
+  timeRangeRT,
+  routeTimingMetadataRT,
+} from '../../shared';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH =
   '/api/infra/log_analysis/results/log_entry_examples';

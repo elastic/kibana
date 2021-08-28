@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import { fieldValidators } from '../../../../es_ui_shared/static/forms/helpers';
+import { fieldValidators } from '../../shared_imports';
+
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 
 const { emptyField, numberGreaterThanField } = fieldValidators;

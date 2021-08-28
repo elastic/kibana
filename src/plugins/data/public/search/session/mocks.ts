@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { BehaviorSubject } from 'rxjs';
-import type { SessionMeta } from './search_session_state';
-import { SearchSessionState } from './search_session_state';
-import type { ISessionsClient } from './sessions_client';
-import type { ISessionService } from './session_service';
+import { ISessionsClient } from './sessions_client';
+import { ISessionService } from './session_service';
+import { SearchSessionState, SessionMeta } from './search_session_state';
 
 export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
   return {

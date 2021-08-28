@@ -4,15 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { htmlIdGenerator } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { useEffect, useMemo } from 'react';
-import { parse, View, Warn } from 'vega';
-import { expressionInterpreter } from 'vega-interpreter';
+
+import React, { useMemo, useEffect, FC } from 'react';
+
 // There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
 // @ts-ignore
-import { compile, TopLevelSpec } from 'vega-lite/build/vega-lite';
+import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
+
+// There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
+// @ts-ignore
+import { compile } from 'vega-lite/build/vega-lite';
+import { parse, View, Warn } from 'vega';
+import { expressionInterpreter } from 'vega-interpreter';
 import { Handler } from 'vega-tooltip';
+
+import { htmlIdGenerator } from '@elastic/eui';
 
 export interface VegaChartViewProps {
   vegaSpec: TopLevelSpec;

@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { Start as InspectorStartContract } from '../../../../../../inspector/public/plugin';
-import type { Action } from '../../../../../../ui_actions/public/actions/action';
-import type { IEmbeddable } from '../../../embeddables/i_embeddable';
+import { Action } from 'src/plugins/ui_actions/public';
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { IEmbeddable } from '../../../embeddables';
 
 export const ACTION_INSPECT_PANEL = 'openInspector';
 

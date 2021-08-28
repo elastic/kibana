@@ -4,12 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Readable } from 'stream';
 
-import type { CoreStart } from '../../../../../../src/core/server';
-import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import type { SavedObjectsImportRetry } from '../../../../../../src/core/server/saved_objects/import/types';
-import type { SavedObject } from '../../../../../../src/core/types/saved_objects';
+import type {
+  CoreStart,
+  KibanaRequest,
+  SavedObject,
+  SavedObjectsImportRetry,
+} from 'src/core/server';
+
 import { spaceIdToNamespace } from '../utils/namespace';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { getIneligibleTypes } from './lib/get_ineligible_types';

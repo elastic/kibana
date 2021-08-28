@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFieldText, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useDebouncedValue } from '../../../../shared_components/debounced_value';
+import { useDebouncedValue } from '../../../../shared_components';
 
 export const LabelInput = ({
   value,

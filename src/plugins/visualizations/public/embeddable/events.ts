@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { APPLY_FILTER_TRIGGER } from '../../../data/public/triggers/apply_filter_trigger';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '../../../embeddable/public/lib/triggers/triggers';
-import { ROW_CLICK_TRIGGER } from '../../../ui_actions/public/triggers/row_click_trigger';
+
+import { ROW_CLICK_TRIGGER } from '../../../ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../plugins/data/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '../../../../plugins/embeddable/public';
 
 export interface VisEventToTrigger {
   ['applyFilter']: typeof APPLY_FILTER_TRIGGER;

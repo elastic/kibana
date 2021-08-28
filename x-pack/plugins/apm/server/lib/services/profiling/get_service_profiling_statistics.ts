@@ -4,31 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
 import { keyBy, last } from 'lodash';
+import { Logger } from 'kibana/server';
 import util from 'util';
-import type { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import { maybe } from '../../../../common/utils/maybe';
+import { ProfileStackFrame } from '../../../../typings/es_schemas/ui/profile';
 import {
-  kqlQuery,
-  rangeQuery,
-} from '../../../../../observability/server/utils/queries';
+  ProfilingValueType,
+  ProfileNode,
+  getValueTypeConfig,
+} from '../../../../common/profiling';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import {
   PROFILE_STACK,
   PROFILE_TOP_ID,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
-import type { ProfileNode } from '../../../../common/profiling';
-import {
-  getValueTypeConfig,
-  ProfilingValueType,
-} from '../../../../common/profiling';
+import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { maybe } from '../../../../common/utils/maybe';
-import type { ProfileStackFrame } from '../../../../typings/es_schemas/ui/profile';
+import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import type { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
-import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 const MAX_STACK_IDS = 10000;
 const MAX_STACKS_PER_REQUEST = 1000;

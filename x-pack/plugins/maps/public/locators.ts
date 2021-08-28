@@ -7,23 +7,20 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import rison from 'rison-node';
-import type { Filter } from '../../../../src/plugins/data/common/es_query';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type {
-  RefreshInterval,
   TimeRange,
-} from '../../../../src/plugins/data/common/query/timefilter/types';
-import type { Query } from '../../../../src/plugins/data/public';
-import { esFilters } from '../../../../src/plugins/data/public/deprecated';
-import type { QueryState } from '../../../../src/plugins/data/public/query/state_sync/types';
-import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public/state_management/url/kbn_url_storage';
-import type {
-  LocatorDefinition,
-  LocatorPublic,
-} from '../../../../src/plugins/share/common/url_service/locators/types';
-import { APP_ID, INITIAL_LAYERS_KEY } from '../common/constants';
-import type { LayerDescriptor } from '../common/descriptor_types/layer_descriptor_types';
+  Filter,
+  Query,
+  QueryState,
+  RefreshInterval,
+} from '../../../../src/plugins/data/public';
+import { esFilters } from '../../../../src/plugins/data/public';
+import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
+import type { LocatorDefinition, LocatorPublic } from '../../../../src/plugins/share/public';
+import type { LayerDescriptor } from '../common/descriptor_types';
+import { INITIAL_LAYERS_KEY, APP_ID } from '../common/constants';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 
 export interface MapsAppLocatorParams extends SerializableRecord {

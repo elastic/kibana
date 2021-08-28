@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiLink } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import type { CoreStart } from '../../../../../../src/core/public/types';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public/context/context';
+import { CoreStart } from '../../../../../../src/core/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 interface RuleNameProps {
   name: string;

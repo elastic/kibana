@@ -4,28 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
+import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { throttle } from 'lodash';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Observable } from 'rxjs';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common/constants';
-import { ANOMALY_THRESHOLD } from '../../../common/constants/anomalies';
-import { ML_APP_LOCATOR } from '../../../common/constants/locator';
-import type { MlLocatorParams } from '../../../common/types/locator';
-import type { EntityField, EntityFieldOperation } from '../../../common/util/anomaly_utils';
-import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
-import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
-import { TimeBuckets } from '../../application/util/time_buckets';
-import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
+import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
+import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import type {
   AnomalyChartsEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsEmbeddableServices,
-} from '../types';
-import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
-import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
+} from '..';
+import type { EntityField, EntityFieldOperation } from '../../../common/util/anomaly_utils';
+
+import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
+import { ML_APP_LOCATOR } from '../../../common/constants/locator';
+import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
+import { ANOMALY_THRESHOLD } from '../../../common';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
+import { TimeBuckets } from '../../application/util/time_buckets';
+import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
+import { MlLocatorParams } from '../../../common/types/locator';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 

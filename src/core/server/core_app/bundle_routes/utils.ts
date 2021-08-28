@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { createHash } from 'crypto';
+
 import { createReadStream, Stats } from 'fs';
+import { createHash } from 'crypto';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 

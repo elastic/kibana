@@ -9,16 +9,16 @@
 /*
  * This file provides logic for migrating raw documents.
  */
-import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { SavedObjectsSerializer } from '../../serialization/serializer';
-import type {
+import * as Either from 'fp-ts/lib/Either';
+import {
   SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,
+  SavedObjectsSerializer,
   SavedObjectUnsanitizedDoc,
-} from '../../serialization/types';
-import type { MigrateAndConvertFn } from './document_migrator';
-import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
+} from '../../serialization';
+import { MigrateAndConvertFn } from './document_migrator';
+import { TransformSavedObjectDocumentError } from '.';
 
 export interface DocumentsTransformFailed {
   readonly type: string;

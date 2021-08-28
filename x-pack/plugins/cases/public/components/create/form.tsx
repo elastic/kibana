@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLoadingSpinner, EuiSteps } from '@elastic/eui';
+
 import React, { useMemo } from 'react';
+import { EuiLoadingSpinner, EuiSteps } from '@elastic/eui';
 import styled, { css } from 'styled-components';
-import { useFormContext } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/form_context';
-import type { ActionConnector } from '../../../common/api/connectors';
-import { Connector } from './connector';
-import { Description } from './description';
-import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { Tags } from './tags';
+
+import { useFormContext } from '../../common/shared_imports';
+
 import { Title } from './title';
+import { Description } from './description';
+import { Tags } from './tags';
+import { Connector } from './connector';
 import * as i18n from './translations';
+import { SyncAlertsToggle } from './sync_alerts_toggle';
+import { ActionConnector } from '../../../common';
 
 interface ContainerProps {
   big?: boolean;

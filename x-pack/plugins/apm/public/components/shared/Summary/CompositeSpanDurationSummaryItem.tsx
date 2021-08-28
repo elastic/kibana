@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiText, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { asDuration } from '../../../../common/utils/formatters/duration';
+import { i18n } from '@kbn/i18n';
+import { EuiToolTip, EuiText } from '@elastic/eui';
+import { asDuration } from '../../../../common/utils/formatters';
 
 interface Props {
   count: number;

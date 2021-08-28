@@ -5,12 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from './constants';
+
 import {
-  findIllegalCharactersInIndexName,
   indexNameBeginsWithPeriod,
+  findIllegalCharactersInIndexName,
   indexNameContainsSpaces,
-} from './validate/validate_index';
+} from './validate';
 
 export const indices = {
   INDEX_ILLEGAL_CHARACTERS_VISIBLE,

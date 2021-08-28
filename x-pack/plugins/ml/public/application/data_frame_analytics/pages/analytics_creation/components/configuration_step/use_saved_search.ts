@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
+
+import { useState, useEffect } from 'react';
 import {
   decorateQuery,
   fromKueryExpression,
   luceneStringToDsl,
   toElasticsearchQuery,
 } from '@kbn/es-query';
-import { useEffect, useState } from 'react';
+import { estypes } from '@elastic/elasticsearch';
+import { useMlContext } from '../../../../../contexts/ml';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
-import { useMlContext } from '../../../../../contexts/ml/use_ml_context';
 import { getQueryFromSavedSearch } from '../../../../../util/index_utils';
 
 // `undefined` is used for a non-initialized state

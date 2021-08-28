@@ -6,8 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { logEntryCursorRT } from '../../log_entry/log_entry_cursor';
-import { logEntriesSummaryBucketRT, logEntriesSummaryRequestRT } from './summary';
+import { logEntryCursorRT } from '../../log_entry';
+import { logEntriesSummaryRequestRT, logEntriesSummaryBucketRT } from './summary';
 
 export const LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH = '/api/log_entries/summary_highlights';
 

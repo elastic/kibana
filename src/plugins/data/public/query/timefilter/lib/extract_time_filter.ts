@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Filter, RangeFilter } from '@kbn/es-query';
-import { isRangeFilter } from '@kbn/es-query';
+
+import { Filter, isRangeFilter, RangeFilter } from '@kbn/es-query';
 import { keys, partition } from 'lodash';
-import type { TimeRange } from '../../../../common/query/timefilter/types';
+import { TimeRange } from '../../../../common';
 import { convertRangeFilterToTimeRangeString } from './change_time_filter';
 
 export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {

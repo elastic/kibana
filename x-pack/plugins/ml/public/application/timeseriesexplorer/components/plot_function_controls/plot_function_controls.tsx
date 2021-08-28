@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useCallback, useEffect } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect } from 'react';
-import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
-import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs/combined_job';
 import { mlJobService } from '../../../services/job_service';
-import { useToastNotificationService } from '../../../services/toast_notification_service/toast_notification_service';
 import { getFunctionDescription, isMetricDetector } from '../../get_function_description';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
+import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
+import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 
 const plotByFunctionOptions = [
   {

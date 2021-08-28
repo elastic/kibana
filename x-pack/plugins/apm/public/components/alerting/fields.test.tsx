@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { expectTextsInDocument } from '../../utils/testHelpers';
 import { ServiceField, TransactionTypeField } from './fields';
+import { act, fireEvent, render } from '@testing-library/react';
+import { expectTextsInDocument } from '../../utils/testHelpers';
 
 describe('alerting fields', () => {
   describe('Service Field', () => {

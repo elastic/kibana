@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -14,9 +16,8 @@ import {
   EuiPagination,
   EuiPopover,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n/';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n/';
 
 interface ToolBarPaginationProps {
   pageSize: number;

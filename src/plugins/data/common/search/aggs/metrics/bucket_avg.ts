@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import type { AggConfigSerialized } from '../agg_config';
-import type { BaseAggParams } from '../types';
 import { aggBucketAvgFnName } from './bucket_avg_fn';
+import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
-import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
+import { AggConfigSerialized, BaseAggParams } from '../types';
 
 export interface AggParamsBucketAvg extends BaseAggParams {
   customMetric?: AggConfigSerialized;

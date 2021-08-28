@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '../../../../../../../../src/core/server/elasticsearch/client/types';
-import type { SavedObjectsClientContract } from '../../../../../../../../src/core/server/saved_objects/types';
+
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+
+import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type {
   EsAssetReference,
   InstallablePackage,
   RegistryDataStream,
-} from '../../../../../common/types/models/epm';
-import { ElasticsearchAssetType } from '../../../../../common/types/models/epm';
-import { getAsset } from '../../archive';
-import { getInstallation } from '../../packages/get';
+} from '../../../../../common/types/models';
+import { getInstallation } from '../../packages';
 import { saveInstalledEsRefs } from '../../packages/install';
+import { getAsset } from '../transform/common';
 
 import { deleteIlmRefs, deleteIlms } from './remove';
 

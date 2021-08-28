@@ -4,41 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 
-import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
-import type { Plugin } from '../../../../src/core/public/plugins/plugin';
-import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public/types';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public/plugin';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry';
-import type {
-  ManagementSetup,
-  ManagementStart,
-} from '../../../../src/plugins/management/public/types';
+import { i18n } from '@kbn/i18n';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { HomePublicPluginSetup } from 'src/plugins/home/public';
+import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
 import type {
   SecurityOssPluginSetup,
   SecurityOssPluginStart,
-} from '../../../../src/plugins/security_oss/public/plugin';
-import type { FeaturesPluginStart } from '../../features/public/plugin';
-import type { LicensingPluginSetup } from '../../licensing/public/types';
-import type { SpacesPluginStart } from '../../spaces/public/plugin';
-import type { SecurityLicense } from '../common/licensing/license_service';
-import { SecurityLicenseService } from '../common/licensing/license_service';
-import { accountManagementApp } from './account_management/account_management_app';
-import type {
-  AuthenticationServiceSetup,
-  AuthenticationServiceStart,
-} from './authentication/authentication_service';
-import { AuthenticationService } from './authentication/authentication_service';
+} from 'src/plugins/security_oss/public';
+
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import type { FeaturesPluginStart } from '../../features/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import type { SpacesPluginStart } from '../../spaces/public';
+import { SecurityLicenseService } from '../common/licensing';
+import type { SecurityLicense } from '../common/licensing';
+import { accountManagementApp } from './account_management';
+import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
+import { AuthenticationService } from './authentication';
 import type { ConfigType } from './config';
-import { ManagementService } from './management/management_service';
-import type { SecurityNavControlServiceStart } from './nav_control/nav_control_service';
-import { SecurityNavControlService } from './nav_control/nav_control_service';
-import { SecurityCheckupService } from './security_checkup/security_checkup_service';
-import { SessionExpired } from './session/session_expired';
-import { SessionTimeout } from './session/session_timeout';
-import { UnauthorizedResponseHttpInterceptor } from './session/unauthorized_response_http_interceptor';
+import { ManagementService } from './management';
+import type { SecurityNavControlServiceStart } from './nav_control';
+import { SecurityNavControlService } from './nav_control';
+import { SecurityCheckupService } from './security_checkup';
+import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 import type { UiApi } from './ui_api';
 import { getUiApi } from './ui_api';
 

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiCallOut,
   EuiFieldPassword,
@@ -22,7 +23,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { FormFlyout } from '../../../components/form_flyout';
 import { useCurrentUser } from '../../../components/use_current_user';
 import type { ValidationErrors } from '../../../components/use_form';

@@ -4,13 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import turfAlong from '@turf/along';
-import turfArea from '@turf/area';
-// @ts-expect-error
-import turfCenterOfMass from '@turf/center-of-mass';
-import { lineString, polygon } from '@turf/helpers';
-import turfLength from '@turf/length';
-import type {
+
+import {
   Feature,
   FeatureCollection,
   Geometry,
@@ -20,6 +15,12 @@ import type {
   MultiPoint,
   MultiPolygon,
 } from 'geojson';
+import turfAlong from '@turf/along';
+import turfArea from '@turf/area';
+// @ts-expect-error
+import turfCenterOfMass from '@turf/center-of-mass';
+import turfLength from '@turf/length';
+import { lineString, polygon } from '@turf/helpers';
 import { GEO_JSON_TYPE, KBN_IS_CENTROID_FEATURE, KBN_METADATA_FEATURE } from './constants';
 
 export function getCentroidFeatures(featureCollection: FeatureCollection): Feature[] {

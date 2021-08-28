@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+
 import { lazy } from 'react';
-import type {
+import { i18n } from '@kbn/i18n';
+import {
+  GenericValidationResult,
   ActionTypeModel,
   ConnectorValidationResult,
-  GenericValidationResult,
 } from '../../../../types';
-import { isValidUrl } from '../../../lib/value_validators';
-import type {
+import {
   ServiceNowActionConnector,
   ServiceNowConfig,
-  ServiceNowITSMActionParams,
   ServiceNowSecrets,
+  ServiceNowITSMActionParams,
   ServiceNowSIRActionParams,
 } from './types';
+import { isValidUrl } from '../../../lib/value_validators';
 
 const validateConnector = async (
   action: ServiceNowActionConnector

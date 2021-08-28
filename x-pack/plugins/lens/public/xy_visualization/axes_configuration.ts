@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Datatable } from '../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
-import type { SerializedFieldFormat } from '../../../../../src/plugins/expressions/common/types/common';
-import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common/types';
-import type { AxisExtentConfig } from '../../common/expressions/xy_chart/axis_config';
-import type { XYLayerConfig } from '../../common/expressions/xy_chart/layer_config';
-import type { FormatFactory } from '../../common/types';
+
+import { FormatFactory } from '../../common';
+import { AxisExtentConfig, XYLayerConfig } from '../../common/expressions';
+import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
+import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
 
 interface FormattedMetric {
   layer: string;

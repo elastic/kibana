@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import { memoize } from 'lodash';
-import type { LazyExoticComponent } from 'react';
-import React, { PureComponent } from 'react';
-import { FieldFormat } from '../../../../field_formats/common/field_format';
-import type { FieldFormatEditor, FieldFormatEditorFactory } from './editors/types';
+import React, { PureComponent, LazyExoticComponent } from 'react';
+import type { FieldFormat } from 'src/plugins/field_formats/common';
+import { FieldFormatEditorFactory, FieldFormatEditor } from './editors';
 
 export interface FormatEditorProps {
   fieldType: string;

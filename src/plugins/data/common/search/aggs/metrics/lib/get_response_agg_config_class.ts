@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { assignIn } from 'lodash';
-import type { IMetricAggConfig } from '../metric_agg_type';
+import { IMetricAggConfig } from '../metric_agg_type';
 
 /**
  * Get the ResponseAggConfig class for an aggConfig,

@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { useMemo } from 'react';
+
 import { useKibanaUiSetting } from '../utils/use_kibana_ui_setting';
 
 const getFormattedTime = (

@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {
-  expandedStateToHashedState,
-  hashedStateToExpandedState,
-} from '../state_encoder/encode_decode_state';
+
+import { expandedStateToHashedState, hashedStateToExpandedState } from '../state_encoder';
 import { replaceUrlHashQuery } from './format';
 
 export type IParsedUrlQuery = Record<string, any>;

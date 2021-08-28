@@ -4,23 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MlDatafeedState, MlJobState, MlJobStats } from '@elastic/elasticsearch/api/types';
+
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
-import type { AlertTypeState } from '../../../../alerting/common/alert';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-} from '../../../../alerting/common/alert_instance';
-import type { ActionGroup } from '../../../../alerting/common/alert_type';
-import type { AlertExecutorOptions } from '../../../../alerting/server/types';
+import { KibanaRequest } from 'kibana/server';
+import { MlDatafeedState, MlJobState, MlJobStats } from '@elastic/elasticsearch/api/types';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
-import { MINIMUM_FULL_LICENSE } from '../../../common/license/ml_license';
+import { MINIMUM_FULL_LICENSE } from '../../../common/license';
+import {
+  anomalyDetectionJobsHealthRuleParams,
+  AnomalyDetectionJobsHealthRuleParams,
+} from '../../routes/schemas/alerting_schema';
+import { RegisterAlertParams } from './register_ml_alerts';
+import {
+  ActionGroup,
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
+} from '../../../../alerting/common';
+import type { AlertExecutorOptions } from '../../../../alerting/server';
 import type { JobMessage } from '../../../common/types/audit_message';
-import type { AnomalyDetectionJobsHealthRuleParams } from '../../routes/schemas/alerting_schema';
-import { anomalyDetectionJobsHealthRuleParams } from '../../routes/schemas/alerting_schema';
-import type { RegisterAlertParams } from './register_ml_alerts';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];
 

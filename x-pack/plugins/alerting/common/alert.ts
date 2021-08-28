@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsResolveResponse } from '../../../../src/core/server/saved_objects/service/saved_objects_client';
-import type {
+
+import {
   SavedObjectAttribute,
   SavedObjectAttributes,
-} from '../../../../src/core/types/saved_objects';
-import type { AlertNotifyWhenType } from './alert_notify_when_type';
+  SavedObjectsResolveResponse,
+} from 'kibana/server';
+import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 export type AlertTypeState = Record<string, unknown>;
 export type AlertTypeParams = Record<string, unknown>;

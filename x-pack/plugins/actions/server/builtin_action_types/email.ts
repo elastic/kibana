@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
+
 import { curry } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
-import type { ActionTypeExecutorResult } from '../../common/types';
-import type { ActionsConfigurationUtilities } from '../actions_config';
-import { renderMustacheObject, renderMustacheString } from '../lib/mustache_renderer';
-import type { ActionType, ActionTypeExecutorOptions } from '../types';
+
+import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
-import type { SendEmailOptions, Transport } from './lib/send_email';
-import { JSON_TRANSPORT_SERVICE, sendEmail } from './lib/send_email';
+import { Logger } from '../../../../../src/core/server';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
+import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
 
 export type EmailActionType = ActionType<
   ActionTypeConfigType,

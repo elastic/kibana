@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { findIndex } from 'lodash';
-import { IndexPattern } from '../index_patterns/index_pattern';
-import type { FieldSpec, IndexPatternFieldMap } from '../types';
+import { IFieldType } from './types';
 import { IndexPatternField } from './index_pattern_field';
-import type { IFieldType } from './types';
+import { FieldSpec, IndexPatternFieldMap } from '../types';
+import { IndexPattern } from '../index_patterns';
 
 type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;
 

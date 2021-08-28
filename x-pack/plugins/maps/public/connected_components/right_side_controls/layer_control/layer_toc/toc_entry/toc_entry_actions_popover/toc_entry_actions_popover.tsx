@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { Component } from 'react';
 import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Component } from 'react';
-import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common/constants';
-import type { ESSearchSourceSyncMeta } from '../../../../../../../common/descriptor_types/data_request_descriptor_types';
-import type { ILayer } from '../../../../../../classes/layers/layer';
-import { VectorLayer } from '../../../../../../classes/layers/vector_layer/vector_layer';
-import { ESSearchSource } from '../../../../../../classes/sources/es_search_source/es_search_source';
+import { ILayer } from '../../../../../../classes/layers/layer';
+import { TOCEntryButton } from '../toc_entry_button';
 import {
   EDIT_FEATURES_LABEL,
   EDIT_LAYER_SETTINGS_LABEL,
@@ -19,7 +17,10 @@ import {
   getVisibilityToggleIcon,
   getVisibilityToggleLabel,
 } from '../action_labels';
-import { TOCEntryButton } from '../toc_entry_button';
+import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
+import { VectorLayer } from '../../../../../../classes/layers/vector_layer';
+import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common';
+import { ESSearchSourceSyncMeta } from '../../../../../../../common/descriptor_types';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;

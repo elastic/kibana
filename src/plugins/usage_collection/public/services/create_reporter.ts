@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Storage } from '@kbn/analytics';
-import { Reporter } from '@kbn/analytics';
-import type { HttpSetup } from '../../../../core/public/http/types';
+
+import { Reporter, Storage } from '@kbn/analytics';
+import { HttpSetup } from 'kibana/public';
 
 interface AnalyicsReporterConfig {
   localStorage: Storage;

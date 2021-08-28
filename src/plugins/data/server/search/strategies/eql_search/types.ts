@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { estypes } from '@elastic/elasticsearch';
+
+import type { estypes } from '@elastic/elasticsearch';
 
 export interface EqlSearchResponse<T = unknown> extends estypes.SearchResponse<T> {
   id?: string;

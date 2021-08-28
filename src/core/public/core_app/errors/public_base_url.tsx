@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import type { DocLinksStart } from '../../doc_links/doc_links_service';
-import type { HttpStart } from '../../http/types';
-import type { NotificationsStart } from '../../notifications/notifications_service';
-import { mountReactNode } from '../../utils/mount';
+
+import type { HttpStart, NotificationsStart } from '../..';
+import type { DocLinksStart } from '../../doc_links';
+import { mountReactNode } from '../../utils';
 
 /** Only exported for tests */
 export const MISSING_CONFIG_STORAGE_KEY = `core.warnings.publicBaseUrlMissingDismissed`;

@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPatternField } from '../../../../../../../../data/common/index_patterns/fields/index_pattern_field';
+
+import { IndexPatternField } from '../../../../../../../../data/public';
 
 export interface FieldFilterState {
   missing: boolean;

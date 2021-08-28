@@ -8,17 +8,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'react-vis/dist/style.css';
-import type { ConfigSchema } from '..';
-import type { CoreStart } from '../../../../../src/core/public/types';
-import type { AppMountParameters } from '../../../../../src/core/public/application/types';
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/utils/app_wrapper_class';
-import type { ObservabilityRuleTypeRegistry } from '../../../observability/public/rules/create_observability_rule_type_registry';
-import { ApmAppRoot } from '../components/routing/app_root';
-import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
+import { ConfigSchema } from '../';
+import {
+  AppMountParameters,
+  CoreStart,
+  APP_WRAPPER_CLASS,
+} from '../../../../../src/core/public';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
 import { setReadonlyBadge } from '../updateBadge';
+import { ApmAppRoot } from '../components/routing/app_root';
 
 /**
  * This module is rendered asynchronously in the Kibana platform.

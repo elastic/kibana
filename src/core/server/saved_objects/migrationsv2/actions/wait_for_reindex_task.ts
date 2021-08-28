@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { flow } from 'fp-ts/lib/function';
-import * as Option from 'fp-ts/lib/Option';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { IndexNotFound, TargetIndexHadWriteBlock } from '.';
-import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
-import { isIncompatibleMappingException, isWriteBlockException } from './es_errors';
-import type { WaitForTaskCompletionTimeout } from './wait_for_task';
-import { waitForTask } from './wait_for_task';
+import * as Option from 'fp-ts/lib/Option';
+import { flow } from 'fp-ts/lib/function';
+import { RetryableEsClientError } from './catch_retryable_es_client_errors';
+import type { IndexNotFound, TargetIndexHadWriteBlock } from './index';
+import { waitForTask, WaitForTaskCompletionTimeout } from './wait_for_task';
+import { isWriteBlockException, isIncompatibleMappingException } from './es_errors';
 
 export interface IncompatibleMappingException {
   type: 'incompatible_mapping_exception';

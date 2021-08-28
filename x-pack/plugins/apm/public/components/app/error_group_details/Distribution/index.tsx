@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SettingsSpec, TooltipValue } from '@elastic/charts';
+
 import {
   Axis,
   Chart,
@@ -13,22 +13,23 @@ import {
   Position,
   ScaleType,
   Settings,
+  SettingsSpec,
+  TooltipValue,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
-import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED } from '@kbn/rule-data-utils';
-// @ts-expect-error
-import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import d3 from 'd3';
 import React, { Suspense, useState } from 'react';
-import { LazyAlertsFlyout } from '../../../../../../observability/public/pages/alerts/alerts_flyout/lazy_alerts_flyout';
-import { AlertType } from '../../../../../common/alert_types';
-import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters/datetime';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import type { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
-import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { AlertType } from '../../../../../common/alert_types';
 import { getAlertAnnotations } from '../../../shared/charts/helper/get_alert_annotations';
-
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { LazyAlertsFlyout } from '../../../../../../observability/public';
 
 const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED = ALERT_RULE_TYPE_ID_NON_TYPED;
 

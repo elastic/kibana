@@ -5,20 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type {
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '../../../../core/types/saved_objects';
-import type { Filter } from '../../../data/common/es_query';
-import type { RefreshInterval } from '../../../data/common/query/timefilter/types';
-import type { ISearchSource } from '../../../data/common/search/search_source/types';
-import type { EmbeddableStart } from '../../../embeddable/public/plugin';
-import type { SavedObjectsStart } from '../../../saved_objects/public/plugin';
-import type { SavedObject } from '../../../saved_objects/public/types';
-import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
+
+import { EmbeddableStart } from '../services/embeddable';
+import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
+import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
+
 import { createDashboardEditUrl } from '../dashboard_constants';
-import type { Query } from '../services/data';
-import type { DashboardOptions } from '../types';
+import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
+
+import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
+import { DashboardOptions } from '../types';
 
 export interface DashboardSavedObject extends SavedObject {
   id?: string;

@@ -7,8 +7,8 @@
  */
 
 /* eslint-disable react/no-danger */
-import type { FC } from 'react';
-import React from 'react';
+
+import React, { FC } from 'react';
 
 interface Props {
   darkMode: boolean;

@@ -5,23 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { RequestHandlerContext } from '..';
-import type { IContextContainer, IContextProvider } from '../context/container/context';
-import type { ICspConfig } from '../csp/csp_config';
-import { ExternalUrlConfig } from '../external_url/external_url_config';
-import type { PluginOpaqueId } from '../plugins/types';
-import type { GetAuthHeaders } from './auth_headers_storage';
-import type { GetAuthState, IsAuthenticated } from './auth_state_storage';
-import type { IBasePath } from './base_path_service';
-import type { SessionStorageCookieOptions } from './cookie_session_storage';
-import type { HttpServerSetup } from './http_server';
-import type { AuthenticationHandler } from './lifecycle/auth';
-import type { OnPostAuthHandler } from './lifecycle/on_post_auth';
-import type { OnPreAuthHandler } from './lifecycle/on_pre_auth';
-import type { OnPreResponseHandler } from './lifecycle/on_pre_response';
-import type { OnPreRoutingHandler } from './lifecycle/on_pre_routing';
-import type { IRouter } from './router/router';
-import type { SessionStorageFactory } from './session_storage';
+
+import { IContextProvider, IContextContainer } from '../context';
+import { ICspConfig } from '../csp';
+import { GetAuthState, IsAuthenticated } from './auth_state_storage';
+import { GetAuthHeaders } from './auth_headers_storage';
+import { IRouter } from './router';
+import { HttpServerSetup } from './http_server';
+import { SessionStorageCookieOptions } from './cookie_session_storage';
+import { SessionStorageFactory } from './session_storage';
+import { AuthenticationHandler } from './lifecycle/auth';
+import { OnPreRoutingHandler } from './lifecycle/on_pre_routing';
+import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
+import { OnPostAuthHandler } from './lifecycle/on_post_auth';
+import { OnPreResponseHandler } from './lifecycle/on_pre_response';
+import { IBasePath } from './base_path_service';
+import { ExternalUrlConfig } from '../external_url';
+import type { PluginOpaqueId, RequestHandlerContext } from '..';
 
 /**
  * An object that handles registration of http request context providers.

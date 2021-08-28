@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IndexMapping } from '../types';
+
+import { IndexMapping } from '../types';
 
 /**
  *  Get the property mappings for the root type in the EsMappingsDsl

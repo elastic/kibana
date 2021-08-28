@@ -6,33 +6,30 @@
  * Side Public License, v 1.
  */
 
+import './import_summary.scss';
+import _ from 'lodash';
+import React, { Fragment, FC, useMemo } from 'react';
 import {
-  EuiButton,
-  EuiCallOut,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiCallOut,
+  EuiButton,
+  EuiToolTip,
   EuiIcon,
   EuiIconTip,
-  EuiSpacer,
-  EuiText,
+  EuiHorizontalRule,
   EuiTitle,
-  EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import _ from 'lodash';
-import type { FC } from 'react';
-import React, { Fragment, useMemo } from 'react';
-import type { IBasePath } from '../../../../../../core/public/http/types';
 import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
-} from '../../../../../../core/server/saved_objects/import/types';
-import { getDefaultTitle } from '../../../lib/get_default_title';
-import { getSavedObjectLabel } from '../../../lib/get_saved_object_label';
-import type { FailedImport } from '../../../lib/process_import_response';
-import './import_summary.scss';
+  IBasePath,
+} from 'kibana/public';
+import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
 
 const DEFAULT_ICON = 'apps';
 

@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { Capabilities } from '../../types/capabilities';
-import type { CapabilitiesSetup, CapabilitiesStart } from './capabilities_service';
-import { CapabilitiesService } from './capabilities_service';
+import { CapabilitiesService, CapabilitiesSetup, CapabilitiesStart } from './capabilities_service';
+import { Capabilities } from './types';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<CapabilitiesSetup> = {

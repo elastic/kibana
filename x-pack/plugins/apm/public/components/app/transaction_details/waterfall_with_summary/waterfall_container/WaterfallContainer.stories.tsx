@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ComponentType } from 'react';
-import React from 'react';
+
+import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { WaterfallContainer } from '.';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
-import type { APIReturnType } from '../../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
+import { WaterfallContainer } from './index';
 import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import {
   inferredSpans,

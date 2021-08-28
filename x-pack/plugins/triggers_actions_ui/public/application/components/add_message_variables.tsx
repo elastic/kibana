@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import type { ActionVariable } from '../../../../alerting/common/alert';
-import { templateActionVariable } from '../lib/template_action_variable';
 import './add_message_variables.scss';
+import { templateActionVariable } from '../lib';
+import { ActionVariable } from '../../../../alerting/common';
 
 interface Props {
   messageVariables?: ActionVariable[];

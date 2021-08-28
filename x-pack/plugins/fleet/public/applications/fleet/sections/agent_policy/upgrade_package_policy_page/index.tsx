@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { memo } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
+
 import { EditPackagePolicyForm } from '../edit_package_policy_page';
 
 export const UpgradePackagePolicyPage = memo(() => {

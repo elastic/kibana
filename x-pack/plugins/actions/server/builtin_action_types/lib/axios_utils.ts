@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/logging';
-import type { AxiosBasicCredentials, AxiosInstance, AxiosResponse, Method } from 'axios';
-import type { ActionsConfigurationUtilities } from '../../actions_config';
+
+import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
+import { Logger } from '../../../../../../src/core/server';
 import { getCustomAgents } from './get_custom_agents';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const request = async <T = unknown>({
   axios,

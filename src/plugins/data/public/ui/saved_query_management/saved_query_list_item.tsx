@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiConfirmModal, EuiIconTip, EuiListGroupItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
+
+import { EuiListGroupItem, EuiConfirmModal, EuiIconTip } from '@elastic/eui';
+
 import React, { Fragment, useState } from 'react';
-import type { SavedQuery } from '../../query/saved_query/types';
+import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
+import { SavedQuery } from '../..';
 
 interface Props {
   savedQuery: SavedQuery;

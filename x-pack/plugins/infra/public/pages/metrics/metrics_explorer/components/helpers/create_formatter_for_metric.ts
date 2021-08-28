@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
 import { createFormatter } from '../../../../../../common/formatters';
-import type { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
 import { InfraFormatterType } from '../../../../../lib/lib';
 import { metricToFormat } from './metric_to_format';
-
 export const createFormatterForMetric = (metric?: MetricsExplorerMetric) => {
   if (metric && metric.field) {
     const format = metricToFormat(metric);

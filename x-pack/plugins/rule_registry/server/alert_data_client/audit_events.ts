@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EcsEventOutcome, EcsEventType } from '@kbn/logging';
-import {
-  ReadOperations,
-  WriteOperations,
-} from '../../../alerting/server/authorization/alerting_authorization';
-import type { AuditEvent } from '../../../security/server/audit/audit_events';
+
+import { EcsEventOutcome, EcsEventType } from 'src/core/server';
+import { AuditEvent } from '../../../security/server';
+import { ReadOperations, WriteOperations } from '../../../alerting/server';
 
 export enum AlertAuditAction {
   GET = 'alert_get',

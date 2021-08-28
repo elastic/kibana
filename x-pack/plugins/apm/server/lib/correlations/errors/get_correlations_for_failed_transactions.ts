@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { isEmpty, omit } from 'lodash';
-import type {
-  AggregationOptionsByType,
-  ESFilter,
-} from '../../../../../../../src/core/types/elasticsearch';
-import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { getBucketSize } from '../../helpers/get_bucket_size';
-import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
-  getFailedTransactionRateTimeSeries,
+  processSignificantTermAggs,
+  TopSigTerm,
+} from '../process_significant_term_aggs';
+import { AggregationOptionsByType } from '../../../../../../../src/core/types/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import {
   getTimeseriesAggregation,
+  getFailedTransactionRateTimeSeries,
 } from '../../helpers/transaction_error_rate';
-import type { CorrelationsOptions } from '../get_filters';
-import { getCorrelationsFilters } from '../get_filters';
-import type { TopSigTerm } from '../process_significant_term_aggs';
-import { processSignificantTermAggs } from '../process_significant_term_aggs';
+import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
 
 interface Options extends CorrelationsOptions {
   fieldNames: string[];

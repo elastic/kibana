@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPatternField } from '../../../../../../../../data/common/index_patterns/fields/index_pattern_field';
-import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
-import type { ElasticSearchHit } from '../../../../../doc_views/doc_views_types';
+
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
+import { IndexPattern, IndexPatternField } from '../../../../../../../../data/public';
+import { ElasticSearchHit } from '../../../../../doc_views/doc_views_types';
 
 export function getDetails(
   field: IndexPatternField,

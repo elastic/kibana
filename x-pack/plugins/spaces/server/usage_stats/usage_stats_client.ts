@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Headers } from '../../../../../src/core/server/http/router/headers';
-import type { ISavedObjectsRepository } from '../../../../../src/core/server/saved_objects/service/lib/repository';
+
+import type { Headers, ISavedObjectsRepository } from 'src/core/server';
+
 import type { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
 import { SPACES_USAGE_STATS_ID, SPACES_USAGE_STATS_TYPE } from './constants';
 import type { UsageStats } from './types';

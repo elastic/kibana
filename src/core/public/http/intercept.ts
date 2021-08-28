@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { HttpInterceptController } from './http_intercept_controller';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
-import type { HttpFetchOptionsWithPath, HttpInterceptor, HttpResponse } from './types';
+import { HttpInterceptor, HttpResponse, HttpFetchOptionsWithPath } from './types';
 
 export async function interceptRequest(
   options: HttpFetchOptionsWithPath,

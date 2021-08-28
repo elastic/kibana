@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RenderingService as Service } from '../rendering_service';
+import type { RenderingService as Service } from '../rendering_service';
 import type { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../types';
 import { mockRenderingServiceParams } from './params';
 

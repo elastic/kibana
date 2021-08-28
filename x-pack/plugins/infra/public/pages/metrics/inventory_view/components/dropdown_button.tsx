@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { ReactNode } from 'react';
-import React from 'react';
-import type { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
-import { withTheme } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import React, { ReactNode } from 'react';
+import { withTheme, EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   'data-test-subj'?: string;

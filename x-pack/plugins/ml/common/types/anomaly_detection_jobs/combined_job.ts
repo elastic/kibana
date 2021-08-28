@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Datafeed } from './datafeed';
+import { DatafeedStats } from './datafeed_stats';
+import { Job } from './job';
+import { JobStats } from './job_stats';
 import type { JobAlertingRuleStats } from '../alerts';
-import type { Datafeed } from './datafeed';
-import type { DatafeedStats } from './datafeed_stats';
-import type { Job } from './job';
-import type { JobStats } from './job_stats';
 
 export type JobWithStats = Job & JobStats & JobAlertingRuleStats;
 export type DatafeedWithStats = Datafeed & DatafeedStats;

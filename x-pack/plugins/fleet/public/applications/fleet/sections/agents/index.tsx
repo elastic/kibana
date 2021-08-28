@@ -4,30 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
+
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Route, Router, Switch, useHistory } from 'react-router-dom';
+import { Router, Route, Switch, useHistory } from 'react-router-dom';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
 
-import { AgentEnrollmentFlyout } from '../../../../components/agent_enrollment_flyout';
-import { Error } from '../../../../components/error';
-import { Loading } from '../../../../components/loading';
-import { FLEET_ROUTING_PATHS } from '../../../../constants/page_paths';
-import { useCapabilities } from '../../../../hooks/use_capabilities';
-import { useConfig } from '../../../../hooks/use_config';
-import { useFleetStatus } from '../../../../hooks/use_fleet_status';
-import { useGetAgentPolicies } from '../../../../hooks/use_request/agent_policy';
-import { useGetSettings } from '../../../../hooks/use_request/settings';
-import { WithoutHeaderLayout } from '../../../../layouts/without_header';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { DefaultLayout } from '../../layouts/default/default';
+import { FLEET_ROUTING_PATHS } from '../../constants';
+import { Loading, Error, AgentEnrollmentFlyout } from '../../components';
+import {
+  useConfig,
+  useFleetStatus,
+  useBreadcrumbs,
+  useCapabilities,
+  useGetSettings,
+  useGetAgentPolicies,
+} from '../../hooks';
+import { DefaultLayout, WithoutHeaderLayout } from '../../layouts';
 
-import { AgentDetailsPage } from './agent_details_page';
 import { AgentListPage } from './agent_list_page';
-import { MissingESRequirementsPage } from './agent_requirements_page/es_requirements_page';
-import { FleetServerRequirementPage } from './agent_requirements_page/fleet_server_requirement_page';
-import { FleetServerUpgradeModal } from './components/fleet_server_upgrade_modal';
+import { FleetServerRequirementPage, MissingESRequirementsPage } from './agent_requirements_page';
+import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
+import { FleetServerUpgradeModal } from './components/fleet_server_upgrade_modal';
 
 export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');

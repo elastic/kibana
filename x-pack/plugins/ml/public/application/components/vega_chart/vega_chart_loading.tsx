@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
+
+import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 
 export const VegaChartLoading = () => {
   return (

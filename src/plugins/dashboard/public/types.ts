@@ -5,40 +5,35 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { History } from 'history';
-import type { AnyAction, Dispatch } from 'redux';
+
+import type {
+  AppMountParameters,
+  CoreStart,
+  SavedObjectsClientContract,
+  ScopedHistory,
+  ChromeStart,
+  IUiSettingsClient,
+  PluginInitializerContext,
+  KibanaExecutionContext,
+} from 'kibana/public';
+import { History } from 'history';
+import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { CoreStart } from '../../../core/public/types';
-import { ScopedHistory } from '../../../core/public/application/scoped_history';
-import type { AppMountParameters } from '../../../core/public/application/types';
-import type { ChromeStart } from '../../../core/public/chrome/types';
-import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
-import type { SavedObjectsClientContract } from '../../../core/public/saved_objects/saved_objects_client';
-import type { IUiSettingsClient } from '../../../core/public/ui_settings/types';
-import type { KibanaExecutionContext } from '../../../core/types/execution_context';
-import type { Filter } from '../../data/common/es_query';
-import { IndexPattern } from '../../data/common/index_patterns/index_patterns/index_pattern';
-import type { IndexPatternsContract } from '../../data/common/index_patterns/index_patterns/index_patterns';
-import type { RefreshInterval, TimeRange } from '../../data/common/query/timefilter/types';
-import type { DataPublicPluginStart } from '../../data/public/types';
-import type { EmbeddableInput } from '../../embeddable/common/types';
-import { ViewMode } from '../../embeddable/common/types';
-import type { ContainerInput } from '../../embeddable/public/lib/containers/i_container';
-import type { EmbeddableStart } from '../../embeddable/public/plugin';
-import type { IKbnUrlStateStorage } from '../../kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
-import type { NavigationPublicPluginStart } from '../../navigation/public/types';
-import type { SavedObjectsStart } from '../../saved_objects/public/plugin';
-import { SavedObjectLoader } from '../../saved_objects/public/saved_object/saved_object_loader';
-import type { SavedObjectsTaggingApi } from '../../saved_objects_tagging_oss/public/api';
-import type { SharePluginStart } from '../../share/public/plugin';
-import type { UrlForwardingStart } from '../../url_forwarding/public/plugin';
-import type { UsageCollectionSetup } from '../../usage_collection/public/plugin';
-import type { VisualizationsStart } from '../../visualizations/public/plugin';
-import type { DashboardPanelState, SavedDashboardPanel } from '../common/types';
-import { DashboardContainer } from './application/embeddable/dashboard_container';
-import { DashboardSessionStorage } from './application/lib/dashboard_session_storage';
-import type { DashboardSavedObject } from './saved_dashboards/saved_dashboard';
-import type { Query } from './services/data';
+import { Query, Filter, IndexPattern, RefreshInterval, TimeRange } from './services/data';
+import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
+import { SharePluginStart } from './services/share';
+import { EmbeddableStart } from './services/embeddable';
+import { DashboardSessionStorage } from './application/lib';
+import { UrlForwardingStart } from '../../url_forwarding/public';
+import { UsageCollectionSetup } from './services/usage_collection';
+import { NavigationPublicPluginStart } from './services/navigation';
+import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
+import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
+import { DataPublicPluginStart, IndexPatternsContract } from './services/data';
+import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
+import { IKbnUrlStateStorage } from './services/kibana_utils';
+import { DashboardContainer, DashboardSavedObject } from '.';
+import { VisualizationsStart } from '../../visualizations/public';
 
 export { SavedDashboardPanel };
 

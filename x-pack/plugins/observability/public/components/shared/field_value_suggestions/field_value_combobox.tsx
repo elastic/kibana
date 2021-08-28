@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormControlLayout } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { union } from 'lodash';
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import type { FieldValueSelectionProps } from './types';
 
+import React, { useEffect, useState } from 'react';
+import { union } from 'lodash';
+import { EuiComboBox, EuiFormControlLayout, EuiComboBoxOptionOption } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
+import { FieldValueSelectionProps } from './types';
 export const ALL_VALUES_SELECTED = 'ALL_VALUES';
 const formatOptions = (values?: string[], allowAllValuesSelection?: boolean) => {
   const uniqueValues = Array.from(

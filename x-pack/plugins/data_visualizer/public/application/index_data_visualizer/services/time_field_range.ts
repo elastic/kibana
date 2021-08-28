@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { estypes } from '@elastic/elasticsearch';
-import type { Query } from '../../../../../../../src/plugins/data/common/query';
-import type { GetTimeFieldRangeResponse } from '../../../../common/types/time_field_request';
 import { lazyLoadModules } from '../../../lazy_load_bundle';
+import { GetTimeFieldRangeResponse } from '../../../../common/types/time_field_request';
+import { Query } from '../../../../../../../src/plugins/data/common/query';
 
 export async function getTimeFieldRange({
   index,

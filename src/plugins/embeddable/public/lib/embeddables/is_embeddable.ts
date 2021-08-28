@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IEmbeddable } from './i_embeddable';
+
+import { IEmbeddable } from './i_embeddable';
 
 export const isEmbeddable = (x: unknown): x is IEmbeddable => {
   if (!x) return false;

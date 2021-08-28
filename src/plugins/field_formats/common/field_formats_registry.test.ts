@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { BoolFormat } from './converters/boolean';
-import { PercentFormat } from './converters/percent';
-import { StringFormat } from './converters/string';
+
 import { FieldFormatsRegistry } from './field_formats_registry';
-import type { FieldFormatInstanceType, FieldFormatsGetConfigFn } from './types';
+import { BoolFormat, PercentFormat, StringFormat } from './converters';
+import { FieldFormatsGetConfigFn, FieldFormatInstanceType } from './types';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 const getValueOfPrivateField = (instance: any, field: string) => instance[field];
 

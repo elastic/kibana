@@ -5,11 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Position } from '@elastic/charts';
-import { EuiButtonIcon, htmlIdGenerator } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
+
 import React, { memo, useMemo } from 'react';
+import classNames from 'classnames';
+
+import { i18n } from '@kbn/i18n';
+import { htmlIdGenerator, EuiButtonIcon } from '@elastic/eui';
+import { Position } from '@elastic/charts';
+
 import './legend_toggle.scss';
 
 interface LegendToggleProps {

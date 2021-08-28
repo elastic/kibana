@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IBasePath } from '../../../../../../../../src/core/public/http/types';
-import type { AgentConfigurationIntake } from '../../../../../common/agent_configuration/configuration_types';
+
+import { IBasePath } from 'kibana/public';
+import { AgentConfigurationIntake } from '../../../../../common/agent_configuration/configuration_types';
 import { getAPMHref } from './APMLink';
 
 export function editAgentConfigurationHref(

@@ -5,23 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Filter, Query } from '@kbn/es-query';
-import { uniqFilters } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
+
 import { uniqBy } from 'lodash';
-import type { SavedObjectReference } from '../../../../../core/types/saved_objects';
-import type { ExecutionContext } from '../../../../expressions/common/execution/types';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common/expression_functions/types';
-import { unboxExpressionValue } from '../../../../expressions/common/expression_types/unbox_expression_value';
-import type { Adapters } from '../../../../inspector/common/adapters/types';
-import type { SavedObjectsClientCommon } from '../../index_patterns/types';
-import type {
-  ExecutionContextSearch,
-  KibanaContext,
-  KibanaFilter,
-  KibanaQueryOutput,
-} from './kibana_context_type';
-import type { KibanaTimerangeOutput } from './timerange';
+import { i18n } from '@kbn/i18n';
+import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
+import { Adapters } from 'src/plugins/inspector/common';
+import { Filter } from '@kbn/es-query';
+import { Query, uniqFilters } from '@kbn/es-query';
+import { unboxExpressionValue } from '../../../../expressions/common';
+import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
+import { KibanaQueryOutput } from './kibana_context_type';
+import { KibanaTimerangeOutput } from './timerange';
+import { SavedObjectReference } from '../../../../../core/types';
+import { SavedObjectsClientCommon } from '../../index_patterns';
 
 /** @internal */
 export interface KibanaContextStartDependencies {

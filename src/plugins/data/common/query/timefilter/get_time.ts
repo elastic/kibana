@@ -8,8 +8,7 @@
 
 import dateMath from '@elastic/datemath';
 import { buildRangeFilter } from '@kbn/es-query';
-import type { IIndexPattern } from '../../index_patterns/types';
-import type { TimeRange, TimeRangeBounds } from './types';
+import type { IIndexPattern, TimeRange, TimeRangeBounds } from '../..';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;

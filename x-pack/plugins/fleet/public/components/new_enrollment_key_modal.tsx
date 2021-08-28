@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiConfirmModal, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 
-import type { AgentPolicy } from '../../common/types/models/agent_policy';
-import type { EnrollmentAPIKey } from '../../common/types/models/enrollment_api_key';
-import { useStartServices } from '../hooks/use_core';
-import { useInput } from '../hooks/use_input';
-import { sendCreateEnrollmentAPIKey } from '../hooks/use_request/enrollment_api_keys';
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiConfirmModal, EuiForm, EuiFormRow, EuiFieldText, EuiSelect } from '@elastic/eui';
+
+import type { AgentPolicy, EnrollmentAPIKey } from '../types';
+import { useInput, useStartServices, sendCreateEnrollmentAPIKey } from '../hooks';
 
 function useCreateApiKeyForm(
   policyIdDefaultValue: string | undefined,

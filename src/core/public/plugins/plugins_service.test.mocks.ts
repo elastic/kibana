@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { PluginName } from '../../server/plugins/types';
-import type { AsyncPlugin, Plugin } from './plugin';
+
+import { PluginName } from 'kibana/server';
+import { Plugin, AsyncPlugin } from './plugin';
 
 export type MockedPluginInitializer = jest.Mock<
   Plugin<unknown, unknown> | AsyncPlugin<unknown, unknown>,

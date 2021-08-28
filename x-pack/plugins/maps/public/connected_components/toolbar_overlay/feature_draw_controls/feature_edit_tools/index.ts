@@ -4,15 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import { DRAW_SHAPE } from '../../../../../common/constants';
-import { updateEditShape } from '../../../../actions/map_actions';
-import type { MapStoreState } from '../../../../reducers/store';
+import {
+  FeatureEditTools,
+  ReduxDispatchProps,
+  ReduxStateProps,
+  OwnProps,
+} from './feature_edit_tools';
+import { updateEditShape } from '../../../../actions';
+import { MapStoreState } from '../../../../reducers/store';
+import { DRAW_SHAPE } from '../../../../../common';
 import { getEditState } from '../../../../selectors/map_selectors';
-import type { OwnProps, ReduxDispatchProps, ReduxStateProps } from './feature_edit_tools';
-import { FeatureEditTools } from './feature_edit_tools';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {
   const editState = getEditState(state);

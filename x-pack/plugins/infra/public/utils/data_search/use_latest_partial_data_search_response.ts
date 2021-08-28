@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import type { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common/search/types';
+import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/public';
 import { useOperator } from '../use_observable';
 import { flattenDataSearchResponseDescriptor } from './flatten_data_search_response';
-import type {
-  ParsedDataSearchRequestDescriptor,
-  ParsedDataSearchResponseDescriptor,
-} from './types';
+import { ParsedDataSearchRequestDescriptor, ParsedDataSearchResponseDescriptor } from './types';
 import { useDataSearchResponseState } from './use_data_search_response_state';
 
 export const useLatestPartialDataSearchResponse = <Request extends IKibanaSearchRequest, Response>(

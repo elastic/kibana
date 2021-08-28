@@ -5,43 +5,39 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiIconProps, PopoverAnchorPosition } from '@elastic/eui';
+
+import React, { Component, RefObject, createRef } from 'react';
+import { i18n } from '@kbn/i18n';
+
+import classNames from 'classnames';
 import {
-  EuiButton,
+  EuiTextArea,
+  EuiOutsideClickDetector,
+  PopoverAnchorPosition,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiButton,
   EuiLink,
-  EuiOutsideClickDetector,
-  EuiPortal,
-  EuiTextArea,
   htmlIdGenerator,
+  EuiPortal,
+  EuiIcon,
+  EuiIconProps,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { i18n } from '@kbn/i18n';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import classNames from 'classnames';
-import { compact, debounce, isEqual, isFunction } from 'lodash';
-import type { RefObject } from 'react';
-import React, { Component, createRef } from 'react';
-import type { Query } from '../..';
-import type { Toast } from '../../../../../core/public/notifications/toasts/toasts_api';
-import type { KibanaReactContextValue } from '../../../../kibana_react/public/context/types';
-import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
-import { KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../common/constants';
-import type { IIndexPattern } from '../../../common/index_patterns/types';
-import type { QuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
-import { QuerySuggestionTypes } from '../../autocomplete/providers/query_suggestion_provider';
-import { fromUser } from '../../query/lib/from_user';
-import { getQueryLog } from '../../query/lib/get_query_log';
-import { matchPairs } from '../../query/lib/match_pairs';
-import { toUser } from '../../query/lib/to_user';
-import { PersistedLog } from '../../query/persisted_log/persisted_log';
-import type { IDataPluginServices } from '../../types';
-import { SuggestionsComponent } from '../typeahead';
-import type { SuggestionsListSize } from '../typeahead/suggestions_component';
+import { debounce, compact, isEqual, isFunction } from 'lodash';
+import { Toast } from 'src/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { IDataPluginServices, IIndexPattern, Query } from '../..';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
+
+import { KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
+import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
+import { SuggestionsListSize } from '../typeahead/suggestions_component';
+import { SuggestionsComponent } from '..';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../common';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;

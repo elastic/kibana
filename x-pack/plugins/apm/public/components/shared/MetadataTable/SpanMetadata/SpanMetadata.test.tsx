@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { render } from '@testing-library/react';
-import type { ReactNode } from 'react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { SpanMetadata } from '.';
-import type { Span } from '../../../../../typings/es_schemas/ui/span';
+import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import {
   expectTextsInDocument,

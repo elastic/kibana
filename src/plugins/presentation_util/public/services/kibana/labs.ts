@@ -5,16 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EnvironmentName, Project, ProjectID, SolutionName } from '../../../common/labs';
-import { getProjectIDs, LABS_PROJECT_PREFIX, projectIDs, projects } from '../../../common/labs';
-import type { PresentationUtilPluginStartDeps } from '../../types';
-import type { KibanaPluginServiceFactory } from '../create/factory';
-import type { PresentationLabsService } from '../labs';
+
 import {
-  applyProjectStatus,
+  EnvironmentName,
+  projectIDs,
+  projects,
+  ProjectID,
+  Project,
+  getProjectIDs,
+  SolutionName,
+  LABS_PROJECT_PREFIX,
+} from '../../../common';
+import { PresentationUtilPluginStartDeps } from '../../types';
+import { KibanaPluginServiceFactory } from '../create';
+import {
+  PresentationLabsService,
   isEnabledByStorageValue,
   setStorageStatus,
   setUISettingsStatus,
+  applyProjectStatus,
 } from '../labs';
 
 export type LabsServiceFactory = KibanaPluginServiceFactory<

@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { StubBrowserStorage } from '@kbn/test/jest';
+
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
-import { DEFAULT_APP_CATEGORIES } from '../../../../utils/default_app_categories';
+import { StubBrowserStorage } from '@kbn/test/jest';
+import { ChromeNavLink, DEFAULT_APP_CATEGORIES } from '../../..';
 import { httpServiceMock } from '../../../http/http_service.mock';
-import type { ChromeNavLink } from '../../nav_links/nav_link';
-import type { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed/recently_accessed_service';
+import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
 import { CollapsibleNav } from './collapsible_nav';
 
 const { kibana, observability, security, management } = DEFAULT_APP_CATEGORIES;
