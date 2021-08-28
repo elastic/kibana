@@ -13,7 +13,7 @@ import {
   savingSaga,
   LoadSavedWorkspacePayload,
 } from './persistence';
-import { UrlTemplate, AdvancedSettings, WorkspaceField } from '../types';
+import { UrlTemplate, AdvancedSettings, WorkspaceField, GraphWorkspaceSavedObject } from '../types';
 import { IndexpatternDatasource, datasourceSelector } from './datasource';
 import { fieldsSelector } from './fields';
 import { metaDataSelector, updateMetaData } from './meta_data';
@@ -104,11 +104,10 @@ describe('persistence sagas', () => {
           savePolicy: 'configAndDataWithConsent',
         },
       });
-      env.mockedDeps.getSavedWorkspace().id = '123';
     });
 
     it('should serialize saved object and save after confirmation', async () => {
-      env.store.dispatch(saveWorkspace());
+      env.store.dispatch(saveWorkspace({ id: '123' } as GraphWorkspaceSavedObject));
       (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, true);
       expect(appStateToSavedWorkspace).toHaveBeenCalled();
       await waitForPromise();
@@ -120,7 +119,7 @@ describe('persistence sagas', () => {
     });
 
     it('should not save data if user does not give consent in the modal', async () => {
-      env.store.dispatch(saveWorkspace());
+      env.store.dispatch(saveWorkspace({} as GraphWorkspaceSavedObject));
       (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, false);
       // serialize function is called with `canSaveData` set to false
       expect(appStateToSavedWorkspace).toHaveBeenCalledWith(
@@ -131,9 +130,8 @@ describe('persistence sagas', () => {
     });
 
     it('should not change url if it was just updating existing workspace', async () => {
-      env.mockedDeps.getSavedWorkspace().id = '123';
       env.store.dispatch(updateMetaData({ savedObjectId: '123' }));
-      env.store.dispatch(saveWorkspace());
+      env.store.dispatch(saveWorkspace({} as GraphWorkspaceSavedObject));
       await waitForPromise();
       expect(env.mockedDeps.changeUrl).not.toHaveBeenCalled();
     });

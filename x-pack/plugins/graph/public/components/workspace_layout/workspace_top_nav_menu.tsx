@@ -101,10 +101,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
         return allSavingDisabled || !hasFieldsSelector(store.getState());
       },
       run: () => {
-        store.dispatch({
-          type: 'x-pack/graph/SAVE_WORKSPACE',
-          payload: props.savedWorkspace,
-        });
+        store.dispatch({ type: 'x-pack/graph/SAVE_WORKSPACE', payload: props.savedWorkspace });
       },
       testId: 'graphSaveButton',
     });

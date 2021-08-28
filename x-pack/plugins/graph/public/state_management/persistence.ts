@@ -8,7 +8,7 @@
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
-import { GraphWorkspaceSavedObject, Workspace } from '../types';
+import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../types';
 import { GraphStoreDependencies, GraphState, submitSearch } from '.';
 import { datasourceSelector } from './datasource';
 import { setDatasource, IndexpatternDatasource } from './datasource';
@@ -27,6 +27,7 @@ import { getEditPath } from '../services/url';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
 
 export interface LoadSavedWorkspacePayload {
+  indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
   urlQuery: string | null;
 }
@@ -34,7 +35,7 @@ export interface LoadSavedWorkspacePayload {
 const actionCreator = actionCreatorFactory('x-pack/graph');
 
 export const loadSavedWorkspace = actionCreator<LoadSavedWorkspacePayload>('LOAD_WORKSPACE');
-export const saveWorkspace = actionCreator<void>('SAVE_WORKSPACE');
+export const saveWorkspace = actionCreator<GraphWorkspaceSavedObject>('SAVE_WORKSPACE');
 export const fillWorkspace = actionCreator<void>('FILL_WORKSPACE');
 
 /**
@@ -45,12 +46,11 @@ export const fillWorkspace = actionCreator<void>('FILL_WORKSPACE');
  */
 export const loadingSaga = ({
   createWorkspace,
-  indexPatterns,
   notifications,
   indexPatternProvider,
 }: GraphStoreDependencies) => {
   function* deserializeWorkspace(action: Action<LoadSavedWorkspacePayload>) {
-    const { savedWorkspace, urlQuery } = action.payload;
+    const { indexPatterns, savedWorkspace, urlQuery } = action.payload;
     const migrationStatus = migrateLegacyIndexPatternRef(savedWorkspace, indexPatterns);
     if (!migrationStatus.success) {
       notifications.toasts.addDanger(
@@ -113,8 +113,8 @@ export const loadingSaga = ({
  * It will serialize everything and save it using the saved objects client
  */
 export const savingSaga = (deps: GraphStoreDependencies) => {
-  function* persistWorkspace() {
-    const savedWorkspace = deps.getSavedWorkspace();
+  function* persistWorkspace(action: Action<GraphWorkspaceSavedObject>) {
+    const savedWorkspace = action.payload;
     const state: GraphState = yield select();
     const workspace = deps.getWorkspace();
     const selectedDatasource = datasourceSelector(state).current;

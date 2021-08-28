@@ -21,7 +21,7 @@ export const DrillDownIconLinks = ({
   openUrlTemplate,
 }: UrlTemplateButtonsProps) => {
   const drillDownsWithIcons = urlTemplates.filter(
-    (curUrlTemplate: UrlTemplate) => curUrlTemplate.icon?.class !== ''
+    ({ icon }: UrlTemplate) => icon && icon.class !== ''
   );
 
   if (drillDownsWithIcons.length === 0) {
