@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { IndexPatternField, IndexPattern, IndexPatternType } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
-import { RollupIndexPatternListConfig } from '../../../service/list';
+import { getFieldInfo } from '../../utils';
 
 jest.mock('@elastic/eui', () => ({
   EuiFlexGroup: 'eui-flex-group',
@@ -30,7 +30,7 @@ const helpers = {
   editField: (fieldName: string) => {},
   deleteField: (fieldName: string) => {},
   // getFieldInfo handles non rollups as well
-  getFieldInfo: new RollupIndexPatternListConfig().getFieldInfo,
+  getFieldInfo,
 };
 
 const indexPattern = ({

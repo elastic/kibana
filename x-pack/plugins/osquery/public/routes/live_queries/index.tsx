@@ -12,15 +12,26 @@ import { LiveQueriesPage } from './list';
 import { NewLiveQueryPage } from './new';
 import { LiveQueryDetailsPage } from './details';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
+import { useKibana } from '../../common/lib/kibana';
+import { MissingPrivileges } from '../components';
 
 const LiveQueriesComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   useBreadcrumbs('live_queries');
   const match = useRouteMatch();
+
+  if (!permissions.readLiveQueries) {
+    return <MissingPrivileges />;
+  }
 
   return (
     <Switch>
       <Route path={`${match.url}/new`}>
-        <NewLiveQueryPage />
+        {permissions.runSavedQueries || permissions.writeLiveQueries ? (
+          <NewLiveQueryPage />
+        ) : (
+          <MissingPrivileges />
+        )}
       </Route>
       <Route path={`${match.url}/:actionId`}>
         <LiveQueryDetailsPage />

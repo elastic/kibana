@@ -1,131 +1,493 @@
-[[create-panels-with-editors]]
+[[aggregation-reference]]
 == Create panels with editors
 
-{kib} provides several editors that you can use to create panels of your data.
+{kib} provides several editors that you can use to create panels of your data. Each editor supports different features and {ref}/search-aggregations.html[{es} aggregations]. To choose the best editor for your data, review the following information.
 
-[cols="2"]
+[float]
+[[chart-types]]
+=== Supported panel types
+
+[options="header"]
 |===
 
-| <<lens,*Lens*>>
-| Create visualizations with the drag and drop editor.
+| Panel type | *Lens* | *TSVB* | *Aggregation-based* | *Vega* | *Timelion*
 
-| <<maps,*Maps*>>
-| Create visualizations with your geographical data.
+| Table
+| &check;
+| &check;
+| &check;
+|
+|
 
-| <<tsvb,*TSVB*>>
-| Create visualizations with your time series data.
+| Bar, line, and area
+| &check;
+| &check;
+| &check;
+| &check;
+| &check;
 
-| <<vega,*Vega*>>
-| Create custom visualizations with the *Vega* and *Vega-Lite* grammars.
+| Split chart and small multiples
+|
+| &check;
+| &check;
+| &check;
+|
 
-| <<add-aggregation-based-visualization-panels,*Aggregation based*>>
-| Build most visualization types using {es} <<aggregation-reference,aggregations>>. 
+| Pie and donut
+| &check;
+|
+| &check;
+| &check;
+|
 
-| <<timelion,*Timelion*>>
-| Create visualizations with your time series data using a simple expression language.
+| Sunburst
+| &check;
+|
+| &check;
+| &check;
+|
+
+| Treemap
+| &check;
+|
+|
+| &check;
+|
+
+| Heatmap
+| &check;
+|
+| &check;
+| &check;
+|
+
+| Gauge and Goal
+|
+| &check;
+| &check;
+| &check;
+|
+
+| Markdown
+|
+| &check;
+|
+|
+|
+
+| Metric
+| &check;
+| &check;
+| &check;
+| &check;
+|
+
+| Tag cloud
+|
+|
+| &check;
+| &check;
+|
 
 |===
 
 [float]
-[[lens-editor]]
-=== Lens
+[[xy-features]]
+=== Bar, line, and area chart features
 
-*Lens* is the drag and drop editor that creates visualizations of your data, recommended for most
-users.
+[options="header"]
+|===
 
-With *Lens*, you can:
+| Feature | *Lens* | *TSVB* | *Aggregation-based* | *Vega* | *Timelion*
 
-* Use the automatically generated suggestions to change the visualization type.
-* Create visualizations with multiple layers and indices.
-* Change the aggregation and labels to customize the data.
-* Perform math on aggregations using *Formula*.
-* Use time shifts to compare data at two times, such as month over month.
+| Dense time series
+| Customizable
+| &check;
+| Customizable
+| &check;
+| &check;
 
-[role="screenshot"]
-image:dashboard/images/lens_advanced_1_1.png[Lens]
+| Percentage mode
+| &check;
+| &check;
+| &check;
+| &check;
+|
 
-[float]
-[[tsvb-editor]]
-=== TSVB
+| Break downs
+| 1
+| 1
+| 3
+| &infin;
+| 1
 
-*TSVB* is a time series data visualization editor that allows you to use the full power of the {es} aggregation framework. 
+| Custom color with break downs
+|
+| Only for Filters
+| &check;
+| &check;
+|
 
-With *TSVB*, you can:
+| Fit missing values
+| &check;
+|
+| &check;
+| &check;
+| &check;
 
-* Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
-* Annotate time series data with timestamped events from an {es} index.
-* View the data in several types of visualizations, including charts, data tables, and markdown panels.
-* Display multiple <<index-patterns, index patterns>> in each visualization.
-* Customize the data with labels and colors.
+| Synchronized tooltips
+|
+| &check;
+|
+|
+|
 
-[role="screenshot"]
-image::images/tsvb.png[TSVB UI]
-
-[float]
-[[custom-visualizations]]
-=== Custom visualizations
-
-*Vega* and *Vega-Lite* are visualization grammars that are integrated into {kib} for custom visualizations.
-
-* *Vega-Lite* &mdash; A high-level grammar for rapid analysis.
-
-* *Vega* &mdash; A declarative language with support for interactivity.
-
-*Vega* and *Vega-Lite* panels can display one or more data sources, including {es}, Elastic Map Service,
-URL, or static data, and support <<reference-for-kibana-extensions,{kib} extensions>> that allow you to embed the panels on your dashboard and add interactive tools.
-
-Use *Vega* or *Vega-Lite* when you want to create visualizations with:
-
-* Aggregations that use `nested` or `parent/child` mapping
-* Aggregations without an index pattern
-* Queries that use custom time filters
-* Complex calculations
-* Extracted data from _source instead of aggregations
-* Scatter charts, sankey charts, and custom maps
-* An unsupported visual theme
-
-These grammars have some limitations: they do not support tables, and can't run queries conditionally.
-
-[role="screenshot"]
-image::images/vega.png[Vega UI]
-
-For detailed *Vega* and *Vega-Lite* information and examples, refer to <<resources-and-examples,Resources and examples>>. 
+|===
 
 [float]
-[[aggregation-based]]
-=== Aggregation-based
+[[other-features]]
+=== Advanced features
 
-With aggregation-based visualizations, you can:
+[options="header"]
+|===
 
-* Create heat map, tag cloud, gauge, and goal visualizations
-* Split charts up to three aggregation levels, which is more than *Lens* and *TSVB*
-* Time series data is not required
-* Use a <<save-open-search,saved search>> as an input
-* Sort data tables and use the summary row and percentage column features
-* Assign colors to series
-* Extend features with plugins
+| Feature | *Lens* | *TSVB* | *Vega* | *Timelion*
 
-[role="screenshot"]
-image:dashboard/images/aggregation_based.png[Aggregation-based editor]
+| Math
+| &check;
+| &check;
+| &check;
+| &check;
 
-Aggregation-based visualizations include the following limitations:
+| Math across indices
+|
+|
+| &check;
+| &check;
 
-* Limited styling options
-* Math is unsupported
-* Multiple indices is unsupported
+| Visualize two indices
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Time shift
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Custom {es} queries
+|
+|
+| &check;
+|
+
+| Normalize by time
+| &check;
+| &check;
+|
+|
+
+| Automatically generated suggestions
+| &check;
+| 
+|
+|
+
+| Annotations
+| 
+| &check;
+|
+|
+
+|===
 
 [float]
-[[timelion-editor]]
-=== Timelion
+[[table-features]]
+=== Table features
 
-*Timelion* is driven by a simple expression language that you use to:
+[options="header"]
+|===
 
-* Retrieve time series data from one or more indices
-* Perform math across two or more time series
-* Visualize the results
+| Feature | *Lens* | *TSVB* | *Aggregation-based*
 
-[role="screenshot"]
-image:dashboard/images/timelion.png[Timelion]
+| Summary row
+| &check;
+|
+| &check;
+
+| Pivot table
+| &check;
+|
+|
+
+| Calculated column
+| Formula
+| &check;
+| Percent only
+
+| Color by value
+| &check;
+| &check;
+|
+
+|===
+
+[float]
+[[custom-functions]]
+=== Functions
+
+[options="header"]
+|===
+
+| Function | *Lens* | *TSVB*
+
+| Counter rate
+| &check;
+| &check;
+
+| <<tsvb-function-reference, Filter ratio>>
+| Use <<lens-formulas, formula>>
+| &check;
+
+| <<tsvb-function-reference, Positive only>>
+|
+| &check;
+
+| <<tsvb-function-reference, Series agg>>
+|
+| &check;
+
+| Static value
+|
+| &check;
+
+|===
+
+[float]
+[[metrics-aggregations]]
+=== Metrics aggregations
+
+Metric aggregations are calculated from the values in the aggregated documents. The values are extracted from the document fields.
+
+[options="header"]
+|===
+
+| Aggregation | *Lens* | *TSVB* | *Aggregation-based* | *Vega*
+
+| Metrics with filters
+| &check;
+|
+|
+| &check;
+
+| Average, Sum, Max, Min
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Unique count (Cardinality)
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Percentiles and Median
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Percentiles Rank
+|
+| &check;
+| &check;
+| &check;
+
+| Standard deviation
+|
+| &check;
+| &check;
+| &check;
+
+| Sum of squares
+|
+| &check;
+|
+| &check;
+
+| Top hit (Last value)
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Value count 
+| 
+| 
+| &check;
+| &check;
+
+| Variance
+| 
+| &check;
+| 
+| &check;
+
+|===
+
+For information about {es} metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
+
+[float]
+[[bucket-aggregations]]
+=== Bucket aggregations
+
+Bucket aggregations group, or bucket, documents based on the aggregation type. To define the document buckets, bucket aggregations compute and return the number of documents for each bucket.
+
+[options="header"]
+|===
+| Aggregation | *Lens* | *TSVB* | *Aggregation-based* | *Vega*
+
+| Histogram
+| &check;
+| 
+| &check;
+| &check;
+
+| Date histogram
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Date range
+| Use filters
+| 
+| &check;
+| &check;
+
+| Filter
+|
+| &check;
+|
+| &check;
+
+| Filters
+| &check;
+| &check;
+| &check;
+| &check;
+
+| GeoHash grid
+| 
+| 
+| &check;
+| &check;
+
+| IP range
+| Use filters
+| Use filters
+| &check;
+| &check;
+
+| Range
+| &check;
+| Use filters
+| &check;
+| &check;
+
+| Terms
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Significant terms
+|
+|
+| &check;
+| &check;
+
+|===
+
+For information about {es} bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
+
+[float]
+[[pipeline-aggregations]]
+=== Pipeline aggregations
+
+Pipeline aggregations are dependent on the outputs calculated from other aggregations. Parent pipeline aggregations are provided with the output of the parent aggregation, and compute new buckets or aggregations that are added to existing buckets. Sibling pipeline aggregations are provided with the output of a sibling aggregation, and compute new aggregations for the same level as the sibling aggregation.
+
+[options="header"]
+|===
+
+| Aggregation | *Lens* | *TSVB* | *Aggregation-based* | *Vega*
+
+| Avg bucket  
+| <<lens-formulas, `overall_average` formula>>
+| &check;
+| &check;
+| &check;
+
+| Derivative  
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Max bucket   
+| <<lens-formulas, `overall_max` formula>>
+| &check;
+| &check;
+| &check;
+
+| Min bucket   
+| <<lens-formulas, `overall_min` formula>>
+| &check;
+| &check;
+| &check;
+
+| Sum bucket  
+| <<lens-formulas, `overall_sum` formula>>
+| &check;
+| &check;
+| &check;
+ 
+| Moving average  
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Cumulative sum 
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Bucket script 
+| 
+| 
+| &check;
+| &check;
+
+| Bucket selector
+| 
+| 
+|
+| &check;
+
+| Serial differencing 
+| 
+| &check;
+| &check;
+| &check;
+
+|===
+
+For information about {es} pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
 
 include::lens.asciidoc[]
 include::tsvb.asciidoc[]

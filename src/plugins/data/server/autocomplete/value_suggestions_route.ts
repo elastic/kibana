@@ -48,10 +48,7 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
       try {
-        const fn =
-          (method ?? config.autocomplete.valueSuggestions.method) === 'terms_enum'
-            ? termsEnumSuggestions
-            : termsAggSuggestions;
+        const fn = method === 'terms_agg' ? termsAggSuggestions : termsEnumSuggestions;
         const body = await fn(
           config,
           context.core.savedObjects.client,

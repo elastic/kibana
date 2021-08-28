@@ -7,9 +7,7 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-/* eslint-disable no-duplicate-imports */
-
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 /* eslint-disable react/display-name */
 
@@ -22,7 +20,6 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
 import { SideEffectContext } from '../side_effect_context';
 import { StyledPanel } from '../styles';
 import {

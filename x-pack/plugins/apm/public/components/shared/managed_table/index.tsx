@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { ReactNode, useCallback, useMemo } from 'react';
@@ -21,6 +22,7 @@ export interface ITableColumn<T> {
   align?: string;
   width?: string;
   sortable?: boolean;
+  truncateText?: boolean;
   render?: (value: any, item: T) => unknown;
 }
 
@@ -40,6 +42,7 @@ interface Props<T> {
     sortDirection: 'asc' | 'desc'
   ) => T[];
   pagination?: boolean;
+  isLoading?: boolean;
 }
 
 function defaultSortFn<T extends any>(
@@ -64,6 +67,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     sortItems = true,
     sortFn = defaultSortFn,
     pagination = true,
+    isLoading = false,
   } = props;
 
   const {
@@ -125,7 +129,14 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
 
   return (
     <EuiBasicTable
-      noItemsMessage={noItemsMessage}
+      loading={isLoading}
+      noItemsMessage={
+        isLoading
+          ? i18n.translate('xpack.apm.managedTable.loading', {
+              defaultMessage: 'Loading...',
+            })
+          : noItemsMessage
+      }
       items={renderedItems}
       columns={(columns as unknown) as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
       sorting={sort}

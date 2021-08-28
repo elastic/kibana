@@ -1,18 +1,25 @@
 [[tsvb]]
 === TSVB
 
-*TSVB* enables you to visualize the data from multiple data series, supports <<aggregation-reference, 
-most {es} metric aggregations>>, multiple visualization types, custom functions, and some math. 
-To create *TSVB* visualization panels, your data must have a time field. 
+*TSVB* is a set of visualization types that you configure and display on dashboards.
+
+With *TSVB*, you can:
+
+* Combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
+* Annotate time series data with timestamped events from an {es} index.
+* View the data in several types of visualizations, including charts, data tables, and markdown panels.
+* Display multiple <<index-patterns, index patterns>> in each visualization.
+* Use custom functions and some math on aggregations.
+* Customize the data with labels and colors.
 
 [role="screenshot"]
-image::visualize/images/tsvb-screenshot.png[TSVB overview]
+image::images/tsvb-screenshot.png[TSVB overview]
 
 [float]
 [[tsvb-required-choices]]
 ==== Open and set up TSVB
 
-Open *TSVB*, then make sure the required settings are configured.
+Open *TSVB*, then configure the required settings.
 
 . On the dashboard, click *All types*, then select *TSVB*.
 
@@ -20,7 +27,7 @@ Open *TSVB*, then make sure the required settings are configured.
 
 .. From the *Index pattern* dropdown, select the index pattern you want to visualize. 
 +
-To visualize an {es} index, open the *Index pattern select mode* menu, deselect *Use only {kib} index patterns*, then enter the {es} index.
+To visualize the data in an {es} index, open the *Index pattern selection mode* menu, deselect *Use only {kib} index patterns*, then enter the {es} index.
 
 .. From the *Time field* dropdown, select the field you want to visualize, then enter the field *Interval*.
 
@@ -28,7 +35,7 @@ To visualize an {es} index, open the *Index pattern select mode* menu, deselect 
 +
 By default, *TSVB* drops the last bucket because the time filter intersects the time range of the last bucket. To view the partial data, select *No*.
 
-.. In the *Panel filter* field, enter <<kuery-query, KQL filters>> to view specific documents.
+.. To view a filtered set of documents, enter <<kuery-query, KQL filters>> in the *Panel filter* field.
 
 [float]
 [[tsvb-index-pattern-mode]]
@@ -222,4 +229,4 @@ To group with multiple fields, create runtime fields in the index pattern you ar
 [role="screenshot"]
 image::images/tsvb_group_by_multiple_fields.png[Group by multiple fields]
 
-. Create a new TSVB visualization and group by this field.
+. Create a *TSVB* visualization and group by this field.

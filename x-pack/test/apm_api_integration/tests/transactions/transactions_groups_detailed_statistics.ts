@@ -39,6 +39,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               latencyAggregationType: 'avg',
               transactionType: 'request',
               transactionNames: JSON.stringify(transactionNames),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -64,6 +66,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               latencyAggregationType: 'avg',
               transactionNames: JSON.stringify(transactionNames),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -104,7 +108,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(removeEmptyCoordinates(errorRate).length).to.be.greaterThan(0);
         expectSnapshot(errorRate).toMatch();
 
-        expectSnapshot(roundNumber(impact)).toMatchInline(`"93.93"`);
+        expectSnapshot(roundNumber(impact)).toMatchInline(`"98.49"`);
       });
 
       it('returns the correct data for latency aggregation 99th percentile', async () => {
@@ -118,6 +122,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               latencyAggregationType: 'p99',
               transactionNames: JSON.stringify(transactionNames),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -166,6 +172,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               latencyAggregationType: 'avg',
               transactionNames: JSON.stringify(['foo']),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -190,6 +198,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -280,8 +290,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const currentPeriodFirstItem = currentPeriodItems[0];
           const previousPeriodFirstItem = previousPeriodItems[0];
 
-          expectSnapshot(roundNumber(currentPeriodFirstItem.impact)).toMatchInline(`"21.29"`);
-          expectSnapshot(roundNumber(previousPeriodFirstItem.impact)).toMatchInline(`"97.03"`);
+          expectSnapshot(roundNumber(currentPeriodFirstItem.impact)).toMatchInline(`"59.04"`);
+          expectSnapshot(roundNumber(previousPeriodFirstItem.impact)).toMatchInline(`"99.05"`);
         });
       });
     }

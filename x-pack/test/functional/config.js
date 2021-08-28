@@ -29,7 +29,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/monitoring'),
       resolve(__dirname, './apps/watcher'),
       resolve(__dirname, './apps/dashboard'),
-      resolve(__dirname, './apps/dashboard_mode'),
       resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/spaces'),
@@ -384,6 +383,17 @@ export default async function ({ readConfigFile }) {
           },
         },
 
+        test_logs_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['test_data_stream'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
         geoall_data_writer: {
           elasticsearch: {
             indices: [
@@ -463,6 +473,17 @@ export default async function ({ readConfigFile }) {
               spaces: ['*'],
             },
           ],
+        },
+
+        test_rollup_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['rollup-*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
         },
 
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965

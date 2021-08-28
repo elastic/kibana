@@ -8,6 +8,9 @@
 export interface KeyCountBucket {
   key: string;
   doc_count: number;
+  isDeprecated?: {
+    doc_count: number;
+  };
 }
 
 export interface AggregationBuckets {
@@ -57,9 +60,11 @@ export interface SearchResponse {
 export interface AvailableTotal {
   available: boolean;
   total: number;
+  deprecated?: number;
 }
 
 type BaseJobTypes = 'csv' | 'csv_searchsource' | 'PNG' | 'printable_pdf';
+
 export interface LayoutCounts {
   print: number;
   preserve_layout: number;
@@ -77,20 +82,15 @@ export type JobTypes = { [K in BaseJobTypes]: AvailableTotal } & {
   };
 };
 
-type Statuses =
-  | 'cancelled'
-  | 'completed'
-  | 'completed_with_warnings'
-  | 'failed'
-  | 'pending'
-  | 'processing';
+export type ByAppCounts = { [J in BaseJobTypes]?: AppCounts };
+
+type Statuses = 'completed' | 'completed_with_warnings' | 'failed' | 'pending' | 'processing';
+
 type StatusCounts = {
   [S in Statuses]?: number;
 };
 type StatusByAppCounts = {
-  [S in Statuses]?: {
-    [J in BaseJobTypes]?: AppCounts;
-  };
+  [S in Statuses]?: ByAppCounts;
 };
 
 export type RangeStats = JobTypes & {
@@ -108,44 +108,6 @@ export type ReportingUsageType = RangeStats & {
 
 export type ExportType = 'csv' | 'csv_searchsource' | 'printable_pdf' | 'PNG';
 export type FeatureAvailabilityMap = { [F in ExportType]: boolean };
-
-export interface KeyCountBucket {
-  key: string;
-  doc_count: number;
-}
-
-export interface AggregationBuckets {
-  buckets: KeyCountBucket[];
-}
-
-export interface StatusByAppBucket {
-  key: string;
-  doc_count: number;
-  jobTypes: {
-    buckets: Array<{
-      doc_count: number;
-      key: string;
-      appNames: AggregationBuckets;
-    }>;
-  };
-}
-
-export interface AggregationResultBuckets {
-  jobTypes: AggregationBuckets;
-  layoutTypes: {
-    doc_count: number;
-    pdf: AggregationBuckets;
-  };
-  objectTypes: {
-    doc_count: number;
-    pdf: AggregationBuckets;
-  };
-  statusTypes: AggregationBuckets;
-  statusByApp: {
-    buckets: StatusByAppBucket[];
-  };
-  doc_count: number;
-}
 
 export interface ReportingUsageSearchResponse {
   aggregations: {

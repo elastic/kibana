@@ -25,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
+  const kibanaServer = getService('kibanaServer');
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -32,8 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('discover feature controls security', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/functional/es_archives/discover/feature_controls/security'
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
       );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
 
@@ -42,8 +43,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/discover/feature_controls/security'
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
       );
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below

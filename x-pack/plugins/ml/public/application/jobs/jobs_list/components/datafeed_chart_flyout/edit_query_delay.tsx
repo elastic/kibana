@@ -24,7 +24,8 @@ import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs'
 const tooltipContent = i18n.translate(
   'xpack.ml.jobsList.datafeedChart.editQueryDelay.tooltipContent',
   {
-    defaultMessage: 'Cannot update query delay when datafeed is running.',
+    defaultMessage:
+      'To edit the query delay, you must have permission to edit the datafeed and the datafeed cannot be running.',
   }
 );
 

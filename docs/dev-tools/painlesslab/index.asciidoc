@@ -1,6 +1,6 @@
 [role="xpack"]
 [[painlesslab]]
-== Painless Lab
+== Debug Painless scripts
 
 beta::[]
 

@@ -7,12 +7,15 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
+import { useGetUserAlertsPermissions } from '@kbn/alerts';
+
 import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
-import { useGetUserCasesPermissions } from '../../../lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import { NavTab } from '../types';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -20,7 +23,6 @@ export const usePrimaryNavigationItems = ({
   ...urlStateProps
 }: PrimaryNavigationItemsProps): Array<EuiSideNavItemType<{}>> => {
   const { navigateTo, getAppUrl } = useNavigation();
-
   const getSideNav = useCallback(
     (tab: NavTab) => {
       const { id, name, disabled } = tab;
@@ -61,8 +63,9 @@ export const usePrimaryNavigationItems = ({
 };
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
+  const uiCapabilities = useKibana().services.application.capabilities;
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
-
+  const hasAlertsReadPermissions = useGetUserAlertsPermissions(uiCapabilities, SERVER_APP_ID);
   return useMemo(
     () => [
       {
@@ -72,11 +75,13 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       },
       {
         ...securityNavGroup.detect,
-        items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
+        items: hasAlertsReadPermissions.read
+          ? [navTabs.alerts, navTabs.rules, navTabs.exceptions]
+          : [navTabs.rules, navTabs.exceptions],
       },
       {
         ...securityNavGroup.explore,
-        items: [navTabs.hosts, navTabs.network],
+        items: [navTabs.hosts, navTabs.network, ...(navTabs.ueba != null ? [navTabs.ueba] : [])],
       },
       {
         ...securityNavGroup.investigate,
@@ -87,6 +92,6 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
         items: [navTabs.endpoints, navTabs.trusted_apps, navTabs.event_filters],
       },
     ],
-    [navTabs, hasCasesReadPermissions]
+    [navTabs, hasCasesReadPermissions, hasAlertsReadPermissions]
   );
 }

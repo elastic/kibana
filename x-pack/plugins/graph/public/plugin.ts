@@ -110,6 +110,7 @@ export class GraphPlugin
           indexPatterns: pluginsStart.data!.indexPatterns,
           overlays: coreStart.overlays,
           savedObjects: pluginsStart.savedObjects,
+          uiSettings: core.uiSettings,
         });
       },
     });

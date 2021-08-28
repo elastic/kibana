@@ -40,6 +40,9 @@ describe('trace', () => {
           allowFromAnyIp: true,
         },
       },
+      execution_context: {
+        enabled: true,
+      },
     });
     await root.preboot();
   }, 30000);
@@ -205,7 +208,10 @@ describe('trace', () => {
           executionContext.set(parentContext);
           const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping();
           return res.ok({
-            body: { context: executionContext.get()?.toJSON(), header: headers?.['x-opaque-id'] },
+            body: {
+              context: executionContext.get()?.toJSON(),
+              header: headers?.['x-opaque-id'],
+            },
           });
         });
 
@@ -237,7 +243,7 @@ describe('trace', () => {
 
       await root.start();
       const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
-      expect(response.body).toEqual({ ...parentContext, requestId: expect.any(String) });
+      expect(response.body).toEqual(parentContext);
     });
 
     it('sets execution context for an async request handler', async () => {
@@ -253,7 +259,7 @@ describe('trace', () => {
 
       await root.start();
       const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
-      expect(response.body).toEqual({ ...parentContext, requestId: expect.any(String) });
+      expect(response.body).toEqual(parentContext);
     });
 
     it('execution context is uniq for sequential requests', async () => {
@@ -261,8 +267,9 @@ describe('trace', () => {
       const { createRouter } = http;
 
       const router = createRouter('');
+      let id = 42;
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        executionContext.set(parentContext);
+        executionContext.set({ ...parentContext, id: String(id++) });
         await delay(100);
         return res.ok({ body: executionContext.get() });
       });
@@ -271,9 +278,8 @@ describe('trace', () => {
       const responseA = await kbnTestServer.request.get(root, '/execution-context').expect(200);
       const responseB = await kbnTestServer.request.get(root, '/execution-context').expect(200);
 
-      expect(responseA.body).toEqual({ ...parentContext, requestId: expect.any(String) });
-      expect(responseB.body).toEqual({ ...parentContext, requestId: expect.any(String) });
-      expect(responseA.body.requestId).not.toBe(responseB.body.requestId);
+      expect(responseA.body).toEqual({ ...parentContext, id: '42' });
+      expect(responseB.body).toEqual({ ...parentContext, id: '43' });
     });
 
     it('execution context is uniq for concurrent requests', async () => {
@@ -283,7 +289,7 @@ describe('trace', () => {
       const router = createRouter('');
       let id = 2;
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        executionContext.set(parentContext);
+        executionContext.set({ ...parentContext, id: String(id) });
         await delay(id-- * 100);
         return res.ok({ body: executionContext.get() });
       });
@@ -298,13 +304,10 @@ describe('trace', () => {
         responseB,
         responseC,
       ]);
-      expect(bodyA.requestId).toBeDefined();
-      expect(bodyB.requestId).toBeDefined();
-      expect(bodyC.requestId).toBeDefined();
 
-      expect(bodyA.requestId).not.toBe(bodyB.requestId);
-      expect(bodyB.requestId).not.toBe(bodyC.requestId);
-      expect(bodyA.requestId).not.toBe(bodyC.requestId);
+      expect(bodyA.id).toBe('2');
+      expect(bodyB.id).toBe('1');
+      expect(bodyC.id).toBe('0');
     });
 
     it('execution context is uniq for concurrent requests when "x-opaque-id" provided', async () => {
@@ -316,7 +319,8 @@ describe('trace', () => {
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
         executionContext.set(parentContext);
         await delay(id-- * 100);
-        return res.ok({ body: executionContext.get() });
+        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping();
+        return res.ok({ body: headers || {} });
       });
 
       await root.start();
@@ -335,9 +339,9 @@ describe('trace', () => {
         responseB,
         responseC,
       ]);
-      expect(bodyA.requestId).toBe('req-1');
-      expect(bodyB.requestId).toBe('req-2');
-      expect(bodyC.requestId).toBe('req-3');
+      expect(bodyA['x-opaque-id']).toContain('req-1');
+      expect(bodyB['x-opaque-id']).toContain('req-2');
+      expect(bodyC['x-opaque-id']).toContain('req-3');
     });
 
     it('parses the parent context if present', async () => {
@@ -355,7 +359,7 @@ describe('trace', () => {
         .set(new ExecutionContextContainer(parentContext).toHeader())
         .expect(200);
 
-      expect(response.body).toEqual({ ...parentContext, requestId: expect.any(String) });
+      expect(response.body).toEqual(parentContext);
     });
 
     it('execution context is the same for all the lifecycle events', async () => {
@@ -410,7 +414,7 @@ describe('trace', () => {
         .set(new ExecutionContextContainer(parentContext).toHeader())
         .expect(200);
 
-      expect(response.body).toEqual({ ...parentContext, requestId: expect.any(String) });
+      expect(response.body).toEqual(parentContext);
 
       expect(response.body).toEqual(onPreRoutingContext);
       expect(response.body).toEqual(onPreAuthContext);
@@ -461,32 +465,26 @@ describe('trace', () => {
       expect(header).toContain('kibana:test-type:test-name:42');
     });
 
-    it('a repeat call overwrites the old context', async () => {
-      const { http, executionContext } = await root.setup();
+    it('passes "x-opaque-id" if no execution context is registered', async () => {
+      const { http } = await root.setup();
       const { createRouter } = http;
 
       const router = createRouter('');
-      const newContext = {
-        type: 'new-type',
-        name: 'new-name',
-        id: '41',
-        description: 'new-description',
-      };
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
-        executionContext.set(newContext);
         const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping();
         return res.ok({ body: headers || {} });
       });
 
       await root.start();
 
+      const myOpaqueId = 'my-opaque-id';
       const response = await kbnTestServer.request
         .get(root, '/execution-context')
-        .set(new ExecutionContextContainer(parentContext).toHeader())
+        .set('x-opaque-id', myOpaqueId)
         .expect(200);
 
       const header = response.body['x-opaque-id'];
-      expect(header).toContain('kibana:new-type:new-name:41');
+      expect(header).toBe(myOpaqueId);
     });
 
     it('does not affect "x-opaque-id" set by user', async () => {
@@ -531,14 +529,83 @@ describe('trace', () => {
 
       await root.start();
 
-      const myOpaqueId = 'my-opaque-id';
-      const response = await kbnTestServer.request
-        .get(root, '/execution-context')
-        .set('x-opaque-id', myOpaqueId)
-        .expect(200);
+      const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
 
       const header = response.body['x-opaque-id'];
-      expect(header).toBe('my-opaque-id;kibana:test-type:test-name:42');
+      expect(header).toContain('kibana:test-type:test-name:42');
+    });
+
+    describe('withContext', () => {
+      it('sets execution context for a nested function', async () => {
+        const { executionContext, http } = await root.setup();
+        const { createRouter } = http;
+
+        const router = createRouter('');
+        router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
+          return executionContext.withContext(parentContext, () =>
+            res.ok({ body: executionContext.get() })
+          );
+        });
+
+        await root.start();
+        const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+        expect(response.body).toEqual(parentContext);
+      });
+
+      it('set execution context inerits a parent if presented', async () => {
+        const { executionContext, http } = await root.setup();
+        const { createRouter } = http;
+
+        const router = createRouter('');
+        const nestedContext = {
+          type: 'nested-type',
+          name: 'nested-name',
+          id: '43',
+          description: 'nested-description',
+        };
+        router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
+          return executionContext.withContext(parentContext, async () => {
+            await delay(100);
+            return executionContext.withContext(nestedContext, async () => {
+              await delay(100);
+              return res.ok({ body: executionContext.get() });
+            });
+          });
+        });
+
+        await root.start();
+        const response = await kbnTestServer.request.get(root, '/execution-context').expect(200);
+        expect(response.body).toEqual({ ...nestedContext, parent: parentContext });
+      });
+
+      it('extends the execution context passed from the client-side', async () => {
+        const { http, executionContext } = await root.setup();
+        const { createRouter } = http;
+
+        const router = createRouter('');
+        const newContext = {
+          type: 'new-type',
+          name: 'new-name',
+          id: '41',
+          description: 'new-description',
+        };
+        router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
+          const { headers } = await executionContext.withContext(newContext, () =>
+            context.core.elasticsearch.client.asCurrentUser.ping()
+          );
+          return res.ok({ body: headers || {} });
+        });
+
+        await root.start();
+
+        const response = await kbnTestServer.request
+          .get(root, '/execution-context')
+          .set(new ExecutionContextContainer(parentContext).toHeader())
+          .expect(200);
+
+        const header = response.body['x-opaque-id'];
+        expect(header).toContain('kibana:test-type:test-name:42;new-type:new-name:41');
+      });
     });
   });
 });

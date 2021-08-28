@@ -27,8 +27,7 @@ describe('GroupLogic', () => {
   const {
     clearFlashMessages,
     flashAPIErrors,
-    setSuccessMessage,
-    setQueuedSuccessMessage,
+    flashSuccessToast,
     setQueuedErrorMessage,
   } = mockFlashMessageHelpers;
 
@@ -224,9 +223,7 @@ describe('GroupLogic', () => {
 
         await nextTick();
         expect(navigateToUrl).toHaveBeenCalledWith(GROUPS_PATH);
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
-          'Group "group" was successfully deleted.'
-        );
+        expect(flashSuccessToast).toHaveBeenCalledWith('Group "group" was successfully deleted.');
       });
 
       it('handles error', async () => {
@@ -255,7 +252,7 @@ describe('GroupLogic', () => {
 
         await nextTick();
         expect(onGroupNameChangedSpy).toHaveBeenCalledWith(group);
-        expect(setSuccessMessage).toHaveBeenCalledWith(
+        expect(flashSuccessToast).toHaveBeenCalledWith(
           'Successfully renamed this group to "group".'
         );
       });
@@ -286,7 +283,7 @@ describe('GroupLogic', () => {
 
         await nextTick();
         expect(onGroupSourcesSavedSpy).toHaveBeenCalledWith(group);
-        expect(setSuccessMessage).toHaveBeenCalledWith(
+        expect(flashSuccessToast).toHaveBeenCalledWith(
           'Successfully updated shared content sources.'
         );
       });
@@ -323,7 +320,7 @@ describe('GroupLogic', () => {
         });
 
         await nextTick();
-        expect(setSuccessMessage).toHaveBeenCalledWith(
+        expect(flashSuccessToast).toHaveBeenCalledWith(
           'Successfully updated shared source prioritization.'
         );
         expect(onGroupPrioritiesChangedSpy).toHaveBeenCalledWith(group);

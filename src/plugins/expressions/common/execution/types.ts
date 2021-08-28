@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
-import type { IExecutionContextContainer } from 'src/core/public';
+import type { KibanaExecutionContext } from 'src/core/public';
 
-import { ExpressionType, SerializableState } from '../expression_types';
+import { ExpressionType } from '../expression_types';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { TablesAdapter } from '../util/tables_adapter';
 
@@ -20,7 +21,7 @@ import { TablesAdapter } from '../util/tables_adapter';
  */
 export interface ExecutionContext<
   InspectorAdapters extends Adapters = Adapters,
-  ExecutionContextSearch extends SerializableState = SerializableState
+  ExecutionContextSearch extends SerializableRecord = SerializableRecord
 > {
   /**
    * Get search context of the expression.
@@ -67,7 +68,7 @@ export interface ExecutionContext<
   /**
    * Contains the meta-data about the source of the expression.
    */
-  getExecutionContext: () => IExecutionContextContainer | undefined;
+  getExecutionContext: () => KibanaExecutionContext | undefined;
 }
 
 /**

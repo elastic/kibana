@@ -78,7 +78,7 @@ describe('Kibana deprecations', () => {
         // the component DOM tree.
         let modal = document.body.querySelector('[data-test-subj="stepsModal"]');
 
-        expect(modal).not.toBe(null);
+        expect(modal).not.toBeNull();
         expect(modal!.textContent).toContain(`Resolve deprecation in '${deprecation.domainId}'`);
 
         const steps: NodeListOf<Element> | null = modal!.querySelectorAll(
@@ -160,7 +160,9 @@ describe('Kibana deprecations', () => {
     test('renders prompt', () => {
       const { exists, find } = testBed;
       expect(exists('noDeprecationsPrompt')).toBe(true);
-      expect(find('noDeprecationsPrompt').text()).toContain('Ready to upgrade!');
+      expect(find('noDeprecationsPrompt').text()).toContain(
+        'Your Kibana configuration is up to date'
+      );
     });
   });
 

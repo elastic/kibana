@@ -191,6 +191,7 @@ kibana_vars=(
     telemetry.enabled
     telemetry.optIn
     telemetry.optInStatusUrl
+    telemetry.sendUsageTo
     telemetry.sendUsageFrom
     tilemap.options.attribution
     tilemap.options.maxZoom
@@ -292,7 +293,6 @@ kibana_vars=(
     xpack.ingestManager.registryUrl
     xpack.license_management.enabled
     xpack.maps.enabled
-    xpack.maps.showMapVisualizationTypes
     xpack.ml.enabled
     xpack.observability.annotations.index
     xpack.observability.unsafe.alertingExperience.enabled

@@ -39,7 +39,7 @@ export const getExceptionListItemSchemaMock = (
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
-  os_types: ['linux'],
+  os_types: [],
   tags: ['user added string for a tag', 'malware'],
   tie_breaker_id: TIE_BREAKER,
   type: ITEM_TYPE,

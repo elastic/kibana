@@ -19,6 +19,9 @@ target
 *.iml
 *.log
 
+# Ignore example plugin builds
+/examples/*/build
+
 # Ignore certain functional test runner artifacts
 /test/*/failure_debug
 /test/*/screenshots/diff
@@ -72,10 +75,13 @@ report.asciidoc
 # TS incremental build cache
 *.tsbuildinfo
 
+# Automatically generated and user-modifiable
+/tsconfig.refs.json
+
 # Yarn local mirror content
 .yarn-local-mirror
 
 # Bazel
-bazel
-bazel-*
+/bazel
+/bazel-*
 .bazelrc.user

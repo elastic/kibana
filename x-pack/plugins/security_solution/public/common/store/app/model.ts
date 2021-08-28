@@ -27,5 +27,5 @@ export type ErrorModel = Error[];
 export interface AppModel {
   notesById: NotesById;
   errors: ErrorState;
-  enableExperimental?: ExperimentalFeatures;
+  enableExperimental: ExperimentalFeatures;
 }

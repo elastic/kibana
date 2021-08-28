@@ -166,12 +166,25 @@ export interface EndpointDetailsActivityLogUpdatePaging {
   };
 }
 
+export interface EndpointDetailsLoad {
+  type: 'endpointDetailsLoad';
+  payload: {
+    endpointId: string;
+  };
+}
+
 export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
   type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange';
   payload: {
     isInvalidDateRange?: boolean;
   };
 }
+
+export type LoadMetadataTransformStats = Action<'loadMetadataTransformStats'>;
+
+export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChanged'> & {
+  payload: EndpointState['metadataTransformStats'];
+};
 
 export type EndpointAction =
   | ServerReturnedEndpointList
@@ -181,6 +194,7 @@ export type EndpointAction =
   | EndpointDetailsActivityLogUpdatePaging
   | EndpointDetailsActivityLogUpdateIsInvalidDateRange
   | EndpointDetailsActivityLogChanged
+  | EndpointDetailsLoad
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
@@ -202,4 +216,6 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointsTotal
   | EndpointIsolationRequest
   | EndpointIsolationRequestStateChange
-  | EndpointPendingActionsStateChanged;
+  | EndpointPendingActionsStateChanged
+  | LoadMetadataTransformStats
+  | MetadataTransformStatsChanged;

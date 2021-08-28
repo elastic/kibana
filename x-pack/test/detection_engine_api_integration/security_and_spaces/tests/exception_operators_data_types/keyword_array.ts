@@ -33,10 +33,19 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('Rule exception operators for data type keyword', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/keyword_as_array');
+    });
+
+    after(async () => {
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/rule_exceptions/keyword_as_array'
+      );
+    });
+
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       await createListsIndex(supertest);
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/keyword_as_array');
     });
 
     afterEach(async () => {
@@ -44,9 +53,6 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllAlerts(supertest);
       await deleteAllExceptions(es);
       await deleteListsIndex(supertest);
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/rule_exceptions/keyword_as_array'
-      );
     });
 
     describe('"is" operator', () => {
@@ -56,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
           [],
           ['word eight', 'word nine', 'word ten'],
@@ -80,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
           [],
           ['word eight', 'word nine', 'word ten'],
@@ -111,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([[], ['word eight', 'word nine', 'word ten']]);
       });
 
@@ -146,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([[]]);
       });
     });
@@ -166,7 +172,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([]);
       });
 
@@ -185,7 +191,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([['word one', 'word two', 'word three', 'word four']]);
       });
 
@@ -211,7 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([]);
       });
     });
@@ -232,7 +238,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
           [],
           ['word eight', 'word nine', 'word ten'],
@@ -255,7 +261,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([[], ['word eight', 'word nine', 'word ten']]);
       });
 
@@ -274,7 +280,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([[]]);
       });
     });
@@ -294,7 +300,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([]);
       });
 
@@ -313,7 +319,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
           ['word five', null, 'word six', 'word seven'],
           ['word one', 'word two', 'word three', 'word four'],
@@ -335,7 +341,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([[]]);
       });
     });
@@ -355,7 +361,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
           ['word eight', 'word nine', 'word ten'],
           ['word five', null, 'word six', 'word seven'],
@@ -394,7 +400,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
           [],
           ['word eight', 'word nine', 'word ten'],
@@ -432,7 +438,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
           [],
           ['word eight', 'word nine', 'word ten'],
@@ -459,7 +465,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
           [],
           ['word eight', 'word nine', 'word ten'],
@@ -486,7 +492,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([[], ['word eight', 'word nine', 'word ten']]);
       });
 
@@ -513,7 +519,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([[]]);
       });
     });
@@ -538,7 +544,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([['word one', 'word two', 'word three', 'word four']]);
       });
 
@@ -561,7 +567,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([['word one', 'word two', 'word three', 'word four']]);
       });
 
@@ -584,7 +590,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
           ['word five', null, 'word six', 'word seven'],
           ['word one', 'word two', 'word three', 'word four'],
@@ -615,7 +621,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((hit) => hit._source.keyword).sort();
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
         expect(hits).to.eql([
           ['word eight', 'word nine', 'word ten'],
           ['word five', null, 'word six', 'word seven'],

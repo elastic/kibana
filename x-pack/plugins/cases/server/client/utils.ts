@@ -12,20 +12,16 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { SavedObjectsFindResponse } from 'kibana/server';
 import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import {
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
   CASE_SAVED_OBJECT,
-  CaseConnector,
   CaseStatuses,
   CaseType,
   CommentRequest,
-  ConnectorTypes,
   ContextTypeUserRt,
-  ESCasesConfigureAttributes,
   excess,
   OWNER_FIELD,
   SUB_CASE_SAVED_OBJECT,
@@ -436,31 +432,6 @@ export const getCaseToUpdate = (
     },
     { id: queryCase.id, version: queryCase.version }
   );
-
-export const getNoneCaseConnector = () => ({
-  id: 'none',
-  name: 'none',
-  type: ConnectorTypes.none,
-  fields: null,
-});
-
-export const getConnectorFromConfiguration = (
-  caseConfigure: SavedObjectsFindResponse<ESCasesConfigureAttributes>
-): CaseConnector => {
-  let caseConnector = getNoneCaseConnector();
-  if (
-    caseConfigure.saved_objects.length > 0 &&
-    caseConfigure.saved_objects[0].attributes.connector
-  ) {
-    caseConnector = {
-      id: caseConfigure.saved_objects[0].attributes.connector.id,
-      name: caseConfigure.saved_objects[0].attributes.connector.name,
-      type: caseConfigure.saved_objects[0].attributes.connector.type,
-      fields: null,
-    };
-  }
-  return caseConnector;
-};
 
 enum SortFieldCase {
   closedAt = 'closed_at',

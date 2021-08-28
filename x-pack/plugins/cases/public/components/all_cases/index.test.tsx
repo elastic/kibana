@@ -9,9 +9,16 @@ import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
 import { waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
+
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
-import { casesStatus, useGetCasesMockState, collectionCase } from '../../containers/mock';
+import {
+  casesStatus,
+  useGetCasesMockState,
+  collectionCase,
+  connectorsMock,
+} from '../../containers/mock';
 
 import { CaseStatuses, CaseType, SECURITY_SOLUTION_OWNER, StatusAll } from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
@@ -20,21 +27,30 @@ import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { useConnectors } from '../../containers/configure/use_connectors';
+import { useKibana } from '../../common/lib/kibana';
 import { AllCasesGeneric as AllCases } from './all_cases_generic';
 import { AllCasesProps } from '.';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
-import { renderHook } from '@testing-library/react-hooks';
+import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
+import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/configure/use_connectors');
 
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const useConnectorsMock = useConnectors as jest.Mock;
+
+const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
 jest.mock('../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../common/lib/kibana');
@@ -42,14 +58,7 @@ jest.mock('../../common/lib/kibana', () => {
     ...originalModule,
     useKibana: () => ({
       services: {
-        triggersActionsUi: {
-          actionTypeRegistry: {
-            get: jest.fn().mockReturnValue({
-              actionTypeTitle: '.jira',
-              iconClass: 'logoSecurity',
-            }),
-          },
-        },
+        triggersActionsUi: mockTriggersActionsUiService,
       },
     }),
   };
@@ -139,6 +148,16 @@ describe('AllCasesGeneric', () => {
     userCanCrud: true,
   };
 
+  const { createMockActionTypeModel } = actionTypeRegistryMock;
+
+  beforeAll(() => {
+    connectorsMock.forEach((connector) =>
+      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
+        createMockActionTypeModel({ id: connector.actionTypeId, iconClass: 'logoSecurity' })
+      )
+    );
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     useUpdateCasesMock.mockReturnValue(defaultUpdateCases);
@@ -146,6 +165,7 @@ describe('AllCasesGeneric', () => {
     useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
+    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     moment.tz.setDefault('UTC');
   });
 

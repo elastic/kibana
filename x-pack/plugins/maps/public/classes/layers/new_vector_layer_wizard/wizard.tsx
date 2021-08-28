@@ -22,6 +22,19 @@ interface State {
   createIndexError: string;
 }
 
+const DEFAULT_MAPPINGS = {
+  created: {
+    properties: {
+      '@timestamp': {
+        type: 'date',
+      },
+      user: {
+        type: 'keyword',
+      },
+    },
+  },
+};
+
 export class NewVectorLayerEditor extends Component<RenderWizardArguments, State> {
   private _isMounted: boolean = false;
 
@@ -59,7 +72,10 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
   _createNewIndex = async () => {
     let indexPatternId: string | undefined;
     try {
-      const response = await createNewIndexAndPattern(this.state.indexName);
+      const response = await createNewIndexAndPattern({
+        indexName: this.state.indexName,
+        defaultMappings: DEFAULT_MAPPINGS,
+      });
       indexPatternId = response.indexPatternId;
     } catch (e) {
       this._setCreateIndexError(e.message);

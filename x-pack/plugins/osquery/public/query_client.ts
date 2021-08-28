@@ -5,6 +5,14 @@
  * 2.0.
  */
 
-import { QueryClient } from 'react-query';
+/* eslint-disable @typescript-eslint/no-empty-function */
+
+import { QueryClient, setLogger } from 'react-query';
+
+setLogger({
+  log: () => {},
+  warn: () => {},
+  error: () => {},
+});
 
 export const queryClient = new QueryClient();

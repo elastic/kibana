@@ -7,10 +7,9 @@
 
 /* eslint-disable react/display-name */
 
-import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumb, EuiBetaBadge } from '@elastic/eui';
+import { EuiBreadcrumb } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { BetaHeader, ThemedBreadcrumbs } from './styles';
+import { ThemedBreadcrumbs } from './styles';
 import { useColors } from '../use_colors';
 
 /**
@@ -31,16 +30,6 @@ export const Breadcrumbs = memo(function ({ breadcrumbs }: { breadcrumbs: EuiBre
   const { resolverBreadcrumbBackground, resolverEdgeText } = useColors();
   return (
     <>
-      <BetaHeader>
-        <EuiBetaBadge
-          label={i18n.translate(
-            'xpack.securitySolution.enpdoint.resolver.panelutils.betaBadgeLabel',
-            {
-              defaultMessage: 'BETA',
-            }
-          )}
-        />
-      </BetaHeader>
       <ThemedBreadcrumbs
         background={resolverBreadcrumbBackground}
         text={resolverEdgeText}

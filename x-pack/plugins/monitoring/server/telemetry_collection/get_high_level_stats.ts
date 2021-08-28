@@ -6,7 +6,6 @@
  */
 
 import { get } from 'lodash';
-import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
@@ -149,14 +148,14 @@ interface OSData {
  * Returns a map of the Cluster UUID to an {@link Object} containing the {@code count} and {@code versions} {@link Map}
  */
 function groupInstancesByCluster<T extends { cluster_uuid?: string }>(
-  instances: Array<{ _source: T }>,
+  instances: Array<{ _source?: T }>,
   product: string
 ) {
   const clusterMap = new Map<string, InternalClusterMap>();
 
   // hits are sorted arbitrarily by product UUID
   instances.map((instance) => {
-    const clusterUuid = instance._source.cluster_uuid;
+    const clusterUuid = instance._source!.cluster_uuid;
     const version: string | undefined = get(
       instance,
       `_source.${product}_stats.${product}.version`
@@ -276,7 +275,7 @@ export async function fetchHighLevelStats<
   end: string,
   product: string,
   maxBucketSize: number
-): Promise<SearchResponse<T>> {
+): Promise<estypes.SearchResponse<T>> {
   const isKibanaIndex = product === KIBANA_SYSTEM_ID;
   const filters: object[] = [{ terms: { cluster_uuid: clusterUuids } }];
 
@@ -332,12 +331,12 @@ export async function fetchHighLevelStats<
     },
   };
 
-  const { body: response } = await callCluster.search(params, {
+  const { body: response } = await callCluster.search<T>(params, {
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },
   });
-  return response as SearchResponse<T>;
+  return response;
 }
 
 /**
@@ -349,7 +348,7 @@ export async function fetchHighLevelStats<
  * Returns an object keyed by the cluster UUIDs to make grouping easier.
  */
 export function handleHighLevelStatsResponse(
-  response: SearchResponse<{ cluster_uuid?: string }>,
+  response: estypes.SearchResponse<{ cluster_uuid?: string }>,
   product: string
 ): ClustersHighLevelStats {
   const instances = response.hits?.hits || [];

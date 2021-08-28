@@ -20,6 +20,9 @@ describe('UpdatePrePackagedRulesCallOut', () => {
         docLinks: {
           ELASTIC_WEBSITE_URL: '',
           DOC_LINK_VERSION: '',
+          links: {
+            siem: { ruleChangeLog: '' },
+          },
         },
       },
     });

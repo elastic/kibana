@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { indexTimestamp } from '../../../plugins/reporting/server/lib/store/index_timestamp';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 interface PDFAppCounts {
@@ -37,6 +38,7 @@ export interface UsageStats {
 
 export function createUsageServices({ getService }: FtrProviderContext) {
   const log = getService('log');
+  const esSupertest = getService('esSupertest');
   const supertest = getService('supertest');
 
   return {
@@ -65,6 +67,42 @@ export function createUsageServices({ getService }: FtrProviderContext) {
       });
 
       expect(statusCode).to.be(200);
+    },
+
+    /**
+     *
+     * @return {Promise<Function>} A function to call to clean up the index alias that was added.
+     */
+    async coerceReportsIntoExistingIndex(indexName: string) {
+      log.debug(`ReportingAPI.coerceReportsIntoExistingIndex(${indexName})`);
+
+      // Adding an index alias coerces the report to be generated on an existing index which means any new
+      // index schema won't be applied. This is important if a point release updated the schema. Reports may still
+      // be inserted into an existing index before the new schema is applied.
+      const timestampForIndex = indexTimestamp('week', '.');
+      await esSupertest
+        .post('/_aliases')
+        .send({
+          actions: [
+            {
+              add: { index: indexName, alias: `.reporting-${timestampForIndex}` },
+            },
+          ],
+        })
+        .expect(200);
+
+      return async () => {
+        await esSupertest
+          .post('/_aliases')
+          .send({
+            actions: [
+              {
+                remove: { index: indexName, alias: `.reporting-${timestampForIndex}` },
+              },
+            ],
+          })
+          .expect(200);
+      };
     },
 
     async expectAllJobsToFinishSuccessfully(jobPaths: string[]) {

@@ -55,8 +55,6 @@ interface ConnectInstanceProps {
   objTypes?: string[];
   name: string;
   serviceType: string;
-  sourceDescription: string;
-  connectStepDescription: string;
   needsPermissions: boolean;
   onFormCreated(name: string): void;
 }
@@ -67,8 +65,6 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   objTypes,
   name,
   serviceType,
-  sourceDescription,
-  connectStepDescription,
   needsPermissions,
   onFormCreated,
   header,
@@ -162,9 +158,9 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     <>
       <EuiPanel paddingSize="l" hasShadow={false} color="subdued">
         <EuiTitle size="s">
-          <h3>
+          <h1>
             <strong>{CONNECT_DOC_PERMISSIONS_TITLE}</strong>
-          </h3>
+          </h1>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">

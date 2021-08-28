@@ -37,6 +37,7 @@ import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
+import { useConnectors } from '../../containers/configure/use_connectors';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -103,6 +104,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
 
     // Post Comment to Case
     const { postComment, isLoading: isCommentUpdating } = usePostComment();
+    const { connectors } = useConnectors({ toastPermissionsErrors: false });
 
     const sorting = useMemo(
       () => ({
@@ -203,6 +205,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       refreshCases,
       showActions,
       userCanCrud,
+      connectors,
     });
 
     const itemIdToExpandedRowMap = useMemo(

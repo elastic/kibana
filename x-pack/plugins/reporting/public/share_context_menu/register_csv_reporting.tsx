@@ -6,35 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import React from 'react';
-import * as Rx from 'rxjs';
-import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
-import { CoreStart } from 'src/core/public';
 import type { SearchSourceFields } from 'src/plugins/data/common';
+import { ExportPanelShareOpts } from '.';
 import type { ShareContext } from '../../../../../src/plugins/share/public';
-import type { LicensingPluginSetup } from '../../../licensing/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
-import type { JobParamsCSV } from '../../server/export_types/csv_searchsource/types';
 import { checkLicense } from '../lib/license_check';
-import type { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
 
 export const ReportingCsvShareProvider = ({
   apiClient,
   toasts,
+  uiSettings,
   license$,
   startServices$,
-  uiSettings,
   usesUiCapabilities,
-}: {
-  apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
-  license$: LicensingPluginSetup['license$'];
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
-  uiSettings: IUiSettingsClient;
-  usesUiCapabilities: boolean;
-}) => {
+}: ExportPanelShareOpts) => {
   let licenseToolTipContent = '';
   let licenseHasCsvReporting = false;
   let licenseDisabled = true;
@@ -56,22 +43,12 @@ export const ReportingCsvShareProvider = ({
     capabilityHasCsvReporting = true; // deprecated
   }
 
-  // If the TZ is set to the default "Browser", it will not be useful for
-  // server-side export. We need to derive the timezone and pass it as a param
-  // to the export API.
-  // TODO: create a helper utility in Reporting. This is repeated in a few places.
-  const browserTimezone =
-    uiSettings.get('dateFormat:tz') === 'Browser'
-      ? moment.tz.guess()
-      : uiSettings.get('dateFormat:tz');
-
   const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
 
-    const jobParams: JobParamsCSV = {
-      browserTimezone,
+    const jobParams = {
       title: sharingData.title as string,
       objectType,
       searchSource: sharingData.searchSource as SearchSourceFields,
@@ -104,6 +81,7 @@ export const ReportingCsvShareProvider = ({
               requiresSavedState={false}
               apiClient={apiClient}
               toasts={toasts}
+              uiSettings={uiSettings}
               reportType={CSV_JOB_TYPE}
               layoutId={undefined}
               objectId={objectId}

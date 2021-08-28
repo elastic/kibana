@@ -19,8 +19,8 @@ import { ProcessorEvent } from '../../../common/processor_event';
 
 export interface CorrelationsOptions {
   setup: Setup & SetupTimeRange;
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string | undefined;
   transactionType: string | undefined;
   transactionName: string | undefined;

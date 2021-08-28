@@ -8,6 +8,7 @@ exports[`Storyshots renderers/DropdownFilter default 1`] = `
     className="canvasDropdownFilter__select"
     data-test-subj="canvasDropdownFilter__select"
     onChange={[Function]}
+    value=""
   >
     <option
       aria-selected={false}
@@ -31,6 +32,7 @@ exports[`Storyshots renderers/DropdownFilter with choices 1`] = `
     className="canvasDropdownFilter__select"
     data-test-subj="canvasDropdownFilter__select"
     onChange={[Function]}
+    value=""
   >
     <option
       aria-selected={false}

@@ -19,4 +19,5 @@ export interface DeprecationsDetails
 |  [documentationUrl](./kibana-plugin-core-server.deprecationsdetails.documentationurl.md) | <code>string</code> |  |
 |  [level](./kibana-plugin-core-server.deprecationsdetails.level.md) | <code>'warning' &#124; 'critical' &#124; 'fetch_error'</code> | levels: - warning: will not break deployment upon upgrade - critical: needs to be addressed before upgrade. - fetch\_error: Deprecations service failed to grab the deprecation details for the domain. |
 |  [message](./kibana-plugin-core-server.deprecationsdetails.message.md) | <code>string</code> |  |
+|  [requireRestart](./kibana-plugin-core-server.deprecationsdetails.requirerestart.md) | <code>boolean</code> |  |
 

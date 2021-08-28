@@ -92,6 +92,7 @@ export const importRulesRoute = (
           savedObjectsClient,
         });
 
+        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const { filename } = (request.body.file as HapiReadableStream).hapi;
         const fileExtension = extname(filename).toLowerCase();
         if (fileExtension !== '.ndjson') {
@@ -185,6 +186,7 @@ export const importRulesRoute = (
                   note,
                   timeline_id: timelineId,
                   timeline_title: timelineTitle,
+                  throttle,
                   version,
                   exceptions_list: exceptionsList,
                 } = parsedRule;
@@ -234,6 +236,7 @@ export const importRulesRoute = (
                       severity,
                       severityMapping,
                       tags,
+                      throttle,
                       to,
                       type,
                       threat,
@@ -259,7 +262,8 @@ export const importRulesRoute = (
                       rulesClient,
                       author,
                       buildingBlockType,
-                      savedObjectsClient,
+                      spaceId: context.securitySolution.getSpaceId(),
+                      ruleStatusClient,
                       description,
                       enabled,
                       eventCategoryOverride,
@@ -286,6 +290,7 @@ export const importRulesRoute = (
                       severityMapping,
                       tags,
                       timestampOverride,
+                      throttle,
                       to,
                       type,
                       threat,

@@ -17,3 +17,4 @@ export const EVENT_URL_FIELD_NAME = 'event.url';
 export const SIGNAL_RULE_NAME_FIELD_NAME = 'signal.rule.name';
 export const SIGNAL_STATUS_FIELD_NAME = 'signal.status';
 export const AGENT_STATUS_FIELD_NAME = 'agent.status';
+export const REASON_FIELD_NAME = 'signal.reason';

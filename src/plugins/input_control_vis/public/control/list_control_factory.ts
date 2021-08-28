@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
-  IFieldType,
+  IndexPatternField,
   TimefilterContract,
   SearchSourceFields,
   DataPublicPluginStart,
@@ -26,7 +26,7 @@ function getEscapedQuery(query = '') {
 }
 
 interface TermsAggArgs {
-  field?: IFieldType;
+  field?: IndexPatternField;
   size: number | null;
   direction: string;
   query?: string;

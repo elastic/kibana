@@ -38,8 +38,8 @@ export const getElasticsearchMetricQuery = (
   const intervalAsMS = intervalAsSeconds * 1000;
   const to = timeframe.end;
   const from = timeframe.start;
-  const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
-  const offsetInMS = parseInt(offset, 10);
+
+  const deliveryDelay = 60 * 1000; // INFO: This allows us to account for any delay ES has in indexing the most recent data.
 
   const aggregations =
     aggType === Aggregators.COUNT
@@ -63,7 +63,7 @@ export const getElasticsearchMetricQuery = (
             date_histogram: {
               field: timefield,
               fixed_interval: interval,
-              offset,
+              offset: calculateDateHistogramOffset({ from, to, interval, field: timefield }),
               extended_bounds: {
                 min: from,
                 max: to,
@@ -76,9 +76,12 @@ export const getElasticsearchMetricQuery = (
           aggregatedIntervals: {
             date_range: {
               field: timefield,
+              // Generate an array of buckets, starting at `from` and ending at `to`
+              // This is usually only necessary for alert previews or rate aggs. Most alert evaluations
+              // will generate only one bucket from this logic.
               ranges: Array.from(Array(Math.floor((to - from) / intervalAsMS)), (_, i) => ({
-                from: from + intervalAsMS * i + offsetInMS,
-                to: from + intervalAsMS * (i + 1) + offsetInMS,
+                from: from + intervalAsMS * i - deliveryDelay,
+                to: from + intervalAsMS * (i + 1) - deliveryDelay,
               })),
             },
             aggregations,

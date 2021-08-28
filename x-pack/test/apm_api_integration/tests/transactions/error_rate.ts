@@ -30,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const response = await supertest.get(
         format({
           pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
-          query: { start, end, transactionType },
+          query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
         })
       );
       expect(response.status).to.be(200);
@@ -52,6 +52,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             end,
             comparisonStart: start,
             comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+            environment: 'ENVIRONMENT_ALL',
+            kuery: '',
           },
         })
       );
@@ -76,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const response = await supertest.get(
             format({
               pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
-              query: { start, end, transactionType },
+              query: { start, end, transactionType, environment: 'ENVIRONMENT_ALL', kuery: '' },
             })
           );
           errorRateResponse = response.body;
@@ -101,7 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             new Date(
               first(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
             ).toISOString()
-          ).toMatchInline(`"2020-12-08T13:57:00.000Z"`);
+          ).toMatchInline(`"2021-08-03T06:50:00.000Z"`);
         });
 
         it('has the correct end date', () => {
@@ -109,7 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             new Date(
               last(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
             ).toISOString()
-          ).toMatchInline(`"2020-12-08T14:27:00.000Z"`);
+          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
         });
 
         it('has the correct number of buckets', () => {
@@ -120,7 +122,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct calculation for average', () => {
           expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
-            `0.159420289855072`
+            `0.0848214285714286`
           );
         });
 
@@ -142,6 +144,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -172,12 +176,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             new Date(
               first(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
             ).toISOString()
-          ).toMatchInline(`"2020-12-08T14:12:00.000Z"`);
+          ).toMatchInline(`"2021-08-03T07:05:00.000Z"`);
           expectSnapshot(
             new Date(
               first(errorRateResponse.previousPeriod.transactionErrorRate)?.x ?? NaN
             ).toISOString()
-          ).toMatchInline(`"2020-12-08T14:12:00.000Z"`);
+          ).toMatchInline(`"2021-08-03T07:05:00.000Z"`);
         });
 
         it('has the correct end date', () => {
@@ -185,12 +189,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             new Date(
               last(errorRateResponse.currentPeriod.transactionErrorRate)?.x ?? NaN
             ).toISOString()
-          ).toMatchInline(`"2020-12-08T14:27:00.000Z"`);
+          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
           expectSnapshot(
             new Date(
               last(errorRateResponse.previousPeriod.transactionErrorRate)?.x ?? NaN
             ).toISOString()
-          ).toMatchInline(`"2020-12-08T14:27:00.000Z"`);
+          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
         });
 
         it('has the correct number of buckets', () => {
@@ -204,9 +208,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct calculation for average', () => {
           expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
-            `0.206896551724138`
+            `0.0792079207920792`
           );
-          expectSnapshot(errorRateResponse.previousPeriod.average).toMatchInline(`0.125`);
+          expectSnapshot(errorRateResponse.previousPeriod.average).toMatchInline(
+            `0.0894308943089431`
+          );
         });
 
         it('has the correct error rate', () => {

@@ -11,7 +11,7 @@ import { ElasticsearchResponse } from '../../../common/types/es';
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
 // @ts-ignore
-import { createBeatsQuery } from './create_beats_query.js';
+import { createBeatsQuery } from './create_beats_query';
 // @ts-ignore
 import { getDiffCalculation } from './_beats_stats';
 
@@ -67,7 +67,7 @@ export function handleResponse(response: ElasticsearchResponse, beatUuid: string
     eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst) ?? null,
     eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst) ?? null,
     eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst) ?? null,
-    bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst) ?? null,
+    bytesWritten: getDiffCalculation(Number(bytesWrittenLast), Number(bytesWrittenFirst)) ?? null,
     handlesHardLimit,
     handlesSoftLimit,
   };

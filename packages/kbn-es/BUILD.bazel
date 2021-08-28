@@ -1,5 +1,5 @@
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("@npm//@babel/cli:index.bzl", "babel")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-es"
 PKG_REQUIRE_NAME = "@kbn/es"
@@ -27,8 +27,7 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md",
 ]
 
-DEPS = [
-  "//packages/kbn-babel-preset",
+RUNTIME_DEPS = [
   "@npm//@elastic/elasticsearch",
   "@npm//abort-controller",
   "@npm//chalk",
@@ -43,31 +42,16 @@ DEPS = [
   "@npm//zlib"
 ]
 
-babel(
-  name = "target",
-  data = DEPS + [
-      ":srcs",
-      ".babelrc",
-  ],
-  output_dir = True,
-  # the following arg paths includes $(execpath) as babel runs on the sandbox root
-  args = [
-      "./%s/src" % package_name(),
-      "--config-file",
-      "./%s/.babelrc" % package_name(),
-      "--out-dir",
-      "$(@D)",
-      "--extensions",
-      ".ts,.js",
-      "--copy-files",
-      "--quiet"
-  ],
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
 )
 
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":target"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

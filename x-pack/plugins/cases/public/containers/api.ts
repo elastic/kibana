@@ -8,7 +8,6 @@
 import { assign, omit } from 'lodash';
 
 import {
-  ACTION_TYPES_URL,
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
@@ -37,6 +36,8 @@ import {
   SubCasesResponse,
   User,
 } from '../../common';
+
+import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
 
@@ -351,9 +352,13 @@ export const pushCase = async (
 };
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> => {
-  const response = await KibanaServices.get().http.fetch<ActionLicense[]>(ACTION_TYPES_URL, {
-    method: 'GET',
-    signal,
-  });
-  return response;
+  const response = await KibanaServices.get().http.fetch<ActionLicense[]>(
+    getAllConnectorTypesUrl(),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+  return convertArrayToCamelCase(response) as ActionLicense[];
 };

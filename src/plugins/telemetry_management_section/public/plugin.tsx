@@ -17,17 +17,6 @@ import {
   TelemetryManagementSectionWrapperProps,
 } from './components/telemetry_management_section_wrapper';
 
-export interface TelemetryPluginConfig {
-  enabled: boolean;
-  url: string;
-  banner: boolean;
-  allowChangingOptInStatus: boolean;
-  optIn: boolean | null;
-  optInStatusUrl: string;
-  sendUsageFrom: 'browser' | 'server';
-  telemetryNotifyUserAboutOptInDefault?: boolean;
-}
-
 export interface TelemetryManagementSectionPluginDepsSetup {
   telemetry: TelemetryPluginSetup;
   advancedSettings: AdvancedSettingsSetup;

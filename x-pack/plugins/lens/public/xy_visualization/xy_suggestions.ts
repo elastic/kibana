@@ -16,7 +16,9 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, SeriesType, XYState, visualizationTypes, XYLayerConfig } from './types';
+import { State, XYState, visualizationTypes } from './types';
+import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -503,6 +505,7 @@ function buildSuggestion({
       'yConfig' in existingLayer && existingLayer.yConfig
         ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
         : undefined,
+    layerType: layerTypes.DATA,
   };
 
   // Maintain consistent order for any layers that were saved
@@ -541,6 +544,11 @@ function buildSuggestion({
       x: true,
       yLeft: true,
       yRight: true,
+    },
+    labelsOrientation: currentState?.labelsOrientation || {
+      x: 0,
+      yLeft: 0,
+      yRight: 0,
     },
     gridlinesVisibilitySettings: currentState?.gridlinesVisibilitySettings || {
       x: true,

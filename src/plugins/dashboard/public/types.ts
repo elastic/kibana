@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   AppMountParameters,
   CoreStart,
   SavedObjectsClientContract,
@@ -14,8 +14,8 @@ import {
   ChromeStart,
   IUiSettingsClient,
   PluginInitializerContext,
+  KibanaExecutionContext,
 } from 'kibana/public';
-
 import { History } from 'history';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -34,6 +34,7 @@ import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
 import { DashboardContainer, DashboardSavedObject } from '.';
 import { VisualizationsStart } from '../../visualizations/public';
+import { DashboardAppLocatorParams } from './locator';
 
 export { SavedDashboardPanel };
 
@@ -86,6 +87,7 @@ export interface DashboardContainerInput extends ContainerInput {
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
@@ -122,6 +124,8 @@ export type DashboardBuildContext = Pick<
   search: DashboardAppServices['data']['search'];
   notifications: DashboardAppServices['core']['notifications'];
 
+  locatorState?: DashboardAppLocatorParams;
+
   history: History;
   kibanaVersion: string;
   isEmbeddedExternally: boolean;
@@ -131,13 +135,15 @@ export type DashboardBuildContext = Pick<
   dispatchDashboardStateChange: Dispatch<AnyAction>;
   $triggerDashboardRefresh: Subject<{ force?: boolean }>;
   $onDashboardStateChange: BehaviorSubject<DashboardState>;
+  executionContext?: KibanaExecutionContext;
 };
 
-export interface DashboardOptions {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DashboardOptions = {
   hidePanelTitles: boolean;
   useMargins: boolean;
   syncColors: boolean;
-}
+};
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
@@ -166,7 +172,7 @@ export interface DashboardAppCapabilities {
   createNew: boolean;
   saveQuery: boolean;
   createShortUrl: boolean;
-  hideWriteControls: boolean;
+  showWriteControls: boolean;
   storeSearchSession: boolean;
   mapsCapabilities: { save: boolean };
   visualizeCapabilities: { save: boolean };

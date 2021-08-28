@@ -76,6 +76,7 @@ export class PluginsStatusService {
 
   public getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus> {
     return this.update$.pipe(
+      debounceTime(25), // Avoid calling the plugin's custom status logic for every plugin that depends on it.
       switchMap(() => {
         // Only go up the dependency tree if any of this plugin's dependencies have a custom status
         // Helps eliminate memory overhead of creating thousands of Observables unnecessarily.

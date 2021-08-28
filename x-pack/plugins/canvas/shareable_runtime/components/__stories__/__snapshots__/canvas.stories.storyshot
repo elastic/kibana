@@ -1344,6 +1344,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                 >
                   <div
                     className="euiTextColor euiTextColor--ghost"
+                    style={Object {}}
                   >
                     <div
                       className="eui-textTruncate"
@@ -1410,6 +1411,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                         >
                           <div
                             className="euiTextColor euiTextColor--ghost"
+                            style={Object {}}
                           >
                             Page 
                             1
@@ -2826,6 +2828,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                 >
                   <div
                     className="euiTextColor euiTextColor--ghost"
+                    style={Object {}}
                   >
                     <div
                       className="eui-textTruncate"
@@ -2892,6 +2895,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                         >
                           <div
                             className="euiTextColor euiTextColor--ghost"
+                            style={Object {}}
                           >
                             Page 
                             1
@@ -3124,6 +3128,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                 >
                   <div
                     className="euiTextColor euiTextColor--ghost"
+                    style={Object {}}
                   >
                     <div
                       className="eui-textTruncate"
@@ -3190,6 +3195,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                         >
                           <div
                             className="euiTextColor euiTextColor--ghost"
+                            style={Object {}}
                           >
                             Page 
                             1

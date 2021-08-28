@@ -23,6 +23,8 @@ import { generateEnginePath } from '../../engine';
 import { CrawlerOverviewLogic } from '../crawler_overview_logic';
 import { CrawlerDomain } from '../types';
 
+import { getDeleteDomainConfirmationMessage } from '../utils';
+
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
 export const DomainsTable: React.FC = () => {
@@ -101,20 +103,7 @@ export const DomainsTable: React.FC = () => {
         icon: 'trash',
         color: 'danger',
         onClick: (domain) => {
-          if (
-            window.confirm(
-              i18n.translate(
-                'xpack.enterpriseSearch.appSearch.crawler.domainsTable.action.delete.confirmationPopupMessage',
-                {
-                  defaultMessage:
-                    'Are you sure you want to remove the domain "{domainUrl}" and all of its settings?',
-                  values: {
-                    domainUrl: domain.url,
-                  },
-                }
-              )
-            )
-          ) {
+          if (window.confirm(getDeleteDomainConfirmationMessage(domain.url))) {
             deleteDomain(domain);
           }
         },

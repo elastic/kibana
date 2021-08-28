@@ -5,21 +5,10 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
-import { StyledComponent } from 'styled-components';
 import { EuiFlyout } from '@elastic/eui';
-import {
-  euiStyled,
-  EuiTheme,
-} from '../../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
-// TODO: EUI team follow up on complex types and styled-components `styled`
-// https://github.com/elastic/eui/issues/4855
-export const ResponsiveFlyout: StyledComponent<
-  typeof EuiFlyout,
-  EuiTheme,
-  { children?: ReactNode }
-> = euiStyled(EuiFlyout)`
+export const ResponsiveFlyout = euiStyled(EuiFlyout)`
   width: 100%;
 
   @media (min-width: 800px) {

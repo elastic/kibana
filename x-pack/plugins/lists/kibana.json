@@ -2,6 +2,10 @@
   "configPath": ["xpack", "lists"],
   "extraPublicDirs": ["common"],
   "id": "lists",
+  "owner": {
+    "name": "Security detections response",
+    "githubTeam": "security-detections-response"
+  },
   "kibanaVersion": "kibana",
   "requiredPlugins": [],
   "optionalPlugins": ["spaces", "security"],

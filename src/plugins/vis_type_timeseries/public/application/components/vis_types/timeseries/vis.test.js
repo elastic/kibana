@@ -11,14 +11,14 @@ import { shallow } from 'enzyme';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import TimeseriesVisualization from './vis';
 import { setFieldFormats } from '../../../../services';
-import { UI_SETTINGS } from '../../../../../../data/public';
+import { FORMATS_UI_SETTINGS } from '../../../../../../field_formats/common';
 import { getFieldFormatsRegistry } from '../../../../../../data/public/test_utils';
 
 describe('TimeseriesVisualization', () => {
   describe('TimeSeries Y-Axis formatted value', () => {
     const config = {
-      [UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: '0.[00]%',
-      [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0.0b',
+      [FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: '0.[00]%',
+      [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0.0b',
     };
     const id = 'default';
     const value = 500;

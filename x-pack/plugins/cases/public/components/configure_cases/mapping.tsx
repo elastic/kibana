@@ -14,42 +14,32 @@ import * as i18n from './translations';
 
 import { FieldMapping } from './field_mapping';
 import { CaseConnectorMapping } from '../../containers/configure/types';
-import { useKibana } from '../../common/lib/kibana';
 
 export interface MappingProps {
-  connectorActionTypeId: string;
+  actionTypeName: string;
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
 }
 
-const MappingComponent: React.FC<MappingProps> = ({
-  connectorActionTypeId,
-  isLoading,
-  mappings,
-}) => {
-  const { triggersActionsUi } = useKibana().services;
-  const selectedConnector = useMemo(
-    () => triggersActionsUi.actionTypeRegistry.get(connectorActionTypeId),
-    [connectorActionTypeId, triggersActionsUi]
-  );
+const MappingComponent: React.FC<MappingProps> = ({ actionTypeName, isLoading, mappings }) => {
   const fieldMappingDesc: { desc: string; color: TextColor } = useMemo(
     () =>
       mappings.length > 0 || isLoading
         ? {
-            desc: i18n.FIELD_MAPPING_DESC(selectedConnector.actionTypeTitle ?? ''),
+            desc: i18n.FIELD_MAPPING_DESC(actionTypeName),
             color: 'subdued',
           }
         : {
-            desc: i18n.FIELD_MAPPING_DESC_ERR(selectedConnector.actionTypeTitle ?? ''),
+            desc: i18n.FIELD_MAPPING_DESC_ERR(actionTypeName),
             color: 'danger',
           },
-    [isLoading, mappings.length, selectedConnector.actionTypeTitle]
+    [isLoading, mappings.length, actionTypeName]
   );
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <h4>{i18n.FIELD_MAPPING_TITLE(selectedConnector.actionTypeTitle ?? '')}</h4>
+        <EuiText size="xs" data-test-subj="field-mapping-text">
+          <h4>{i18n.FIELD_MAPPING_TITLE(actionTypeName)}</h4>
           <EuiTextColor data-test-subj="field-mapping-desc" color={fieldMappingDesc.color}>
             {fieldMappingDesc.desc}
           </EuiTextColor>
@@ -57,7 +47,7 @@ const MappingComponent: React.FC<MappingProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FieldMapping
-          connectorActionTypeId={connectorActionTypeId}
+          actionTypeName={actionTypeName}
           data-test-subj="case-mappings-field"
           isLoading={isLoading}
           mappings={mappings}

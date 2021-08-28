@@ -116,6 +116,7 @@ export const createPrepackagedRules = async (
   const exceptionsListClient =
     context.lists != null ? context.lists.getExceptionListClient() : exceptionsClient;
   const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
+  const ruleStatusClient = context.securitySolution.getExecutionLogClient();
   if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
   }
@@ -154,7 +155,13 @@ export const createPrepackagedRules = async (
     timeline,
     importTimelineResultSchema
   );
-  await updatePrepackagedRules(rulesClient, savedObjectsClient, rulesToUpdate, signalsIndex);
+  await updatePrepackagedRules(
+    rulesClient,
+    context.securitySolution.getSpaceId(),
+    ruleStatusClient,
+    rulesToUpdate,
+    signalsIndex
+  );
 
   const prepackagedRulesOutput: PrePackagedRulesAndTimelinesSchema = {
     rules_installed: rulesToInstall.length,

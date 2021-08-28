@@ -8,9 +8,12 @@
 
 import React from 'react';
 
-import { DiscoverGridEmbeddable } from '../angular/create_discover_grid_directive';
-import { DiscoverDocTableEmbeddable } from '../angular/doc_table/create_doc_table_embeddable';
-import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
+import {
+  DiscoverGridEmbeddable,
+  DiscoverGridEmbeddableProps,
+} from '../angular/create_discover_grid_directive';
+import { DiscoverDocTableEmbeddable } from '../apps/main/components/doc_table/create_doc_table_embeddable';
+import { DocTableEmbeddableProps } from '../apps/main/components/doc_table/doc_table_embeddable';
 import { SearchProps } from './saved_search_embeddable';
 
 interface SavedSearchEmbeddableComponentProps {
@@ -32,8 +35,8 @@ export function SavedSearchEmbeddableComponent({
       ...searchProps,
       refs,
     };
-    return <DiscoverDocTableEmbeddableMemoized {...docTableProps} />;
+    return <DiscoverDocTableEmbeddableMemoized {...(docTableProps as DocTableEmbeddableProps)} />;
   }
-  const discoverGridProps = searchProps as DiscoverGridProps;
+  const discoverGridProps = searchProps as DiscoverGridEmbeddableProps;
   return <DiscoverGridEmbeddableMemoized {...discoverGridProps} className="dscDiscoverGrid" />;
 }

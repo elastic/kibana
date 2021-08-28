@@ -16,6 +16,7 @@ import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '../types';
 import { PluginName } from '../../plugins';
 import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
 import { PackageInfo } from '../../config';
+import { StatusResponse } from '../../../types/status';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
 
@@ -41,55 +42,9 @@ interface StatusInfo {
   plugins: Record<string, ServiceStatus>;
 }
 
-interface StatusHttpBody {
-  name: string;
-  uuid: string;
-  version: {
-    number: string;
-    build_hash: string;
-    build_number: number;
-    build_snapshot: boolean;
-  };
+// The moment we remove support for the LegacyStatusInfo, we can use the StatusResponse straight away.
+interface StatusHttpBody extends Omit<StatusResponse, 'status'> {
   status: StatusInfo | LegacyStatusInfo;
-  metrics: {
-    /** ISO-8601 date string w/o timezone */
-    last_updated: string;
-    collection_interval_in_millis: number;
-    process: {
-      memory: {
-        heap: {
-          total_in_bytes: number;
-          used_in_bytes: number;
-          size_limit: number;
-        };
-        resident_set_size_in_bytes: number;
-      };
-      event_loop_delay: number;
-      pid: number;
-      uptime_in_millis: number;
-    };
-    os: {
-      load: Record<string, number>;
-      memory: {
-        total_in_bytes: number;
-        used_in_bytes: number;
-        free_in_bytes: number;
-      };
-      uptime_in_millis: number;
-      platform: string;
-      platformRelease: string;
-    };
-    response_times: {
-      max_in_millis: number;
-    };
-    requests: {
-      total: number;
-      disconnects: number;
-      statusCodes: Record<number, number>;
-      status_codes: Record<number, number>;
-    };
-    concurrent_connections: number;
-  };
 }
 
 export const registerStatusRoute = ({ router, config, metrics, status }: Deps) => {

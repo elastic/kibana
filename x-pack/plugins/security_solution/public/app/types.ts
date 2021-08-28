@@ -54,19 +54,21 @@ export interface SecuritySubPlugin {
 export type SecuritySubPluginKeyStore =
   | 'hosts'
   | 'network'
+  | 'ueba'
   | 'timeline'
   | 'hostList'
   | 'alertList'
   | 'management';
 
 export type SecurityDeepLinkName =
-  | SecurityPageName.overview
+  | SecurityPageName.administration
+  | SecurityPageName.case
   | SecurityPageName.detections
   | SecurityPageName.hosts
   | SecurityPageName.network
+  | SecurityPageName.overview
   | SecurityPageName.timelines
-  | SecurityPageName.case
-  | SecurityPageName.administration;
+  | SecurityPageName.ueba;
 
 interface SecurityDeepLink {
   base: AppDeepLink[];

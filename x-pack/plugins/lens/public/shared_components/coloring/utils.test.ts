@@ -405,4 +405,15 @@ describe('getContrastColor', () => {
     expect(getContrastColor('#fff', true)).toBe('#000000');
     expect(getContrastColor('#fff', false)).toBe('#000000');
   });
+
+  it('should take into account background color if the primary color is opaque', () => {
+    expect(getContrastColor('rgba(0,0,0,0)', true)).toBe('#ffffff');
+    expect(getContrastColor('rgba(0,0,0,0)', false)).toBe('#000000');
+    expect(getContrastColor('#00000000', true)).toBe('#ffffff');
+    expect(getContrastColor('#00000000', false)).toBe('#000000');
+    expect(getContrastColor('#ffffff00', true)).toBe('#ffffff');
+    expect(getContrastColor('#ffffff00', false)).toBe('#000000');
+    expect(getContrastColor('rgba(255,255,255,0)', true)).toBe('#ffffff');
+    expect(getContrastColor('rgba(255,255,255,0)', false)).toBe('#000000');
+  });
 });

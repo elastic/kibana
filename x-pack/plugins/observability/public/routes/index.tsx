@@ -7,8 +7,7 @@
 
 import * as t from 'io-ts';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
-import { alertStatusRt } from '../../common/typings';
+import { alertWorkflowStatusRt } from '../../common/typings';
 import { ExploratoryViewPage } from '../components/shared/exploratory_view';
 import { AlertsPage } from '../pages/alerts';
 import { AllCasesPage } from '../pages/cases/all_cases';
@@ -94,26 +93,13 @@ export const routes = {
         rangeFrom: t.string,
         rangeTo: t.string,
         kuery: t.string,
-        status: alertStatusRt,
+        workflowStatus: alertWorkflowStatusRt,
         refreshPaused: jsonRt.pipe(t.boolean),
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
   },
-  '/exploratory-view/': {
-    handler: () => {
-      return <Redirect to="//exploratory-view/configure" />;
-    },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
-    },
-  },
-  '/exploratory-view/:mode': {
+  '/exploratory-view': {
     handler: () => {
       return <ExploratoryViewPage />;
     },
@@ -126,4 +112,18 @@ export const routes = {
       }),
     },
   },
+  // enable this to test multi series architecture
+  // '/exploratory-view/multi': {
+  //   handler: () => {
+  //     return <ExploratoryViewPage multiSeries={true} />;
+  //   },
+  //   params: {
+  //     query: t.partial({
+  //       rangeFrom: t.string,
+  //       rangeTo: t.string,
+  //       refreshPaused: jsonRt.pipe(t.boolean),
+  //       refreshInterval: jsonRt.pipe(t.number),
+  //     }),
+  //   },
+  // },
 };
