@@ -25,14 +25,7 @@ import {
 } from './advanced_settings';
 import { DatasourceState, datasourceReducer } from './datasource';
 import { datasourceSaga } from './datasource.sagas';
-import {
-  IndexPatternProvider,
-  Workspace,
-  IndexPatternSavedObject,
-  GraphSavePolicy,
-  GraphWorkspaceSavedObject,
-  AdvancedSettings,
-} from '../types';
+import { IndexPatternProvider, Workspace, GraphSavePolicy, AdvancedSettings } from '../types';
 import { loadingSaga, savingSaga } from './persistence';
 import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
 import { fillWorkspaceSaga, submitSearchSaga, workspaceReducer, WorkspaceState } from './workspace';
@@ -49,10 +42,8 @@ export interface GraphState {
 export interface GraphStoreDependencies {
   addBasePath: (url: string) => string;
   indexPatternProvider: IndexPatternProvider;
-  indexPatterns: IndexPatternSavedObject[];
   createWorkspace: (index: string, advancedSettings: AdvancedSettings) => Workspace;
   getWorkspace: () => Workspace | undefined;
-  getSavedWorkspace: () => GraphWorkspaceSavedObject;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   overlays: OverlayStart;
