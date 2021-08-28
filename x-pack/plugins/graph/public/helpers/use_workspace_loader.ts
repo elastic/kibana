@@ -37,6 +37,10 @@ export const useWorkspaceLoader = ({
   const history = useHistory();
   const { id } = useParams<WorkspaceUrlParams>();
 
+  /**
+   * The following effect initializes workspace initially and reacts
+   * on changes in id parameter and URL query only.
+   */
   useEffect(() => {
     function loadWorkspace(
       fetchedSavedWorkspace: GraphWorkspaceSavedObject,
@@ -101,13 +105,13 @@ export const useWorkspaceLoader = ({
 
     initializeWorkspace();
   }, [
-    history,
     id,
+    urlQuery,
+    store,
+    history,
     savedObjectsClient,
     setSavedWorkspace,
-    store,
     toastNotifications,
-    urlQuery,
     workspaceRef,
   ]);
 
