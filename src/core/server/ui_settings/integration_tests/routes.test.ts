@@ -13,7 +13,10 @@ describe('ui settings service', () => {
   describe('routes', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeAll(async () => {
-      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
+      root = kbnTestServer.createRoot({
+        plugins: { initialize: false },
+        elasticsearch: { skipStartupConnectionCheck: true },
+      });
 
       await root.preboot();
       const { uiSettings } = await root.setup();

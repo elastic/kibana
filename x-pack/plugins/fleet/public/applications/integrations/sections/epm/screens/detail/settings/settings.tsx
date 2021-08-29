@@ -48,8 +48,8 @@ const UpdatesAvailableMsg = () => (
 );
 
 const LatestVersionLink = ({ name, version }: { name: string; version: string }) => {
-  const { getPath } = useLink();
-  const settingsPath = getPath('integration_details_settings', {
+  const { getHref } = useLink();
+  const settingsPath = getHref('integration_details_settings', {
     pkgkey: `${name}-${version}`,
   });
   return (

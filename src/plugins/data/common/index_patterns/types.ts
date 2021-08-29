@@ -51,10 +51,10 @@ export interface IIndexPattern extends DataViewBase {
  * Interface for an index pattern saved object
  */
 export interface DataViewAttributes {
-  type: string;
   fields: string;
   title: string;
-  typeMeta: string;
+  type?: string;
+  typeMeta?: string;
   timeFieldName?: string;
   intervalName?: string;
   sourceFilters?: string;
