@@ -118,27 +118,27 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
 
     return (
       <KibanaContextProvider services={dependencies}>
-        <RedirectAppLinks application={dependencies.application}>
-          <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={true}>
-                <EuiTitle size="s">
-                  <h1>{title}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <InspectorViewChooser
-                  views={views}
-                  onViewSelected={this.onViewSelected}
-                  selectedView={selectedView}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={true}>
+              <EuiTitle size="s">
+                <h1>{title}</h1>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <InspectorViewChooser
+                views={views}
+                onViewSelected={this.onViewSelected}
+                selectedView={selectedView}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
+          <RedirectAppLinks application={dependencies.application}>
             {this.renderSelectedPanel()}
-          </EuiFlyoutBody>
-        </RedirectAppLinks>
+          </RedirectAppLinks>
+        </EuiFlyoutBody>
       </KibanaContextProvider>
     );
   }
