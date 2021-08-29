@@ -33,7 +33,7 @@ Open *Lens*, then make sure the correct fields appear.
 
 . Make sure the *kibana_sample_data_ecommerce* index appears.
 +
-If you are using your own data, select the <<index-patterns, index pattern>> that contains your data.
+If you are using your own data, select the <<data-views, data view>> that contains your data.
 
 [discrete]
 [[custom-time-interval]]

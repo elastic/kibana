@@ -360,7 +360,7 @@ To configure the bounds, use the menus in the editor toolbar. Bar and area chart
 .*Is it possible to display icons in data tables?*
 [%collapsible]
 ====
-You can display icons with <<managing-index-patterns, field formatter>> in data tables.
+You can display icons with <<managing-data-views, field formatter>> in data tables.
 ====
 
 [discrete]
