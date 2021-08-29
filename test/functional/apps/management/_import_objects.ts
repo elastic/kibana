@@ -319,7 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isSuccessful).to.be(true);
       });
 
-      it('should allow the user to confirm overriding multiple duplicate index patterns', async function () {
+      it.skip('should allow the user to confirm overriding multiple duplicate index patterns', async function () {
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
         await PageObjects.savedObjects.importFile(
