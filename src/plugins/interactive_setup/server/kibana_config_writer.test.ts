@@ -112,7 +112,7 @@ elasticsearch.ssl.certificateAuthorities: [/some/path/ca_1234.crt]
       );
     });
 
-    it('can successfully write CA certificate and elasticsearch config to the disk', async () => {
+    it('can successfully write CA certificate and elasticsearch config with service token', async () => {
       await expect(
         kibanaConfigWriter.writeConfig({
           caCert: 'ca-content',
@@ -132,6 +132,57 @@ elasticsearch.ssl.certificateAuthorities: [/some/path/ca_1234.crt]
 elasticsearch.hosts: [some-host]
 elasticsearch.serviceAccountToken: some-value
 elasticsearch.ssl.certificateAuthorities: [/some/path/ca_1234.crt]
+
+`
+      );
+    });
+
+    it('can successfully write CA certificate and elasticsearch config with credentials', async () => {
+      await expect(
+        kibanaConfigWriter.writeConfig({
+          caCert: 'ca-content',
+          host: 'some-host',
+          username: 'username',
+          password: 'password',
+        })
+      ).resolves.toBeUndefined();
+
+      expect(mockWriteFile).toHaveBeenCalledTimes(1);
+      expect(mockWriteFile).toHaveBeenCalledWith('/some/path/ca_1234.crt', 'ca-content');
+      expect(mockAppendFile).toHaveBeenCalledTimes(1);
+      expect(mockAppendFile).toHaveBeenCalledWith(
+        '/some/path/kibana.yml',
+        `
+
+# This section was automatically generated during setup.
+elasticsearch.hosts: [some-host]
+elasticsearch.password: password
+elasticsearch.username: username
+elasticsearch.ssl.certificateAuthorities: [/some/path/ca_1234.crt]
+
+`
+      );
+    });
+
+    it('can successfully write elasticsearch config without CA certificate', async () => {
+      await expect(
+        kibanaConfigWriter.writeConfig({
+          host: 'some-host',
+          username: 'username',
+          password: 'password',
+        })
+      ).resolves.toBeUndefined();
+
+      expect(mockWriteFile).not.toHaveBeenCalled();
+      expect(mockAppendFile).toHaveBeenCalledTimes(1);
+      expect(mockAppendFile).toHaveBeenCalledWith(
+        '/some/path/kibana.yml',
+        `
+
+# This section was automatically generated during setup.
+elasticsearch.hosts: [some-host]
+elasticsearch.password: password
+elasticsearch.username: username
 
 `
       );

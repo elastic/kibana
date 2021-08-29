@@ -24,13 +24,13 @@ export function definePingRoute({ router, logger, elasticsearch, preboot }: Rout
     },
     async (context, request, response) => {
       if (!preboot.isSetupOnHold()) {
-        logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot phase`);
-        return response.badRequest();
+        logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot stage`);
+        return response.badRequest({ body: 'Cannot process request outside of preboot stage.' });
       }
 
-      let pingResult: PingResult;
+      let result: PingResult;
       try {
-        pingResult = await elasticsearch.ping(request.body.host);
+        result = await elasticsearch.ping(request.body.host);
       } catch {
         return response.customError({
           statusCode: 500,
@@ -38,7 +38,7 @@ export function definePingRoute({ router, logger, elasticsearch, preboot }: Rout
         });
       }
 
-      return response.ok({ body: pingResult });
+      return response.ok({ body: result });
     }
   );
 }

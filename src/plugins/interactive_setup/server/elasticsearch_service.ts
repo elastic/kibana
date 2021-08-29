@@ -30,15 +30,15 @@ import type {
 
 import { ElasticsearchConnectionStatus } from '../common';
 import type { Certificate, PingResult } from '../common';
-import { getDetailedErrorMessage } from './errors';
+import { getDetailedErrorMessage, getErrorStatusCode } from './errors';
 
-interface EnrollParameters {
+export interface EnrollParameters {
   apiKey: string;
   hosts: string[];
   caFingerprint: string;
 }
 
-interface AuthenticateParameters {
+export interface AuthenticateParameters {
   host: string;
   username?: string;
   password?: string;
@@ -75,7 +75,7 @@ export interface ElasticsearchServiceSetup {
   /**
    * Tries to authenticate specified user with cluster.
    */
-  authenticate: (params: AuthenticateParameters) => Promise<AuthenticateResult>;
+  authenticate: (params: AuthenticateParameters) => Promise<void>;
 
   /**
    * Tries to connect to specified cluster and fetches certificate chain.
@@ -120,7 +120,7 @@ export class ElasticsearchService {
     connectionCheckInterval,
   }: ElasticsearchServiceSetupDeps): ElasticsearchServiceSetup {
     const connectionStatusClient = (this.connectionStatusClient = elasticsearch.createClient(
-      'ping'
+      'connectionStatus'
     ));
 
     return {
@@ -260,11 +260,7 @@ export class ElasticsearchService {
   private async authenticate(
     elasticsearch: ElasticsearchServicePreboot,
     { host, username, password, caCert }: AuthenticateParameters
-  ): Promise<AuthenticateResult> {
-    if (caCert) {
-      caCert = ElasticsearchService.createPemCertificate(caCert);
-    }
-
+  ) {
     const client = elasticsearch.createClient('authenticate', {
       hosts: [host],
       username,
@@ -284,13 +280,6 @@ export class ElasticsearchService {
     } finally {
       await client.close();
     }
-
-    return {
-      host,
-      username,
-      password,
-      caCert,
-    };
   }
 
   private async ping(elasticsearch: ElasticsearchServicePreboot, host: string) {
@@ -305,7 +294,12 @@ export class ElasticsearchService {
     try {
       await client.asInternalUser.ping();
     } catch (error) {
-      authRequired = error.statusCode === 401;
+      if (error instanceof errors.ConnectionError || error instanceof errors.TimeoutError) {
+        this.logger.error(`Unable to connect to host "${host}": ${getDetailedErrorMessage(error)}`);
+        throw error;
+      }
+
+      authRequired = getErrorStatusCode(error) === 401;
     } finally {
       await client.close();
     }
@@ -335,7 +329,7 @@ export class ElasticsearchService {
   private static fetchPeerCertificate(host: string, port: string | number) {
     return new Promise<tls.DetailedPeerCertificate>((resolve, reject) => {
       const socket = tls.connect({ host, port: Number(port), rejectUnauthorized: false });
-      socket.once('secureConnect', function () {
+      socket.once('secureConnect', () => {
         const cert = socket.getPeerCertificate(true);
         socket.destroy();
         resolve(cert);
@@ -366,7 +360,7 @@ export class ElasticsearchService {
     };
   }
 
-  private static createPemCertificate(derCaString: string) {
+  public static createPemCertificate(derCaString: string) {
     // Use `X509Certificate` class once we upgrade to Node v16.
     return `-----BEGIN CERTIFICATE-----\n${derCaString
       .replace(/_/g, '/')

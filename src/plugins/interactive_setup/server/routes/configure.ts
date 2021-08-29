@@ -12,7 +12,9 @@ import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '.';
 import { ElasticsearchConnectionStatus } from '../../common';
-import type { AuthenticateResult } from '../elasticsearch_service';
+import type { AuthenticateParameters } from '../elasticsearch_service';
+import { ElasticsearchService } from '../elasticsearch_service';
+import type { WriteConfigParameters } from '../kibana_config_writer';
 
 export function defineConfigureRoute({
   router,
@@ -93,9 +95,17 @@ export function defineConfigureRoute({
         });
       }
 
-      let authenticateResult: AuthenticateResult;
+      const configToWrite: WriteConfigParameters & AuthenticateParameters = {
+        host: request.body.host,
+        username: request.body.username,
+        password: request.body.password,
+        caCert: request.body.caCert
+          ? ElasticsearchService.createPemCertificate(request.body.caCert)
+          : undefined,
+      };
+
       try {
-        authenticateResult = await elasticsearch.authenticate(request.body);
+        await elasticsearch.authenticate(configToWrite);
       } catch {
         // For security reasons, we shouldn't leak to the user whether Elasticsearch node couldn't process enrollment
         // request or we just couldn't connect to any of the provided hosts.
@@ -106,7 +116,7 @@ export function defineConfigureRoute({
       }
 
       try {
-        await kibanaConfigWriter.writeConfig(authenticateResult);
+        await kibanaConfigWriter.writeConfig(configToWrite);
       } catch {
         // For security reasons, we shouldn't leak any filesystem related errors.
         return response.customError({

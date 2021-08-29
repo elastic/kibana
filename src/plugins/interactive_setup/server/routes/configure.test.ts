@@ -69,6 +69,9 @@ describe('Configure routes', () => {
         `"[password]: expected value of type [string] but got [undefined]"`
       );
       expect(() =>
+        bodySchema.validate({ host: 'http://localhost:9200', password: 'password' })
+      ).toThrowErrorMatchingInlineSnapshot(`"[password]: a value wasn't expected to be present"`);
+      expect(() =>
         bodySchema.validate({
           host: 'http://localhost:9200',
           username: 'kibana_system',
@@ -163,7 +166,7 @@ describe('Configure routes', () => {
       expect(mockRouteParams.preboot.completeSetup).not.toHaveBeenCalled();
     });
 
-    it('fails if configure call fails.', async () => {
+    it('fails if authenticate call fails.', async () => {
       mockRouteParams.preboot.isSetupOnHold.mockReturnValue(true);
       mockRouteParams.elasticsearch.connectionStatus$.next(
         ElasticsearchConnectionStatus.NotConfigured
@@ -202,11 +205,6 @@ describe('Configure routes', () => {
         ElasticsearchConnectionStatus.NotConfigured
       );
       mockRouteParams.kibanaConfigWriter.isConfigWritable.mockResolvedValue(true);
-      mockRouteParams.elasticsearch.authenticate.mockResolvedValue({
-        ca: 'some-ca',
-        host: 'host',
-        serviceAccountToken: { name: 'some-name', value: 'some-value' },
-      });
       mockRouteParams.kibanaConfigWriter.writeConfig.mockRejectedValue(
         new Error('Some error with sensitive path')
       );
@@ -241,12 +239,6 @@ describe('Configure routes', () => {
         ElasticsearchConnectionStatus.NotConfigured
       );
       mockRouteParams.kibanaConfigWriter.isConfigWritable.mockResolvedValue(true);
-      mockRouteParams.elasticsearch.authenticate.mockResolvedValue({
-        host: 'host',
-        username: 'username',
-        password: 'password',
-        caCert: 'pem',
-      });
       mockRouteParams.kibanaConfigWriter.writeConfig.mockResolvedValue();
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -264,7 +256,7 @@ describe('Configure routes', () => {
         host: 'host',
         username: 'username',
         password: 'password',
-        caCert: 'der',
+        caCert: '-----BEGIN CERTIFICATE-----\nder\n-----END CERTIFICATE-----\n',
       });
 
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).toHaveBeenCalledTimes(1);
@@ -272,7 +264,7 @@ describe('Configure routes', () => {
         host: 'host',
         username: 'username',
         password: 'password',
-        caCert: 'pem',
+        caCert: '-----BEGIN CERTIFICATE-----\nder\n-----END CERTIFICATE-----\n',
       });
 
       expect(mockRouteParams.preboot.completeSetup).toHaveBeenCalledTimes(1);

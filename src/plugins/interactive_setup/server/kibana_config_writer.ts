@@ -75,18 +75,19 @@ export class KibanaConfigWriter {
       }
     }
 
+    const config: Record<string, any> = { 'elasticsearch.hosts': [params.host] };
+    if ('serviceAccountToken' in params) {
+      config['elasticsearch.serviceAccountToken'] = params.serviceAccountToken.value;
+    } else if ('username' in params) {
+      config['elasticsearch.password'] = params.password;
+      config['elasticsearch.username'] = params.username;
+    }
+    if (params.caCert) {
+      config['elasticsearch.ssl.certificateAuthorities'] = [caPath];
+    }
+
     this.logger.debug(`Writing Elasticsearch configuration to ${this.configPath}.`);
     try {
-      const config: Record<string, any> = { 'elasticsearch.hosts': [params.host] };
-      if ('serviceAccountToken' in params) {
-        config['elasticsearch.serviceAccountToken'] = params.serviceAccountToken.value;
-      } else if ('username' in params) {
-        config['elasticsearch.password'] = params.password;
-        config['elasticsearch.username'] = params.username;
-      }
-      if (params.caCert) {
-        config['elasticsearch.ssl.certificateAuthorities'] = [caPath];
-      }
       await fs.appendFile(
         this.configPath,
         `\n\n# This section was automatically generated during setup.\n${yaml.safeDump(config, {

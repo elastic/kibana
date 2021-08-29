@@ -111,15 +111,15 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       return errors;
     },
     onSubmit: async (values) => {
-        await http.post('/internal/interactive_setup/configure', {
-          body: JSON.stringify({
+      await http.post('/internal/interactive_setup/configure', {
+        body: JSON.stringify({
           host,
-            username: values.username,
-            password: values.password,
-            caCert: values.caCert,
-          }),
-        });
-        onSuccess?.();
+          username: values.username,
+          password: values.password,
+          caCert: values.caCert,
+        }),
+      });
+      onSuccess?.();
     },
   });
 
@@ -132,7 +132,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
           <EuiCallOut
             color="danger"
             title={i18n.translate('interactiveSetup.clusterConfigurationForm.submitErrorTitle', {
-                defaultMessage: "Couldn't connect to cluster",
+              defaultMessage: "Couldn't connect to cluster",
             })}
           >
             {(form.submitError as IHttpFetchError).body?.message}
