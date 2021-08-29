@@ -20,7 +20,6 @@ jest.mock('@kbn/i18n/react', () => {
     },
   };
 });
-
 import { shallow } from 'enzyme';
 import React from 'react';
 import { I18nService } from './i18n_service';

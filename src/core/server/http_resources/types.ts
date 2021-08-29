@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { RequestHandlerContext } from '..';
 import type { ResponseHeaders } from '../http/router/headers';
 import type {
   HttpResponseOptions,
@@ -14,6 +13,7 @@ import type {
 } from '../http/router/response';
 import type { RouteConfig } from '../http/router/route';
 import type { IRouter, RequestHandler } from '../http/router/router';
+import type { RequestHandlerContext } from '../plugin_api';
 
 /**
  * Allows to configure HTTP response parameters

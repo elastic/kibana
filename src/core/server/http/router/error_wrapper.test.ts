@@ -7,7 +7,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { RequestHandlerContext } from '../..';
+import type { RequestHandlerContext } from '../../plugin_api';
 import { wrapErrors } from './error_wrapper';
 import { KibanaRequest } from './request';
 import type { KibanaResponseFactory } from './response';

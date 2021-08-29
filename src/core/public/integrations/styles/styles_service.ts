@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Subscription } from 'rxjs';
 import type { CoreService } from '../../../types/core_service';
 import type { IUiSettingsClient } from '../../ui_settings/types';

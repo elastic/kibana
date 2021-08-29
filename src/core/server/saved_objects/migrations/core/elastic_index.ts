@@ -10,7 +10,6 @@
  * This module contains various functions for querying and manipulating
  * elasticsearch indices.
  */
-
 import { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import type { SavedObjectsMigrationVersion } from '../../../../types/saved_objects';

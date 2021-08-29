@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from '../../../../core/types';
+import type { SavedObjectReference } from '../../../../core/types/saved_objects';
 
 /**
  * Versioned state is a POJO JavaScript object that can be serialized to JSON,

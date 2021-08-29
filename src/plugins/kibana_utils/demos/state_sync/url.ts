@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { defaultState, pureTransitions, TodoActions, TodoState } from '../state_containers/todomvc';
-import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
-import {
-  createKbnUrlStateStorage,
-  syncState,
-  INullableBaseStateContainer,
-} from '../../public/state_sync';
+import { createStateContainer } from '../../common/state_containers/create_state_container';
+import type { BaseState, BaseStateContainer } from '../../common/state_containers/types';
+import { syncState } from '../../public/state_sync/state_sync';
+import { createKbnUrlStateStorage } from '../../public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
+import type { INullableBaseStateContainer } from '../../public/state_sync/types';
+import type { TodoActions, TodoState } from '../state_containers/todomvc';
+import { defaultState, pureTransitions } from '../state_containers/todomvc';
 
 const tick = () => new Promise((resolve) => setTimeout(resolve));
 

@@ -7,10 +7,10 @@
  */
 import type { ShallowPromise } from '@kbn/utility-types';
 import { flatten, pick } from 'lodash';
-import type { RequestHandlerContext } from '../..';
 import type { CoreId } from '../../core_context';
 import type { RequestHandler } from '../../http/router/router';
 import type { PluginOpaqueId } from '../../plugins/types';
+import type { RequestHandlerContext } from '../../plugin_api';
 
 /**
  * A function that returns a context value for a specific key of given context type.

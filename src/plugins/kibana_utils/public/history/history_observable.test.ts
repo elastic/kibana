@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { History } from 'history';
+import { createMemoryHistory } from 'history';
+import type { ParsedQuery } from 'query-string';
 import {
   createHistoryObservable,
   createQueryParamObservable,
   createQueryParamsObservable,
 } from './history_observable';
-import { createMemoryHistory, History } from 'history';
-import { ParsedQuery } from 'query-string';
 
 let history: History;
 

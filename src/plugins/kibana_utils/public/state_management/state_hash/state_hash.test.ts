@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { encode as encodeRison } from 'rison-node';
 import { mockStorage } from '../../storage/hashed_item_store/mock';
 import { createStateHash, isStateHash } from './state_hash';

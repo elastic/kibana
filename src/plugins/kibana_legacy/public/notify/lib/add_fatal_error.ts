@@ -5,13 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { FatalErrorsSetup } from '../../../../../core/public';
-import {
-  AngularHttpError,
-  formatAngularHttpError,
-  isAngularHttpError,
-} from './format_angular_http_error';
+import type { FatalErrorsSetup } from '../../../../../core/public/fatal_errors/fatal_errors_service';
+import type { AngularHttpError } from './format_angular_http_error';
+import { formatAngularHttpError, isAngularHttpError } from './format_angular_http_error';
 
 export function addFatalError(
   fatalErrors: FatalErrorsSetup,

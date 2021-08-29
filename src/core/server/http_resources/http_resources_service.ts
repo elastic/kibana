@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import type { Logger } from '@kbn/logging';
-import type { RequestHandlerContext } from '..';
 import type { CoreService } from '../../types/core_service';
 import type { CoreContext } from '../core_context';
 import { KibanaRequest } from '../http/router/request';
@@ -14,6 +13,7 @@ import type { KibanaResponseFactory } from '../http/router/response';
 import type { RouteConfig } from '../http/router/route';
 import type { IRouter } from '../http/router/router';
 import type { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http/types';
+import type { RequestHandlerContext } from '../plugin_api';
 import type {
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,

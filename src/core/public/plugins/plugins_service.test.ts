@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import { omit, pick } from 'lodash';
-import type { CoreSetup, CoreStart } from '..';
 import type { PluginName } from '../../server/plugins/types';
 import { PluginType } from '../../server/plugins/types';
 import { applicationServiceMock } from '../application/application_service.mock';
@@ -21,6 +20,7 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { coreMock } from '../mocks';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
+import type { CoreSetup, CoreStart } from '../plugin_api';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import type { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';

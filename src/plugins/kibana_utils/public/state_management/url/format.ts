@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ParsedQuery } from 'query-string';
+import { stringify } from 'query-string';
 import { format as formatUrl } from 'url';
-import { stringify, ParsedQuery } from 'query-string';
+import { url as urlUtils } from '../../../common/url';
 import { parseUrl, parseUrlHash } from './parse';
-import { url as urlUtils } from '../../../common';
 
 export function replaceUrlQuery(
   rawUrl: string,

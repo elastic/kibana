@@ -6,10 +6,18 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["public/**/*"],
+  "include": [
+    "public/**/*"
+  ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
+    {
+      "path": "../../core/tsconfig.json"
+    },
+    {
+      "path": "../kibana_react/tsconfig.json"
+    },
+    {
+      "path": "../data/tsconfig.json"
+    }
   ]
 }

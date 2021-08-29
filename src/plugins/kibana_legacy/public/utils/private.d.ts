@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IServiceProvider } from 'angular';
+import type { IServiceProvider } from 'angular';
 
 export type IPrivate = <T>(provider: (...injectable: any[]) => T) => T;
 

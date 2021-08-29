@@ -5,62 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-/**
- * The HashedItemStore associates JSON objects with states in browser history and persists these
- * objects in sessionStorage. We persist them so that when a tab is closed and re-opened, we can
- * retain access to the state objects referenced by the browser history.
- *
- * Because there is a limit on how much data we can put into sessionStorage, the HashedItemStore
- * will attempt to remove old items from storage once that limit is reached.
- *
- * -------------------------------------------------------------------------------------------------
- *
- * Consideration 1: We can't (easily) mirror the browser history
- *
- * If we use letters to indicate a unique state object, and numbers to represent the same state
- * occurring again (due to action by the user), a history could look like this:
- *
- * Old < - - - - - - - - > New
- * A1 | B1 | C1 | A2 | D1 | E1
- *
- * If the user navigates back to C1 and starts to create new states, persisted history states will
- * become inaccessible:
- *
- * Old < - - - - - - - - - - -> New
- * A1 | B1 | C1 | F1 | G1 | H1 | I1  (new history states)
- *                A2 | D1 | E1       (inaccessible persisted history states)
- *
- * Theoretically, we could build a mirror of the browser history. When the onpopstate event is
- * dispatched, we could determine whether we have gone back or forward in history. Then, when
- * a new state is persisted, we could delete all of the persisted items which are no longer
- * accessible. (Note that this would require reference-counting so that A isn't removed while D and
- * E are, since A would still have a remaining reference from A1).
- *
- * However, the History API doesn't allow us to read from the history beyond the current state. This
- * means that if a session is restored, we can't rebuild this browser history mirror.
- *
- * Due to this imperfect implementation, HashedItemStore ignores the possibility of inaccessible
- * history states. In the future, we could implement this history mirror and persist it in
- * sessionStorage too. Then, when restoring a session, we can just retrieve it from sessionStorage.
- *
- * -------------------------------------------------------------------------------------------------
- *
- * Consideration 2: We can't tell when we've hit the browser history limit
- *
- * Because some of our persisted history states may no longer be referenced by the browser history,
- * and we have no way of knowing which ones, we have no way of knowing whether we've persisted a
- * number of accessible states beyond the browser history length limit.
- *
- * More fundamentally, the browser history length limit is a browser implementation detail, so it
- * can change from browser to browser, or over time. Respecting this limit would introduce a lot of
- * (unnecessary?) complexity.
- *
- * For these reasons, HashedItemStore doesn't concern itself with this constraint.
- */
-
 import { pull, sortBy } from 'lodash';
-import { IStorage } from '../types';
+import type { IStorage } from '../types';
 
 interface IndexedItem {
   hash: string;

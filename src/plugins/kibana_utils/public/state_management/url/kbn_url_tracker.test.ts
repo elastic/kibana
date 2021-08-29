@@ -5,14 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { StubBrowserStorage } from '@kbn/test/jest';
-import { createMemoryHistory, History } from 'history';
-import { createKbnUrlTracker, KbnUrlTracker } from './kbn_url_tracker';
+import type { History } from 'history';
+import { createMemoryHistory } from 'history';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { App, AppUpdater, ToastsSetup } from 'kibana/public';
+import type { App, AppUpdater } from '../../../../../core/public/application/types';
 import { coreMock } from '../../../../../core/public/mocks';
+import type { ToastsSetup } from '../../../../../core/public/notifications/toasts/toasts_service';
 import { unhashUrl } from './hash_unhash_url';
+import type { KbnUrlTracker } from './kbn_url_tracker';
+import { createKbnUrlTracker } from './kbn_url_tracker';
 
 jest.mock('./hash_unhash_url', () => ({
   unhashUrl: jest.fn((x) => x),

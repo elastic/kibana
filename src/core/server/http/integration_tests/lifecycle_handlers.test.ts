@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 import { BehaviorSubject } from 'rxjs';

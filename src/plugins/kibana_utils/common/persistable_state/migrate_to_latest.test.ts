@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SerializableRecord } from '@kbn/utility-types';
-import { MigrateFunction } from './types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { migrateToLatest } from './migrate_to_latest';
+import type { MigrateFunction } from './types';
 
 interface StateV1 extends SerializableRecord {
   name: string;

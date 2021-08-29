@@ -48,7 +48,6 @@
  * appropriate. This means for data import scenarios, any documetns being imported should be explicitly
  * given an empty migrationVersion property {} if no such property exists.
  */
-
 import { set } from '@elastic/safer-lodash-set';
 import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/logging';

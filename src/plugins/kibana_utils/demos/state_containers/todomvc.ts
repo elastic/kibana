@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { createStateContainer, PureTransition } from '../../common/state_containers';
+import { createStateContainer } from '../../common/state_containers/create_state_container';
+import type { PureTransition } from '../../common/state_containers/types';
 
 export interface TodoItem {
   text: string;

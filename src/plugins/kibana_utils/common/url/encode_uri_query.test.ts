@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { encodeUriQuery, encodeQuery, addQueryParam } from './encode_uri_query';
+import { addQueryParam, encodeQuery, encodeUriQuery } from './encode_uri_query';
 
 describe('encodeUriQuery', () => {
   test('should correctly encode uri query and not encode chars defined as pchar set in rfc3986', () => {

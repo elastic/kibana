@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { RequestHandlerContext } from '..';
 import type { IContextContainer, IContextProvider } from '../context/container/context';
 import type { ICspConfig } from '../csp/csp_config';
 import { ExternalUrlConfig } from '../external_url/external_url_config';
 import type { PluginOpaqueId } from '../plugins/types';
+import type { RequestHandlerContext } from '../plugin_api';
 import type { GetAuthHeaders } from './auth_headers_storage';
 import type { GetAuthState, IsAuthenticated } from './auth_state_storage';
 import type { IBasePath } from './base_path_service';

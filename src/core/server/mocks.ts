@@ -9,7 +9,6 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { duration } from 'moment';
 import { of } from 'rxjs';
-import type { CorePreboot, CoreSetup, CoreStart, StartServicesAccessor } from '.';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
@@ -24,6 +23,7 @@ import { loggingServiceMock } from './logging/logging_service.mock';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { metricsServiceMock } from './metrics/metrics_service.mock';
 import type { PluginInitializerContext, SharedGlobalConfig } from './plugins/types';
+import type { CorePreboot, CoreSetup, CoreStart, StartServicesAccessor } from './plugin_api';
 import { prebootServiceMock } from './preboot/preboot_service.mock';
 import { renderingMock } from './rendering/rendering_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
@@ -31,6 +31,7 @@ import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_object
 import { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+
 type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 
 export function pluginInitializerContextConfigMock<T>(config: T) {

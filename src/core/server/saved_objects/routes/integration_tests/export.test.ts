@@ -9,7 +9,6 @@
 jest.mock('../../export', () => ({
   exportSavedObjectsToStream: jest.fn(),
 }));
-
 import type { UnwrapPromise } from '@kbn/utility-types';
 import { createListStream } from '@kbn/utils';
 import supertest from 'supertest';

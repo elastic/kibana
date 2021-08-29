@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { MonoTypeOperatorFunction, queueScheduler, scheduled, from } from 'rxjs';
+import type { MonoTypeOperatorFunction } from 'rxjs';
+import { from, queueScheduler, scheduled } from 'rxjs';
 import { concatAll, distinctUntilChanged, skip } from 'rxjs/operators';
 
 export function distinctUntilChangedWithInitialValue<T>(

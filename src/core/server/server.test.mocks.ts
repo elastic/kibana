@@ -91,5 +91,4 @@ export const mockDeprecationService = deprecationsServiceMock.create();
 jest.doMock('./deprecations/deprecations_service', () => ({
   DeprecationsService: jest.fn(() => mockDeprecationService),
 }));
-
 export { mockRenderingService };

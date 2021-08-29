@@ -16,9 +16,9 @@ import type { LoggerFactory } from '@kbn/logging';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { PathConfigType } from '@kbn/utils';
 import { Observable } from 'rxjs';
-import type { CorePreboot, CoreSetup, CoreStart } from '..';
 import type { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import type { KibanaConfigType } from '../kibana_config';
+import type { CorePreboot, CoreSetup, CoreStart } from '../plugin_api';
 import type { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 
 type Maybe<T> = T | undefined;

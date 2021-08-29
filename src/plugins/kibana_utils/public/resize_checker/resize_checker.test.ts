@@ -5,14 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ResizeChecker } from './resize_checker';
-import { EventEmitter } from 'events';
-
 // If you want to know why these mocks are created,
 // please check: https://github.com/elastic/kibana/pull/44750
 jest.mock('resize-observer-polyfill');
+import { EventEmitter } from 'events';
 import ResizeObserver from 'resize-observer-polyfill';
+import { ResizeChecker } from './resize_checker';
 
 class MockElement {
   public clientWidth: number;

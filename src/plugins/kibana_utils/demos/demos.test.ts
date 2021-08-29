@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { result as counterResult } from './state_containers/counter';
 import { result as todomvcResult } from './state_containers/todomvc';
 import { result as urlSyncResult } from './state_sync/url';

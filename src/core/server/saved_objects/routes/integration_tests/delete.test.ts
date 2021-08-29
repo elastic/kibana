@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { UnwrapPromise } from '@kbn/utility-types';
 import supertest from 'supertest';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';

@@ -26,22 +26,29 @@ const createTimer = () => {
 
 const timer = createTimer();
 
+const tsConfigFilePath = Path.resolve(argv.project || './tsconfig.json')
 const project = new Project({
-  tsConfigFilePath: Path.resolve(argv.project || './tsconfig.json'),
+  tsConfigFilePath,
 });
 
 timer.measure('createProject');
 
-let dirsAlreadyProcessed = [
+console.log(tsConfigFilePath)
 
+const tsConfig = require(tsConfigFilePath);
+
+const projects = tsConfig.references?.map(ref => {
+  return Path.dirname(Path.resolve(Path.dirname(tsConfigFilePath), ref.path))
+}) || [];
+
+let dirsAlreadyProcessed = [
+  ...projects
 ];
+
 
 let dirsToProcess = [
   argv.test ? 'test_imports.ts' : './',
-];
-
-dirsToProcess = dirsToProcess.map((path) => Path.resolve(__dirname, path));
-dirsAlreadyProcessed = dirsAlreadyProcessed.map((path) => Path.resolve(__dirname, path));
+].map((path) => Path.resolve(__dirname, path));
 
 const allFilesInProject = project
   .getSourceFiles()
@@ -56,13 +63,11 @@ const allFilesToProcess = allFilesInProject.filter((file) => {
   return dirsAlreadyProcessed.every((dir) => !file.startsWith(dir));
 });
 
-console.log(allFilesToProcess);
-
 const filesToProcessNow = allFilesInProject.filter((file) => {
   return allFilesToProcess.includes(file) && dirsToProcess.some((dir) => file.startsWith(dir));
 });
 
-console.log(filesToProcessNow);
+console.log(filesToProcessNow.slice(0, 10));
 
 timer.measure('start processing');
 

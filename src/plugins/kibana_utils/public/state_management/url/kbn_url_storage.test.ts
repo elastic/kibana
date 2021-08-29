@@ -6,22 +6,17 @@
  * Side Public License, v 1.
  */
 
+import type { History } from 'history';
+import { createBrowserHistory, createHashHistory, createMemoryHistory, createPath } from 'history';
+import { ScopedHistory } from '../../../../../core/public/application/scoped_history';
 import '../../storage/hashed_item_store/mock';
+import type { IKbnUrlControls } from './kbn_url_storage';
 import {
-  History,
-  createBrowserHistory,
-  createHashHistory,
-  createMemoryHistory,
-  createPath,
-} from 'history';
-import {
-  getRelativeToHistoryPath,
   createKbnUrlControls,
-  IKbnUrlControls,
-  setStateToKbnUrl,
+  getRelativeToHistoryPath,
   getStateFromKbnUrl,
+  setStateToKbnUrl,
 } from './kbn_url_storage';
-import { ScopedHistory } from '../../../../../core/public';
 
 describe('kbn_url_storage', () => {
   describe('getStateFromUrl & setStateToUrl', () => {

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
-import { UiComponent } from '../../common/ui/ui_component';
+import type { UiComponent } from '../../common/ui/ui_component';
 
 /**
  * Represents something that can be configured by user using UI.

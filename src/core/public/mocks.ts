@@ -157,7 +157,6 @@ export const coreMock = {
   createStorage: createStorageMock,
   createAppMountParamters: createAppMountParametersMock,
 };
-
 export { applicationServiceMock } from './application/application_service.mock';
 export { scopedHistoryMock } from './application/scoped_history.mock';
 export { chromeServiceMock } from './chrome/chrome_service.mock';

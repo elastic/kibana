@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { Location } from 'history';
 import { getQueryParams } from './get_query_params';
-import { Location } from 'history';
 
 describe('getQueryParams', () => {
   it('should getQueryParams', () => {

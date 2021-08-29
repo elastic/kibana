@@ -5,12 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  createSessionStorageStateStorage,
-  ISessionStorageStateStorage,
-} from './create_session_storage_state_storage';
 import { StubBrowserStorage } from '@kbn/test/jest';
+import type { ISessionStorageStateStorage } from './create_session_storage_state_storage';
+import { createSessionStorageStateStorage } from './create_session_storage_state_storage';
 
 describe('SessionStorageStateStorage', () => {
   let browserStorage: StubBrowserStorage;

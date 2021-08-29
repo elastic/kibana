@@ -8,8 +8,8 @@
 import { isPromise } from '@kbn/std';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import type { CoreSetup, CoreStart } from '..';
 import type { DiscoveredPlugin, PluginOpaqueId } from '../../server/plugins/types';
+import type { CoreSetup, CoreStart } from '../plugin_api';
 import type { PluginInitializerContext } from './plugin_context';
 import { read } from './plugin_reader';
 

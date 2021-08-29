@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { createUrlTracker, IUrlTracker } from './url_tracker';
 import { StubBrowserStorage } from '@kbn/test/jest';
-import { createMemoryHistory, History } from 'history';
+import type { History } from 'history';
+import { createMemoryHistory } from 'history';
+import type { IUrlTracker } from './url_tracker';
+import { createUrlTracker } from './url_tracker';
 
 describe('urlTracker', () => {
   let storage: StubBrowserStorage;

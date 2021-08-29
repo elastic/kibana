@@ -8,9 +8,9 @@
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { CoreStart } from '../../..';
 import type { InternalApplicationStart } from '../../../application/types';
 import type { HttpStart } from '../../../http/types';
+import type { CoreStart } from '../../../plugin_api';
 import type { ChromeNavLink } from '../../nav_links/nav_link';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 import type { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed/recently_accessed_service';

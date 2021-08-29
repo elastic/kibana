@@ -7,9 +7,9 @@
  */
 import type { EnvironmentMode, PackageInfo } from '@kbn/config';
 import { omit } from 'lodash';
-import type { CoreSetup, CoreStart } from '..';
 import type { DiscoveredPlugin, PluginOpaqueId } from '../../server/plugins/types';
 import type { CoreContext } from '../core_system';
+import type { CoreSetup, CoreStart } from '../plugin_api';
 import { PluginWrapper } from './plugin';
 import type { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 

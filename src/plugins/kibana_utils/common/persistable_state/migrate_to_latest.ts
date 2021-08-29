@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { SerializableRecord } from '@kbn/utility-types';
 import { compare } from 'semver';
-import { SerializableRecord } from '@kbn/utility-types';
-import { VersionedState, MigrateFunctionsObject } from './types';
+import type { MigrateFunctionsObject, VersionedState } from './types';
 
 export function migrateToLatest<S extends SerializableRecord>(
   migrations: MigrateFunctionsObject,

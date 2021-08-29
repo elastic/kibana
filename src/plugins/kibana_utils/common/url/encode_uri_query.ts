@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ParsedQuery, parse, stringify } from 'query-string';
 import { transform } from 'lodash';
+import type { ParsedQuery } from 'query-string';
+import { parse, stringify } from 'query-string';
 
 /**
  * This method is intended for encoding *key* or *value* parts of query component. We need a custom

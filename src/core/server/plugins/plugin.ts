@@ -12,7 +12,7 @@ import { join } from 'path';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import typeDetect from 'type-detect';
-import type { CorePreboot, CoreSetup, CoreStart } from '..';
+import type { CorePreboot, CoreSetup, CoreStart } from '../plugin_api';
 import type {
   AsyncPlugin,
   Plugin,

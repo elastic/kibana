@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { CoreSetup, CoreStart, PluginConfigDescriptor } from 'kibana/server';
 import { get } from 'lodash';
-
-import { configSchema, ConfigSchema } from '../config';
+import type { PluginConfigDescriptor } from '../../../core/server/plugins/types';
+import type { CoreSetup, CoreStart } from '../../../core/server/plugin_api';
+import type { ConfigSchema } from '../config';
+import { configSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {

@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { StartServicesAccessor } from '../../../../core/public';
-import { createStartServicesGetter } from './create_start_service_getter';
+import type { StartServicesAccessor } from '../../../../core/public';
 import { Defer } from '../../common/defer';
+import { createStartServicesGetter } from './create_start_service_getter';
 
 describe('createStartServicesGetter', () => {
   test('throws if services are accessed before accessor resolves', async () => {

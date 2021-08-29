@@ -5,15 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mockStorage } from '../../storage/hashed_item_store/mock';
-import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
-import { History, createBrowserHistory } from 'history';
-import { takeUntil, toArray } from 'rxjs/operators';
+import type { History } from 'history';
+import { createBrowserHistory } from 'history';
 import { Subject } from 'rxjs';
-import { ScopedHistory } from '../../../../../core/public';
-import { withNotifyOnErrors } from '../../state_management/url';
+import { takeUntil, toArray } from 'rxjs/operators';
+import { ScopedHistory } from '../../../../../core/public/application/scoped_history';
 import { coreMock } from '../../../../../core/public/mocks';
+import { withNotifyOnErrors } from '../../state_management/url/errors';
+import { mockStorage } from '../../storage/hashed_item_store/mock';
+import type { IKbnUrlStateStorage } from './create_kbn_url_state_storage';
+import { createKbnUrlStateStorage } from './create_kbn_url_state_storage';
 
 describe('KbnUrlStateStorage', () => {
   describe('useHash: false', () => {

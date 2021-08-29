@@ -9,7 +9,6 @@
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
-
 import { schema } from '@kbn/config-schema';
 import supertest from 'supertest';
 import { contextServiceMock } from '../../context/context_service.mock';

@@ -5,13 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { RawConfigurationProvider } from '@kbn/config';
 import { ConfigService, Env } from '@kbn/config';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { config as pathConfig } from '@kbn/utils';
 import apm from 'elastic-apm-node';
-import type { RequestHandlerContext } from '.';
 import { CapabilitiesService } from './capabilities/capabilities_service';
 import { coreDeprecationProvider } from './config/deprecation/core_deprecations';
 import { ensureValidConfiguration } from './config/ensure_valid_configuration';
@@ -49,6 +47,7 @@ import { opsConfig } from './metrics/ops_config';
 import { config as pluginsConfig } from './plugins/plugins_config';
 import type { DiscoveredPlugins } from './plugins/plugins_service';
 import { PluginsService } from './plugins/plugins_service';
+import type { RequestHandlerContext } from './plugin_api';
 import { PrebootService } from './preboot/preboot_service';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { RenderingService } from './rendering/rendering_service';

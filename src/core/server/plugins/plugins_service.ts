@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { IConfigService } from '@kbn/config';
 import type { Logger } from '@kbn/logging';
 import { getFlattenedObject, pick } from '@kbn/std';

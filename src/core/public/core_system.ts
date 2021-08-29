@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import type { EnvironmentMode, PackageInfo } from '@kbn/config';
-import type { CoreSetup, CoreStart } from '.';
 import type { CoreId } from '../server/core_context';
 import { ApplicationService } from './application/application_service';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
@@ -28,6 +27,7 @@ import { IntegrationsService } from './integrations/integrations_service';
 import { NotificationsService } from './notifications/notifications_service';
 import { OverlayService } from './overlays/overlay_service';
 import { PluginsService } from './plugins/plugins_service';
+import type { CoreSetup, CoreStart } from './plugin_api';
 import { RenderingService } from './rendering/rendering_service';
 import { SavedObjectsService } from './saved_objects/saved_objects_service';
 import { UiSettingsService } from './ui_settings/ui_settings_service';

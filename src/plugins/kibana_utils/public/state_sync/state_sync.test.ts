@@ -5,26 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
-import {
-  defaultState,
-  pureTransitions,
-  TodoActions,
-  TodoState,
-} from '../../demos/state_containers/todomvc';
-import { syncState, syncStates } from './state_sync';
-import { IStateStorage } from './state_sync_state_storage/types';
-import { Observable, Subject } from 'rxjs';
-import {
-  createSessionStorageStateStorage,
-  createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
-  ISessionStorageStateStorage,
-} from './state_sync_state_storage';
 import { StubBrowserStorage } from '@kbn/test/jest';
-import { createBrowserHistory, History } from 'history';
-import { INullableBaseStateContainer } from './types';
+import type { History } from 'history';
+import { createBrowserHistory } from 'history';
+import { Observable, Subject } from 'rxjs';
+import { createStateContainer } from '../../common/state_containers/create_state_container';
+import type { BaseState, BaseStateContainer } from '../../common/state_containers/types';
+import type { TodoActions, TodoState } from '../../demos/state_containers/todomvc';
+import { defaultState, pureTransitions } from '../../demos/state_containers/todomvc';
+import { syncState, syncStates } from './state_sync';
+import type { IKbnUrlStateStorage } from './state_sync_state_storage/create_kbn_url_state_storage';
+import { createKbnUrlStateStorage } from './state_sync_state_storage/create_kbn_url_state_storage';
+import type { ISessionStorageStateStorage } from './state_sync_state_storage/create_session_storage_state_storage';
+import { createSessionStorageStateStorage } from './state_sync_state_storage/create_session_storage_state_storage';
+import type { IStateStorage } from './state_sync_state_storage/types';
+import type { INullableBaseStateContainer } from './types';
 
 describe('state_sync', () => {
   describe('basic', () => {

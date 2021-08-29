@@ -8,11 +8,11 @@
 import Boom from '@hapi/boom';
 import { createConcatStream, createPromiseFromStreams } from '@kbn/utils';
 import { Readable } from 'stream';
-import type { RequestHandlerContext } from '../..';
 import { KibanaRequest } from '../../http/router/request';
 import type { KibanaResponseFactory } from '../../http/router/response';
 import { kibanaResponseFactory } from '../../http/router/response';
 import type { RequestHandler } from '../../http/router/router';
+import type { RequestHandlerContext } from '../../plugin_api';
 import {
   catchAndReturnBoomErrors,
   createSavedObjectsStreamFromNdJson,

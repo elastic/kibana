@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';

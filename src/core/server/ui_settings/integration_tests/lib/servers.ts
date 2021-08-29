@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import type supertest from 'supertest';
 import type {

@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SavedObjectsType } from '../server/saved_objects/types';
 import type { SavedObject } from '../types/saved_objects';
 import * as kbnTestServer from './kbn_server';

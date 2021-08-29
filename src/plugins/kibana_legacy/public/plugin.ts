@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PluginInitializerContext, CoreStart, CoreSetup } from 'kibana/public';
-import { ConfigSchema } from '../config';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+import type { CoreSetup, CoreStart } from '../../../core/public/plugin_api';
+import type { ConfigSchema } from '../config';
 import { injectHeaderStyle } from './utils/inject_header_style';
 
 export class KibanaLegacyPlugin {

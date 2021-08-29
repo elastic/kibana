@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { HashedItemStore } from '../../storage/hashed_item_store/hashed_item_store';
 import { mockStorage } from '../../storage/hashed_item_store/mock';
-import { HashedItemStore } from '../../storage/hashed_item_store';
 import { hashUrl, unhashUrl } from './hash_unhash_url';
 
 describe('hash unhash url', () => {

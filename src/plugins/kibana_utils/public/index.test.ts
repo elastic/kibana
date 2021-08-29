@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { createStateContainer, createStateContainerReactHelpers } from '.';
+import { createStateContainer } from '../common/state_containers/create_state_container';
+import { createStateContainerReactHelpers } from '../common/state_containers/create_state_container_react_helpers';
 
 test('exports store methods', () => {
   expect(typeof createStateContainer).toBe('function');

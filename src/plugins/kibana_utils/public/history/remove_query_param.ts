@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { History, Location } from 'history';
 import { stringify } from 'query-string';
-import { History, Location } from 'history';
-import { url } from '../../common';
+import { url } from '../../common/url';
 import { getQueryParams } from './get_query_params';
 
 export function removeQueryParam(history: History, param: string, replace: boolean = true) {

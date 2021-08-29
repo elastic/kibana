@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { Location } from 'history';
+import { createMemoryHistory } from 'history';
 import { removeQueryParam } from './remove_query_param';
-import { createMemoryHistory, Location } from 'history';
 
 describe('removeQueryParam', () => {
   it('should remove query param from url', () => {

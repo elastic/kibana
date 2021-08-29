@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { Storage } from './storage';
-import { IStorage, IStorageWrapper } from './types';
+import type { IStorage, IStorageWrapper } from './types';
 
 const payload = { first: 'john', last: 'smith' };
 const createMockStore = (): MockedKeys<IStorage> => {

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 import { shareReplay } from 'rxjs/operators';
-import type { CorePreboot, CoreSetup, CoreStart, RequestHandlerContext } from '..';
 import type { CoreContext } from '../core_context';
 import type { IRouter } from '../http/router/router';
 import type { RequestHandlerContextProvider } from '../http/types';
+import type { CorePreboot, CoreSetup, CoreStart, RequestHandlerContext } from '../plugin_api';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { PluginWrapper } from './plugin';
 import type {
