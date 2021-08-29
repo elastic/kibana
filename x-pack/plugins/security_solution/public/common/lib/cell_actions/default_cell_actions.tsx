@@ -12,6 +12,7 @@ import type {
   TimelineNonEcsData,
 } from '../../../../../timelines/common/search_strategy';
 import { DataProvider, TGridCellAction } from '../../../../../timelines/common/types';
+import { getPageRowIndex } from '../../../../../timelines/public';
 import { getMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { allowTopN, escapeDataProviderId } from '../../components/drag_and_drop/helpers';
@@ -36,11 +37,20 @@ const useKibanaServices = () => {
 
 /** the default actions shown in `EuiDataGrid` cells */
 export const defaultCellActions: TGridCellAction[] = [
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
+    rowIndex,
+    columnId,
+    Component,
+  }) => {
     const { timelines, filterManager } = useKibanaServices();
 
+    const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+    if (pageRowIndex >= data.length) {
+      return null;
+    }
+
     const value = getMappedNonEcsValue({
-      data: data[rowIndex],
+      data: data[pageRowIndex],
       fieldName: columnId,
     });
 
@@ -58,11 +68,20 @@ export const defaultCellActions: TGridCellAction[] = [
       </>
     );
   },
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
+    rowIndex,
+    columnId,
+    Component,
+  }) => {
     const { timelines, filterManager } = useKibanaServices();
 
+    const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+    if (pageRowIndex >= data.length) {
+      return null;
+    }
+
     const value = getMappedNonEcsValue({
-      data: data[rowIndex],
+      data: data[pageRowIndex],
       fieldName: columnId,
     });
 
@@ -80,11 +99,20 @@ export const defaultCellActions: TGridCellAction[] = [
       </>
     );
   },
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
+    rowIndex,
+    columnId,
+    Component,
+  }) => {
     const { timelines } = useKibanaServices();
 
+    const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+    if (pageRowIndex >= data.length) {
+      return null;
+    }
+
     const value = getMappedNonEcsValue({
-      data: data[rowIndex],
+      data: data[pageRowIndex],
       fieldName: columnId,
     });
 
@@ -122,16 +150,23 @@ export const defaultCellActions: TGridCellAction[] = [
     browserFields,
     data,
     timelineId,
+    pageSize,
   }: {
     browserFields: BrowserFields;
     data: TimelineNonEcsData[][];
     timelineId: string;
+    pageSize: number;
   }) => ({ rowIndex, columnId, Component }) => {
     const [showTopN, setShowTopN] = useState(false);
     const onClick = useCallback(() => setShowTopN(!showTopN), [showTopN]);
 
+    const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+    if (pageRowIndex >= data.length) {
+      return null;
+    }
+
     const value = getMappedNonEcsValue({
-      data: data[rowIndex],
+      data: data[pageRowIndex],
       fieldName: columnId,
     });
 
@@ -159,11 +194,20 @@ export const defaultCellActions: TGridCellAction[] = [
       </>
     );
   },
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
+    rowIndex,
+    columnId,
+    Component,
+  }) => {
     const { timelines } = useKibanaServices();
 
+    const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+    if (pageRowIndex >= data.length) {
+      return null;
+    }
+
     const value = getMappedNonEcsValue({
-      data: data[rowIndex],
+      data: data[pageRowIndex],
       fieldName: columnId,
     });
 
