@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { LensAppState, setState } from '..';
 import { updateLayer, updateVisualizationState, LensStoreDeps } from '..';
+import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
 import { initializeDatasources } from '../../editor_frame_service/editor_frame';
@@ -28,12 +29,27 @@ export const getPersisted = async ({
 }: {
   initialInput: LensEmbeddableInput;
   lensServices: LensAppServices;
-}): Promise<{ doc: Document } | undefined> => {
-  const { notifications, attributeService } = lensServices;
+}): Promise<
+  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'errorJSON'> } | undefined
+> => {
+  const { notifications, spacesApi, attributeService } = lensServices;
   let doc: Document;
 
   try {
-    const attributes = await attributeService.unwrapAttributes(initialInput);
+    const { sharingSavedObjectProps, ...attributes } = await attributeService.unwrapAttributes(
+      initialInput
+    );
+    if (spacesApi && sharingSavedObjectProps?.outcome === 'aliasMatch') {
+      // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newPath = getFullPath(newObjectId);
+      await spacesApi.ui.redirectLegacyUrl(
+        newPath,
+        i18n.translate('xpack.lens.appName', {
+          defaultMessage: 'Lens visualization',
+        })
+      );
+    }
 
     doc = {
       ...initialInput,
@@ -43,6 +59,10 @@ export const getPersisted = async ({
 
     return {
       doc,
+      sharingSavedObjectProps: {
+        aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
+        outcome: sharingSavedObjectProps?.outcome,
+      },
     };
   } catch (e) {
     notifications.toasts.addDanger(
@@ -150,7 +170,7 @@ export function loadInitial(
     .then(
       (persisted) => {
         if (persisted) {
-          const { doc } = persisted;
+          const { doc, sharingSavedObjectProps } = persisted;
           if (attributeService.inputIsRefType(initialInput)) {
             lensServices.chrome.recentlyAccessed.add(
               getFullPath(initialInput.savedObjectId),
@@ -190,6 +210,7 @@ export function loadInitial(
 
               dispatch(
                 setState({
+                  sharingSavedObjectProps,
                   query: doc.state.query,
                   searchSessionId:
                     dashboardFeatureFlag.allowByValueEmbeddables &&

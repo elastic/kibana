@@ -383,6 +383,9 @@ describe('Lens App', () => {
             savedObjectId: savedObjectId || 'aaa',
           }));
         services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
+          sharingSavedObjectProps: {
+            outcome: 'exactMatch',
+          },
           savedObjectId: initialSavedObjectId ?? 'aaa',
           references: [],
           state: {
@@ -1254,6 +1257,23 @@ describe('Lens App', () => {
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(confirmLeave).toHaveBeenCalled();
       expect(defaultLeave).not.toHaveBeenCalled();
+    });
+  });
+  it('should display a conflict callout if saved object conflicts', async () => {
+    const { services } = await mountWith({
+      preloadedState: {
+        persistedDoc: defaultDoc,
+        sharingSavedObjectProps: {
+          outcome: 'conflict',
+          aliasTargetId: '2',
+        },
+      },
+    });
+    expect(services.spacesApi.ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
+      currentObjectId: '1234',
+      objectNoun: 'Lens visualization',
+      otherObjectId: '2',
+      otherObjectPath: '/app/lens#/edit/2',
     });
   });
 });
