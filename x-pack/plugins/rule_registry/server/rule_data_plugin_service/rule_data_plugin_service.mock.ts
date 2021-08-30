@@ -12,18 +12,17 @@ type Schema = PublicMethodsOf<RuleDataPluginService>;
 
 const createRuleDataPluginService = () => {
   const mocked: jest.Mocked<Schema> = {
-    getRegisteredIndexInfo: jest.fn(),
     getResourcePrefix: jest.fn(),
     getResourceName: jest.fn(),
     isWriteEnabled: jest.fn(),
     initializeService: jest.fn(),
     initializeIndex: jest.fn(),
+    findIndexByName: jest.fn(),
+    findIndicesByFeature: jest.fn(),
   };
   return mocked;
 };
 
-export const ruleDataPluginServiceMock: {
-  create: () => jest.Mocked<PublicMethodsOf<RuleDataPluginService>>;
-} = {
+export const ruleDataPluginServiceMock = {
   create: createRuleDataPluginService,
 };
