@@ -177,13 +177,11 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             <p>
               {i18n.translate('xpack.observability.alertsDisclaimerText', {
                 defaultMessage:
-                  'This page shows an experimental alerting view. The data shown here will probably not be an accurate representation of alerts. A non-experimental list of alerts is available in the Alerts and Actions settings in Stack Management.',
+                  'This page shows an experimental list of alerts. The data might not be accurate. All alerts are available in the ',
               })}
-            </p>
-            <p>
               <EuiLink href={prepend('/app/management/insightsAndAlerting/triggersActions/alerts')}>
                 {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                  defaultMessage: 'Alerts and Actions',
+                  defaultMessage: 'Rules and Connectors settings.',
                 })}
               </EuiLink>
             </p>

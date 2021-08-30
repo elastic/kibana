@@ -51,15 +51,18 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypeDefini
 export function getDocumentPayloadFactory(reporting: ReportingCore) {
   const exportTypesRegistry = reporting.getExportTypesRegistry();
 
-  async function getCompleted(
-    output: TaskRunResult,
-    jobType: string,
-    title: string,
-    content: Stream
-  ): Promise<Payload> {
+  async function getCompleted({
+    id,
+    index,
+    output,
+    jobtype: jobType,
+    payload: { title },
+  }: Required<ReportApiJSON>): Promise<Payload> {
     const exportType = exportTypesRegistry.get(
       (item: ExportTypeDefinition) => item.jobType === jobType
     );
+    const encoding = exportType.jobContentEncoding === 'base64' ? 'base64' : 'raw';
+    const content = await getContentStream(reporting, { id, index }, { encoding });
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
 
@@ -77,18 +80,21 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
 
   // @TODO: These should be semantic HTTP codes as 500/503's indicate
   // error then these are really operating properly.
-  function getFailure(content: string): Payload {
+  async function getFailure({ id }: ReportApiJSON): Promise<Payload> {
+    const jobsQuery = jobsQueryFactory(reporting);
+    const error = await jobsQuery.getError(id);
+
     return {
       statusCode: 500,
       content: {
-        message: `Reporting generation failed: ${content}`,
+        message: `Reporting generation failed: ${error}`,
       },
       contentType: 'application/json',
       headers: {},
     };
   }
 
-  function getIncomplete(status: string) {
+  function getIncomplete({ status }: ReportApiJSON): Payload {
     return {
       statusCode: 503,
       content: status,
@@ -97,30 +103,18 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     };
   }
 
-  return async function getDocumentPayload({
-    id,
-    index,
-    output,
-    status,
-    jobtype: jobType,
-    payload: { title },
-  }: ReportApiJSON): Promise<Payload> {
-    if (output) {
-      if (status === statuses.JOB_STATUS_COMPLETED || status === statuses.JOB_STATUS_WARNINGS) {
-        const stream = await getContentStream(reporting, { id, index });
-
-        return getCompleted(output, jobType, title, stream);
+  return async function getDocumentPayload(report: ReportApiJSON): Promise<Payload> {
+    if (report.output) {
+      if ([statuses.JOB_STATUS_COMPLETED, statuses.JOB_STATUS_WARNINGS].includes(report.status)) {
+        return getCompleted(report as Required<ReportApiJSON>);
       }
 
-      if (status === statuses.JOB_STATUS_FAILED) {
-        const jobsQuery = jobsQueryFactory(reporting);
-        const error = await jobsQuery.getError(id);
-
-        return getFailure(error);
+      if (statuses.JOB_STATUS_FAILED === report.status) {
+        return getFailure(report);
       }
     }
 
     // send a 503 indicating that the report isn't completed yet
-    return getIncomplete(status);
+    return getIncomplete(report);
   };
 }
