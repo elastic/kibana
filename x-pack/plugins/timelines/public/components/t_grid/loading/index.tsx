@@ -6,8 +6,21 @@
  */
 
 import React from 'react';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { FullWidthFlexGroup } from '../styles';
 
 export const TGridLoading: React.FC = () => {
-  return <EuiLoadingContent data-test-subj="loading-alerts-panel" />;
+  return (
+    <FullWidthFlexGroup
+      $visible={true}
+      $color="subdued"
+      alignItems="center"
+      justifyContent="center"
+      data-test-subj="loading-alerts-panel"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexItem>
+    </FullWidthFlexGroup>
+  );
 };
