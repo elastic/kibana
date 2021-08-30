@@ -43,7 +43,6 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
-        '--xpack.maps.showMapVisualizationTypes=true',
 
         // to be re-enabled once kibana/issues/102552 is completed
         '--xpack.security.enabled=false',
@@ -170,6 +169,20 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['alias*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+        test_field_formatters: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['field_formats_management_functional_tests*'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

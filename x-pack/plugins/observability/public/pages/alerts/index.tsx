@@ -6,9 +6,12 @@
  */
 
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useRef } from 'react';
+import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
+import useAsync from 'react-use/lib/useAsync';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertWorkflowStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
@@ -19,8 +22,8 @@ import { RouteParams } from '../../routes';
 import { callObservabilityApi } from '../../services/call_observability_api';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
-import { WorkflowStatusFilter } from './workflow_status_filter';
 import './styles.scss';
+import { WorkflowStatusFilter } from './workflow_status_filter';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -35,7 +38,7 @@ interface AlertsPageProps {
 }
 
 export function AlertsPage({ routeParams }: AlertsPageProps) {
-  const { core, ObservabilityPageTemplate } = usePluginContext();
+  const { core, plugins, ObservabilityPageTemplate } = usePluginContext();
   const { prepend } = core.http.basePath;
   const history = useHistory();
   const refetch = useRef<() => void>();
@@ -43,7 +46,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     query: {
       rangeFrom = 'now-15m',
       rangeTo = 'now',
-      kuery = 'kibana.alert.status: "open"', // TODO change hardcoded values as part of another PR
+      kuery = `${ALERT_STATUS}: "${ALERT_STATUS_ACTIVE}"`,
       workflowStatus = 'open',
     },
   } = routeParams;
@@ -60,17 +63,40 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   // observability. For now link to the settings page.
   const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
 
-  const { data: dynamicIndexPatternResp } = useFetcher(({ signal }) => {
+  const { data: indexNames = NO_INDEX_NAMES } = useFetcher(({ signal }) => {
     return callObservabilityApi({
       signal,
       endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
+      params: {
+        query: {
+          namespace: 'default',
+          registrationContexts: [
+            'observability.apm',
+            'observability.logs',
+            'observability.metrics',
+            'observability.uptime',
+          ],
+        },
+      },
     });
   }, []);
 
-  const dynamicIndexPattern = useMemo(
-    () => (dynamicIndexPatternResp ? [dynamicIndexPatternResp] : []),
-    [dynamicIndexPatternResp]
-  );
+  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<IndexPatternBase[]> => {
+    if (indexNames.length === 0) {
+      return [];
+    }
+
+    return [
+      {
+        id: 'dynamic-observability-alerts-table-index-pattern',
+        title: indexNames.join(','),
+        fields: await plugins.data.indexPatterns.getFieldsForWildcard({
+          pattern: indexNames.join(','),
+          allowNoIndex: true,
+        }),
+      },
+    ];
+  }, [indexNames]);
 
   const setWorkflowStatusFilter = useCallback(
     (value: AlertWorkflowStatus) => {
@@ -165,7 +191,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
         </EuiFlexItem>
         <EuiFlexItem>
           <AlertsSearchBar
-            dynamicIndexPattern={dynamicIndexPattern}
+            dynamicIndexPatterns={dynamicIndexPatternsAsyncState.value ?? NO_INDEX_PATTERNS}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             query={kuery}
@@ -183,7 +209,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
 
         <EuiFlexItem>
           <AlertsTableTGrid
-            indexName={dynamicIndexPattern.length > 0 ? dynamicIndexPattern[0].title : ''}
+            indexNames={indexNames}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             kuery={kuery}
@@ -196,3 +222,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     </ObservabilityPageTemplate>
   );
 }
+
+const NO_INDEX_NAMES: string[] = [];
+const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
