@@ -325,7 +325,8 @@ export class SettingsPageObject extends FtrService {
 
   async hasIndexPattern(name: string) {
     this.log.debug(
-      `---- checking if ${name} already exists in ${await this.getAllIndexPatternNames()}`);
+      `---- checking if ${name} already exists in ${await this.getAllIndexPatternNames()}`
+    );
     return (await this.getAllIndexPatternNames()).includes(name);
   }
 
