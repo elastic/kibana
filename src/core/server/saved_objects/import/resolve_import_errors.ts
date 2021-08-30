@@ -225,7 +225,7 @@ export async function resolveSavedObjectsImportErrors({
   const errorResults = errorAccumulator.map((error) => {
     const icon = typeRegistry.getType(error.type)?.management?.icon;
     const attemptedOverwrite = retries.some(
-      ({ type, id, overwrite }) => type === error.type && id === error.id && overwrite
+      ({ overwrite, ...retry }) => getObjKey(retry) === getObjKey(error) && overwrite
     );
     return {
       ...error,

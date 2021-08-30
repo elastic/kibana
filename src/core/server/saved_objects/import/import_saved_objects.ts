@@ -173,7 +173,7 @@ export async function importSavedObjectsFromStream({
   });
   const errorResults = errorAccumulator.map((error) => {
     const icon = typeRegistry.getType(error.type)?.management?.icon;
-    const attemptedOverwrite = pendingOverwrites.has(`${error.type}:${error.id}`);
+    const attemptedOverwrite = pendingOverwrites.has(getObjKey(error));
     return {
       ...error,
       meta: { ...error.meta, icon },
