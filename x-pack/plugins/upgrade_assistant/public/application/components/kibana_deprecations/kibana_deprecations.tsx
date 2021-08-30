@@ -253,7 +253,7 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
 
   if (kibanaDeprecations?.length) {
     return (
-      <div data-test-subj="kibanaDeprecationsContent">
+      <div data-test-subj="kibanaDeprecations">
         <EuiPageHeader
           bottomBorder
           pageTitle={i18nTexts.pageTitle}

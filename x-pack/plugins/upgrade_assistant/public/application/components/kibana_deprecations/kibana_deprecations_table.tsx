@@ -225,8 +225,8 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       <EuiButton
         iconType="refresh"
         onClick={reload}
-        data-test-subj="reloadButton"
-        key="reloadButton"
+        data-test-subj="refreshButton"
+        key="refreshButton"
       >
         {i18nTexts.refreshButtonLabel}
       </EuiButton>,
