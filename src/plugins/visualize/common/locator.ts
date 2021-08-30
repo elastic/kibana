@@ -98,7 +98,7 @@ export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLo
 
     path = `${path}?_g=${rison.encode(globalUrlState)}&_a=${rison.encode(appUrlState)}`;
 
-    path = params.type ? `${path}?type=${params.type}` : path;
+    path = params.type ? `${path}&type=${params.type}` : path;
 
     return {
       app: VisualizeConstants.APP_ID,

@@ -29,7 +29,7 @@ describe('visualize locator', () => {
     const location = await definition.getLocation({ visId: 'test', type: 'test' });
 
     expect(location.app).toMatchInlineSnapshot(`"visualize"`);
-    expect(location.path).toMatchInlineSnapshot(`"#/edit/test?type=test&_g=()&_a=()"`);
+    expect(location.path).toMatchInlineSnapshot(`"#/edit/test?_g=()&_a=()&type=test"`);
     expect(location.state).toMatchInlineSnapshot(`Object {}`);
   });
 
@@ -69,7 +69,7 @@ describe('visualize locator', () => {
     expect(location.path.match(/refreshInterval:/g)?.length).toBe(1);
     expect(location.path.match(/time:/g)?.length).toBe(1);
     expect(location.path).toMatchInlineSnapshot(
-      `"#/edit/123?type=test&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))"`
+      `"#/edit/123?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&type=test"`
     );
 
     expect(location.state).toMatchInlineSnapshot(`Object {}`);
@@ -99,7 +99,7 @@ describe('visualize locator', () => {
 
     expect(location.app).toMatchInlineSnapshot(`"visualize"`);
     expect(location.path).toMatchInlineSnapshot(
-      `"#/edit/123?type=test&_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),linked:!t,query:(language:kuery,query:bye),uiState:(fakeUIState:fakeUIState),vis:(fakeVis:fakeVis))"`
+      `"#/edit/123?_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),linked:!t,query:(language:kuery,query:bye),uiState:(fakeUIState:fakeUIState),vis:(fakeVis:fakeVis))&type=test"`
     );
     expect(location.state).toMatchInlineSnapshot(`Object {}`);
   });
