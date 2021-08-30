@@ -82,10 +82,12 @@ describe('#importSavedObjectsFromStream', () => {
         management: { icon: `${type}-icon` },
       } as any),
     importHooks = {},
+    importNamespaces = false,
   }: {
     createNewCopies?: boolean;
     getTypeImpl?: (name: string) => any;
     importHooks?: Record<string, SavedObjectsImportHook[]>;
+    importNamespaces?: boolean;
   } = {}): ImportSavedObjectsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -100,6 +102,7 @@ describe('#importSavedObjectsFromStream', () => {
       namespace,
       createNewCopies,
       importHooks,
+      importNamespaces,
     };
   };
   const createObject = ({

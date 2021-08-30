@@ -49,6 +49,13 @@ export interface ResolveSavedObjectsImportErrorsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  /**
+   * TODO: doc
+   * Defaults to false.
+   *
+   * Remarks: the stream of document will be validated accordingly
+   */
+  importNamespaces?: boolean;
 }
 
 /**
@@ -65,6 +72,7 @@ export async function resolveSavedObjectsImportErrors({
   typeRegistry,
   importHooks,
   namespace,
+  importNamespaces = false,
   createNewCopies,
 }: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
@@ -179,6 +187,7 @@ export async function resolveSavedObjectsImportErrors({
       importIdMap,
       namespace,
       overwrite,
+      importNamespaces,
     });
     successObjects = [...successObjects, ...createdObjects];
     errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
