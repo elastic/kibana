@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { DomainDeprecationDetails } from 'kibana/public';
 import { SectionLoading, GlobalFlyout } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
-import { NoDeprecationsPrompt } from '../shared';
+import { NoDeprecationsPrompt, DeprecationCount } from '../shared';
 import { KibanaDeprecationErrors } from './kibana_deprecation_errors';
 import { KibanaDeprecationsTable } from './kibana_deprecations_table';
 import {
@@ -80,6 +80,24 @@ export interface KibanaDeprecationDetails extends DomainDeprecationDetails {
   id: string;
 }
 
+const getDeprecationCountByLevel = (deprecations: KibanaDeprecationDetails[]) => {
+  const criticalDeprecations: KibanaDeprecationDetails[] = [];
+  const warningDeprecations: KibanaDeprecationDetails[] = [];
+
+  deprecations.forEach((deprecation) => {
+    if (deprecation.level === 'critical') {
+      criticalDeprecations.push(deprecation);
+      return;
+    }
+    warningDeprecations.push(deprecation);
+  });
+
+  return {
+    criticalDeprecations: criticalDeprecations.length,
+    warningDeprecations: warningDeprecations.length,
+  };
+};
+
 export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) => {
   const [kibanaDeprecations, setKibanaDeprecations] = useState<
     KibanaDeprecationDetails[] | undefined
@@ -132,6 +150,11 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
 
     setIsLoading(false);
   }, [deprecations]);
+
+  const deprecationsCountByLevel: {
+    warningDeprecations: number;
+    criticalDeprecations: number;
+  } = useMemo(() => getDeprecationCountByLevel(kibanaDeprecations || []), [kibanaDeprecations]);
 
   const toggleFlyout = (newFlyoutContent?: KibanaDeprecationDetails) => {
     setFlyoutContent(newFlyoutContent);
@@ -235,7 +258,12 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
           bottomBorder
           pageTitle={i18nTexts.pageTitle}
           description={i18nTexts.pageDescription}
-        />
+        >
+          <DeprecationCount
+            totalCriticalDeprecations={deprecationsCountByLevel.criticalDeprecations}
+            totalWarningDeprecations={deprecationsCountByLevel.warningDeprecations}
+          />
+        </EuiPageHeader>
 
         <EuiSpacer size="l" />
 

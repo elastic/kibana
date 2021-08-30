@@ -6,3 +6,4 @@
  */
 
 export { NoDeprecationsPrompt } from './no_deprecations';
+export { DeprecationCount } from './deprecation_count';

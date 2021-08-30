@@ -27,3 +27,8 @@ export const DEPRECATION_TYPE_MAP = {
     defaultMessage: 'Machine Learning',
   }),
 };
+
+export const PAGINATION_CONFIG = {
+  initialPageSize: 50,
+  pageSizeOptions: [50, 100, 200],
+};

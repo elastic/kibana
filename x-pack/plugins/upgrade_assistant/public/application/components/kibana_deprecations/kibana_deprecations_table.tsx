@@ -15,6 +15,7 @@ import {
   Search,
 } from '@elastic/eui';
 
+import { PAGINATION_CONFIG } from '../constants';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
 import { ResolutionTableCell } from './resolution_table_cell';
 
@@ -179,11 +180,6 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
     },
   ];
 
-  const pagination = {
-    initialPageSize: 50,
-    pageSizeOptions: [50, 100, 200],
-  };
-
   const sorting = {
     sort: {
       field: 'level',
@@ -240,7 +236,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       columns={columns}
       search={searchConfig}
       sorting={sorting}
-      pagination={pagination}
+      pagination={PAGINATION_CONFIG}
       rowProps={() => ({
         'data-test-subj': 'row',
       })}
