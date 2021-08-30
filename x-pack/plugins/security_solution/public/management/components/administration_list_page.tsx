@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { useTestIdGenerator } from './hooks/use_test_id_generator';
 
 interface AdministrationListPageProps {
   title: React.ReactNode;
@@ -55,15 +56,17 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
       return <span data-test-subj="header-panel-subtitle">{subtitle}</span>;
     }, [subtitle]);
 
+    const getTestId = useTestIdGenerator(otherProps['data-test-subj']);
+
     return (
-      <>
+      <div {...otherProps}>
         <EuiPageHeader
           pageTitle={header}
           description={description}
           bottomBorder={true}
           rightSideItems={[actions]}
           restrictWidth={restrictWidth}
-          {...otherProps}
+          data-test-subj={getTestId('header')}
         />
         <EuiPageContent
           hasBorder={false}
@@ -76,7 +79,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
         </EuiPageContent>
 
         <SpyRoute pageName={SecurityPageName.administration} />
-      </>
+      </div>
     );
   }
 );
