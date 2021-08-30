@@ -132,7 +132,7 @@ describe('Policy Details', () => {
       expect(backToListLink.prop('href')).toBe(`/app/security${endpointListPath}`);
       expect(backToListLink.text()).toBe('Back to endpoint hosts');
 
-      const pageTitle = policyView.find('h1[data-test-subj="header-page-title"]');
+      const pageTitle = policyView.find('span[data-test-subj="header-page-title"]');
       expect(pageTitle).toHaveLength(1);
       expect(pageTitle.text()).toEqual(policyPackagePolicy.name);
     });
