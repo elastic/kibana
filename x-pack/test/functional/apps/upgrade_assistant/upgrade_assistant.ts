@@ -80,6 +80,8 @@ export default function upgradeAssistantFunctionalTests({
         log.debug('[Cleanup error] Error deleting indices');
         throw e;
       }
+
+      await security.testUser.restoreDefaults();
     });
 
     it('renders the Overview page', async () => {
