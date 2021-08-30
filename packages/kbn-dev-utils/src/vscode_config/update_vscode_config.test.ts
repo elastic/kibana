@@ -6,28 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
 import dedent from 'dedent';
 
 import { updateVscodeConfig } from './update_vscode_config';
-import { createReplaceSerializer } from '../serializers';
 import { ManagedConfigKey } from './managed_config_keys';
 
 // avoid excessive escaping in snapshots
 expect.addSnapshotSerializer({ test: (v) => typeof v === 'string', print: (v) => `${v}` });
-expect.addSnapshotSerializer(createReplaceSerializer(REPO_ROOT, '<repo>'));
 
 const TEST_KEYS: ManagedConfigKey[] = [
   {
-    key: 'foo',
-    value: 100,
-  },
-  {
-    key: 'bar',
-    value: 'bar value',
-  },
-  {
-    key: 'complex',
+    key: 'key',
     value: {
       hello: true,
       world: [1, 2, 3],
@@ -35,26 +24,16 @@ const TEST_KEYS: ManagedConfigKey[] = [
   },
 ];
 
-const run = (json?: string) => updateVscodeConfig(TEST_KEYS, json);
+const run = (json?: string) => updateVscodeConfig(TEST_KEYS, '', json);
 
 it('updates the passed JSON with the managed settings', () => {
   expect(run(`{}`)).toMatchInlineSnapshot(`
-    /**
-     * @managed
-     *
-     * The following keys in this file are managed by @kbn/dev-utils:
-     *   - foo
-     *   - bar
-     *   - complex
-     *
-     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
-     * a specific setting place this comment directly before that key.
-     */
+    // @managed
     {
-      "foo": 100,
-      "bar": "bar value",
-      "complex": {
+      "key": {
+        // @managed
         "hello": true,
+        // @managed
         "world": [1, 2, 3]
       }
     }
@@ -64,22 +43,12 @@ it('updates the passed JSON with the managed settings', () => {
 
 it('initialized empty or undefined json values', () => {
   expect(run('')).toMatchInlineSnapshot(`
-    /**
-     * @managed
-     *
-     * The following keys in this file are managed by @kbn/dev-utils:
-     *   - foo
-     *   - bar
-     *   - complex
-     *
-     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
-     * a specific setting place this comment directly before that key.
-     */
+    // @managed
     {
-      "foo": 100,
-      "bar": "bar value",
-      "complex": {
+      "key": {
+        // @managed
         "hello": true,
+        // @managed
         "world": [1, 2, 3]
       }
     }
@@ -87,22 +56,12 @@ it('initialized empty or undefined json values', () => {
   `);
 
   expect(run()).toMatchInlineSnapshot(`
-    /**
-     * @managed
-     *
-     * The following keys in this file are managed by @kbn/dev-utils:
-     *   - foo
-     *   - bar
-     *   - complex
-     *
-     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
-     * a specific setting place this comment directly before that key.
-     */
+    // @managed
     {
-      "foo": 100,
-      "bar": "bar value",
-      "complex": {
+      "key": {
+        // @managed
         "hello": true,
+        // @managed
         "world": [1, 2, 3]
       }
     }
@@ -134,17 +93,7 @@ it('persists comments in the original file', () => {
     }
   `);
   expect(newJson).toMatchInlineSnapshot(`
-    /**
-     * @managed
-     *
-     * The following keys in this file are managed by @kbn/dev-utils:
-     *   - foo
-     *   - bar
-     *   - complex
-     *
-     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
-     * a specific setting place this comment directly before that key.
-     */
+    // @managed
 
     /**
      * This is a top level comment
@@ -153,10 +102,10 @@ it('persists comments in the original file', () => {
       "a": "bar",
       // this is just test data
       "b": "box",
-      "foo": 100,
-      "bar": "bar value",
-      "complex": {
+      "key": {
+        // @managed
         "hello": true,
+        // @managed
         "world": [1, 2, 3]
       }
     }
@@ -174,22 +123,15 @@ it('overrides old values for managed keys', () => {
   `);
 
   expect(newJson).toMatchInlineSnapshot(`
-    /**
-     * @managed
-     *
-     * The following keys in this file are managed by @kbn/dev-utils:
-     *   - foo
-     *   - bar
-     *   - complex
-     *
-     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
-     * a specific setting place this comment directly before that key.
-     */
+    // @managed
     {
-      "foo": 100,
-      "bar": "bar value",
-      "complex": {
+      "foo": 0,
+      "bar": "some other config",
+      "complex": "some other config",
+      "key": {
+        // @managed
         "hello": true,
+        // @managed
         "world": [1, 2, 3]
       }
     }
@@ -199,46 +141,157 @@ it('overrides old values for managed keys', () => {
 
 it('does not modify files starting with // SELF MANAGED', () => {
   const newJson = run(dedent`
-    // SELF MANAGED
+    // self managed
     {
       "invalid": "I know what I am doing",
     }
   `);
 
   expect(newJson).toMatchInlineSnapshot(`
-    // SELF MANAGED
+    // self managed
     {
       "invalid": "I know what I am doing",
     }
   `);
 });
 
-it('does not modify keys with leading `// SELF MANAGED` comment', () => {
+it('does not modify properties with leading `// self managed` comment', () => {
   const newJson = run(dedent`
     {
-      "foo": 0,
       // self managed
-      "bar": "custom value"
+      "key": {
+        "world": [5]
+      }
     }
   `);
+
+  expect(newJson).toMatchInlineSnapshot(`
+    // @managed
+    {
+      // self managed
+      "key": {
+        "world": [5]
+      }
+    }
+
+  `);
+});
+
+it('does not modify child properties with leading `// self managed` comment', () => {
+  const newJson = run(dedent`
+    {
+      "key": {
+        // self managed
+        "world": [5]
+      }
+    }
+  `);
+
+  expect(newJson).toMatchInlineSnapshot(`
+    // @managed
+    {
+      "key": {
+        // self managed
+        "world": [5],
+        // @managed
+        "hello": true
+      }
+    }
+
+  `);
+});
+
+it('does not modify unknown child properties', () => {
+  const newJson = run(dedent`
+    {
+      "key": {
+        "foo": "bar",
+        // self managed
+        "world": [5],
+      }
+    }
+  `);
+
+  expect(newJson).toMatchInlineSnapshot(`
+    // @managed
+    {
+      "key": {
+        "foo": "bar",
+        // self managed
+        "world": [5],
+        // @managed
+        "hello": true
+      }
+    }
+
+  `);
+});
+
+it('removes managed properties which are no longer managed', () => {
+  const newJson = run(dedent`
+    {
+      "key": {
+        // @managed
+        "foo": "bar",
+        // self managed
+        "world": [5],
+      }
+    }
+  `);
+
+  expect(newJson).toMatchInlineSnapshot(`
+    // @managed
+    {
+      "key": {
+        // self managed
+        "world": [5],
+        // @managed
+        "hello": true
+      }
+    }
+
+  `);
+});
+
+it('wipes out child keys which conflict with newly managed child keys', () => {
+  const newJson = run(dedent`
+    {
+      "key": {
+        // some user specified comment
+        "world": [5],
+      }
+    }
+  `);
+
+  expect(newJson).toMatchInlineSnapshot(`
+    // @managed
+    {
+      "key": {
+        // @managed
+        "hello": true,
+        // @managed
+        "world": [1, 2, 3]
+      }
+    }
+
+  `);
+});
+
+it('correctly formats info text when specified', () => {
+  const newJson = updateVscodeConfig(TEST_KEYS, 'info users\nshould know', `{}`);
 
   expect(newJson).toMatchInlineSnapshot(`
     /**
      * @managed
      *
-     * The following keys in this file are managed by @kbn/dev-utils:
-     *   - foo
-     *   - complex
-     *
-     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
-     * a specific setting place this comment directly before that key.
+     * info users
+     * should know
      */
     {
-      "foo": 100,
-      // self managed
-      "bar": "custom value",
-      "complex": {
+      "key": {
+        // @managed
         "hello": true,
+        // @managed
         "world": [1, 2, 3]
       }
     }

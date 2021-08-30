@@ -13,20 +13,42 @@ import Prettier from 'prettier';
 
 import { ManagedConfigKey } from './managed_config_keys';
 
+type ManagedPropAst = t.ObjectProperty & {
+  key: t.StringLiteral;
+  value: t.ObjectExpression;
+};
+
+type ManagedPropProp = t.ObjectProperty & {
+  key: t.StringLiteral;
+};
+
 const isSelfManaged = (node?: t.Node) =>
-  node?.leadingComments?.find(
+  !!node?.leadingComments?.some(
     (c) => c.type === 'CommentLine' && c.value.trim().toLocaleLowerCase() === 'self managed'
   );
 
+const remove = <T>(arr: T[], value: T) => {
+  const index = arr.indexOf(value);
+  if (index > -1) {
+    arr.splice(index, 1);
+  }
+};
+
+const createManagedChildProp = (key: string, value: any) => {
+  const childProp = t.objectProperty(t.stringLiteral(key), parseExpression(JSON.stringify(value)));
+  t.addComment(childProp, 'leading', ' @managed', true);
+  return childProp;
+};
+
 /**
  * Update the settings.json file used by VSCode in the Kibana repository. If the file starts
- * with the comment "// SELF MANAGED" then it is not touched. Otherwise managed settings are
+ * with the comment "// self managed" then it is not touched. Otherwise managed settings are
  * overwritten in the file. We don't just use `JSON.parse()` and `JSON.stringify()` in order
  * to maintain comments. After the config file is updated it is formatted with prettier.
  *
  * @param json The settings file as a string
  */
-export function updateVscodeConfig(keys: ManagedConfigKey[], json?: string) {
+export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, json?: string) {
   json = json || '{}';
   const ast = parseExpression(json);
 
@@ -38,41 +60,99 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], json?: string) {
     return json;
   }
 
-  const managedKeys: string[] = [];
   for (const { key, value } of keys) {
-    const valueAst = parseExpression(JSON.stringify(value));
-    const existing = ast.properties.find(
-      (p): p is t.ObjectProperty =>
-        p.type === 'ObjectProperty' && p.key.type === 'StringLiteral' && p.key.value === key
+    const existingProp = ast.properties.find(
+      (p): p is ManagedPropAst =>
+        p.type === 'ObjectProperty' &&
+        p.key.type === 'StringLiteral' &&
+        p.key.value === key &&
+        p.value.type === 'ObjectExpression'
     );
 
-    if (isSelfManaged(existing)) {
+    if (isSelfManaged(existingProp)) {
       continue;
     }
 
-    managedKeys.push(key);
-    if (existing) {
-      existing.value = valueAst;
-    } else {
-      ast.properties.push(t.objectProperty(t.stringLiteral(key), valueAst));
+    // setting isn't in config file so create it and attach `@managed` comments to each property
+    if (!existingProp) {
+      ast.properties.push(
+        t.objectProperty(
+          t.stringLiteral(key),
+          t.objectExpression(Object.entries(value).map(([k, v]) => createManagedChildProp(k, v)))
+        )
+      );
+      continue;
+    }
+
+    // discover all the managed child props so that we can keep track of which props we need to delete
+    // because they are no longer managed
+    const existingManagedChildProps = new Map(
+      existingProp.value.properties
+        .filter(
+          (n): n is ManagedPropProp =>
+            n.type === 'ObjectProperty' &&
+            n.key.type === 'StringLiteral' &&
+            !!n.leadingComments?.some((c) => c.value.trim() === '@managed')
+        )
+        .map((n) => {
+          return [n.key.value, n];
+        })
+    );
+
+    // iterate through all the keys in the managed `value` and either add them to the
+    // prop, update their value, or ignore them because they are "// self managed"
+    for (const [k, v] of Object.entries(value)) {
+      const managedChildProp = existingManagedChildProps.get(k);
+
+      if (managedChildProp) {
+        // the prop already exists and is still managed, so update it's value
+        managedChildProp.value = parseExpression(JSON.stringify(v));
+        // delete it from the existing map so that we don't delete it later
+        existingManagedChildProps.delete(k);
+        continue;
+      }
+
+      // find existing child props with the same key so we can detect if it's self managed
+      const unmanagedChildProp = existingProp.value.properties.find(
+        (p) => p.type === 'ObjectProperty' && p.key.type === 'StringLiteral' && p.key.value === k
+      );
+
+      if (unmanagedChildProp && isSelfManaged(unmanagedChildProp)) {
+        // ignore this key in `value` because it already exists and is "// self managed"
+        continue;
+      }
+
+      // take over the unmanaged child prop by deleting the previous prop and replacing it
+      // with a brand new one
+      if (unmanagedChildProp) {
+        remove(existingProp.value.properties, unmanagedChildProp);
+      }
+
+      // add the new managed prop
+      existingProp.value.properties.push(createManagedChildProp(k, v));
+    }
+
+    // iterate through the remaining managed props which weren't updated and delete them, they
+    // were managed but are no longer managed
+    for (const oldPropProp of existingManagedChildProps.values()) {
+      remove(existingProp.value.properties, oldPropProp);
     }
   }
 
-  const commentText = `*
+  ast.leadingComments = [
+    (infoText
+      ? {
+          type: 'CommentBlock',
+          value: `*
  * @managed
  *
- * The following keys in this file are managed by @kbn/dev-utils:
- *   - ${managedKeys.join('\n *   - ')}
- *
- * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
- * a specific setting place this comment directly before that key.
-`;
-
-  ast.leadingComments = [
-    {
-      type: 'CommentBlock',
-      value: commentText,
-    } as t.CommentBlock,
+ * ${infoText.split(/\r?\n/).join('\n * ')}
+`,
+        }
+      : {
+          type: 'CommentLine',
+          value: ' @managed',
+        }) as t.CommentBlock,
     ...(ast.leadingComments ?? [])?.filter((c) => !c.value.includes('@managed')),
   ];
 

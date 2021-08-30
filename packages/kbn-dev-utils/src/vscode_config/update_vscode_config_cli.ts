@@ -10,6 +10,7 @@ import Path from 'path';
 import Fs from 'fs/promises';
 
 import { REPO_ROOT } from '@kbn/utils';
+import dedent from 'dedent';
 
 import { run } from '../run';
 
@@ -29,7 +30,16 @@ export function runUpdateVscodeConfigCli() {
       }
     }
 
-    const updatedJson = updateVscodeConfig(MANAGED_CONFIG_KEYS, json);
+    const updatedJson = updateVscodeConfig(
+      MANAGED_CONFIG_KEYS,
+      dedent`
+        Some settings in this file are managed by @kbn/dev-utils. When a setting is managed it is preceeded
+        with a comment "// @managed" comment. Replace that with "// self managed" and the scripts will not
+        touch that value. Put a "// self managed" comment at the top of the file, or above a group of settings
+        to disable management of that entire section.
+      `,
+      json
+    );
     await Fs.mkdir(Path.dirname(path), { recursive: true });
     await Fs.writeFile(path, updatedJson);
 

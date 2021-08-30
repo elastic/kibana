@@ -6,33 +6,35 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-
-import { REPO_ROOT } from '@kbn/utils';
-
 export interface ManagedConfigKey {
   key: string;
-  value: any;
+  value: Record<string, any>;
 }
 
 /**
- * Defines the keys which we overrite in user's vscode config for the workspace
+ * Defines the keys which we overrite in user's vscode config for the workspace. We currently
+ * only support object values because that's all we needed to support, but support for non object
+ * values should be easy to add.
  */
 export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
   {
     key: 'files.watcherExclude',
     value: {
-      [Path.resolve(REPO_ROOT, '.eslintcache')]: true,
-      [Path.resolve(REPO_ROOT, 'build')]: true,
-      [Path.resolve(REPO_ROOT, '.es')]: true,
-      [Path.resolve(REPO_ROOT, '.yarn-local-mirror')]: true,
-      [Path.resolve(REPO_ROOT, '.chromium')]: true,
-      [Path.resolve(REPO_ROOT, 'data')]: true,
-      [Path.resolve(REPO_ROOT, 'kbn-pm/dist/index.js')]: true,
+      ['**/.eslintcache']: true,
+      ['**/.es']: true,
+      ['**/.yarn-local-mirror']: true,
+      ['**/.chromium']: true,
+      ['**/packages/kbn-pm/dist/index.js']: true,
       ['**/bazel-*']: true,
       ['**/node_modules']: true,
       ['**/target']: true,
       ['**/*.log']: true,
+    },
+  },
+  {
+    key: 'search.exclude',
+    value: {
+      ['**/packages/kbn-pm/dist/index.js']: true,
     },
   },
 ];
