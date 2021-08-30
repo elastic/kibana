@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { SPACES } from '../../common/lib/spaces';
+import { SPACES, ALL_SPACES_ID } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   bulkGetTestSuiteFactory,
   TEST_CASES as CASES,
+  BulkGetTestCase,
   BulkGetTestDefinition,
 } from '../../common/suites/bulk_get';
 
@@ -44,9 +45,26 @@ const createTestCases = (spaceId: string) => {
     CASES.NAMESPACE_AGNOSTIC,
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
   ];
+  const crossNamespace = [
+    {
+      ...CASES.SINGLE_NAMESPACE_SPACE_2,
+      namespaces: ['x', 'y'],
+      ...fail400(), // cannot be searched for in multiple spaces
+    },
+    { ...CASES.SINGLE_NAMESPACE_SPACE_2, namespaces: [SPACE_2_ID] }, // second try searches for it in a single other space, which is valid
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1,
+      namespaces: [ALL_SPACES_ID],
+      ...fail400(), // cannot be searched for in multiple spaces
+    },
+    { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, namespaces: [SPACE_1_ID] }, // second try searches for it in a single other space, which is valid
+    { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, namespaces: [SPACE_2_ID], ...fail404() },
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, namespaces: [SPACE_2_ID, 'x'] }, // unknown space is allowed / ignored
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, namespaces: [ALL_SPACES_ID] }, // this is different than the same test case in the spaces_only and security_only suites, since MULTI_NAMESPACE_ONLY_SPACE_1 *may* return a 404 error to a partially authorized user
+  ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
-  const allTypes = normalTypes.concat(hiddenType);
-  return { normalTypes, hiddenType, allTypes };
+  const allTypes = [...normalTypes, ...crossNamespace, ...hiddenType];
+  return { normalTypes, crossNamespace, hiddenType, allTypes };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -58,13 +76,39 @@ export default function ({ getService }: FtrProviderContext) {
     supertest
   );
   const createTests = (spaceId: string) => {
-    const { normalTypes, hiddenType, allTypes } = createTestCases(spaceId);
+    const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(spaceId);
     // use singleRequest to reduce execution time and/or test combined cases
+    const authorizedCommon = [
+      createTestDefinitions(normalTypes, false, { singleRequest: true }),
+      createTestDefinitions(hiddenType, true),
+    ].flat();
+    const crossNamespaceAuthorizedAtSpace = crossNamespace.reduce<{
+      authorized: BulkGetTestCase[];
+      unauthorized: BulkGetTestCase[];
+    }>(
+      ({ authorized, unauthorized }, cur) => {
+        // A user who is only authorized in a single space will be authorized to execute some of the cross-namespace test cases, but not all
+        if (cur.namespaces.some((x) => ![ALL_SPACES_ID, spaceId].includes(x))) {
+          return { authorized, unauthorized: [...unauthorized, cur] };
+        }
+        return { authorized: [...authorized, cur], unauthorized };
+      },
+      { authorized: [], unauthorized: [] }
+    );
+
     return {
       unauthorized: createTestDefinitions(allTypes, true),
-      authorized: [
-        createTestDefinitions(normalTypes, false, { singleRequest: true }),
-        createTestDefinitions(hiddenType, true),
+      authorizedAtSpace: [
+        authorizedCommon,
+        createTestDefinitions(crossNamespaceAuthorizedAtSpace.authorized, false, {
+          singleRequest: true,
+        }),
+        createTestDefinitions(crossNamespaceAuthorizedAtSpace.unauthorized, true),
+        createTestDefinitions(allTypes, true, { singleRequest: true }),
+      ].flat(),
+      authorizedEverywhere: [
+        authorizedCommon,
+        createTestDefinitions(crossNamespace, false, { singleRequest: true }),
         createTestDefinitions(allTypes, true, {
           singleRequest: true,
           responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
@@ -77,7 +121,9 @@ export default function ({ getService }: FtrProviderContext) {
   describe('_bulk_get', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
-      const { unauthorized, authorized, superuser } = createTests(spaceId);
+      const { unauthorized, authorizedAtSpace, authorizedEverywhere, superuser } = createTests(
+        spaceId
+      );
       const _addTests = (user: TestUser, tests: BulkGetTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
@@ -85,16 +131,15 @@ export default function ({ getService }: FtrProviderContext) {
       [users.noAccess, users.legacyAll, users.allAtOtherSpace].forEach((user) => {
         _addTests(user, unauthorized);
       });
-      [
-        users.dualAll,
-        users.dualRead,
-        users.allGlobally,
-        users.readGlobally,
-        users.allAtSpace,
-        users.readAtSpace,
-      ].forEach((user) => {
-        _addTests(user, authorized);
+
+      [users.allAtSpace, users.readAtSpace].forEach((user) => {
+        _addTests(user, authorizedAtSpace);
       });
+
+      [users.dualAll, users.dualRead, users.allGlobally, users.readGlobally].forEach((user) => {
+        _addTests(user, authorizedEverywhere);
+      });
+
       _addTests(users.superuser, superuser);
     });
   });
