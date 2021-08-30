@@ -92,7 +92,6 @@ export enum SOURCE_TYPES {
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
-  REGIONMAP_FILE = 'REGIONMAP_FILE',
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
   TABLE_SOURCE = 'TABLE_SOURCE',
