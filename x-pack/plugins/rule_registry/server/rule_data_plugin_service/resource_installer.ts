@@ -132,7 +132,6 @@ export class ResourceInstaller {
                 settings: ct.settings ?? {},
                 mappings: ct.mappings,
               },
-              version: ct.version,
               _meta: ct._meta,
             },
           });
@@ -146,29 +145,22 @@ export class ResourceInstaller {
   }
 
   private async updateIndexMappings(indexInfo: IndexInfo) {
-    const { logger, getClusterClient } = this.options;
-    const clusterClient = await getClusterClient();
+    const { logger } = this.options;
+
+    const aliases = indexInfo.basePattern;
+    const backingIndices = indexInfo.getPatternForBackingIndices();
 
     logger.debug(`Updating mappings of existing concrete indices for ${indexInfo.baseName}`);
 
-    const { body: aliasesResponse } = await clusterClient.indices.getAlias({
-      index: indexInfo.basePattern,
-    });
+    // Find all concrete indices for all namespaces of the index.
+    const concreteIndices = await this.fetchConcreteIndices(aliases, backingIndices);
+    const concreteWriteIndices = concreteIndices.filter((item) => item.isWriteIndex);
 
-    const writeIndicesAndAliases = Object.entries(aliasesResponse).flatMap(([index, { aliases }]) =>
-      Object.entries(aliases)
-        .filter(([, aliasProperties]) => aliasProperties.is_write_index)
-        .map(([aliasName]) => ({ index, alias: aliasName }))
-    );
-
-    await Promise.all(
-      writeIndicesAndAliases.map((indexAndAlias) =>
-        this.updateAliasWriteIndexMapping(indexAndAlias)
-      )
-    );
+    // Update mappings of the found write indices.
+    await Promise.all(concreteWriteIndices.map((item) => this.updateAliasWriteIndexMapping(item)));
   }
 
-  private async updateAliasWriteIndexMapping({ index, alias }: { index: string; alias: string }) {
+  private async updateAliasWriteIndexMapping({ index, alias }: ConcreteIndexInfo) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
 
@@ -228,57 +220,159 @@ export class ResourceInstaller {
     indexInfo: IndexInfo,
     namespace: string
   ): Promise<void> {
-    await this.createWriteTargetIfNeeded(indexInfo, namespace);
+    const { logger } = this.options;
+
+    const alias = indexInfo.getPrimaryAlias(namespace);
+
+    logger.info(`Installing namespace-level resources and creating concrete index for ${alias}`);
+
+    // If we find a concrete backing index which is the write index for the alias here, we shouldn't
+    // be making a new concrete index. We return early because we don't need a new write target.
+    const indexExists = await this.checkIfConcreteWriteIndexExists(indexInfo, namespace);
+    if (indexExists) {
+      return;
+    }
+
+    await this.installNamespacedIndexTemplate(indexInfo, namespace);
+    await this.createConcreteWriteIndex(indexInfo, namespace);
   }
 
-  private async createWriteTargetIfNeeded(indexInfo: IndexInfo, namespace: string) {
+  private async checkIfConcreteWriteIndexExists(
+    indexInfo: IndexInfo,
+    namespace: string
+  ): Promise<boolean> {
+    const { logger } = this.options;
+
+    const primaryNamespacedAlias = indexInfo.getPrimaryAlias(namespace);
+    const indexPatternForBackingIndices = indexInfo.getPatternForBackingIndices(namespace);
+
+    logger.debug(`Checking if concrete write index exists for ${primaryNamespacedAlias}`);
+
+    const concreteIndices = await this.fetchConcreteIndices(
+      primaryNamespacedAlias,
+      indexPatternForBackingIndices
+    );
+    const concreteIndicesExist = concreteIndices.some(
+      (item) => item.alias === primaryNamespacedAlias
+    );
+    const concreteWriteIndicesExist = concreteIndices.some(
+      (item) => item.alias === primaryNamespacedAlias && item.isWriteIndex
+    );
+
+    // If we find backing indices for the alias here, we shouldn't be making a new concrete index -
+    // either one of the indices is the write index so we return early because we don't need a new write target,
+    // or none of them are the write index so we'll throw an error because one of the existing indices should have
+    // been the write target
+
+    // If there are some concrete indices but none of them are the write index, we'll throw an error
+    // because one of the existing indices should have been the write target.
+    if (concreteIndicesExist && !concreteWriteIndicesExist) {
+      throw new Error(
+        `Indices matching pattern ${indexPatternForBackingIndices} exist but none are set as the write index for alias ${primaryNamespacedAlias}`
+      );
+    }
+
+    return concreteWriteIndicesExist;
+  }
+
+  private async installNamespacedIndexTemplate(indexInfo: IndexInfo, namespace: string) {
+    const { logger, getResourceName } = this.options;
+    const {
+      componentTemplateRefs,
+      componentTemplates,
+      indexTemplate = {},
+      ilmPolicy,
+    } = indexInfo.indexOptions;
+
+    const primaryNamespacedAlias = indexInfo.getPrimaryAlias(namespace);
+    const secondaryNamespacedAlias = indexInfo.getSecondaryAlias(namespace);
+    const indexPatternForBackingIndices = indexInfo.getPatternForBackingIndices(namespace);
+
+    logger.debug(`Installing index template for ${primaryNamespacedAlias}`);
+
+    const technicalComponentNames = [getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME)];
+    const referencedComponentNames = componentTemplateRefs.map((ref) => getResourceName(ref));
+    const ownComponentNames = componentTemplates.map((template) =>
+      indexInfo.getComponentTemplateName(template.name)
+    );
+    const ilmPolicyName = ilmPolicy
+      ? indexInfo.getIlmPolicyName()
+      : getResourceName(DEFAULT_ILM_POLICY_ID);
+
+    const indexMetadata: estypes.Metadata = {
+      ...indexTemplate._meta,
+      kibana: {
+        ...indexTemplate._meta?.kibana,
+        version: indexInfo.kibanaVersion,
+      },
+      namespace,
+    };
+
+    // TODO: need a way to update this template if/when we decide to make changes to the
+    // built in index template. Probably do it as part of updateIndexMappingsForAsset?
+    // (Before upgrading any indices, find and upgrade all namespaced index templates - component templates
+    // will already have been upgraded by solutions or rule registry, in the case of technical/ECS templates)
+    // With the current structure, it's tricky because the index template creation
+    // depends on both the namespace and secondary alias, both of which are not currently available
+    // to updateIndexMappingsForAsset. We can make the secondary alias available since
+    // it's known at plugin startup time, but
+    // the namespace values can really only come from the existing templates that we're trying to update
+    // - maybe we want to store the namespace as a _meta field on the index template for easy retrieval
+    await this.createOrUpdateIndexTemplate({
+      name: indexInfo.getIndexTemplateName(namespace),
+      body: {
+        index_patterns: [indexPatternForBackingIndices],
+
+        // Order matters:
+        // - first go external component templates referenced by this index (e.g. the common full ECS template)
+        // - then we include own component templates registered with this index
+        // - finally, we include technical component templates to make sure the index gets all the
+        //   mappings and settings required by all Kibana plugins using rule registry to work properly
+        composed_of: [
+          ...referencedComponentNames,
+          ...ownComponentNames,
+          ...technicalComponentNames,
+        ],
+
+        template: {
+          settings: {
+            'index.lifecycle': {
+              name: ilmPolicyName,
+              // TODO: fix the types in the ES package, they don't include rollover_alias???
+              // @ts-expect-error
+              rollover_alias: primaryNamespacedAlias,
+            },
+          },
+          mappings: {
+            _meta: indexMetadata,
+          },
+          aliases:
+            secondaryNamespacedAlias != null
+              ? {
+                  [secondaryNamespacedAlias]: {
+                    is_write_index: false,
+                  },
+                }
+              : undefined,
+        },
+
+        _meta: indexMetadata,
+
+        // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
+        // then newly created indices will use the matching template with the *longest* namespace
+        priority: namespace.length,
+      },
+    });
+  }
+
+  private async createConcreteWriteIndex(indexInfo: IndexInfo, namespace: string) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
 
     const primaryNamespacedAlias = indexInfo.getPrimaryAlias(namespace);
-    const primaryNamespacedPattern = indexInfo.getPrimaryAliasPattern(namespace);
     const initialIndexName = indexInfo.getConcreteIndexInitialName(namespace);
 
-    logger.debug(`Creating write target for ${primaryNamespacedAlias}`);
-
-    try {
-      // When a new namespace is created we expect getAlias to return a 404 error,
-      // we'll catch it below and continue on. A non-404 error is a real problem so we throw.
-
-      // It's critical that we specify *both* the index pattern and alias in this request. The alias prevents the
-      // request from finding other namespaces that could match the -* part of the index pattern
-      // (see https://github.com/elastic/kibana/issues/107704). The index pattern prevents the request from
-      // finding legacy .siem-signals indices that we add the alias to for backwards compatibility reasons. Together,
-      // the index pattern and alias should ensure that we retrieve only the "new" backing indices for this
-      // particular alias.
-      const { body: aliases } = await clusterClient.indices.getAlias({
-        index: primaryNamespacedPattern,
-        name: primaryNamespacedAlias,
-      });
-
-      // If we find backing indices for the alias here, we shouldn't be making a new concrete index -
-      // either one of the indices is the write index so we return early because we don't need a new write target,
-      // or none of them are the write index so we'll throw an error because one of the existing indices should have
-      // been the write target
-      if (
-        Object.values(aliases).some(
-          (aliasesObject) => aliasesObject.aliases[primaryNamespacedAlias].is_write_index
-        )
-      ) {
-        return;
-      } else {
-        throw new Error(
-          `Indices matching pattern ${primaryNamespacedPattern} exist but none are set as the write index for alias ${primaryNamespacedAlias}`
-        );
-      }
-    } catch (err) {
-      // 404 is expected if the alerts-as-data index hasn't been created yet
-      if (err.statusCode !== 404) {
-        throw err;
-      }
-    }
-
-    await this.installNamespacedIndexTemplate(indexInfo, namespace);
+    logger.debug(`Creating concrete write index for ${primaryNamespacedAlias}`);
 
     try {
       await clusterClient.indices.create({
@@ -308,89 +402,6 @@ export class ResourceInstaller {
         throw err;
       }
     }
-  }
-
-  private async installNamespacedIndexTemplate(indexInfo: IndexInfo, namespace: string) {
-    const { logger, getResourceName } = this.options;
-    const {
-      componentTemplateRefs,
-      componentTemplates,
-      indexTemplate,
-      ilmPolicy,
-    } = indexInfo.indexOptions;
-
-    const primaryNamespacedAlias = indexInfo.getPrimaryAlias(namespace);
-    const primaryNamespacedPattern = indexInfo.getPrimaryAliasPattern(namespace);
-    const secondaryNamespacedAlias = indexInfo.getSecondaryAlias(namespace);
-
-    logger.debug(`Installing index template for ${primaryNamespacedAlias}`);
-
-    const technicalComponentNames = [getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME)];
-    const referencedComponentNames = componentTemplateRefs.map((ref) => getResourceName(ref));
-    const ownComponentNames = componentTemplates.map((template) =>
-      indexInfo.getComponentTemplateName(template.name)
-    );
-    const ilmPolicyName = ilmPolicy
-      ? indexInfo.getIlmPolicyName()
-      : getResourceName(DEFAULT_ILM_POLICY_ID);
-
-    // TODO: need a way to update this template if/when we decide to make changes to the
-    // built in index template. Probably do it as part of updateIndexMappingsForAsset?
-    // (Before upgrading any indices, find and upgrade all namespaced index templates - component templates
-    // will already have been upgraded by solutions or rule registry, in the case of technical/ECS templates)
-    // With the current structure, it's tricky because the index template creation
-    // depends on both the namespace and secondary alias, both of which are not currently available
-    // to updateIndexMappingsForAsset. We can make the secondary alias available since
-    // it's known at plugin startup time, but
-    // the namespace values can really only come from the existing templates that we're trying to update
-    // - maybe we want to store the namespace as a _meta field on the index template for easy retrieval
-    await this.createOrUpdateIndexTemplate({
-      name: indexInfo.getIndexTemplateName(namespace),
-      body: {
-        index_patterns: [primaryNamespacedPattern],
-
-        // Order matters:
-        // - first go external component templates referenced by this index (e.g. the common full ECS template)
-        // - then we include own component templates registered with this index
-        // - finally, we include technical component templates to make sure the index gets all the
-        //   mappings and settings required by all Kibana plugins using rule registry to work properly
-        composed_of: [
-          ...referencedComponentNames,
-          ...ownComponentNames,
-          ...technicalComponentNames,
-        ],
-
-        template: {
-          settings: {
-            'index.lifecycle': {
-              name: ilmPolicyName,
-              // TODO: fix the types in the ES package, they don't include rollover_alias???
-              // @ts-expect-error
-              rollover_alias: primaryNamespacedAlias,
-            },
-          },
-          aliases:
-            secondaryNamespacedAlias != null
-              ? {
-                  [secondaryNamespacedAlias]: {
-                    is_write_index: false,
-                  },
-                }
-              : undefined,
-        },
-
-        _meta: {
-          ...indexTemplate._meta,
-          namespace,
-        },
-
-        version: indexTemplate.version,
-
-        // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
-        // then newly created indices will use the matching template with the *longest* namespace
-        priority: namespace.length,
-      },
-    });
   }
 
   // -----------------------------------------------------------------------------------------------
@@ -431,4 +442,55 @@ export class ResourceInstaller {
 
     return clusterClient.indices.putIndexTemplate(template);
   }
+
+  private async fetchConcreteIndices(
+    aliasOrPatternForAliases: string,
+    indexPatternForBackingIndices: string
+  ): Promise<ConcreteIndexInfo[]> {
+    const { logger, getClusterClient } = this.options;
+    const clusterClient = await getClusterClient();
+
+    logger.debug(`Fetching concrete indices for ${indexPatternForBackingIndices}`);
+
+    try {
+      // It's critical that we specify *both* the index pattern for backing indices and their alias(es) in this request.
+      // The alias prevents the request from finding other namespaces that could match the -* part of the index pattern
+      // (see https://github.com/elastic/kibana/issues/107704). The backing index pattern prevents the request from
+      // finding legacy .siem-signals indices that we add the alias to for backwards compatibility reasons. Together,
+      // the index pattern and alias should ensure that we retrieve only the "new" backing indices for this
+      // particular alias.
+      const { body: response } = await clusterClient.indices.getAlias({
+        index: indexPatternForBackingIndices,
+        name: aliasOrPatternForAliases,
+      });
+
+      return createConcreteIndexInfo(response);
+    } catch (err) {
+      // 404 is expected if the alerts-as-data indices haven't been created yet
+      if (err.statusCode === 404) {
+        return createConcreteIndexInfo({});
+      }
+
+      // A non-404 error is a real problem so we re-throw.
+      throw err;
+    }
+  }
 }
+
+interface ConcreteIndexInfo {
+  index: string;
+  alias: string;
+  isWriteIndex: boolean;
+}
+
+const createConcreteIndexInfo = (
+  response: estypes.IndicesGetAliasResponse
+): ConcreteIndexInfo[] => {
+  return Object.entries(response).flatMap(([index, { aliases }]) =>
+    Object.entries(aliases).map(([aliasName, aliasProperties]) => ({
+      index,
+      alias: aliasName,
+      isWriteIndex: aliasProperties.is_write_index ?? false,
+    }))
+  );
+};

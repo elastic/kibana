@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import { ReactNode } from 'react';
 import { GeoJsonProperties, Geometry } from 'geojson';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
@@ -14,7 +15,7 @@ import type { TooltipFeature } from '../../../../../plugins/maps/common/descript
 
 export interface ITooltipProperty {
   getPropertyKey(): string;
-  getPropertyName(): string;
+  getPropertyName(): string | ReactNode;
   getHtmlDisplayValue(): string;
   getRawValue(): string | string[] | undefined;
   isFilterable(): boolean;
