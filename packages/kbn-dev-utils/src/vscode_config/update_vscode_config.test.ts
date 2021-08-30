@@ -313,3 +313,28 @@ it('correctly formats info text when specified', () => {
 
   `);
 });
+
+it('allows "// self managed" comments conflicting with "// @managed" comments to win', () => {
+  const newJson = run(dedent`
+    {
+      "key": {
+        // @managed
+        // self managed
+        "hello": ["world"]
+      }
+    }
+  `);
+
+  expect(newJson).toMatchInlineSnapshot(`
+    // @managed
+    {
+      "key": {
+        // self managed
+        "hello": ["world"],
+        // @managed
+        "world": [1, 2, 3]
+      }
+    }
+
+  `);
+});
