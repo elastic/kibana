@@ -10,15 +10,13 @@ import { first } from 'rxjs/operators';
 
 import { schema } from '@kbn/config-schema';
 
+import type { RouteDefinitionParams } from '.';
 import { ElasticsearchConnectionStatus } from '../../common';
-import type { EnrollResult } from '../elasticsearch_service';
+import type { AuthenticateParameters } from '../elasticsearch_service';
+import { ElasticsearchService } from '../elasticsearch_service';
 import type { WriteConfigParameters } from '../kibana_config_writer';
-import type { RouteDefinitionParams } from './';
 
-/**
- * Defines routes to deal with Elasticsearch `enroll_kibana` APIs.
- */
-export function defineEnrollRoutes({
+export function defineConfigureRoute({
   router,
   logger,
   kibanaConfigWriter,
@@ -27,14 +25,37 @@ export function defineEnrollRoutes({
 }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/interactive_setup/enroll',
+      path: '/internal/interactive_setup/configure',
       validate: {
+        query: schema.object({
+          code: schema.maybe(schema.string()),
+        }),
         body: schema.object({
-          hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {
-            minSize: 1,
-          }),
-          apiKey: schema.string({ minLength: 1 }),
-          caFingerprint: schema.string({ maxLength: 64, minLength: 64 }),
+          host: schema.uri({ scheme: ['http', 'https'] }),
+          username: schema.maybe(
+            schema.string({
+              validate: (value: string) => {
+                if (value === 'elastic') {
+                  return (
+                    'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
+                    'privilege-related issues. You should use the "kibana_system" user instead.'
+                  );
+                }
+              },
+            })
+          ),
+          password: schema.conditional(
+            schema.siblingRef('username'),
+            schema.string(),
+            schema.string(),
+            schema.never()
+          ),
+          caCert: schema.conditional(
+            schema.siblingRef('host'),
+            schema.uri({ scheme: 'https' }),
+            schema.string(),
+            schema.never()
+          ),
         }),
       },
       options: { authRequired: false },
@@ -74,27 +95,23 @@ export function defineEnrollRoutes({
         });
       }
 
-      // Convert a plain hex string returned in the enrollment token to a format that ES client
-      // expects, i.e. to a colon delimited hex string in upper case: deadbeef -> DE:AD:BE:EF.
-      const colonFormattedCaFingerprint =
-        request.body.caFingerprint
-          .toUpperCase()
-          .match(/.{1,2}/g)
-          ?.join(':') ?? '';
+      const configToWrite: WriteConfigParameters & AuthenticateParameters = {
+        host: request.body.host,
+        username: request.body.username,
+        password: request.body.password,
+        caCert: request.body.caCert
+          ? ElasticsearchService.createPemCertificate(request.body.caCert)
+          : undefined,
+      };
 
-      let configToWrite: WriteConfigParameters & EnrollResult;
       try {
-        configToWrite = await elasticsearch.enroll({
-          apiKey: request.body.apiKey,
-          hosts: request.body.hosts,
-          caFingerprint: colonFormattedCaFingerprint,
-        });
+        await elasticsearch.authenticate(configToWrite);
       } catch {
         // For security reasons, we shouldn't leak to the user whether Elasticsearch node couldn't process enrollment
         // request or we just couldn't connect to any of the provided hosts.
         return response.customError({
           statusCode: 500,
-          body: { message: 'Failed to enroll.', attributes: { type: 'enroll_failure' } },
+          body: { message: 'Failed to configure.', attributes: { type: 'configure_failure' } },
         });
       }
 
