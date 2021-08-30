@@ -61,13 +61,13 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
         <EuiFlexItem grow={2}>
           <ConfigFormHeading>{TITLES.type}</ConfigFormHeading>
-          <EuiText size="m">{type}</EuiText>
+          <EuiText size="s">{type}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')} </EuiText>
+              <EuiText size="s">{supportedOss.map((os) => OS_TITLES[os]).join(', ')} </EuiText>
             </EuiFlexItem>
             {osRestriction && (
               <EuiFlexItem grow={false}>

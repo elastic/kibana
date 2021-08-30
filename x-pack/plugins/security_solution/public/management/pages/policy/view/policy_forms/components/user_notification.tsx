@@ -120,7 +120,7 @@ export const UserNotification = React.memo(
             <EuiSpacer size="s" />
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiText size="xs">
+                <EuiText size="s">
                   <h4>
                     <FormattedMessage
                       id="xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification"

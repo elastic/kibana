@@ -13,7 +13,6 @@ import {
   EuiHealth,
   EuiI18nNumber,
 } from '@elastic/eui';
-import { Chart, Partition, Settings } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 
 export interface AgentsSummaryProps {
@@ -73,47 +72,6 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
       },
     ];
   }, []);
-
-  /* const donut = useMemo(() => {
-    return (
-      <Chart size={{ height: 50 }}>
-        <Settings ariaLabelledBy={exampleTwo} />
-        <Partition
-          id="donutByTotalAgents"
-          data={[
-            {
-              status: 'Healthy',
-              percent: props.online / props.total,
-            },
-            {
-              status: 'Unhealthy',
-              percent: props.error / props.total,
-            },
-            {
-              status: 'Offline',
-              percent: props.offline / props.total,
-            },
-          ]}
-          valueAccessor={(d) => Number(d.percent)}
-          valueFormatter={() => ''}
-          layers={[
-            {
-              groupByRollup: (d) => d.status,
-              shape: {
-                fillColor: (d) => euiChartTheme.theme.colors.vizColors[d.sortIndex],
-              },
-            },
-          ]}
-          config={{
-            ...euiPartitionConfig,
-            emptySizeRatio: 0.4,
-            clockwiseSectors: false,
-          }}
-        />
-      </Chart>
-    );
-  }, [props.error, props.online, props.offline, props.total]);
-   */
 
   return (
     <EuiFlexGroup gutterSize="xl" responsive={false} data-test-subj="policyAgentsSummary">

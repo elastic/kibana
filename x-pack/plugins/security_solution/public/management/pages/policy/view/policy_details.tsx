@@ -66,6 +66,7 @@ export const PolicyDetails = React.memo(() => {
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
   const policyName = policyItem?.name ?? '';
+  const policyDescription = policyItem?.description ?? '';
   const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
 
   // Handle showing update statuses
@@ -171,32 +172,6 @@ export const PolicyDetails = React.memo(() => {
     />
   );
 
-  /* <SecuritySolutionPageWrapper
-        noTimeline
-        data-test-subj="policyDetailsPage"
-        noPadding
-        style={{ backgroundColor: theme.eui.euiHeaderBackgroundColor }}
-        className="policyDetailsPage"
-      >
-        <PolicyDetailsHeader>
-          <HeaderPage
-            hideSourcerer={true}
-            title={policyItem.name}
-            backOptions={{
-              text: i18n.translate(
-                'xpack.securitySolution.endpoint.policy.details.backToListTitle',
-                {
-                  defaultMessage: 'Back to endpoint hosts',
-                }
-              ),
-              pageId: SecurityPageName.endpoints,
-              dataTestSubj: 'policyDetailsBackLink',
-            }}
-          >
-            {headerRightContent}
-          </HeaderPage>
-        </PolicyDetailsHeader>*/
-
   return (
     <>
       {showConfirm && (
@@ -208,11 +183,8 @@ export const PolicyDetails = React.memo(() => {
       )}
       <AdministrationListPage
         data-test-subj="policyDetailsPage"
-        title={policyItem.name}
-        subtitle={i18n.translate('xpack.securitySolution.endpoint.policy.details.subtitle', {
-          defaultMessage: `{policyName} details`,
-          values: { policyName: policyItem.name },
-        })}
+        title={policyName}
+        subtitle={policyDescription}
         headerBackComponent={backToEndpointList}
         actions={headerRightContent}
         restrictWidth={true}
