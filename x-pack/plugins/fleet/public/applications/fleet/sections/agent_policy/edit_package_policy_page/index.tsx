@@ -71,8 +71,9 @@ export const EditPackagePolicyPage = memo(() => {
 
 export const EditPackagePolicyForm = memo<{
   packagePolicyId: string;
+  isUpgrade?: boolean;
   from?: EditPackagePolicyFrom;
-}>(({ packagePolicyId, from = 'edit' }) => {
+}>(({ packagePolicyId, isUpgrade = false, from = 'edit' }) => {
   const { application, notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -98,9 +99,6 @@ export const EditPackagePolicyForm = memo<{
     GetOnePackagePolicyResponse['item']
   >();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
-
-  const isUpgrade =
-    from === 'upgrade-from-fleet-policy-list' || from === 'upgrade-from-integrations-policy-list';
 
   const policyId = agentPolicy?.id ?? '';
 
