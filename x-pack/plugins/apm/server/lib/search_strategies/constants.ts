@@ -79,3 +79,5 @@ export const SIGNIFICANT_VALUE_DIGITS = 3;
 
 export const CORRELATION_THRESHOLD = 0.3;
 export const KS_TEST_THRESHOLD = 0.1;
+
+export const ERROR_CORRELATION_THRESHOLD = 0.02;

@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/latency_correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';

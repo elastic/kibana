@@ -10,7 +10,7 @@ import { getOrElse } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/latency_correlations/types';
 import { rangeRt } from '../../../routes/default_api_types';
 import { getCorrelationsFilters } from '../../correlations/get_filters';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';

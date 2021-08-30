@@ -16,7 +16,7 @@ import {
   IKibanaSearchResponse,
 } from '../../../../../../src/plugins/data/common';
 
-import type { SearchServiceParams } from '../../../common/search_strategies/correlations/types';
+import type { SearchServiceParams } from '../../../common/search_strategies/latency_correlations/types';
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 export type PartialSearchRequest = IKibanaSearchRequest<SearchServiceParams>;
@@ -42,7 +42,7 @@ type GetAsyncSearchServiceState<
   RawResponse extends RawResponseBase
 > = () => AsyncSearchServiceState<RawResponse>;
 
-type AsyncSearchServiceProvider<RawResponse extends RawResponseBase> = (
+export type AsyncSearchServiceProvider<RawResponse extends RawResponseBase> = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   searchServiceParams: SearchServiceParams,

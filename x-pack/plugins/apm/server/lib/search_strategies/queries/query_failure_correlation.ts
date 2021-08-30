@@ -6,7 +6,7 @@
  */
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
-import { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
+import { SearchServiceFetchParams } from '../../../../common/search_strategies/latency_correlations/types';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { getQueryWithParams, getTermsQuery } from './get_query_with_params';

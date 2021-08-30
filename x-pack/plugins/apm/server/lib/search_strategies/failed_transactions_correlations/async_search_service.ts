@@ -13,17 +13,17 @@ import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import type {
   SearchServiceParams,
   SearchServiceFetchParams,
-} from '../../../../common/search_strategies/correlations/types';
+} from '../../../../common/search_strategies/latency_correlations/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
-import { asyncSearchServiceLogProvider } from '../latency_correlations/async_search_service_log';
+import { asyncSearchServiceLogProvider } from '../async_search_service_log';
 import { asyncErrorCorrelationsSearchServiceStateProvider } from './async_search_service_state';
 import {
   fetchFailedTransactionsCorrelationPValues,
   fetchTransactionDurationFieldCandidates,
 } from '../queries';
-import { ERROR_CORRELATION_THRESHOLD } from './constants';
+import { ERROR_CORRELATION_THRESHOLD } from '../constants';
 
-export const asyncErrorCorrelationSearchServiceProvider = (
+export const failedTransactionsCorrelationsAsyncSearchServiceProvider = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   searchServiceParams: SearchServiceParams,

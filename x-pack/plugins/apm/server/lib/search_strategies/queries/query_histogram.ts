@@ -14,7 +14,7 @@ import type {
   HistogramItem,
   ResponseHit,
   SearchServiceFetchParams,
-} from '../../../../common/search_strategies/correlations/types';
+} from '../../../../common/search_strategies/latency_correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';

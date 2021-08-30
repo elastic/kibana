@@ -16,7 +16,7 @@ import {
 import type {
   SearchServiceParams,
   SearchServiceRawResponse,
-} from '../../common/search_strategies/correlations/types';
+} from '../../common/search_strategies/latency_correlations/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { APM_SEARCH_STRATEGIES } from '../../common/search_strategies/constants';
 import { ApmPluginStartDeps } from '../plugin';

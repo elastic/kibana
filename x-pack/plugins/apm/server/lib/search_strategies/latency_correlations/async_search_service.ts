@@ -11,9 +11,10 @@ import type {
   SearchServiceParams,
   SearchServiceRawResponse,
   SearchServiceFetchParams,
-} from '../../../../common/search_strategies/correlations/types';
+} from '../../../../common/search_strategies/latency_correlations/types';
 
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+
 import {
   fetchTransactionDurationFieldCandidates,
   fetchTransactionDurationFieldValuePairs,
@@ -24,10 +25,12 @@ import {
   fetchTransactionDurationRanges,
 } from '../queries';
 import { computeExpectationsAndRanges } from '../utils';
-import { asyncSearchServiceLogProvider } from './async_search_service_log';
+import { asyncSearchServiceLogProvider } from '../async_search_service_log';
+import type { AsyncSearchServiceProvider } from '../search_strategy_provider';
+
 import { asyncSearchServiceStateProvider } from './async_search_service_state';
 
-export const asyncSearchServiceProvider = (
+export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServiceProvider<SearchServiceRawResponse> = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   searchServiceParams: SearchServiceParams,

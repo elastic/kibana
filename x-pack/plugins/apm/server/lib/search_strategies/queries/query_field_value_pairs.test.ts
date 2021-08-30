@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
-import { asyncSearchServiceLogProvider } from '../latency_correlations/async_search_service_log';
+import { asyncSearchServiceLogProvider } from '../async_search_service_log';
 import { asyncSearchServiceStateProvider } from '../latency_correlations/async_search_service_state';
 
 import {

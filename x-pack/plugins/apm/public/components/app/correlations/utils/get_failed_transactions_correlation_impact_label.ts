@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FailureCorrelationImpactThreshold } from '../../../../../common/search_strategies/failure_correlations/types';
-import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/failure_correlations/constants';
+import { FailureCorrelationImpactThreshold } from '../../../../../common/search_strategies/failed_transactions_correlations/types';
+import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/failed_transactions_correlations/constants';
 
 export function getFailedTransactionsCorrelationImpactLabel(
   pValue: number

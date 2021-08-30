@@ -41,7 +41,7 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
+import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import { Summary } from '../../shared/Summary';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';

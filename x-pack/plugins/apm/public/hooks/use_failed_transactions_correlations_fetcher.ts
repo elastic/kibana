@@ -13,10 +13,10 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../src/plugins/data/public';
-import type { SearchServiceParams } from '../../common/search_strategies/correlations/types';
+import type { SearchServiceParams } from '../../common/search_strategies/latency_correlations/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { ApmPluginStartDeps } from '../plugin';
-import { FailedTransactionsCorrelationValue } from '../../common/search_strategies/failure_correlations/types';
+import type { ApmPluginStartDeps } from '../plugin';
+import type { FailedTransactionsCorrelationValue } from '../../common/search_strategies/failed_transactions_correlations/types';
 import { APM_SEARCH_STRATEGIES } from '../../common/search_strategies/constants';
 
 interface RawResponse {

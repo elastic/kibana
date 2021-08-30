@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
+import { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 
 interface Progress {
   started: number;

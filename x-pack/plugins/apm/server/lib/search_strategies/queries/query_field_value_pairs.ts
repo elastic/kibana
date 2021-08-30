@@ -9,9 +9,9 @@ import type { ElasticsearchClient } from 'src/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/latency_correlations/types';
 
-import type { AsyncSearchServiceLog } from '../latency_correlations/async_search_service_log';
+import type { AsyncSearchServiceLog } from '../async_search_service_log';
 import type { AsyncSearchServiceState } from '../latency_correlations/async_search_service_state';
 import { TERMS_SIZE } from '../constants';
 

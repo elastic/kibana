@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { asyncErrorCorrelationSearchServiceProvider } from './async_search_service';
+export { failedTransactionsCorrelationsAsyncSearchServiceProvider } from './async_search_service';
