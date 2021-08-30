@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-// required for i18nIdDirective
-import 'angular-sanitize';
-
-import './doc';
-import './context';
+export { SingleDocRoute } from './single_doc_route';
