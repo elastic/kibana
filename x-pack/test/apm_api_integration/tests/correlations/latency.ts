@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import { PartialSearchRequest } from '../../../../plugins/apm/server/lib/search_strategies/correlations/search_strategy';
+import type { PartialSearchRequest } from '../../../../plugins/apm/server/lib/search_strategies/search_strategy_provider';
 import { parseBfetchResponse } from '../../common/utils/parse_b_fetch';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

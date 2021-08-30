@@ -17,7 +17,7 @@ import type { SearchServiceParams } from '../../common/search_strategies/correla
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../plugin';
 import { FailedTransactionsCorrelationValue } from '../../common/search_strategies/failure_correlations/types';
-import { FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY } from '../../common/search_strategies/failure_correlations/constants';
+import { APM_SEARCH_STRATEGIES } from '../../common/search_strategies/constants';
 
 interface RawResponse {
   took: number;
@@ -88,7 +88,7 @@ export const useFailedTransactionsCorrelationsFetcher = () => {
       // Submit the search request using the `data.search` service.
       searchSubscription$.current = data.search
         .search<IKibanaSearchRequest, IKibanaSearchResponse<RawResponse>>(req, {
-          strategy: FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
+          strategy: APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS,
           abortSignal: abortCtrl.current.signal,
         })
         .subscribe({

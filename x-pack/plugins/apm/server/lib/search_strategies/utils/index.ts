@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { asyncErrorCorrelationSearchServiceProvider } from './async_search_service';
+export { computeExpectationsAndRanges } from './compute_expectations_and_ranges';
+export { hasPrefixToInclude } from './has_prefix_to_include';

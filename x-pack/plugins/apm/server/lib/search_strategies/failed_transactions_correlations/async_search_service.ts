@@ -6,16 +6,22 @@
  */
 
 import type { ElasticsearchClient } from 'src/core/server';
+
 import { chunk } from 'lodash';
-import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
-import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
-import { asyncSearchServiceLogProvider } from '../correlations/async_search_service_log';
-import { asyncErrorCorrelationsSearchServiceStateProvider } from './async_search_service_state';
-import { fetchTransactionDurationFieldCandidates } from '../correlations/queries';
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
-import { fetchFailedTransactionsCorrelationPValues } from './queries/query_failure_correlation';
-import { ERROR_CORRELATION_THRESHOLD } from './constants';
+
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
+import type {
+  SearchServiceParams,
+  SearchServiceFetchParams,
+} from '../../../../common/search_strategies/correlations/types';
+import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import { asyncSearchServiceLogProvider } from '../latency_correlations/async_search_service_log';
+import { asyncErrorCorrelationsSearchServiceStateProvider } from './async_search_service_state';
+import {
+  fetchFailedTransactionsCorrelationPValues,
+  fetchTransactionDurationFieldCandidates,
+} from '../queries';
+import { ERROR_CORRELATION_THRESHOLD } from './constants';
 
 export const asyncErrorCorrelationSearchServiceProvider = (
   esClient: ElasticsearchClient,
@@ -115,19 +121,28 @@ export const asyncErrorCorrelationSearchServiceProvider = (
   return () => {
     const { ccsWarning, error, isRunning, progress } = state.getState();
 
-    return {
-      ccsWarning,
-      error,
-      log: getLogMessages(),
-      isRunning,
+    const meta = {
       loaded: Math.round(state.getOverallProgress() * 100),
-      started: progress.started,
       total: 100,
+      isRunning,
+      isPartial: isRunning,
+    };
+
+    const rawResponse = {
+      ccsWarning,
+      log: getLogMessages(),
+      took: Date.now() - progress.started,
       values: state.getValuesSortedByScore(),
+    };
+
+    return {
       cancel: () => {
         addLogMessage(`Service cancelled.`);
         state.setIsCancelled(true);
       },
+      error,
+      meta,
+      rawResponse,
     };
   };
 };

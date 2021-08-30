@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { asyncErrorCorrelationSearchServiceProvider } from './async_search_service';
+export const APM_SEARCH_STRATEGIES = {
+  APM_FAILED_TRANSACTIONS_CORRELATIONS: 'apmFailedTransactionsCorrelations',
+  APM_LATENCY_CORRELATIONS: 'apmLatencyCorrelations',
+} as const;

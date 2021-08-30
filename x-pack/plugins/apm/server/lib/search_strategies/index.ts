@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { asyncErrorCorrelationSearchServiceProvider } from './async_search_service';
+export { registerSearchStrategies } from './register_search_strategies';

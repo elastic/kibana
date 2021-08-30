@@ -18,6 +18,7 @@ import type {
   SearchServiceRawResponse,
 } from '../../common/search_strategies/correlations/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { APM_SEARCH_STRATEGIES } from '../../common/search_strategies/constants';
 import { ApmPluginStartDeps } from '../plugin';
 
 interface TransactionLatencyCorrelationsFetcherState {
@@ -109,7 +110,7 @@ export const useTransactionLatencyCorrelationsFetcher = () => {
           IKibanaSearchRequest,
           IKibanaSearchResponse<SearchServiceRawResponse>
         >(req, {
-          strategy: 'apmCorrelationsSearchStrategy',
+          strategy: APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
           abortSignal: abortCtrl.current.signal,
         })
         .subscribe({
