@@ -20,7 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const security = getService('security');
 
-  describe('ILM policy migration APIs', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/110483
+  describe.skip('ILM policy migration APIs', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
