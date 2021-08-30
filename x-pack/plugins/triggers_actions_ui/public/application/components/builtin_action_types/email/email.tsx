@@ -7,6 +7,7 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiSelectOption } from '@elastic/eui';
 import {
   ActionTypeModel,
   ConnectorValidationResult,
@@ -14,8 +15,8 @@ import {
 } from '../../../../types';
 import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
 
-export const emailServerTypes: { [key: string]: any } = {
-  gmail: {
+export const emailServerTypes: EuiSelectOption[] = [
+  {
     text: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.gmailServerTypeLabel',
       {
@@ -24,34 +25,34 @@ export const emailServerTypes: { [key: string]: any } = {
     ),
     value: 'gmail',
   },
-  office365: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.office365ServerTypeLabel',
-      {
-        defaultMessage: 'Office 365',
-      }
-    ),
-    value: 'office365',
-  },
-  exchange: {
+  {
     text: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.exchangeServerTypeLabel',
       {
         defaultMessage: 'MS Exchange',
       }
     ),
-    value: 'exchange',
+    value: 'outlook365',
   },
-  outlook: {
+  {
     text: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.outlookServerTypeLabel',
       {
         defaultMessage: 'Outlook',
       }
     ),
-    value: 'outlook',
+    value: 'hotmail',
   },
-  elastic_cloud: {
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.outlookServerTypeLabel',
+      {
+        defaultMessage: 'Amazon SES',
+      }
+    ),
+    value: 'ses',
+  },
+  {
     text: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.elastic_cloudServerTypeLabel',
       {
@@ -60,16 +61,7 @@ export const emailServerTypes: { [key: string]: any } = {
     ),
     value: 'elastic_cloud',
   },
-  amazon_ses: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.amazon_sesServerTypeLabel',
-      {
-        defaultMessage: 'Amazon SES',
-      }
-    ),
-    value: 'amazon_ses',
-  },
-  other: {
+  {
     text: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.otherServerTypeLabel',
       {
@@ -78,7 +70,7 @@ export const emailServerTypes: { [key: string]: any } = {
     ),
     value: 'other',
   },
-};
+];
 
 export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   const mailformat = /^[^@\s]+@[^@\s]+$/;

@@ -46,6 +46,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        serverType: 'other',
       },
     } as EmailActionConnector;
 
@@ -82,6 +83,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: false,
+        serverType: 'other',
       },
     } as EmailActionConnector;
 
@@ -113,6 +115,7 @@ describe('connector validation', () => {
       config: {
         from: 'test@test.com',
         hasAuth: true,
+        serverType: 'other',
       },
     } as EmailActionConnector;
 
@@ -148,6 +151,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        serverType: 'other',
       },
     } as EmailActionConnector;
 
@@ -183,6 +187,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        serverType: 'other',
       },
     } as EmailActionConnector;
 

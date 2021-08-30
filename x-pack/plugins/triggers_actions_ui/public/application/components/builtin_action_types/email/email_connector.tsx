@@ -106,10 +106,11 @@ export const EmailActionConnectorFields: React.FunctionComponent<
           >
             <EuiSelect
               name="serverType"
-              value={serverType || 'other'}
+              hasNoInitialSelection={true}
+              value={serverType}
               disabled={readOnly}
               data-test-subj="emailServerTypeSelect"
-              options={Object.values(emailServerTypes)}
+              options={emailServerTypes}
               onChange={(e) => {
                 editActionConfig('serverType', e.target.value);
               }}

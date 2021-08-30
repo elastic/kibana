@@ -34,11 +34,10 @@ export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 export enum EmailServerTypes {
   GMAIL = 'gmail',
-  OFFICE365 = 'office365',
-  EXCHANGE = 'exchange',
-  OUTLOOK = 'outlook',
+  EXCHANGE = 'outlook365',
+  OUTLOOK = 'hotmail',
   ELASTIC_CLOUD = 'elastic_cloud',
-  AMAZON_SES = 'amazon_ses',
+  AMAZON_SES = 'ses',
   OTHER = 'other',
 }
 
@@ -54,7 +53,6 @@ const ConfigSchemaProps = {
   serverType: schema.oneOf(
     [
       schema.literal(EmailServerTypes.GMAIL),
-      schema.literal(EmailServerTypes.OFFICE365),
       schema.literal(EmailServerTypes.EXCHANGE),
       schema.literal(EmailServerTypes.OUTLOOK),
       schema.literal(EmailServerTypes.ELASTIC_CLOUD),
