@@ -819,7 +819,7 @@ const resizePointAnnotations = (config, parent, a, b) => ([x, y, cursorAngle]) =
   const xName = xNames[x];
   const yName = yNames[y];
   return {
-    id: [config.resizeHandleName, xName, yName, parent].join('_'),
+    id: [config.resizeHandleName, xName, yName, parent.id].join('_'),
     type: 'annotation',
     subtype: config.resizeHandleName,
     horizontalPosition: xName,
