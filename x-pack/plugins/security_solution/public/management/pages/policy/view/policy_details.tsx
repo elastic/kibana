@@ -189,7 +189,6 @@ export const PolicyDetails = React.memo(() => {
         actions={headerRightContent}
         restrictWidth={true}
       >
-        <EuiSpacer size="l" />
         <PolicyDetailsForm />
         <EuiSpacer size="xxl" />
         <EuiBottomBar paddingSize="s">

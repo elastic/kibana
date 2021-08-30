@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -68,6 +69,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
           restrictWidth={restrictWidth}
           data-test-subj={getTestId('header')}
         />
+        <EuiSpacer size="l" />
         <EuiPageContent
           hasBorder={false}
           hasShadow={false}
@@ -75,7 +77,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
           color="transparent"
           borderRadius="none"
         >
-          <EuiPageContentBody restrictWidth>{children}</EuiPageContentBody>
+          <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
         </EuiPageContent>
 
         <SpyRoute pageName={SecurityPageName.administration} />
