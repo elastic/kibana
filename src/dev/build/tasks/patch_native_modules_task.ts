@@ -57,7 +57,7 @@ const packages: Package[] = [
       'linux-arm64': {
         url:
           'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/linux-arm64-83.gz',
-        sha256: '89b3c7ff74c7d94b55fba2ef610b43e77adcfaac1002cf345e539c45fbdc27a8',
+        sha256: '114505c60dbf57ad30556937ac5f49213c6676ad79d92706b96949d3a63f53b4',
       },
       'win32-x64': {
         url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/win32-x64-83.gz',
