@@ -46,11 +46,13 @@ export type TGridCellAction = ({
   browserFields,
   data,
   timelineId,
+  pageSize,
 }: {
   browserFields: BrowserFields;
   /** each row of data is represented as one TimelineNonEcsData[] */
   data: TimelineNonEcsData[][];
   timelineId: string;
+  pageSize: number;
 }) => (props: EuiDataGridColumnCellActionProps) => ReactNode;
 
 /** The specification of a column header */
