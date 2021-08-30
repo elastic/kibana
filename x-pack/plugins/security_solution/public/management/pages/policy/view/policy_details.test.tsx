@@ -150,7 +150,7 @@ describe('Policy Details', () => {
 
       const agentsSummary = policyView.find('EuiFlexGroup[data-test-subj="policyAgentsSummary"]');
       expect(agentsSummary).toHaveLength(1);
-      expect(agentsSummary.text()).toBe('Agents5Healthy3Unhealthy1Offline1');
+      expect(agentsSummary.text()).toBe('Total Agents5Healthy3Unhealthy1Offline1');
     });
     it('should display cancel button', async () => {
       await asyncActions;
