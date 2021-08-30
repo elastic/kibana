@@ -12,6 +12,7 @@ import { alertFilterLabels, filterAriaLabels } from './translations';
 import { FieldValueSuggestions } from '../../../../../../observability/public';
 import { useIndexPattern } from '../../../../contexts/uptime_index_pattern_context';
 import { FILTER_FIELDS } from '../../../../../common/constants';
+import { useGetUrlParams } from '../../../../hooks';
 
 export interface FilterExpressionsSelectProps {
   alertParams: { [key: string]: any };
@@ -22,6 +23,17 @@ export interface FilterExpressionsSelectProps {
 }
 
 const { TYPE, TAGS, LOCATION, PORT } = FILTER_FIELDS;
+
+function hasTimerangeStart(
+  params: any
+): params is { timerangeCount: number; timerangeUnit: string } {
+  return !!params.timerangeCount && isNaN(params.timerangeCount) && params.timerangeUnit;
+}
+
+export function formatParamsDateRange(alertParams: { [key: string]: unknown }) {
+  if (!hasTimerangeStart(alertParams)) return undefined;
+  return `now-${alertParams.timerangeCount.toString()}${alertParams.timerangeCount}`;
+}
 
 export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = ({
   alertParams,
@@ -36,6 +48,7 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
   const selectedSchemes = alertFilters?.[TYPE] ?? [];
   const selectedTags = alertFilters?.[TAGS] ?? [];
 
+  const { dateRangeStart: DEFAULT_FROM, dateRangeEnd: to } = useGetUrlParams();
   const onFilterFieldChange = (fieldName: string, values?: string[]) => {
     // the `filters` field is no longer a string
     if (alertParams.filters && typeof alertParams.filters !== 'string') {
@@ -131,6 +144,7 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
               {indexPattern && (
                 <FieldValueSuggestions
                   filters={[]}
+                  key={fieldName}
                   indexPatternTitle={indexPattern.title}
                   sourceField={fieldName}
                   label={title}
@@ -154,6 +168,10 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
                   }}
                   asCombobox={false}
                   cardinalityField="monitor.id"
+                  time={{
+                    from: formatParamsDateRange(alertParams) ?? DEFAULT_FROM,
+                    to: to ?? 'now',
+                  }}
                 />
               )}
             </EuiFlexItem>
