@@ -17,13 +17,8 @@ type BasicObjectProp = t.ObjectProperty & {
   key: t.StringLiteral;
 };
 
-type BasicObjectPropWithObjectValue = BasicObjectProp & { value: t.ObjectExpression };
-
 const isBasicObjectProp = (n: t.Node): n is BasicObjectProp =>
   n.type === 'ObjectProperty' && n.key.type === 'StringLiteral';
-
-const isBasicObjectPropWithObjectValue = (n: t.Node): n is BasicObjectPropWithObjectValue =>
-  isBasicObjectProp(n) && n.value.type === 'ObjectExpression';
 
 const isManaged = (node?: t.Node) =>
   !!node?.leadingComments?.some(
@@ -89,57 +84,53 @@ const replaceManagedProp = (
  * no longer in the `managedValue` is removed, and any properties in the `managedValue` are either
  * added or updated based on their existence in the AST.
  *
- * @param existing existing AST node of the object property ("key": <value>)
+ * @param properties Object expression properties list which we will merge with ("key": <value>)
  * @param managedValue the managed value that should be merged into the existing values
  */
-const mergeManagedProp = (
-  existing: BasicObjectPropWithObjectValue,
+const mergeManagedProperties = (
+  properties: t.ObjectExpression['properties'],
   managedValue: Record<string, any>
 ) => {
-  // capture a reference to the properties of this specific managed setting
-  const childProps = existing.value.properties;
-
   // iterate through all the keys in the managed `value` and either add them to the
   // prop, update their value, or ignore them because they are "// self managed"
   for (const [key, value] of Object.entries(managedValue)) {
-    const existingChildProp = childProps.filter(isBasicObjectProp).find((p) => p.key.value === key);
+    const existing = properties.filter(isBasicObjectProp).find((p) => p.key.value === key);
 
-    if (!existingChildProp) {
+    if (!existing) {
       // add the new managed prop
-      childProps.push(createManagedChildProp(key, value));
+      properties.push(createManagedChildProp(key, value));
       continue;
     }
 
-    if (isSelfManaged(existingChildProp)) {
+    if (isSelfManaged(existing)) {
       // strip "// @managed" comment if conflicting with "// self managed"
-      existingChildProp.leadingComments = (existingChildProp.leadingComments ?? []).filter(
+      existing.leadingComments = (existing.leadingComments ?? []).filter(
         (c) => c.value.trim() !== '@managed'
       );
       continue;
     }
 
-    if (isManaged(existingChildProp)) {
+    if (isManaged(existing)) {
       // the prop already exists and is still managed, so update it's value
-      existingChildProp.value = parseExpression(JSON.stringify(value));
+      existing.value = parseExpression(JSON.stringify(value));
       continue;
     }
 
     // take over the unmanaged child prop by deleting the previous prop and replacing it
     // with a brand new one
-    remove(childProps, existingChildProp);
-    childProps.push(createManagedChildProp(key, value));
+    remove(properties, existing);
+    properties.push(createManagedChildProp(key, value));
   }
 
   // iterate through the props to find "// @managed" props which are no longer in
   // the `managedValue` and remove them
-  for (const prop of childProps) {
+  for (const prop of properties) {
     if (
       isBasicObjectProp(prop) &&
       isManaged(prop) &&
-      !isSelfManaged(prop) &&
       !Object.prototype.hasOwnProperty.call(managedValue, prop.key.value)
     ) {
-      remove(childProps, prop);
+      remove(properties, prop);
     }
   }
 };
@@ -179,13 +170,14 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
       continue;
     }
 
-    if (existingProp && isBasicObjectPropWithObjectValue(existingProp)) {
-      mergeManagedProp(existingProp, value);
+    if (existingProp && existingProp.value.type === 'ObjectExpression') {
+      // setting exists and is an object so merge properties of `value` with it
+      mergeManagedProperties(existingProp.value.properties, value);
       continue;
     }
 
-    // setting exists but its value is not an object expression so replace it
     if (existingProp) {
+      // setting exists but its value is not an object expression so replace it
       replaceManagedProp(ast, existingProp, value);
       continue;
     }
