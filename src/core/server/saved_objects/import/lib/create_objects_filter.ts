@@ -7,19 +7,15 @@
  */
 
 import { SavedObject } from '../../types';
-import { getObjKey } from '../../service/lib';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { ObjectKeyProvider } from './get_object_key';
 import { SavedObjectsImportRetry } from '../types';
 
 export function createObjectsFilter(
   retries: SavedObjectsImportRetry[],
-  typeRegistry: ISavedObjectTypeRegistry,
-  namespace?: string
+  getObjKey: ObjectKeyProvider
 ): (obj: SavedObject) => boolean {
-  const retryKeys = new Set<string>(
-    retries.map((retry) => getObjKey(retry, typeRegistry, namespace))
-  );
+  const retryKeys = new Set<string>(retries.map((retry) => getObjKey(retry)));
   return (obj: SavedObject) => {
-    return retryKeys.has(getObjKey(obj, typeRegistry, namespace));
+    return retryKeys.has(getObjKey(obj));
   };
 }

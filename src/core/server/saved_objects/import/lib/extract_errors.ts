@@ -7,27 +7,23 @@
  */
 
 import { SavedObject } from '../../types';
-import { getObjKey } from '../../service/lib';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { ObjectKeyProvider } from './get_object_key';
 import { SavedObjectsImportFailure, CreatedObject } from '../types';
 
 export function extractErrors(
   // TODO: define saved object type
   savedObjectResults: Array<CreatedObject<unknown>>,
   savedObjectsToImport: Array<SavedObject<any>>,
-  typeRegistry: ISavedObjectTypeRegistry,
-  namespace?: string
+  getObjKey: ObjectKeyProvider
 ) {
   const errors: SavedObjectsImportFailure[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject<{ title: string }>>();
   for (const savedObject of savedObjectsToImport) {
-    originalSavedObjectsMap.set(getObjKey(savedObject, typeRegistry, namespace), savedObject);
+    originalSavedObjectsMap.set(getObjKey(savedObject), savedObject);
   }
   for (const savedObject of savedObjectResults) {
     if (savedObject.error) {
-      const originalSavedObject = originalSavedObjectsMap.get(
-        getObjKey(savedObject, typeRegistry, namespace)
-      );
+      const originalSavedObject = originalSavedObjectsMap.get(getObjKey(savedObject));
       const title = originalSavedObject?.attributes?.title;
       const { destinationId } = savedObject;
       if (savedObject.error.statusCode === 409) {

@@ -7,29 +7,24 @@
  */
 
 import { SavedObject } from '../../types';
-import { getObjKey } from '../../service/lib';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { ObjectKeyProvider } from './get_object_key';
 import { SavedObjectsImportRetry } from '../types';
 
 export function splitOverwrites<T>({
   savedObjects,
   retries,
-  typeRegistry,
-  namespace,
+  getObjKey,
 }: {
   savedObjects: Array<SavedObject<T>>;
   retries: SavedObjectsImportRetry[];
-  typeRegistry: ISavedObjectTypeRegistry;
-  namespace?: string;
+  getObjKey: ObjectKeyProvider;
 }) {
   const objectsToOverwrite: Array<SavedObject<T>> = [];
   const objectsToNotOverwrite: Array<SavedObject<T>> = [];
-  const overwrites = retries
-    .filter((retry) => retry.overwrite)
-    .map((retry) => getObjKey(retry, typeRegistry, namespace));
+  const overwrites = retries.filter((retry) => retry.overwrite).map((retry) => getObjKey(retry));
 
   for (const savedObject of savedObjects) {
-    if (overwrites.includes(getObjKey(savedObject, typeRegistry, namespace))) {
+    if (overwrites.includes(getObjKey(savedObject))) {
       objectsToOverwrite.push(savedObject);
     } else {
       objectsToNotOverwrite.push(savedObject);

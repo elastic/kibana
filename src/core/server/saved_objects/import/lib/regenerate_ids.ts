@@ -8,23 +8,20 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObject } from '../../types';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { getObjKey } from '../../service/lib';
+import type { ObjectKeyProvider } from './get_object_key';
 
 /**
  * Takes an array of saved objects and returns an importIdMap of randomly-generated new IDs.
  */
 export const regenerateIds = ({
   objects,
-  typeRegistry,
-  namespace,
+  getObjKey,
 }: {
   objects: SavedObject[];
-  typeRegistry: ISavedObjectTypeRegistry;
-  namespace?: string;
+  getObjKey: ObjectKeyProvider;
 }) => {
   return objects.reduce((acc, object) => {
-    return acc.set(getObjKey(object, typeRegistry, namespace), {
+    return acc.set(getObjKey(object), {
       id: uuidv4(),
       omitOriginId: true,
     });

@@ -7,10 +7,10 @@
  */
 
 import { savedObjectsClientMock } from '../../../mocks';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { createSavedObjects } from './create_saved_objects';
 import type { SavedObject, SavedObjectsImportFailure } from '../../types';
 import { SavedObjectsErrorHelpers } from '../../service';
+import type { ObjectKeyProvider } from './get_object_key';
 import { extractErrors } from './extract_errors';
 
 type CreateSavedObjectsParams = Parameters<typeof createSavedObjects>[0];
@@ -64,9 +64,9 @@ const getImportIdMap = (namespace?: string) => {
 };
 
 describe('#createSavedObjects', () => {
-  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
+  const defaultGetObjKey: ObjectKeyProvider = ({ type, id }) => `${type}:${id}`;
 
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let bulkCreate: typeof savedObjectsClient['bulkCreate'];
 
   /**
@@ -79,16 +79,16 @@ describe('#createSavedObjects', () => {
     namespace?: string;
     overwrite?: boolean;
     importNamespaces: boolean;
+    getObjKey?: ObjectKeyProvider;
   }): CreateSavedObjectsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
-    typeRegistry = typeRegistryMock.create();
 
     bulkCreate = savedObjectsClient.bulkCreate;
 
     return {
       accumulatedErrors: [],
       savedObjectsClient,
-      typeRegistry,
+      getObjKey: defaultGetObjKey,
       importIdMap: getImportIdMap(partial.namespace),
       ...partial,
     };
@@ -155,11 +155,15 @@ describe('#createSavedObjects', () => {
    * In addition, extract the errors out of the created objects -- since we are testing with realistic objects/errors, we can use the real
    * `extractErrors` module to do so.
    */
-  const getExpectedResults = (resultObjects: SavedObject[], objects: SavedObject[]) => {
+  const getExpectedResults = (
+    resultObjects: SavedObject[],
+    objects: SavedObject[],
+    getObjKey: ObjectKeyProvider = defaultGetObjKey
+  ) => {
     const remappedResults = resultObjects.map((result, i) => ({ ...result, id: objects[i].id }));
     return {
       createdObjects: remappedResults.filter((obj) => !obj.error),
-      errors: extractErrors(remappedResults, objects, typeRegistry),
+      errors: extractErrors(remappedResults, objects, getObjKey),
     };
   };
 
@@ -272,7 +276,12 @@ describe('#createSavedObjects', () => {
   });
 
   const testBulkCreateObjects = async (namespace?: string) => {
-    const options = setupParams({ objects: objs, namespace, importNamespaces: false });
+    const options = setupParams({
+      objects: objs,
+      namespace,
+      importNamespaces: false,
+      getObjKey: namespace ? ({ id, type }) => `${namespace}:${type}:${id}` : defaultGetObjKey,
+    });
     setupMockResults(options);
 
     await createSavedObjects(options);
@@ -286,7 +295,13 @@ describe('#createSavedObjects', () => {
   };
   const testBulkCreateOptions = async (namespace?: string) => {
     const overwrite = (Symbol() as unknown) as boolean;
-    const options = setupParams({ objects: objs, namespace, overwrite, importNamespaces: false });
+    const options = setupParams({
+      objects: objs,
+      namespace,
+      overwrite,
+      importNamespaces: false,
+      getObjKey: namespace ? ({ id, type }) => `${namespace}:${type}:${id}` : defaultGetObjKey,
+    });
     setupMockResults(options);
 
     await createSavedObjects(options);
@@ -294,7 +309,12 @@ describe('#createSavedObjects', () => {
     expectBulkCreateArgs.options(1, options);
   };
   const testReturnValue = async (namespace?: string) => {
-    const options = setupParams({ objects: objs, namespace, importNamespaces: false });
+    const options = setupParams({
+      objects: objs,
+      namespace,
+      importNamespaces: false,
+      getObjKey: namespace ? ({ id, type }) => `${namespace}:${type}:${id}` : defaultGetObjKey,
+    });
     setupMockResults(options);
 
     const results = await createSavedObjects(options);

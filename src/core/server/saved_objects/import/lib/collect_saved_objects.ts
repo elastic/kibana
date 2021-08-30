@@ -15,8 +15,7 @@ import {
 } from '@kbn/utils';
 
 import { SavedObject } from '../../types';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { getObjKey } from '../../service/lib';
+import type { ObjectKeyProvider } from './get_object_key';
 import { SavedObjectsImportFailure } from '../types';
 import { SavedObjectsImportError } from '../errors';
 import { getNonUniqueEntries } from './get_non_unique_entries';
@@ -26,8 +25,8 @@ export interface CollectSavedObjectsOptions {
   readStream: Readable;
   objectLimit: number;
   filter?: (obj: SavedObject) => boolean;
-  typeRegistry: ISavedObjectTypeRegistry;
-  namespace?: string;
+  getObjKey: ObjectKeyProvider;
+  supportedTypes: string[];
 }
 
 export interface CollectSavedObjectsResult {
@@ -40,11 +39,9 @@ export async function collectSavedObjects({
   readStream,
   objectLimit,
   filter,
-  typeRegistry,
-  namespace,
+  getObjKey,
+  supportedTypes,
 }: CollectSavedObjectsOptions): Promise<CollectSavedObjectsResult> {
-  const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
-
   const errors: SavedObjectsImportFailure[] = [];
   const entries: Array<{ type: string; id: string; namespaces?: string[] }> = [];
   const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
@@ -71,17 +68,16 @@ export async function collectSavedObjects({
     }),
     createFilterStream<SavedObject>((obj) => (filter ? filter(obj) : true)),
     createMapStream((obj: SavedObject) => {
-      // TODO: unsure what to be done for imports without namespaces info?
-      importIdMap.set(getObjKey(obj, typeRegistry, namespace), {});
+      importIdMap.set(getObjKey(obj), {});
       // Ensure migrations execute on every saved object
-      return Object.assign({ migrationVersion: {} }, obj);
+      return { ...{ migrationVersion: {} }, ...obj };
     }),
     createConcatStream([]),
   ]);
 
   // throw a BadRequest error if we see the same import object type/id more than once
   // for `single` namespaceType object, this is done on a per-space basis.
-  const nonUniqueEntries = getNonUniqueEntries(entries, typeRegistry, namespace);
+  const nonUniqueEntries = getNonUniqueEntries(entries, getObjKey);
   if (nonUniqueEntries.length > 0) {
     throw SavedObjectsImportError.nonUniqueImportObjects(nonUniqueEntries);
   }

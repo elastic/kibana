@@ -7,29 +7,28 @@
  */
 
 import { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { savedObjectsClientMock } from '../../../mocks';
 import { SavedObjectsErrorHelpers } from '../../service';
+import { ObjectKeyProvider } from './get_object_key';
 
 describe('getNonExistingReferenceAsKeys()', () => {
   const namespace = 'foo-ns';
 
-  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
+  let getObjKey: jest.MockedFunction<ObjectKeyProvider>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     jest.resetAllMocks();
 
+    getObjKey = jest.fn().mockImplementation(({ type, id }) => `${type}:${id}`);
     savedObjectsClient = savedObjectsClientMock.create();
-    typeRegistry = typeRegistryMock.create();
   });
 
   test('returns empty response when no objects exist', async () => {
     const result = await getNonExistingReferenceAsKeys({
       savedObjects: [],
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
     expect(result).toEqual([]);
@@ -58,8 +57,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
       savedObjects,
       retries,
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
     expect(result).toEqual([]);
@@ -90,8 +88,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
     const result = await getNonExistingReferenceAsKeys({
       savedObjects,
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
     expect(result).toEqual([]);
@@ -126,8 +123,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
     const result = await getNonExistingReferenceAsKeys({
       savedObjects,
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
     expect(result).toEqual([]);
@@ -163,8 +159,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
     const result = await getNonExistingReferenceAsKeys({
       savedObjects,
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
     expect(result).toEqual([]);
@@ -218,11 +213,10 @@ describe('getNonExistingReferenceAsKeys()', () => {
     const result = await getNonExistingReferenceAsKeys({
       savedObjects,
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
-    expect(result).toEqual([`${namespace}:index-pattern:1`, `${namespace}:search:3`]);
+    expect(result).toEqual([`index-pattern:1`, `search:3`]);
 
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
@@ -246,22 +240,21 @@ describe('getNonExistingReferenceAsKeys()', () => {
 describe('validateReferences()', () => {
   const namespace = 'foo-ns';
 
-  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
+  let getObjKey: jest.MockedFunction<ObjectKeyProvider>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     jest.resetAllMocks();
 
+    getObjKey = jest.fn().mockImplementation(({ type, id }) => `${type}:${id}`);
     savedObjectsClient = savedObjectsClientMock.create();
-    typeRegistry = typeRegistryMock.create();
   });
 
   test('returns empty when no objects are passed in', async () => {
     const result = await validateReferences({
       savedObjects: [],
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
     expect(result).toEqual([]);
@@ -366,8 +359,7 @@ describe('validateReferences()', () => {
     const result = await validateReferences({
       savedObjects,
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
     expect(result).toEqual([
@@ -470,8 +462,7 @@ describe('validateReferences()', () => {
       savedObjects,
       retries,
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
     expect(result).toEqual([]);
@@ -506,8 +497,7 @@ describe('validateReferences()', () => {
     const result = await validateReferences({
       savedObjects,
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
     expect(result).toEqual([]);
@@ -538,8 +528,7 @@ describe('validateReferences()', () => {
     const result = await validateReferences({
       savedObjects,
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
     expect(result).toEqual([]);
@@ -569,8 +558,7 @@ describe('validateReferences()', () => {
     const result = await validateReferences({
       savedObjects,
       savedObjectsClient,
-      typeRegistry,
-      importNamespaces: false,
+      getObjKey,
       namespace,
     });
     expect(result).toEqual([]);
@@ -607,8 +595,7 @@ describe('validateReferences()', () => {
       validateReferences({
         savedObjects,
         savedObjectsClient,
-        typeRegistry,
-        importNamespaces: false,
+        getObjKey,
         namespace,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(

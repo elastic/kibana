@@ -7,21 +7,10 @@
  */
 
 import { createObjectsFilter } from './create_objects_filter';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 
 describe('createObjectsFilter()', () => {
-  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
-  const namespace = 'foo-ns';
-
-  beforeEach(() => {
-    typeRegistry = typeRegistryMock.create();
-    typeRegistry.isSingleNamespace.mockImplementation((type) => {
-      return type !== 'shareable-type';
-    });
-  });
-
   it('should return false when contains empty parameters', () => {
-    const filter = createObjectsFilter([], typeRegistry, namespace);
+    const filter = createObjectsFilter([], ({ type, id }) => `${type}:${id}`);
     expect(filter({ type: 'a', id: '1', attributes: {}, references: [] })).toEqual(false);
   });
 
@@ -35,8 +24,7 @@ describe('createObjectsFilter()', () => {
           replaceReferences: [],
         },
       ],
-      typeRegistry,
-      namespace
+      ({ type, id }) => `${type}:${id}`
     );
     expect(
       fn({
@@ -58,8 +46,7 @@ describe('createObjectsFilter()', () => {
           replaceReferences: [],
         },
       ],
-      typeRegistry,
-      namespace
+      ({ type, id }) => `${type}:${id}`
     );
     expect(
       fn({
@@ -90,8 +77,7 @@ describe('createObjectsFilter()', () => {
           replaceReferences: [],
         },
       ],
-      typeRegistry,
-      namespace
+      ({ type, id, namespaces }) => `${namespaces![0]}:${type}:${id}`
     );
     expect(
       fn({
@@ -115,8 +101,7 @@ describe('createObjectsFilter()', () => {
           replaceReferences: [],
         },
       ],
-      typeRegistry,
-      namespace
+      ({ type, id, namespaces }) => `${namespaces![0]}:${type}:${id}`
     );
     expect(
       fn({
@@ -140,8 +125,7 @@ describe('createObjectsFilter()', () => {
           replaceReferences: [],
         },
       ],
-      typeRegistry,
-      namespace
+      ({ type, id }) => `${type}:${id}`
     );
     expect(
       fn({

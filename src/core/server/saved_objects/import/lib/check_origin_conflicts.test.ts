@@ -18,6 +18,7 @@ import { checkOriginConflicts, getImportIdMapForRetries } from './check_origin_c
 import { savedObjectsClientMock } from '../../../mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { ObjectKeyProvider } from './get_object_key';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckOriginConflictsParams = Parameters<typeof checkOriginConflicts>[0];
@@ -64,6 +65,7 @@ describe('#checkOriginConflicts', () => {
     namespace?: string;
     importIdMap?: Map<string, unknown>;
     ignoreRegularConflicts?: boolean;
+    getObjKey?: ObjectKeyProvider;
   }): CheckOriginConflictsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     find = savedObjectsClient.find;
@@ -71,11 +73,13 @@ describe('#checkOriginConflicts', () => {
     typeRegistry = typeRegistryMock.create();
     typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
     typeRegistry.isSingleNamespace.mockImplementation((type) => type !== MULTI_NS_TYPE);
+    const getObjKey: ObjectKeyProvider = ({ type, id }) => `${type}:${id}`;
     return {
       importIdMap: new Map<string, unknown>(), // empty by default
-      ...partial,
       savedObjectsClient,
       typeRegistry,
+      getObjKey,
+      ...partial,
     };
   };
 
@@ -540,13 +544,14 @@ describe('#getImportIdMapForRetries', () => {
     retries: SavedObjectsImportRetry[];
     createNewCopies: boolean;
     namespace?: string;
+    getObjKey?: ObjectKeyProvider;
   }): GetImportIdMapForRetriesParams => {
     typeRegistry = typeRegistryMock.create();
     typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
     typeRegistry.isSingleNamespace.mockImplementation((type) => type !== MULTI_NS_TYPE);
-
+    const getObjKey: ObjectKeyProvider = ({ type, id }) => `${type}:${id}`;
     return {
-      typeRegistry,
+      getObjKey,
       namespace,
       ...partials,
     };
@@ -581,8 +586,8 @@ describe('#getImportIdMapForRetries', () => {
     const checkOriginConflictsResult = await getImportIdMapForRetries(params);
     expect(checkOriginConflictsResult).toEqual(
       new Map([
-        [`${namespace}:${obj3.type}:${obj3.id}`, { id: 'id-X', omitOriginId: false }],
-        [`${namespace}:${obj4.type}:${obj4.id}`, { id: 'id-Y', omitOriginId: true }],
+        [`${obj3.type}:${obj3.id}`, { id: 'id-X', omitOriginId: false }],
+        [`${obj4.type}:${obj4.id}`, { id: 'id-Y', omitOriginId: true }],
       ])
     );
   });
@@ -595,7 +600,7 @@ describe('#getImportIdMapForRetries', () => {
 
     const checkOriginConflictsResult = await getImportIdMapForRetries(params);
     expect(checkOriginConflictsResult).toEqual(
-      new Map([[`${namespace}:${obj.type}:${obj.id}`, { id: 'id-X', omitOriginId: true }]])
+      new Map([[`${obj.type}:${obj.id}`, { id: 'id-X', omitOriginId: true }]])
     );
   });
 });

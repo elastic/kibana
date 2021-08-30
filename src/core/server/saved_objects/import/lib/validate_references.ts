@@ -7,8 +7,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from '../../types';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { getObjKey } from '../../service/lib';
+import type { ObjectKeyProvider } from '../lib';
 import { SavedObjectsBulkGetObject } from '../../service';
 import { SavedObjectsImportFailure, SavedObjectsImportRetry } from '../types';
 import { SavedObjectsImportError } from '../errors';
@@ -19,37 +18,31 @@ function filterReferencesToValidate({ type }: { type: string }) {
   return REF_TYPES_TO_VALIDATE.includes(type);
 }
 
-const getObjectsToSkip = (
-  retries: SavedObjectsImportRetry[] = [],
-  typeRegistry: ISavedObjectTypeRegistry,
-  namespace?: string
-) =>
+const getObjectsToSkip = (retries: SavedObjectsImportRetry[] = [], getObjKey: ObjectKeyProvider) =>
   retries.reduce(
     (acc, { ignoreMissingReferences, ...obj }) =>
-      ignoreMissingReferences ? acc.add(getObjKey(obj, typeRegistry, namespace)) : acc,
+      ignoreMissingReferences ? acc.add(getObjKey(obj)) : acc,
     new Set<string>()
   );
 
 export async function getNonExistingReferenceAsKeys({
   savedObjects,
   savedObjectsClient,
-  importNamespaces,
-  typeRegistry,
+  getObjKey,
   namespace,
   retries,
 }: {
   savedObjects: Array<SavedObject<{ title?: string }>>;
   savedObjectsClient: SavedObjectsClientContract;
-  importNamespaces: boolean;
-  typeRegistry: ISavedObjectTypeRegistry;
+  getObjKey: ObjectKeyProvider;
   namespace?: string;
   retries?: SavedObjectsImportRetry[];
 }) {
-  const objectsToSkip = getObjectsToSkip(retries, typeRegistry, namespace);
+  const objectsToSkip = getObjectsToSkip(retries, getObjKey);
   const collector = new Map<string, { type: string; id: string; namespaces?: string[] }>();
   // Collect all references within objects
   for (const savedObject of savedObjects) {
-    const objKey = getObjKey(savedObject, typeRegistry, namespace);
+    const objKey = getObjKey(savedObject);
 
     if (objectsToSkip.has(objKey)) {
       // skip objects with retries that have specified `ignoreMissingReferences`
@@ -57,18 +50,14 @@ export async function getNonExistingReferenceAsKeys({
     }
     const filteredReferences = (savedObject.references || []).filter(filterReferencesToValidate);
     for (const { type, id } of filteredReferences) {
-      const refKey = getObjKey(
-        { type, id, namespaces: savedObject.namespaces },
-        typeRegistry,
-        namespace
-      );
+      const refKey = getObjKey({ type, id, namespaces: savedObject.namespaces });
       collector.set(refKey, { type, id });
     }
   }
 
   // Remove objects that could be references
   for (const savedObject of savedObjects) {
-    collector.delete(getObjKey(savedObject, typeRegistry, namespace));
+    collector.delete(getObjKey(savedObject));
   }
   if (collector.size === 0) {
     return [];
@@ -96,16 +85,7 @@ export async function getNonExistingReferenceAsKeys({
     if (savedObject.error) {
       continue;
     }
-    // the (non-agnostic) objects returned from bulkGet will always have a `namespaces` field populated,
-    // but the keys we're using in the rest of the algorithm don't have it, so in that case, we exclude the namespaces
-    // when generating the key from the fetched object.
-    collector.delete(
-      getObjKey(
-        { ...savedObject, ...(importNamespaces ? {} : { namespaces: undefined }) },
-        typeRegistry,
-        namespace
-      )
-    );
+    collector.delete(getObjKey(savedObject));
   }
 
   return [...collector.keys()];
@@ -114,32 +94,29 @@ export async function getNonExistingReferenceAsKeys({
 export async function validateReferences({
   savedObjects,
   savedObjectsClient,
-  typeRegistry,
-  importNamespaces,
+  getObjKey,
   namespace,
   retries,
 }: {
   savedObjects: Array<SavedObject<{ title?: string }>>;
   savedObjectsClient: SavedObjectsClientContract;
-  typeRegistry: ISavedObjectTypeRegistry;
-  importNamespaces: boolean;
+  getObjKey: ObjectKeyProvider;
   namespace?: string;
   retries?: SavedObjectsImportRetry[];
 }) {
-  const objectsToSkip = getObjectsToSkip(retries, typeRegistry);
+  const objectsToSkip = getObjectsToSkip(retries, getObjKey);
   const errorMap: { [key: string]: SavedObjectsImportFailure } = {};
   const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys({
     savedObjects,
     savedObjectsClient,
-    typeRegistry,
-    importNamespaces,
-    namespace,
     retries,
+    namespace,
+    getObjKey,
   });
 
   // Filter out objects with missing references, add to error object
   savedObjects.forEach((obj) => {
-    const objKey = getObjKey(obj, typeRegistry, namespace);
+    const objKey = getObjKey(obj);
     if (objectsToSkip.has(objKey)) {
       // skip objects with retries that have specified `ignoreMissingReferences`
       return;
@@ -154,7 +131,7 @@ export async function validateReferences({
         namespaces: obj.namespaces,
       }));
     for (const enforcedRef of enforcedTypeReferences) {
-      if (nonExistingReferenceKeys.includes(getObjKey(enforcedRef, typeRegistry, namespace))) {
+      if (nonExistingReferenceKeys.includes(getObjKey(enforcedRef))) {
         missingReferences.push({ type: enforcedRef.type, id: enforcedRef.id });
       }
     }

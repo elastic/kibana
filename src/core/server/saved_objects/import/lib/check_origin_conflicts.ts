@@ -14,13 +14,14 @@ import {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from '../../types';
-import { getObjKey } from '../../service/lib';
+import type { ObjectKeyProvider } from './get_object_key';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 interface CheckOriginConflictsParams {
   objects: Array<SavedObject<{ title?: string }>>;
   savedObjectsClient: SavedObjectsClientContract;
   typeRegistry: ISavedObjectTypeRegistry;
+  getObjKey: ObjectKeyProvider;
   namespace?: string;
   ignoreRegularConflicts?: boolean;
   importIdMap: Map<string, unknown>;
@@ -33,9 +34,8 @@ type CheckOriginConflictParams = Omit<CheckOriginConflictsParams, 'objects'> & {
 interface GetImportIdMapForRetriesParams {
   objects: SavedObject[];
   retries: SavedObjectsImportRetry[];
+  getObjKey: ObjectKeyProvider;
   createNewCopies: boolean;
-  typeRegistry: ISavedObjectTypeRegistry;
-  namespace?: string;
 }
 
 interface InexactMatch<T> {
@@ -93,7 +93,7 @@ const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
 const checkOriginConflict = async (
   params: CheckOriginConflictParams
 ): Promise<Either<{ title?: string }>> => {
-  const { object, savedObjectsClient, typeRegistry, namespace, importIdMap } = params;
+  const { object, savedObjectsClient, getObjKey, typeRegistry, namespace, importIdMap } = params;
   const importIds = new Set(importIdMap.keys());
   const { type, originId } = object;
 
@@ -121,9 +121,7 @@ const checkOriginConflict = async (
     return { tag: 'right', value: object };
   }
   // This is an "inexact match" so far; filter the conflict destination(s) to exclude any that exactly match other objects we are importing.
-  const objects = savedObjects.filter(
-    (obj) => !importIds.has(getObjKey(obj, typeRegistry, namespace))
-  );
+  const objects = savedObjects.filter((obj) => !importIds.has(getObjKey(obj)));
   const destinations = transformObjectsToAmbiguousConflictFields(objects);
   if (destinations.length === 0) {
     // No conflict destinations remain after filtering, so this is a "no match" result.
@@ -151,7 +149,7 @@ const checkOriginConflict = async (
  *     B. Otherwise, this is an "ambiguous conflict" result; return an error.
  */
 export async function checkOriginConflicts({ objects, ...params }: CheckOriginConflictsParams) {
-  const { typeRegistry, namespace } = params;
+  const { getObjKey } = params;
   // Check each object for possible destination conflicts, ensuring we don't too many concurrent searches running.
   const mapper = async (object: SavedObject<{ title?: string }>) =>
     checkOriginConflict({ object, ...params });
@@ -180,7 +178,7 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
       ambiguousConflictSourcesMap.get(key)!
     );
     const { object, destinations } = result.value;
-    const objKey = getObjKey(object, typeRegistry, namespace);
+    const objKey = getObjKey(object);
     const { type, id, attributes } = object;
     if (sources.length === 1 && destinations.length === 1) {
       // This is a simple "inexact match" result -- a single import object has a single destination conflict.
@@ -238,17 +236,16 @@ export function getImportIdMapForRetries({
   objects,
   retries,
   createNewCopies,
-  namespace,
-  typeRegistry,
+  getObjKey,
 }: GetImportIdMapForRetriesParams) {
   const retryMap = retries.reduce(
-    (acc, cur) => acc.set(getObjKey(cur, typeRegistry, namespace), cur),
+    (acc, cur) => acc.set(getObjKey(cur), cur),
     new Map<string, SavedObjectsImportRetry>()
   );
   const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
 
   objects.forEach((obj) => {
-    const objKey = getObjKey(obj, typeRegistry, namespace);
+    const objKey = getObjKey(obj);
     const retry = retryMap.get(objKey);
     if (!retry) {
       throw new Error(`Retry was expected for "${objKey}" but not found`);

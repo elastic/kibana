@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
-import { getObjKey } from '../../service/lib';
+import type { ObjectKeyProvider } from './get_object_key';
 import type { SavedObject } from '../../types';
 import type { SavedObjectsImportRetry } from '../types';
 import { splitOverwrites } from './split_overwrites';
 
 describe('splitOverwrites', () => {
-  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
-  const namespace = 'foo-ns';
+  let getObjKey: jest.MockedFunction<ObjectKeyProvider>;
 
   const createObject = ({ type, id }: { type: string; id: string }): SavedObject => ({
     type,
@@ -38,10 +36,8 @@ describe('splitOverwrites', () => {
     replaceReferences: [],
   });
 
-  const getKey = (obj: SavedObject, ns = namespace) => getObjKey(obj, typeRegistry, ns);
-
   beforeEach(() => {
-    typeRegistry = typeRegistryMock.create();
+    getObjKey = jest.fn().mockImplementation(({ type, id }) => `${type}:${id}`);
   });
 
   it('should split array accordingly', () => {
@@ -60,11 +56,13 @@ describe('splitOverwrites', () => {
     const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites({
       savedObjects,
       retries,
-      typeRegistry,
-      namespace,
+      getObjKey,
     });
 
-    expect(objectsToOverwrite.map((obj) => getKey(obj))).toEqual([getKey(objA), getKey(objC)]);
-    expect(objectsToNotOverwrite.map((obj) => getKey(obj))).toEqual([getKey(objB)]);
+    expect(objectsToOverwrite.map((obj) => getObjKey(obj))).toEqual([
+      getObjKey(objA),
+      getObjKey(objC),
+    ]);
+    expect(objectsToNotOverwrite.map((obj) => getObjKey(obj))).toEqual([getObjKey(objB)]);
   });
 });

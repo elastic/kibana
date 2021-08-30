@@ -7,8 +7,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
-import { getObjKey } from '../../service/lib';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { ObjectKeyProvider } from './get_object_key';
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from '../types';
 
@@ -16,7 +15,7 @@ interface CreateSavedObjectsParams<T> {
   objects: Array<SavedObject<T>>;
   accumulatedErrors: SavedObjectsImportFailure[];
   savedObjectsClient: SavedObjectsClientContract;
-  typeRegistry: ISavedObjectTypeRegistry;
+  getObjKey: ObjectKeyProvider;
   importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
   importNamespaces: boolean;
   namespace?: string;
@@ -36,7 +35,7 @@ export const createSavedObjects = async <T>({
   objects,
   accumulatedErrors,
   savedObjectsClient,
-  typeRegistry,
+  getObjKey,
   importIdMap,
   importNamespaces,
   namespace,
@@ -44,12 +43,10 @@ export const createSavedObjects = async <T>({
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
   // filter out any objects that resulted in errors
   const errorSet = accumulatedErrors.reduce(
-    (acc, obj) => acc.add(getObjKey(obj, typeRegistry, namespace)),
+    (acc, obj) => acc.add(getObjKey(obj)),
     new Set<string>()
   );
-  const filteredObjects = objects.filter(
-    (obj) => !errorSet.has(getObjKey(obj, typeRegistry, namespace))
-  );
+  const filteredObjects = objects.filter((obj) => !errorSet.has(getObjKey(obj)));
 
   // exit early if there are no objects to create
   if (filteredObjects.length === 0) {
@@ -58,7 +55,7 @@ export const createSavedObjects = async <T>({
 
   // generate a map of the raw object IDs
   const objectIdMap = filteredObjects.reduce(
-    (map, object) => map.set(getObjKey(object, typeRegistry, namespace), object),
+    (map, object) => map.set(getObjKey(object), object),
     new Map<string, SavedObject<T>>()
   );
 
@@ -68,15 +65,11 @@ export const createSavedObjects = async <T>({
     const references = object.references?.map((reference) => {
       const { type, id } = reference;
       const importIdEntry = importIdMap.get(
-        getObjKey(
-          {
-            type,
-            id,
-            namespaces: object.namespaces,
-          },
-          typeRegistry,
-          namespace
-        )
+        getObjKey({
+          type,
+          id,
+          namespaces: object.namespaces,
+        })
       );
       if (importIdEntry?.id) {
         return { ...reference, id: importIdEntry.id };
@@ -85,12 +78,9 @@ export const createSavedObjects = async <T>({
     });
     // use the import ID map to ensure that each object is being created with the correct ID, also ensure that the `originId` is set on
     // the created object if it did not have one (or is omitted if specified)
-    const importIdEntry = importIdMap.get(getObjKey(object, typeRegistry, namespace));
+    const importIdEntry = importIdMap.get(getObjKey(object));
     if (importIdEntry?.id) {
-      objectIdMap.set(
-        getObjKey({ ...object, id: importIdEntry.id }, typeRegistry, namespace),
-        object
-      );
+      objectIdMap.set(getObjKey({ ...object, id: importIdEntry.id }), object);
       const originId = importIdEntry.omitOriginId ? undefined : object.originId ?? object.id;
       return { ...object, id: importIdEntry.id, originId, ...(references && { references }) };
     }
@@ -103,7 +93,7 @@ export const createSavedObjects = async <T>({
     const bulkCreateResponse = await savedObjectsClient.bulkCreate(
       objectsToCreate.map(({ namespaces, ...obj }) => ({
         ...obj,
-        ...(namespaces && importNamespaces ? { initialNamespaces: namespaces } : {}),
+        ...(importNamespaces ? { initialNamespaces: namespaces } : {}),
       })),
       {
         namespace,
@@ -119,15 +109,14 @@ export const createSavedObjects = async <T>({
     // the (non-agnostic) created objects will always have a `namespaces` field populated,
     // but the keys we're using in the rest of the algorithm don't have it, so in that case, we exclude the namespaces
     // when generating the key from the created object.
+    // TODO: not sure omitting namespaces is still required now that we extracted getObjKey
     const resultKey = getObjKey(
       importNamespaces
         ? result
         : {
             ...result,
             namespaces: undefined,
-          },
-      typeRegistry,
-      namespace
+          }
     );
 
     const { id } = objectIdMap.get(resultKey)!;
@@ -141,6 +130,6 @@ export const createSavedObjects = async <T>({
 
   return {
     createdObjects: remappedResults.filter((obj) => !obj.error),
-    errors: extractErrors(remappedResults, objects, typeRegistry, namespace),
+    errors: extractErrors(remappedResults, objects, getObjKey),
   };
 };

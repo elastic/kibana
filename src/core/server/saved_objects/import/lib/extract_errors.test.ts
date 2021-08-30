@@ -6,26 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObject } from '../../types';
 import { extractErrors } from './extract_errors';
 import { SavedObjectsErrorHelpers } from '../../service';
+import type { ObjectKeyProvider } from './get_object_key';
 import { CreatedObject } from '../types';
 
 describe('extractErrors()', () => {
-  const namespace = 'foo-ns';
-  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
+  let getObjKey: ObjectKeyProvider;
 
   beforeEach(() => {
-    typeRegistry = typeRegistryMock.create();
-    typeRegistry.isSingleNamespace.mockImplementation((type) => {
-      return type !== 'multiple';
-    });
+    getObjKey = ({ type, id }) => `${type}:${id}`;
   });
 
   test('returns empty array when no errors exist', () => {
     const savedObjects: SavedObject[] = [];
-    const result = extractErrors(savedObjects, savedObjects, typeRegistry, namespace);
+    const result = extractErrors(savedObjects, savedObjects, getObjKey);
     expect(result).toEqual([]);
   });
 
@@ -60,7 +56,7 @@ describe('extractErrors()', () => {
         destinationId: 'foo',
       },
     ];
-    const result = extractErrors(savedObjects, savedObjects, typeRegistry, namespace);
+    const result = extractErrors(savedObjects, savedObjects, getObjKey);
     expect(result).toEqual([
       {
         type: 'dashboard',

@@ -9,7 +9,6 @@
 import { Readable } from 'stream';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsClientContract } from '../types';
-import { getObjKey } from '../service/lib';
 import {
   SavedObjectsImportFailure,
   SavedObjectsImportResponse,
@@ -23,6 +22,7 @@ import {
   regenerateIds,
   collectSavedObjects,
   executeImportHooks,
+  getObjectKeyProvider,
 } from './lib';
 
 /**
@@ -69,14 +69,23 @@ export async function importSavedObjectsFromStream({
   namespace,
   importNamespaces,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
+  const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
+
   let errorAccumulator: SavedObjectsImportFailure[] = [];
+
+  const getObjKey = getObjectKeyProvider({
+    typeRegistry,
+    namespace,
+    useObjectNamespaces: importNamespaces,
+    useProvidedNamespace: namespace !== undefined,
+  });
 
   // Get the objects to import
   const collectSavedObjectsResult = await collectSavedObjects({
     readStream,
     objectLimit,
-    typeRegistry,
-    namespace,
+    supportedTypes,
+    getObjKey,
   });
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
 
@@ -91,8 +100,7 @@ export async function importSavedObjectsFromStream({
   const validateReferencesResult = await validateReferences({
     savedObjects: collectSavedObjectsResult.collectedObjects,
     savedObjectsClient,
-    typeRegistry,
-    importNamespaces,
+    getObjKey,
     namespace,
   });
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
@@ -100,15 +108,14 @@ export async function importSavedObjectsFromStream({
   if (createNewCopies) {
     importIdMap = regenerateIds({
       objects: collectSavedObjectsResult.collectedObjects,
-      typeRegistry,
-      namespace,
+      getObjKey,
     });
   } else {
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsResult = await checkConflicts({
       objects: collectSavedObjectsResult.collectedObjects,
       savedObjectsClient,
-      typeRegistry,
+      getObjKey,
       namespace,
       ignoreRegularConflicts: overwrite,
     });
@@ -120,6 +127,7 @@ export async function importSavedObjectsFromStream({
     const checkOriginConflictsResult = await checkOriginConflicts({
       objects: checkConflictsResult.filteredObjects,
       savedObjectsClient,
+      getObjKey,
       typeRegistry,
       namespace,
       ignoreRegularConflicts: overwrite,
@@ -138,7 +146,7 @@ export async function importSavedObjectsFromStream({
     objects: collectSavedObjectsResult.collectedObjects,
     accumulatedErrors: errorAccumulator,
     savedObjectsClient,
-    typeRegistry,
+    getObjKey,
     importIdMap,
     overwrite,
     namespace,
@@ -153,9 +161,7 @@ export async function importSavedObjectsFromStream({
       title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
       icon: typeRegistry.getType(type)?.management?.icon,
     };
-    const attemptedOverwrite = pendingOverwrites.has(
-      getObjKey(createdObject, typeRegistry, namespace)
-    );
+    const attemptedOverwrite = pendingOverwrites.has(getObjKey(createdObject));
     return {
       type,
       id,

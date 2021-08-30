@@ -14,13 +14,12 @@ import {
   SavedObjectError,
   SavedObjectsImportRetry,
 } from '../../types';
-import { getObjKey } from '../../service/lib';
-import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { ObjectKeyProvider } from './get_object_key';
 
 interface CheckConflictsParams {
   objects: Array<SavedObject<{ title?: string }>>;
   savedObjectsClient: SavedObjectsClientContract;
-  typeRegistry: ISavedObjectTypeRegistry;
+  getObjKey: ObjectKeyProvider;
   namespace?: string;
   ignoreRegularConflicts?: boolean;
   retries?: SavedObjectsImportRetry[];
@@ -33,7 +32,7 @@ const isUnresolvableConflict = (error: SavedObjectError) =>
 export async function checkConflicts({
   objects,
   savedObjectsClient,
-  typeRegistry,
+  getObjKey,
   namespace,
   ignoreRegularConflicts,
   retries = [],
@@ -50,11 +49,11 @@ export async function checkConflicts({
   }
 
   const retryMap = retries.reduce(
-    (acc, cur) => acc.set(getObjKey(cur, typeRegistry, namespace), cur),
+    (acc, cur) => acc.set(getObjKey(cur), cur),
     new Map<string, SavedObjectsImportRetry>()
   );
   const objectsToCheck = objects.map((x) => {
-    const objKey = getObjKey(x, typeRegistry, namespace);
+    const objKey = getObjKey(x);
     const id = retryMap.get(objKey)?.destinationId ?? x.id;
     return { ...x, id };
   });
@@ -62,25 +61,21 @@ export async function checkConflicts({
     namespace,
   });
   const errorMap = checkConflictsResult.errors.reduce(
-    (acc, { error, ...obj }) => acc.set(getObjKey(obj, typeRegistry, namespace), error),
+    (acc, { error, ...obj }) => acc.set(getObjKey(obj), error),
     new Map<string, SavedObjectError>()
   );
 
   objects.forEach((object) => {
-    const objKey = getObjKey(object, typeRegistry, namespace);
+    const objKey = getObjKey(object);
     const {
       attributes: { title },
     } = object;
     const { destinationId, overwrite, createNewCopy } = retryMap.get(objKey) || {};
     const errorObj = errorMap.get(
-      getObjKey(
-        {
-          ...object,
-          id: destinationId ?? object.id,
-        },
-        typeRegistry,
-        namespace
-      )
+      getObjKey({
+        ...object,
+        id: destinationId ?? object.id,
+      })
     );
     if (errorObj && isUnresolvableConflict(errorObj)) {
       // Any object create attempt that would result in an unresolvable conflict should have its ID regenerated. This way, when an object

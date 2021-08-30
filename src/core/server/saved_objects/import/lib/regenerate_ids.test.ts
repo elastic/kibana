@@ -7,13 +7,12 @@
  */
 
 import { mockUuidv4 } from './__mocks__';
-import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
+import type { ObjectKeyProvider } from './get_object_key';
 import { regenerateIds } from './regenerate_ids';
 import { SavedObject } from '../../types';
 
 describe('#regenerateIds', () => {
-  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
-  const namespace = 'foo-ns';
+  let getObjKey: jest.MockedFunction<ObjectKeyProvider>;
 
   const mapToObj = <V>(map: Map<string, V>): Record<string, V> => {
     return Object.fromEntries(map.entries());
@@ -38,10 +37,7 @@ describe('#regenerateIds', () => {
   beforeEach(() => {
     mockUuidv4.mockReset();
 
-    typeRegistry = typeRegistryMock.create();
-    typeRegistry.isSingleNamespace.mockImplementation((type) => {
-      return type !== 'shareable';
-    });
+    getObjKey = jest.fn().mockImplementation(({ type, id }) => `${type}:${id}`);
   });
 
   test('returns expected values', () => {
@@ -60,24 +56,47 @@ describe('#regenerateIds', () => {
       mapToObj(
         regenerateIds({
           objects,
-          typeRegistry,
-          namespace,
+          getObjKey,
         })
       )
     ).toEqual({
-      'foo-ns:foo:1': {
+      'foo:1': {
         id: 'uuid1',
         omitOriginId: true,
       },
-      'foo-ns:bar:2': {
+      'bar:2': {
         id: 'uuid2',
         omitOriginId: true,
       },
-      'foo-ns:baz:3': {
+      'baz:3': {
         id: 'uuid3',
         omitOriginId: true,
       },
     });
+  });
+
+  test('call `getObjKey` with each object', () => {
+    mockUuidv4
+      .mockReturnValueOnce('uuid1')
+      .mockReturnValueOnce('uuid2')
+      .mockReturnValueOnce('uuid3');
+
+    const objects = [
+      createObj({ type: 'foo', id: '1' }),
+      createObj({ type: 'shareable', id: '2', namespaces: ['ns1', 'ns2'] }),
+      createObj({ type: 'bar', id: '3', namespaces: ['other-ns'] }),
+    ];
+
+    regenerateIds({
+      objects,
+      getObjKey,
+    });
+
+    expect(getObjKey).toHaveBeenCalledTimes(3);
+
+    expect(getObjKey).toHaveBeenCalledWith(objects[0]);
+    expect(getObjKey).toHaveBeenCalledWith(objects[1]);
+    expect(getObjKey).toHaveBeenCalledWith(objects[2]);
   });
 
   test('generates correct keys for the objects', () => {
@@ -96,12 +115,11 @@ describe('#regenerateIds', () => {
       mapToObj(
         regenerateIds({
           objects,
-          typeRegistry,
-          namespace,
+          getObjKey,
         })
       )
     ).toEqual({
-      'foo-ns:foo:1': {
+      'foo:1': {
         id: 'uuid1',
         omitOriginId: true,
       },
@@ -109,7 +127,7 @@ describe('#regenerateIds', () => {
         id: 'uuid2',
         omitOriginId: true,
       },
-      'other-ns:bar:3': {
+      'bar:3': {
         id: 'uuid3',
         omitOriginId: true,
       },

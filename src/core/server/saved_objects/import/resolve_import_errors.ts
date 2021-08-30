@@ -9,7 +9,7 @@
 import { Readable } from 'stream';
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportRetry } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { getObjKey } from '../service/lib';
+import { getObjectKeyProvider } from './lib';
 import {
   SavedObjectsImportFailure,
   SavedObjectsImportHook,
@@ -75,13 +75,22 @@ export async function resolveSavedObjectsImportErrors({
   importNamespaces = false,
   createNewCopies,
 }: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
+  const getObjKey = getObjectKeyProvider({
+    typeRegistry,
+    namespace,
+    useObjectNamespaces: importNamespaces,
+    useProvidedNamespace: namespace !== undefined,
+  });
+
   // throw a BadRequest error if we see invalid retries
-  validateRetries(retries, typeRegistry, namespace);
+  validateRetries(retries, getObjKey);
+
+  const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
 
   let successCount = 0;
   let errorAccumulator: SavedObjectsImportFailure[] = [];
   let importIdMap: Map<string, { id?: string; omitOriginId?: boolean }> = new Map();
-  const filter = createObjectsFilter(retries, typeRegistry, namespace);
+  const filter = createObjectsFilter(retries, getObjKey);
 
   // Get the objects to resolve errors
   const { errors: collectorErrors, collectedObjects: objectsToResolve } = await collectSavedObjects(
@@ -89,8 +98,8 @@ export async function resolveSavedObjectsImportErrors({
       readStream,
       objectLimit,
       filter,
-      typeRegistry,
-      namespace,
+      getObjKey,
+      supportedTypes,
     }
   );
   errorAccumulator = [...errorAccumulator, ...collectorErrors];
@@ -101,25 +110,19 @@ export async function resolveSavedObjectsImportErrors({
   for (const retry of retries) {
     const map: Record<string, string> = {};
     for (const { type, from, to } of retry.replaceReferences) {
-      map[
-        getObjKey({ type, id: from, namespaces: retry.namespaces }, typeRegistry, namespace)
-      ] = to;
+      map[getObjKey({ type, id: from, namespaces: retry.namespaces })] = to;
     }
-    retriesReferencesMap.set(getObjKey(retry, typeRegistry, namespace), map);
+    retriesReferencesMap.set(getObjKey(retry), map);
   }
 
   // Replace references
   for (const savedObject of objectsToResolve) {
-    const refMap = retriesReferencesMap.get(getObjKey(savedObject, typeRegistry, namespace));
+    const refMap = retriesReferencesMap.get(getObjKey(savedObject));
     if (!refMap) {
       continue;
     }
     for (const reference of savedObject.references || []) {
-      const refKey = getObjKey(
-        { ...reference, namespaces: savedObject.namespaces },
-        typeRegistry,
-        namespace
-      );
+      const refKey = getObjKey({ ...reference, namespaces: savedObject.namespaces });
       if (refMap[refKey]) {
         reference.id = refMap[refKey];
       }
@@ -130,7 +133,7 @@ export async function resolveSavedObjectsImportErrors({
   const validateReferencesResult = await validateReferences({
     savedObjects: objectsToResolve,
     savedObjectsClient,
-    typeRegistry,
+    getObjKey,
     namespace,
     retries,
   });
@@ -141,8 +144,7 @@ export async function resolveSavedObjectsImportErrors({
     // This is because a retry to resolve a missing reference error may not necessarily specify a destinationId
     importIdMap = regenerateIds({
       objects: objectsToResolve,
-      typeRegistry,
-      namespace,
+      getObjKey,
     });
   }
 
@@ -150,7 +152,7 @@ export async function resolveSavedObjectsImportErrors({
   const checkConflictsResult = await checkConflicts({
     objects: objectsToResolve,
     savedObjectsClient,
-    typeRegistry,
+    getObjKey,
     namespace,
     retries,
     createNewCopies,
@@ -162,8 +164,7 @@ export async function resolveSavedObjectsImportErrors({
     objects: checkConflictsResult.filteredObjects,
     retries,
     createNewCopies,
-    typeRegistry,
-    namespace,
+    getObjKey,
   });
   importIdMap = new Map([
     ...importIdMap,
@@ -183,7 +184,7 @@ export async function resolveSavedObjectsImportErrors({
       objects,
       accumulatedErrors,
       savedObjectsClient,
-      typeRegistry,
+      getObjKey,
       importIdMap,
       namespace,
       overwrite,
@@ -216,8 +217,7 @@ export async function resolveSavedObjectsImportErrors({
   const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites({
     savedObjects: objectsToResolve,
     retries,
-    typeRegistry,
-    namespace,
+    getObjKey,
   });
   await bulkCreateObjects(objectsToOverwrite, true);
   await bulkCreateObjects(objectsToNotOverwrite);
