@@ -20,7 +20,7 @@ The following {kib} spaces APIs are available:
 
 * <<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects to space conflicts API>> to overwrite saved objects returned as errors from the copy saved objects to space API
 
-* <<spaces-api-disable-legacy-url-aliases, Disable legacy URL aliases API>> to disable legacy URL aliases
+* <<spaces-api-disable-legacy-url-aliases, Disable legacy URL aliases API>> to disable legacy URL aliases if an error is encountered
 
 include::spaces-management/post.asciidoc[]
 include::spaces-management/put.asciidoc[]
