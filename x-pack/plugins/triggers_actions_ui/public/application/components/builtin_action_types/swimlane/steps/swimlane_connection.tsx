@@ -4,7 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCallOut, EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFieldText,
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiFieldPassword,
+} from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as i18n from '../translations';
@@ -141,7 +149,7 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({
               <EuiSpacer size="m" />
             </>
           )}
-          <EuiFieldText
+          <EuiFieldPassword
             fullWidth
             isInvalid={isApiTokenInvalid}
             readOnly={readOnly}

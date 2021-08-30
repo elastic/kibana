@@ -76,11 +76,20 @@ describe('Search Sessions Management table column factory', () => {
       expires: '2020-12-07T00:19:32Z',
       initialState: {},
       restoreState: {},
+      version: '7.14.0',
     };
   });
 
   test('returns columns', () => {
-    const columns = getColumns(mockCoreStart, mockPluginsSetup, api, mockConfig, tz, handleAction);
+    const columns = getColumns(
+      mockCoreStart,
+      mockPluginsSetup,
+      api,
+      mockConfig,
+      tz,
+      handleAction,
+      '7.14.0'
+    );
     expect(columns).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -144,12 +153,77 @@ describe('Search Sessions Management table column factory', () => {
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const name = mount(nameColumn.render!(mockSession.name, mockSession) as ReactElement);
 
       expect(name.text()).toBe('Cool mock session');
+    });
+
+    describe('old version warning', () => {
+      const currentKibanaVersion = '7.14.0';
+      const olderKibanaVersion = '7.13.0';
+      let hasRenderedVersionWarning: (partialSession: Partial<UISession>) => boolean;
+      beforeEach(() => {
+        const [, nameColumn] = getColumns(
+          mockCoreStart,
+          mockPluginsSetup,
+          api,
+          mockConfig,
+          tz,
+          handleAction,
+          currentKibanaVersion
+        ) as Array<EuiTableFieldDataColumnType<UISession>>;
+
+        hasRenderedVersionWarning = (partialSession: Partial<UISession>): boolean => {
+          const session: UISession = {
+            ...mockSession,
+            ...partialSession,
+          };
+          const node = mount(
+            nameColumn.render!(session.name, session) as ReactElement
+          ).getDOMNode();
+          return !!node.querySelector('[data-test-subj="versionIncompatibleWarningTestSubj"]');
+        };
+      });
+
+      test("don't render warning for the same version when can restore", () => {
+        expect(
+          hasRenderedVersionWarning({
+            version: currentKibanaVersion,
+            status: SearchSessionStatus.COMPLETE,
+          })
+        ).toBe(false);
+      });
+
+      test("don't render warning for the same version when can't restore", () => {
+        expect(
+          hasRenderedVersionWarning({
+            version: currentKibanaVersion,
+            status: SearchSessionStatus.EXPIRED,
+          })
+        ).toBe(false);
+      });
+
+      test('render a warning for a different version when can restore', () => {
+        expect(
+          hasRenderedVersionWarning({
+            version: olderKibanaVersion,
+            status: SearchSessionStatus.COMPLETE,
+          })
+        ).toBe(true);
+      });
+
+      test("don't render a warning for a different version when can't restore", () => {
+        expect(
+          hasRenderedVersionWarning({
+            version: olderKibanaVersion,
+            status: SearchSessionStatus.EXPIRED,
+          })
+        ).toBe(false);
+      });
     });
   });
 
@@ -162,7 +236,8 @@ describe('Search Sessions Management table column factory', () => {
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const numOfSearchesLine = mount(
@@ -181,7 +256,8 @@ describe('Search Sessions Management table column factory', () => {
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const statusLine = mount(status.render!(mockSession.status, mockSession) as ReactElement);
@@ -197,7 +273,8 @@ describe('Search Sessions Management table column factory', () => {
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       mockSession.status = 'INVALID' as SearchSessionStatus;
@@ -220,7 +297,8 @@ describe('Search Sessions Management table column factory', () => {
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const date = mount(createdDateCol.render!(mockSession.created, mockSession) as ReactElement);
@@ -237,7 +315,8 @@ describe('Search Sessions Management table column factory', () => {
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const date = mount(createdDateCol.render!(mockSession.created, mockSession) as ReactElement);
@@ -252,7 +331,8 @@ describe('Search Sessions Management table column factory', () => {
         api,
         mockConfig,
         tz,
-        handleAction
+        handleAction,
+        '7.14.0'
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       mockSession.created = 'INVALID';

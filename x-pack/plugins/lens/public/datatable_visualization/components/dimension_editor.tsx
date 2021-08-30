@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { VisualizationDimensionEditorProps } from '../../types';
-import { ColumnState, DatatableVisualizationState } from '../visualization';
-import { getOriginalId } from '../transpose_helpers';
+import { DatatableVisualizationState } from '../visualization';
 import {
   CustomizablePalette,
   applyPaletteParams,
@@ -33,13 +32,16 @@ import {
   PalettePanelContainer,
   findMinMaxByColumnId,
 } from '../../shared_components/';
-import './dimension_editor.scss';
+import type { ColumnState } from '../../../common/expressions';
 import {
+  isNumericFieldForDatatable,
   getDefaultSummaryLabel,
   getFinalSummaryConfiguration,
   getSummaryRowOptions,
-} from '../summary';
-import { isNumericField } from '../utils';
+  getOriginalId,
+} from '../../../common/expressions';
+
+import './dimension_editor.scss';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -84,7 +86,7 @@ export function TableDimensionEditor(
       onChange: onSummaryLabelChangeToDebounce,
       value: column?.summaryLabel,
     },
-    { allowEmptyString: true } // empty string is a valid label for this feature
+    { allowFalsyValue: true } // falsy values are valid for this feature
   );
 
   if (!column) return null;
@@ -93,7 +95,7 @@ export function TableDimensionEditor(
   const currentData = frame.activeData?.[state.layerId];
 
   // either read config state or use same logic as chart itself
-  const isNumeric = isNumericField(currentData, accessor);
+  const isNumeric = isNumericFieldForDatatable(currentData, accessor);
   const currentAlignment = column?.alignment || (isNumeric ? 'right' : 'left');
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';

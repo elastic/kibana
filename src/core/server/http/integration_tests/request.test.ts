@@ -30,10 +30,11 @@ const setupDeps = {
   executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
 
-beforeEach(() => {
+beforeEach(async () => {
   logger = loggingSystemMock.create();
 
   server = createHttpServer({ logger });
+  await server.preboot({ context: contextServiceMock.createPrebootContract() });
 });
 
 afterEach(async () => {

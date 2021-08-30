@@ -1,0 +1,64 @@
+{
+  "type": "index",
+  "value": {
+    "index": "endpoint_without_host_type",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "os": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "caseless": {
+                      "type": "keyword",
+                      "ignore_above": 1024,
+                      "normalizer": "lowercase"
+                    },
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                }
+              }
+            },
+            "name": {
+              "type": "keyword",
+              "ignore_above": 1024,
+              "fields": {
+                "caseless": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "normalizer": "lowercase"
+                },
+                "text": {
+                  "type": "text"
+                }
+              }
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "code": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

@@ -40,9 +40,7 @@ export const config = {
         schema.literal(SearchAggregatedTransactionSetting.always),
         schema.literal(SearchAggregatedTransactionSetting.never),
       ],
-      {
-        defaultValue: SearchAggregatedTransactionSetting.never,
-      }
+      { defaultValue: SearchAggregatedTransactionSetting.auto }
     ),
     telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
     metricsInterval: schema.number({ defaultValue: 30 }),

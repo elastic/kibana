@@ -171,7 +171,7 @@ describe('ES search strategy', () => {
         expect(request.index).toEqual(params.index);
         expect(request.body).toEqual(params.body);
 
-        expect(request).toHaveProperty('keep_alive', '60000ms');
+        expect(request).toHaveProperty('keep_alive', '604800000ms');
       });
 
       it('makes a GET request to async search without keepalive', async () => {

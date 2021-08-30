@@ -45,6 +45,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       { x: 'Other', y: 5722.77 },
     ];
 
+    const expectedPieData = [
+      { name: '97.220.3.248', value: 19755 },
+      { name: '169.228.188.120', value: 18994 },
+      { name: '78.83.247.30', value: 17246 },
+      { name: '226.82.228.233', value: 15687 },
+      { name: '93.28.27.24', value: 15614.33 },
+      { name: '__other__', value: 5722.77 },
+    ];
+
     function assertMatchesExpectedData(state: DebugState) {
       expect(
         state.bars![0].bars.map((bar) => ({
@@ -54,32 +63,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).to.eql(expectedData);
     }
 
+    function assertMatchesExpectedPieData(state: DebugState) {
+      expect(
+        state
+          .partition![0].partitions.map((partition) => ({
+            name: partition.name,
+            value: Math.floor(partition.value * 100) / 100,
+          }))
+          .sort(({ value: a }, { value: b }) => b - a)
+      ).to.eql(expectedPieData);
+    }
+
     it('should render xy chart', async () => {
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
     });
 
-    // Partition chart tests have to be skipped until
-    // https://github.com/elastic/elastic-charts/issues/917 gets fixed
-    it.skip('should render pie chart', async () => {
+    it('should render pie chart', async () => {
       await PageObjects.lens.switchToVisualization('pie');
       await PageObjects.lens.waitForVisualization();
       const data = await PageObjects.lens.getCurrentChartDebugState();
-      assertMatchesExpectedData(data!);
+      assertMatchesExpectedPieData(data!);
     });
 
-    it.skip('should render donut chart', async () => {
+    it('should render donut chart', async () => {
       await PageObjects.lens.switchToVisualization('donut');
       await PageObjects.lens.waitForVisualization();
       const data = await PageObjects.lens.getCurrentChartDebugState();
-      assertMatchesExpectedData(data!);
+      assertMatchesExpectedPieData(data!);
     });
 
-    it.skip('should render treemap chart', async () => {
+    it('should render treemap chart', async () => {
       await PageObjects.lens.switchToVisualization('treemap', 'treemap');
       await PageObjects.lens.waitForVisualization();
       const data = await PageObjects.lens.getCurrentChartDebugState();
-      assertMatchesExpectedData(data!);
+      assertMatchesExpectedPieData(data!);
     });
 
     it('should render heatmap chart', async () => {
@@ -107,11 +125,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend
       expect(debugState.legend!.items).to.eql([
-        { key: '5722.77', name: '> 5,722.77', color: '#6092c0' },
-        { key: '8529.22', name: '> 8,529.22', color: '#a8bfda' },
-        { key: '11335.66', name: '> 11,335.66', color: '#ebeff5' },
-        { key: '14142.11', name: '> 14,142.11', color: '#ecb385' },
-        { key: '16948.55', name: '> 16,948.55', color: '#e7664c' },
+        { color: '#6092c0', key: '5,722.77 - 8,529.22', name: '5,722.77 - 8,529.22' },
+        { color: '#a8bfda', key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66' },
+        { color: '#ebeff5', key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11' },
+        { color: '#ecb385', key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55' },
+        { color: '#e7664c', key: '≥ 16,948.55', name: '≥ 16,948.55' },
       ]);
     });
 

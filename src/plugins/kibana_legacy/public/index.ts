@@ -14,7 +14,6 @@ export const plugin = (initializerContext: PluginInitializerContext) =>
 
 export * from './plugin';
 
-export { initAngularBootstrap } from './angular_bootstrap';
 export { PaginateDirectiveProvider, PaginateControlsDirectiveProvider } from './paginate/paginate';
 export * from './angular';
 export * from './notify';

@@ -13,7 +13,6 @@ import {
   setupEnvironment,
   pageHelpers,
   nextTick,
-  delay,
   getRandomString,
   findTestSubject,
 } from './helpers';
@@ -409,9 +408,9 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await delay(100);
-          testBed.component.update();
         });
+
+        testBed.component.update();
       });
 
       test('should display an empty prompt', () => {
@@ -438,9 +437,8 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await delay(2000);
-          testBed.component.update();
         });
+        testBed.component.update();
       });
 
       test('should display an empty prompt', () => {
@@ -477,9 +475,9 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await delay(2000);
-          testBed.component.update();
         });
+
+        testBed.component.update();
       });
 
       test('should list them in the table', async () => {

@@ -31,3 +31,6 @@ export const getPolicyByName = (
     return policies.find((policy: PolicyFromES) => policy.name === policyName);
   }
 };
+
+export const hasLinkedIndices = (policy: PolicyFromES) =>
+  Boolean(policy.indices && policy.indices.length);

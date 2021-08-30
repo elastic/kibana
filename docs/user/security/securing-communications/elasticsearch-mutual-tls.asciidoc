@@ -109,7 +109,7 @@ This role mapping will assign the `kibana_system` role to any user that matches 
 certificate's DN attribute:
 
 [role="screenshot"]
-image:user/security/images/mutual-tls-role-mapping.png["Role mapping for the {kib} client certificate"]
+image:security/images/mutual-tls-role-mapping.png["Role mapping for the {kib} client certificate"]
 
 For more information, see <<role-mappings,role mappings>>.
 --

@@ -20,9 +20,8 @@ import type { SearchCapabilities } from '../../search_strategies';
 import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
 
 const calculateBucketData = (timeInterval: string, capabilities: SearchCapabilities) => {
-  let intervalString = capabilities
-    ? capabilities.getValidTimeInterval(timeInterval)
-    : timeInterval;
+  let intervalString = capabilities?.getValidTimeInterval(timeInterval) ?? timeInterval;
+
   const intervalStringMatch = intervalString.match(INTERVAL_STRING_RE);
   const parsedInterval = parseInterval(intervalString);
 
@@ -32,10 +31,6 @@ const calculateBucketData = (timeInterval: string, capabilities: SearchCapabilit
   // don't go too small
   if (bucketSize < 1) {
     bucketSize = 1;
-  }
-
-  if (bucketSize > capabilities.maxBucketsLimit) {
-    bucketSize = capabilities.maxBucketsLimit;
   }
 
   // Check decimal
@@ -60,10 +55,7 @@ const calculateBucketData = (timeInterval: string, capabilities: SearchCapabilit
   };
 };
 
-const calculateBucketSizeForAutoInterval = (
-  req: VisTypeTimeseriesVisDataRequest,
-  maxBars: number
-) => {
+const calcAutoInterval = (req: VisTypeTimeseriesVisDataRequest, maxBars: number) => {
   const { from, to } = getTimerange(req);
   const timerange = to.valueOf() - from.valueOf();
 
@@ -76,24 +68,24 @@ export const getBucketSize = (
   capabilities: SearchCapabilities,
   bars: number
 ) => {
-  const defaultBucketSize = calculateBucketSizeForAutoInterval(req, bars);
-  let intervalString = `${defaultBucketSize}s`;
+  const userIntervalMatches = Boolean(interval) && interval.match(INTERVAL_STRING_RE);
+
+  if (userIntervalMatches) {
+    return calculateBucketData(interval, capabilities);
+  }
 
   const gteAutoMatch = Boolean(interval) && interval.match(GTE_INTERVAL_RE);
+  const autoInterval = calcAutoInterval(req, bars);
+  const autoBucketData = calculateBucketData(`${autoInterval}s`, capabilities);
 
   if (gteAutoMatch) {
-    const bucketData = calculateBucketData(gteAutoMatch[1], capabilities);
+    const gteBucketData = calculateBucketData(gteAutoMatch[1], capabilities);
+    const gteInSecondInterval = convertIntervalToUnit(gteBucketData.intervalString, 's');
 
-    if (bucketData.bucketSize >= defaultBucketSize) {
-      return bucketData;
+    if (gteInSecondInterval && gteInSecondInterval?.value > autoInterval) {
+      return gteBucketData;
     }
   }
 
-  const matches = interval && interval.match(INTERVAL_STRING_RE);
-
-  if (matches) {
-    intervalString = interval;
-  }
-
-  return calculateBucketData(intervalString, capabilities);
+  return autoBucketData;
 };

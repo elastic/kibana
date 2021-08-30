@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from 'src/plugins/share/public';
 import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
 import type { JobId } from './anomaly_detection_jobs/job';
@@ -253,6 +253,6 @@ export type MlLocatorState =
   | FilterEditUrlState
   | MlGenericUrlState;
 
-export type MlLocatorParams = MlLocatorState & SerializableState;
+export type MlLocatorParams = MlLocatorState & SerializableRecord;
 
 export type MlLocator = LocatorPublic<MlLocatorParams>;

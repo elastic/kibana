@@ -12,11 +12,12 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
+import { rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
-  calculateTransactionErrorPercentage,
+  calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 
@@ -74,12 +75,9 @@ export async function getTransactionErrorRateChartPreview({
   }
 
   return resp.aggregations.timeseries.buckets.map((bucket) => {
-    const errorPercentage = calculateTransactionErrorPercentage(
-      bucket.outcomes
-    );
     return {
       x: bucket.key,
-      y: errorPercentage,
+      y: calculateFailedTransactionRate(bucket.outcomes),
     };
   });
 }

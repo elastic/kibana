@@ -9,7 +9,7 @@
 import type { Observable } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
 import { catchError, first, tap } from 'rxjs/operators';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { from } from 'rxjs';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
@@ -59,7 +59,7 @@ export const enhancedEsSearchStrategyProvider = (
 
     const search = async () => {
       const params = id
-        ? getDefaultAsyncGetParams(options)
+        ? getDefaultAsyncGetParams(searchSessionsClient.getConfig(), options)
         : {
             ...(await getDefaultAsyncSubmitParams(
               uiSettingsClient,
@@ -71,12 +71,14 @@ export const enhancedEsSearchStrategyProvider = (
       const promise = id
         ? client.asyncSearch.get({ ...params, id })
         : client.asyncSearch.submit(params);
-      const { body } = await shimAbortSignal(promise, options.abortSignal);
+      const { body, headers } = await shimAbortSignal(promise, options.abortSignal);
+
       const response = shimHitsTotal(body.response, options);
 
       return toAsyncKibanaSearchResponse(
         // @ts-expect-error @elastic/elasticsearch start_time_in_millis expected to be number
-        { ...body, response }
+        { ...body, response },
+        headers?.warning
       );
     };
 
@@ -121,7 +123,7 @@ export const enhancedEsSearchStrategyProvider = (
       });
 
       const esResponse = await shimAbortSignal(promise, options?.abortSignal);
-      const response = esResponse.body as SearchResponse<any>;
+      const response = esResponse.body as estypes.SearchResponse<any>;
       return {
         rawResponse: shimHitsTotal(response, options),
         ...getTotalLoaded(response),

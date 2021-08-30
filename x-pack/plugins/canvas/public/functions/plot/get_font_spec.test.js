@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { fontStyle } from '../../../canvas_plugin_src/functions/common/__fixtures__/test_styles';
+import { fontStyle } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { defaultSpec, getFontSpec } from './get_font_spec';
 
 describe('getFontSpec', () => {

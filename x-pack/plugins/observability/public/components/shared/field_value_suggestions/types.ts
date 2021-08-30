@@ -39,6 +39,7 @@ export type FieldValueSelectionProps = CommonProps & {
   loading?: boolean;
   onChange: (val?: string[], excludedValue?: string[]) => void;
   values?: ListItem[];
+  query?: string;
   setQuery: Dispatch<SetStateAction<string>>;
 };
 

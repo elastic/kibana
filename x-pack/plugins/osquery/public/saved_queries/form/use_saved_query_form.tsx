@@ -9,9 +9,11 @@ import { isArray } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
 
+import { useMemo } from 'react';
 import { useForm } from '../../shared_imports';
-import { formSchema } from '../../scheduled_query_groups/queries/schema';
+import { createFormSchema } from '../../scheduled_query_groups/queries/schema';
 import { ScheduledQueryGroupFormData } from '../../scheduled_query_groups/queries/use_scheduled_query_group_query_form';
+import { useSavedQueries } from '../use_saved_queries';
 
 const SAVED_QUERY_FORM_ID = 'savedQueryForm';
 
@@ -20,11 +22,29 @@ interface UseSavedQueryFormProps {
   handleSubmit: (payload: unknown) => Promise<void>;
 }
 
-export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryFormProps) =>
-  useForm({
+export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryFormProps) => {
+  const { data } = useSavedQueries({});
+  const ids: string[] = useMemo<string[]>(
+    () => data?.savedObjects.map((obj) => obj.attributes.id) ?? [],
+    [data]
+  );
+  const idSet = useMemo<Set<string>>(() => {
+    const res = new Set<string>(ids);
+    // @ts-expect-error update types
+    if (defaultValue && defaultValue.id) res.delete(defaultValue.id);
+    return res;
+  }, [ids, defaultValue]);
+  const formSchema = useMemo<ReturnType<typeof createFormSchema>>(() => createFormSchema(idSet), [
+    idSet,
+  ]);
+  return useForm({
     id: SAVED_QUERY_FORM_ID + uuid.v4(),
     schema: formSchema,
-    onSubmit: handleSubmit,
+    onSubmit: async (formData, isValid) => {
+      if (isValid) {
+        return handleSubmit(formData);
+      }
+    },
     options: {
       stripEmptyFields: false,
     },
@@ -62,3 +82,4 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
       };
     },
   });
+};

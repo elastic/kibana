@@ -6,24 +6,8 @@
  * Side Public License, v 1.
  */
 
-const preset = require('@kbn/test/jest-preset');
-
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_integration',
   rootDir: '.',
   roots: ['<rootDir>/src', '<rootDir>/packages'],
-  testMatch: ['**/integration_tests**/*.test.{js,mjs,ts,tsx}'],
-  testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
-    (pattern) => !pattern.includes('integration_tests')
-  ),
-  setupFilesAfterEnv: [
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/after_env.integration.js',
-  ],
-  reporters: [
-    'default',
-    ['@kbn/test/target_node/jest/junit_reporter', { reportName: 'Jest Integration Tests' }],
-  ],
-  coverageReporters: !!process.env.CI
-    ? [['json', { file: 'jest-integration.json' }]]
-    : ['html', 'text'],
 };

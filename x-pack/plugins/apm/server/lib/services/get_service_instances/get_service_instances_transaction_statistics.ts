@@ -14,7 +14,8 @@ import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
-import { environmentQuery, kqlQuery, rangeQuery } from '../../../utils/queries';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
@@ -71,8 +72,8 @@ export async function getServiceInstancesTransactionStatistics<
   end: number;
   isComparisonSearch: T;
   serviceNodeIds?: string[];
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   size?: number;
   numBuckets?: number;
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {

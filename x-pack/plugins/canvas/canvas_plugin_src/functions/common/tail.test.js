@@ -11,6 +11,7 @@ import { tail } from './tail';
 
 describe('tail', () => {
   const fn = functionWrapper(tail);
+
   const lastIndex = testTable.rows.length - 1;
 
   it('returns a datatable with the last N rows of the context', () => {

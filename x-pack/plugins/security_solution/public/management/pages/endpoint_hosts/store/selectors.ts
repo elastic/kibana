@@ -38,6 +38,7 @@ import {
 import { ServerApiError } from '../../../../common/types';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
+import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -362,9 +363,11 @@ export const getIsolationRequestError: (
   }
 });
 
-export const getEndpointDetailsFlyoutView = (
+export const getIsOnEndpointDetailsActivityLog: (
   state: Immutable<EndpointState>
-): EndpointIndexUIQueryParams['show'] => state.endpointDetails.flyoutView;
+) => boolean = createSelector(uiQueryParams, (searchParams) => {
+  return searchParams.show === EndpointDetailsTabsTypes.activityLog;
+});
 
 export const getActivityLogDataPaging = (
   state: Immutable<EndpointState>
@@ -450,3 +453,12 @@ export const getEndpointHostIsolationStatusPropsCallback: (
     };
   }
 );
+
+export const getMetadataTransformStats = (state: Immutable<EndpointState>) =>
+  state.metadataTransformStats;
+
+export const metadataTransformStats = (state: Immutable<EndpointState>) =>
+  isLoadedResourceState(state.metadataTransformStats) ? state.metadataTransformStats.data : [];
+
+export const isMetadataTransformStatsLoading = (state: Immutable<EndpointState>) =>
+  isLoadingResourceState(state.metadataTransformStats);

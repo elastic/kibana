@@ -37,6 +37,25 @@ export function registerSnapshotsRoutes({
         // Silently swallow error as policy names aren't required in UI
       }
 
+      let repositories: string[] = [];
+
+      try {
+        const {
+          body: repositoriesByName,
+        } = await clusterClient.asCurrentUser.snapshot.getRepository({
+          repository: '_all',
+        });
+        repositories = Object.keys(repositoriesByName);
+
+        if (repositories.length === 0) {
+          return res.ok({
+            body: { snapshots: [], repositories: [], policies },
+          });
+        }
+      } catch (e) {
+        return handleEsError({ error: e, response: res });
+      }
+
       try {
         // If any of these repositories 504 they will cost the request significant time.
         const { body: fetchedSnapshots } = await clusterClient.asCurrentUser.snapshot.get({
@@ -51,24 +70,16 @@ export function registerSnapshotsRoutes({
           size: SNAPSHOT_LIST_MAX_SIZE,
         });
 
-        const allRepos: string[] = [];
-
         // Decorate each snapshot with the repository with which it's associated.
         const snapshots = fetchedSnapshots?.snapshots?.map((snapshot) => {
-          // @ts-expect-error @elastic/elasticsearch "repository" is a new field in the response
-          allRepos.push(snapshot.repository);
           return deserializeSnapshotDetails(snapshot as SnapshotDetailsEs, managedRepository);
-        });
-
-        const uniqueRepos = allRepos.filter((repo, index) => {
-          return allRepos.indexOf(repo) === index;
         });
 
         return res.ok({
           body: {
             snapshots: snapshots || [],
             policies,
-            repositories: uniqueRepos,
+            repositories,
             // @ts-expect-error @elastic/elasticsearch "failures" is a new field in the response
             errors: fetchedSnapshots?.failures,
           },

@@ -32,6 +32,7 @@ describe('Elasticsearch Errors', () => {
       },
     });
 
+    await root.preboot();
     await root.setup();
     start = await root.start();
     client = start.elasticsearch.client.asInternalUser;
@@ -63,6 +64,7 @@ describe('Elasticsearch Errors', () => {
         { ignore: [403] }
       );
 
+      // @ts-expect-error @elastic/elasticsearch doesn't declare error on IndexResponse
       expect(isWriteBlockException(res.body.error!)).toEqual(true);
     });
 
@@ -78,6 +80,7 @@ describe('Elasticsearch Errors', () => {
         { ignore: [403] }
       );
 
+      // @ts-expect-error @elastic/elasticsearch doesn't declare error on IndexResponse
       expect(isWriteBlockException(res.body.error!)).toEqual(true);
     });
 

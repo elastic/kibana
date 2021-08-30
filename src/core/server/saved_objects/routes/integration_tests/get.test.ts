@@ -16,7 +16,7 @@ import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_st
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { HttpService, InternalHttpServiceSetup } from '../../../http';
 import { createHttpServer, createCoreContext } from '../../../http/test_utils';
-import { coreMock } from '../../../mocks';
+import { contextServiceMock, coreMock } from '../../../mocks';
 
 const coreId = Symbol('core');
 
@@ -30,6 +30,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
     server = createHttpServer(coreContext);
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
 
     const contextService = new ContextService(coreContext);
     httpSetup = await server.setup({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getServiceAgentName } from './get_service_agent_name';
+import { getServiceAgent } from './get_service_agent';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getServicesItems } from './get_services/get_services_items';
 import { getLegacyDataStatus } from './get_services/get_legacy_data_status';
@@ -14,6 +14,7 @@ import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../utils/test_helpers';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('services queries', () => {
   let mock: SearchParamsMock;
@@ -24,7 +25,7 @@ describe('services queries', () => {
 
   it('fetches the service agent name', async () => {
     mock = await inspectSearchParams((setup) =>
-      getServiceAgentName({
+      getServiceAgent({
         serviceName: 'foo',
         setup,
         searchAggregatedTransactions: false,
@@ -52,6 +53,8 @@ describe('services queries', () => {
         setup,
         searchAggregatedTransactions: false,
         logger: {} as any,
+        environment: ENVIRONMENT_ALL.value,
+        kuery: '',
       })
     );
 

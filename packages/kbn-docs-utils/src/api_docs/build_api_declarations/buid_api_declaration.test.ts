@@ -84,7 +84,7 @@ it('Test Interface Kind doc def', () => {
 
   expect(def.type).toBe(TypeKind.InterfaceKind);
   expect(def.children).toBeDefined();
-  expect(def.children!.length).toBe(3);
+  expect(def.children!.length).toBe(6);
 });
 
 it('Test union export', () => {

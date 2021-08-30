@@ -292,6 +292,48 @@ export const SOURCE_CONFIG_DESCRIPTION = i18n.translate(
   }
 );
 
+export const SYNC_MANAGEMENT_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementTitle',
+  {
+    defaultMessage: 'Sync management',
+  }
+);
+
+export const SYNC_MANAGEMENT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementDescription',
+  {
+    defaultMessage: 'Enable and disable extraction of specific content for this source.',
+  }
+);
+
+export const SYNC_MANAGEMENT_SYNCHRONIZE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementSynchronizeLabel',
+  {
+    defaultMessage: 'Synchronize this source',
+  }
+);
+
+export const SYNC_MANAGEMENT_THUMBNAILS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementThumbnailsLabel',
+  {
+    defaultMessage: 'Sync thumbnails',
+  }
+);
+
+export const SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementGlobalConfigLabel',
+  {
+    defaultMessage: 'Sync thumbnails - disabled at global configuration level',
+  }
+);
+
+export const SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSources.syncManagementContentExtractionLabel',
+  {
+    defaultMessage: 'Sync all text and content',
+  }
+);
+
 export const SOURCE_CONFIG_LINK = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.config.link',
   {
@@ -468,5 +510,19 @@ export const PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING = i18n.translate(
   {
     defaultMessage:
       'Workplace Search is currently available for search only, due to regular maintenance. Contact your system administrator for more information.',
+  }
+);
+
+export const PERSONAL_DASHBOARD_SOURCE_ERROR = (error: string) =>
+  i18n.translate('xpack.enterpriseSearch.workplaceSearch.personalDashboardSourceError', {
+    defaultMessage:
+      'Could not connect the source, reach out to your admin for help. Error message: {error}',
+    values: { error },
+  });
+
+export const SOURCE_OVERVIEW_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceOverviewTitle',
+  {
+    defaultMessage: 'Source overview',
   }
 );

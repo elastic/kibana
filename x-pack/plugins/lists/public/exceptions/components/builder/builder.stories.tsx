@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import { Story, addDecorator } from '@storybook/react';
 import React from 'react';
@@ -119,7 +113,7 @@ export default {
     },
     indexPatterns: {
       description:
-        '`IIndexPattern` - index patterns used to populate field options and value autocomplete.',
+        '`IndexPatternBase` - index patterns used to populate field options and value autocomplete.',
       type: {
         required: true,
       },
@@ -201,7 +195,7 @@ export default {
     },
     listTypeSpecificIndexPatternFilter: {
       description:
-        '`(pattern: IIndexPattern, type: ExceptionListType) => IIndexPattern` - callback invoked when index patterns filtered. Optional to be used if you would only like certain fields displayed.',
+        '`(pattern: IndexPatternBase, type: ExceptionListType) => IndexPatternBase` - callback invoked when index patterns filtered. Optional to be used if you would only like certain fields displayed.',
       type: {
         required: false,
       },

@@ -7,7 +7,7 @@
 
 import { ROLES } from '../../../common/test';
 import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
-import { newRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
 import {
@@ -77,7 +77,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createCustomRule(newRule);
+          createCustomRule(getNewRule());
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();
@@ -127,7 +127,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createCustomRule(newRule);
+          createCustomRule(getNewRule());
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();
@@ -177,7 +177,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createCustomRule(newRule);
+          createCustomRule(getNewRule());
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();

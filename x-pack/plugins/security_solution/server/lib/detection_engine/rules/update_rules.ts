@@ -16,15 +16,17 @@ import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
+import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 export const updateRules = async ({
-  alertsClient,
-  savedObjectsClient,
+  spaceId,
+  rulesClient,
+  ruleStatusClient,
   defaultOutputIndex,
   ruleUpdate,
 }: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   const existingRule = await readRules({
-    alertsClient,
+    rulesClient,
     ruleId: ruleUpdate.rule_id,
     id: ruleUpdate.id,
   });
@@ -72,23 +74,27 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions:
-      ruleUpdate.throttle === 'rule'
-        ? (ruleUpdate.actions ?? []).map(transformRuleToAlertAction)
-        : [],
-    throttle: null,
-    notifyWhen: null,
+    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
+    throttle: transformToAlertThrottle(ruleUpdate.throttle),
+    notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
   };
 
-  const update = await alertsClient.update({
+  const update = await rulesClient.update({
     id: existingRule.id,
     data: newInternalRule,
   });
 
+  await maybeMute({
+    rulesClient,
+    muteAll: existingRule.muteAll,
+    throttle: ruleUpdate.throttle,
+    id: update.id,
+  });
+
   if (existingRule.enabled && enabled === false) {
-    await alertsClient.disable({ id: existingRule.id });
+    await rulesClient.disable({ id: existingRule.id });
   } else if (!existingRule.enabled && enabled === true) {
-    await enableRule({ rule: existingRule, alertsClient, savedObjectsClient });
+    await enableRule({ rule: existingRule, rulesClient, ruleStatusClient, spaceId });
   }
   return { ...update, enabled };
 };

@@ -27,3 +27,7 @@ export const UNIT = (totalCount: number) =>
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
   });
+
+export const ACTIONS = i18n.translate('xpack.securitySolution.eventsViewer.actionsColumnLabel', {
+  defaultMessage: 'Actions',
+});

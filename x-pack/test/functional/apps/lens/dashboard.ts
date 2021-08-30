@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const security = getService('security');
   const panelActions = getService('dashboardPanelActions');
+  const inspector = getService('inspector');
 
   async function clickInChart(x: number, y: number) {
     const el = await elasticChart.getCanvas();
@@ -131,6 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not carry over filters if creating a new lens visualization from within dashboard', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await filterBar.addFilter('geo.src', 'is', 'US');
       await filterBar.toggleFilterPinned('geo.src');
       await filterBar.addFilter('geo.dest', 'is', 'LS');
@@ -156,6 +158,56 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await panelActions.openContextMenu();
       await panelActions.clickContextMenuMoreItem();
       await testSubjects.existOrFail(ACTION_TEST_SUBJ);
+    });
+
+    it('should show all data from all layers in the inspector', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickCreateNewLink();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.createLayer();
+
+      expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
+
+      await PageObjects.lens.switchToVisualization('line');
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        },
+        1
+      );
+
+      await PageObjects.lens.configureDimension(
+        {
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'median',
+          field: 'bytes',
+        },
+        1
+      );
+      await PageObjects.lens.saveAndReturn();
+
+      await panelActions.openContextMenu();
+      await panelActions.clickContextMenuMoreItem();
+      await testSubjects.click('embeddablePanelAction-openInspector');
+      await inspector.openInspectorRequestsView();
+      const requests = await inspector.getRequestNames();
+      expect(requests.split(',').length).to.be(2);
     });
 
     it('unlink lens panel from embeddable library', async () => {

@@ -104,7 +104,9 @@ export const AddSourceList: React.FC = () => {
     <Layout
       pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE]}
       pageViewTelemetry="add_source"
-      pageHeader={{ pageTitle: PAGE_TITLE, description: PAGE_DESCRIPTION }}
+      pageHeader={
+        dataLoading ? undefined : { pageTitle: PAGE_TITLE, description: PAGE_DESCRIPTION }
+      }
       isLoading={dataLoading}
     >
       {!isOrganization && (

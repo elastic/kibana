@@ -15,11 +15,8 @@ import {
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import {
-  environmentQuery,
-  kqlQuery,
-  rangeQuery,
-} from '../../../server/utils/queries';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -32,7 +29,7 @@ import {
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
+import { calculateFailedTransactionRate } from '../helpers/transaction_error_rate';
 
 export async function getServiceTransactionGroupDetailedStatistics({
   environment,
@@ -47,8 +44,8 @@ export async function getServiceTransactionGroupDetailedStatistics({
   start,
   end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionNames: string[];
   setup: Setup;
@@ -167,7 +164,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     }));
     const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,
-      y: calculateTransactionErrorPercentage(timeseriesBucket[EVENT_OUTCOME]),
+      y: calculateFailedTransactionRate(timeseriesBucket[EVENT_OUTCOME]),
     }));
     const transactionGroupTotalDuration =
       bucket.transaction_group_total_duration.value || 0;
@@ -205,8 +202,8 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   latencyAggregationType: LatencyAggregationType;
   comparisonStart?: number;
   comparisonEnd?: number;
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
 }) {
   const { start, end } = setup;
 
@@ -242,7 +239,7 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
     previousPeriodPromise,
   ]);
 
-  const firtCurrentPeriod = currentPeriod.length ? currentPeriod[0] : undefined;
+  const firstCurrentPeriod = currentPeriod?.[0];
 
   return {
     currentPeriod: keyBy(currentPeriod, 'transactionName'),
@@ -251,15 +248,15 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
         return {
           ...data,
           errorRate: offsetPreviousPeriodCoordinates({
-            currentPeriodTimeseries: firtCurrentPeriod?.errorRate,
+            currentPeriodTimeseries: firstCurrentPeriod?.errorRate,
             previousPeriodTimeseries: data.errorRate,
           }),
           throughput: offsetPreviousPeriodCoordinates({
-            currentPeriodTimeseries: firtCurrentPeriod?.throughput,
+            currentPeriodTimeseries: firstCurrentPeriod?.throughput,
             previousPeriodTimeseries: data.throughput,
           }),
           latency: offsetPreviousPeriodCoordinates({
-            currentPeriodTimeseries: firtCurrentPeriod?.latency,
+            currentPeriodTimeseries: firstCurrentPeriod?.latency,
             previousPeriodTimeseries: data.latency,
           }),
         };

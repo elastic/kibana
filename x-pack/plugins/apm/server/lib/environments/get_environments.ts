@@ -11,7 +11,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 

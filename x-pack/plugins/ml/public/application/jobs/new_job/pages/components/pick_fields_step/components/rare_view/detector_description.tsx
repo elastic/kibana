@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
@@ -21,7 +20,7 @@ interface Props {
 export const DetectorDescription: FC<Props> = ({ detectorType }) => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
-  const [description, setDescription] = useState<string[] | null>(null);
+  const [description, setDescription] = useState<string | null>(null);
 
   useEffect(() => {
     const desc = createDetectorDescription(jobCreator, detectorType);
@@ -37,18 +36,12 @@ export const DetectorDescription: FC<Props> = ({ detectorType }) => {
       title={i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.calloutTitle',
         {
-          defaultMessage: 'Detector summary',
+          defaultMessage: 'Job summary',
         }
       )}
     >
-      <FormattedMessage
-        id="xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.title"
-        defaultMessage="This job:"
-      />
       <ul>
-        {description.map((d) => (
-          <li>{d}</li>
-        ))}
+        <li>{description}</li>
       </ul>
     </EuiCallOut>
   );
@@ -63,50 +56,71 @@ function createDetectorDescription(jobCreator: RareJobCreator, detectorType: RAR
   const populationFieldName = jobCreator.populationField?.id;
   const splitFieldName = jobCreator.splitField?.id;
 
-  const beginningSummary = i18n.translate(
-    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.beginningSummary',
+  const rareSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.rareSummary',
     {
-      defaultMessage: 'detects rare values of {rareFieldName}',
+      defaultMessage: 'Detects rare {rareFieldName} values.',
       values: { rareFieldName },
     }
   );
 
-  const beginningSummaryFreq = i18n.translate(
-    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.beginningSummaryFreq',
+  const rareSplitSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.rareSplitSummary',
     {
-      defaultMessage: 'detects frequently rare values of {rareFieldName}',
-      values: { rareFieldName },
+      defaultMessage: 'For each {splitFieldName}, detects rare {rareFieldName} values.',
+      values: { splitFieldName, rareFieldName },
     }
   );
 
-  const population = i18n.translate(
-    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.population',
+  const freqRarePopulationSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.freqRarePopulationSummary',
     {
-      defaultMessage: 'compared to the population of {populationFieldName}',
-      values: { populationFieldName },
+      defaultMessage:
+        'Detects {populationFieldName} values that frequently have rare {rareFieldName} values relative to the population.',
+      values: { populationFieldName, rareFieldName },
     }
   );
 
-  const split = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.split', {
-    defaultMessage: 'for each value of {splitFieldName}',
-    values: { splitFieldName },
-  });
+  const freqRareSplitPopulationSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.freqRareSplitPopulationSummary',
+    {
+      defaultMessage:
+        'For each {splitFieldName}, detects {populationFieldName} values that frequently have rare {rareFieldName} values relative to the population.',
+      values: { splitFieldName, populationFieldName, rareFieldName },
+    }
+  );
 
-  const desc = [];
+  const rarePopulationSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.rarePopulationSummary',
+    {
+      defaultMessage:
+        'Detects {populationFieldName} values that have rare {rareFieldName} values relative to the population.',
+      values: { populationFieldName, rareFieldName },
+    }
+  );
+
+  const rareSplitPopulationSummary = i18n.translate(
+    'xpack.ml.newJob.wizard.pickFieldsStep.rareField.plainText.rareSplitPopulationSummary',
+    {
+      defaultMessage:
+        'For each {splitFieldName}, detects {populationFieldName} values that have rare {rareFieldName} values relative to the population.',
+      values: { splitFieldName, populationFieldName, rareFieldName },
+    }
+  );
+
+  if (detectorType === RARE_DETECTOR_TYPE.RARE) {
+    return splitFieldName !== undefined ? rareSplitSummary : rareSummary;
+  }
 
   if (detectorType === RARE_DETECTOR_TYPE.FREQ_RARE_POPULATION) {
-    desc.push(beginningSummaryFreq);
-  } else {
-    desc.push(beginningSummary);
+    return splitFieldName !== undefined
+      ? freqRareSplitPopulationSummary
+      : freqRarePopulationSummary;
   }
 
-  if (populationFieldName !== undefined) {
-    desc.push(population);
+  if (detectorType === RARE_DETECTOR_TYPE.RARE_POPULATION) {
+    return splitFieldName !== undefined ? rareSplitPopulationSummary : rarePopulationSummary;
   }
 
-  if (splitFieldName !== undefined) {
-    desc.push(split);
-  }
-
-  return desc;
+  return null;
 }

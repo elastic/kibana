@@ -19,6 +19,7 @@ describe('config validation', () => {
           "interval": "5m",
           "removalDelay": "1h",
         },
+        "maxEphemeralActionsPerAlert": 10,
       }
     `);
   });

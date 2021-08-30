@@ -56,6 +56,7 @@ export function getTableVisualizationControllerClass(
     async initLocalAngular() {
       if (!this.tableVisModule) {
         const [coreStart, { kibanaLegacy }] = await core.getStartServices();
+        await kibanaLegacy.loadAngularBootstrap();
         this.tableVisModule = getAngularModule(innerAngularName, coreStart, context);
         initTableVisLegacyModule(this.tableVisModule);
         kibanaLegacy.loadFontAwesome();

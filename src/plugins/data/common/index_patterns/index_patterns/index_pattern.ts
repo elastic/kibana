@@ -15,7 +15,7 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../.
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
+import { FieldFormatsStartCommon, FieldFormat } from '../../../../field_formats/common';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
@@ -52,8 +52,9 @@ export class IndexPattern implements IIndexPattern {
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
   public timeFieldName: string | undefined;
   /**
-   * @deprecated
-   * Deprecated. used by time range index patterns
+   * @deprecated Used by time range index patterns
+   * @removeBy 8.1
+   *
    */
   public intervalName: string | undefined;
   /**
@@ -241,6 +242,7 @@ export class IndexPattern implements IIndexPattern {
    * @param fieldType
    * @param lang
    * @deprecated use runtime field instead
+   * @removeBy 8.1
    */
   async addScriptedField(name: string, script: string, fieldType: string = 'string') {
     const scriptedFields = this.getScriptedFields();
@@ -267,6 +269,7 @@ export class IndexPattern implements IIndexPattern {
    * Remove scripted field from field list
    * @param fieldName
    * @deprecated use runtime field instead
+   * @removeBy 8.1
    */
 
   removeScriptedField(fieldName: string) {
@@ -279,6 +282,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    *
    * @deprecated use runtime field instead
+   * @removeBy 8.1
    */
   getNonScriptedFields() {
     return [...this.fields.getAll().filter((field) => !field.scripted)];
@@ -287,6 +291,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    *
    * @deprecated use runtime field instead
+   * @removeBy 8.1
    */
   getScriptedFields() {
     return [...this.fields.getAll().filter((field) => field.scripted)];

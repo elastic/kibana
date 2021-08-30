@@ -24,10 +24,7 @@
         "signature": [
           "{ readonly host?: string | undefined; readonly enabled: boolean; readonly ssl: Readonly<{ certificateAuthorities?: string | string[] | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; }>; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/enterprise_search/server/index.ts",
-          "lineNumber": 33
-        },
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -58,10 +55,7 @@
           "Type",
           "<\"none\" | \"certificate\" | \"full\">; }>; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/enterprise_search/server/index.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

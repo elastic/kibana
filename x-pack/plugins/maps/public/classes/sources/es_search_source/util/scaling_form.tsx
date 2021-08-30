@@ -38,12 +38,12 @@ interface Props {
 }
 
 interface State {
-  maxResultWindow: number;
+  maxResultWindow: string;
 }
 
 export class ScalingForm extends Component<Props, State> {
   state = {
-    maxResultWindow: DEFAULT_MAX_RESULT_WINDOW,
+    maxResultWindow: DEFAULT_MAX_RESULT_WINDOW.toLocaleString(),
   };
   _isMounted = false;
 
@@ -61,7 +61,7 @@ export class ScalingForm extends Component<Props, State> {
       const indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
       const { maxResultWindow } = await loadIndexSettings(indexPattern!.title);
       if (this._isMounted) {
-        this.setState({ maxResultWindow });
+        this.setState({ maxResultWindow: maxResultWindow.toLocaleString() });
       }
     } catch (err) {
       return;
@@ -90,7 +90,7 @@ export class ScalingForm extends Component<Props, State> {
       <EuiRadio
         id={SCALING_TYPES.CLUSTERS}
         label={i18n.translate('xpack.maps.source.esSearch.clusterScalingLabel', {
-          defaultMessage: 'Show clusters when results exceed {maxResultWindow}.',
+          defaultMessage: 'Show clusters when results exceed {maxResultWindow}',
           values: { maxResultWindow: this.state.maxResultWindow },
         })}
         checked={this.props.scalingType === SCALING_TYPES.CLUSTERS}
@@ -170,7 +170,7 @@ export class ScalingForm extends Component<Props, State> {
             <EuiRadio
               id={SCALING_TYPES.LIMIT}
               label={i18n.translate('xpack.maps.source.esSearch.limitScalingLabel', {
-                defaultMessage: 'Limit results to {maxResultWindow}.',
+                defaultMessage: 'Limit results to {maxResultWindow}',
                 values: { maxResultWindow: this.state.maxResultWindow },
               })}
               checked={this.props.scalingType === SCALING_TYPES.LIMIT}

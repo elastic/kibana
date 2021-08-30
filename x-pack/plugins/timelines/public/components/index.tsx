@@ -8,17 +8,17 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Store } from 'redux';
+import type { Store } from 'redux';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { createStore } from '../store/t_grid';
 
 import { TGrid as TGridComponent } from './tgrid';
-import { TGridProps } from '../types';
+import type { TGridProps } from '../types';
 import { DragDropContextWrapper } from './drag_and_drop';
 import { initialTGridState } from '../store/t_grid/reducer';
-import { TGridIntegratedProps } from './t_grid/integrated';
+import type { TGridIntegratedProps } from './t_grid/integrated';
 
 const EMPTY_BROWSER_FIELDS = {};
 
@@ -58,3 +58,4 @@ export * from './drag_and_drop';
 export * from './draggables';
 export * from './last_updated';
 export * from './loading';
+export * from './fields_browser';

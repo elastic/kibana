@@ -11,7 +11,7 @@
 import apm from 'elastic-apm-node';
 import { Subject, Observable, from, of } from 'rxjs';
 import { map, mergeScan } from 'rxjs/operators';
-import { difference, partition, groupBy, mapValues, countBy, pick } from 'lodash';
+import { difference, partition, groupBy, mapValues, countBy, pick, isPlainObject } from 'lodash';
 import { some, none } from 'fp-ts/lib/Option';
 
 import { Logger } from '../../../../../src/core/server';
@@ -87,6 +87,9 @@ export interface ClaimOwnershipResult {
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
 }
+export const isClaimOwnershipResult = (result: unknown): result is ClaimOwnershipResult =>
+  isPlainObject((result as ClaimOwnershipResult).stats) &&
+  Array.isArray((result as ClaimOwnershipResult).docs);
 
 enum BatchConcurrency {
   Unlimited,

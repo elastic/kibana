@@ -33,7 +33,6 @@ export declare interface SwimlaneData {
   points: SwimlanePoint[];
   interval: number;
 }
-
 interface ChartRecord extends RecordForInfluencer {
   function: string;
 }
@@ -180,15 +179,6 @@ declare interface LoadOverallDataResponse {
   loading: boolean;
   overallSwimlaneData: OverallSwimlaneData;
 }
-
-export declare const loadViewByTopFieldValuesForSelectedTime: (
-  earliestMs: number,
-  latestMs: number,
-  selectedJobs: ExplorerJob[],
-  viewBySwimlaneFieldName: string,
-  swimlaneLimit: number,
-  noInfluencersConfigured: boolean
-) => Promise<any>;
 
 export declare interface FilterData {
   influencersFilterQuery: InfluencersFilterQuery;

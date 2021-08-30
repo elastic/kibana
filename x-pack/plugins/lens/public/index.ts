@@ -11,8 +11,13 @@ export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
+export type { XYState } from './xy_visualization/types';
+export type { DataType, OperationMetadata } from './types';
 export type {
-  XYState,
+  PieVisualizationState,
+  PieLayerState,
+  SharedPieLayerState,
+  MetricState,
   AxesSettingsConfig,
   XYLayerConfig,
   LegendConfig,
@@ -21,15 +26,8 @@ export type {
   YAxisMode,
   XYCurveType,
   YConfig,
-} from './xy_visualization/types';
-export type { DataType, OperationMetadata } from './types';
-export type {
-  PieVisualizationState,
-  PieLayerState,
-  SharedPieLayerState,
-} from './pie_visualization/types';
+} from '../common/expressions';
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
-export type { MetricState } from './metric_visualization/types';
 export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,

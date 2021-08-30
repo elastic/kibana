@@ -7,3 +7,4 @@
  */
 
 export * from './render';
+export * from './wait_for';

@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import { IndexPattern } from './index_pattern';
-import { FieldFormatsContentType } from '../../../common';
+import { FieldFormatsContentType } from '../../../../field_formats/common';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();

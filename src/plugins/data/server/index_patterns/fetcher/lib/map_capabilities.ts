@@ -8,7 +8,7 @@
 
 import { mergeJobConfigurations } from './jobs_compatibility';
 
-export function getCapabilitiesForRollupIndices(indices: { [key: string]: any }) {
+export function getCapabilitiesForRollupIndices(indices: Record<string, { rollup_jobs: any }>) {
   const indexNames = Object.keys(indices);
   const capabilities = {} as { [key: string]: any };
 

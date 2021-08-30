@@ -55,6 +55,7 @@ export type DataRequestContext = {
   startLoading(dataId: string, requestToken: symbol, requestMeta?: DataMeta): void;
   stopLoading(dataId: string, requestToken: symbol, data: object, resultsMeta?: DataMeta): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
+  onJoinError(errorMessage: string): void;
   updateSourceData(newData: unknown): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
@@ -121,6 +122,8 @@ function getDataRequestContext(
       dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
       dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
+    onJoinError: (errorMessage: string) =>
+      dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage)),
     updateSourceData: (newData: object) => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
@@ -193,13 +196,11 @@ export function syncDataForLayerId(layerId: string | null) {
 }
 
 function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
-  return (dispatch: Dispatch) => {
-    dispatch({
-      type: SET_LAYER_ERROR_STATUS,
-      isInErrorState: errorMessage !== null,
-      layerId,
-      errorMessage,
-    });
+  return {
+    type: SET_LAYER_ERROR_STATUS,
+    isInErrorState: errorMessage !== null,
+    layerId,
+    errorMessage,
   };
 }
 

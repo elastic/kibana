@@ -18,7 +18,7 @@ const createLangWorkerConfig = (lang) => {
     mode: 'production',
     entry,
     output: {
-      path: path.resolve(__dirname, 'target_web'),
+      path: path.resolve(__dirname, 'target_workers'),
       filename: `${lang}.editor.worker.js`,
     },
     resolve: {

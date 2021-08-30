@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { exception } from '../../objects/exception';
-import { newRule } from '../../objects/rule';
+import { getException } from '../../objects/exception';
+import { getNewRule } from '../../objects/rule';
 
 import { ALERTS_COUNT, NUMBER_OF_ALERTS } from '../../screens/alerts';
 import { RULE_STATUS } from '../../screens/create_new_rule';
@@ -43,7 +43,7 @@ describe('From alert', () => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule, 'rule_testing', '10s');
+    createCustomRule(getNewRule(), 'rule_testing', '10s');
     goToManageAlertsDetectionRules();
     goToRuleDetails();
 
@@ -64,26 +64,27 @@ describe('From alert', () => {
     esArchiverUnload('auditbeat_for_exceptions2');
   });
 
-  it('Creates an exception and deletes it', () => {
+  // TODO: Unskip the test when `https://github.com/elastic/kibana/issues/108244` it is fixed
+  it.skip('Creates an exception and deletes it', () => {
     addExceptionFromFirstAlert();
-    addsException(exception);
+    addsException(getException());
     esArchiverLoad('auditbeat_for_exceptions2');
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', '0');
+    cy.get(NUMBER_OF_ALERTS).should('have.text', '0 alerts');
 
     goToClosedAlerts();
     refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
+    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alerts`);
 
     goToOpenedAlerts();
     waitForTheRuleToBeExecuted();
     refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', '0');
+    cy.get(NUMBER_OF_ALERTS).should('have.text', '0 alerts');
 
     goToExceptionsTab();
     removeException();
@@ -93,6 +94,6 @@ describe('From alert', () => {
     refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
+    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alerts`);
   });
 });

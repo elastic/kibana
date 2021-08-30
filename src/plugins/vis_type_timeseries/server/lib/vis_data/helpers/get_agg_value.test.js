@@ -67,11 +67,7 @@ describe('getAggValue', () => {
         doc_count: 1,
         docs: {
           hits: {
-            hits: [
-              { _source: { example: { value: 25 } } },
-              { _source: { example: { value: 25 } } },
-              { _source: { example: { value: 25 } } },
-            ],
+            hits: [{ fields: { 'example.value': [25, 25, 25] } }],
           },
         },
       },

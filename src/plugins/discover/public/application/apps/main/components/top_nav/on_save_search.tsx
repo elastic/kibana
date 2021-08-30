@@ -135,7 +135,9 @@ export async function onSaveSearch({
       onClose={() => {}}
       title={savedSearch.title}
       showCopyOnSave={!!savedSearch.id}
-      objectType="search"
+      objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
+        defaultMessage: 'search',
+      })}
       description={i18n.translate('discover.localMenu.saveSaveSearchDescription', {
         defaultMessage:
           'Save your Discover search so you can use it in visualizations and dashboards',

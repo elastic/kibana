@@ -324,6 +324,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                             <button
                               class="euiButton euiButton--primary euiButton--small"
                               id="generated-id"
+                              style="min-width: auto;"
                               type="submit"
                             >
                               <span

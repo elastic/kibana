@@ -142,9 +142,7 @@ async function createCloudApmPackagePolicy(
 ) {
   updateLocalStorage(FETCH_STATUS.LOADING);
   try {
-    const {
-      cloud_apm_package_policy: cloudApmPackagePolicy,
-    } = await callApmApi({
+    const { cloudApmPackagePolicy } = await callApmApi({
       endpoint: 'POST /api/apm/fleet/cloud_apm_package_policy',
       signal: null,
     });

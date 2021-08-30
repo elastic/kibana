@@ -132,6 +132,11 @@ export class TimePickerPageObject extends FtrService {
     await this.testSubjects.click('superDatePickerAbsoluteTab');
     await this.testSubjects.click('superDatePickerAbsoluteDateInput');
     await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+
+    await this.retry.waitFor('Timepicker popover to close', async () => {
+      return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput'));
+    });
 
     const superDatePickerApplyButtonExists = await this.testSubjects.exists(
       'superDatePickerApplyTimeButton'

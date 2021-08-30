@@ -67,7 +67,7 @@ export function UrlStorageContextProvider({
 
     setAllSeries(allSeriesN);
     setFirstSeriesId(allSeriesIds?.[0]);
-    setFirstSeries(allSeriesN?.[0]);
+    setFirstSeries(allSeriesN?.[allSeriesIds?.[0]]);
     (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
   }, [allShortSeries, storage]);
 

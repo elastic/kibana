@@ -46,7 +46,7 @@ and then click *Save session*. Once you save a search session, you can start a n
 navigate to a different application, or close the browser.
 +
 [role="screenshot"]
-image::images/search-session-awhile.png[Search Session indicator displaying the current state of the search, which you can click to stop or save a running Search Session ]
+image::images/search-session-awhile.png[Search Session indicator displaying the current state of the search, which you can click to stop or save a running Search Session, width=75% ]
 
 . To view your saved searches, open the main menu, and then click
 *Stack Management > Search Sessions*.  You can also open this view from the search sessions popup for a saved or completed session.

@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { EndpointIndexUIQueryParams, EndpointState } from '../types';
+import { EndpointState } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface ServerReturnedEndpointList {
@@ -166,6 +166,13 @@ export interface EndpointDetailsActivityLogUpdatePaging {
   };
 }
 
+export interface EndpointDetailsLoad {
+  type: 'endpointDetailsLoad';
+  payload: {
+    endpointId: string;
+  };
+}
+
 export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
   type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange';
   payload: {
@@ -173,10 +180,11 @@ export interface EndpointDetailsActivityLogUpdateIsInvalidDateRange {
   };
 }
 
-export interface EndpointDetailsFlyoutTabChanged {
-  type: 'endpointDetailsFlyoutTabChanged';
-  payload: { flyoutView: EndpointIndexUIQueryParams['show'] };
-}
+export type LoadMetadataTransformStats = Action<'loadMetadataTransformStats'>;
+
+export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChanged'> & {
+  payload: EndpointState['metadataTransformStats'];
+};
 
 export type EndpointAction =
   | ServerReturnedEndpointList
@@ -185,8 +193,8 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointDetails
   | EndpointDetailsActivityLogUpdatePaging
   | EndpointDetailsActivityLogUpdateIsInvalidDateRange
-  | EndpointDetailsFlyoutTabChanged
   | EndpointDetailsActivityLogChanged
+  | EndpointDetailsLoad
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
@@ -208,4 +216,6 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointsTotal
   | EndpointIsolationRequest
   | EndpointIsolationRequestStateChange
-  | EndpointPendingActionsStateChanged;
+  | EndpointPendingActionsStateChanged
+  | LoadMetadataTransformStats
+  | MetadataTransformStatsChanged;

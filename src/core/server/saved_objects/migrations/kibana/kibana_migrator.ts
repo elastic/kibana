@@ -184,11 +184,12 @@ export class KibanaMigrator {
               logger: this.log,
               preMigrationScript: indexMap[index].script,
               transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
-                migrateRawDocsSafely(
-                  this.serializer,
-                  this.documentMigrator.migrateAndConvert,
-                  rawDocs
-                ),
+                migrateRawDocsSafely({
+                  serializer: this.serializer,
+                  knownTypes: new Set(this.typeRegistry.getAllTypes().map((t) => t.name)),
+                  migrateDoc: this.documentMigrator.migrateAndConvert,
+                  rawDocs,
+                }),
               migrationVersionPerType: this.documentMigrator.migrationVersion,
               indexPrefix: index,
               migrationsConfig: this.soMigrationsConfig,

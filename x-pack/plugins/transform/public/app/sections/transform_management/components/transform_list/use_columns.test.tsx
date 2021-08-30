@@ -20,13 +20,14 @@ describe('Transform: Job List Columns', () => {
 
     const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 
-    expect(columns).toHaveLength(7);
+    expect(columns).toHaveLength(8);
     expect(columns[0].isExpander).toBeTruthy();
     expect(columns[1].name).toBe('ID');
     expect(columns[2].name).toBe('Description');
-    expect(columns[3].name).toBe('Status');
-    expect(columns[4].name).toBe('Mode');
-    expect(columns[5].name).toBe('Progress');
-    expect(columns[6].name).toBe('Actions');
+    expect(columns[3].name).toBe('Type');
+    expect(columns[4].name).toBe('Status');
+    expect(columns[5].name).toBe('Mode');
+    expect(columns[6].name).toBe('Progress');
+    expect(columns[7].name).toBe('Actions');
   });
 });

@@ -14,9 +14,10 @@ import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
 } from 'src/plugins/telemetry_collection_manager/server';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 
 interface SendTelemetryOptInStatusConfig {
-  optInStatusUrl: string;
+  sendUsageTo: 'staging' | 'prod';
   newOptInStatus: boolean;
   currentKibanaVersion: string;
 }
@@ -26,7 +27,12 @@ export async function sendTelemetryOptInStatus(
   config: SendTelemetryOptInStatusConfig,
   statsGetterConfig: StatsGetterConfig
 ) {
-  const { optInStatusUrl, newOptInStatus, currentKibanaVersion } = config;
+  const { sendUsageTo, newOptInStatus, currentKibanaVersion } = config;
+  const optInStatusUrl = getTelemetryChannelEndpoint({
+    env: sendUsageTo,
+    channelName: 'optInStatus',
+  });
+
   const optInStatus = await telemetryCollectionManager.getOptInStats(
     newOptInStatus,
     statsGetterConfig

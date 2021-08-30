@@ -170,6 +170,57 @@ describe('7.14.0 Endpoint Package Policy migration', () => {
     expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
   });
 
+  it('adds supported option for ransomware on migrations and linux malware option and notification customization when ransomware is malformed', () => {
+    const initialDoc = policyDoc({
+      windowsMalware: { malware: { mode: 'on' } },
+      windowsRansomware: { ransomware: 'off' },
+      windowsPopup: {
+        popup: {
+          malware: {
+            message: '',
+            enabled: true,
+          },
+          ransomware: {
+            message: '',
+            enabled: true,
+          },
+        },
+      },
+    });
+
+    const migratedDoc = policyDoc({
+      windowsMalware: { malware: { mode: 'on' } },
+      windowsRansomware: { ransomware: { mode: 'off', supported: true } },
+      windowsPopup: {
+        popup: {
+          malware: {
+            message: '',
+            enabled: true,
+          },
+          ransomware: {
+            message: '',
+            enabled: true,
+          },
+        },
+      },
+      linuxMalware: {
+        malware: {
+          mode: 'on',
+        },
+      },
+      linuxPopup: {
+        popup: {
+          malware: {
+            message: '',
+            enabled: true,
+          },
+        },
+      },
+    });
+
+    expect(migration(initialDoc, {} as SavedObjectMigrationContext)).toEqual(migratedDoc);
+  });
+
   it('does not modify non-endpoint package policies', () => {
     const doc: SavedObjectUnsanitizedDoc<PackagePolicy> = {
       id: 'mock-saved-object-id',

@@ -7,15 +7,20 @@
 
 import { Geometry, Position } from 'geojson';
 import { set } from '@elastic/safer-lodash-set';
-import { GET_MATCHING_INDEXES_PATH, INDEX_FEATURE_PATH } from '../../../../../common';
+import {
+  CHECK_IS_DRAWING_INDEX,
+  GET_MATCHING_INDEXES_PATH,
+  INDEX_FEATURE_PATH,
+} from '../../../../../common';
 import { getHttp } from '../../../../kibana_services';
 
 export const addFeatureToIndex = async (
   indexName: string,
   geometry: Geometry | Position[],
-  path: string
+  path: string,
+  defaultFields: Record<string, Record<string, string>>
 ) => {
-  const data = set({}, path, geometry);
+  const data = set({ ...defaultFields }, path, geometry);
   return await getHttp().fetch({
     path: `${INDEX_FEATURE_PATH}`,
     method: 'POST',
@@ -40,5 +45,13 @@ export const getMatchingIndexes = async (indexPattern: string) => {
   return await getHttp().fetch({
     path: `${GET_MATCHING_INDEXES_PATH}/${indexPattern}`,
     method: 'GET',
+  });
+};
+
+export const getIsDrawLayer = async (index: string) => {
+  return await getHttp().fetch({
+    path: CHECK_IS_DRAWING_INDEX,
+    method: 'GET',
+    query: { index },
   });
 };

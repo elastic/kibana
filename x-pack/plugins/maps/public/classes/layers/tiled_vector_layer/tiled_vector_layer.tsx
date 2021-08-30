@@ -95,13 +95,13 @@ export class TiledVectorLayer extends VectorLayer {
         ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
             defaultMessage: `Results limited to {count} documents.`,
             values: {
-              count: totalFeaturesCount,
+              count: totalFeaturesCount.toLocaleString(),
             },
           })
         : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
             defaultMessage: `Found {count} documents.`,
             values: {
-              count: totalFeaturesCount,
+              count: totalFeaturesCount.toLocaleString(),
             },
           }),
       areResultsTrimmed: isIncomplete,

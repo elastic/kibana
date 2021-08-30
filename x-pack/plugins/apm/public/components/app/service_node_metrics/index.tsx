@@ -19,12 +19,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
+import {
+  getServiceNodeName,
+  SERVICE_NODE_NAME_MISSING,
+} from '../../../../common/service_nodes';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric_charts_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { truncate, unit } from '../../../utils/style';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
@@ -39,20 +45,39 @@ const Truncate = euiStyled.span`
   ${truncate(unit * 12)}
 `;
 
-interface ServiceNodeMetricsProps {
-  serviceName: string;
-  serviceNodeName: string;
-}
+export function ServiceNodeMetrics() {
+  const { agentName, serviceName } = useApmServiceContext();
 
-export function ServiceNodeMetrics({
-  serviceName,
-  serviceNodeName,
-}: ServiceNodeMetricsProps) {
+  const apmRouter = useApmRouter();
+
   const {
-    urlParams: { kuery, start, end },
-  } = useUrlParams();
-  const { agentName } = useApmServiceContext();
-  const { data } = useServiceMetricChartsFetcher({ serviceNodeName });
+    path: { serviceNodeName },
+    query,
+  } = useApmParams('/services/:serviceName/nodes/:serviceNodeName/metrics');
+
+  const { environment, kuery, rangeFrom, rangeTo } = query;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  useBreadcrumb({
+    title: getServiceNodeName(serviceNodeName),
+    href: apmRouter.link(
+      '/services/:serviceName/nodes/:serviceNodeName/metrics',
+      {
+        path: {
+          serviceName,
+          serviceNodeName,
+        },
+        query,
+      }
+    ),
+  });
+
+  const { data } = useServiceMetricChartsFetcher({
+    serviceNodeName,
+    kuery,
+    environment,
+  });
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {

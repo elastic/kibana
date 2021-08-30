@@ -9,6 +9,7 @@ import { isArray } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock, formatDate } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import { useAllActions } from './use_all_actions';
 import { Direction } from '../../common/search_strategy';
@@ -27,6 +28,7 @@ const ActionTableResultsButton = React.memo<ActionTableResultsButtonProps>(({ ac
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
+  const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
@@ -65,6 +67,16 @@ const ActionsTableComponent = () => {
   const renderActionsColumn = useCallback(
     (item) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
     []
+  );
+
+  const handlePlayClick = useCallback(
+    (item) =>
+      push('/live_queries/new', {
+        form: {
+          query: item._source?.data?.query,
+        },
+      }),
+    [push]
   );
 
   const columns = useMemo(
@@ -107,12 +119,18 @@ const ActionsTableComponent = () => {
         }),
         actions: [
           {
+            type: 'icon',
+            icon: 'play',
+            onClick: handlePlayClick,
+          },
+          {
             render: renderActionsColumn,
           },
         ],
       },
     ],
     [
+      handlePlayClick,
       renderActionsColumn,
       renderAgentsColumn,
       renderCreatedByColumn,
@@ -135,6 +153,7 @@ const ActionsTableComponent = () => {
     <EuiBasicTable
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={actionsData?.actions ?? []}
+      // @ts-expect-error update types
       columns={columns}
       pagination={pagination}
       onChange={onTableChange}

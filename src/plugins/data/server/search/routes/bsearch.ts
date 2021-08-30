@@ -8,6 +8,7 @@
 
 import { catchError, first } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
+import type { ExecutionContextSetup } from 'src/core/server';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -17,7 +18,8 @@ import { ISearchStart } from '../types';
 
 export function registerBsearchRoute(
   bfetch: BfetchServerSetup,
-  getScoped: ISearchStart['asScoped']
+  getScoped: ISearchStart['asScoped'],
+  executionContextService: ExecutionContextSetup
 ): void {
   bfetch.addBatchProcessingRoute<
     { request: IKibanaSearchRequest; options?: ISearchOptionsSerializable },
@@ -30,21 +32,25 @@ export function registerBsearchRoute(
        */
       onBatchItem: async ({ request: requestData, options }) => {
         const search = getScoped(request);
-        return search
-          .search(requestData, options)
-          .pipe(
-            first(),
-            catchError((err) => {
-              // Re-throw as object, to get attributes passed to the client
-              // eslint-disable-next-line no-throw-literal
-              throw {
-                message: err.message,
-                statusCode: err.statusCode,
-                attributes: err.errBody?.error,
-              };
-            })
-          )
-          .toPromise();
+        const { executionContext, ...restOptions } = options || {};
+
+        return executionContextService.withContext(executionContext, () =>
+          search
+            .search(requestData, restOptions)
+            .pipe(
+              first(),
+              catchError((err) => {
+                // Re-throw as object, to get attributes passed to the client
+                // eslint-disable-next-line no-throw-literal
+                throw {
+                  message: err.message,
+                  statusCode: err.statusCode,
+                  attributes: err.errBody?.error,
+                };
+              })
+            )
+            .toPromise()
+        );
       },
     };
   });

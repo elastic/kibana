@@ -225,13 +225,20 @@ export class AnomalyExplorerChartsService {
       chartRange.min = chartRange.min + maxBucketSpanMs;
     }
 
+    // When used as an embeddable, selectedEarliestMs is the start date on the time picker,
+    // which may be earlier than the time of the first point plotted in the chart (as we plot
+    // the first full bucket with a start date no earlier than the start).
+    const selectedEarliestBucketCeil = boundsMin
+      ? Math.ceil(Math.max(selectedEarliestMs, boundsMin) / maxBucketSpanMs) * maxBucketSpanMs
+      : Math.ceil(selectedEarliestMs / maxBucketSpanMs) * maxBucketSpanMs;
+
     const selectedLatestBucketStart = boundsMax
       ? Math.floor(Math.min(selectedLatestMs, boundsMax) / maxBucketSpanMs) * maxBucketSpanMs
       : Math.floor(selectedLatestMs / maxBucketSpanMs) * maxBucketSpanMs;
 
     if (
-      (chartRange.min > selectedEarliestMs || chartRange.max < selectedLatestBucketStart) &&
-      chartRange.max - chartRange.min < selectedLatestBucketStart - selectedEarliestMs
+      (chartRange.min > selectedEarliestBucketCeil || chartRange.max < selectedLatestBucketStart) &&
+      chartRange.max - chartRange.min < selectedLatestBucketStart - selectedEarliestBucketCeil
     ) {
       tooManyBuckets = true;
     }
@@ -497,8 +504,9 @@ export class AnomalyExplorerChartsService {
         const config = seriesConfigs[i];
         let records;
         if (
-          config.detectorLabel !== undefined &&
-          config.detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)
+          (config.detectorLabel !== undefined &&
+            config.detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)) ||
+          config?.metricFunction === ML_JOB_AGGREGATION.LAT_LONG
         ) {
           if (config.entityFields.length) {
             records = [

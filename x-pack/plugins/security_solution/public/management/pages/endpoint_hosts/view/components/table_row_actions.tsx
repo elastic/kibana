@@ -62,5 +62,3 @@ export const TableRowActions = memo<TableRowActionProps>(({ endpointMetadata }) 
   );
 });
 TableRowActions.displayName = 'EndpointTableRowActions';
-
-ContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';

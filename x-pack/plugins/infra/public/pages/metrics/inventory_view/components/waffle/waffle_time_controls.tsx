@@ -53,7 +53,7 @@ export const WaffleTimeControls = withTheme(({ theme }: Props) => {
   );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m">
+    <EuiFlexGroup gutterSize="m">
       <EuiFlexItem grow={false} data-test-subj="waffleDatePicker">
         <EuiDatePicker
           dateFormat="L LTS"

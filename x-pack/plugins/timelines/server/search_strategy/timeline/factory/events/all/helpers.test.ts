@@ -19,7 +19,7 @@ describe('#formatTimelineData', () => {
         'destination.ip',
         'source.ip',
         'source.geo.location',
-        'threat.indicator.matched.field',
+        'threat.enrichments.matched.field',
       ],
       TIMELINE_EVENTS_FIELDS,
       eventHit
@@ -42,7 +42,7 @@ describe('#formatTimelineData', () => {
             value: ['beats-ci-immutable-ubuntu-1804-1605624279743236239'],
           },
           {
-            field: 'threat.indicator.matched.field',
+            field: 'threat.enrichments.matched.field',
             value: ['matched_field', 'other_matched_field', 'matched_field_2'],
           },
           {
@@ -95,10 +95,10 @@ describe('#formatTimelineData', () => {
             name: ['jenkins'],
           },
           threat: {
-            indicator: [
+            enrichments: [
               {
-                event: {
-                  dataset: [],
+                indicator: {
+                  provider: ['yourself'],
                   reference: [],
                 },
                 matched: {
@@ -106,11 +106,10 @@ describe('#formatTimelineData', () => {
                   field: ['matched_field', 'other_matched_field'],
                   type: [],
                 },
-                provider: ['yourself'],
               },
               {
-                event: {
-                  dataset: [],
+                indicator: {
+                  provider: ['other_you'],
                   reference: [],
                 },
                 matched: {
@@ -118,7 +117,6 @@ describe('#formatTimelineData', () => {
                   field: ['matched_field_2'],
                   type: [],
                 },
-                provider: ['other_you'],
               },
             ],
           },
@@ -141,7 +139,7 @@ describe('#formatTimelineData', () => {
           parent: {
             depth: 0,
             index:
-              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
+              'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
             id: '0268af90-d8da-576a-9747-2a191519416a',
             type: 'event',
           },
@@ -180,6 +178,7 @@ describe('#formatTimelineData', () => {
             query: '_id :*',
             index: [
               'apm-*-transaction*',
+              'traces-apm*',
               'auditbeat-*',
               'endgame-*',
               'filebeat-*',
@@ -246,7 +245,7 @@ describe('#formatTimelineData', () => {
             {
               depth: 0,
               index:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
+                'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
               id: '0268af90-d8da-576a-9747-2a191519416a',
               type: 'event',
             },
@@ -255,7 +254,7 @@ describe('#formatTimelineData', () => {
             {
               depth: 0,
               index:
-                'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
+                'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
               id: '0268af90-d8da-576a-9747-2a191519416a',
               type: 'event',
             },
@@ -279,6 +278,7 @@ describe('#formatTimelineData', () => {
         'signal.rule.version': ['1'],
         'signal.rule.index': [
           'apm-*-transaction*',
+          'traces-apm*',
           'auditbeat-*',
           'endgame-*',
           'filebeat-*',
@@ -332,6 +332,7 @@ describe('#formatTimelineData', () => {
               id: ['696c24e0-526d-11eb-836c-e1620268b945'],
               index: [
                 'apm-*-transaction*',
+                'traces-apm*',
                 'auditbeat-*',
                 'endgame-*',
                 'filebeat-*',
@@ -463,9 +464,9 @@ describe('#formatTimelineData', () => {
     });
 
     it('builds intermediate objects at multiple levels', () => {
-      expect(buildObjectForFieldPath('threat.indicator.matched.atomic', eventHit)).toEqual({
+      expect(buildObjectForFieldPath('threat.enrichments.matched.atomic', eventHit)).toEqual({
         threat: {
-          indicator: [
+          enrichments: [
             {
               matched: {
                 atomic: ['matched_atomic'],
@@ -482,9 +483,9 @@ describe('#formatTimelineData', () => {
     });
 
     it('preserves multiple values for a single leaf', () => {
-      expect(buildObjectForFieldPath('threat.indicator.matched.field', eventHit)).toEqual({
+      expect(buildObjectForFieldPath('threat.enrichments.matched.field', eventHit)).toEqual({
         threat: {
-          indicator: [
+          enrichments: [
             {
               matched: {
                 field: ['matched_field', 'other_matched_field'],

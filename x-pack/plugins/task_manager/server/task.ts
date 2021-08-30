@@ -363,6 +363,13 @@ export interface ConcreteTaskInstance extends TaskInstance {
   ownerId: string | null;
 }
 
+/**
+ * A task instance that has an id and is ready for storage.
+ */
+export type EphemeralTask = Pick<ConcreteTaskInstance, 'taskType' | 'params' | 'state' | 'scope'>;
+export type EphemeralTaskInstance = EphemeralTask &
+  Pick<ConcreteTaskInstance, 'id' | 'scheduledAt' | 'startedAt' | 'runAt' | 'status' | 'ownerId'>;
+
 export type SerializedConcreteTaskInstance = Omit<
   ConcreteTaskInstance,
   'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'

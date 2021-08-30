@@ -6,6 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiLinkButtonProps,
@@ -22,6 +23,9 @@ export const HelpPopoverButton = ({ onClick }: { onClick: EuiLinkButtonProps['on
       className="mlHelpPopover__buttonIcon"
       size="s"
       iconType="help"
+      aria-label={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
+        defaultMessage: 'Help',
+      })}
       onClick={onClick}
     />
   );

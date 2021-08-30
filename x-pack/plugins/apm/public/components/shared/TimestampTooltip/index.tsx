@@ -15,9 +15,9 @@ import {
 
 interface Props {
   /**
-   * timestamp in milliseconds
+   * timestamp in milliseconds or ISO timestamp
    */
-  time: number;
+  time: number | string;
   timeUnit?: TimeUnit;
 }
 

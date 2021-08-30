@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import webpack from 'webpack';
-
+import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
+
+import webpack from 'webpack';
 
 import { Bundle, WorkerConfig, ascending, parseFilePath } from '../common';
 import { BundleRefModule } from './bundle_ref_module';
@@ -29,6 +30,20 @@ import {
  * across mulitple workers on machines with lots of cores.
  */
 const EXTRA_SCSS_WORK_UNITS = 100;
+
+const isBazelPackageCache = new Map<string, boolean>();
+function isBazelPackage(pkgJsonPath: string) {
+  const cached = isBazelPackageCache.get(pkgJsonPath);
+  if (typeof cached === 'boolean') {
+    return cached;
+  }
+
+  const path = parseFilePath(Fs.realpathSync(pkgJsonPath, 'utf-8'));
+  const match = !!path.matchDirs('bazel-out', /-fastbuild$/, 'bin', 'packages');
+  isBazelPackageCache.set(pkgJsonPath, match);
+
+  return match;
+}
 
 export class PopulateBundleCachePlugin {
   constructor(private readonly workerConfig: WorkerConfig, private readonly bundle: Bundle) {}
@@ -57,12 +72,11 @@ export class PopulateBundleCachePlugin {
             let path = getModulePath(module);
             let parsedPath = parseFilePath(path);
 
-            if (parsedPath.dirs.includes('bazel-out')) {
-              const index = parsedPath.dirs.indexOf('bazel-out');
-              path = Path.join(
-                workerConfig.repoRoot,
-                'bazel-out',
-                ...parsedPath.dirs.slice(index + 1),
+            const bazelOutIndex = parsedPath.dirs.indexOf('bazel-out');
+            if (bazelOutIndex >= 0) {
+              path = Path.resolve(
+                this.workerConfig.repoRoot,
+                ...parsedPath.dirs.slice(bazelOutIndex),
                 parsedPath.filename ?? ''
               );
               parsedPath = parseFilePath(path);
@@ -84,13 +98,13 @@ export class PopulateBundleCachePlugin {
 
             const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
             const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
-            referencedFiles.add(
-              Path.join(
-                parsedPath.root,
-                ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
-                'package.json'
-              )
+            const pkgJsonPath = Path.join(
+              parsedPath.root,
+              ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
+              'package.json'
             );
+
+            referencedFiles.add(isBazelPackage(pkgJsonPath) ? path : pkgJsonPath);
             continue;
           }
 

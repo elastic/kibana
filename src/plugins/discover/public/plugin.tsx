@@ -317,7 +317,6 @@ export class DiscoverPlugin
       stopUrlTracker();
     };
 
-    this.docViewsRegistry.setAngularInjectorGetter(this.getEmbeddableInjector);
     core.application.register({
       id: 'discover',
       title: 'Discover',
@@ -337,6 +336,11 @@ export class DiscoverPlugin
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
         const {
           plugins: { data: dataStart },
         } = await this.initializeServices();
@@ -350,6 +354,7 @@ export class DiscoverPlugin
         const unmount = await renderApp(innerAngularName, params.element);
         return () => {
           params.element.classList.remove('dscAppWrapper');
+          unlistenParentHistory();
           unmount();
           appUnMounted();
         };
@@ -403,6 +408,7 @@ export class DiscoverPlugin
       }
       // this is used by application mount and tests
       const { getInnerAngularModule } = await import('./application/angular/get_inner_angular');
+      await plugins.kibanaLegacy.loadAngularBootstrap();
       const module = getInnerAngularModule(
         innerAngularName,
         core,
@@ -473,7 +479,7 @@ export class DiscoverPlugin
         throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
       }
       const { core, plugins } = await this.initializeServices();
-      getServices().kibanaLegacy.loadFontAwesome();
+      await getServices().kibanaLegacy.loadAngularBootstrap();
       const { getInnerAngularModuleEmbeddable } = await import(
         './application/angular/get_inner_angular'
       );

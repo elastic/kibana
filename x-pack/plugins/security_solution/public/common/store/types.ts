@@ -18,10 +18,12 @@ import { HostsPluginState } from '../../hosts/store';
 import { DragAndDropState } from './drag_and_drop/reducer';
 import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
+import { UebaPluginState } from '../../ueba/store';
 import { ManagementPluginState } from '../../management';
 
 export type StoreState = HostsPluginState &
   NetworkPluginState &
+  UebaPluginState &
   TimelinePluginState &
   ManagementPluginState & {
     app: AppState;

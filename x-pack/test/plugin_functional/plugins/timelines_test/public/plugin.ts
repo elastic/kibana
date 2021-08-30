@@ -9,6 +9,7 @@ import { Plugin, CoreStart, CoreSetup, AppMountParameters } from 'kibana/public'
 import { i18n } from '@kbn/i18n';
 import { TimelinesUIStart } from '../../../../../plugins/timelines/public';
 import { renderApp } from './applications/timelines_test';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 export type TimelinesTestPluginSetup = void;
 export type TimelinesTestPluginStart = void;
@@ -17,6 +18,7 @@ export interface TimelinesTestPluginSetupDependencies {}
 
 export interface TimelinesTestPluginStartDependencies {
   timelines: TimelinesUIStart;
+  data: DataPublicPluginStart;
 }
 
 export class TimelinesTestPlugin
@@ -39,8 +41,8 @@ export class TimelinesTestPlugin
       }),
       mount: async (params: AppMountParameters<unknown>) => {
         const startServices = await core.getStartServices();
-        const [coreStart] = startServices;
-        return renderApp(coreStart, params, this.timelinesPlugin);
+        const [coreStart, { data }] = startServices;
+        return renderApp({ ...coreStart, data }, params, this.timelinesPlugin);
       },
     });
   }

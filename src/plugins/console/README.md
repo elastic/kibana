@@ -4,6 +4,20 @@
 
 Console provides the user with tools for storing and executing requests against Elasticsearch.
 
+## Features
+
+### `load_from` query parameter
+
+The `load_from` query parameter enables opening Console with prepopulated reuqests in two ways: from the elastic.co docs and from within other parts of Kibana.
+
+Plugins can open requests in Kibana by assigning this parameter a `data:text/plain` [lz-string](https://pieroxy.net/blog/pages/lz-string/index.html) encoded value. For example, navigating to `/dev_tools#/console?load_from=data:text/plain,OIUQKgBA+gzgpgQwE4GMAWAoA3gIgI4CucSAnjgFy4C2CALulAgDZMVYC+nQA` will prepopulate Console with the following request:
+
+```
+GET _search
+{"query":{"match_all":{}}}
+```
+
+
 ## Architecture
 - Ace editor wrapped with `<KIBANA_REPO>/src/plugins/console/public/types/core_editor.ts`. This wrapper allows for an easier change of the editor, for example from Ace to Monaco.
 - Autocomplete logic in `<KIBANA_REPO>/src/plugins/console/public/lib/autocomplete`. Autocomplete rules are computed by classes in `components` folder.
@@ -52,5 +66,4 @@ When defining url parameters or body request parameters, each key in the object 
 
 ### Parameters
 These values are filled in at runtime and can be used with curly braces to be evaluated at runtime. For the complete list of parameters check `parametrizedComponentFactories` function in `<KIBANA_REPO>/src/plugins/console/public/lib/kb/kb.js`. Examples include `{indices}`, `{types}`, `{id}`, `{username}`, `{template}`, `{nodes}` etc.
-
 

@@ -43,6 +43,7 @@ export {
   ArrayItem,
   FormHook,
   useFormContext,
+  UseMultiFields,
   FormDataProvider,
   OnFormUpdateArg,
   FieldConfig,

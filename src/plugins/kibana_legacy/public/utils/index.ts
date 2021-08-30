@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './system_api';
 // @ts-ignore
 export { KbnAccessibleClickProvider } from './kbn_accessible_click';
 // @ts-ignore

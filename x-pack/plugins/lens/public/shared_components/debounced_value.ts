@@ -21,11 +21,11 @@ export const useDebouncedValue = <T>(
     onChange: (val: T) => void;
     value: T;
   },
-  { allowEmptyString }: { allowEmptyString?: boolean } = {}
+  { allowFalsyValue }: { allowFalsyValue?: boolean } = {}
 ) => {
   const [inputValue, setInputValue] = useState(value);
   const unflushedChanges = useRef(false);
-  const shouldUpdateWithEmptyString = Boolean(allowEmptyString);
+  const shouldUpdateWithFalsyValue = Boolean(allowFalsyValue);
 
   // Save the initial value
   const initialValue = useRef(value);
@@ -57,7 +57,7 @@ export const useDebouncedValue = <T>(
 
   const handleInputChange = (val: T) => {
     setInputValue(val);
-    const valueToUpload = shouldUpdateWithEmptyString
+    const valueToUpload = shouldUpdateWithFalsyValue
       ? val ?? initialValue.current
       : val || initialValue.current;
     onChangeDebounced(valueToUpload);

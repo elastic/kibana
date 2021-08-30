@@ -7,14 +7,8 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-  PluginInitializerContext,
-  LegacyAPICaller,
-} from 'src/core/server';
+import { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import { Index } from '../../index_management/server';
 import { PLUGIN } from '../common/constants';
@@ -23,20 +17,18 @@ import { registerApiRoutes } from './routes';
 import { CrossClusterReplicationConfig } from './config';
 import { License, handleEsError } from './shared_imports';
 
-// TODO replace deprecated ES client after Index Management is updated
-const ccrDataEnricher = async (indicesList: Index[], callWithRequest: LegacyAPICaller) => {
+const ccrDataEnricher = async (indicesList: Index[], client: IScopedClusterClient) => {
   if (!indicesList?.length) {
     return indicesList;
   }
-  const params = {
-    path: '/_all/_ccr/info',
-    method: 'GET',
-  };
+
   try {
-    const { follower_indices: followerIndices } = await callWithRequest(
-      'transport.request',
-      params
-    );
+    const {
+      body: { follower_indices: followerIndices },
+    } = await client.asCurrentUser.ccr.followInfo({
+      index: '_all',
+    });
+
     return indicesList.map((index) => {
       const isFollowerIndex = !!followerIndices.find(
         (followerIndex: { follower_index: string }) => {

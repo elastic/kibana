@@ -9,6 +9,7 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { Start as InspectorStart } from '../../inspector/public';
@@ -39,7 +40,7 @@ import {
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
 import { Storage } from '../../kibana_utils/public';
-import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
+import { migrateToLatest, PersistableStateService } from '../../kibana_utils/common';
 import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
 import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
 import { EmbeddableStateWithType } from '../common/types';
@@ -181,6 +182,13 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getEnhancement: this.getEnhancement,
     };
 
+    const getAllMigrationsFn = () =>
+      getAllMigrations(
+        Array.from(this.embeddableFactories.values()),
+        Array.from(this.enhancements.values()),
+        getMigrateFunction(commonContract)
+      );
+
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
@@ -206,12 +214,10 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       telemetry: getTelemetryFunction(commonContract),
       extract: getExtractFunction(commonContract),
       inject: getInjectFunction(commonContract),
-      getAllMigrations: () =>
-        getAllMigrations(
-          Array.from(this.embeddableFactories.values()),
-          Array.from(this.enhancements.values()),
-          getMigrateFunction(commonContract)
-        ),
+      getAllMigrations: getAllMigrationsFn,
+      migrateToLatest: (state) => {
+        return migrateToLatest(getAllMigrationsFn(), state) as EmbeddableStateWithType;
+      },
     };
   }
 
@@ -231,7 +237,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       inject: enhancement.inject || identity,
       extract:
         enhancement.extract ||
-        ((state: SerializableState) => {
+        ((state: SerializableRecord) => {
           return { state, references: [] };
         }),
       migrations: enhancement.migrations || {},
@@ -244,7 +250,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         id: 'unknown',
         telemetry: (state, stats) => stats,
         inject: identity,
-        extract: (state: SerializableState) => {
+        extract: (state: SerializableRecord) => {
           return { state, references: [] };
         },
         migrations: {},

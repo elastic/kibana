@@ -24,6 +24,12 @@ const REL_NOFOLLOW = 'nofollow';
 /** prevents the browser from sending the current address as referrer via the Referer HTTP header */
 const REL_NOREFERRER = 'noreferrer';
 
+// Maps deprecated code block languages to supported ones in prism.js
+const CODE_LANGUAGE_OVERRIDES: Record<string, string> = {
+  $json: 'json',
+  $yml: 'yml',
+};
+
 export const markdownRenderers = {
   root: ({ children }: { children: React.ReactNode[] }) => (
     <EuiText grow={true}>{children}</EuiText>
@@ -60,8 +66,17 @@ export const markdownRenderers = {
     </EuiLink>
   ),
   code: ({ language, value }: { language: string; value: string }) => {
-    // Old packages are using `$json`, which is not valid any more with the move to prism.js
-    const parsedLang = language === '$json' ? 'json' : language;
+    let parsedLang = language;
+
+    // Some integrations export code block content that includes language tags that have since
+    // been removed or deprecated in `prism.js`, the upstream depedency that handles syntax highlighting
+    // in EuiCodeBlock components
+    const languageOverride = CODE_LANGUAGE_OVERRIDES[language];
+
+    if (languageOverride) {
+      parsedLang = languageOverride;
+    }
+
     return (
       <EuiCodeBlock language={parsedLang} isCopyable>
         {value}

@@ -19,6 +19,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:defaultThreatIndex': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -80,6 +84,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'timelion:legacyChartsLibrary': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'timelion:target_buckets': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -134,10 +142,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'courier:maxConcurrentShardRequests': {
     type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'courier:batchSearches': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'courier:setRequestPreference': {
@@ -384,6 +388,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'autocomplete:valueSuggestionMethod': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'search:timeout': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -417,10 +425,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'apm:enableSignificantTerms': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'apm:enableServiceOverview': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

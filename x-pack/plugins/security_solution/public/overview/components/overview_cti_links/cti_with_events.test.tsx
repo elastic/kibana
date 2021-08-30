@@ -51,7 +51,7 @@ describe('CtiWithEvents', () => {
     );
 
     expect(wrapper.find('[data-test-subj="cti-total-event-count"]').text()).toEqual(
-      `Showing: ${mockCtiWithEventsProps.totalCount} events`
+      `Showing: ${mockCtiWithEventsProps.totalCount} indicators`
     );
   });
 });

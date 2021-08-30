@@ -38,7 +38,6 @@ export function registerLayerWizards() {
 
   // Registration order determines display order
   registerLayerWizard(uploadLayerWizardConfig);
-  registerLayerWizard(newVectorLayerWizardConfig);
   registerLayerWizard(esDocumentsLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(choroplethLayerWizardConfig);
@@ -51,6 +50,7 @@ export function registerLayerWizards() {
   registerLayerWizard(point2PointLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(emsBoundariesLayerWizardConfig);
+  registerLayerWizard(newVectorLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(emsBaseMapLayerWizardConfig);
   // @ts-ignore

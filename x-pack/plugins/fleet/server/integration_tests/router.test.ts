@@ -37,6 +37,7 @@ describe('ingestManager', () => {
 
     beforeAll(async () => {
       root = createXPackRoot();
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -70,6 +71,7 @@ describe('ingestManager', () => {
       root = createXPackRoot({
         ingestManager: ingestManagerConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -109,6 +111,7 @@ describe('ingestManager', () => {
       root = createXPackRoot({
         ingestManager: ingestManagerConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -143,6 +146,7 @@ describe('ingestManager', () => {
       root = createXPackRoot({
         ingestManager: ingestManagerConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);
@@ -178,6 +182,7 @@ describe('ingestManager', () => {
       root = createXPackRoot({
         ingestManager: ingestManagerConfig,
       });
+      await root.preboot();
       await root.setup();
       await root.start();
     }, 30000);

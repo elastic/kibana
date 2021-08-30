@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
+  EuiFlexGroupProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -29,6 +31,8 @@ interface Props {
   showKueryBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
+  kueryBarPlaceholder?: string;
+  kueryBarBoolFilter?: QueryDslQueryContainer[];
 }
 
 function DebugQueryCallout() {
@@ -82,12 +86,17 @@ export function SearchBar({
   showKueryBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
+  kueryBarBoolFilter,
+  kueryBarPlaceholder,
 }: Props) {
-  const { isSmall, isMedium, isLarge, isXl, isXXL } = useBreakPoints();
+  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakPoints();
 
   if (hidden) {
     return null;
   }
+
+  const searchBarDirection: EuiFlexGroupProps['direction'] =
+    isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
 
   return (
     <>
@@ -95,11 +104,11 @@ export function SearchBar({
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
-        direction={isXXL ? 'row' : 'column'}
+        direction={searchBarDirection}
       >
         <EuiFlexItem>
           <EuiFlexGroup
-            direction={isSmall ? 'columnReverse' : 'row'}
+            direction={isLarge ? 'columnReverse' : 'row'}
             gutterSize="s"
             responsive={false}
           >
@@ -111,20 +120,23 @@ export function SearchBar({
 
             {showKueryBar && (
               <EuiFlexItem>
-                <KueryBar />
+                <KueryBar
+                  placeholder={kueryBarPlaceholder}
+                  boolFilter={kueryBarBoolFilter}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={showTimeComparison && !isXXL}>
+        <EuiFlexItem grow={showTimeComparison && !isXXXL}>
           <EuiFlexGroup
             direction={isSmall || isMedium || isLarge ? 'columnReverse' : 'row'}
-            justifyContent={isXl ? 'flexEnd' : undefined}
+            justifyContent={isXXL ? 'flexEnd' : undefined}
             gutterSize="s"
             responsive={false}
           >
             {showTimeComparison && (
-              <EuiFlexItem grow={isXXL} style={{ minWidth: 300 }}>
+              <EuiFlexItem grow={isXXXL} style={{ minWidth: 300 }}>
                 <TimeComparison />
               </EuiFlexItem>
             )}

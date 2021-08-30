@@ -25,7 +25,9 @@ import {
   DashboardRedirect,
   DashboardState,
 } from '../../types';
+import { DashboardAppLocatorParams } from '../../locator';
 import {
+  loadDashboardHistoryLocationState,
   tryDestroyDashboardContainer,
   syncDashboardContainerInput,
   savedObjectToDashboardState,
@@ -88,6 +90,7 @@ export const useDashboardAppState = ({
     savedObjectsTagging,
     dashboardCapabilities,
     dashboardSessionStorage,
+    scopedHistory,
   } = services;
   const { docTitle } = chrome;
   const { notifications } = core;
@@ -149,10 +152,15 @@ export const useDashboardAppState = ({
        */
       const dashboardSessionStorageState = dashboardSessionStorage.getState(savedDashboardId) || {};
       const dashboardURLState = loadDashboardUrlState(dashboardBuildContext);
+      const forwardedAppState = loadDashboardHistoryLocationState(
+        scopedHistory()?.location?.state as undefined | DashboardAppLocatorParams
+      );
+
       const initialDashboardState = {
         ...savedDashboardState,
         ...dashboardSessionStorageState,
         ...dashboardURLState,
+        ...forwardedAppState,
 
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
@@ -177,6 +185,13 @@ export const useDashboardAppState = ({
         incomingEmbeddable,
         savedDashboard,
         data,
+        executionContext: {
+          type: 'application',
+          name: 'dashboard',
+          id: savedDashboard.id ?? 'unsaved_dashboard',
+          description: savedDashboard.title,
+          url: history.location.pathname,
+        },
       });
       if (canceled || !dashboardContainer) {
         tryDestroyDashboardContainer(dashboardContainer);
@@ -219,8 +234,14 @@ export const useDashboardAppState = ({
           const unsavedChanges =
             current.viewMode === ViewMode.EDIT ? diffDashboardState(lastSaved, current) : {};
 
+          let savedTimeChanged = false;
+
+          /**
+           * changes to the time filter should only be considered 'unsaved changes' when
+           * editing the dashboard
+           */
           if (current.viewMode === ViewMode.EDIT) {
-            const savedTimeChanged =
+            savedTimeChanged =
               lastSaved.timeRestore &&
               !areTimeRangesEqual(
                 {
@@ -229,9 +250,9 @@ export const useDashboardAppState = ({
                 },
                 timefilter.getTime()
               );
-            const hasUnsavedChanges = Object.keys(unsavedChanges).length > 0 || savedTimeChanged;
-            setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
           }
+          const hasUnsavedChanges = Object.keys(unsavedChanges).length > 0 || savedTimeChanged;
+          setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
 
           unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.
           dashboardSessionStorage.setState(savedDashboardId, unsavedChanges);
@@ -246,7 +267,7 @@ export const useDashboardAppState = ({
       const updateLastSavedState = () => {
         setLastSavedState(
           savedObjectToDashboardState({
-            hideWriteControls: dashboardBuildContext.dashboardCapabilities.hideWriteControls,
+            showWriteControls: dashboardBuildContext.dashboardCapabilities.showWriteControls,
             version: dashboardBuildContext.kibanaVersion,
             savedObjectsTagging,
             usageCollection,
@@ -299,6 +320,7 @@ export const useDashboardAppState = ({
     getStateTransfer,
     savedDashboards,
     usageCollection,
+    scopedHistory,
     notifications,
     indexPatterns,
     kibanaVersion,
@@ -328,7 +350,12 @@ export const useDashboardAppState = ({
       if (from && to) timefilter.setTime({ from, to });
       if (refreshInterval) timefilter.setRefreshInterval(refreshInterval);
     }
-    dispatchDashboardStateChange(setDashboardState(lastSavedState));
+    dispatchDashboardStateChange(
+      setDashboardState({
+        ...lastSavedState,
+        viewMode: ViewMode.VIEW,
+      })
+    );
   }, [lastSavedState, dashboardAppState, data.query.timefilter, dispatchDashboardStateChange]);
 
   /**

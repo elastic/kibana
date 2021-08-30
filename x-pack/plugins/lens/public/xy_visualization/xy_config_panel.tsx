@@ -8,7 +8,7 @@
 import './xy_config_panel.scss';
 import React, { useMemo, useState, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position, ScaleType } from '@elastic/charts';
+import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
   EuiButtonGroup,
@@ -20,24 +20,26 @@ import {
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
+  EuiPopover,
+  EuiSelectable,
+  EuiText,
+  EuiPopoverTitle,
 } from '@elastic/eui';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import {
+import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type {
   VisualizationLayerWidgetProps,
   VisualizationToolbarProps,
   VisualizationDimensionEditorProps,
-  FormatFactory,
   FramePublicAPI,
 } from '../types';
+import { State, visualizationTypes, XYState } from './types';
+import type { FormatFactory } from '../../common';
 import {
-  State,
   SeriesType,
-  visualizationTypes,
   YAxisMode,
   AxesSettingsConfig,
   AxisExtentConfig,
-  XYState,
-} from './types';
+} from '../../common/expressions';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';
@@ -47,6 +49,7 @@ import { PalettePicker, TooltipWrapper } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getScaleType, getSortedAccessors } from './to_expression';
 import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
+import { ToolbarButton } from '../../../../../src/plugins/kibana_react/public';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -61,7 +64,11 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
   };
 }
 
-const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
+const legendOptions: Array<{
+  id: string;
+  value: 'auto' | 'show' | 'hide';
+  label: string;
+}> = [
   {
     id: `xy_legend_auto`,
     value: 'auto',
@@ -84,6 +91,90 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
     }),
   },
 ];
+
+export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
+  const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+  const { state, layerId } = props;
+  const horizontalOnly = isHorizontalChart(state.layers);
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
+  const layer = state.layers[index];
+  if (!layer) {
+    return null;
+  }
+
+  const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
+
+  const createTrigger = function () {
+    return (
+      <ToolbarButton
+        data-test-subj="lns_layer_settings"
+        title={currentVisType.fullLabel || currentVisType.label}
+        onClick={() => setPopoverIsOpen(!isPopoverOpen)}
+        fullWidth
+        size="s"
+      >
+        <>
+          <EuiIcon type={currentVisType.icon} />
+          <EuiText size="s" className="lnsLayerPanelChartSwitch_title">
+            {currentVisType.fullLabel || currentVisType.label}
+          </EuiText>
+        </>
+      </ToolbarButton>
+    );
+  };
+
+  return (
+    <>
+      <EuiPopover
+        panelClassName="lnsChangeIndexPatternPopover"
+        button={createTrigger()}
+        isOpen={isPopoverOpen}
+        closePopover={() => setPopoverIsOpen(false)}
+        display="block"
+        panelPaddingSize="s"
+        ownFocus
+      >
+        <EuiPopoverTitle>
+          {i18n.translate('xpack.lens.layerPanel.layerVisualizationType', {
+            defaultMessage: 'Layer visualization type',
+          })}
+        </EuiPopoverTitle>
+        <div>
+          <EuiSelectable<{
+            key?: string;
+            label: string;
+            value?: string;
+            checked?: 'on' | 'off';
+          }>
+            singleSelection="always"
+            options={visualizationTypes
+              .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
+              .map((t) => ({
+                value: t.id,
+                key: t.id,
+                checked: t.id === currentVisType.id ? 'on' : undefined,
+                prepend: <EuiIcon type={t.icon} />,
+                label: t.fullLabel || t.label,
+                'data-test-subj': `lnsXY_seriesType-${t.id}`,
+              }))}
+            onChange={(newOptions) => {
+              const chosenType = newOptions.find(({ checked }) => checked === 'on');
+              if (!chosenType) {
+                return;
+              }
+              const id = chosenType.value!;
+              trackUiEvent('xy_change_layer_display');
+              props.setState(updateLayer(state, { ...layer, seriesType: id as SeriesType }, index));
+              setPopoverIsOpen(false);
+            }}
+          >
+            {(list) => <>{list}</>}
+          </EuiSelectable>
+        </div>
+      </EuiPopover>
+    </>
+  );
+}
 
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;
@@ -219,6 +310,25 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
     });
   };
 
+  const labelsOrientation = {
+    x: state?.labelsOrientation?.x ?? 0,
+    yLeft: state?.labelsOrientation?.yLeft ?? 0,
+    yRight: state?.labelsOrientation?.yRight ?? 0,
+  };
+
+  const onLabelsOrientationChange = (axis: AxesSettingsConfigKeys, orientation: number): void => {
+    const newLabelsOrientation = {
+      ...labelsOrientation,
+      ...{
+        [axis]: orientation,
+      },
+    };
+    setState({
+      ...state,
+      labelsOrientation: newLabelsOrientation,
+    });
+  };
+
   const axisTitlesVisibilitySettings = {
     x: state?.axisTitlesVisibilitySettings?.x ?? true,
     yLeft: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
@@ -319,30 +429,85 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
+            location={state?.legend.isInside ? 'inside' : 'outside'}
+            onLocationChange={(location) => {
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  isInside: location === 'inside',
+                },
+              });
+            }}
             onDisplayChange={(optionId) => {
               const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
               if (newMode === 'auto') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: true, showSingleSeries: false },
+                  legend: {
+                    ...state.legend,
+                    isVisible: true,
+                    showSingleSeries: false,
+                  },
                 });
               } else if (newMode === 'show') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: true, showSingleSeries: true },
+                  legend: {
+                    ...state.legend,
+                    isVisible: true,
+                    showSingleSeries: true,
+                  },
                 });
               } else if (newMode === 'hide') {
                 setState({
                   ...state,
-                  legend: { ...state.legend, isVisible: false, showSingleSeries: false },
+                  legend: {
+                    ...state.legend,
+                    isVisible: false,
+                    showSingleSeries: false,
+                  },
                 });
               }
             }}
             position={state?.legend.position}
+            horizontalAlignment={state?.legend.horizontalAlignment}
+            verticalAlignment={state?.legend.verticalAlignment}
+            floatingColumns={state?.legend.floatingColumns}
+            onFloatingColumnsChange={(val) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, floatingColumns: val },
+              });
+            }}
+            maxLines={state?.legend.maxLines}
+            onMaxLinesChange={(val) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, maxLines: val },
+              });
+            }}
+            shouldTruncate={state?.legend.shouldTruncate ?? true}
+            onTruncateLegendChange={() => {
+              const current = state?.legend.shouldTruncate ?? true;
+              setState({
+                ...state,
+                legend: { ...state.legend, shouldTruncate: !current },
+              });
+            }}
             onPositionChange={(id) => {
               setState({
                 ...state,
                 legend: { ...state.legend, position: id as Position },
+              });
+            }}
+            onAlignmentChange={(value) => {
+              const [vertical, horizontal] = value.split('_');
+              const verticalAlignment = vertical as VerticalAlignment;
+              const horizontalAlignment = horizontal as HorizontalAlignment;
+              setState({
+                ...state,
+                legend: { ...state.legend, verticalAlignment, horizontalAlignment },
               });
             }}
             renderValueInLegendSwitch={nonOrdinalXAxis}
@@ -384,6 +549,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               isDisabled={
                 Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
               }
+              orientation={labelsOrientation.yLeft}
+              setOrientation={onLabelsOrientationChange}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
               extent={state?.yLeftExtent || { mode: 'full' }}
@@ -402,6 +569,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             toggleTickLabelsVisibility={onTickLabelsVisibilitySettingsChange}
             areGridlinesVisible={gridlinesVisibilitySettings.x}
             toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
+            orientation={labelsOrientation.x}
+            setOrientation={onLabelsOrientationChange}
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
             toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}
             endzonesVisible={!state?.hideEndzones}
@@ -436,6 +605,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length ===
                 0
               }
+              orientation={labelsOrientation.yRight}
+              setOrientation={onLabelsOrientationChange}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
               isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
               toggleAxisTitleVisibility={onAxisTitlesVisibilitySettingsChange}

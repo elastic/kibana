@@ -7,17 +7,17 @@
 
 import React from 'react';
 import { keyBy } from 'lodash';
-import { useParams } from 'react-router-dom';
-import { IUrlParams } from '../../../../../context/url_params_context/types';
+import type { ApmUrlParams } from '../../../../../context/url_params_context/types';
 import {
   IWaterfall,
   WaterfallLegendType,
 } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import { Waterfall } from './Waterfall';
 import { WaterfallLegends } from './WaterfallLegends';
+import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 
 interface Props {
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
   waterfall: IWaterfall;
   exceedsMax: boolean;
 }
@@ -27,7 +27,7 @@ export function WaterfallContainer({
   waterfall,
   exceedsMax,
 }: Props) {
-  const { serviceName } = useParams<{ serviceName: string }>();
+  const { serviceName } = useApmServiceContext();
 
   if (!waterfall) {
     return null;

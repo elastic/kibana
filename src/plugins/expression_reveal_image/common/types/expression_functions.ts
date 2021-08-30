@@ -31,7 +31,7 @@ export type ExpressionRevealImageFunction = () => ExpressionFunctionDefinition<
   'revealImage',
   number,
   Arguments,
-  ExpressionValueRender<Output>
+  Promise<ExpressionValueRender<Output>>
 >;
 
 export enum Position {

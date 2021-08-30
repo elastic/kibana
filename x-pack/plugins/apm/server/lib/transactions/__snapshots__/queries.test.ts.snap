@@ -335,7 +335,7 @@ Object {
 }
 `;
 
-exports[`transaction queries fetches transaction distribution 1`] = `
+exports[`transaction queries fetches transaction trace samples 1`] = `
 Object {
   "apm": Object {
     "events": Array [
@@ -343,13 +343,6 @@ Object {
     ],
   },
   "body": Object {
-    "aggs": Object {
-      "stats": Object {
-        "max": Object {
-          "field": "transaction.duration.us",
-        },
-      },
-    },
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -377,10 +370,27 @@ Object {
               },
             },
           },
+          Object {
+            "term": Object {
+              "transaction.sampled": true,
+            },
+          },
+        ],
+        "should": Array [
+          Object {
+            "term": Object {
+              "trace.id": "qux",
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.id": "quz",
+            },
+          },
         ],
       },
     },
-    "size": 0,
+    "size": 500,
   },
 }
 `;

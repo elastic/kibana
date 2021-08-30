@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { History } from 'history';
 // @ts-expect-error
 import createHashStateHistory from 'history-extra/dist/createHashStateHistory';
-import { useServices } from '../../services';
+import { useNavLinkService } from '../../services';
 // @ts-expect-error
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { CanvasRouter } from '../../routes';
@@ -31,11 +31,11 @@ class ShortcutManagerContextWrapper extends React.Component {
 
 export const App: FC = () => {
   const historyRef = useRef<History>(createHashStateHistory() as History);
-  const services = useServices();
+  const { updatePath } = useNavLinkService();
 
   useEffect(() => {
     return historyRef.current.listen(({ pathname }) => {
-      services.navLink.updatePath(pathname);
+      updatePath(pathname);
     });
   });
 

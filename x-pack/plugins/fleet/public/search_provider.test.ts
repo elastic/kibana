@@ -92,7 +92,7 @@ describe('Package search provider', () => {
               title: 'test',
               type: 'integration',
               url: {
-                path: 'undefined#/detail/test-test/overview',
+                path: 'undefined/detail/test-test/overview',
                 prependBasePath: false,
               },
             },
@@ -102,7 +102,7 @@ describe('Package search provider', () => {
               title: 'test1',
               type: 'integration',
               url: {
-                path: 'undefined#/detail/test1-test1/overview',
+                path: 'undefined/detail/test1-test1/overview',
                 prependBasePath: false,
               },
             },
@@ -175,7 +175,7 @@ describe('Package search provider', () => {
               title: 'test1',
               type: 'integration',
               url: {
-                path: 'undefined#/detail/test1-test1/overview',
+                path: 'undefined/detail/test1-test1/overview',
                 prependBasePath: false,
               },
             },
@@ -231,7 +231,7 @@ describe('Package search provider', () => {
                 title: 'test',
                 type: 'integration',
                 url: {
-                  path: 'undefined#/detail/test-test/overview',
+                  path: 'undefined/detail/test-test/overview',
                   prependBasePath: false,
                 },
               },
@@ -241,7 +241,7 @@ describe('Package search provider', () => {
                 title: 'test1',
                 type: 'integration',
                 url: {
-                  path: 'undefined#/detail/test1-test1/overview',
+                  path: 'undefined/detail/test1-test1/overview',
                   prependBasePath: false,
                 },
               },
@@ -274,7 +274,7 @@ describe('Package search provider', () => {
                 title: 'test1',
                 type: 'integration',
                 url: {
-                  path: 'undefined#/detail/test1-test1/overview',
+                  path: 'undefined/detail/test1-test1/overview',
                   prependBasePath: false,
                 },
               },

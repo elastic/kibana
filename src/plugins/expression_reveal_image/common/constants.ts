@@ -7,3 +7,6 @@
  */
 export const PLUGIN_ID = 'expressionRevealImage';
 export const PLUGIN_NAME = 'expressionRevealImage';
+
+export const BASE64 = '`base64`';
+export const URL = 'URL';

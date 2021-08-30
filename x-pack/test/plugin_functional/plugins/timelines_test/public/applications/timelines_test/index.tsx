@@ -12,12 +12,15 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesUIStart } from '../../../../../../../plugins/timelines/public';
+import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
+
+type CoreStartTimelines = CoreStart & { data: DataPublicPluginStart };
 
 /**
  * Render the Timeline Test app. Returns a cleanup function.
  */
 export function renderApp(
-  coreStart: CoreStart,
+  coreStart: CoreStartTimelines,
   parameters: AppMountParameters,
   timelinesPluginSetup: TimelinesUIStart | null
 ) {
@@ -41,7 +44,7 @@ const AppRoot = React.memo(
     parameters,
     timelinesPluginSetup,
   }: {
-    coreStart: CoreStart;
+    coreStart: CoreStartTimelines;
     parameters: AppMountParameters;
     timelinesPluginSetup: TimelinesUIStart | null;
   }) => {
@@ -50,6 +53,9 @@ const AppRoot = React.memo(
     const setRefetch = useCallback((_refetch) => {
       refetch.current = _refetch;
     }, []);
+
+    const hasAlertsCrudPermissions = useCallback(() => true, []);
+
     return (
       <I18nProvider>
         <Router history={parameters.history}>
@@ -57,14 +63,19 @@ const AppRoot = React.memo(
             {(timelinesPluginSetup &&
               timelinesPluginSetup.getTGrid &&
               timelinesPluginSetup.getTGrid<'standalone'>({
+                appId: 'securitySolution',
                 type: 'standalone',
+                casePermissions: {
+                  read: true,
+                  crud: true,
+                },
                 columns: [],
                 indexNames: [],
                 deletedEventIds: [],
                 end: '',
                 footerText: 'Events',
                 filters: [],
-                itemsPerPage: 50,
+                hasAlertsCrudPermissions,
                 itemsPerPageOptions: [1, 2, 3],
                 loadingText: 'Loading events',
                 renderCellValue: () => <div data-test-subj="timeline-wrapper">test</div>,
@@ -78,6 +89,7 @@ const AppRoot = React.memo(
                 setRefetch,
                 start: '',
                 rowRenderers: [],
+                filterStatus: 'open',
                 unit: (n: number) => `${n}`,
               })) ??
               null}

@@ -7,13 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import {
-  AlertType,
-  AlertInstanceState,
-  AlertInstanceContext,
-  AlertExecutorOptions,
-  ActionGroupIdsOf,
-} from '../../../../../alerting/server';
+import { ActionGroupIdsOf } from '../../../../../alerting/common';
+import { AlertType, PluginSetupContract } from '../../../../../alerting/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import {
   createMetricThresholdExecutor,
@@ -33,28 +28,17 @@ import {
   thresholdActionVariableDescription,
 } from '../common/messages';
 
-export type MetricThresholdAlertType = AlertType<
-  /**
-   * TODO: Remove this use of `any` by utilizing a proper type
-   */
-  Record<string, any>,
-  Record<string, any>,
-  AlertInstanceState,
-  AlertInstanceContext,
-  ActionGroupIdsOf<typeof FIRED_ACTIONS | typeof WARNING_ACTIONS>
+type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
-export type MetricThresholdAlertExecutorOptions = AlertExecutorOptions<
-  /**
-   * TODO: Remove this use of `any` by utilizing a proper type
-   */
-  Record<string, any>,
-  Record<string, any>,
-  AlertInstanceState,
-  AlertInstanceContext,
-  ActionGroupIdsOf<typeof FIRED_ACTIONS | typeof WARNING_ACTIONS>
->;
+export type MetricThresholdAlertType = Omit<AlertType, 'ActionGroupIdsOf'> & {
+  ActionGroupIdsOf: MetricThresholdAllowedActionGroups;
+};
 
-export function registerMetricThresholdAlertType(libs: InfraBackendLibs): MetricThresholdAlertType {
+export async function registerMetricThresholdAlertType(
+  alertingPlugin: PluginSetupContract,
+  libs: InfraBackendLibs
+) {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),
@@ -76,7 +60,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
     metric: schema.never(),
   });
 
-  return {
+  alertingPlugin.registerType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.alertName', {
       defaultMessage: 'Metric threshold',
@@ -114,5 +98,5 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
       ],
     },
     producer: 'infrastructure',
-  };
+  });
 }

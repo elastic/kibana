@@ -7,9 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
-toJSON(): Readonly<KibanaServerExecutionContext>;
+toJSON(): Readonly<KibanaExecutionContext>;
 ```
 <b>Returns:</b>
 
-`Readonly<KibanaServerExecutionContext>`
+`Readonly<KibanaExecutionContext>`
 

@@ -175,6 +175,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               immutable: false,
               index: [
                 'apm-*-transaction*',
+                'traces-apm*',
                 'auditbeat-*',
                 'endgame-*',
                 'filebeat-*',
@@ -414,6 +415,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               immutable: false,
               index: [
                 'apm-*-transaction*',
+                'traces-apm*',
                 'auditbeat-*',
                 'endgame-*',
                 'filebeat-*',
@@ -619,6 +621,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               immutable: false,
               index: [
                 'apm-*-transaction*',
+                'traces-apm*',
                 'auditbeat-*',
                 'endgame-*',
                 'filebeat-*',
@@ -822,6 +825,7 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
               immutable: false,
               index: [
                 'apm-*-transaction*',
+                'traces-apm*',
                 'auditbeat-*',
                 'endgame-*',
                 'filebeat-*',

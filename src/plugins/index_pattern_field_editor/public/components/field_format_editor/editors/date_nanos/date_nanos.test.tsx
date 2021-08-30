@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import type { FieldFormat } from 'src/plugins/data/public';
+import type { FieldFormat } from 'src/plugins/field_formats/common';
 
 import { DateNanosFormatEditor } from './date_nanos';
 

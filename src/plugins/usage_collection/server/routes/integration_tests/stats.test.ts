@@ -36,6 +36,7 @@ describe('/api/stats', () => {
 
   beforeEach(async () => {
     server = createHttpServer();
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createInternalSetupContract(),

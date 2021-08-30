@@ -31,7 +31,11 @@ export const migrateEndpointPackagePolicyToV7140: SavedObjectMigrationFn<
 
       // This value is based on license.
       // For the migration, we add 'true', our license watcher will correct it, if needed, when the app starts.
-      policy.windows.ransomware.supported = true;
+      if (policy?.windows?.ransomware?.mode) {
+        policy.windows.ransomware.supported = true;
+      } else {
+        policy.windows.ransomware = { mode: 'off', supported: true };
+      }
     }
   }
 

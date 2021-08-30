@@ -23,6 +23,7 @@ export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
           properties: {
             ingested: {
               type: 'date',
+              format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
             },
             agent_id_status: {
               ignore_above: 1024,
@@ -35,14 +36,22 @@ export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
   },
 };
 
+export const FLEET_FINAL_PIPELINE_VERSION = 1;
+// If the content is updated you probably need to update the FLEET_FINAL_PIPELINE_VERSION too to allow upgrade of the pipeline
 export const FLEET_FINAL_PIPELINE_CONTENT = `---
+version: ${FLEET_FINAL_PIPELINE_VERSION}
 description: >
   Final pipeline for processing all incoming Fleet Agent documents.
 processors:
   - set:
       description: Add time when event was ingested.
       field: event.ingested
-      value: '{{{_ingest.timestamp}}}'
+      copy_from: _ingest.timestamp
+  - script:
+      description: Remove sub-seconds from event.ingested to improve storage efficiency.
+      tag: truncate-subseconds-event-ingested
+      source: ctx.event.ingested = ctx.event.ingested.withNano(0).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+      ignore_failure: true
   - remove:
       description: Remove any pre-existing untrusted values.
       field:
@@ -120,6 +129,10 @@ processors:
       params:
         # List of users responsible for creating Fleet output API keys.
         trusted_users:
+          - username: elastic/fleet-server
+            realm: _service_account
+          - username: cloud-internal-agent-server
+            realm: found
           - username: elastic
             realm: reserved
   - remove:

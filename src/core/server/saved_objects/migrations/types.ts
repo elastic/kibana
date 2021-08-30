@@ -65,6 +65,10 @@ export interface SavedObjectMigrationContext {
    * The version in which this object type is being converted to a multi-namespace type
    */
   readonly convertToMultiNamespaceTypeVersion?: string;
+  /**
+   * Whether this is a single-namespace type or not
+   */
+  readonly isSingleNamespaceType: boolean;
 }
 
 /**

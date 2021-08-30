@@ -11,7 +11,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function hasRumData({

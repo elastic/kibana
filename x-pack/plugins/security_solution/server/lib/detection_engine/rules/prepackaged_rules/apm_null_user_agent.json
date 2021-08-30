@@ -25,7 +25,8 @@
     }
   ],
   "index": [
-    "apm-*-transaction*"
+    "apm-*-transaction*",
+    "traces-apm*"
   ],
   "language": "kuery",
   "license": "Elastic License v2",
@@ -43,5 +44,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }

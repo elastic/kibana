@@ -53,6 +53,18 @@ export const configSchema = schema.object({
     )
   ),
   password: schema.maybe(schema.string()),
+  serviceAccountToken: schema.maybe(
+    schema.conditional(
+      schema.siblingRef('username'),
+      schema.never(),
+      schema.string(),
+      schema.string({
+        validate: () => {
+          return `serviceAccountToken cannot be specified when "username" is also set.`;
+        },
+      })
+    )
+  ),
   requestHeadersWhitelist: schema.oneOf(
     [
       schema.string({
@@ -141,6 +153,21 @@ export const configSchema = schema.object({
     }),
     schema.boolean({ defaultValue: false })
   ),
+  skipStartupConnectionCheck: schema.conditional(
+    // Using dist over dev because integration_tests run with dev: false,
+    // and this config is solely introduced to allow some of the integration tests to run without an ES server.
+    schema.contextRef('dist'),
+    true,
+    schema.boolean({
+      validate: (rawValue) => {
+        if (rawValue === true) {
+          return '"skipStartupConnectionCheck" can only be set to true when running from source to allow integration tests to run without an ES server';
+        }
+      },
+      defaultValue: false,
+    }),
+    schema.boolean({ defaultValue: false })
+  ),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -209,6 +236,17 @@ export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
  */
 export class ElasticsearchConfig {
   /**
+   * @internal
+   * Only valid in dev mode. Skip the valid connection check during startup. The connection check allows
+   * Kibana to ensure that the Elasticsearch connection is valid before allowing
+   * any other services to be set up.
+   *
+   * @remarks
+   * You should disable this check at your own risk: Other services in Kibana
+   * may fail if this step is not completed.
+   */
+  public readonly skipStartupConnectionCheck: boolean;
+  /**
    * The interval between health check requests Kibana sends to the Elasticsearch.
    */
   public readonly healthCheckDelay: Duration;
@@ -272,6 +310,7 @@ export class ElasticsearchConfig {
   /**
    * If Elasticsearch is protected with basic authentication, this setting provides
    * the username that the Kibana server uses to perform its administrative functions.
+   * Cannot be used in conjunction with serviceAccountToken.
    */
   public readonly username?: string;
 
@@ -280,6 +319,14 @@ export class ElasticsearchConfig {
    * the password that the Kibana server uses to perform its administrative functions.
    */
   public readonly password?: string;
+
+  /**
+   * If Elasticsearch security features are enabled, this setting provides the service account
+   * token that the Kibana server users to perform its administrative functions.
+   *
+   * This is an alternative to specifying a username and password.
+   */
+  public readonly serviceAccountToken?: string;
 
   /**
    * Set of settings configure SSL connection between Kibana and Elasticsearch that
@@ -314,7 +361,9 @@ export class ElasticsearchConfig {
     this.healthCheckDelay = rawConfig.healthCheck.delay;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
+    this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
+    this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { exception, exceptionList, expectedExportedExceptionList } from '../../objects/exception';
-import { newRule } from '../../objects/rule';
+import {
+  getException,
+  getExceptionList,
+  expectedExportedExceptionList,
+} from '../../objects/exception';
+import { getNewRule } from '../../objects/rule';
 
 import { RULE_STATUS } from '../../screens/create_new_rule';
 
@@ -46,7 +50,7 @@ describe('Exceptions Table', () => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsIndexToBeCreated();
-    createCustomRule(newRule);
+    createCustomRule(getNewRule());
     goToManageAlertsDetectionRules();
     goToRuleDetails();
 
@@ -56,11 +60,11 @@ describe('Exceptions Table', () => {
 
     // Add a detections exception list
     goToExceptionsTab();
-    addsExceptionFromRuleSettings(exception);
+    addsExceptionFromRuleSettings(getException());
     waitForTheRuleToBeExecuted();
 
     // Create exception list not used by any rules
-    createExceptionList(exceptionList).as('exceptionListResponse');
+    createExceptionList(getExceptionList()).as('exceptionListResponse');
 
     goBackToAllRulesTable();
     waitForRulesTableToBeLoaded();

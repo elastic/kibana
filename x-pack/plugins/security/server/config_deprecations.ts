@@ -21,6 +21,23 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
   unused('authorization.legacyFallback.enabled'),
   unused('authc.saml.maxRedirectURLSize'),
+  // Deprecation warning for the legacy audit logger.
+  (settings, fromPath, addDeprecation) => {
+    const auditLoggingEnabled = settings?.xpack?.security?.audit?.enabled ?? false;
+    const legacyAuditLoggerEnabled = !settings?.xpack?.security?.audit?.appender;
+    if (auditLoggingEnabled && legacyAuditLoggerEnabled) {
+      addDeprecation({
+        message: `The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.`,
+        documentationUrl:
+          'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#audit-logging-settings',
+        correctiveActions: {
+          manualSteps: [
+            `Declare an audit logger "appender" via "xpack.security.audit.appender" to enable the ECS audit logger.`,
+          ],
+        },
+      });
+    }
+  },
   // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.
   (settings, fromPath, addDeprecation) => {
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {

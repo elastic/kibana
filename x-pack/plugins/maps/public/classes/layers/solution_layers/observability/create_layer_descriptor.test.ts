@@ -54,7 +54,7 @@ describe('createLayerDescriptor', () => {
             applyGlobalTime: true,
             id: '12345',
             indexPatternId: 'apm_static_index_pattern_id',
-            indexPatternTitle: 'apm-*',
+            indexPatternTitle: 'traces-apm*,logs-apm*,metrics-apm*,apm-*',
             metrics: [
               {
                 field: 'transaction.duration.us',

@@ -403,6 +403,7 @@ class AnnotationsTableUI extends Component {
         sortable: true,
         width: '40%',
         scope: 'row',
+        'data-test-subj': `mlAnnotationsColumnAnnotation`,
       },
       {
         field: 'timestamp',
@@ -412,6 +413,7 @@ class AnnotationsTableUI extends Component {
         dataType: 'date',
         render: timeFormatter,
         sortable: true,
+        'data-test-subj': `mlAnnotationsColumnFrom`,
       },
       {
         field: 'end_timestamp',
@@ -421,6 +423,7 @@ class AnnotationsTableUI extends Component {
         dataType: 'date',
         render: timeFormatter,
         sortable: true,
+        'data-test-subj': `mlAnnotationsColumnTo`,
       },
       {
         field: 'modified_time',
@@ -430,6 +433,7 @@ class AnnotationsTableUI extends Component {
         dataType: 'date',
         render: timeFormatter,
         sortable: true,
+        'data-test-subj': `mlAnnotationsColumnModifiedDate`,
       },
       {
         field: 'modified_username',
@@ -437,6 +441,7 @@ class AnnotationsTableUI extends Component {
           defaultMessage: 'Last modified by',
         }),
         sortable: true,
+        'data-test-subj': `mlAnnotationsColumnModifiedBy`,
       },
       {
         field: 'event',
@@ -445,6 +450,7 @@ class AnnotationsTableUI extends Component {
         }),
         sortable: true,
         width: '10%',
+        'data-test-subj': `mlAnnotationsColumnEvent`,
       },
     ];
 
@@ -456,6 +462,7 @@ class AnnotationsTableUI extends Component {
           defaultMessage: 'job ID',
         }),
         sortable: true,
+        'data-test-subj': `mlAnnotationsColumnJobId`,
       });
     }
 
@@ -470,6 +477,7 @@ class AnnotationsTableUI extends Component {
         render: (key) => {
           return <EuiBadge color="default">{key}</EuiBadge>;
         },
+        'data-test-subj': `mlAnnotationsColumnLabel`,
       });
     }
 
@@ -486,6 +494,7 @@ class AnnotationsTableUI extends Component {
 
         annotationUpdatesService.setValue(originalAnnotation ?? annotation);
       },
+      'data-test-subj': `mlAnnotationsActionEdit`,
     });
 
     if (this.state.jobId && this.props.jobs[0].analysis_config.bucket_span) {
@@ -501,6 +510,7 @@ class AnnotationsTableUI extends Component {
             datafeedEnd: annotation.end_timestamp,
           });
         },
+        'data-test-subj': `mlAnnotationsActionViewDatafeed`,
       });
     }
 
@@ -549,11 +559,13 @@ class AnnotationsTableUI extends Component {
         icon: 'visLine',
         type: 'icon',
         onClick: (annotation) => this.openSingleMetricView(annotation),
+        'data-test-subj': `mlAnnotationsActionOpenInSingleMetricViewer`,
       });
     }
 
     const getRowProps = (item) => {
       return {
+        'data-test-subj': `mlAnnotationsTableRow row-${item._id}`,
         onMouseOver: () => this.onMouseOverRow(item),
         onMouseLeave: () => this.onMouseLeaveRow(),
       };
@@ -594,6 +606,7 @@ class AnnotationsTableUI extends Component {
           name: field.key,
           view: `${field.key} (${field.doc_count})`,
         })),
+        'data-test-subj': 'mlAnnotationTableEventFilter',
       },
     ];
 
@@ -692,6 +705,7 @@ class AnnotationsTableUI extends Component {
           defaultMessage: 'Actions',
         }),
         actions,
+        'data-test-subj': `mlAnnotationsColumnActions`,
       },
       {
         // hidden column, for search only
@@ -707,6 +721,7 @@ class AnnotationsTableUI extends Component {
     return (
       <Fragment>
         <EuiInMemoryTable
+          data-test-subj={'mlAnnotationsTable'}
           error={searchError}
           className="eui-textOverflowWrap"
           compressed={true}

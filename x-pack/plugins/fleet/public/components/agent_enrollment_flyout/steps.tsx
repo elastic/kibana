@@ -11,9 +11,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import semver from 'semver';
 
-import type { AgentPolicy, PackagePolicy } from '../../types';
-import { sendGetOneAgentPolicy, useKibanaVersion } from '../../hooks';
-import { FLEET_SERVER_PACKAGE } from '../../constants';
+import type { AgentPolicy } from '../../types';
+import { useKibanaVersion } from '../../hooks';
 
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
@@ -69,13 +68,11 @@ export const AgentPolicySelectionStep = ({
   selectedApiKeyId,
   setSelectedAPIKeyId,
   excludeFleetServer,
-  setIsFleetServerPolicySelected,
 }: {
   agentPolicies?: AgentPolicy[];
   setSelectedPolicyId?: (policyId?: string) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId?: (key?: string) => void;
-  setIsFleetServerPolicySelected?: (selected: boolean) => void;
   excludeFleetServer?: boolean;
 }) => {
   const regularAgentPolicies = useMemo(() => {
@@ -92,21 +89,8 @@ export const AgentPolicySelectionStep = ({
       if (setSelectedPolicyId) {
         setSelectedPolicyId(policyId);
       }
-      if (policyId && setIsFleetServerPolicySelected) {
-        const agentPolicyRequest = await sendGetOneAgentPolicy(policyId);
-        if (
-          agentPolicyRequest.data?.item &&
-          (agentPolicyRequest.data.item.package_policies as PackagePolicy[]).some(
-            (packagePolicy) => packagePolicy.package?.name === FLEET_SERVER_PACKAGE
-          )
-        ) {
-          setIsFleetServerPolicySelected(true);
-        } else {
-          setIsFleetServerPolicySelected(false);
-        }
-      }
     },
-    [setIsFleetServerPolicySelected, setSelectedPolicyId]
+    [setSelectedPolicyId]
   );
 
   return {

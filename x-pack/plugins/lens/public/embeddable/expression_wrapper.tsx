@@ -14,11 +14,13 @@ import {
   ReactExpressionRendererType,
   ReactExpressionRendererProps,
 } from 'src/plugins/expressions/public';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { ErrorMessage } from '../editor_frame_service/types';
+import { LensInspector } from '../lens_inspector_service';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -39,6 +41,8 @@ export interface ExpressionWrapperProps {
   className?: string;
   canEdit: boolean;
   onRuntimeError: () => void;
+  executionContext?: KibanaExecutionContext;
+  lensInspector: LensInspector;
 }
 
 interface VisualizationErrorProps {
@@ -108,6 +112,8 @@ export function ExpressionWrapper({
   errors,
   canEdit,
   onRuntimeError,
+  executionContext,
+  lensInspector,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -123,8 +129,10 @@ export function ExpressionWrapper({
             searchContext={searchContext}
             searchSessionId={searchSessionId}
             onData$={onData$}
+            inspectorAdapters={lensInspector.adapters}
             renderMode={renderMode}
             syncColors={syncColors}
+            executionContext={executionContext}
             renderError={(errorMessage, error) => {
               onRuntimeError();
               return (

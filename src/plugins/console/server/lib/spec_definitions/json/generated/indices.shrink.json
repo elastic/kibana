@@ -1,7 +1,6 @@
 {
   "indices.shrink": {
     "url_params": {
-      "copy_settings": "__flag__",
       "timeout": "",
       "master_timeout": "",
       "wait_for_active_shards": ""

@@ -8,7 +8,8 @@
 import { Logger } from 'kibana/server';
 import { of } from 'rxjs';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import type { RuleDataClient } from '../../../../../rule_registry/server';
+import { IRuleDataClient } from '../../../../../rule_registry/server';
+import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../alerting/server';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
 
@@ -51,27 +52,23 @@ export const createRuleTypeMocks = () => {
       alerting,
       config$: mockedConfig$,
       logger: loggerMock,
-      ruleDataClient: ({
-        getReader: () => {
-          return {
-            search: jest.fn(),
-          };
-        },
-        getWriter: () => {
-          return {
-            bulk: jest.fn(),
-          };
-        },
-        isWriteEnabled: jest.fn(() => true),
-      } as unknown) as RuleDataClient,
+      ruleDataClient: ruleRegistryMocks.createRuleDataClient(
+        '.alerts-observability.apm.alerts'
+      ) as IRuleDataClient,
     },
     services,
     scheduleActions,
     executor: async ({ params }: { params: Record<string, any> }) => {
       return alertExecutor({
         services,
-        rule: { consumer: APM_SERVER_FEATURE_ID },
         params,
+        rule: {
+          consumer: APM_SERVER_FEATURE_ID,
+          name: 'name',
+          producer: 'producer',
+          ruleTypeId: 'ruleTypeId',
+          ruleTypeName: 'ruleTypeName',
+        },
         startedAt: new Date(),
       });
     },

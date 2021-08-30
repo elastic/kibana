@@ -10,8 +10,7 @@ import {
   getEmptyFindResult,
   getAlertMock,
   getCreateRequest,
-  getFindResultStatus,
-  getNonEmptyIndex,
+  getRuleExecutionStatuses,
   getFindResultWithSingleHit,
   createMlRuleRequest,
 } from '../__mocks__/request_responses';
@@ -19,12 +18,10 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesRoute } from './create_rules_route';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-jest.mock('../../rules/update_rules_notifications');
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
 describe('create_rules', () => {
@@ -37,13 +34,11 @@ describe('create_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
-    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
-    clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // creation succeeds
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // needed to transform
+    clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
+    clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // creation succeeds
+    clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses()); // needed to transform: ;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
     createRulesRoute(server.router, ml);
@@ -51,18 +46,12 @@ describe('create_rules', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
-      (updateRulesNotifications as jest.Mock).mockResolvedValue({
-        id: 'id',
-        actions: [],
-        alertThrottle: null,
-        ruleThrottle: 'no_actions',
-      });
       const response = await server.inject(getCreateRequest(), context);
       expect(response.status).toEqual(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
+      context.alerting!.getRulesClient = jest.fn();
       const response = await server.inject(getCreateRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
@@ -108,8 +97,7 @@ describe('create_rules', () => {
 
   describe('unhappy paths', () => {
     test('it returns a 400 if the index does not exist', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
       );
       const response = await server.inject(getCreateRequest(), context);
@@ -122,7 +110,7 @@ describe('create_rules', () => {
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const response = await server.inject(getCreateRequest(), context);
 
       expect(response.status).toEqual(409);
@@ -133,7 +121,7 @@ describe('create_rules', () => {
     });
 
     test('catches error if creation throws', async () => {
-      clients.alertsClient.create.mockImplementation(async () => {
+      clients.rulesClient.create.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getCreateRequest(), context);

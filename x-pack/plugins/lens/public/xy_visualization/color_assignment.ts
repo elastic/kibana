@@ -6,11 +6,12 @@
  */
 
 import { uniq, mapValues } from 'lodash';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { Datatable } from 'src/plugins/expressions';
-import { AccessorConfig, FormatFactory, FramePublicAPI } from '../types';
+import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import type { Datatable } from 'src/plugins/expressions';
+import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { XYLayerConfig } from './types';
+import type { FormatFactory } from '../../common';
+import type { XYLayerConfig } from '../../common/expressions';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 

@@ -8,13 +8,14 @@
 
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { buildEsQuery, Query } from '@kbn/es-query';
+
+import { GeoBoundingBox, QueryFilter, geoBoundingBoxToAst, queryToAst } from '../../expressions';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { GeoBoundingBox } from './lib/geo_point';
 import { aggFilterFnName } from './filter_fn';
 import { BaseAggParams } from '../types';
-import { Query } from '../../../types';
-import { buildEsQuery, getEsQueryConfig } from '../../../es_query';
+import { getEsQueryConfig } from '../../../es_query';
 
 const filterTitle = i18n.translate('data.search.aggs.buckets.filterTitle', {
   defaultMessage: 'Filter',
@@ -22,6 +23,7 @@ const filterTitle = i18n.translate('data.search.aggs.buckets.filterTitle', {
 
 export interface AggParamsFilter extends BaseAggParams {
   geo_bounding_box?: GeoBoundingBox;
+  filter?: QueryFilter;
 }
 
 export const getFilterBucketAgg = ({ getConfig }: { getConfig: <T = any>(key: string) => any }) =>
@@ -33,6 +35,7 @@ export const getFilterBucketAgg = ({ getConfig }: { getConfig: <T = any>(key: st
     params: [
       {
         name: 'geo_bounding_box',
+        toExpressionAst: geoBoundingBoxToAst,
       },
       {
         name: 'filter',
@@ -55,6 +58,7 @@ export const getFilterBucketAgg = ({ getConfig }: { getConfig: <T = any>(key: st
 
           output.params = query;
         },
+        toExpressionAst: queryToAst,
       },
     ],
   });

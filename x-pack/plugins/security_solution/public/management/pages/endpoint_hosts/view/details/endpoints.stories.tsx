@@ -120,16 +120,21 @@ export default {
 export const Tabs = () => (
   <EndpointDetailsFlyoutTabs
     show="details"
+    hostname="endpoint-name-01"
     tabs={[
       {
         id: 'overview',
         name: 'Overview',
         content: <>{'Endpoint Details'}</>,
+        route:
+          '/administration/endpoints?page_index=0&page_size=10&selected_endpoint=endpoint-id-00001010&show=details',
       },
       {
         id: 'activity_log',
         name: 'Activity Log',
         content: ActivityLogMarkup(),
+        route:
+          '/administration/endpoints?page_index=0&page_size=10&selected_endpoint=endpoint-id-00001010&show=activity_log',
       },
     ]}
   />

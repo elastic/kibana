@@ -11,7 +11,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
 
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
 import type {
   ControlColumnProps,
   ColumnHeaderOptions,

@@ -10,4 +10,10 @@ export { deserializeField } from './serialization';
 
 export { getLinks } from './documentation';
 
-export { getRuntimeFieldValidator, RuntimeFieldPainlessError } from './runtime_field_validation';
+export {
+  getRuntimeFieldValidator,
+  RuntimeFieldPainlessError,
+  parseEsError,
+} from './runtime_field_validation';
+
+export { initApi, ApiService } from './api';

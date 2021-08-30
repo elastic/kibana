@@ -42,7 +42,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except('ml', 'monitoring')
+              navLinksBuilder.except('ml', 'monitoring', 'osquery')
             );
             break;
           case 'read':
@@ -55,7 +55,8 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 'monitoring',
                 'enterpriseSearch',
                 'appSearch',
-                'workplaceSearch'
+                'workplaceSearch',
+                'osquery'
               )
             );
             break;

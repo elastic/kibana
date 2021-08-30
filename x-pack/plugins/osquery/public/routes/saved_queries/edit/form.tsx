@@ -24,11 +24,13 @@ import { useSavedQueryForm } from '../../../saved_queries/form/use_saved_query_f
 interface EditSavedQueryFormProps {
   defaultValue?: unknown;
   handleSubmit: () => Promise<void>;
+  viewMode?: boolean;
 }
 
 const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
   defaultValue,
   handleSubmit,
+  viewMode,
 }) => {
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
@@ -39,41 +41,45 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
 
   return (
     <Form form={form}>
-      <SavedQueryForm />
-      <EuiBottomBar>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="m">
+      <SavedQueryForm viewMode={viewMode} />
+      {!viewMode && (
+        <>
+          <EuiBottomBar>
+            <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="ghost" {...savedQueryListProps}>
-                  <FormattedMessage
-                    id="xpack.osquery.editSavedQuery.form.cancelButtonLabel"
-                    defaultMessage="Cancel"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  // isLoading={isLoading}
-                  color="primary"
-                  fill
-                  size="m"
-                  iconType="save"
-                  onClick={form.submit}
-                >
-                  <FormattedMessage
-                    id="xpack.osquery.editSavedQuery.form.updateQueryButtonLabel"
-                    defaultMessage="Update query"
-                  />
-                </EuiButton>
+                <EuiFlexGroup gutterSize="m">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty color="ghost" {...savedQueryListProps}>
+                      <FormattedMessage
+                        id="xpack.osquery.editSavedQuery.form.cancelButtonLabel"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      // isLoading={isLoading}
+                      color="primary"
+                      fill
+                      size="m"
+                      iconType="save"
+                      onClick={form.submit}
+                    >
+                      <FormattedMessage
+                        id="xpack.osquery.editSavedQuery.form.updateQueryButtonLabel"
+                        defaultMessage="Update query"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiBottomBar>
-      <EuiSpacer size="xxl" />
-      <EuiSpacer size="xxl" />
-      <EuiSpacer size="xxl" />
+          </EuiBottomBar>
+          <EuiSpacer size="xxl" />
+          <EuiSpacer size="xxl" />
+          <EuiSpacer size="xxl" />
+        </>
+      )}
     </Form>
   );
 };

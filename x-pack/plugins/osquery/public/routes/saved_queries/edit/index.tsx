@@ -17,7 +17,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useParams } from 'react-router-dom';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
@@ -25,6 +25,8 @@ import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 
 const EditSavedQueryPageComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
+
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const { savedQueryId } = useParams<{ savedQueryId: string }>();
   const savedQueryListProps = useRouterNavigate('saved_queries');
@@ -34,6 +36,8 @@ const EditSavedQueryPageComponent = () => {
   const deleteSavedQueryMutation = useDeleteSavedQuery({ savedQueryId });
 
   useBreadcrumbs('saved_query_edit', { savedQueryName: savedQueryDetails?.attributes?.id ?? '' });
+
+  const viewMode = useMemo(() => !permissions.writeSavedQueries, [permissions.writeSavedQueries]);
 
   const handleCloseDeleteConfirmationModal = useCallback(() => {
     setIsDeleteModalVisible(false);
@@ -63,21 +67,32 @@ const EditSavedQueryPageComponent = () => {
         <EuiFlexItem>
           <BetaBadgeRowWrapper>
             <h1>
-              <FormattedMessage
-                id="xpack.osquery.editSavedQuery.pageTitle"
-                defaultMessage='Edit "{savedQueryId}"'
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                values={{
-                  savedQueryId: savedQueryDetails?.attributes?.id ?? '',
-                }}
-              />
+              {viewMode ? (
+                <FormattedMessage
+                  id="xpack.osquery.viewSavedQuery.pageTitle"
+                  defaultMessage='"{savedQueryId}" details'
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    savedQueryId: savedQueryDetails?.attributes?.id ?? '',
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.osquery.editSavedQuery.pageTitle"
+                  defaultMessage='Edit "{savedQueryId}"'
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    savedQueryId: savedQueryDetails?.attributes?.id ?? '',
+                  }}
+                />
+              )}
             </h1>
             <BetaBadge />
           </BetaBadgeRowWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [savedQueryDetails?.attributes?.id, savedQueryListProps]
+    [savedQueryDetails?.attributes?.id, savedQueryListProps, viewMode]
   );
 
   const RightColumn = useMemo(
@@ -95,12 +110,17 @@ const EditSavedQueryPageComponent = () => {
   if (isLoading) return null;
 
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
+    <WithHeaderLayout
+      leftColumn={LeftColumn}
+      rightColumn={!viewMode ? RightColumn : undefined}
+      rightColumnGrow={false}
+    >
       {!isLoading && !isEmpty(savedQueryDetails) && (
         <EditSavedQueryForm
           defaultValue={savedQueryDetails?.attributes}
           // @ts-expect-error update types
           handleSubmit={updateSavedQueryMutation.mutateAsync}
+          viewMode={viewMode}
         />
       )}
       {isDeleteModalVisible ? (

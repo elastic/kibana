@@ -15,6 +15,7 @@ import {
   PinnedEvent,
 } from './pinned_event';
 import { Direction, Maybe } from '../../search_strategy';
+import { Ecs } from '../../ecs';
 
 export * from './actions';
 export * from './cells';
@@ -314,6 +315,7 @@ export enum TimelineId {
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
+  uebaPageExternalAlerts = 'ueba-page-external-alerts',
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
@@ -326,6 +328,7 @@ export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
   runtimeTypes.literal(TimelineId.detectionsPage),
   runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
+  runtimeTypes.literal(TimelineId.uebaPageExternalAlerts),
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
 ]);
@@ -473,6 +476,7 @@ export type TimelineExpandedEventType =
       params?: {
         eventId: string;
         indexName: string;
+        ecsData?: Ecs;
       };
     }
   | EmptyObject;

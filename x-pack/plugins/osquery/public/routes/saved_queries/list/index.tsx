@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -16,20 +16,68 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useHistory } from 'react-router-dom';
 
 import { SavedObject } from 'kibana/public';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
 
-interface EditButtonProps {
+interface PlayButtonProps {
+  disabled: boolean;
   savedQueryId: string;
   savedQueryName: string;
 }
 
-const EditButtonComponent: React.FC<EditButtonProps> = ({ savedQueryId, savedQueryName }) => {
+const PlayButtonComponent: React.FC<PlayButtonProps> = ({
+  disabled = false,
+  savedQueryId,
+  savedQueryName,
+}) => {
+  const { push } = useHistory();
+
+  // TODO: Fix href
+  const handlePlayClick = useCallback(
+    () =>
+      push('/live_queries/new', {
+        form: {
+          savedQueryId,
+        },
+      }),
+    [push, savedQueryId]
+  );
+
+  return (
+    <EuiButtonIcon
+      color="primary"
+      iconType="play"
+      isDisabled={disabled}
+      onClick={handlePlayClick}
+      aria-label={i18n.translate('xpack.osquery.savedQueryList.queriesTable.runActionAriaLabel', {
+        defaultMessage: 'Run {savedQueryName}',
+        values: {
+          savedQueryName,
+        },
+      })}
+    />
+  );
+};
+
+const PlayButton = React.memo(PlayButtonComponent);
+
+interface EditButtonProps {
+  disabled?: boolean;
+  savedQueryId: string;
+  savedQueryName: string;
+}
+
+const EditButtonComponent: React.FC<EditButtonProps> = ({
+  disabled = false,
+  savedQueryId,
+  savedQueryName,
+}) => {
   const buttonProps = useRouterNavigate(`saved_queries/${savedQueryId}`);
 
   return (
@@ -37,6 +85,7 @@ const EditButtonComponent: React.FC<EditButtonProps> = ({ savedQueryId, savedQue
       color="primary"
       {...buttonProps}
       iconType="pencil"
+      isDisabled={disabled}
       aria-label={i18n.translate('xpack.osquery.savedQueryList.queriesTable.editActionAriaLabel', {
         defaultMessage: 'Edit {savedQueryName}',
         values: {
@@ -50,36 +99,33 @@ const EditButtonComponent: React.FC<EditButtonProps> = ({ savedQueryId, savedQue
 const EditButton = React.memo(EditButtonComponent);
 
 const SavedQueriesPageComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
+
   useBreadcrumbs('saved_queries');
   const newQueryLinkProps = useRouterNavigate('saved_queries/new');
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState('updated_at');
+  const [pageSize, setPageSize] = useState(20);
+  const [sortField, setSortField] = useState('attributes.updated_at');
   const [sortDirection, setSortDirection] = useState('desc');
 
   const { data } = useSavedQueries({ isLive: true });
-
-  // const handlePlayClick = useCallback(
-  //   (item) =>
-  //     push({
-  //       search: qs.stringify({
-  //         tab: 'live_query',
-  //       }),
-  //       state: {
-  //         query: {
-  //           id: item.id,
-  //           query: item.attributes.query,
-  //         },
-  //       },
-  //     }),
-  //   [push]
-  // );
 
   const renderEditAction = useCallback(
     (item: SavedObject<{ name: string }>) => (
       <EditButton savedQueryId={item.id} savedQueryName={item.attributes.name} />
     ),
     []
+  );
+
+  const renderPlayAction = useCallback(
+    (item: SavedObject<{ name: string }>) => (
+      <PlayButton
+        savedQueryId={item.id}
+        savedQueryName={item.attributes.name}
+        disabled={!(permissions.runSavedQueries || permissions.writeLiveQueries)}
+      />
+    ),
+    [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
   const renderUpdatedAt = useCallback((updatedAt, item) => {
@@ -96,45 +142,46 @@ const SavedQueriesPageComponent = () => {
     () => [
       {
         field: 'attributes.id',
-        name: 'Query ID',
+        name: i18n.translate('xpack.osquery.savedQueries.table.queryIdColumnTitle', {
+          defaultMessage: 'Query ID',
+        }),
         sortable: true,
         truncateText: true,
       },
       {
         field: 'attributes.description',
-        name: 'Description',
+        name: i18n.translate('xpack.osquery.savedQueries.table.descriptionColumnTitle', {
+          defaultMessage: 'Description',
+        }),
         sortable: true,
         truncateText: true,
       },
       {
         field: 'attributes.created_by',
-        name: 'Created by',
+        name: i18n.translate('xpack.osquery.savedQueries.table.createdByColumnTitle', {
+          defaultMessage: 'Created by',
+        }),
         sortable: true,
         truncateText: true,
       },
       {
         field: 'attributes.updated_at',
-        name: 'Last updated at',
+        name: i18n.translate('xpack.osquery.savedQueries.table.updatedAtColumnTitle', {
+          defaultMessage: 'Last updated at',
+        }),
         sortable: (item: SavedObject<{ updated_at: string }>) =>
           item.attributes.updated_at ? Date.parse(item.attributes.updated_at) : 0,
         truncateText: true,
         render: renderUpdatedAt,
       },
       {
-        name: 'Actions',
-        actions: [
-          // {
-          //   name: 'Live query',
-          //   description: 'Run live query',
-          //   type: 'icon',
-          //   icon: 'play',
-          //   onClick: handlePlayClick,
-          // },
-          { render: renderEditAction },
-        ],
+        name: i18n.translate('xpack.osquery.savedQueries.table.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        actions: [{ render: renderPlayAction }, { render: renderEditAction }],
       },
     ],
-    [renderEditAction, renderUpdatedAt]
+    [renderEditAction, renderPlayAction, renderUpdatedAt]
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }) => {
@@ -185,14 +232,19 @@ const SavedQueriesPageComponent = () => {
 
   const RightColumn = useMemo(
     () => (
-      <EuiButton fill {...newQueryLinkProps} iconType="plusInCircle">
+      <EuiButton
+        fill
+        {...newQueryLinkProps}
+        iconType="plusInCircle"
+        isDisabled={!permissions.writeSavedQueries}
+      >
         <FormattedMessage
           id="xpack.osquery.savedQueryList.addSavedQueryButtonLabel"
           defaultMessage="Add saved query"
         />
       </EuiButton>
     ),
-    [newQueryLinkProps]
+    [permissions.writeSavedQueries, newQueryLinkProps]
   );
 
   return (

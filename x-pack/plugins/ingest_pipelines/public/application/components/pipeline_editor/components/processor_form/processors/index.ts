@@ -8,6 +8,7 @@
 export { Append } from './append';
 export { Bytes } from './bytes';
 export { Circle } from './circle';
+export { CommunityId } from './community_id';
 export { Convert } from './convert';
 export { CSV } from './csv';
 export { DateProcessor } from './date';
@@ -28,6 +29,7 @@ export { Join } from './join';
 export { Json } from './json';
 export { Kv } from './kv';
 export { Lowercase } from './lowercase';
+export { NetworkDirection } from './network_direction';
 export { Pipeline } from './pipeline';
 export { RegisteredDomain } from './registered_domain';
 export { Remove } from './remove';

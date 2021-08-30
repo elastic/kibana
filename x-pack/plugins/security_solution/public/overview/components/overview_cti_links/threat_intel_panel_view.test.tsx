@@ -75,7 +75,7 @@ describe('ThreatIntelPanelView', () => {
       </Provider>
     );
 
-    expect(wrapper.find('[data-test-subj="cti-inner-panel-info"]').length).toEqual(1);
+    expect(wrapper.find('[data-test-subj="cti-inner-panel-info"]').hostNodes().length).toEqual(1);
   });
 
   it('does not render info panel if dashboard plugin is disabled', () => {
@@ -141,7 +141,35 @@ describe('ThreatIntelPanelView', () => {
     );
 
     expect(wrapper.find('[data-test-subj="cti-total-event-count"]').text()).toEqual(
-      `Showing: ${mockThreatIntelPanelViewProps.totalEventCount} events`
+      `Showing: ${mockThreatIntelPanelViewProps.totalEventCount} indicators`
     );
+  });
+
+  it('renders inspect button by default', () => {
+    const wrapper = mount(
+      <Provider store={store}>
+        <I18nProvider>
+          <ThemeProvider theme={mockTheme}>
+            <ThreatIntelPanelView {...mockThreatIntelPanelViewProps} />
+          </ThemeProvider>
+        </I18nProvider>
+      </Provider>
+    );
+
+    expect(wrapper.exists('[data-test-subj="inspect-icon-button"]')).toBe(true);
+  });
+
+  it('does not render inspect button if isInspectEnabled is false', () => {
+    const wrapper = mount(
+      <Provider store={store}>
+        <I18nProvider>
+          <ThemeProvider theme={mockTheme}>
+            <ThreatIntelPanelView {...mockThreatIntelPanelViewProps} isInspectEnabled={false} />
+          </ThemeProvider>
+        </I18nProvider>
+      </Provider>
+    );
+
+    expect(wrapper.exists('[data-test-subj="inspect-icon-button"]')).toBe(false);
   });
 });

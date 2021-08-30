@@ -23,7 +23,7 @@ export interface Config {
    * A collection of choices to display in the dropdown
    * @default []
    */
-  choices: string[];
+  choices: Array<[string, string]>;
   filterGroup: string;
 }
 
@@ -88,7 +88,7 @@ export const dropdownFilter: RendererFactory<Config> = () => ({
       <DropdownFilter
         commit={commit}
         choices={config.choices || []}
-        value={getFilterValue(filterExpression)}
+        initialValue={getFilterValue(filterExpression)}
       />,
       domNode,
       () => handlers.done()

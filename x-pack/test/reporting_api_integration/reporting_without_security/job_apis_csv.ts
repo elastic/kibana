@@ -7,36 +7,18 @@
 
 import expect from '@kbn/expect';
 import { pick } from 'lodash';
-import {
-  ReportApiJSON,
-  ReportDocument,
-  ReportSource,
-} from '../../../plugins/reporting/common/types';
+import { ReportApiJSON } from '../../../plugins/reporting/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const apiResponseFields = [
   'attempts',
   'created_by',
   'jobtype',
-  'max_attempts',
   'meta',
   'payload.isDeprecated',
   'payload.title',
   'payload.type',
   'status',
-];
-
-// TODO: clean up the /list and /info endpoints to return ReportApiJSON interface data
-const documentResponseFields = [
-  '_source.attempts',
-  '_source.created_by',
-  '_source.jobtype',
-  '_source.max_attempts',
-  '_source.meta',
-  '_source.payload.isDeprecated',
-  '_source.payload.title',
-  '_source.payload.type',
-  '_source.status',
 ];
 
 // eslint-disable-next-line import/no-default-export
@@ -45,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestNoAuth = getService('supertestWithoutAuth');
   const reportingAPI = getService('reportingAPI');
 
-  const postJobCSV = async () => {
+  const postJobCSV = async (): Promise<{ job: ReportApiJSON; path: string }> => {
     const jobParams =
       `(browserTimezone:UTC,columns:!('@timestamp',clientip,extension),` +
       `objectType:search,searchSource:(fields:!((field:'*',include_unmapped:true)),filter:!((meta:(index:'logstash-*',params:()),` +
@@ -81,13 +63,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Posted CSV job is visible in the job count', async () => {
-      const { job, path }: { job: ReportApiJSON; path: string } = await postJobCSV();
+      const { job, path } = await postJobCSV();
       expectSnapshot(pick(job, apiResponseFields)).toMatchInline(`
         Object {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv_searchsource",
-          "max_attempts": 1,
           "meta": Object {
             "objectType": "search",
           },
@@ -110,13 +91,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('Posted CSV job is visible in the status check', async () => {
       // post a job
-      const { job, path }: { job: ReportApiJSON; path: string } = await postJobCSV();
+      const { job, path } = await postJobCSV();
       expectSnapshot(pick(job, apiResponseFields)).toMatchInline(`
         Object {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv_searchsource",
-          "max_attempts": 1,
           "meta": Object {
             "objectType": "search",
           },
@@ -133,24 +113,21 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx');
 
       // verify the top item in the list
-      const listingJobs: ReportDocument[] = JSON.parse(listText);
-      expect(listingJobs[0]._id).to.be(job.id);
-      expectSnapshot(listingJobs.map((j) => pick(j, documentResponseFields))).toMatchInline(`
+      const listingJobs: ReportApiJSON[] = JSON.parse(listText);
+      expect(listingJobs[0].id).to.be(job.id);
+      expectSnapshot(listingJobs.map((j) => pick(j, apiResponseFields))).toMatchInline(`
         Array [
           Object {
-            "_source": Object {
-              "attempts": 0,
-              "created_by": false,
-              "jobtype": "csv_searchsource",
-              "max_attempts": 1,
-              "meta": Object {
-                "objectType": "search",
-              },
-              "payload": Object {
-                "title": "A Saved Search With a DATE FILTER",
-              },
-              "status": "pending",
+            "attempts": 0,
+            "created_by": false,
+            "jobtype": "csv_searchsource",
+            "meta": Object {
+              "objectType": "search",
             },
+            "payload": Object {
+              "title": "A Saved Search With a DATE FILTER",
+            },
+            "status": "pending",
           },
         ]
       `);
@@ -161,13 +138,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('Posted CSV job is visible in the first page of jobs listing', async () => {
       // post a job
-      const { job, path }: { job: ReportApiJSON; path: string } = await postJobCSV();
+      const { job, path } = await postJobCSV();
       expectSnapshot(pick(job, apiResponseFields)).toMatchInline(`
         Object {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv_searchsource",
-          "max_attempts": 1,
           "meta": Object {
             "objectType": "search",
           },
@@ -179,29 +155,27 @@ export default function ({ getService }: FtrProviderContext) {
       `);
 
       // call the listing api
-      const { text: listText } = await supertestNoAuth
+      const { text: listText, status } = await supertestNoAuth
         .get(`/api/reporting/jobs/list?page=0`)
         .set('kbn-xsrf', 'xxx');
+      expect(status).to.be(200);
 
       // verify the top item in the list
-      const listingJobs: ReportDocument[] = JSON.parse(listText);
-      expect(listingJobs[0]._id).to.be(job.id);
-      expectSnapshot(listingJobs.map((j) => pick(j, documentResponseFields))).toMatchInline(`
+      const listingJobs: ReportApiJSON[] = JSON.parse(listText);
+      expect(listingJobs[0].id).to.be(job.id);
+      expectSnapshot(listingJobs.map((j) => pick(j, apiResponseFields))).toMatchInline(`
         Array [
           Object {
-            "_source": Object {
-              "attempts": 0,
-              "created_by": false,
-              "jobtype": "csv_searchsource",
-              "max_attempts": 1,
-              "meta": Object {
-                "objectType": "search",
-              },
-              "payload": Object {
-                "title": "A Saved Search With a DATE FILTER",
-              },
-              "status": "pending",
+            "attempts": 0,
+            "created_by": false,
+            "jobtype": "csv_searchsource",
+            "meta": Object {
+              "objectType": "search",
             },
+            "payload": Object {
+              "title": "A Saved Search With a DATE FILTER",
+            },
+            "status": "pending",
           },
         ]
       `);
@@ -212,13 +186,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('Posted CSV job details are visible in the info API', async () => {
       // post a job
-      const { job, path }: { job: ReportApiJSON; path: string } = await postJobCSV();
+      const { job, path } = await postJobCSV();
       expectSnapshot(pick(job, apiResponseFields)).toMatchInline(`
         Object {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv_searchsource",
-          "max_attempts": 1,
           "meta": Object {
             "objectType": "search",
           },
@@ -229,17 +202,17 @@ export default function ({ getService }: FtrProviderContext) {
         }
       `);
 
-      const { text: infoText } = await supertestNoAuth
+      const { text: infoText, status } = await supertestNoAuth
         .get(`/api/reporting/jobs/info/${job.id}`)
         .set('kbn-xsrf', 'xxx');
+      expect(status).to.be(200);
 
-      const info: ReportSource = JSON.parse(infoText);
+      const info = JSON.parse(infoText);
       expectSnapshot(pick(info, apiResponseFields)).toMatchInline(`
         Object {
           "attempts": 0,
           "created_by": false,
           "jobtype": "csv_searchsource",
-          "max_attempts": 1,
           "meta": Object {
             "objectType": "search",
           },

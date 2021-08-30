@@ -8,7 +8,6 @@
 import React, { useEffect } from 'react';
 import {
   EuiButton,
-  EuiPanel,
   EuiLink,
   EuiEmptyPrompt,
   EuiFlexItem,
@@ -39,62 +38,54 @@ export const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploym
 
   return (
     <>
-      <EuiPanel
-        paddingSize="none"
-        grow={false}
-        hasShadow={false}
-        hasBorder={true}
-        className="eui-textCenter"
-      >
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.fleet.fleetServerSetup.cloudSetupTitle"
-                defaultMessage="Enable APM & Fleet"
-              />
-            </h2>
-          }
-          body={
+      <EuiEmptyPrompt
+        title={
+          <h2>
             <FormattedMessage
-              id="xpack.fleet.fleetServerSetup.cloudSetupText"
-              defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. You can add one to your deployment by enabling APM & Fleet. For more information see the {link}"
-              values={{
-                link: (
-                  <EuiLink
-                    href={docLinks.links.fleet.fleetServerAddFleetServer}
-                    target="_blank"
-                    external
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.settings.userGuideLink"
-                      defaultMessage="Fleet User Guide"
-                    />
-                  </EuiLink>
-                ),
-              }}
+              id="xpack.fleet.fleetServerSetup.cloudSetupTitle"
+              defaultMessage="Enable APM & Fleet"
             />
-          }
-          actions={
-            <>
-              <EuiButton
-                iconSide="right"
-                iconType="popout"
-                fill
-                isLoading={false}
-                type="submit"
-                href={`${deploymentUrl}/edit`}
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.fleetServerSetup.cloudDeploymentLink"
-                  defaultMessage="Edit deployment"
-                />
-              </EuiButton>
-            </>
-          }
-        />
-      </EuiPanel>
+          </h2>
+        }
+        body={
+          <FormattedMessage
+            id="xpack.fleet.fleetServerSetup.cloudSetupText"
+            defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. You can add one to your deployment by enabling APM & Fleet. For more information see the {link}"
+            values={{
+              link: (
+                <EuiLink
+                  href={docLinks.links.fleet.fleetServerAddFleetServer}
+                  target="_blank"
+                  external
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.settings.userGuideLink"
+                    defaultMessage="Fleet User Guide"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+        actions={
+          <>
+            <EuiButton
+              iconSide="right"
+              iconType="popout"
+              fill
+              isLoading={false}
+              type="submit"
+              href={`${deploymentUrl}/edit`}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.fleet.fleetServerSetup.cloudDeploymentLink"
+                defaultMessage="Edit deployment"
+              />
+            </EuiButton>
+          </>
+        }
+      />
       <EuiSpacer size="m" />
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="center" gutterSize="s">

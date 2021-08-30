@@ -188,6 +188,9 @@ export class SearchInterceptor {
       serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
     if (combined.isStored !== undefined) serializableOptions.isStored = combined.isStored;
+    if (combined.executionContext !== undefined) {
+      serializableOptions.executionContext = combined.executionContext;
+    }
 
     return serializableOptions;
   }

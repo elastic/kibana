@@ -48,7 +48,12 @@ describe('EventDetails', () => {
   let wrapper: ReactWrapper;
   let alertsWrapper: ReactWrapper;
   beforeAll(async () => {
-    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({});
+    (useInvestigationTimeEnrichment as jest.Mock).mockReturnValue({
+      result: [],
+      range: { to: 'now', from: 'now-30d' },
+      setRange: jest.fn(),
+      loading: false,
+    });
     wrapper = mount(
       <TestProviders>
         <EventDetails {...defaultProps} />
@@ -63,7 +68,7 @@ describe('EventDetails', () => {
   });
 
   describe('tabs', () => {
-    ['Table', 'JSON View'].forEach((tab) => {
+    ['Table', 'JSON'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
         expect(
           wrapper
@@ -82,33 +87,38 @@ describe('EventDetails', () => {
   });
 
   describe('alerts tabs', () => {
-    ['Summary', 'Threat Intel', 'Table', 'JSON View'].forEach((tab) => {
+    ['Overview', 'Threat Intel', 'Table', 'JSON'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
-        const expectedCopy = tab === 'Threat Intel' ? `${tab} (1)` : tab;
         expect(
           alertsWrapper
             .find('[data-test-subj="eventDetails"]')
             .find('[role="tablist"]')
-            .containsMatchingElement(<span>{expectedCopy}</span>)
+            .containsMatchingElement(<span>{tab}</span>)
         ).toBeTruthy();
       });
     });
 
-    test('the Summary tab is selected by default', () => {
+    test('the Overview tab is selected by default', () => {
       expect(
         alertsWrapper
           .find('[data-test-subj="eventDetails"]')
           .find('.euiTab-isSelected')
           .first()
           .text()
-      ).toEqual('Summary');
+      ).toEqual('Overview');
+    });
+
+    test('Enrichment count is displayed as a notification', () => {
+      expect(
+        alertsWrapper.find('[data-test-subj="enrichment-count-notification"]').hostNodes().text()
+      ).toEqual('1');
     });
   });
 
   describe('threat intel tab', () => {
     it('renders a "no enrichments" panel view if there are no enrichments', () => {
       alertsWrapper.find('[data-test-subj="threatIntelTab"]').first().simulate('click');
-      expect(alertsWrapper.find('[data-test-subj="no-enrichments-panel"]').exists()).toEqual(true);
+      expect(alertsWrapper.find('[data-test-subj="no-enrichments-found"]').exists()).toEqual(true);
     });
   });
 });

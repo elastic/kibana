@@ -1231,7 +1231,7 @@ export class TimeSeriesExplorer extends React.Component {
                 )}
                 {focusAnnotationData && focusAnnotationData.length > 0 && (
                   <EuiAccordion
-                    id={'EuiAccordion-blah'}
+                    id={'mlAnnotationsAccordion'}
                     buttonContent={
                       <EuiTitle className="panel-title">
                         <h2>

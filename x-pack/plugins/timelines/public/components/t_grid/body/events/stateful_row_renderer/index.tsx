@@ -80,6 +80,7 @@ export const StatefulRowRenderer = ({
                 {rowRenderer.renderRow({
                   browserFields,
                   data: event.ecs,
+                  isDraggable: false,
                   timelineId,
                 })}
               </div>
