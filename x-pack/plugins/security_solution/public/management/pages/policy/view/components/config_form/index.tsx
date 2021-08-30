@@ -29,7 +29,7 @@ const TITLES = {
     defaultMessage: 'Type',
   }),
   os: i18n.translate('xpack.securitySolution.endpoint.policyDetailOS', {
-    defaultMessage: 'Operating System',
+    defaultMessage: 'Operating system',
   }),
 };
 

@@ -36,7 +36,7 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
         title: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetails.agentsSummary.totalTitle',
           {
-            defaultMessage: 'Total Agents',
+            defaultMessage: 'Total agents',
           }
         ),
         health: '',
@@ -80,7 +80,13 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
     <EuiFlexGroup gutterSize="l" responsive={false} data-test-subj="policyAgentsSummary">
       {stats.map(({ key, title, health }) => {
         return (
-          <EuiFlexItem grow={false} key={key}>
+          <EuiFlexItem
+            grow={false}
+            key={key}
+            style={{
+              marginRight: key === 'total' ? theme.eui.gutterTypes.gutterExtraLarge : undefined,
+            }}
+          >
             <EuiDescriptionList
               textStyle="reverse"
               style={{ textAlign: 'right' }}

@@ -64,7 +64,7 @@ export const RadioButtons = React.memo(
         <ConfigFormHeading>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyDetailsConfig.protectionLevel"
-            defaultMessage="Protection Level"
+            defaultMessage="Protection level"
           />
         </ConfigFormHeading>
         <EuiSpacer size="xs" />

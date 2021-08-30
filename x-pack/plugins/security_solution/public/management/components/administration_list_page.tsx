@@ -22,7 +22,7 @@ import { useTestIdGenerator } from './hooks/use_test_id_generator';
 
 interface AdministrationListPageProps {
   title: React.ReactNode;
-  subtitle: React.ReactNode;
+  subtitle?: React.ReactNode;
   actions?: React.ReactNode;
   restrictWidth?: boolean | number;
   headerBackComponent?: React.ReactNode;
@@ -54,7 +54,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     }, [headerBackComponent, title]);
 
     const description = useMemo(() => {
-      return <span data-test-subj="header-panel-subtitle">{subtitle}</span>;
+      return subtitle ? <span data-test-subj="header-panel-subtitle">{subtitle}</span> : undefined;
     }, [subtitle]);
 
     const getTestId = useTestIdGenerator(otherProps['data-test-subj']);

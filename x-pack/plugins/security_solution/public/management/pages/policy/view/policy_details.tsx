@@ -66,7 +66,7 @@ export const PolicyDetails = React.memo(() => {
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
   const policyName = policyItem?.name ?? '';
-  const policyDescription = policyItem?.description ?? '';
+  const policyDescription = policyItem?.description ?? undefined;
   const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
 
   // Handle showing update statuses
