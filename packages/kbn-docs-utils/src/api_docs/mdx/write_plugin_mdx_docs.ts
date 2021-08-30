@@ -86,8 +86,8 @@ import ${json} from './${fileName}.json';
 ${plugin.manifest.description ?? ''}
 
 ${
-  plugin.manifest.owner?.githubTeam && name
-    ? `Contact [${name}](https://github.com/orgs/elastic/teams/${plugin.manifest.owner?.githubTeam}) for questions regarding this plugin.`
+  plugin.manifest.owner.githubTeam && name
+    ? `Contact [${name}](https://github.com/orgs/elastic/teams/${plugin.manifest.owner.githubTeam}) for questions regarding this plugin.`
     : name
     ? `Contact ${name} for questions regarding this plugin.`
     : ''

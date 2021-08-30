@@ -11,8 +11,9 @@ import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
 import { enqueueJob } from '../lib/enqueue_job';
-import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate';
+import { registerGenerateFromJobParams } from './generate_from_jobparams';
+import { registerLegacy } from './legacy';
 import { HandlerFunction } from './types';
 
 const getDownloadBaseUrl = (reporting: ReportingCore) => {
@@ -87,4 +88,5 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
 
   registerGenerateFromJobParams(reporting, handler, handleError);
   registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
+  registerLegacy(reporting, handler, handleError, logger);
 }

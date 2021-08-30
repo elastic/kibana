@@ -33,6 +33,7 @@ import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoin
 import { TimelineNonEcsData } from '../../../../../common';
 import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
+import { EntityType } from '../../../../../../timelines/common';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -51,6 +52,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
+  entityType?: EntityType;
   expandedEvent: {
     eventId: string;
     indexName: string;
@@ -67,6 +69,7 @@ interface EventDetailsPanelProps {
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   browserFields,
   docValueFields,
+  entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
   isFlyoutView,
@@ -75,6 +78,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 }) => {
   const [loading, detailsData] = useTimelineEventsDetails({
     docValueFields,
+    entityType,
     indexName: expandedEvent.indexName ?? '',
     eventId: expandedEvent.eventId ?? '',
     skip: !expandedEvent.eventId,

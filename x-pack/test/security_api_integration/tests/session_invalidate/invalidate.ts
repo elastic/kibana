@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import request, { Cookie } from 'request';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     expect(apiResponse.body.authentication_provider).to.eql(provider);
 
     return Array.isArray(apiResponse.headers['set-cookie'])
-      ? request.cookie(apiResponse.headers['set-cookie'][0])!
+      ? parseCookie(apiResponse.headers['set-cookie'][0])!
       : undefined;
   }
 
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
     const authenticationResponse = await supertest
       .post('/api/security/saml/callback')
       .set('kbn-xsrf', 'xxx')
-      .set('Cookie', request.cookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
+      .set('Cookie', parseCookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
       .send({
         SAMLResponse: await getSAMLResponse({
           destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(302);
 
-    const cookie = request.cookie(authenticationResponse.headers['set-cookie'][0])!;
+    const cookie = parseCookie(authenticationResponse.headers['set-cookie'][0])!;
     await checkSessionCookie(cookie, 'a@b.c', { type: 'saml', name: 'saml1' });
     return cookie;
   }
@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
-    const cookie = request.cookie(authenticationResponse.headers['set-cookie'][0])!;
+    const cookie = parseCookie(authenticationResponse.headers['set-cookie'][0])!;
     await checkSessionCookie(cookie, credentials.username, { type: 'basic', name: 'basic1' });
     return cookie;
   }

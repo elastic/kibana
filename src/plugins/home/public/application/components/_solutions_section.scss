@@ -1,23 +1,25 @@
 .homSolutions__item {
   @include euiBreakpoint('l', 'xl') {
-    max-width: calc(50% - #{$euiSizeM * 2});
+    max-width: calc(33.33% - #{$euiSizeM * 2});
   }
 }
 
-.euiCard__image {
-  .homSolutionPanel & {
+.homSolutionPanel {
+  img {
     background-color: $euiColorPrimary;
+    max-height: $euiSize * 10;
+    object-fit: cover;
   }
 
-  .homSolutionPanel--enterpriseSearch & {
+  &--enterpriseSearch img {
     background-color: $euiColorWarning;
   }
 
-  .homSolutionPanel--observability & {
+  &--observability img {
     background-color: $euiColorAccent;
   }
 
-  .homSolutionPanel--securitySolution & {
+  &--securitySolution img {
     background-color: $euiColorSecondary;
   }
 }

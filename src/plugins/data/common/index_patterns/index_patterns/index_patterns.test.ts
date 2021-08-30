@@ -9,8 +9,9 @@
 import { defaults } from 'lodash';
 import { IndexPatternsService, IndexPattern } from '.';
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
-import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
+
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
+import { stubbedSavedObjectIndexPattern } from '../index_pattern.stub';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
@@ -137,11 +138,11 @@ describe('IndexPatterns', () => {
     expect((await indexPatterns.get(id)).fields.length).toBe(1);
   });
 
-  test('savedObjectCache pre-fetches only title', async () => {
+  test('savedObjectCache pre-fetches title, type, typeMeta', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'type', 'typeMeta'],
       perPage: 10000,
     });
   });

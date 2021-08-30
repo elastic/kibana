@@ -278,6 +278,17 @@ export interface SavedObjectsBulkGetObject {
   type: string;
   /** SavedObject fields to include in the response */
   fields?: string[];
+  /**
+   * Optional namespace(s) for the object to be retrieved in. If this is defined, it will supersede the namespace ID that is in the
+   * top-level options.
+   *
+   * * For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,
+   *   including the "All spaces" identifier (`'*'`).
+   * * For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only
+   *   be used to specify a single space, and the "All spaces" identifier (`'*'`) is not allowed.
+   * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
+   */
+  namespaces?: string[];
 }
 
 /**
@@ -334,7 +345,7 @@ export interface SavedObjectsResolveResponse<T = unknown> {
 /**
  * @public
  */
-export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsOpenPointInTimeOptions {
   /**
    * Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`.
    */
@@ -343,6 +354,15 @@ export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOpti
    * An optional ES preference value to be used for the query.
    */
   preference?: string;
+  /**
+   * An optional list of namespaces to be used when opening the PIT.
+   *
+   * When the spaces plugin is enabled:
+   *  - this will default to the user's current space (as determined by the URL)
+   *  - if specified, the user's current space will be ignored
+   *  - `['*']` will search across all available spaces
+   */
+  namespaces?: string[];
 }
 
 /**

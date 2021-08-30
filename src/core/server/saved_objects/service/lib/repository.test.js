@@ -652,6 +652,29 @@ describe('SavedObjectsRepository', () => {
         });
       };
 
+      const unsupportedProductBulkCreateMgetError = async (objects, options) => {
+        const multiNamespaceObjects = objects.filter(
+          ({ type, id }) => registry.isMultiNamespace(type) && id
+        );
+        if (multiNamespaceObjects?.length) {
+          const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
+          client.mget.mockResolvedValue(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(
+              { ...response },
+              { statusCode: 404 },
+              {}
+            )
+          );
+        }
+        const response = getMockBulkCreateResponse(objects, options?.namespace);
+        client.bulk.mockResolvedValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
+        );
+        await expect(savedObjectsRepository.bulkCreate(objects, options)).rejects.toThrowError(
+          createGenericNotFoundEsUnavailableError()
+        );
+      };
+
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           savedObjectsRepository.bulkCreate([obj3], { namespace: ALL_NAMESPACES_STRING })
@@ -758,6 +781,13 @@ describe('SavedObjectsRepository', () => {
       it(`returns bulk error`, async () => {
         const expectedErrorResult = { type: obj3.type, id: obj3.id, error: 'Oh no, a bulk error!' };
         await bulkCreateError(obj3, true, expectedErrorResult);
+      });
+
+      it(`throws when ES mget action returns 404 with missing Elasticsearch header`, async () => {
+        const objects = [obj1, { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE }];
+        await unsupportedProductBulkCreateMgetError(objects);
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(client.bulk).toHaveBeenCalledTimes(0);
       });
     });
 
@@ -923,7 +953,7 @@ describe('SavedObjectsRepository', () => {
 
     const bulkGet = async (objects, options) =>
       savedObjectsRepository.bulkGet(
-        objects.map(({ type, id }) => ({ type, id })), // bulkGet only uses type and id
+        objects.map(({ type, id, namespaces }) => ({ type, id, namespaces })), // bulkGet only uses type, id, and optionally namespaces
         options
       );
     const bulkGetSuccess = async (objects, options) => {
@@ -962,6 +992,13 @@ describe('SavedObjectsRepository', () => {
         _expectClientCallArgs([obj1, obj2], { getId });
       });
 
+      it(`prepends namespace to the id when providing namespaces for single-namespace type`, async () => {
+        const getId = (type, id) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
+        const objects = [obj1, obj2].map((obj) => ({ ...obj, namespaces: [namespace] }));
+        await bulkGetSuccess(objects, { namespace: 'some-other-ns' });
+        _expectClientCallArgs([obj1, obj2], { getId });
+      });
+
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         const getId = (type, id) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkGetSuccess([obj1, obj2]);
@@ -981,34 +1018,51 @@ describe('SavedObjectsRepository', () => {
         _expectClientCallArgs(objects, { getId });
 
         client.mget.mockClear();
-        objects = [obj1, obj2].map((obj) => ({ ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE }));
+        objects = [obj1, { ...obj2, namespaces: ['some-other-ns'] }].map((obj) => ({
+          ...obj,
+          type: MULTI_NAMESPACE_ISOLATED_TYPE,
+        }));
         await bulkGetSuccess(objects, { namespace });
         _expectClientCallArgs(objects, { getId });
       });
     });
 
     describe('errors', () => {
-      const bulkGetErrorInvalidType = async ([obj1, obj, obj2]) => {
-        const response = getMockMgetResponse([obj1, obj2]);
+      const bulkGetError = async (obj, isBulkError, expectedErrorResult) => {
+        let response;
+        if (isBulkError) {
+          // mock the bulk error for only the second object
+          mockGetBulkOperationError.mockReturnValueOnce(undefined);
+          mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error);
+          response = getMockMgetResponse([obj1, obj, obj2]);
+        } else {
+          response = getMockMgetResponse([obj1, obj2]);
+        }
         client.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
         );
-        const result = await bulkGet([obj1, obj, obj2]);
+
+        const objects = [obj1, obj, obj2];
+        const result = await bulkGet(objects);
         expect(client.mget).toHaveBeenCalled();
         expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectErrorInvalidType(obj), expectSuccess(obj2)],
+          saved_objects: [expectSuccess(obj1), expectedErrorResult, expectSuccess(obj2)],
         });
       };
 
-      const bulkGetErrorNotFound = async ([obj1, obj, obj2], options, response) => {
+      const unsupportedProductBulkGetMgetError = async (objects, options) => {
+        const response = getMockMgetResponse(objects, options?.namespace);
         client.mget.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { ...response },
+            { statusCode: 404 },
+            {}
+          )
         );
-        const result = await bulkGet([obj1, obj, obj2], options);
-        expect(client.mget).toHaveBeenCalled();
-        expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectErrorNotFound(obj), expectSuccess(obj2)],
-        });
+        await expect(bulkGet(objects, options)).rejects.toThrowError(
+          createGenericNotFoundEsUnavailableError()
+        );
+        expect(client.mget).toHaveBeenCalledTimes(1);
       };
 
       it(`throws when options.namespace is '*'`, async () => {
@@ -1018,33 +1072,71 @@ describe('SavedObjectsRepository', () => {
         ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
       });
 
+      it(`returns error when namespaces is used with a space-agnostic object`, async () => {
+        const obj = { type: NAMESPACE_AGNOSTIC_TYPE, id: 'three', namespaces: [] };
+        await bulkGetError(
+          obj,
+          undefined,
+          expectErrorResult(
+            obj,
+            createBadRequestError('"namespaces" cannot be used on space-agnostic types')
+          )
+        );
+      });
+
+      it(`returns error when namespaces is used with a space-isolated object and does not specify a single space`, async () => {
+        const doTest = async (objType, namespaces) => {
+          const obj = { type: objType, id: 'three', namespaces };
+          await bulkGetError(
+            obj,
+            undefined,
+            expectErrorResult(
+              obj,
+              createBadRequestError(
+                '"namespaces" can only specify a single space when used with space-isolated types'
+              )
+            )
+          );
+        };
+        await doTest('dashboard', ['spacex', 'spacey']);
+        await doTest('dashboard', ['*']);
+        await doTest(MULTI_NAMESPACE_ISOLATED_TYPE, ['spacex', 'spacey']);
+        await doTest(MULTI_NAMESPACE_ISOLATED_TYPE, ['*']);
+      });
+
       it(`returns error when type is invalid`, async () => {
         const obj = { type: 'unknownType', id: 'three' };
-        await bulkGetErrorInvalidType([obj1, obj, obj2]);
+        await bulkGetError(obj, undefined, expectErrorInvalidType(obj));
       });
 
       it(`returns error when type is hidden`, async () => {
         const obj = { type: HIDDEN_TYPE, id: 'three' };
-        await bulkGetErrorInvalidType([obj1, obj, obj2]);
+        await bulkGetError(obj, undefined, expectErrorInvalidType(obj));
       });
 
       it(`returns error when document is not found`, async () => {
         const obj = { type: 'dashboard', id: 'three', found: false };
-        const response = getMockMgetResponse([obj1, obj, obj2]);
-        await bulkGetErrorNotFound([obj1, obj, obj2], undefined, response);
+        await bulkGetError(obj, true, expectErrorNotFound(obj));
       });
 
       it(`handles missing ids gracefully`, async () => {
         const obj = { type: 'dashboard', id: undefined, found: false };
-        const response = getMockMgetResponse([obj1, obj, obj2]);
-        await bulkGetErrorNotFound([obj1, obj, obj2], undefined, response);
+        await bulkGetError(obj, true, expectErrorNotFound(obj));
       });
 
       it(`returns error when type is multi-namespace and the document exists, but not in this namespace`, async () => {
-        const obj = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: 'three' };
-        const response = getMockMgetResponse([obj1, obj, obj2]);
-        response.docs[1].namespaces = ['bar-namespace'];
-        await bulkGetErrorNotFound([obj1, obj, obj2], { namespace }, response);
+        const obj = {
+          type: MULTI_NAMESPACE_ISOLATED_TYPE,
+          id: 'three',
+          namespace: 'bar-namespace',
+        };
+        await bulkGetError(obj, true, expectErrorNotFound(obj));
+      });
+
+      it(`throws when ES mget action responds with a 404 and a missing Elasticsearch product header`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        await unsupportedProductBulkGetMgetError([obj1, obj2]); // returns 404 without required product header
+        _expectClientCallArgs([obj1, obj2], { getId });
       });
     });
 
@@ -1450,6 +1542,34 @@ describe('SavedObjectsRepository', () => {
           saved_objects: [expectSuccess(obj1), expectErrorNotFound(_obj), expectSuccess(obj2)],
         });
       };
+      const unsupportedProductBulkUpdateMgetError = async (objects, options, includeOriginId) => {
+        const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
+        if (multiNamespaceObjects?.length) {
+          const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
+          client.mget.mockResolvedValueOnce(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(
+              { ...response },
+              { statusCode: 404 },
+              {}
+            )
+          );
+        }
+        const response = getMockBulkUpdateResponse(objects, options?.namespace, includeOriginId);
+        client.bulk.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
+        );
+
+        await expect(savedObjectsRepository.bulkUpdate(objects, options)).rejects.toThrowError(
+          createGenericNotFoundEsUnavailableError()
+        );
+        expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
+      };
+
+      it(`throws when ES mget action responds with a 404 and a missing Elasticsearch product header`, async () => {
+        const objects = [obj1, { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE }];
+        await unsupportedProductBulkUpdateMgetError(objects);
+        expect(client.mget).toHaveBeenCalledTimes(1);
+      });
 
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
@@ -1650,6 +1770,24 @@ describe('SavedObjectsRepository', () => {
         await expect(
           savedObjectsRepository.checkConflicts([obj1], { namespace: ALL_NAMESPACES_STRING })
         ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
+      });
+
+      it(`throws when not found responses aren't from Elasticsearch`, async () => {
+        const checkConflictsMgetError = async (objects, options) => {
+          const response = getMockMgetResponse(objects, options?.namespace);
+          client.mget.mockResolvedValue(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(
+              { ...response },
+              { statusCode: 404 },
+              {}
+            )
+          );
+          await expect(checkConflicts(objects, options)).rejects.toThrowError(
+            createGenericNotFoundEsUnavailableError()
+          );
+          expect(client.mget).toHaveBeenCalledTimes(1);
+        };
+        await checkConflictsMgetError([obj1, obj2], { namespace: 'default' });
       });
     });
 
@@ -2228,11 +2366,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { found: false },
-            undefined,
-            { 'x-elastic-product': 'Elasticsearch' }
-          )
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false }, undefined)
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -2240,11 +2374,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the index during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(
-            {},
-            { statusCode: 404 },
-            { 'x-elastic-product': 'Elasticsearch' }
-          )
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -2252,14 +2382,18 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get with missing Elasticsearch header`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { found: false },
+            { statusCode: 404 },
+            {}
+          )
         );
         await expectNotFoundEsUnavailableError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
       });
 
       it(`throws when ES is unable to find the index during get with missing Elasticsearch header`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 }, {})
         );
         await expectNotFoundEsUnavailableError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
       });
@@ -2307,7 +2441,7 @@ describe('SavedObjectsRepository', () => {
         client.delete.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise({ result: 'not_found' })
         );
-        await expectNotFoundEsUnavailableError(type, id);
+        await expectNotFoundError(type, id);
         expect(client.delete).toHaveBeenCalledTimes(1);
       });
 
@@ -2317,7 +2451,7 @@ describe('SavedObjectsRepository', () => {
             error: { type: 'index_not_found_exception' },
           })
         );
-        await expectNotFoundEsUnavailableError(type, id);
+        await expectNotFoundError(type, id);
         expect(client.delete).toHaveBeenCalledTimes(1);
       });
 
@@ -2572,6 +2706,22 @@ describe('SavedObjectsRepository', () => {
           savedObjectsRepository.removeReferencesTo(type, id, defaultOptions)
         ).rejects.toThrowError(createConflictError(type, id));
       });
+
+      it(`throws on 404 with missing Elasticsearch header`, async () => {
+        client.updateByQuery.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            {
+              updated: updatedCount,
+            },
+            { statusCode: 404 },
+            {}
+          )
+        );
+        await expect(
+          savedObjectsRepository.removeReferencesTo(type, id, defaultOptions)
+        ).rejects.toThrowError(createGenericNotFoundEsUnavailableError(type, id));
+        expect(client.updateByQuery).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
@@ -2748,6 +2898,21 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
+      const findNotSupportedServerError = async (options, namespace) => {
+        const expectedSearchResults = generateSearchResults(namespace);
+        client.search.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { ...expectedSearchResults },
+            { statusCode: 404 },
+            {}
+          )
+        );
+        await expect(savedObjectsRepository.find(options)).rejects.toThrowError(
+          createGenericNotFoundEsUnavailableError()
+        );
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
+        expect(client.search).toHaveBeenCalledTimes(1);
+      };
       it(`throws when type is not defined`, async () => {
         await expect(savedObjectsRepository.find({})).rejects.toThrowError(
           'options.type must be a string or an array of strings'
@@ -2827,6 +2992,11 @@ describe('SavedObjectsRepository', () => {
                       `);
         expect(getSearchDslNS.getSearchDsl).not.toHaveBeenCalled();
         expect(client.search).not.toHaveBeenCalled();
+      });
+
+      it(`throws when ES is unable to find with missing Elasticsearch`, async () => {
+        await findNotSupportedServerError({ type });
+        expect(client.search).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -3204,6 +3374,7 @@ describe('SavedObjectsRepository', () => {
           createGenericNotFoundEsUnavailableError(type, id)
         );
       };
+
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           savedObjectsRepository.get(type, id, { namespace: ALL_NAMESPACES_STRING })
@@ -3222,11 +3393,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { found: false },
-            undefined,
-            { 'x-elastic-product': 'Elasticsearch' }
-          )
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false }, undefined)
         );
         await expectNotFoundError(type, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -3234,11 +3401,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the index during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(
-            {},
-            { statusCode: 404 },
-            { 'x-elastic-product': 'Elasticsearch' }
-          )
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
         );
         await expectNotFoundError(type, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -3257,7 +3420,11 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES does not return the correct header when finding the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { found: false },
+            { statusCode: 404 },
+            {}
+          )
         );
         await expectNotFoundEsUnavailableError(type, id);
 
@@ -3367,8 +3534,7 @@ describe('SavedObjectsRepository', () => {
           client.get.mockResolvedValueOnce(
             elasticsearchClientMock.createSuccessTransportRequestPromise(
               { found: false },
-              undefined,
-              { 'x-elastic-product': 'Elasticsearch' }
+              undefined
             ) // for actual target
           );
 
@@ -3421,10 +3587,16 @@ describe('SavedObjectsRepository', () => {
         describe('because alias is not used', () => {
           const expectExactMatchResult = async (aliasResult) => {
             const options = { namespace };
-            client.update.mockResolvedValueOnce(aliasResult); // for alias object
+            if (!aliasResult.body) {
+              client.update.mockResolvedValueOnce(
+                elasticsearchClientMock.createSuccessTransportRequestPromise({}, { ...aliasResult })
+              );
+            } else {
+              client.update.mockResolvedValueOnce(aliasResult); // for alias object
+            }
             const response = getMockGetResponse({ type, id }, options.namespace);
             client.get.mockResolvedValueOnce(
-              elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
+              elasticsearchClientMock.createSuccessTransportRequestPromise({ ...response }) // for actual target
             );
 
             const result = await savedObjectsRepository.resolve(type, id, options);
@@ -3909,8 +4081,7 @@ describe('SavedObjectsRepository', () => {
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(
             { ...mockGetResponse },
-            { statusCode: 200 },
-            { 'x-elastic-product': 'Elasticsearch' }
+            { statusCode: 200 }
           )
         );
       }
@@ -3932,8 +4103,7 @@ describe('SavedObjectsRepository', () => {
               },
             },
           },
-          { statusCode: 200 },
-          { 'x-elastic-product': 'Elasticsearch' }
+          { statusCode: 200 }
         )
       );
       const result = await savedObjectsRepository.update(type, id, attributes, options);
@@ -4144,11 +4314,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { found: false },
-            undefined,
-            { 'x-elastic-product': 'Elasticsearch' }
-          )
+          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false }, undefined)
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -4156,11 +4322,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the index during get`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(
-            {},
-            { statusCode: 404 },
-            { 'x-elastic-product': 'Elasticsearch' }
-          )
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -4168,15 +4330,19 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when ES is unable to find the document during get with missing Elasticsearch header`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({ found: false })
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { found: false },
+            { statusCode: 404 },
+            {}
+          )
         );
         await expectNotFoundEsUnavailableError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
       });
 
-      it(`throws when ES is unable to find the index during get with missing Elasticsearch`, async () => {
+      it(`throws when ES is unable to find the index during get with missing Elasticsearch header`, async () => {
         client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 }, {})
         );
         await expectNotFoundEsUnavailableError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         expect(client.get).toHaveBeenCalledTimes(1);
@@ -4303,6 +4469,21 @@ describe('SavedObjectsRepository', () => {
         );
       };
 
+      const unsupportedProductExpectNotFoundError = async (type, options) => {
+        const results = generateResults();
+        client.openPointInTime.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            { ...results },
+            { statusCode: 404 },
+            {}
+          )
+        );
+        await expect(
+          savedObjectsRepository.openPointInTimeForType(type, options)
+        ).rejects.toThrowError(createGenericNotFoundEsUnavailableError());
+        expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      };
+
       it(`throws when ES is unable to find the index`, async () => {
         client.openPointInTime.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
@@ -4320,6 +4501,11 @@ describe('SavedObjectsRepository', () => {
         await test('unknownType');
         await test(HIDDEN_TYPE);
         await test(['unknownType', HIDDEN_TYPE]);
+      });
+
+      it(`throws on 404 with missing Elasticsearch product header`, async () => {
+        await unsupportedProductExpectNotFoundError(type);
+        expect(client.openPointInTime).toHaveBeenCalledTimes(1);
       });
     });
 

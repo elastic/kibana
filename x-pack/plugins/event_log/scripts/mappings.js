@@ -77,6 +77,9 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
+      version: {
+        type: 'version',
+      },
     },
   },
 };

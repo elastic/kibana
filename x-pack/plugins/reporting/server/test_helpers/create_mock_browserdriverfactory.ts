@@ -80,10 +80,7 @@ mockBrowserEvaluate.mockImplementation(() => {
   }
   throw new Error(mockCall);
 });
-const mockScreenshot = jest.fn();
-mockScreenshot.mockImplementation((item: ElementsPositionAndAttribute) => {
-  return Promise.resolve(`allyourBase64`);
-});
+const mockScreenshot = jest.fn(async () => Buffer.from('screenshot'));
 const getCreatePage = (driver: HeadlessChromiumDriver) =>
   jest.fn().mockImplementation(() => Rx.of({ driver, exit$: Rx.never() }));
 

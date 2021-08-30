@@ -89,7 +89,7 @@ export const createDetectionIndex = async (
   ruleDataService: RuleDataPluginService,
   ruleRegistryEnabled: boolean
 ): Promise<void> => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const spaceId = siemClient.getSpaceId();
 
   if (!siemClient) {

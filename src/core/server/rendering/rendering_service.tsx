@@ -24,7 +24,7 @@ import {
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import { getSettingValue, getStylesheetPaths } from './render_utils';
-import { KibanaRequest, LegacyRequest } from '../http';
+import { KibanaRequest } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
 
 type RenderOptions = (RenderingPrebootDeps & { status?: never }) | RenderingSetupDeps;
@@ -76,7 +76,7 @@ export class RenderingService {
 
   private async render(
     { http, uiPlugins, status }: RenderOptions,
-    request: KibanaRequest | LegacyRequest,
+    request: KibanaRequest,
     uiSettings: IUiSettingsClient,
     { includeUserSettings = true, vars }: IRenderOptions = {}
   ) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Cookie, cookie } from 'request';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: mockUserName, password: mockUserPassword },
         })
         .expect(200);
-      sessionCookie = cookie(loginResponse.headers['set-cookie'][0])!;
+      sessionCookie = parseCookie(loginResponse.headers['set-cookie'][0])!;
     });
 
     afterEach(async () => await security.user.delete(mockUserName));
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ password: mockUserPassword, newPassword })
         .expect(204);
 
-      const newSessionCookie = cookie(passwordChangeResponse.headers['set-cookie'][0])!;
+      const newSessionCookie = parseCookie(passwordChangeResponse.headers['set-cookie'][0])!;
 
       // Old cookie is still valid (since it's still the same user and cookie doesn't store password).
       await supertest

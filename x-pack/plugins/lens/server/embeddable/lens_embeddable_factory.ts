@@ -19,6 +19,7 @@ import {
   LensDocShapePre712,
   VisStatePre715,
 } from '../migrations/types';
+import { extract, inject } from '../../common/embeddable_factory';
 
 export const lensEmbeddableFactory = (): EmbeddableRegistryDefinition => {
   return {
@@ -50,5 +51,7 @@ export const lensEmbeddableFactory = (): EmbeddableRegistryDefinition => {
         } as unknown) as SerializableRecord;
       },
     },
+    extract,
+    inject,
   };
 };

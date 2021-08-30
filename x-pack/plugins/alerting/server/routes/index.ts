@@ -22,6 +22,7 @@ import { findRulesRoute } from './find_rules';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
+import { resolveRuleRoute } from './resolve_rule';
 import { ruleTypesRoute } from './rule_types';
 import { muteAllRuleRoute } from './mute_all_rule';
 import { muteAlertRoute } from './mute_alert';
@@ -42,6 +43,7 @@ export function defineRoutes(opts: RouteOptions) {
   defineLegacyRoutes(opts);
   createRuleRoute(opts);
   getRuleRoute(router, licenseState);
+  resolveRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);
   deleteRuleRoute(router, licenseState);
   aggregateRulesRoute(router, licenseState);

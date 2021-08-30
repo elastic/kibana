@@ -265,6 +265,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
                     'kibana.saved_objects.id': ids,
                   },
                 },
+                // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
                 namespaceQuery,
               ],
             },

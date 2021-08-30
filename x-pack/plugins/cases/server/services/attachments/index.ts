@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { Logger, SavedObject, SavedObjectReference } from 'kibana/server';
+import {
+  Logger,
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsUpdateOptions,
+} from 'kibana/server';
 
 import { KueryNode } from '../../../../../../src/plugins/data/common';
 import {
@@ -38,10 +43,10 @@ interface CreateAttachmentArgs extends ClientArgs {
 interface UpdateArgs {
   attachmentId: string;
   updatedAttributes: AttachmentPatchAttributes;
-  version?: string;
+  options?: SavedObjectsUpdateOptions<AttachmentAttributes>;
 }
 
-type UpdateAttachmentArgs = UpdateArgs & ClientArgs;
+export type UpdateAttachmentArgs = UpdateArgs & ClientArgs;
 
 interface BulkUpdateAttachmentArgs extends ClientArgs {
   comments: UpdateArgs[];
@@ -142,7 +147,7 @@ export class AttachmentService {
     unsecuredSavedObjectsClient,
     attachmentId,
     updatedAttributes,
-    version,
+    options,
   }: UpdateAttachmentArgs) {
     try {
       this.log.debug(`Attempting to UPDATE comment ${attachmentId}`);
@@ -150,7 +155,7 @@ export class AttachmentService {
         CASE_COMMENT_SAVED_OBJECT,
         attachmentId,
         updatedAttributes,
-        { version }
+        options
       );
     } catch (error) {
       this.log.error(`Error on UPDATE comment ${attachmentId}: ${error}`);
@@ -168,7 +173,7 @@ export class AttachmentService {
           type: CASE_COMMENT_SAVED_OBJECT,
           id: c.attachmentId,
           attributes: c.updatedAttributes,
-          version: c.version,
+          ...c.options,
         }))
       );
     } catch (error) {

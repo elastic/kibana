@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { IBasePath, IRouter, Logger } from 'src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IBasePath, IRouter, Logger, PrebootServicePreboot } from 'src/core/server';
 
-import type { ElasticsearchConnectionStatus } from '../../common';
 import type { ConfigType } from '../config';
+import type { ElasticsearchServiceSetup } from '../elasticsearch_service';
+import type { KibanaConfigWriter } from '../kibana_config_writer';
 import { defineEnrollRoutes } from './enroll';
 
 /**
@@ -19,8 +21,12 @@ export interface RouteDefinitionParams {
   readonly router: IRouter;
   readonly basePath: IBasePath;
   readonly logger: Logger;
+  readonly preboot: PrebootServicePreboot & {
+    completeSetup: (result: { shouldReloadConfig: boolean }) => void;
+  };
+  readonly kibanaConfigWriter: PublicMethodsOf<KibanaConfigWriter>;
+  readonly elasticsearch: ElasticsearchServiceSetup;
   readonly getConfig: () => ConfigType;
-  readonly getElasticsearchConnectionStatus: () => ElasticsearchConnectionStatus;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {

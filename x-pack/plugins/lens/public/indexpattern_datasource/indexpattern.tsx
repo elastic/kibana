@@ -77,7 +77,7 @@ export {
 } from '../../common/expressions';
 export { FormatColumnArgs, supportedFormats, formatColumn } from '../../common/expressions';
 export { getSuffixFormatter, unitSuffixesLong } from '../../common/suffix_formatter';
-export { timeScale, TimeScaleArgs } from '../../common/expressions';
+export { getTimeScale, TimeScaleArgs } from '../../common/expressions';
 export { renameColumns } from '../../common/expressions';
 
 export function getIndexPatternDatasource({
