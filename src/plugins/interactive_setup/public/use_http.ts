@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-// Mapbox-gl doesn't declare this type.
-declare module 'maplibre-gl/dist/maplibre-gl-csp';
+import constate from 'constate';
+
+import type { HttpSetup } from 'src/core/public';
+
+export const [HttpProvider, useHttp] = constate(({ http }: { http: HttpSetup }) => {
+  return http;
+});

@@ -42,6 +42,7 @@ import { BUCKET_TYPES } from '../../../../common/enums';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
+import { KBN_FIELD_TYPES } from '../../../../../data/public';
 
 export class TablePanelConfig extends Component<
   PanelConfigProps,
@@ -115,6 +116,13 @@ export class TablePanelConfig extends Component<
                         defaultMessage="Group by field"
                       />
                     }
+                    restrict={[
+                      KBN_FIELD_TYPES.NUMBER,
+                      KBN_FIELD_TYPES.BOOLEAN,
+                      KBN_FIELD_TYPES.DATE,
+                      KBN_FIELD_TYPES.IP,
+                      KBN_FIELD_TYPES.STRING,
+                    ]}
                     fields={this.props.fields}
                     value={model.pivot_id}
                     indexPattern={model.index_pattern}
