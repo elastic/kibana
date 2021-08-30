@@ -17,8 +17,13 @@ type BasicObjectProp = t.ObjectProperty & {
   key: t.StringLiteral;
 };
 
+type BasicObjectPropWithObjectValue = BasicObjectProp & { value: t.ObjectExpression };
+
 const isBasicObjectProp = (n: t.Node): n is BasicObjectProp =>
   n.type === 'ObjectProperty' && n.key.type === 'StringLiteral';
+
+const isBasicObjectPropWithObjectValue = (n: t.Node): n is BasicObjectPropWithObjectValue =>
+  isBasicObjectProp(n) && n.value.type === 'ObjectExpression';
 
 const isManaged = (node?: t.Node) =>
   !!node?.leadingComments?.some(
@@ -41,6 +46,106 @@ const createManagedChildProp = (key: string, value: any) => {
   const childProp = t.objectProperty(t.stringLiteral(key), parseExpression(JSON.stringify(value)));
   t.addComment(childProp, 'leading', ' @managed', true);
   return childProp;
+};
+
+const createManagedProp = (key: string, value: Record<string, any>) => {
+  return t.objectProperty(
+    t.stringLiteral(key),
+    t.objectExpression(Object.entries(value).map(([k, v]) => createManagedChildProp(k, v)))
+  );
+};
+
+/**
+ * Adds a new setting to the settings.json file. Used when there is no existing key
+ *
+ * @param ast AST of the entire settings.json file
+ * @param key the key name to add
+ * @param value managed value which should be set at `key`
+ */
+const addManagedProp = (ast: t.ObjectExpression, key: string, value: Record<string, any>) => {
+  ast.properties.push(createManagedProp(key, value));
+};
+
+/**
+ * Replace an existing setting in the settings.json file with the `managedValue`, ignoring its
+ * type, used when the value of the existing setting is not an ObjectExpression
+ *
+ * @param ast AST of the entire settings.json file
+ * @param existing node which should be replaced
+ * @param value managed value which should replace the current value, regardless of its type
+ */
+const replaceManagedProp = (
+  ast: t.ObjectExpression,
+  existing: BasicObjectProp,
+  value: Record<string, any>
+) => {
+  remove(ast.properties, existing);
+  addManagedProp(ast, existing.key.value, value);
+};
+
+/**
+ * Merge the managed value in to the value already in the settings.json file. Any property which is
+ * labeled with a `// self managed` comment is untouched, any property which is `// @managed` but
+ * no longer in the `managedValue` is removed, and any properties in the `managedValue` are either
+ * added or updated based on their existence in the AST.
+ *
+ * @param existing existing AST node of the object property ("key": <value>)
+ * @param managedValue the managed value that should be merged into the existing values
+ */
+const mergeManagedProp = (
+  existing: BasicObjectPropWithObjectValue,
+  managedValue: Record<string, any>
+) => {
+  // capture a reference to the properties of this specific managed setting
+  const childProps = existing.value.properties;
+
+  // discover all the current managed child props so that we can keep track of which
+  // props we need to delete because they are no longer managed
+  const existingManagedChildProps = new Map(
+    childProps
+      .filter(isBasicObjectProp)
+      .filter(isManaged)
+      .map((n) => {
+        return [n.key.value, n];
+      })
+  );
+
+  // iterate through all the keys in the managed `value` and either add them to the
+  // prop, update their value, or ignore them because they are "// self managed"
+  for (const [k, v] of Object.entries(managedValue)) {
+    const managedChildProp = existingManagedChildProps.get(k);
+
+    if (managedChildProp) {
+      // the prop already exists and is still managed, so update it's value
+      managedChildProp.value = parseExpression(JSON.stringify(v));
+      // delete it from the existing map so that we don't delete it later
+      existingManagedChildProps.delete(k);
+      continue;
+    }
+
+    // find existing child props with the same key so we can detect if it's self managed
+    const unmanagedChildProp = childProps.filter(isBasicObjectProp).find((p) => p.key.value === k);
+
+    if (unmanagedChildProp && isSelfManaged(unmanagedChildProp)) {
+      // ignore this key in `value` because it already exists and is "// self managed"
+      continue;
+    }
+
+    // take over the unmanaged child prop by deleting the previous prop and replacing it
+    // with a brand new one
+    if (unmanagedChildProp) {
+      remove(childProps, unmanagedChildProp);
+    }
+
+    // add the new managed prop
+    childProps.push(createManagedChildProp(k, v));
+  }
+
+  // iterate through the remaining managed props which weren't updated and delete them, they
+  // were managed but are no longer managed
+  for (const oldPropProp of existingManagedChildProps.values()) {
+    remove(childProps, oldPropProp);
+  }
 };
 
 /**
@@ -78,73 +183,19 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
       continue;
     }
 
-    // setting isn't in config file, or is not an object, so create it and attach `@managed` comments to each property
-    if (!existingProp || existingProp.value.type !== 'ObjectExpression') {
-      if (existingProp) {
-        remove(ast.properties, existingProp);
-      }
-
-      ast.properties.push(
-        t.objectProperty(
-          t.stringLiteral(key),
-          t.objectExpression(Object.entries(value).map(([k, v]) => createManagedChildProp(k, v)))
-        )
-      );
+    if (existingProp && isBasicObjectPropWithObjectValue(existingProp)) {
+      mergeManagedProp(existingProp, value);
       continue;
     }
 
-    // capture a reference to the properties of this specific managed setting
-    const childProps = existingProp.value.properties;
-
-    // discover all the current managed child props so that we can keep track of which
-    // props we need to delete because they are no longer managed
-    const existingManagedChildProps = new Map(
-      childProps
-        .filter(isBasicObjectProp)
-        .filter(isManaged)
-        .map((n) => {
-          return [n.key.value, n];
-        })
-    );
-
-    // iterate through all the keys in the managed `value` and either add them to the
-    // prop, update their value, or ignore them because they are "// self managed"
-    for (const [k, v] of Object.entries(value)) {
-      const managedChildProp = existingManagedChildProps.get(k);
-
-      if (managedChildProp) {
-        // the prop already exists and is still managed, so update it's value
-        managedChildProp.value = parseExpression(JSON.stringify(v));
-        // delete it from the existing map so that we don't delete it later
-        existingManagedChildProps.delete(k);
-        continue;
-      }
-
-      // find existing child props with the same key so we can detect if it's self managed
-      const unmanagedChildProp = childProps
-        .filter(isBasicObjectProp)
-        .find((p) => p.key.value === k);
-
-      if (unmanagedChildProp && isSelfManaged(unmanagedChildProp)) {
-        // ignore this key in `value` because it already exists and is "// self managed"
-        continue;
-      }
-
-      // take over the unmanaged child prop by deleting the previous prop and replacing it
-      // with a brand new one
-      if (unmanagedChildProp) {
-        remove(childProps, unmanagedChildProp);
-      }
-
-      // add the new managed prop
-      childProps.push(createManagedChildProp(k, v));
+    // setting exists but its value is not an object expression so replace it
+    if (existingProp) {
+      replaceManagedProp(ast, existingProp, value);
+      continue;
     }
 
-    // iterate through the remaining managed props which weren't updated and delete them, they
-    // were managed but are no longer managed
-    for (const oldPropProp of existingManagedChildProps.values()) {
-      remove(childProps, oldPropProp);
-    }
+    // setting isn't in config file so create it
+    addManagedProp(ast, key, value);
   }
 
   ast.leadingComments = [
