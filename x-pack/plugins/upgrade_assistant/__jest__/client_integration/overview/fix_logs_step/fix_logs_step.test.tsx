@@ -103,14 +103,29 @@ describe('Overview - Fix deprecation logs step', () => {
 
       expect(exists('fetchLoggingError')).toBe(true);
     });
+
+    test('It doesnt show external links and deprecations count when toggle is disabled', async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
+        isDeprecationLogIndexingEnabled: false,
+        isDeprecationLoggingEnabled: false,
+      });
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { exists, component } = testBed;
+
+      component.update();
+
+      expect(exists('externalLinksTitle')).toBe(false);
+      expect(exists('deprecationsCountTitle')).toBe(false);
+    });
   });
 
   describe('Step 2 - Analyze logs', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
-        isDeprecationLogIndexingEnabled: true,
-        isDeprecationLoggingEnabled: true,
-      });
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
     });
 
     test('Has a link to see logs in observability app', async () => {
@@ -149,6 +164,99 @@ describe('Overview - Fix deprecation logs step', () => {
 
       expect(exists('viewDiscoverLogs')).toBe(true);
       expect(find('viewDiscoverLogs').props().href).toBe('/discover/logs');
+    });
+  });
+
+  describe('Step 3 - Resolve log issues', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
+    });
+
+    test('With deprecation warnings', async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+        count: 10,
+      });
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { find, exists, component } = testBed;
+
+      component.update();
+
+      expect(exists('hasWarningsCallout')).toBe(true);
+      expect(find('hasWarningsCallout').text()).toContain('10');
+    });
+
+    test('No deprecation warnings', async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+        count: 0,
+      });
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { find, exists, component } = testBed;
+
+      component.update();
+
+      expect(exists('noWarningsCallout')).toBe(true);
+      expect(find('noWarningsCallout').text()).toContain('No deprecation warnings');
+    });
+
+    test('Handles errors and can retry', async () => {
+      const error = {
+        statusCode: 500,
+        error: 'Internal server error',
+        message: 'Internal server error',
+      };
+
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(undefined, error);
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { exists, actions, component } = testBed;
+
+      component.update();
+
+      expect(exists('errorCallout')).toBe(true);
+
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+        count: 0,
+      });
+
+      await actions.clickRetryButton();
+
+      expect(exists('noWarningsCallout')).toBe(true);
+    });
+
+    test('Allows user to reset last stored date', async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+        count: 10,
+      });
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { exists, actions, component } = testBed;
+
+      component.update();
+
+      expect(exists('hasWarningsCallout')).toBe(true);
+      expect(exists('resetLastStoredDate')).toBe(true);
+
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+        count: 0,
+      });
+
+      await actions.clickResetButton();
+
+      expect(exists('noWarningsCallout')).toBe(true);
     });
   });
 });

@@ -61,7 +61,7 @@ describe('deprecation logging API', () => {
 
     it('returns an error if it throws', async () => {
       (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-        .getSettings as jest.Mock).mockRejectedValue(new Error(`scary error!`));
+        .getSettings as jest.Mock).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
           method: 'get',
@@ -96,12 +96,69 @@ describe('deprecation logging API', () => {
 
     it('returns an error if it throws', async () => {
       (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-        .putSettings as jest.Mock).mockRejectedValue(new Error(`scary error!`));
+        .putSettings as jest.Mock).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
           method: 'put',
           pathPattern: '/api/upgrade_assistant/deprecation_logging',
         })(routeHandlerContextMock, { body: { isEnabled: false } }, kibanaResponseFactory)
+      ).rejects.toThrow('scary error!');
+    });
+  });
+
+  describe('GET /api/upgrade_assistant/deprecation_logging/count', () => {
+    const MOCK_FROM_DATE = '2021-08-23T07:32:34.782Z';
+
+    it('returns count of deprecations', async () => {
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices
+        .exists as jest.Mock).mockResolvedValue({
+        body: true,
+      });
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser
+        .count as jest.Mock).mockResolvedValue({
+        body: { count: 10 },
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/deprecation_logging/count',
+      })(
+        routeHandlerContextMock,
+        createRequestMock({ query: { from: MOCK_FROM_DATE } }),
+        kibanaResponseFactory
+      );
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({ count: 10 });
+    });
+
+    it('returns zero matches when deprecation logs index is not created', async () => {
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices
+        .exists as jest.Mock).mockResolvedValue({
+        body: false,
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/deprecation_logging/count',
+      })(
+        routeHandlerContextMock,
+        createRequestMock({ query: { from: MOCK_FROM_DATE } }),
+        kibanaResponseFactory
+      );
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({ count: 0 });
+    });
+
+    it('returns an error if it throws', async () => {
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices
+        .exists as jest.Mock).mockRejectedValue(new Error('scary error!'));
+      await expect(
+        routeDependencies.router.getHandler({
+          method: 'get',
+          pathPattern: '/api/upgrade_assistant/deprecation_logging/count',
+        })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory)
       ).rejects.toThrow('scary error!');
     });
   });
