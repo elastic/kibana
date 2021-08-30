@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { Dataset } from '../../../rule_registry/server';
 import { createObservabilityServerRoute } from './create_observability_server_route';
 import { createObservabilityServerRouteRepository } from './create_observability_server_route_repository';
 
@@ -24,7 +25,7 @@ const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
     const { namespace, registrationContexts } = params.query;
     const indexNames = registrationContexts.flatMap((registrationContext) => {
       const indexName = ruleDataService
-        .getRegisteredIndexInfo(registrationContext)
+        .findIndexByName(registrationContext, Dataset.alerts)
         ?.getPrimaryAlias(namespace);
 
       if (indexName != null) {

@@ -29,16 +29,22 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('Tests involving runtime fields of source indexes and the signals index', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/runtime');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/runtime');
+    });
+
     describe('Regular runtime field mappings', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/runtime');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/runtime');
       });
 
       it('should copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
