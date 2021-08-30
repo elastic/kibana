@@ -27,7 +27,7 @@ const idToUrlMap = {
 const shareMock = sharePluginMock.createSetupContract();
 shareMock.url.locators.get = (id) => ({
   // @ts-expect-error This object is missing some properties that we're not using in the UI
-  getUrl: (): string | undefined => idToUrlMap[id],
+  useUrl: (): string | undefined => idToUrlMap[id],
 });
 
 export const getAppContextMock = (mockHttpClient: HttpSetup) => ({
