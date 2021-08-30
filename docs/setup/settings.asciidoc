@@ -563,36 +563,31 @@ proxy sitting in front of it. This determines whether HTTP compression may be us
 This setting may not be used when <<server-compression, `server.compression.enabled`>> is set to `false`. *Default: `none`*
 
 a|
-`server.securityResponseHeaders:`
-`strictTransportSecurity:`
+`server.securityResponseHeaders.strictTransportSecurity:`
 | [[server-securityResponseHeaders-strictTransportSecurity]] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security[`Strict-Transport-Security`]
 header is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or
 `null`. To disable, set to `null`. *Default:* `null`
 
 [[server-securityResponseHeaders-xContentTypeOptions]]
-a| `server.securityResponseHeaders:`
-`xContentTypeOptions:`
+a| `server.securityResponseHeaders.xContentTypeOptions:`
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options[`X-Content-Type-Options`] header is
 used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are `nosniff` or `null`. To
 disable, set to `null`. *Default:* `"nosniff"`
 
 [[server-securityResponseHeaders-referrerPolicy]]
-a|`server.securityResponseHeaders:`
-`referrerPolicy:`
+a|`server.securityResponseHeaders.referrerPolicy:`
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy[`Referrer-Policy`] header is used in all
 responses to the client from the {kib} server, and specifies what value is used. Allowed values are `no-referrer`,
 `no-referrer-when-downgrade`, `origin`, `origin-when-cross-origin`, `same-origin`, `strict-origin`, `strict-origin-when-cross-origin`,
 `unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"no-referrer-when-downgrade"`
 
 [[server-securityResponseHeaders-permissionsPolicy]]
-a|`server.securityResponseHeaders:`
-`permissionsPolicy:`
+a|`server.securityResponseHeaders.permissionsPolicy:`
 | experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy[`Permissions-Policy`] header
 is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
 To disable, set to `null`. *Default:* `null`
 
-|[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders:`
-`disableEmbedding:`
+|[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding:`
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
 {kib} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors:
