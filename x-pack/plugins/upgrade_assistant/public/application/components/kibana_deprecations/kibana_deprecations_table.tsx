@@ -64,7 +64,7 @@ const i18nTexts = {
   unknownDeprecationTypeCellLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.unknownDeprecationTypeCellLabel',
     {
-      defaultMessage: 'Unknown',
+      defaultMessage: 'Uncategorized',
     }
   ),
   typeFilterLabel: i18n.translate(

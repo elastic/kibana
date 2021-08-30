@@ -8,7 +8,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import uuid from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiPageContent, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -53,12 +53,21 @@ const i18nTexts = {
   isLoading: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.loadingText', {
     defaultMessage: 'Loading deprecations…',
   }),
-  successMessage: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.successMessage', {
-    defaultMessage: 'Deprecation resolved',
-  }),
-  errorMessage: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.errorMessage', {
-    defaultMessage: 'Error resolving deprecation',
-  }),
+  kibanaDeprecationErrorTitle: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.kibanaDeprecationErrorTitle',
+    {
+      defaultMessage: 'Deprecation warnings may be incomplete',
+    }
+  ),
+  getKibanaDeprecationErrorDescription: (pluginIds: string[]) =>
+    i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.kibanaDeprecationErrorDescription', {
+      defaultMessage:
+        'Failed to get deprecation warnings for {pluginCount, plural, one {this plugin} other {these plugins}}: {pluginIds}. Check the Kibana server logs for more details.',
+      values: {
+        pluginCount: pluginIds.length,
+        pluginIds: pluginIds.join(', '),
+      },
+    }),
 };
 
 export interface DeprecationResolutionState {
@@ -75,6 +84,7 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
   const [kibanaDeprecations, setKibanaDeprecations] = useState<
     KibanaDeprecationDetails[] | undefined
   >(undefined);
+  const [kibanaDeprecationErrors, setKibanaDeprecationErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
   const [flyoutContent, setFlyoutContent] = useState<undefined | KibanaDeprecationDetails>(
@@ -95,14 +105,27 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
     setIsLoading(true);
 
     try {
-      const newKibanaDeprecations = await deprecations.getAllDeprecations();
-      const newKibanaDeprecationsWithIds = newKibanaDeprecations.map((deprecation) => {
-        return {
+      const allDeprecations = await deprecations.getAllDeprecations();
+
+      const filteredDeprecations: KibanaDeprecationDetails[] = [];
+      const deprecationErrors: string[] = [];
+
+      allDeprecations.forEach((deprecation) => {
+        // Keep track of any deprecations that failed to fetch to show warning in UI
+        if (deprecation.level === 'fetch_error') {
+          deprecationErrors.push(deprecation.domainId);
+          return;
+        }
+
+        // Only show deprecations in the table that fetched successfully
+        filteredDeprecations.push({
           ...deprecation,
-          id: uuid.v4(),
-        };
+          id: uuid.v4(), // Associate an unique ID with each deprecation to track resolution state
+        });
       });
-      setKibanaDeprecations(newKibanaDeprecationsWithIds);
+
+      setKibanaDeprecations(filteredDeprecations);
+      setKibanaDeprecationErrors(deprecationErrors);
     } catch (e) {
       setError(e);
     }
@@ -215,6 +238,21 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
         />
 
         <EuiSpacer size="l" />
+
+        {kibanaDeprecationErrors.length > 0 && (
+          <>
+            <EuiCallOut
+              title={i18nTexts.kibanaDeprecationErrorTitle}
+              color="warning"
+              iconType="alert"
+              data-test-subj="kibanaDeprecationErrors"
+            >
+              <p>{i18nTexts.getKibanaDeprecationErrorDescription(kibanaDeprecationErrors)}</p>
+            </EuiCallOut>
+
+            <EuiSpacer />
+          </>
+        )}
 
         <KibanaDeprecationsTable
           deprecations={kibanaDeprecations}
