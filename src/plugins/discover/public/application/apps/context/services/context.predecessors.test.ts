@@ -9,11 +9,11 @@
 import moment from 'moment';
 import { get, last } from 'lodash';
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
-import { EsHitRecordList, fetchContextProvider, SurrDocType } from './context';
+import { fetchContextProvider, SurrDocType } from './context';
 import { setServices, SortDirection } from '../../../../kibana_services';
-import { EsHitRecord } from './context';
 import { Query } from '../../../../../../data/public';
 import { DiscoverServices } from '../../../../build_services';
+import { EsHitRecord, EsHitRecordList } from '../../../types';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();

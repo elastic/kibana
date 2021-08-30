@@ -12,9 +12,9 @@ import { get, last } from 'lodash';
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
 import { setServices, SortDirection } from '../../../../kibana_services';
 import { Query } from '../../../../../../data/public';
-import { EsHitRecordList, fetchContextProvider, SurrDocType } from './context';
-import { EsHitRecord } from './context';
+import { fetchContextProvider, SurrDocType } from './context';
 import { DiscoverServices } from '../../../../build_services';
+import { EsHitRecord, EsHitRecordList } from '../../../types';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();

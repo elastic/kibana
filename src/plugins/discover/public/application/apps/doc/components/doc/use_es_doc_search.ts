@@ -8,10 +8,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
-import { getServices, IndexPattern } from '../../../kibana_services';
+import { getServices, IndexPattern } from '../../../../../kibana_services';
 import { DocProps } from './doc';
-import { ElasticSearchHit } from '../../doc_views/doc_views_types';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
 import { ElasticRequestState } from './elastic_request_state';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;

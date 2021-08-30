@@ -11,7 +11,7 @@ import { fromPairs } from 'lodash';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../../common';
 import { DiscoverServices } from '../../../../build_services';
 import { fetchAnchorProvider } from '../services/anchor';
-import { EsHitRecord, fetchContextProvider, SurrDocType } from '../services/context';
+import { fetchContextProvider, SurrDocType } from '../services/context';
 import { MarkdownSimple, toMountPoint } from '../../../../../../kibana_react/public';
 import { IndexPattern, SortDirection } from '../../../../../../data/public';
 import {
@@ -22,6 +22,7 @@ import {
 } from '../services/context_query_state';
 import { AppState } from '../services/context_state';
 import { getFirstSortableField } from '../services/utils/sorting';
+import { EsHitRecord } from '../../../types';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },

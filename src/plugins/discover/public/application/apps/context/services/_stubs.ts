@@ -10,7 +10,7 @@ import sinon from 'sinon';
 import moment from 'moment';
 
 import { IndexPatternsContract } from '../../../../../../data/public';
-import { EsHitRecordList } from './context';
+import { EsHitRecordList } from '../../../types';
 
 type SortHit = {
   [key in string]: number; // timeField name

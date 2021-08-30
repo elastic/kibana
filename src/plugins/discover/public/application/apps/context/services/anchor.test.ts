@@ -9,9 +9,9 @@
 import { EsQuerySortValue, SortDirection } from '../../../../../../data/public';
 import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
 import { fetchAnchorProvider, updateSearchSource } from './anchor';
-import { EsHitRecord, EsHitRecordList } from './context';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
+import { EsHitRecord, EsHitRecordList } from '../../../types';
 
 describe('context app', function () {
   let fetchAnchor: (

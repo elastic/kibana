@@ -14,7 +14,7 @@ import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { esFilters, SortDirection } from '../../../../../data/public';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
-import { ContextErrorMessage } from '../../components/context_error_message';
+import { ContextErrorMessage } from './components/context_error_message';
 import { IndexPattern, IndexPatternField } from '../../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
 import { getServices } from '../../../kibana_services';

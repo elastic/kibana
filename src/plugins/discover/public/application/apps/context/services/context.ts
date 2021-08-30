@@ -5,31 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
-import { Filter, IndexPatternsContract, IndexPattern, SearchSource } from 'src/plugins/data/public';
+import { Filter, IndexPattern, IndexPatternsContract, SearchSource } from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from './utils/sorting';
-import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
+import { convertIsoToMillis, extractNanos } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
 import { generateIntervals } from './utils/generate_intervals';
 import { getEsQuerySearchAfter } from './utils/get_es_query_search_after';
 import { getEsQuerySort } from './utils/get_es_query_sort';
 import { getServices } from '../../../../kibana_services';
+import { EsHitRecord, EsHitRecordList } from '../../../types';
 
 export enum SurrDocType {
   SUCCESSORS = 'successors',
   PREDECESSORS = 'predecessors',
 }
-
-export type EsHitRecord = Required<
-  Pick<estypes.SearchHit, '_id' | 'fields' | 'sort' | '_index' | '_version'>
-> & {
-  _source?: Record<string, unknown>;
-  _score?: number;
-  isAnchor?: boolean;
-};
-
-export type EsHitRecordList = EsHitRecord[];
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 

@@ -15,7 +15,7 @@ import {
   EsQuerySortValue,
   IndexPattern,
 } from '../../../../../../data/public';
-import { EsHitRecord } from './context';
+import { EsHitRecord } from '../../../types';
 
 export function fetchAnchorProvider(
   indexPatterns: IndexPatternsContract,

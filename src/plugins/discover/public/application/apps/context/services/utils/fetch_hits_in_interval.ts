@@ -8,9 +8,9 @@
 
 import { ISearchSource, EsQuerySortValue, SortDirection } from '../../../../../../../data/public';
 import { convertTimeValueToIso } from './date_conversion';
-import { EsHitRecordList, EsHitRecord } from '../context';
 import { IntervalValue } from './generate_intervals';
 import { EsQuerySearchAfter } from './get_es_query_search_after';
+import { EsHitRecord, EsHitRecordList } from '../../../../types';
 
 interface RangeQuery {
   format: string;

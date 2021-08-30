@@ -13,7 +13,7 @@ import {
   FailureReason,
   LoadingStatus,
   LoadingStatusEntry,
-} from '../../apps/context/services/context_query_state';
+} from '../../services/context_query_state';
 
 export interface ContextErrorMessageProps {
   /**

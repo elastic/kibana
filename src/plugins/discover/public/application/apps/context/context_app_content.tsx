@@ -17,10 +17,11 @@ import { ActionBar } from './components/action_bar/action_bar';
 import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { AppState } from './services/context_state';
-import { EsHitRecordList, SurrDocType } from './services/context';
+import { SurrDocType } from './services/context';
 import { DiscoverServices } from '../../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
 import { DocTableContext } from '../main/components/doc_table/doc_table_context';
+import { EsHitRecordList } from '../../types';
 
 export interface ContextAppContentProps {
   columns: string[];

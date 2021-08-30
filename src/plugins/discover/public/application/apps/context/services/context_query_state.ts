@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EsHitRecord } from './context';
-import { EsHitRecordList } from './context';
+import { EsHitRecord, EsHitRecordList } from '../../../types';
 
 export interface ContextFetchState {
   /**
