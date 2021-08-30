@@ -9,7 +9,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut } from '@elastic/eui';
-import { SurrDocType } from '../../api/context';
+import { SurrDocType } from '../../services/context';
 
 export function ActionBarWarning({ docCount, type }: { docCount: number; type: SurrDocType }) {
   if (type === SurrDocType.PREDECESSORS) {

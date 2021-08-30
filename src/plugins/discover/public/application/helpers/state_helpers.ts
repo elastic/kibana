@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient } from 'kibana/public';
 import { isEqual } from 'lodash';
-import { SEARCH_FIELDS_FROM_SOURCE, DEFAULT_COLUMNS_SETTING } from '../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE, DEFAULT_COLUMNS_SETTING } from '../../../common';
 
 /**
  * Makes sure the current state is not referencing the source column when using the fields api

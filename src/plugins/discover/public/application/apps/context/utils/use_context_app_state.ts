@@ -8,10 +8,10 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { cloneDeep } from 'lodash';
-import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../common';
-import { IndexPattern } from '../../../../../data/public';
-import { DiscoverServices } from '../../../build_services';
-import { AppState, getState } from '../../angular/context_state';
+import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../../common';
+import { IndexPattern } from '../../../../../../data/public';
+import { DiscoverServices } from '../../../../build_services';
+import { AppState, getState } from '../services/context_state';
 
 export function useContextAppState({
   indexPattern,

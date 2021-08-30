@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import './_action_bar.scss';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
@@ -18,11 +19,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { ActionBarWarning } from './action_bar_warning';
-import { SurrDocType } from '../../api/context';
-import {
-  MAX_CONTEXT_SIZE,
-  MIN_CONTEXT_SIZE,
-} from '../../../../components/context_app/utils/constants';
+import { SurrDocType } from '../../services/context';
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../utils/constants';
 
 export interface ActionBarProps {
   /**

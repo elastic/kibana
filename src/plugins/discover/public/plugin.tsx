@@ -74,7 +74,6 @@ export interface DiscoverSetup {
   docViews: {
     /**
      * Add new doc view shown along with table view and json view in the details of each document in Discover.
-     * Both react and angular doc views are supported.
      * @param docViewRaw
      */
     addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
@@ -187,8 +186,7 @@ export interface DiscoverStartPlugins {
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
- * There are 2 kinds of Angular bootstrapped for rendering, additionally to the main Angular
- * Discover provides embeddables, those contain a slimmer Angular
+ * Discover provides embeddables for Dashboards
  */
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
@@ -319,7 +317,6 @@ export class DiscoverPlugin
         const unlistenParentHistory = params.history.listen(() => {
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
-
         // make sure the index pattern list is up to date
         await depsStart.data.indexPatterns.clearCache();
 
@@ -373,7 +370,7 @@ export class DiscoverPlugin
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
     // we need to register the application service at setup, but to render it
     // there are some start dependencies necessary, for this reason
-    // initializeInnerAngular + initializeServices are assigned at start and used
+    // initializeServices are assigned at start and used
     // when the application/embeddable is mounted
 
     setUiActions(plugins.uiActions);
@@ -397,9 +394,6 @@ export class DiscoverPlugin
     }
   }
 
-  /**
-   * register embeddable with a slimmer embeddable version of inner angular
-   */
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();

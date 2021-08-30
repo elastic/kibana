@@ -13,7 +13,7 @@ import {
   FailureReason,
   LoadingStatus,
   LoadingStatusEntry,
-} from '../../angular/context_query_state';
+} from '../../apps/context/services/context_query_state';
 
 export interface ContextErrorMessageProps {
   /**

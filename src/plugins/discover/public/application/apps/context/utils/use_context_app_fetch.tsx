@@ -8,20 +8,20 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { fromPairs } from 'lodash';
-import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
-import { DiscoverServices } from '../../../build_services';
-import { fetchAnchorProvider } from '../../angular/context/api/anchor';
-import { EsHitRecord, fetchContextProvider, SurrDocType } from '../../angular/context/api/context';
-import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
-import { IndexPattern, SortDirection } from '../../../../../data/public';
+import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../../common';
+import { DiscoverServices } from '../../../../build_services';
+import { fetchAnchorProvider } from '../services/anchor';
+import { EsHitRecord, fetchContextProvider, SurrDocType } from '../services/context';
+import { MarkdownSimple, toMountPoint } from '../../../../../../kibana_react/public';
+import { IndexPattern, SortDirection } from '../../../../../../data/public';
 import {
   ContextFetchState,
   FailureReason,
   getInitialContextQueryState,
   LoadingStatus,
-} from '../../angular/context_query_state';
-import { AppState } from '../../angular/context_state';
-import { getFirstSortableField } from '../../angular/context/api/utils/sorting';
+} from '../services/context_query_state';
+import { AppState } from '../services/context_state';
+import { getFirstSortableField } from '../services/utils/sorting';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },

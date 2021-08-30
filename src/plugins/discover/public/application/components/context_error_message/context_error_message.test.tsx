@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { ContextErrorMessage } from './context_error_message';
-import { FailureReason, LoadingStatus } from '../../angular/context_query_state';
+import { FailureReason, LoadingStatus } from '../../apps/context/services/context_query_state';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('loading spinner', function () {

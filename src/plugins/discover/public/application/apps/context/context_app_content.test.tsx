@@ -9,17 +9,17 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
-import { AppState, GetStateReturn } from '../../angular/context_state';
+import { ActionBar } from './components/action_bar/action_bar';
+import { AppState, GetStateReturn } from './services/context_state';
 import { SortDirection } from 'src/plugins/data/common';
-import { EsHitRecordList } from '../../angular/context/api/context';
+import { EsHitRecordList } from './services/context';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { getServices, setServices } from '../../../kibana_services';
-import { LoadingStatus } from '../../angular/context_query_state';
+import { LoadingStatus } from './services/context_query_state';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
-import { DiscoverGrid } from '../discover_grid/discover_grid';
+import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { DocTableWrapper } from '../../apps/main/components/doc_table/doc_table_wrapper';
+import { DocTableWrapper } from '../main/components/doc_table/doc_table_wrapper';
 
 describe('ContextAppContent test', () => {
   let hit;

@@ -10,11 +10,8 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ActionBar, ActionBarProps } from './action_bar';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import {
-  MAX_CONTEXT_SIZE,
-  MIN_CONTEXT_SIZE,
-} from '../../../../components/context_app/utils/constants';
-import { SurrDocType } from '../../api/context';
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../utils/constants';
+import { SurrDocType } from '../../services/context';
 
 describe('Test Discover Context ActionBar for successor | predecessor records', () => {
   [SurrDocType.SUCCESSORS, SurrDocType.PREDECESSORS].forEach((type) => {

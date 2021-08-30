@@ -7,25 +7,25 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { setServices, getServices } from '../../../kibana_services';
-import { SortDirection } from '../../../../../data/public';
-import { createFilterManagerMock } from '../../../../../data/public/query/filter_manager/filter_manager.mock';
-import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
-import { DiscoverServices } from '../../../build_services';
-import { indexPatternMock } from '../../../__mocks__/index_pattern';
-import { indexPatternsMock } from '../../../__mocks__/index_patterns';
-import { FailureReason, LoadingStatus } from '../../angular/context_query_state';
+import { setServices, getServices } from '../../../../kibana_services';
+import { SortDirection } from '../../../../../../data/public';
+import { createFilterManagerMock } from '../../../../../../data/public/query/filter_manager/filter_manager.mock';
+import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../../common';
+import { DiscoverServices } from '../../../../build_services';
+import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { indexPatternsMock } from '../../../../__mocks__/index_patterns';
+import { FailureReason, LoadingStatus } from '../services/context_query_state';
 import { ContextAppFetchProps, useContextAppFetch } from './use_context_app_fetch';
 import {
   mockAnchorHit,
   mockPredecessorHits,
   mockSuccessorHits,
-} from './__mocks__/use_context_app_fetch';
+} from '../__mocks__/use_context_app_fetch';
 
 const mockFilterManager = createFilterManagerMock();
 
-jest.mock('../../angular/context/api/context', () => {
-  const originalModule = jest.requireActual('../../angular/context/api/context');
+jest.mock('../services/context', () => {
+  const originalModule = jest.requireActual('../services/context');
   return {
     ...originalModule,
     fetchContextProvider: () => ({
@@ -39,7 +39,7 @@ jest.mock('../../angular/context/api/context', () => {
   };
 });
 
-jest.mock('../../angular/context/api/anchor', () => ({
+jest.mock('../services/anchor', () => ({
   fetchAnchorProvider: () => (indexPatternId: string) => {
     if (!indexPatternId) {
       throw new Error();

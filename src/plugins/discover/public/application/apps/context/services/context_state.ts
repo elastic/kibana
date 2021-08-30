@@ -15,9 +15,9 @@ import {
   syncStates,
   withNotifyOnErrors,
   ReduxLikeStateContainer,
-} from '../../../../kibana_utils/public';
-import { esFilters, FilterManager, Filter, SortDirection } from '../../../../data/public';
-import { handleSourceColumnState } from './helpers';
+} from '../../../../../../kibana_utils/public';
+import { esFilters, FilterManager, Filter, SortDirection } from '../../../../../../data/public';
+import { handleSourceColumnState } from '../../../helpers';
 
 export interface AppState {
   /**

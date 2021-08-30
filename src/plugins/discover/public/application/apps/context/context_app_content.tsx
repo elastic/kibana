@@ -12,15 +12,15 @@ import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
 import { IndexPattern } from '../../../../../data/common';
 import { SortDirection } from '../../../../../data/public';
-import { LoadingStatus } from '../../angular/context_query_state';
-import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
-import { DiscoverGrid } from '../discover_grid/discover_grid';
+import { LoadingStatus } from './services/context_query_state';
+import { ActionBar } from './components/action_bar/action_bar';
+import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
-import { AppState } from '../../angular/context_state';
-import { EsHitRecordList, SurrDocType } from '../../angular/context/api/context';
+import { AppState } from './services/context_state';
+import { EsHitRecordList, SurrDocType } from './services/context';
 import { DiscoverServices } from '../../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
-import { DocTableContext } from '../../apps/main/components/doc_table/doc_table_context';
+import { DocTableContext } from '../main/components/doc_table/doc_table_context';
 
 export interface ContextAppContentProps {
   columns: string[];
