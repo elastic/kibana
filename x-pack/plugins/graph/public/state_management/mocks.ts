@@ -61,15 +61,11 @@ export function createMockGraphStore({
     } as unknown) as ChromeStart,
     createWorkspace: jest.fn(),
     getWorkspace: jest.fn(() => workspaceMock),
-    getSavedWorkspace: jest.fn(() => savedWorkspace),
     indexPatternProvider: {
       get: jest.fn(() =>
         Promise.resolve(({ id: '123', title: 'test-pattern' } as unknown) as IndexPattern)
       ),
     },
-    indexPatterns: [
-      ({ id: '123', attributes: { title: 'test-pattern' } } as unknown) as IndexPatternSavedObject,
-    ],
     I18nContext: jest
       .fn()
       .mockImplementation(({ children }: { children: React.ReactNode }) => children),
