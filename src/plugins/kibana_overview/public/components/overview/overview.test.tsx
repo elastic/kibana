@@ -18,11 +18,18 @@ jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
       http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
       data: { indexPatterns: {} },
       uiSettings: { get: jest.fn() },
+      docLinks: {
+        links: {
+          kibana: 'kibana_docs_url',
+        },
+      },
     },
   }),
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
   overviewPageActions: jest.fn().mockReturnValue([]),
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
+  KibanaPageTemplate: jest.fn().mockReturnValue(<></>),
+  KibanaPageTemplateSolutionNavAvatar: jest.fn().mockReturnValue(<></>),
 }));
 
 jest.mock('../../lib/ui_metric', () => ({
@@ -78,9 +85,8 @@ const mockNewsFetchResult = {
 const mockSolutions = [
   {
     id: 'kibana',
-    title: 'Kibana',
-    subtitle: 'Visualize & analyze',
-    appDescriptions: ['Analyze data in dashboards'],
+    title: 'Analytics',
+    description: 'Description of Kibana',
     icon: 'logoKibana',
     path: 'kibana_landing_page',
     order: 1,
@@ -88,9 +94,7 @@ const mockSolutions = [
   {
     id: 'solution-2',
     title: 'Solution two',
-    subtitle: 'Subtitle for solution two',
     description: 'Description of solution two',
-    appDescriptions: ['Example use case'],
     icon: 'empty',
     path: 'path-to-solution-two',
     order: 2,
@@ -98,9 +102,7 @@ const mockSolutions = [
   {
     id: 'solution-3',
     title: 'Solution three',
-    subtitle: 'Subtitle for solution three',
     description: 'Description of solution three',
-    appDescriptions: ['Example use case'],
     icon: 'empty',
     path: 'path-to-solution-three',
     order: 3,
@@ -108,9 +110,7 @@ const mockSolutions = [
   {
     id: 'solution-4',
     title: 'Solution four',
-    subtitle: 'Subtitle for solution four',
     description: 'Description of solution four',
-    appDescriptions: ['Example use case'],
     icon: 'empty',
     path: 'path-to-solution-four',
     order: 4,

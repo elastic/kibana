@@ -12,6 +12,7 @@ export interface UsageStats {
    */
   'timelion:quandl.key': string;
   'securitySolution:defaultIndex': string;
+  'securitySolution:defaultThreatIndex': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;
@@ -59,7 +60,6 @@ export interface UsageStats {
   'securitySolution:enableNewsFeed': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
-  'courier:batchSearches': boolean;
   'courier:setRequestPreference': string;
   'courier:customRequestPreference': string;
   'courier:ignoreFilterIfFieldNotInIndex': boolean;

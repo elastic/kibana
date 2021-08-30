@@ -18,6 +18,7 @@ import {
   TimelineId,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
+import type { SetEventsDeleted, SetEventsLoading } from '../../../../../../../timelines/common';
 import { BrowserFields } from '../../../../../common/containers/source';
 import {
   TimelineItem,
@@ -39,7 +40,7 @@ import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { getMappedNonEcsValue } from '../data_driven_columns';
-import { StatefulEventContext } from './stateful_event_context';
+import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   actionsColumnWidth: number;
@@ -102,7 +103,13 @@ const StatefulEventComponent: React.FC<Props> = ({
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
-  const [activeStatefulEventContext] = useState({ timelineID: timelineId, tabType });
+  const [activeStatefulEventContext] = useState({
+    timelineID: timelineId,
+    enableHostDetailsFlyout: true,
+    enableIpDetailsFlyout: true,
+    tabType,
+  });
+
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedDetail = useDeepEqualSelector(
@@ -212,6 +219,20 @@ const StatefulEventComponent: React.FC<Props> = ({
     [dispatch, event, isEventPinned, timelineId]
   );
 
+  const setEventsLoading = useCallback<SetEventsLoading>(
+    ({ eventIds, isLoading }) => {
+      dispatch(timelineActions.setEventsLoading({ id: timelineId, eventIds, isLoading }));
+    },
+    [dispatch, timelineId]
+  );
+
+  const setEventsDeleted = useCallback<SetEventsDeleted>(
+    ({ eventIds, isDeleted }) => {
+      dispatch(timelineActions.setEventsDeleted({ id: timelineId, eventIds, isDeleted }));
+    },
+    [dispatch, timelineId]
+  );
+
   const RowRendererContent = useMemo(
     () => (
       <EventsTrSupplement>
@@ -276,6 +297,8 @@ const StatefulEventComponent: React.FC<Props> = ({
           toggleShowNotes={onToggleShowNotes}
           leadingControlColumns={leadingControlColumns}
           trailingControlColumns={trailingControlColumns}
+          setEventsLoading={setEventsLoading}
+          setEventsDeleted={setEventsDeleted}
         />
 
         <EventsTrSupplementContainerWrapper>

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { EuiContextMenuItem } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '../../../../common';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
@@ -46,17 +47,19 @@ export const useHostIsolationAction = ({
     [detailsData]
   );
 
-  const isolationSupported = isIsolationSupported({
-    osName: hostOsFamily,
-    version: agentVersion,
-  });
-
   const {
     loading: loadingHostIsolationStatus,
     isIsolated: isolationStatus,
     agentStatus,
+    capabilities,
   } = useHostIsolationStatus({
     agentId,
+  });
+
+  const isolationSupported = isIsolationSupported({
+    osName: hostOsFamily,
+    version: agentVersion,
+    capabilities,
   });
 
   const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
@@ -79,11 +82,14 @@ export const useHostIsolationAction = ({
       isolationSupported &&
       isHostIsolationPanelOpen === false
         ? [
-            {
-              name: isolateHostTitle,
-              onClick: isolateHostHandler,
-              disabled: loadingHostIsolationStatus || agentStatus === HostStatus.UNENROLLED,
-            },
+            <EuiContextMenuItem
+              key="isolate-host-action-item"
+              data-test-subj="isolate-host-action-item"
+              disabled={loadingHostIsolationStatus || agentStatus === HostStatus.UNENROLLED}
+              onClick={isolateHostHandler}
+            >
+              {isolateHostTitle}
+            </EuiContextMenuItem>,
           ]
         : [],
     [

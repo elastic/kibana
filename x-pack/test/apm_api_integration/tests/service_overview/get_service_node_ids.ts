@@ -30,6 +30,8 @@ export async function getServiceNodeIds({
         start,
         end,
         transactionType: 'request',
+        environment: 'ENVIRONMENT_ALL',
+        kuery: '',
       },
     },
   });

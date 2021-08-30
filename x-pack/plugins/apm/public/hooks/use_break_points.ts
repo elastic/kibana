@@ -10,6 +10,8 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 import useDebounce from 'react-use/lib/useDebounce';
 import { isWithinMaxBreakpoint, isWithinMinBreakpoint } from '@elastic/eui';
 
+export type BreakPoints = ReturnType<typeof getScreenSizes>;
+
 export function getScreenSizes(windowWidth: number) {
   return {
     isXSmall: isWithinMaxBreakpoint(windowWidth, 'xs'),

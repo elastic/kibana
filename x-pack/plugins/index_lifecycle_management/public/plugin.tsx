@@ -97,7 +97,7 @@ export class IndexLifecycleManagementPlugin
             defaultMessage:
               'Define lifecycle policies to automatically perform operations as an index ages.',
           }),
-          icon: 'indexSettings',
+          icon: 'indexRollupApp',
           path: '/app/management/data/index_lifecycle_management',
           showOnHomePage: true,
           category: FeatureCatalogueCategory.ADMIN,

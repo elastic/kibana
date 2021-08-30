@@ -23,7 +23,7 @@ export const wrapHitsFactory = ({
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   mergeStrategy: ConfigType['alertMergeStrategy'];
   spaceId: string | null | undefined;
-}): WrapHits => (events) => {
+}): WrapHits => (events, buildReasonMessage) => {
   try {
     const wrappedDocs = events.map((event) => {
       return {
@@ -34,7 +34,14 @@ export const wrapHitsFactory = ({
           String(event._version),
           ruleSO.attributes.params.ruleId ?? ''
         ),
-        _source: buildBulkBody(spaceId, ruleSO, event as SimpleHit, mergeStrategy, true),
+        _source: buildBulkBody(
+          spaceId,
+          ruleSO,
+          event as SimpleHit,
+          mergeStrategy,
+          true,
+          buildReasonMessage
+        ),
       };
     });
 

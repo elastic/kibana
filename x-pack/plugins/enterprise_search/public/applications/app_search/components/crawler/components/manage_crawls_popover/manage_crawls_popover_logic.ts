@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { EngineLogic } from '../../../engine';
@@ -55,7 +57,14 @@ export const ManageCrawlsPopoverLogic = kea<
           body: JSON.stringify(requestBody),
         });
 
-        flashSuccessToast('Crawl Rules are being re-applied in the background');
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.enterpriseSearch.appSearch.crawler.manageCrawlsPopover.reApplyCrawlRules.successMessage',
+            {
+              defaultMessage: 'Crawl rules are being re-applied in the background',
+            }
+          )
+        );
       } catch (e) {
         flashAPIErrors(e);
       } finally {

@@ -8,6 +8,7 @@
     "data",
     "charts",
     "expressions",
+    "fieldFormats",
     "inspector",
     "navigation",
     "urlForwarding",

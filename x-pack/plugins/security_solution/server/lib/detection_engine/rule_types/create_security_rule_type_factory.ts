@@ -15,7 +15,6 @@ import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { toError } from '@kbn/securitysolution-list-api';
 
 import { createPersistenceRuleTypeFactory } from '../../../../../rule_registry/server';
-import { ruleStatusServiceFactory } from '../signals/rule_status_service';
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
 import {
   checkPrivilegesFromEsClient,
@@ -36,10 +35,11 @@ import { getNotificationResultsLink } from '../notifications/utils';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory } from './factories';
 import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
-  indexAlias,
   lists,
   logger,
   mergeStrategy,
@@ -54,6 +54,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         alertId,
         params,
         previousStartedAt,
+        startedAt,
         services,
         spaceId,
         state,
@@ -67,12 +68,6 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
       const esClient = scopedClusterClient.asCurrentUser;
 
       const ruleStatusClient = new RuleExecutionLogClient({ savedObjectsClient, ruleDataService });
-      const ruleStatusService = await ruleStatusServiceFactory({
-        spaceId,
-        alertId,
-        ruleStatusClient,
-      });
-
       const ruleSO = await savedObjectsClient.get('alert', alertId);
 
       const {
@@ -86,14 +81,18 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         id: alertId,
         ruleId,
         name,
-        index: indexAlias,
+        index: ruleDataClient.indexName,
       });
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
 
       let wroteWarningStatus = false;
-      await ruleStatusService.goingToRun();
+      await ruleStatusClient.logStatusChange({
+        spaceId,
+        ruleId: alertId,
+        newStatus: RuleExecutionStatus['going to run'],
+      });
 
       let result = createResultObject(state);
 
@@ -124,22 +123,33 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
               () =>
                 tryCatch(
                   () =>
-                    hasReadIndexPrivileges(privileges, logger, buildRuleMessage, ruleStatusService),
+                    hasReadIndexPrivileges({
+                      spaceId,
+                      ruleId: alertId,
+                      privileges,
+                      logger,
+                      buildRuleMessage,
+                      ruleStatusClient,
+                    }),
                   toError
                 ),
               chain((wroteStatus: unknown) =>
                 tryCatch(
                   () =>
-                    hasTimestampFields(
-                      wroteStatus as boolean,
-                      hasTimestampOverride ? (timestampOverride as string) : TIMESTAMP,
-                      name,
-                      timestampFieldCaps,
+                    hasTimestampFields({
+                      spaceId,
+                      ruleId: alertId,
+                      wroteStatus: wroteStatus as boolean,
+                      timestampField: hasTimestampOverride
+                        ? (timestampOverride as string)
+                        : '@timestamp',
+                      ruleName: name,
+                      timestampFieldCapsResponse: timestampFieldCaps,
                       inputIndices,
-                      ruleStatusService,
+                      ruleStatusClient,
                       logger,
-                      buildRuleMessage
-                    ),
+                      buildRuleMessage,
+                    }),
                   toError
                 )
               )
@@ -167,7 +177,13 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         );
         logger.warn(gapMessage);
         hasError = true;
-        await ruleStatusService.error(gapMessage, { gap: gapString });
+        await ruleStatusClient.logStatusChange({
+          spaceId,
+          ruleId: alertId,
+          newStatus: RuleExecutionStatus.failed,
+          message: gapMessage,
+          metrics: { gap: gapString },
+        });
       }
 
       try {
@@ -234,7 +250,12 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
 
         if (result.warningMessages.length) {
           const warningMessage = buildRuleMessage(result.warningMessages.join());
-          await ruleStatusService.partialFailure(warningMessage);
+          await ruleStatusClient.logStatusChange({
+            spaceId,
+            ruleId: alertId,
+            newStatus: RuleExecutionStatus['partial failure'],
+            message: warningMessage,
+          });
         }
 
         if (result.success) {
@@ -259,7 +280,20 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
 
             logger.info(buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`));
 
-            if (createdSignalsCount) {
+            if (ruleSO.attributes.throttle != null) {
+              await scheduleThrottledNotificationActions({
+                alertInstance: services.alertInstanceFactory(alertId),
+                throttle: ruleSO.attributes.throttle,
+                startedAt,
+                id: ruleSO.id,
+                kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                  ?.kibana_siem_app_url,
+                outputIndex: ruleDataClient.indexName,
+                ruleId,
+                esClient: services.scopedClusterClient.asCurrentUser,
+                notificationRuleParams,
+              });
+            } else if (createdSignalsCount) {
               const alertInstance = services.alertInstanceFactory(alertId);
               scheduleNotificationActions({
                 alertInstance,
@@ -274,15 +308,21 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
           logger.debug(
             buildRuleMessage(
-              `[+] Finished indexing ${createdSignalsCount} signals into alias ${indexAlias}`
+              `[+] Finished indexing ${createdSignalsCount} signals into ${ruleDataClient.indexName}`
             )
           );
 
           if (!hasError && !wroteWarningStatus && !result.warning) {
-            await ruleStatusService.success('succeeded', {
-              bulkCreateTimeDurations: result.bulkCreateTimes,
-              searchAfterTimeDurations: result.searchAfterTimes,
-              lastLookBackDate: result.lastLookbackDate?.toISOString(),
+            await ruleStatusClient.logStatusChange({
+              spaceId,
+              ruleId: alertId,
+              newStatus: RuleExecutionStatus.succeeded,
+              message: 'succeeded',
+              metrics: {
+                bulkCreateTimeDurations: result.bulkCreateTimes,
+                searchAfterTimeDurations: result.searchAfterTimes,
+                lastLookBackDate: result.lastLookbackDate?.toISOString(),
+              },
             });
           }
 
@@ -302,10 +342,16 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             result.errors.join()
           );
           logger.error(errorMessage);
-          await ruleStatusService.error(errorMessage, {
-            bulkCreateTimeDurations: result.bulkCreateTimes,
-            searchAfterTimeDurations: result.searchAfterTimes,
-            lastLookBackDate: result.lastLookbackDate?.toISOString(),
+          await ruleStatusClient.logStatusChange({
+            spaceId,
+            ruleId: alertId,
+            newStatus: RuleExecutionStatus.failed,
+            message: errorMessage,
+            metrics: {
+              bulkCreateTimeDurations: result.bulkCreateTimes,
+              searchAfterTimeDurations: result.searchAfterTimes,
+              lastLookBackDate: result.lastLookbackDate?.toISOString(),
+            },
           });
         }
       } catch (error) {
@@ -316,10 +362,16 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         );
 
         logger.error(message);
-        await ruleStatusService.error(message, {
-          bulkCreateTimeDurations: result.bulkCreateTimes,
-          searchAfterTimeDurations: result.searchAfterTimes,
-          lastLookBackDate: result.lastLookbackDate?.toISOString(),
+        await ruleStatusClient.logStatusChange({
+          spaceId,
+          ruleId: alertId,
+          newStatus: RuleExecutionStatus.failed,
+          message,
+          metrics: {
+            bulkCreateTimeDurations: result.bulkCreateTimes,
+            searchAfterTimeDurations: result.searchAfterTimes,
+            lastLookBackDate: result.lastLookbackDate?.toISOString(),
+          },
         });
       }
 

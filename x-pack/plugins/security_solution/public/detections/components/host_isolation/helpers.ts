@@ -8,6 +8,19 @@ import { find } from 'lodash/fp';
 
 import type { TimelineEventsDetailsItem } from '../../../../common';
 
+export const getFieldValues = (
+  {
+    category,
+    field,
+  }: {
+    category: string;
+    field: string;
+  },
+  data: TimelineEventsDetailsItem[] | null
+) => {
+  return find({ category, field }, data)?.values;
+};
+
 export const getFieldValue = (
   {
     category,
@@ -18,6 +31,6 @@ export const getFieldValue = (
   },
   data: TimelineEventsDetailsItem[] | null
 ) => {
-  const currentField = find({ category, field }, data)?.values;
+  const currentField = getFieldValues({ category, field }, data);
   return currentField && currentField.length > 0 ? currentField[0] : '';
 };

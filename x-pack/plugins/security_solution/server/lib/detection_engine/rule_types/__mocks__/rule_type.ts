@@ -11,15 +11,22 @@ import { v4 } from 'uuid';
 import { Logger, SavedObject } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { RuleDataClient } from '../../../../../../rule_registry/server';
+import type { IRuleDataClient } from '../../../../../../rule_registry/server';
+import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
 import { listMock } from '../../../../../../lists/server/mocks';
-import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
+import { RuleParams } from '../../schemas/rule_schemas';
+// this is only used in tests
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createDefaultAlertExecutorOptions } from '../../../../../../rule_registry/server/utils/rule_executor_test_utils';
 
-export const createRuleTypeMocks = () => {
+export const createRuleTypeMocks = (
+  ruleType: string = 'query',
+  ruleParams: Partial<RuleParams> = {}
+) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   let alertExecutor: (...args: any[]) => Promise<any>;
 
@@ -43,7 +50,7 @@ export const createRuleTypeMocks = () => {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   mockSavedObjectsClient.get.mockResolvedValue({
     id: 'de2f6a49-28a3-4794-bad7-0e9482e075f8',
-    type: 'query',
+    type: ruleType,
     references: [],
     attributes: {
       actions: [],
@@ -57,7 +64,7 @@ export const createRuleTypeMocks = () => {
         interval: '30m',
       },
       throttle: '',
-      params: createRuleMock(),
+      params: createRuleMock(ruleParams),
     },
   } as SavedObject<AlertAttributes>);
 
@@ -77,25 +84,21 @@ export const createRuleTypeMocks = () => {
       config$: mockedConfig$,
       lists: listMock.createSetup(),
       logger: loggerMock,
-      ruleDataClient: ({
-        getReader: jest.fn(() => ({
-          search: jest.fn(),
-        })),
-        getWriter: jest.fn(() => ({
-          bulk: jest.fn(),
-        })),
-        isWriteEnabled: jest.fn(() => true),
-      } as unknown) as RuleDataClient,
+      ruleDataClient: ruleRegistryMocks.createRuleDataClient(
+        '.alerts-security.alerts'
+      ) as IRuleDataClient,
       ruleDataService: ruleRegistryMocks.createRuleDataPluginService(),
     },
     services,
     scheduleActions,
     executor: async ({ params }: { params: Record<string, unknown> }) => {
       return alertExecutor({
+        ...createDefaultAlertExecutorOptions({
+          params,
+          alertId: v4(),
+          state: {},
+        }),
         services,
-        params,
-        alertId: v4(),
-        startedAt: new Date(),
       });
     },
   };

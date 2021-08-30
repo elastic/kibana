@@ -10,6 +10,7 @@ import { SavedObject } from 'src/core/types';
 import { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithOverrides, buildRuleWithoutOverrides } from '../../../signals/build_rule';
+import { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
 import { AlertAttributes, SignalSource, SignalSourceHit, SimpleHit } from '../../../signals/types';
 import { RACAlert } from '../../types';
@@ -36,19 +37,23 @@ export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SimpleHit,
   mergeStrategy: ConfigType['alertMergeStrategy'],
-  applyOverrides: boolean
+  applyOverrides: boolean,
+  buildReasonMessage: BuildReasonMessage
 ): RACAlert => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);
   const filteredSource = filterSource(mergedDoc);
+  const timestamp = new Date().toISOString();
+
+  const reason = buildReasonMessage({ mergedDoc, rule });
   if (isSourceDoc(mergedDoc)) {
     return {
       ...filteredSource,
-      ...buildAlert([mergedDoc], rule, spaceId),
+      ...buildAlert([mergedDoc], rule, spaceId, reason),
       ...additionalAlertFields(mergedDoc),
-      [TIMESTAMP]: new Date().toISOString(),
+      [TIMESTAMP]: timestamp,
     };
   }
 

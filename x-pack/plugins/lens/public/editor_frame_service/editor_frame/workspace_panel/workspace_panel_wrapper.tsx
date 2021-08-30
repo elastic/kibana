@@ -14,23 +14,22 @@ import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types'
 import { NativeRenderer } from '../../../native_renderer';
 import { ChartSwitch } from './chart_switch';
 import { WarningsPopover } from './warnings_popover';
-import { useLensDispatch, updateVisualizationState } from '../../../state_management';
+import {
+  useLensDispatch,
+  updateVisualizationState,
+  DatasourceStates,
+  VisualizationState,
+} from '../../../state_management';
 import { WorkspaceTitle } from './title';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
   framePublicAPI: FramePublicAPI;
-  visualizationState: unknown;
+  visualizationState: VisualizationState['state'];
   visualizationMap: VisualizationMap;
   visualizationId: string | null;
   datasourceMap: DatasourceMap;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
+  datasourceStates: DatasourceStates;
   isFullscreen: boolean;
 }
 

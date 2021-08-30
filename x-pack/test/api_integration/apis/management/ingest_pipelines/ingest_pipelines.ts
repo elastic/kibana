@@ -204,7 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({
           statusCode: 404,
           error: 'Not Found',
-          message: 'Response Error',
+          message: '{}',
           attributes: {},
         });
       });
@@ -494,7 +494,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).to.eql({
           error: 'Not Found',
-          message: 'Response Error',
+          message: '{"_index":"test_index","_id":"2","found":false}',
           statusCode: 404,
           attributes: {},
         });

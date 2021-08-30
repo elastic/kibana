@@ -1,10 +1,9 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
-    "incremental": false,
     "isolatedModules": true,
     "outDir": "./target_types",
     "sourceMap": true,

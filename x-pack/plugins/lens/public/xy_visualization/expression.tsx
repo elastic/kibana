@@ -40,7 +40,8 @@ import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
-import { LayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
+import { layerTypes } from '../../common';
+import type { LayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
 import { visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
@@ -123,7 +124,7 @@ export function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
 }
 
 export const getXyChartRenderer = (dependencies: {
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginStart['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
@@ -148,12 +149,12 @@ export const getXyChartRenderer = (dependencies: {
     const onSelectRange = (data: LensBrushEvent['data']) => {
       handlers.event({ name: 'brush', data });
     };
-    const formatFactory = await dependencies.formatFactory;
+
     ReactDOM.render(
       <I18nProvider>
         <XYChartReportable
           {...config}
-          formatFactory={formatFactory}
+          formatFactory={dependencies.formatFactory}
           chartsActiveCursorService={dependencies.chartsActiveCursorService}
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
@@ -316,7 +317,7 @@ export function XYChart({
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
-    layers,
+    filteredLayers,
     data,
     minInterval,
     Boolean(isTimeViz),
@@ -515,6 +516,9 @@ export function XYChart({
           },
           background: {
             color: undefined, // removes background for embeddables
+          },
+          legend: {
+            labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
           },
         }}
         baseTheme={chartBaseTheme}
@@ -842,17 +846,20 @@ export function XYChart({
 }
 
 function getFilteredLayers(layers: LayerArgs[], data: LensMultiTable) {
-  return layers.filter(({ layerId, xAccessor, accessors, splitAccessor }) => {
-    return !(
-      !accessors.length ||
-      !data.tables[layerId] ||
-      data.tables[layerId].rows.length === 0 ||
-      (xAccessor &&
-        data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
-      // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
-      (!xAccessor &&
-        splitAccessor &&
-        data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
+  return layers.filter(({ layerId, xAccessor, accessors, splitAccessor, layerType }) => {
+    return (
+      layerType === layerTypes.DATA &&
+      !(
+        !accessors.length ||
+        !data.tables[layerId] ||
+        data.tables[layerId].rows.length === 0 ||
+        (xAccessor &&
+          data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')) ||
+        // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
+        (!xAccessor &&
+          splitAccessor &&
+          data.tables[layerId].rows.every((row) => typeof row[splitAccessor] === 'undefined'))
+      )
     );
   });
 }

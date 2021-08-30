@@ -13,12 +13,12 @@ import { CsmSharedContextProvider } from './CsmSharedContext';
 import { WebApplicationSelect } from './Panels/WebApplicationSelect';
 import { DatePicker } from '../../shared/DatePicker';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
-  defaultMessage: 'User Experience',
+  defaultMessage: 'Dashboard',
 });
 
 export function RumHome() {
@@ -36,12 +36,12 @@ export function RumHome() {
           isXXL
             ? {
                 pageTitle: i18n.translate('xpack.apm.ux.overview', {
-                  defaultMessage: 'Overview',
+                  defaultMessage: 'Dashboard',
                 }),
                 rightSideItems: [
                   <DatePicker />,
                   <div style={envStyle}>
-                    <EnvironmentFilter />
+                    <UxEnvironmentFilter />
                   </div>,
                   <UserPercentile />,
                   <WebApplicationSelect />,
@@ -82,7 +82,7 @@ function PageHeader() {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div style={envStyle}>
-            <EnvironmentFilter />
+            <UxEnvironmentFilter />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

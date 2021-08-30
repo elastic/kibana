@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   EuiSpacer,
   EuiButtonIcon,
@@ -66,13 +66,11 @@ export function DiscoverLayout({
   stateContainer,
 }: DiscoverLayoutProps) {
   const { trackUiMetric, capabilities, indexPatterns, data, uiSettings, filterManager } = services;
+  const { main$, charts$, totalHits$ } = savedSearchData$;
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
-  const collapseIcon = useRef<HTMLButtonElement>(null);
   const fetchCounter = useRef<number>(0);
-  const { main$, charts$, totalHits$ } = savedSearchData$;
-
   const dataState: DataMainMsg = useDataState(main$);
 
   useEffect(() => {
@@ -81,8 +79,6 @@ export function DiscoverLayout({
     }
   }, [dataState.fetchStatus]);
 
-  // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
-  const isMobile = useCallback(() => collapseIcon && !collapseIcon.current, []);
   const timeField = useMemo(() => {
     return indexPatternsUtils.isDefault(indexPattern) ? indexPattern.timeFieldName : undefined;
   }, [indexPattern]);
@@ -126,7 +122,7 @@ export function DiscoverLayout({
   const onAddFilter = useCallback(
     (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
-      popularizeField(indexPattern, fieldName, indexPatterns);
+      popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       const newFilters = esFilters.generateFilters(
         filterManager,
         field,
@@ -139,7 +135,7 @@ export function DiscoverLayout({
       }
       return filterManager.addFilters(newFilters);
     },
-    [filterManager, indexPattern, indexPatterns, trackUiMetric]
+    [filterManager, indexPattern, indexPatterns, trackUiMetric, capabilities]
   );
 
   const onEditRuntimeField = useCallback(() => {
@@ -208,7 +204,6 @@ export function DiscoverLayout({
                     aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
                       defaultMessage: 'Toggle sidebar',
                     })}
-                    buttonRef={collapseIcon}
                   />
                 </div>
               </EuiFlexItem>
@@ -261,11 +256,11 @@ export function DiscoverLayout({
                       />
                     </EuiFlexItem>
                     <EuiHorizontalRule margin="none" />
+
                     <DiscoverDocuments
                       documents$={savedSearchData$.documents$}
                       expandedDoc={expandedDoc}
                       indexPattern={indexPattern}
-                      isMobile={isMobile}
                       navigateTo={navigateTo}
                       onAddFilter={onAddFilter as DocViewFilterFn}
                       savedSearch={savedSearch}

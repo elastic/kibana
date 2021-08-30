@@ -8,19 +8,25 @@
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
-  ALERT_OWNER,
-  ALERT_SEVERITY_LEVEL,
+  ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_UUID,
   TIMESTAMP,
+  ALERT_RULE_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
 import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   ApmPluginContext,
@@ -116,23 +122,25 @@ export default {
 };
 
 export function Example(_args: Args) {
-  return <LatencyChart height={300} />;
+  return (
+    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
+  );
 }
 Example.args = {
   alertsResponse: {
     alerts: [
       {
-        'rule.id': ['apm.transaction_duration'],
+        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
         [ALERT_EVALUATION_VALUE]: [2001708.19],
         'service.name': ['frontend-rum'],
-        'rule.name': ['Latency threshold | frontend-rum'],
+        [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
         [ALERT_DURATION]: [10000000000],
-        [ALERT_STATUS]: ['open'],
+        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        [ALERT_OWNER]: ['apm'],
+        [ALERT_RULE_PRODUCER]: ['apm'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478180'],
-        'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
+        [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
         [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
         [ALERT_ID]: ['apm.transaction_duration_All'],
@@ -140,21 +148,21 @@ Example.args = {
         [ALERT_EVALUATION_THRESHOLD]: [500000],
         [ALERT_START]: ['2021-06-02T04:00:00.000Z'],
         'event.kind': ['state'],
-        'rule.category': ['Latency threshold'],
+        [ALERT_RULE_CATEGORY]: ['Latency threshold'],
       },
       {
-        'rule.id': ['apm.transaction_duration'],
+        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
         [ALERT_EVALUATION_VALUE]: [2001708.19],
         'service.name': ['frontend-rum'],
-        'rule.name': ['Latency threshold | frontend-rum'],
+        [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
         [ALERT_DURATION]: [10000000000],
-        [ALERT_STATUS]: ['open'],
+        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        [ALERT_OWNER]: ['apm'],
-        [ALERT_SEVERITY_LEVEL]: ['warning'],
+        [ALERT_RULE_PRODUCER]: ['apm'],
+        [ALERT_SEVERITY]: ['warning'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478181'],
-        'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
+        [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
         [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
         [ALERT_ID]: ['apm.transaction_duration_All'],
@@ -162,21 +170,21 @@ Example.args = {
         [ALERT_EVALUATION_THRESHOLD]: [500000],
         [ALERT_START]: ['2021-06-02T10:45:00.000Z'],
         'event.kind': ['state'],
-        'rule.category': ['Latency threshold'],
+        [ALERT_RULE_CATEGORY]: ['Latency threshold'],
       },
       {
-        'rule.id': ['apm.transaction_duration'],
+        [ALERT_RULE_TYPE_ID]: ['apm.transaction_duration'],
         [ALERT_EVALUATION_VALUE]: [2001708.19],
         'service.name': ['frontend-rum'],
-        'rule.name': ['Latency threshold | frontend-rum'],
+        [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
         [ALERT_DURATION]: [1000000000],
-        [ALERT_STATUS]: ['open'],
+        [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
         tags: ['apm', 'service.name:frontend-rum'],
         'transaction.type': ['page-load'],
-        [ALERT_OWNER]: ['apm'],
-        [ALERT_SEVERITY_LEVEL]: ['critical'],
+        [ALERT_RULE_PRODUCER]: ['apm'],
+        [ALERT_SEVERITY]: ['critical'],
         [ALERT_UUID]: ['af2ae371-df79-4fca-b0eb-a2dbd9478182'],
-        'rule.uuid': ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
+        [ALERT_RULE_UUID]: ['82e0ee40-c2f4-11eb-9a42-a9da66a1722f'],
         'event.action': ['active'],
         [TIMESTAMP]: ['2021-06-01T20:27:48.833Z'],
         [ALERT_ID]: ['apm.transaction_duration_All'],
@@ -184,7 +192,7 @@ Example.args = {
         [ALERT_EVALUATION_THRESHOLD]: [500000],
         [ALERT_START]: ['2021-06-02T16:50:00.000Z'],
         'event.kind': ['state'],
-        'rule.category': ['Latency threshold'],
+        [ALERT_RULE_CATEGORY]: ['Latency threshold'],
       },
     ],
   },
@@ -798,7 +806,9 @@ Example.args = {
 };
 
 export function NoData(_args: Args) {
-  return <LatencyChart height={300} />;
+  return (
+    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
+  );
 }
 NoData.args = {
   alertsResponse: { alerts: [] },

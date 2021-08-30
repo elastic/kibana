@@ -61,7 +61,7 @@ Array [
               className="euiTitle euiTitle--medium"
               id="flyoutTitle"
             >
-              Unable to fetch report info
+              Unable to fetch report info.
             </h2>
           </EuiTitle>
         </div>
@@ -113,7 +113,7 @@ Array [
             className="euiTitle euiTitle--medium"
             id="flyoutTitle"
           >
-            Unable to fetch report info
+            Unable to fetch report info.
           </h2>
         </EuiTitle>
       </div>

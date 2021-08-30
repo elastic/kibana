@@ -10,9 +10,10 @@ import { kibanaResponseFactory } from 'src/core/server';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
-import { enqueueJobFactory } from '../lib/enqueue_job';
-import { registerGenerateFromJobParams } from './generate_from_jobparams';
+import { enqueueJob } from '../lib/enqueue_job';
 import { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate';
+import { registerGenerateFromJobParams } from './generate_from_jobparams';
+import { registerLegacy } from './legacy';
 import { HandlerFunction } from './types';
 
 const getDownloadBaseUrl = (reporting: ReportingCore) => {
@@ -42,8 +43,15 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
     }
 
     try {
-      const enqueueJob = enqueueJobFactory(reporting, logger);
-      const report = await enqueueJob(exportTypeId, jobParams, user, context, req);
+      const report = await enqueueJob(
+        reporting,
+        req,
+        context,
+        user,
+        exportTypeId,
+        jobParams,
+        logger
+      );
 
       // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(reporting);
@@ -80,4 +88,5 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
 
   registerGenerateFromJobParams(reporting, handler, handleError);
   registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
+  registerLegacy(reporting, handler, handleError, logger);
 }

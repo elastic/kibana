@@ -1,0 +1,6 @@
+{
+  "extends": "../../shared/cypress/tsconfig.json",
+  "references": [{ "path": "../../shared/cypress/tsconfig.json" }],
+  "compilerOptions": { "outDir": "../../../../target/cypress/types/enterprise_search" },
+  "include": ["./**/*"]
+}

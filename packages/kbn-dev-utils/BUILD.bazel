@@ -56,7 +56,6 @@ RUNTIME_DEPS = [
   "@npm//globby",
   "@npm//load-json-file",
   "@npm//markdown-it",
-  "@npm//moment",
   "@npm//normalize-path",
   "@npm//rxjs",
   "@npm//tar",
@@ -100,6 +99,7 @@ ts_config(
   src = "tsconfig.json",
   deps = [
     "//:tsconfig.base.json",
+    "//:tsconfig.bazel.json",
   ],
 )
 
@@ -111,7 +111,6 @@ ts_project(
   declaration = True,
   declaration_map = True,
   emit_declaration_only = True,
-  incremental = False,
   out_dir = "target_types",
   source_map = True,
   root_dir = "src",

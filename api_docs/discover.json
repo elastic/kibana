@@ -77,13 +77,7 @@
             "text": "DiscoverAppLocatorParams"
           },
           " extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          }
+          "SerializableRecord"
         ],
         "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
@@ -159,13 +153,7 @@
                 "text": "RefreshInterval"
               },
               " & ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -274,13 +262,7 @@
             ],
             "signature": [
               "(string[][] & ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -1053,7 +1035,7 @@
           "signature": [
             "{ addDocView(docViewRaw: ComponentDocViewInput | ",
             "RenderDocViewInput",
-            " | DirectiveDocViewInput | ",
+            " | ",
             "DocViewInputFn",
             "): void; }"
           ],
@@ -1137,10 +1119,6 @@
           "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": true,
           "references": [
-            {
-              "plugin": "observability",
-              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
-            },
             {
               "plugin": "osquery",
               "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_table.tsx"

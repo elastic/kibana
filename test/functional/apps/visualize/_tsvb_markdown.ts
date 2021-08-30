@@ -11,10 +11,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualBuilder, timePicker, visualize } = getPageObjects([
+  const { visualBuilder, timePicker, visualize, visChart } = getPageObjects([
     'visualBuilder',
     'timePicker',
     'visualize',
+    'visChart',
   ]);
   const retry = getService('retry');
 
@@ -74,6 +75,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.enterMarkdown(html);
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(html);
+      });
+
+      it('markdown variables should be clickable', async () => {
+        await visualBuilder.clearMarkdown();
+        const [firstVariable] = await visualBuilder.getMarkdownTableVariables();
+        await firstVariable.selector.click();
+        await visChart.waitForVisualizationRenderingStabilized();
+        const markdownText = await visualBuilder.getMarkdownText();
+        expect(markdownText).to.be('46');
       });
 
       it('should render mustache list', async () => {

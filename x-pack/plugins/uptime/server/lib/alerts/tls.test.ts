@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-
+import { ALERT_SEVERITY_WARNING, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { tlsAlertFactory, getCertSummary, DEFAULT_SIZE } from './tls';
 import { TLS } from '../../../common/constants/alerts';
 import { CertResult, DynamicSettings } from '../../../common/runtime_types';
@@ -116,6 +116,7 @@ describe('tls alert', () => {
             'tls.server.x509.not_after': cert.not_after,
             'tls.server.x509.not_before': cert.not_before,
             'tls.server.hash.sha256': cert.sha256,
+            [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING,
           }),
           id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
         });

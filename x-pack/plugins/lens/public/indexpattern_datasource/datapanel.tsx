@@ -23,14 +23,15 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EsQueryConfig, Query, Filter } from '@kbn/es-query';
+import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart } from 'kibana/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { CoreStart } from 'kibana/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { htmlIdGenerator } from '@elastic/eui';
-import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
+import type { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
-import {
+import type {
   IndexPattern,
   IndexPatternPrivateState,
   IndexPatternField,
@@ -46,6 +47,7 @@ import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actio
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   changeIndexPattern: (
     id: string,
     state: IndexPatternPrivateState,
@@ -118,6 +120,7 @@ export function IndexPatternDataPanel({
   dragDropContext,
   core,
   data,
+  fieldFormats,
   query,
   filters,
   dateRange,
@@ -231,6 +234,7 @@ export function IndexPatternDataPanel({
           dragDropContext={dragDropContext}
           core={core}
           data={data}
+          fieldFormats={fieldFormats}
           charts={charts}
           indexPatternFieldEditor={indexPatternFieldEditor}
           onChangeIndexPattern={onChangeIndexPattern}
@@ -289,6 +293,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onUpdateIndexPattern,
   core,
   data,
+  fieldFormats,
   indexPatternFieldEditor,
   existingFields,
   charts,
@@ -297,6 +302,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   uiActions,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover' | 'core'> & {
   data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   core: CoreStart;
   currentIndexPatternId: string;
   indexPatternRefs: IndexPatternRef[];
@@ -565,6 +571,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     () => ({
       core,
       data,
+      fieldFormats,
       indexPattern: currentIndexPattern,
       highlight: localState.nameFilter.toLowerCase(),
       dateRange,
@@ -575,6 +582,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     [
       core,
       data,
+      fieldFormats,
       currentIndexPattern,
       dateRange,
       query,

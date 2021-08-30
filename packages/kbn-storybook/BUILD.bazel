@@ -1,14 +1,14 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-storybook"
 PKG_REQUIRE_NAME = "@kbn/storybook"
 
 SOURCE_FILES = glob(
   [
-    "lib/**/*.ts",
-    "lib/**/*.tsx",
-    "*.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
   ],
   exclude = ["**/*.test.*"],
 )
@@ -28,7 +28,7 @@ NPM_MODULE_EXTRA_FILES = [
   "preset.js",
 ]
 
-SRC_DEPS = [
+RUNTIME_DEPS = [
   "//packages/kbn-dev-utils",
   "//packages/kbn-ui-shared-deps",
   "@npm//@storybook/addons",
@@ -45,31 +45,47 @@ SRC_DEPS = [
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-dev-utils",
+  "//packages/kbn-ui-shared-deps",
+  "@npm//@storybook/addons",
+  "@npm//@storybook/api",
+  "@npm//@storybook/components",
+  "@npm//@storybook/core",
+  "@npm//@storybook/node-logger",
+  "@npm//@storybook/react",
+  "@npm//@storybook/theming",
   "@npm//@types/loader-utils",
   "@npm//@types/node",
+  "@npm//@types/react",
   "@npm//@types/webpack",
   "@npm//@types/webpack-merge",
 ]
 
-DEPS = SRC_DEPS + TYPES_DEPS
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
 
 ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
   deps = [
     "//:tsconfig.base.json",
+    "//:tsconfig.bazel.json",
   ],
 )
 
 ts_project(
-  name = "tsc",
+  name = "tsc_types",
   args = ['--pretty'],
   srcs = SRCS,
-  deps = DEPS,
+  deps = TYPES_DEPS,
   declaration = True,
   declaration_map = True,
-  incremental = True,
-  out_dir = "target",
+  emit_declaration_only = True,
+  out_dir = "target_types",
+  root_dir = "src",
   source_map = True,
   tsconfig = ":tsconfig",
 )
@@ -77,7 +93,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = [":tsc"] + DEPS,
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
