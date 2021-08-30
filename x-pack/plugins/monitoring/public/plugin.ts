@@ -14,6 +14,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { Legacy } from './legacy_shims';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import {
   FeatureCatalogueCategory,
@@ -108,6 +109,20 @@ export class MonitoringPlugin
           usageCollection: plugins.usageCollection,
           appMountParameters: params,
         };
+
+        Legacy.init({
+          core: deps.core,
+          element: deps.element,
+          data: deps.data,
+          navigation: deps.navigation,
+          isCloud: deps.isCloud,
+          pluginInitializerContext: deps.pluginInitializerContext,
+          externalConfig: deps.externalConfig,
+          kibanaLegacy: deps.kibanaLegacy,
+          triggersActionsUi: deps.triggersActionsUi,
+          usageCollection: deps.usageCollection,
+          appMountParameters: deps.appMountParameters,
+        });
 
         const config = Object.fromEntries(externalConfig);
         if (config.renderReactApp) {
