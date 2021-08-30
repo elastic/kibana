@@ -58,7 +58,7 @@ export const PolicyDetailsForm = memo(() => {
         </h4>
       </EuiText>
 
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <MalwareProtections />
       <EuiSpacer size="m" />
       {isPlatinumPlus ? <Ransomware /> : <LockedPolicyCard title={LOCKED_CARD_RAMSOMWARE_TITLE} />}
@@ -85,7 +85,7 @@ export const PolicyDetailsForm = memo(() => {
         </h4>
       </EuiText>
 
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <WindowsEvents />
       <EuiSpacer size="m" />
       <MacEvents />

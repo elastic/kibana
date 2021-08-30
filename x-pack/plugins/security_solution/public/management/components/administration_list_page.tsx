@@ -9,10 +9,11 @@ import React, { FC, memo, useMemo } from 'react';
 import {
   CommonProps,
   EuiPageHeader,
+  EuiPageContent,
+  EuiPageContentBody,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiSpacer,
 } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -21,11 +22,20 @@ interface AdministrationListPageProps {
   title: React.ReactNode;
   subtitle: React.ReactNode;
   actions?: React.ReactNode;
+  restrictWidth?: boolean | number;
   headerBackComponent?: React.ReactNode;
 }
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
-  ({ title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
+  ({
+    title,
+    subtitle,
+    actions,
+    children,
+    restrictWidth = false,
+    headerBackComponent,
+    ...otherProps
+  }) => {
     const header = useMemo(() => {
       return (
         <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
@@ -52,11 +62,18 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
           description={description}
           bottomBorder={true}
           rightSideItems={[actions]}
-          restrictWidth={false}
+          restrictWidth={restrictWidth}
           {...otherProps}
         />
-        <EuiSpacer size="l" />
-        {children}
+        <EuiPageContent
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="none"
+          color="transparent"
+          borderRadius="none"
+        >
+          <EuiPageContentBody restrictWidth>{children}</EuiPageContentBody>
+        </EuiPageContent>
 
         <SpyRoute pageName={SecurityPageName.administration} />
       </>

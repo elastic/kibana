@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useContext } from 'react';
-import styled, { ThemeContext } from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,27 +41,9 @@ import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/
 import { APP_ID } from '../../../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { HeaderPage, HeaderLinkBack } from '../../../../common/components/header_page';
+import { HeaderLinkBack } from '../../../../common/components/header_page';
 import { PolicyDetailsForm } from './policy_details_form';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-
-const maxFormWidth = '770px';
-const PolicyDetailsHeader = styled.div`
-  padding: ${(props) => props.theme.eui.paddingSizes.xl} 0;
-  border-bottom: 1px solid #d3dae6;
-  .securitySolutionHeaderPage {
-    max-width: ${maxFormWidth};
-    margin: 0 auto;
-  }
-`;
-
-const PolicyDetailsFormDiv = styled.div`
-  background-color: ${(props) => props.theme.eui.euiHeaderBackgroundColor};
-  padding: ${(props) => props.theme.eui.paddingSizes.l} 0;
-  max-width: ${maxFormWidth};
-  flex: 1;
-  align-self: center;
-`;
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -86,7 +67,6 @@ export const PolicyDetails = React.memo(() => {
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
   const policyName = policyItem?.name ?? '';
   const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
-  const theme = useContext(ThemeContext);
 
   // Handle showing update statuses
   useEffect(() => {
@@ -191,21 +171,7 @@ export const PolicyDetails = React.memo(() => {
     />
   );
 
-  return (
-    <>
-      {showConfirm && (
-        <ConfirmUpdate
-          hostCount={policyAgentStatusSummary?.total ?? 0}
-          onCancel={handleSaveCancel}
-          onConfirm={handleSaveConfirmation}
-        />
-      )}
-      <AdministrationListPage
-        data-test-subj="policyDetailsPage"
-        title={policyItem.name}
-        headerBackComponent={backToEndpointList}
-      />
-      <SecuritySolutionPageWrapper
+  /* <SecuritySolutionPageWrapper
         noTimeline
         data-test-subj="policyDetailsPage"
         noPadding
@@ -229,45 +195,62 @@ export const PolicyDetails = React.memo(() => {
           >
             {headerRightContent}
           </HeaderPage>
-        </PolicyDetailsHeader>
+        </PolicyDetailsHeader>*/
 
-        <PolicyDetailsFormDiv>
-          <PolicyDetailsForm />
-        </PolicyDetailsFormDiv>
+  return (
+    <>
+      {showConfirm && (
+        <ConfirmUpdate
+          hostCount={policyAgentStatusSummary?.total ?? 0}
+          onCancel={handleSaveCancel}
+          onConfirm={handleSaveConfirmation}
+        />
+      )}
+      <AdministrationListPage
+        data-test-subj="policyDetailsPage"
+        title={policyItem.name}
+        subtitle={i18n.translate('xpack.securitySolution.endpoint.policy.details.subtitle', {
+          defaultMessage: `{policyName} details`,
+          values: { policyName: policyItem.name },
+        })}
+        headerBackComponent={backToEndpointList}
+        actions={headerRightContent}
+        restrictWidth={true}
+      >
+        <EuiSpacer size="l" />
+        <PolicyDetailsForm />
         <EuiSpacer size="xxl" />
-      </SecuritySolutionPageWrapper>
-      <EuiBottomBar paddingSize="s">
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="ghost"
-              onClick={handleCancelOnClick}
-              data-test-subj="policyDetailsCancelButton"
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.cancel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill={true}
-              iconType="save"
-              data-test-subj="policyDetailsSaveButton"
-              onClick={handleSaveOnClick}
-              isLoading={isPolicyLoading}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.save"
-                defaultMessage="Save"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiBottomBar>
-
-      <SpyRoute pageName={SecurityPageName.administration} />
+        <EuiBottomBar paddingSize="s">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="ghost"
+                onClick={handleCancelOnClick}
+                data-test-subj="policyDetailsCancelButton"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.details.cancel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill={true}
+                iconType="save"
+                data-test-subj="policyDetailsSaveButton"
+                onClick={handleSaveOnClick}
+                isLoading={isPolicyLoading}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.details.save"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiBottomBar>
+      </AdministrationListPage>
     </>
   );
 });
