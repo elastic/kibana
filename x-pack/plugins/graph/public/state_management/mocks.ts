@@ -15,7 +15,7 @@ import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
 import { ChromeStart } from 'kibana/public';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
-import { Workspace, GraphWorkspaceSavedObject, IndexPatternSavedObject } from '../types';
+import { Workspace } from '../types';
 import { IndexPattern } from '../../../../../src/plugins/data/public';
 
 export interface MockedGraphEnvironment {
@@ -47,10 +47,6 @@ export function createMockGraphStore({
     options: {},
     blocklistedNodes: [],
   } as unknown) as Workspace;
-
-  const savedWorkspace = ({
-    save: jest.fn(),
-  } as unknown) as GraphWorkspaceSavedObject;
 
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
     basePath: '',

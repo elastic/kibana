@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { UrlTemplate } from '../../types';
 
@@ -32,18 +32,30 @@ export const DrillDownIconLinks = ({
     const onUrlTemplateClick = () => openUrlTemplate(cur);
 
     return (
-      <EuiToolTip content={cur.description}>
-        <button
-          className="kuiButton kuiButton--basic kuiButton--small gphVertexSelect__button"
-          type="button"
-          disabled={hasNodes}
-          onClick={onUrlTemplateClick}
-        >
-          <span className={`kuiIcon ${cur.icon?.class || ''}`} />
-        </button>
-      </EuiToolTip>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={cur.description}>
+          <button
+            className="kuiButton kuiButton--basic kuiButton--small"
+            type="button"
+            disabled={hasNodes}
+            onClick={onUrlTemplateClick}
+          >
+            <span className={`kuiIcon ${cur.icon?.class || ''}`} />
+          </button>
+        </EuiToolTip>
+      </EuiFlexItem>
     );
   });
 
-  return <div>{drillDowns}</div>;
+  return (
+    <EuiFlexGroup
+      className="gphDrillDownIconLinks"
+      justifyContent="flexStart"
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+    >
+      {drillDowns}
+    </EuiFlexGroup>
+  );
 };

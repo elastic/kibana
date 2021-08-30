@@ -7,7 +7,7 @@
 
 import { SavedObjectsClientContract, ToastsStart } from 'kibana/public';
 import { useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { GraphStore } from '../state_management';
 import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../types';
@@ -18,7 +18,6 @@ interface UseWorkspaceLoaderProps {
   workspaceRef: React.MutableRefObject<Workspace | undefined>;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: ToastsStart;
-  urlQuery: string | null;
 }
 
 interface WorkspaceUrlParams {
@@ -30,11 +29,11 @@ export const useWorkspaceLoader = ({
   store,
   savedObjectsClient,
   toastNotifications,
-  urlQuery,
 }: UseWorkspaceLoaderProps) => {
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>();
   const [savedWorkspace, setSavedWorkspace] = useState<GraphWorkspaceSavedObject>();
   const history = useHistory();
+  const location = useLocation();
   const { id } = useParams<WorkspaceUrlParams>();
 
   /**
@@ -42,6 +41,8 @@ export const useWorkspaceLoader = ({
    * on changes in id parameter and URL query only.
    */
   useEffect(() => {
+    const urlQuery = new URLSearchParams(location.search).get('query');
+
     function loadWorkspace(
       fetchedSavedWorkspace: GraphWorkspaceSavedObject,
       fetchedIndexPatterns: IndexPatternSavedObject[]
@@ -106,7 +107,7 @@ export const useWorkspaceLoader = ({
     initializeWorkspace();
   }, [
     id,
-    urlQuery,
+    location,
     store,
     history,
     savedObjectsClient,

@@ -39,8 +39,9 @@
  * Vertex Select
  */
 
-.gphVertexSelect__button {
-  margin: $euiSizeXS $euiSizeXS $euiSizeXS 0;
+.vertexSelectionTypesBar {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /**
@@ -70,6 +71,15 @@
 
 .gphSelectionList__field--selected {
   background: $euiColorLightShade;
+}
+
+/**
+ * Link summary
+ */
+
+.gphDrillDownIconLinks {
+  margin-top: .5 * $euiSizeXS;
+  margin-bottom: .5 * $euiSizeXS;
 }
 
 /**

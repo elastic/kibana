@@ -119,7 +119,6 @@ export const WorkspaceRoute = ({
     store,
     savedObjectsClient,
     toastNotifications,
-    urlQuery,
   });
 
   if (!savedWorkspace || !indexPatterns) {
