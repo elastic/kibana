@@ -14,7 +14,7 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { truncate } from '../../../utils/style';
+import { truncate, unit } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
@@ -24,7 +24,7 @@ import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 type TraceGroup = APIReturnType<'GET /api/apm/traces'>['items'][0];
 
 const StyledTransactionLink = euiStyled(TransactionDetailLink)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeM};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   ${truncate('100%')};
 `;
 
@@ -111,7 +111,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
         </>
       </EuiToolTip>
     ),
-    width: '20%',
+    width: `${unit * 6}px`,
     align: 'left',
     sortable: true,
     render: (_, { impact }) => <ImpactBar value={impact} />,
