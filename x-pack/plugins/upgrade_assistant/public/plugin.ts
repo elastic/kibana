@@ -42,19 +42,19 @@ export class UpgradeAssistantUIPlugin
         values: { version: `${kibanaVersionInfo.nextMajor}.0` },
       });
 
-      appRegistrar.registerApp({
-        id: 'upgrade_assistant',
-        title: pluginName,
-        order: 1,
-        async mount(params) {
-          const [coreStart, { discover, data }] = await coreSetup.getStartServices();
-          const services: AppServicesContext = { discover, data, cloud };
+    appRegistrar.registerApp({
+      id: 'upgrade_assistant',
+      title: pluginName,
+      order: 1,
+      async mount(params) {
+        const [coreStart, { data }] = await coreSetup.getStartServices();
+        const services: AppServicesContext = { data, cloud };
 
-          const {
-            chrome: { docTitle },
-          } = coreStart;
+        const {
+          chrome: { docTitle },
+        } = coreStart;
 
-          docTitle.change(pluginName);
+        docTitle.change(pluginName);
 
         const { mountManagementSection } = await import('./application/mount_management_section');
         const unmountAppCallback = await mountManagementSection(

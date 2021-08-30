@@ -21,12 +21,15 @@ import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 // We'll mock these values to avoid testing the locators themselves.
 const idToUrlMap = {
   SNAPSHOT_RESTORE_LOCATOR: 'snapshotAndRestoreUrl',
+  DISCOVER_APP_LOCATOR: 'discoverUrl',
 };
 
 const shareMock = sharePluginMock.createSetupContract();
 shareMock.url.locators.get = (id) => ({
   // @ts-expect-error This object is missing some properties that we're not using in the UI
   useUrl: (): string | undefined => idToUrlMap[id],
+  // @ts-expect-error This object is missing some properties that we're not using in the UI
+  getUrl: (): string | undefined => idToUrlMap[id],
 });
 
 export const getAppContextMock = (mockHttpClient: HttpSetup) => ({

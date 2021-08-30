@@ -6,25 +6,9 @@
  */
 
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { discoverPluginMock } from '../../../../../../src/plugins/discover/public/mocks';
 import { applicationServiceMock } from '../../../../../../src/core/public/application/application_service.mock';
-
-const discoverMock = discoverPluginMock.createStartContract();
 
 export const kibanaContextMock = {
   data: dataPluginMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
-  discover: {
-    ...discoverMock,
-    locator: {
-      ...discoverMock.locator,
-      getLocation: jest.fn(() =>
-        Promise.resolve({
-          app: '/discover',
-          path: 'logs',
-          state: {},
-        })
-      ),
-    },
-  },
 };

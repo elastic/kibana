@@ -151,11 +151,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
     test('Has a link to see logs in discover app', async () => {
       await act(async () => {
-        testBed = await setupOverviewPage({
-          getUrlForApp: jest.fn((app, options) => {
-            return `${app}/${options.path}`;
-          }),
-        });
+        testBed = await setupOverviewPage();
       });
 
       const { exists, component, find } = testBed;
@@ -163,7 +159,7 @@ describe('Overview - Fix deprecation logs step', () => {
       component.update();
 
       expect(exists('viewDiscoverLogs')).toBe(true);
-      expect(find('viewDiscoverLogs').props().href).toBe('/discover/logs');
+      expect(find('viewDiscoverLogs').props().href).toBe('discoverUrl');
     });
   });
 
