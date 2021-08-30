@@ -6,14 +6,10 @@
  */
 
 import { useQuery } from 'react-query';
-
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
-import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const useActionResultsPrivileges = () => {
   const { http } = useKibana().services;
-  const setErrorToast = useErrorToast();
 
   return useQuery(
     ['actionResultsPrivileges'],
@@ -21,13 +17,6 @@ export const useActionResultsPrivileges = () => {
     {
       keepPreviousData: true,
       select: (response) => response?.has_all_requested ?? false,
-      onSuccess: () => setErrorToast(),
-      onError: (error: Error) =>
-        setErrorToast(error, {
-          title: i18n.translate('xpack.osquery.action_results_privileges.fetchError', {
-            defaultMessage: 'Error while fetching action results privileges',
-          }),
-        }),
     }
   );
 };
