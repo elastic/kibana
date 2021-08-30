@@ -154,28 +154,60 @@ export const FieldEditorFlyoutContentContainer = ({
     [field?.name, field?.type, indexPattern]
   );
 
+  const updateRuntimeField = useCallback(
+    (updatedField: Field | RuntimeCompositeWithSubFields): IndexPatternField[] => {
+      try {
+        usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
+        // eslint-disable-next-line no-empty
+      } catch {}
+
+      return (updatedField as RuntimeCompositeWithSubFields).subFields !== undefined
+        ? saveCompositeRuntime(updatedField as RuntimeCompositeWithSubFields)
+        : saveRuntimeField(updatedField as Field);
+    },
+    [usageCollection, saveCompositeRuntime, saveRuntimeField]
+  );
+
+  const updateConcreteField = useCallback(
+    (updatedField: Field): IndexPatternField[] => {
+      try {
+        usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
+        // eslint-disable-next-line no-empty
+      } catch {}
+
+      const editedField = indexPattern.getFieldByName(updatedField.name);
+
+      if (!editedField) {
+        throw new Error(
+          `Unable to find field named '${updatedField.name}' on index pattern '${indexPattern.title}'`
+        );
+      }
+
+      // Update custom label, popularity and format
+      indexPattern.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+
+      editedField.count = updatedField.popularity || 0;
+      if (updatedField.format) {
+        indexPattern.setFieldFormat(updatedField.name, updatedField.format!);
+      } else {
+        indexPattern.deleteFieldFormat(updatedField.name);
+      }
+
+      return [editedField];
+    },
+    [usageCollection, indexPattern]
+  );
+
   const saveField = useCallback(
     async (updatedField: Field | RuntimeCompositeWithSubFields) => {
       setIsSaving(true);
 
-      if (fieldTypeToProcess === 'runtime') {
-        try {
-          usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
-          // eslint-disable-next-line no-empty
-        } catch {}
-      } else {
-        try {
-          usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
-          // eslint-disable-next-line no-empty
-        } catch {}
-      }
+      const editedFields: IndexPatternField[] =
+        fieldTypeToProcess === 'runtime'
+          ? updateRuntimeField(updatedField)
+          : updateConcreteField(updatedField as Field);
 
       try {
-        const editedFields: IndexPatternField[] =
-          (updatedField as RuntimeCompositeWithSubFields).subFields !== undefined
-            ? saveCompositeRuntime(updatedField as RuntimeCompositeWithSubFields)
-            : saveRuntimeField(updatedField as Field);
-
         await indexPatternService.updateSavedObject(indexPattern);
 
         const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
@@ -200,9 +232,8 @@ export const FieldEditorFlyoutContentContainer = ({
       indexPatternService,
       notifications,
       fieldTypeToProcess,
-      usageCollection,
-      saveRuntimeField,
-      saveCompositeRuntime,
+      updateConcreteField,
+      updateRuntimeField,
     ]
   );
 
