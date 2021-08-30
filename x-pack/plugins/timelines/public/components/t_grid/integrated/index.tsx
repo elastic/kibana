@@ -8,13 +8,12 @@
 import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
 // @ts-expect-error
 import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
@@ -48,6 +47,7 @@ import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
 import { TGridLoading } from '../loading';
+import { TGridEmpty } from '../empty';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
@@ -304,27 +304,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
             {!graphEventId && graphOverlay == null && (
               <>
-                {totalCountMinusDeleted === 0 && loading === false && (
-                  <EuiEmptyPrompt
-                    title={
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaTitle"
-                          defaultMessage="No results match your search criteria"
-                        />
-                      </h2>
-                    }
-                    titleSize="s"
-                    body={
-                      <p>
-                        <FormattedMessage
-                          id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaDescription"
-                          defaultMessage="Try searching over a longer period of time or modifying your search."
-                        />
-                      </p>
-                    }
-                  />
-                )}
+                {totalCountMinusDeleted === 0 && loading === false && <TGridEmpty />}
                 {totalCountMinusDeleted > 0 && (
                   <StatefulBody
                     hasAlertsCrud={hasAlertsCrud}

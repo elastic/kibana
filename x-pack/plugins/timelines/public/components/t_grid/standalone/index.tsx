@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
@@ -49,6 +48,7 @@ import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
 import { TGridLoading } from '../loading';
+import { TGridEmpty } from '../empty';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const STANDALONE_ID = 'standalone-t-grid';
@@ -348,27 +348,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                 </UpdatedFlexItem>
               </UpdatedFlexGroup>
 
-              {totalCountMinusDeleted === 0 && loading === false && (
-                <EuiEmptyPrompt
-                  title={
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaTitle"
-                        defaultMessage="No results match your search criteria"
-                      />
-                    </h2>
-                  }
-                  titleSize="s"
-                  body={
-                    <p>
-                      <FormattedMessage
-                        id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaDescription"
-                        defaultMessage="Try searching over a longer period of time or modifying your search."
-                      />
-                    </p>
-                  }
-                />
-              )}
+              {totalCountMinusDeleted === 0 && loading === false && <TGridEmpty />}
+
               {totalCountMinusDeleted > 0 && (
                 <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
                   <ScrollableFlexItem grow={1}>
