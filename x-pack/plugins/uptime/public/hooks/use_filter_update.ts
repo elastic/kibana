@@ -47,21 +47,29 @@ export const useFilterUpdate = (
 ) => {
   const [getUrlParams, updateUrl] = useUrlParams();
 
-  const { filters: currentFilters, excludedFilters: currentExcludedFilters } = getUrlParams();
+  const {
+    filters: currentFiltersString,
+    excludedFilters: currentExclusionsString,
+  } = getUrlParams();
 
   useEffect(() => {
     if (fieldName) {
-      const currentFiltersMap: Map<string, string[]> = parseFiltersMap(currentFilters);
-      const currentExclusionsMap: Map<string, string[]> = parseFiltersMap(currentExcludedFilters);
+      const currentFiltersMap: Map<string, string[]> = parseFiltersMap(currentFiltersString);
+      const currentExclusionsMap: Map<string, string[]> = parseFiltersMap(currentExclusionsString);
       const newFiltersString = getUpdateFilters(currentFiltersMap, fieldName, values);
       const newExclusionsString = getUpdateFilters(currentExclusionsMap, fieldName, notValues);
 
       const update: { [key: string]: string } = {};
-      if (currentFilters !== newFiltersString) {
+      if (currentFiltersString !== newFiltersString) {
         update.filters = newFiltersString;
+      } else {
+        update.filters = currentFiltersString;
       }
-      if (currentExcludedFilters !== newExclusionsString) {
+
+      if (currentExclusionsString !== newExclusionsString) {
         update.excludedFilters = newExclusionsString;
+      } else {
+        update.excludedFilters = currentExclusionsString;
       }
       if (shouldUpdateUrl && Object.keys(update).length > 0) {
         updateUrl({ ...update, pagination: '' });

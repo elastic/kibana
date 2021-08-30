@@ -66,23 +66,27 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
         ...updatedParams,
       };
 
-      history.push({
-        pathname,
-        search: stringify(
-          // drop any parameters that have no value
-          Object.keys(mergedParams).reduce((params, key) => {
-            const value = mergedParams[key];
-            if (value === undefined || value === '') {
-              return params;
-            }
-            return {
-              ...params,
-              [key]: value,
-            };
-          }, {}),
-          { sort: false }
-        ),
-      });
+      const updatedSearch = stringify(
+        // drop any parameters that have no value
+        Object.keys(mergedParams).reduce((params, key) => {
+          const value = mergedParams[key];
+          if (value === undefined || value === '') {
+            return params;
+          }
+          return {
+            ...params,
+            [key]: value,
+          };
+        }, {})
+      );
+
+      // only update the URL if the search has actually changed
+      if (search !== updatedSearch) {
+        history.push({
+          pathname,
+          search: updatedSearch,
+        });
+      }
       const filterMap = getMapFromFilters(mergedParams.filters);
       if (!filterMap) {
         dispatch(setSelectedFilters(null));
