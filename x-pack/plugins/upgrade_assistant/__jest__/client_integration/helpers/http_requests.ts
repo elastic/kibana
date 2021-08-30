@@ -51,11 +51,13 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
-  const setUpdateIndexSettingsResponse = (response?: object) => {
+  const setUpdateIndexSettingsResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
     server.respondWith('POST', `${API_BASE_PATH}/:indexName/index_settings`, [
-      200,
+      status,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
+      JSON.stringify(body),
     ]);
   };
 
@@ -64,6 +66,17 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const body = error ? error : response;
 
     server.respondWith('POST', `${API_BASE_PATH}/ml_snapshots`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setUpgradeMlSnapshotStatusResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/ml_snapshots/:jobId/:snapshotId`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -88,6 +101,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setUpdateIndexSettingsResponse,
     setUpgradeMlSnapshotResponse,
     setDeleteMlSnapshotResponse,
+    setUpgradeMlSnapshotStatusResponse,
   };
 };
 

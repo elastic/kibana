@@ -8,8 +8,10 @@
 
 import { EsQuerySortValue, SortDirection } from '../../../../../../data/public';
 import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
-import { fetchAnchorProvider } from './anchor';
+import { fetchAnchorProvider, updateSearchSource } from './anchor';
 import { EsHitRecord, EsHitRecordList } from './context';
+import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { savedSearchMock } from '../../../../__mocks__/saved_search';
 
 describe('context app', function () {
   let fetchAnchor: (
@@ -112,6 +114,32 @@ describe('context app', function () {
           { _doc: SortDirection.desc },
         ]);
       });
+    });
+
+    it('should update search source correctly when useNewFieldsApi set to false', function () {
+      const searchSource = updateSearchSource(
+        savedSearchMock.searchSource,
+        'id',
+        [],
+        false,
+        indexPatternMock
+      );
+      const searchRequestBody = searchSource.getSearchRequestBody();
+      expect(searchRequestBody._source).toBeInstanceOf(Object);
+      expect(searchRequestBody.track_total_hits).toBe(false);
+    });
+
+    it('should update search source correctly when useNewFieldsApi set to true', function () {
+      const searchSource = updateSearchSource(
+        savedSearchMock.searchSource,
+        'id',
+        [],
+        true,
+        indexPatternMock
+      );
+      const searchRequestBody = searchSource.getSearchRequestBody();
+      expect(searchRequestBody._source).toBe(false);
+      expect(searchRequestBody.track_total_hits).toBe(false);
     });
 
     it('should reject with an error when no hits were found', function () {

@@ -16,13 +16,6 @@ export interface PageSizeParams {
   subheadingHeight: number;
 }
 
-export interface LayoutSelectorDictionary {
-  screenshot: string;
-  renderComplete: string;
-  itemsCountAttribute: string;
-  timefilterDurationAttribute: string;
-}
-
 export interface PdfImageSize {
   width: number;
   height?: number;
@@ -36,7 +29,6 @@ export interface Size {
 export interface LayoutParams {
   id: string;
   dimensions?: Size;
-  selectors?: LayoutSelectorDictionary;
 }
 
 export interface ReportDocumentHead {
@@ -81,7 +73,12 @@ export interface ReportSource {
   jobtype: string; // refers to `ExportTypeDefinition.jobType`
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
   payload: BasePayload;
-  meta: { objectType: string; layout?: string }; // for telemetry
+  meta: {
+    // for telemetry
+    objectType: string;
+    layout?: string;
+    isDeprecated?: boolean;
+  };
   migration_version: string; // for reminding the user to update their POST URL
   attempts: number; // initially populated as 0
   created_at: string; // timestamp in UTC

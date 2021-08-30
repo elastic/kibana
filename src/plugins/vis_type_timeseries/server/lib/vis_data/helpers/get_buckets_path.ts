@@ -8,7 +8,8 @@
 
 import { startsWith } from 'lodash';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
-import { METRIC_TYPES } from '../../../../common/enums';
+import { METRIC_TYPES } from '../../../../../data/common';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
 
 const percentileTest = /\[[0-9\.]+\]$/;
@@ -25,7 +26,7 @@ export const getBucketsPath = (id: string, metrics: Metric[]) => {
       // For percentiles we need to breakout the percentile key that the user
       // specified. This information is stored in the key using the following pattern
       // {metric.id}[{percentile}]
-      case METRIC_TYPES.PERCENTILE:
+      case TSVB_METRIC_TYPES.PERCENTILE:
         if (percentileTest.test(bucketsPath)) break;
         if (metric.percentiles?.length) {
           const percent = metric.percentiles[0];
@@ -33,13 +34,13 @@ export const getBucketsPath = (id: string, metrics: Metric[]) => {
           bucketsPath += `[${toPercentileNumber(percent.value!)}]`;
         }
         break;
-      case METRIC_TYPES.PERCENTILE_RANK:
+      case TSVB_METRIC_TYPES.PERCENTILE_RANK:
         if (percentileTest.test(bucketsPath)) break;
         bucketsPath += `[${toPercentileNumber(metric.value!)}]`;
         break;
-      case METRIC_TYPES.STD_DEVIATION:
-      case METRIC_TYPES.VARIANCE:
-      case METRIC_TYPES.SUM_OF_SQUARES:
+      case TSVB_METRIC_TYPES.STD_DEVIATION:
+      case TSVB_METRIC_TYPES.VARIANCE:
+      case TSVB_METRIC_TYPES.SUM_OF_SQUARES:
         if (/^std_deviation/.test(metric.type) && ['upper', 'lower'].includes(metric.mode!)) {
           bucketsPath += `[std_${metric.mode}]`;
         } else {

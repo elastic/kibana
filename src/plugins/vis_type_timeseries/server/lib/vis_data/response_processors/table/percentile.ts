@@ -9,7 +9,7 @@
 import { last } from 'lodash';
 import { getSplits, getLastMetric } from '../../helpers';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
-import { METRIC_TYPES } from '../../../../../common/enums';
+import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 
 import type { TableResponseProcessorsFunction } from './types';
 import type { PanelDataArray } from '../../../../../common/types/vis_data';
@@ -23,7 +23,7 @@ export const percentile: TableResponseProcessorsFunction = ({
 }) => (next) => async (results) => {
   const metric = getLastMetric(series);
 
-  if (metric.type !== METRIC_TYPES.PERCENTILE) {
+  if (metric.type !== TSVB_METRIC_TYPES.PERCENTILE) {
     return next(results);
   }
 

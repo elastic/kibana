@@ -12,14 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const i18nTexts = {
-  emptyPromptTitle: i18n.translate('xpack.upgradeAssistant.noDeprecationsPrompt.title', {
-    defaultMessage: 'Ready to upgrade!',
-  }),
-  getEmptyPromptDescription: (deprecationType: string) =>
+  getEmptyPromptTitle: (deprecationType: string) =>
     i18n.translate('xpack.upgradeAssistant.noDeprecationsPrompt.description', {
-      defaultMessage: 'Your configuration is up to date.',
+      defaultMessage: 'Your {deprecationType} configuration is up to date',
+      values: {
+        deprecationType,
+      },
     }),
-  getEmptyPromptNextStepsDescription: (navigateToOverviewPage: () => void) => (
+  getEmptyPromptDescription: (navigateToOverviewPage: () => void) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.noDeprecationsPrompt.nextStepsDescription"
       defaultMessage="Check the {overviewButton} for other Stack deprecations."
@@ -47,15 +47,14 @@ export const NoDeprecationsPrompt: FunctionComponent<Props> = ({
 }) => {
   return (
     <EuiEmptyPrompt
-      iconType="faceHappy"
+      iconType="check"
       data-test-subj="noDeprecationsPrompt"
-      title={<h2>{i18nTexts.emptyPromptTitle}</h2>}
+      title={<h2>{i18nTexts.getEmptyPromptTitle(deprecationType)}</h2>}
       body={
         <>
           <p data-test-subj="upgradeAssistantIssueSummary">
-            {i18nTexts.getEmptyPromptDescription(deprecationType)}
+            {i18nTexts.getEmptyPromptDescription(navigateToOverviewPage)}
           </p>
-          <p>{i18nTexts.getEmptyPromptNextStepsDescription(navigateToOverviewPage)}</p>
         </>
       }
     />

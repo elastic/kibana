@@ -30,6 +30,7 @@ export interface TimelineNonEcsData {
 }
 
 export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {
+  consumers: Record<string, number>;
   edges: TimelineEdges[];
   totalCount: number;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
