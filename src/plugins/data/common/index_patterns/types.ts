@@ -38,8 +38,10 @@ export interface ESRuntimeField extends Omit<estypes.MappingRuntimeField, 'type'
 /**
  * The RuntimeField which is saved in the Data View saved object. We extend it to
  * keep a reference to a possible parent composite object.
+ * To simplify the consuming code we enforce the script to be `InlineScript` type (and not also `string`)
  */
-export interface RuntimeField extends ESRuntimeField {
+export interface RuntimeField extends Omit<ESRuntimeField, 'script'> {
+  script?: estypes.InlineScript;
   parentComposite?: string;
 }
 

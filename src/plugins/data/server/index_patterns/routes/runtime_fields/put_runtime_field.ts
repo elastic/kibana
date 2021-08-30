@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { EnhancedRuntimeField } from 'src/plugins/data/common';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSpecSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../../core/server';
@@ -44,7 +45,10 @@ export const registerPutRuntimeFieldRoute = (
         elasticsearchClient
       );
       const id = req.params.id;
-      const { name, runtimeField } = req.body;
+      const { name, runtimeField } = req.body as {
+        name: string;
+        runtimeField: EnhancedRuntimeField;
+      };
 
       const indexPattern = await indexPatternsService.get(id);
 

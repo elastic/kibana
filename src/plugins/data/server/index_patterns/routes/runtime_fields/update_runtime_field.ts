@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RuntimeField } from 'src/plugins/data/common';
+import { EnhancedRuntimeField } from 'src/plugins/data/common';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSpec, runtimeFieldSpecTypeSchema } from '../util/schemas';
@@ -53,7 +53,7 @@ export const registerUpdateRuntimeFieldRoute = (
       );
       const id = req.params.id;
       const name = req.params.name;
-      const runtimeField = req.body.runtimeField as Partial<RuntimeField>;
+      const runtimeField = req.body.runtimeField as Partial<EnhancedRuntimeField>;
 
       const indexPattern = await indexPatternsService.get(id);
       const existingRuntimeField = indexPattern.getRuntimeField(name);
@@ -62,11 +62,17 @@ export const registerUpdateRuntimeFieldRoute = (
         throw new ErrorIndexPatternFieldNotFound(id, name);
       }
 
-      indexPattern.removeRuntimeField(name);
-      indexPattern.addRuntimeField(name, {
-        ...existingRuntimeField,
+      // We remove a possible format as the ES "format" (string) is different
+      // from our Kibana field format definition.
+      const { format, ...previousField } = existingRuntimeField;
+
+      const updatedRuntimeField: EnhancedRuntimeField = {
+        ...previousField,
         ...runtimeField,
-      });
+      };
+
+      indexPattern.removeRuntimeField(name);
+      indexPattern.addRuntimeField(name, updatedRuntimeField);
 
       await indexPatternsService.updateSavedObject(indexPattern);
 
