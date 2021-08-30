@@ -26,13 +26,17 @@ import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 import { emailServerTypes } from './email';
+import { useEmailConfig } from './use_email_config';
 
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
-  const { docLinks } = useKibana().services;
+  const { docLinks, http } = useKibana().services;
   const { from, host, port, secure, hasAuth, serverType } = action.config;
   const { user, password } = action.secrets;
+
+  const { setEmailServerType } = useEmailConfig(http, action.config, editActionConfig);
+
   useEffect(() => {
     if (!action.id) {
       editActionConfig('hasAuth', true);
@@ -117,7 +121,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               data-test-subj="emailServerTypeSelect"
               options={emailServerTypes}
               onChange={(e) => {
-                editActionConfig('serverType', e.target.value);
+                setEmailServerType(e.target.value);
               }}
             />
           </EuiFormRow>

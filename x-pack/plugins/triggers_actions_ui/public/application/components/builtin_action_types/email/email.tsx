@@ -29,19 +29,10 @@ export const emailServerTypes: EuiSelectOption[] = [
     text: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.exchangeServerTypeLabel',
       {
-        defaultMessage: 'MS Exchange',
-      }
-    ),
-    value: 'outlook365',
-  },
-  {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.outlookServerTypeLabel',
-      {
         defaultMessage: 'Outlook',
       }
     ),
-    value: 'hotmail',
+    value: 'outlook365',
   },
   {
     text: i18n.translate(
