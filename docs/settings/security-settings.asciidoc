@@ -371,7 +371,7 @@ xpack.security.audit.appender.type: rolling-file
 
 [NOTE]
 ============
-deprecated:[7.15.0,"In 8.0 and later, the legacy audit logger will be removed, and this setting will enable the ECS audit logger with a default appender."] To enable the legacy audit logger only specify:
+deprecated:[7.15.0,"The legacy audit logger will be removed in an upcoming version, and this setting will enable the ECS audit logger with a default appender."] To enable the legacy audit logger only specify:
 
 [source,yaml]
 ----------------------------------------
