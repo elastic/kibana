@@ -53,7 +53,7 @@ export const deleteRulesRoute = (
         }
 
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
-        const rule = await readRules({ isRuleRegistryEnabled, rulesClient, id, ruleId }); // TODO: support RAC
+        const rule = await readRules({ isRuleRegistryEnabled, rulesClient, id, ruleId });
         if (!rule) {
           const error = getIdError({ id, ruleId });
           return siemResponse.error({

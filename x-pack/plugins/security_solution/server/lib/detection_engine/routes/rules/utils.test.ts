@@ -41,7 +41,10 @@ import {
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
-describe('utils', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('utils - %s', (_, isRuleRegistryEnabled) => {
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
       const fullRule = getAlertMock(getQueryRuleParams());
@@ -396,24 +399,34 @@ describe('utils', () => {
 
   describe('transformOrBulkError', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformOrBulkError('rule-1', getAlertMock(getQueryRuleParams()), {
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        actions: [],
-        ruleThrottle: 'no_actions',
-        alertThrottle: null,
-      });
+      const output = transformOrBulkError(
+        'rule-1',
+        getAlertMock(getQueryRuleParams()),
+        {
+          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          actions: [],
+          ruleThrottle: 'no_actions',
+          alertThrottle: null,
+        },
+        isRuleRegistryEnabled
+      );
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
       const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
-      const output = transformOrBulkError('rule-1', unsafeCast, {
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        actions: [],
-        ruleThrottle: 'no_actions',
-        alertThrottle: null,
-      });
+      const output = transformOrBulkError(
+        'rule-1',
+        unsafeCast,
+        {
+          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          actions: [],
+          ruleThrottle: 'no_actions',
+          alertThrottle: null,
+        },
+        isRuleRegistryEnabled
+      );
       const expected: BulkError = {
         rule_id: 'rule-1',
         error: { message: 'Internal error transforming', status_code: 500 },
@@ -449,10 +462,7 @@ describe('utils', () => {
     });
   });
 
-  describe.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('transformOrImportError - %s', (_, isRuleRegistryEnabled) => {
+  describe('transformOrImportError', () => {
     test('returns 1 given success if the alert is an alert type and the existing success count is 0', () => {
       const output = transformOrImportError(
         'rule-1',

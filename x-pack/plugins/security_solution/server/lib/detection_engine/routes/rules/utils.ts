@@ -151,10 +151,10 @@ export const transform = (
 export const transformOrBulkError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
-  ruleStatus?: unknown
+  ruleStatus?: unknown,
+  isRuleRegistryEnabled?: boolean
 ): Partial<RulesSchema> | BulkError => {
-  if (isAlertType(false, alert)) {
-    // TODO: support RAC
+  if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
     if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
       return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
     } else {

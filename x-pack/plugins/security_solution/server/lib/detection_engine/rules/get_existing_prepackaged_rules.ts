@@ -14,22 +14,26 @@ export const FILTER_NON_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IM
 export const FILTER_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`;
 
 export const getNonPackagedRulesCount = async ({
+  isRuleRegistryEnabled,
   rulesClient,
 }: {
+  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
 }): Promise<number> => {
-  return getRulesCount({ rulesClient, filter: FILTER_NON_PREPACKED_RULES });
+  return getRulesCount({ isRuleRegistryEnabled, rulesClient, filter: FILTER_NON_PREPACKED_RULES });
 };
 
 export const getRulesCount = async ({
   rulesClient,
   filter,
+  isRuleRegistryEnabled,
 }: {
   rulesClient: RulesClient;
   filter: string;
+  isRuleRegistryEnabled: boolean;
 }): Promise<number> => {
   const firstRule = await findRules({
-    isRuleRegistryEnabled: false, // TODO: support RAC
+    isRuleRegistryEnabled,
     rulesClient,
     filter,
     perPage: 1,
@@ -50,7 +54,7 @@ export const getRules = async ({
   filter: string;
   isRuleRegistryEnabled: boolean;
 }) => {
-  const count = await getRulesCount({ rulesClient, filter });
+  const count = await getRulesCount({ rulesClient, filter, isRuleRegistryEnabled });
   const rules = await findRules({
     isRuleRegistryEnabled,
     rulesClient,
