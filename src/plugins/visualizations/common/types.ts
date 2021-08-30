@@ -8,7 +8,7 @@
 
 import { SavedObjectAttributes } from 'kibana/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { AggConfigOptions } from 'src/plugins/data/common';
+import { AggConfigSerialized } from 'src/plugins/data/common';
 
 export interface VisParams {
   [key: string]: any;
@@ -19,7 +19,7 @@ export type SavedVisState<TVisParams = SerializableRecord> = {
   title: string;
   type: string;
   params: TVisParams;
-  aggs: AggConfigOptions[];
+  aggs: AggConfigSerialized[];
 };
 
 export interface VisualizationSavedObjectAttributes extends SavedObjectAttributes {

@@ -16,6 +16,8 @@ import { setStateToKbnUrl } from '../../kibana_utils/public';
 
 import { VisualizeConstants } from './application/visualize_constants';
 
+import type { PureVisState } from './application/types';
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type VisualizeLocatorParams = {
   /**
@@ -58,7 +60,7 @@ export type VisualizeLocatorParams = {
   /**
    * Serialized visualization.
    */
-  vis?: SerializableRecord;
+  vis?: PureVisState;
 
   /**
    * Whether this visualization is linked a saved search.

@@ -8,7 +8,6 @@
 
 import React from 'react';
 import moment from 'moment';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -292,7 +291,7 @@ export const getTopNavConfig = (
             type: currentState.vis.type,
             uiState: currentState.uiState,
             query: currentState.query,
-            vis: (currentState.vis as unknown) as SerializableRecord,
+            vis: currentState.vis,
           };
           // TODO: support sharing in by-value mode
           share.toggleShareContextMenu({

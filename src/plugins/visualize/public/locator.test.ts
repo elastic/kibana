@@ -8,6 +8,7 @@
 
 import { VisualizeLocatorDefinition } from './locator';
 import { esFilters } from '../../data/public';
+import type { PureVisState } from './application/types';
 
 describe('visualize locator', () => {
   let definition: VisualizeLocatorDefinition;
@@ -93,7 +94,7 @@ describe('visualize locator', () => {
       query: { query: 'bye', language: 'kuery' },
       linked: true,
       uiState: { fakeUIState: 'fakeUIState' },
-      vis: { fakeVis: 'fakeVis' },
+      vis: ({ fakeVis: 'fakeVis' } as unknown) as PureVisState,
     });
 
     expect(location.app).toMatchInlineSnapshot(`"visualize"`);
