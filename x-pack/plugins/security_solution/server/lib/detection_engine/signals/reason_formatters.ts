@@ -60,7 +60,7 @@ export const buildReasonMessageUtil = ({ rule, mergedDoc }: BuildReasonMessageUt
   };
 
   return i18n.translate('xpack.securitySolution.detectionEngine.signals.alertReasonDescription', {
-    defaultMessage: `{eventCategory} event with\
+    defaultMessage: `{eventCategory, select, null {} other {{eventCategory}}} event with\
 {processName, select, null {} other {{whitespace}process {processName},} }\
 {processParentName, select, null {} other {{whitespace}parent process {processParentName},} }\
 {fileName, select, null {} other {{whitespace}file {fileName},} }\
