@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ConfigPath } from '@kbn/config';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HotObservable } from 'rxjs/internal/testing/HotObservable';
 import { TestScheduler } from 'rxjs/testing';
@@ -29,12 +30,31 @@ import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 
 describe('CoreUsageDataService', () => {
+  function getConfigServiceAtPathMockImplementation() {
+    return (path: ConfigPath) => {
+      if (path === 'elasticsearch') {
+        return new BehaviorSubject(RawElasticsearchConfig.schema.validate({}));
+      } else if (path === 'server') {
+        return new BehaviorSubject(RawHttpConfig.schema.validate({}));
+      } else if (path === 'logging') {
+        return new BehaviorSubject(RawLoggingConfig.schema.validate({}));
+      } else if (path === 'savedObjects') {
+        return new BehaviorSubject(RawSavedObjectsConfig.schema.validate({}));
+      } else if (path === 'kibana') {
+        return new BehaviorSubject(RawKibanaConfig.schema.validate({}));
+      }
+      return new BehaviorSubject({});
+    };
+  }
+
   const getTestScheduler = () =>
     new TestScheduler((actual, expected) => {
       expect(actual).toEqual(expected);
     });
 
   let service: CoreUsageDataService;
+  let configService: ReturnType<typeof configServiceMock.create>;
+
   const mockConfig = {
     unused_config: {},
     elasticsearch: { username: 'kibana_system', password: 'changeme' },
@@ -60,27 +80,11 @@ describe('CoreUsageDataService', () => {
     },
   };
 
-  const configService = configServiceMock.create({
-    getConfig$: mockConfig,
-  });
-
-  configService.atPath.mockImplementation((path) => {
-    if (path === 'elasticsearch') {
-      return new BehaviorSubject(RawElasticsearchConfig.schema.validate({}));
-    } else if (path === 'server') {
-      return new BehaviorSubject(RawHttpConfig.schema.validate({}));
-    } else if (path === 'logging') {
-      return new BehaviorSubject(RawLoggingConfig.schema.validate({}));
-    } else if (path === 'savedObjects') {
-      return new BehaviorSubject(RawSavedObjectsConfig.schema.validate({}));
-    } else if (path === 'kibana') {
-      return new BehaviorSubject(RawKibanaConfig.schema.validate({}));
-    }
-    return new BehaviorSubject({});
-  });
-  const coreContext = mockCoreContext.create({ configService });
-
   beforeEach(() => {
+    configService = configServiceMock.create({ getConfig$: mockConfig });
+    configService.atPath.mockImplementation(getConfigServiceAtPathMockImplementation());
+
+    const coreContext = mockCoreContext.create({ configService });
     service = new CoreUsageDataService(coreContext);
   });
 
@@ -150,7 +154,7 @@ describe('CoreUsageDataService', () => {
 
   describe('start', () => {
     describe('getCoreUsageData', () => {
-      it('returns core metrics for default config', async () => {
+      function setup() {
         const http = httpServiceMock.createInternalSetupContract();
         const metrics = metricsServiceMock.createInternalSetupContract();
         const savedObjectsStartPromise = Promise.resolve(
@@ -208,6 +212,11 @@ describe('CoreUsageDataService', () => {
           exposedConfigsToUsage: new Map(),
           elasticsearch,
         });
+        return { getCoreUsageData };
+      }
+
+      it('returns core metrics for default config', async () => {
+        const { getCoreUsageData } = setup();
         expect(getCoreUsageData()).resolves.toMatchInlineSnapshot(`
           Object {
             "config": Object {
@@ -241,6 +250,7 @@ describe('CoreUsageDataService', () => {
                   "truststoreConfigured": false,
                   "verificationMode": "full",
                 },
+                "username": "none",
               },
               "http": Object {
                 "basePathConfigured": false,
@@ -353,6 +363,42 @@ describe('CoreUsageDataService', () => {
             },
           }
         `);
+      });
+
+      describe('elasticsearch.username', () => {
+        async function doTest({ username, expected }: { username: string; expected: string }) {
+          const defaultMockImplementation = getConfigServiceAtPathMockImplementation();
+          configService.atPath.mockImplementation((path) => {
+            if (path === 'elasticsearch') {
+              return new BehaviorSubject(RawElasticsearchConfig.schema.validate({ username }));
+            }
+            return defaultMockImplementation(path);
+          });
+          const { getCoreUsageData } = setup();
+          return expect(getCoreUsageData()).resolves.toEqual(
+            expect.objectContaining({
+              config: expect.objectContaining({
+                elasticsearch: expect.objectContaining({ username: expected }),
+              }),
+            })
+          );
+        }
+
+        it('returns expected usage data for "elastic"', async () => {
+          return doTest({ username: 'elastic', expected: 'elastic' });
+        });
+
+        it('returns expected usage data for "kibana"', async () => {
+          return doTest({ username: 'kibana', expected: 'kibana' });
+        });
+
+        it('returns expected usage data for "kibana_system"', async () => {
+          return doTest({ username: 'kibana_system', expected: 'kibana_system' });
+        });
+
+        it('returns expected usage data for anything else', async () => {
+          return doTest({ username: 'anything else', expected: 'other' });
+        });
       });
     });
 

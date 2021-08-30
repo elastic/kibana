@@ -205,6 +205,7 @@ export interface CoreConfigUsageData {
     };
     apiVersion: string;
     healthCheckDelayMs: number;
+    username: 'none' | 'elastic' | 'kibana' | 'kibana_system' | 'other';
   };
 
   http: {

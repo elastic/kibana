@@ -131,6 +131,10 @@ export function getCoreUsageCollector(
                 'The interval in miliseconds between health check requests Kibana sends to the Elasticsearch.',
             },
           },
+          username: {
+            type: 'keyword',
+            _meta: { description: 'Indicates what elasticsearch username is configured, if any.' },
+          },
         },
 
         http: {

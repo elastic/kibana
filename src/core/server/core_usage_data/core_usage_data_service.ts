@@ -29,6 +29,7 @@ import type {
   CoreUsageDataStart,
   CoreUsageDataSetup,
   ConfigUsageData,
+  CoreConfigUsageData,
 } from './types';
 import { isConfigured } from './is_configured';
 import { ElasticsearchServiceStart } from '../elasticsearch';
@@ -253,6 +254,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             truststoreConfigured: isConfigured.record(es.ssl.truststore),
             keystoreConfigured: isConfigured.record(es.ssl.keystore),
           },
+          username: getEsUsernameUsage(es.username),
         },
         http: {
           basePathConfigured: isConfigured.string(http.basePath),
@@ -511,4 +513,20 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     this.stop$.next();
     this.stop$.complete();
   }
+}
+
+function getEsUsernameUsage(username: string | undefined) {
+  let value: CoreConfigUsageData['elasticsearch']['username'] = 'none';
+  if (isConfigured.string(username)) {
+    switch (username) {
+      case 'elastic': // deprecated
+      case 'kibana': // deprecated
+      case 'kibana_system':
+        value = username;
+        break;
+      default:
+        value = 'other';
+    }
+  }
+  return value;
 }
