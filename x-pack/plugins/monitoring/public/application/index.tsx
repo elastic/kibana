@@ -11,6 +11,7 @@ import ReactDOM from 'react-dom';
 import { Route, Switch, Redirect, Router } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { LoadingPage } from './pages/loading_page';
+import { ClusterOverview } from './pages/cluster/overview_page';
 import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalStateProvider } from './global_state_context';
 import { createPreserveQueryHistory } from './preserve_query_history';
@@ -73,10 +74,6 @@ const NoData: React.FC<{}> = () => {
 
 const Home: React.FC<{}> = () => {
   return <div>Home page (Cluster listing)</div>;
-};
-
-const ClusterOverview: React.FC<{}> = () => {
-  return <div>Cluster overview page</div>;
 };
 
 const License: React.FC<{}> = () => {
