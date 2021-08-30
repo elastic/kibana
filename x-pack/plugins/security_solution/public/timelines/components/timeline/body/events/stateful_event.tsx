@@ -40,7 +40,7 @@ import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { getMappedNonEcsValue } from '../data_driven_columns';
-import { StatefulEventContext } from './stateful_event_context';
+import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   actionsColumnWidth: number;
@@ -103,7 +103,13 @@ const StatefulEventComponent: React.FC<Props> = ({
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
-  const [activeStatefulEventContext] = useState({ timelineID: timelineId, tabType });
+  const [activeStatefulEventContext] = useState({
+    timelineID: timelineId,
+    enableHostDetailsFlyout: true,
+    enableIpDetailsFlyout: true,
+    tabType,
+  });
+
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedDetail = useDeepEqualSelector(
