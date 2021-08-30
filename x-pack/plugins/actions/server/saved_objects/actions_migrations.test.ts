@@ -118,6 +118,26 @@ describe('successful migrations', () => {
       });
     });
   });
+
+  describe('7.16.0', () => {
+    test('add serverType config property for .email actions', () => {
+      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const action = getMockDataForEmail({});
+      const migratedAction = migration716(action, context);
+      expect(migratedAction.attributes.config).toEqual({
+        serverType: 'other',
+      });
+      expect(migratedAction).toEqual({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            serverType: 'other',
+          },
+        },
+      });
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {
