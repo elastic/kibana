@@ -66,7 +66,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
    * Fetch docs on ui changes
    */
   useEffect(() => {
-    if (!prevAppState.current) {
+    if (!prevAppState.current || fetchedState.anchor._id !== anchorId) {
       fetchAllRows();
     } else if (prevAppState.current.predecessorCount !== appState.predecessorCount) {
       fetchSurroundingRows(SurrDocType.PREDECESSORS);
@@ -77,7 +77,15 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
     }
 
     prevAppState.current = cloneDeep(appState);
-  }, [appState, indexPatternId, anchorId, fetchContextRows, fetchAllRows, fetchSurroundingRows]);
+  }, [
+    appState,
+    indexPatternId,
+    anchorId,
+    fetchContextRows,
+    fetchAllRows,
+    fetchSurroundingRows,
+    fetchedState.anchor._id,
+  ]);
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useDataGridColumns({
     capabilities,

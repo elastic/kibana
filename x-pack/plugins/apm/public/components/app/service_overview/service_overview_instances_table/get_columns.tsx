@@ -101,7 +101,7 @@ export function getColumns({
     {
       field: 'latency',
       name: getLatencyColumnLabel(latencyAggregationType),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { serviceNodeName, latency }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.latency;
@@ -126,7 +126,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { serviceNodeName, throughput }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.throughput;
