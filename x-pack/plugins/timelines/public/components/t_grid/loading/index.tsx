@@ -12,7 +12,6 @@ import { FullWidthFlexGroup } from '../styles';
 export const TGridLoading: React.FC = () => {
   return (
     <FullWidthFlexGroup
-      $visible={true}
       $color="subdued"
       alignItems="center"
       justifyContent="center"

@@ -459,11 +459,11 @@ export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
   })
 )<{ $isVisible: boolean }>``;
 
-export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean; $color?: string }>`
+export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean; $color?: string }>`
   overflow: hidden;
   margin: 0;
   min-height: 490px;
-  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+  display: ${({ $visible = true }) => ($visible ? 'flex' : 'none')};
   background: ${({ $color, theme }) =>
     $color ? theme.eui.euiPanelBackgroundColorModifiers[$color] : 'transparent'};
 `;
