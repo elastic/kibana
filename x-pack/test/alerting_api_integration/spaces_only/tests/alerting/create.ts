@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { SavedObject } from 'kibana/server';
+import { SavedObjectsUtils } from '../../../../../../src/core/server/saved_objects';
 import { Spaces } from '../../scenarios';
 import {
   checkAAD,
@@ -193,7 +194,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
       const esResponse = await es.get<SavedObject<RawAlert>>({
         index: '.kibana',
-        id: `${Spaces.space1.id}:alert:${response.body.id}`,
+        id: `alert:${SavedObjectsUtils.getConvertedObjectId(undefined, 'alert', response.body.id)}`,
       });
       expect(esResponse.statusCode).to.eql(200);
       const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];

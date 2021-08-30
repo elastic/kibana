@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ESTestIndexTool, getUrlPrefix, ObjectRemover, AlertUtils } from '../../../common/lib';
 import { setupSpacesAndUsers } from '..';
 import { SavedObjectsUtils } from '../../../../../../src/core/server/saved_objects';
-//import { SavedObjectsUtils } from '../../../../../../src/plugins/saved_objects/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
