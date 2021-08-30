@@ -29,6 +29,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
       savedObjects: [],
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([]);
@@ -58,6 +59,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
       retries,
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([]);
@@ -89,6 +91,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
       savedObjects,
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([]);
@@ -124,6 +127,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
       savedObjects,
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([]);
@@ -160,6 +164,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
       savedObjects,
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([]);
@@ -214,6 +219,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
       savedObjects,
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([`${namespace}:index-pattern:1`, `${namespace}:search:3`]);
@@ -255,6 +261,7 @@ describe('validateReferences()', () => {
       savedObjects: [],
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([]);
@@ -360,6 +367,7 @@ describe('validateReferences()', () => {
       savedObjects,
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([
@@ -463,6 +471,7 @@ describe('validateReferences()', () => {
       retries,
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([]);
@@ -498,6 +507,7 @@ describe('validateReferences()', () => {
       savedObjects,
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([]);
@@ -529,6 +539,7 @@ describe('validateReferences()', () => {
       savedObjects,
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([]);
@@ -559,6 +570,7 @@ describe('validateReferences()', () => {
       savedObjects,
       savedObjectsClient,
       typeRegistry,
+      importNamespaces: false,
       namespace,
     });
     expect(result).toEqual([]);
@@ -596,6 +608,7 @@ describe('validateReferences()', () => {
         savedObjects,
         savedObjectsClient,
         typeRegistry,
+        importNamespaces: false,
         namespace,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
