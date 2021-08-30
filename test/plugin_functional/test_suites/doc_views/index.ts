@@ -9,12 +9,16 @@
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, loadTestFile }: PluginFunctionalProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   // SKIPPED: https://github.com/elastic/kibana/issues/100060
   describe.skip('doc views', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover.json');
     });
 
     loadTestFile(require.resolve('./doc_views'));
