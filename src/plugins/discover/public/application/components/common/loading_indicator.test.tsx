@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DiscoverMainApp } from '../apps/main';
+import { LoadingIndicator } from './loading_indicator';
+import React from 'react';
+import { mount } from 'enzyme';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createDiscoverDirective(reactDirective: any) {
-  return reactDirective(DiscoverMainApp, [
-    ['indexPattern', { watchDepth: 'reference' }],
-    ['opts', { watchDepth: 'reference' }],
-  ]);
-}
+describe('Loading indicator', () => {
+  it('renders correctly', () => {
+    const component = mount(<LoadingIndicator />);
+    expect(component).toMatchSnapshot();
+  });
+});
