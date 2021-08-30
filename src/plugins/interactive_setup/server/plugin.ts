@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import chalk from 'chalk';
 import type { Subscription } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
@@ -17,13 +18,11 @@ import { ElasticsearchService } from './elasticsearch_service';
 import { KibanaConfigWriter } from './kibana_config_writer';
 import { defineRoutes } from './routes';
 
-export class UserSetupPlugin implements PrebootPlugin {
+export class InteractiveSetupPlugin implements PrebootPlugin {
   readonly #logger: Logger;
+  readonly #elasticsearch: ElasticsearchService;
 
   #elasticsearchConnectionStatusSubscription?: Subscription;
-  readonly #elasticsearch = new ElasticsearchService(
-    this.initializerContext.logger.get('elasticsearch')
-  );
 
   #configSubscription?: Subscription;
   #config?: ConfigType;
@@ -36,6 +35,9 @@ export class UserSetupPlugin implements PrebootPlugin {
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.#logger = this.initializerContext.logger.get();
+    this.#elasticsearch = new ElasticsearchService(
+      this.initializerContext.logger.get('elasticsearch')
+    );
   }
 
   public setup(core: CorePreboot) {
@@ -90,6 +92,14 @@ export class UserSetupPlugin implements PrebootPlugin {
           this.#logger.debug(
             'Starting interactive setup mode since Kibana cannot to connect to Elasticsearch at http://localhost:9200.'
           );
+          const serverInfo = core.http.getServerInfo();
+          const url = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}`;
+          this.#logger.info(`
+
+${chalk.whiteBright.bold(`${chalk.cyanBright('i')} Kibana has not been configured.`)}
+
+Go to ${chalk.cyanBright.underline(url)} to get started.
+`);
         }
       }
     );
