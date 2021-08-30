@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { InteractiveSetupPlugin } from './plugin';
+import constate from 'constate';
 
-export const plugin = () => new InteractiveSetupPlugin();
+import type { HttpSetup } from 'src/core/public';
+
+export const [HttpProvider, useHttp] = constate(({ http }: { http: HttpSetup }) => {
+  return http;
+});
