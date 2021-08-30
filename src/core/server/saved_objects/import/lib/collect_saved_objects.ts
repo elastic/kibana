@@ -80,6 +80,7 @@ export async function collectSavedObjects({
   ]);
 
   // throw a BadRequest error if we see the same import object type/id more than once
+  // for `single` namespaceType object, this is done on a per-space basis.
   const nonUniqueEntries = getNonUniqueEntries(entries, typeRegistry, namespace);
   if (nonUniqueEntries.length > 0) {
     throw SavedObjectsImportError.nonUniqueImportObjects(nonUniqueEntries);

@@ -9,6 +9,7 @@
 import { Readable } from 'stream';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsClientContract } from '../types';
+import { getObjKey } from '../service/lib';
 import {
   SavedObjectsImportFailure,
   SavedObjectsImportResponse,
@@ -45,6 +46,7 @@ export interface ImportSavedObjectsOptions {
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
   /**
+   * // TODO: doc
    * If true
    */
   importNamespaces: boolean;
@@ -77,12 +79,13 @@ export async function importSavedObjectsFromStream({
     namespace,
   });
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
+
+  // validate the presence of namespaces or not depending on `importNamespaces`
+  // TODO (?)
+
   /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
   let importIdMap = collectSavedObjectsResult.importIdMap;
   let pendingOverwrites = new Set<string>();
-
-  // validate the presence of namespaces or not depending on `importNamespaces`
-  // TODO
 
   // Validate references
   const validateReferencesResult = await validateReferences({
@@ -150,7 +153,9 @@ export async function importSavedObjectsFromStream({
       title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
       icon: typeRegistry.getType(type)?.management?.icon,
     };
-    const attemptedOverwrite = pendingOverwrites.has(`${type}:${id}`);
+    const attemptedOverwrite = pendingOverwrites.has(
+      getObjKey(createdObject, typeRegistry, namespace)
+    );
     return {
       type,
       id,
