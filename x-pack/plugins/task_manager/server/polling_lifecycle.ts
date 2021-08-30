@@ -9,7 +9,7 @@ import { Subject, Observable, Subscription } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
-import { Logger } from '../../../../src/core/server';
+import type { Logger, ExecutionContextStart } from '../../../../src/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
@@ -53,6 +53,7 @@ export type TaskPollingLifecycleOpts = {
   config: TaskManagerConfig;
   middleware: Middleware;
   elasticsearchAndSOAvailability$: Observable<boolean>;
+  executionContext: ExecutionContextStart;
 } & ManagedConfiguration;
 
 export type TaskLifecycleEvent =
@@ -73,6 +74,7 @@ export class TaskPollingLifecycle {
   private store: TaskStore;
   private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
+  private readonly executionContext: ExecutionContextStart;
 
   private logger: Logger;
   public pool: TaskPool;
@@ -100,11 +102,13 @@ export class TaskPollingLifecycle {
     config,
     taskStore,
     definitions,
+    executionContext,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
     this.definitions = definitions;
     this.store = taskStore;
+    this.executionContext = executionContext;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -227,6 +231,7 @@ export class TaskPollingLifecycle {
       beforeMarkRunning: this.middleware.beforeMarkRunning,
       onTaskEvent: this.emitEvent,
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
+      executionContext: this.executionContext,
     });
   };
 

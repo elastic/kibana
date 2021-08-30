@@ -21,6 +21,7 @@ export type {
   IErrorObject,
   AlertFlyoutCloseReason,
   AlertTypeParams,
+  AsApiContract,
 } from './types';
 
 export {

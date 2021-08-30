@@ -11,7 +11,7 @@ import { useQuery } from 'react-query';
 import { useKibana } from '../lib/kibana';
 import { useErrorToast } from './use_error_toast';
 
-export const useOsqueryIntegration = () => {
+export const useOsqueryIntegrationStatus = () => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
@@ -22,5 +22,9 @@ export const useOsqueryIntegration = () => {
           defaultMessage: 'Error while fetching osquery integration',
         }),
       }),
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
   });
 };

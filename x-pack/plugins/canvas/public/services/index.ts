@@ -8,9 +8,11 @@
 export * from './legacy';
 
 import { PluginServices } from '../../../../../src/plugins/presentation_util/public';
+
+import { CanvasCustomElementService } from './custom_element';
 import { CanvasEmbeddablesService } from './embeddables';
 import { CanvasExpressionsService } from './expressions';
-import { CanvasCustomElementService } from './custom_element';
+import { CanvasLabsService } from './labs';
 import { CanvasNavLinkService } from './nav_link';
 import { CanvasNotifyService } from './notify';
 import { CanvasPlatformService } from './platform';
@@ -21,6 +23,7 @@ export interface CanvasPluginServices {
   customElement: CanvasCustomElementService;
   embeddables: CanvasEmbeddablesService;
   expressions: CanvasExpressionsService;
+  labs: CanvasLabsService;
   navLink: CanvasNavLinkService;
   notify: CanvasNotifyService;
   platform: CanvasPlatformService;
@@ -30,12 +33,13 @@ export interface CanvasPluginServices {
 
 export const pluginServices = new PluginServices<CanvasPluginServices>();
 
-export const useEmbeddablesService = () =>
-  (() => pluginServices.getHooks().embeddables.useService())();
 export const useCustomElementService = () =>
   (() => pluginServices.getHooks().customElement.useService())();
+export const useEmbeddablesService = () =>
+  (() => pluginServices.getHooks().embeddables.useService())();
 export const useExpressionsService = () =>
   (() => pluginServices.getHooks().expressions.useService())();
+export const useLabsService = () => (() => pluginServices.getHooks().labs.useService())();
 export const useNavLinkService = () => (() => pluginServices.getHooks().navLink.useService())();
 export const useNotifyService = () => (() => pluginServices.getHooks().notify.useService())();
 export const usePlatformService = () => (() => pluginServices.getHooks().platform.useService())();

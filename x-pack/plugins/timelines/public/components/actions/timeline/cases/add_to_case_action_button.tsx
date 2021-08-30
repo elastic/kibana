@@ -21,7 +21,7 @@ import * as i18n from './translations';
 
 const AddToCaseActionButtonComponent: React.FC<AddToCaseActionProps> = ({
   ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
-  ecsRowData,
+  event,
   useInsertTimeline,
   casePermissions,
   appId,
@@ -36,7 +36,7 @@ const AddToCaseActionButtonComponent: React.FC<AddToCaseActionProps> = ({
     openPopover,
     closePopover,
     isPopoverOpen,
-  } = useAddToCase({ ecsRowData, useInsertTimeline, casePermissions, appId, onClose });
+  } = useAddToCase({ event, useInsertTimeline, casePermissions, appId, onClose });
   const tooltipContext = userCanCrud
     ? isEventSupported
       ? i18n.ACTION_ADD_TO_CASE_TOOLTIP

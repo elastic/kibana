@@ -22,6 +22,7 @@ import {
   Direction,
   TimelineFactoryQueryTypes,
   TimelineEventsQueries,
+  EntityType,
 } from '../../common/search_strategy';
 import type {
   DocValueFields,
@@ -50,6 +51,7 @@ export const detectionsTimelineIds = [
 type Refetch = () => void;
 
 export interface TimelineArgs {
+  consumers: Record<string, number>;
   events: TimelineItem[];
   id: string;
   inspect: InspectResponse;
@@ -71,6 +73,7 @@ export interface UseTimelineEventsProps {
   filterQuery?: ESQuery | string;
   skip?: boolean;
   endDate: string;
+  entityType: EntityType;
   excludeEcsData?: boolean;
   id: string;
   fields: string[];
@@ -113,6 +116,7 @@ export const useTimelineEvents = ({
   alertConsumers = NO_CONSUMERS,
   docValueFields,
   endDate,
+  entityType,
   excludeEcsData = false,
   id = ID,
   indexNames,
@@ -130,7 +134,7 @@ export const useTimelineEvents = ({
   const refetch = useRef<Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activePage, setActivePage] = useState(0);
   const [timelineRequest, setTimelineRequest] = useState<TimelineRequest<typeof language> | null>(
     null
@@ -159,7 +163,15 @@ export const useTimelineEvents = ({
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
 
+  const setUpdated = useCallback(
+    (updatedAt: number) => {
+      dispatch(tGridActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
+    },
+    [dispatch, id]
+  );
+
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
+    consumers: {},
     id,
     inspect: {
       dsl: [],
@@ -190,7 +202,7 @@ export const useTimelineEvents = ({
         if (data && data.search) {
           searchSubscription$.current = data.search
             .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
-              { ...request, entityType: 'alerts' },
+              { ...request, entityType },
               {
                 strategy:
                   request.language === 'eql'
@@ -202,18 +214,21 @@ export const useTimelineEvents = ({
             .subscribe({
               next: (response) => {
                 if (isCompleteResponse(response)) {
-                  setLoading(false);
                   setTimelineResponse((prevResponse) => {
                     const newTimelineResponse = {
                       ...prevResponse,
+                      consumers: response.consumers,
                       events: getTimelineEvents(response.edges),
                       inspect: getInspectResponse(response, prevResponse.inspect),
                       pageInfo: response.pageInfo,
                       totalCount: response.totalCount,
                       updatedAt: Date.now(),
                     };
+                    setUpdated(newTimelineResponse.updatedAt);
                     return newTimelineResponse;
                   });
+                  setLoading(false);
+
                   searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
                   setLoading(false);
@@ -237,7 +252,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data, addWarning, addError, skip]
+    [skip, data, entityType, setUpdated, addWarning, addError]
   );
 
   useEffect(() => {
@@ -334,6 +349,7 @@ export const useTimelineEvents = ({
   useEffect(() => {
     if (isEmpty(filterQuery)) {
       setTimelineResponse({
+        consumers: {},
         id,
         inspect: {
           dsl: [],

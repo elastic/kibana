@@ -12,7 +12,9 @@
     "public/**/*",
     "scripts/**/*",
     "server/**/*",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
+    // ECS and Osquery schema files
+    "public/common/schemas/*/**.json",
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },

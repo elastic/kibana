@@ -105,6 +105,84 @@ describe('SourceSettings', () => {
     );
   });
 
+  it('handles disabling synchronization', () => {
+    const wrapper = shallow(<SourceSettings />);
+
+    const synchronizeSwitch = wrapper.find('[data-test-subj="SynchronizeToggle"]').first();
+    const event = { target: { checked: false } };
+    synchronizeSwitch.prop('onChange')?.(event as any);
+
+    wrapper.find('[data-test-subj="SaveSyncControlsButton"]').simulate('click');
+
+    expect(updateContentSource).toHaveBeenCalledWith(fullContentSources[0].id, {
+      indexing: {
+        enabled: false,
+        features: {
+          content_extraction: { enabled: true },
+          thumbnails: { enabled: true },
+        },
+      },
+    });
+  });
+
+  it('handles disabling thumbnails', () => {
+    const wrapper = shallow(<SourceSettings />);
+
+    const thumbnailsSwitch = wrapper.find('[data-test-subj="ThumbnailsToggle"]').first();
+    const event = { target: { checked: false } };
+    thumbnailsSwitch.prop('onChange')?.(event as any);
+
+    wrapper.find('[data-test-subj="SaveSyncControlsButton"]').simulate('click');
+
+    expect(updateContentSource).toHaveBeenCalledWith(fullContentSources[0].id, {
+      indexing: {
+        enabled: true,
+        features: {
+          content_extraction: { enabled: true },
+          thumbnails: { enabled: false },
+        },
+      },
+    });
+  });
+
+  it('handles disabling content extraction', () => {
+    const wrapper = shallow(<SourceSettings />);
+
+    const contentExtractionSwitch = wrapper
+      .find('[data-test-subj="ContentExtractionToggle"]')
+      .first();
+    const event = { target: { checked: false } };
+    contentExtractionSwitch.prop('onChange')?.(event as any);
+
+    wrapper.find('[data-test-subj="SaveSyncControlsButton"]').simulate('click');
+
+    expect(updateContentSource).toHaveBeenCalledWith(fullContentSources[0].id, {
+      indexing: {
+        enabled: true,
+        features: {
+          content_extraction: { enabled: false },
+          thumbnails: { enabled: true },
+        },
+      },
+    });
+  });
+
+  it('disables the thumbnails switch when globally disabled', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...fullContentSources[0],
+        areThumbnailsConfigEnabled: false,
+      },
+    });
+
+    const wrapper = shallow(<SourceSettings />);
+
+    const synchronizeSwitch = wrapper.find('[data-test-subj="ThumbnailsToggle"]');
+
+    expect(synchronizeSwitch.prop('disabled')).toEqual(true);
+  });
+
   describe('DownloadDiagnosticsButton', () => {
     it('renders for org with correct href', () => {
       const wrapper = shallow(<SourceSettings />);

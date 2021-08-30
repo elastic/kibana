@@ -13,6 +13,8 @@ import type {
   RequestHandlerContext,
   ElasticsearchClient,
 } from 'kibana/server';
+import type Boom from '@hapi/boom';
+import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
 import type {
@@ -179,3 +181,5 @@ export interface ClusterSettingsReasonResponse {
     data?: string;
   };
 }
+
+export type ErrorTypes = Error | Boom.Boom | ResponseError | ElasticsearchClientError;

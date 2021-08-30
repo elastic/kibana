@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,6 +27,14 @@ export const DeleteDomainPanel: React.FC = ({}) => {
 
   return (
     <>
+      <EuiTitle size="s">
+        <h2>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.deleteDomainPanel.title', {
+            defaultMessage: 'Delete domain',
+          })}
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <EuiText size="s">
         <p>
           <FormattedMessage

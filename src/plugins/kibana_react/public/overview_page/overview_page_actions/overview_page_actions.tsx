@@ -39,7 +39,7 @@ export const overviewPageActions = ({
         className="kbnOverviewPageHeader__actionButton"
         flush="both"
         href={addBasePath('/app/home#/tutorial_directory')}
-        iconType="indexOpen"
+        iconType="plusInCircle"
       >
         {i18n.translate('kibana-react.kbnOverviewPageHeader.addDataButtonLabel', {
           defaultMessage: 'Add data',

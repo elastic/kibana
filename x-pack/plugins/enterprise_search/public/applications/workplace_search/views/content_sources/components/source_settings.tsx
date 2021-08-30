@@ -17,6 +17,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -50,6 +52,12 @@ import {
   SYNC_DIAGNOSTICS_TITLE,
   SYNC_DIAGNOSTICS_DESCRIPTION,
   SYNC_DIAGNOSTICS_BUTTON,
+  SYNC_MANAGEMENT_TITLE,
+  SYNC_MANAGEMENT_DESCRIPTION,
+  SYNC_MANAGEMENT_SYNCHRONIZE_LABEL,
+  SYNC_MANAGEMENT_THUMBNAILS_LABEL,
+  SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL,
+  SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL,
 } from '../constants';
 import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
@@ -63,7 +71,21 @@ export const SourceSettings: React.FC = () => {
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
-    contentSource: { name, id, serviceType },
+    contentSource: {
+      name,
+      id,
+      serviceType,
+      custom: isCustom,
+      isIndexedSource,
+      areThumbnailsConfigEnabled,
+      indexing: {
+        enabled,
+        features: {
+          contentExtraction: { enabled: contentExtractionEnabled },
+          thumbnails: { enabled: thumbnailsEnabled },
+        },
+      },
+    },
     buttonLoading,
   } = useValues(SourceLogic);
 
@@ -88,6 +110,11 @@ export const SourceSettings: React.FC = () => {
   const hideConfirm = () => setModalVisibility(false);
 
   const showConfig = isOrganization && !isEmpty(configuredFields);
+  const showSyncControls = isOrganization && isIndexedSource && !isCustom;
+
+  const [synchronizeChecked, setSynchronize] = useState(enabled);
+  const [thumbnailsChecked, setThumbnails] = useState(thumbnailsEnabled);
+  const [contentExtractionChecked, setContentExtraction] = useState(contentExtractionEnabled);
 
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
 
@@ -100,6 +127,18 @@ export const SourceSettings: React.FC = () => {
   const submitNameChange = (e: FormEvent) => {
     e.preventDefault();
     updateContentSource(id, { name: inputValue });
+  };
+
+  const submitSyncControls = () => {
+    updateContentSource(id, {
+      indexing: {
+        enabled: synchronizeChecked,
+        features: {
+          content_extraction: { enabled: contentExtractionChecked },
+          thumbnails: { enabled: thumbnailsChecked },
+        },
+      },
+    });
   };
 
   const handleSourceRemoval = () => {
@@ -178,6 +217,58 @@ export const SourceSettings: React.FC = () => {
               {SOURCE_CONFIG_LINK}
             </EuiButtonEmptyTo>
           </EuiFormRow>
+        </ContentSection>
+      )}
+      {showSyncControls && (
+        <ContentSection title={SYNC_MANAGEMENT_TITLE} description={SYNC_MANAGEMENT_DESCRIPTION}>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={synchronizeChecked}
+                onChange={(e) => setSynchronize(e.target.checked)}
+                label={SYNC_MANAGEMENT_SYNCHRONIZE_LABEL}
+                data-test-subj="SynchronizeToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={thumbnailsChecked}
+                onChange={(e) => setThumbnails(e.target.checked)}
+                label={
+                  areThumbnailsConfigEnabled
+                    ? SYNC_MANAGEMENT_THUMBNAILS_LABEL
+                    : SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL
+                }
+                disabled={!areThumbnailsConfigEnabled}
+                data-test-subj="ThumbnailsToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={contentExtractionChecked}
+                onChange={(e) => setContentExtraction(e.target.checked)}
+                label={SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL}
+                data-test-subj="ContentExtractionToggle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                onClick={submitSyncControls}
+                data-test-subj="SaveSyncControlsButton"
+              >
+                {SAVE_CHANGES_BUTTON}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </ContentSection>
       )}
       <ContentSection title={SYNC_DIAGNOSTICS_TITLE} description={SYNC_DIAGNOSTICS_DESCRIPTION}>

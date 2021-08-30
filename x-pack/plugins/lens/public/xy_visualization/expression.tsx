@@ -517,6 +517,9 @@ export function XYChart({
           background: {
             color: undefined, // removes background for embeddables
           },
+          legend: {
+            labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+          },
         }}
         baseTheme={chartBaseTheme}
         tooltip={{

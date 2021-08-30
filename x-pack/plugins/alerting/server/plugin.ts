@@ -36,7 +36,7 @@ import {
   SavedObjectsBulkGetObject,
   ServiceStatusLevels,
 } from '../../../../src/core/server';
-import type { AlertingRequestHandlerContext } from './types';
+import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
 import { defineRoutes } from './routes';
 import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import {
@@ -221,11 +221,15 @@ export class AlertingPlugin {
       });
     }
 
+    // Usage counter for telemetry
+    const usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
+
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.ruleTypeRegistry,
-      this.logger
+      this.logger,
+      plugins.actions.isPreconfiguredConnector
     );
 
     initializeApiKeyInvalidator(
@@ -274,7 +278,12 @@ export class AlertingPlugin {
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
-    defineRoutes(router, this.licenseState, plugins.encryptedSavedObjects);
+    defineRoutes({
+      router,
+      licenseState: this.licenseState,
+      usageCounter,
+      encryptedSavedObjects: plugins.encryptedSavedObjects,
+    });
 
     return {
       registerType<
@@ -381,6 +390,7 @@ export class AlertingPlugin {
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+      executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
       kibanaBaseUrl: this.kibanaBaseUrl,
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),

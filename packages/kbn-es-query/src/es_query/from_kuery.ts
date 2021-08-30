@@ -30,7 +30,7 @@ function buildQuery(
   indexPattern: IndexPatternBase | undefined,
   queryASTs: KueryNode[],
   config: SerializableRecord = {}
-) {
+): BoolQuery {
   const compoundQueryAST = nodeTypes.function.buildNode('and', queryASTs);
   const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern, config);
 

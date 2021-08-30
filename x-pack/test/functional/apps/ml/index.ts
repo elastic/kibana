@@ -88,6 +88,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./feature_controls'));
       loadTestFile(require.resolve('./settings'));
       loadTestFile(require.resolve('./embeddables'));
+      loadTestFile(require.resolve('./stack_management_jobs'));
     });
   });
 }

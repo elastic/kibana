@@ -27,7 +27,7 @@ interface Timestamp {
   lte?: string;
 }
 
-describe('context app', function () {
+describe('context predecessors', function () {
   let fetchPredecessors: (
     indexPatternId: string,
     timeField: string,
@@ -49,7 +49,7 @@ describe('context app', function () {
         data: {
           search: {
             searchSource: {
-              create: jest.fn().mockImplementation(() => mockSearchSource),
+              createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
             },
           },
         },
@@ -241,7 +241,7 @@ describe('context app', function () {
         data: {
           search: {
             searchSource: {
-              create: jest.fn().mockImplementation(() => mockSearchSource),
+              createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
             },
           },
         },

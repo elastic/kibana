@@ -7,13 +7,15 @@
  */
 
 import { DeprecationsFactory } from './deprecations_factory';
-import { RegisterDeprecationsConfig } from './types';
+import { DomainDeprecationDetails, RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
 
 import { CoreContext } from '../core_context';
 import { CoreService } from '../../types';
 import { InternalHttpServiceSetup } from '../http';
 import { Logger } from '../logging';
+import { IScopedClusterClient } from '../elasticsearch/client';
+import { SavedObjectsClientContract } from '../saved_objects/types';
 
 /**
  * The deprecations service provides a way for the Kibana platform to communicate deprecated
@@ -102,6 +104,25 @@ export interface DeprecationsServiceSetup {
   registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;
 }
 
+/**
+ * Server-side client that provides access to fetch all Kibana deprecations
+ *
+ * @public
+ */
+export interface DeprecationsClient {
+  getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
+}
+export interface InternalDeprecationsServiceStart {
+  /**
+   * Creates a {@link DeprecationsClient} with provided SO client and ES client.
+   *
+   */
+  asScopedToClient(
+    esClient: IScopedClusterClient,
+    savedObjectsClient: SavedObjectsClientContract
+  ): DeprecationsClient;
+}
+
 /** @internal */
 export interface InternalDeprecationsServiceSetup {
   getRegistry: (domainId: string) => DeprecationsServiceSetup;
@@ -113,21 +134,24 @@ export interface DeprecationsSetupDeps {
 }
 
 /** @internal */
-export class DeprecationsService implements CoreService<InternalDeprecationsServiceSetup> {
+export class DeprecationsService
+  implements CoreService<InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart> {
   private readonly logger: Logger;
+  private readonly deprecationsFactory: DeprecationsFactory;
 
   constructor(private readonly coreContext: Pick<CoreContext, 'logger' | 'configService'>) {
     this.logger = coreContext.logger.get('deprecations-service');
+    this.deprecationsFactory = new DeprecationsFactory({
+      logger: this.logger,
+    });
   }
 
   public setup({ http }: DeprecationsSetupDeps): InternalDeprecationsServiceSetup {
     this.logger.debug('Setting up Deprecations service');
-    const deprecationsFactory = new DeprecationsFactory({
-      logger: this.logger,
-    });
+    const deprecationsFactory = this.deprecationsFactory;
 
-    registerRoutes({ http, deprecationsFactory });
-    this.registerConfigDeprecationsInfo(deprecationsFactory);
+    registerRoutes({ http });
+    this.registerConfigDeprecationsInfo(this.deprecationsFactory);
 
     return {
       getRegistry: (domainId: string): DeprecationsServiceSetup => {
@@ -139,8 +163,27 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
     };
   }
 
-  public start() {}
+  public start(): InternalDeprecationsServiceStart {
+    return {
+      asScopedToClient: this.createScopedDeprecations(),
+    };
+  }
+
   public stop() {}
+
+  private createScopedDeprecations(): (
+    esClient: IScopedClusterClient,
+    savedObjectsClient: SavedObjectsClientContract
+  ) => DeprecationsClient {
+    return (esClient: IScopedClusterClient, savedObjectsClient: SavedObjectsClientContract) => {
+      return {
+        getAllDeprecations: this.deprecationsFactory.getAllDeprecations.bind(null, {
+          savedObjectsClient,
+          esClient,
+        }),
+      };
+    };
+  }
 
   private registerConfigDeprecationsInfo(deprecationsFactory: DeprecationsFactory) {
     const handledDeprecatedConfigs = this.coreContext.configService.getHandledDeprecatedConfigs();

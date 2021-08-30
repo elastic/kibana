@@ -3,16 +3,11 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "inspector",
-    "uiActions"
-  ],
-  "extraPublicDirs": [
-    "public/lib/test_samples"
-  ],
-  "requiredBundles": [
-    "savedObjects",
-    "kibanaReact",
-    "kibanaUtils"
-  ]
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "requiredPlugins": ["inspector", "uiActions"],
+  "extraPublicDirs": ["public/lib/test_samples"],
+  "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils"]
 }

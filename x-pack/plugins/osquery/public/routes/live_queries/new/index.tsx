@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
 
@@ -22,28 +22,20 @@ const NewLiveQueryPageComponent = () => {
   const { replace } = useHistory();
   const location = useLocation();
   const liveQueryListProps = useRouterNavigate('live_queries');
+  const [initialQuery, setInitialQuery] = useState<string | undefined>(undefined);
 
-  const formDefaultValue = useMemo(() => {
+  const agentPolicyId = useMemo(() => {
     const queryParams = qs.parse(location.search);
 
+    return queryParams?.agentPolicyId as string | undefined;
+  }, [location.search]);
+
+  useEffect(() => {
     if (location.state?.form.query) {
       replace({ state: null });
-      return { query: location.state?.form.query };
+      setInitialQuery(location.state?.form.query);
     }
-
-    if (queryParams?.agentPolicyId) {
-      return {
-        agentSelection: {
-          allAgentsSelected: false,
-          agents: [],
-          platformsSelected: [],
-          policiesSelected: [queryParams?.agentPolicyId],
-        },
-      };
-    }
-
-    return undefined;
-  }, [location.search, location.state, replace]);
+  }, [location.state?.form.query, replace]);
 
   const LeftColumn = useMemo(
     () => (
@@ -74,7 +66,7 @@ const NewLiveQueryPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      <LiveQuery defaultValue={formDefaultValue} />
+      <LiveQuery agentPolicyId={agentPolicyId} query={initialQuery} />
     </WithHeaderLayout>
   );
 };

@@ -20,6 +20,7 @@ import { useKibana } from '../../lib/kibana';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import type { EntityType } from '../../../../../timelines/common';
 
 export interface OwnProps {
   end: string;
@@ -63,6 +64,7 @@ const defaultAlertsFilters: Filter[] = [
 interface Props {
   timelineId: TimelineIdLiteral;
   endDate: string;
+  entityType?: EntityType;
   startDate: string;
   pageFilters?: Filter[];
 }
@@ -70,6 +72,7 @@ interface Props {
 const AlertsTableComponent: React.FC<Props> = ({
   timelineId,
   endDate,
+  entityType = 'alerts',
   startDate,
   pageFilters = [],
 }) => {
@@ -107,6 +110,7 @@ const AlertsTableComponent: React.FC<Props> = ({
       defaultModel={alertsDefaultModel}
       defaultCellActions={defaultCellActions}
       end={endDate}
+      entityType={entityType}
       id={timelineId}
       renderCellValue={DefaultCellRenderer}
       rowRenderers={defaultRowRenderers}

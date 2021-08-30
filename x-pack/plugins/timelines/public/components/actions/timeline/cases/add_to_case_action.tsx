@@ -8,8 +8,8 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { CaseStatuses, StatusAll } from '../../../../../../cases/common';
-import { Ecs } from '../../../../../common/ecs';
-import { useAddToCase } from '../../../../hooks/use_add_to_case';
+import { TimelineItem } from '../../../../../common/';
+import { useAddToCase, normalizedEventFields } from '../../../../hooks/use_add_to_case';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesStartServices } from '../../../../types';
 import { CreateCaseFlyout } from './create/flyout';
@@ -18,7 +18,7 @@ import * as i18n from './translations';
 
 export interface AddToCaseActionProps {
   ariaLabel?: string;
-  ecsRowData: Ecs;
+  event?: TimelineItem;
   useInsertTimeline?: Function;
   casePermissions: {
     crud: boolean;
@@ -30,15 +30,14 @@ export interface AddToCaseActionProps {
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
-  ecsRowData,
+  event,
   useInsertTimeline,
   casePermissions,
   appId,
   onClose,
 }) => {
-  const eventId = ecsRowData._id;
-  const eventIndex = ecsRowData._index;
-  const rule = ecsRowData.signal?.rule;
+  const eventId = event?.ecs._id ?? '';
+  const eventIndex = event?.ecs._index ?? '';
   const dispatch = useDispatch();
   const { cases } = useKibana<TimelinesStartServices>().services;
   const {
@@ -49,22 +48,26 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     createCaseUrl,
     isAllCaseModalOpen,
     isCreateCaseFlyoutOpen,
-  } = useAddToCase({ ecsRowData, useInsertTimeline, casePermissions, appId, onClose });
+  } = useAddToCase({ event, useInsertTimeline, casePermissions, appId, onClose });
 
   const getAllCasesSelectorModalProps = useMemo(() => {
+    const { ruleId, ruleName } = normalizedEventFields(event);
     return {
       alertData: {
         alertId: eventId,
         index: eventIndex ?? '',
         rule: {
-          id: rule?.id != null ? rule.id[0] : null,
-          name: rule?.name != null ? rule.name[0] : null,
+          id: ruleId,
+          name: ruleName,
         },
         owner: appId,
       },
       createCaseNavigation: {
         href: createCaseUrl,
         onClick: goToCreateCase,
+      },
+      hooks: {
+        useInsertTimeline,
       },
       hiddenStatuses: [CaseStatuses.closed, StatusAll],
       onRowClick: onCaseClicked,
@@ -82,10 +85,10 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     goToCreateCase,
     eventId,
     eventIndex,
-    rule?.id,
-    rule?.name,
     appId,
     dispatch,
+    useInsertTimeline,
+    event,
   ]);
 
   const closeCaseFlyoutOpen = useCallback(() => {

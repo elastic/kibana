@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { take } from 'rxjs/operators';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { schema } from '@kbn/config-schema';
 import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
@@ -19,27 +18,32 @@ import {
   ALERT_REASON as ALERT_REASON_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { take } from 'rxjs/operators';
 import { asDuration } from '../../../../observability/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import {
-  getEnvironmentLabel,
-  getEnvironmentEsField,
-} from '../../../common/environment_filter_values';
+import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
 import {
   AlertType,
-  APM_SERVER_FEATURE_ID,
   ALERT_TYPES_CONFIG,
+  APM_SERVER_FEATURE_ID,
   formatTransactionDurationReason,
 } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
+import {
+  getEnvironmentEsField,
+  getEnvironmentLabel,
+} from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { getDurationFormatter } from '../../../common/utils/formatters';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { getDurationFormatter } from '../../../common/utils/formatters';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
@@ -105,8 +109,23 @@ export function registerTransactionDurationAlertType({
         savedObjectsClient: services.savedObjectsClient,
       });
 
+      // only query transaction events when set to 'never',
+      // to prevent (likely) unnecessary blocking request
+      // in rule execution
+      const searchAggregatedTransactions =
+        config['xpack.apm.searchAggregatedTransactions'] !==
+        SearchAggregatedTransactionSetting.never;
+
+      const index = searchAggregatedTransactions
+        ? indices['apm_oss.metricsIndices']
+        : indices['apm_oss.transactionIndices'];
+
+      const field = getTransactionDurationFieldForAggregatedTransactions(
+        searchAggregatedTransactions
+      );
+
       const searchParams = {
-        index: indices['apm_oss.transactionIndices'],
+        index,
         body: {
           size: 0,
           query: {
@@ -119,9 +138,9 @@ export function registerTransactionDurationAlertType({
                     },
                   },
                 },
-                {
-                  term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction },
-                },
+                ...getDocumentTypeFilterForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },
                 {
                   term: {
@@ -135,10 +154,10 @@ export function registerTransactionDurationAlertType({
           aggs: {
             latency:
               alertParams.aggregationType === 'avg'
-                ? { avg: { field: TRANSACTION_DURATION } }
+                ? { avg: { field } }
                 : {
                     percentiles: {
-                      field: TRANSACTION_DURATION,
+                      field,
                       percents: [
                         alertParams.aggregationType === '95th' ? 95 : 99,
                       ],

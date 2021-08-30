@@ -16,7 +16,6 @@ import { CreateRuleOptions } from '../types';
 export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) => {
   const {
     experimentalFeatures,
-    indexAlias,
     lists,
     logger,
     mergeStrategy,
@@ -25,7 +24,6 @@ export const createIndicatorMatchAlertType = (createOptions: CreateRuleOptions) 
     ruleDataService,
   } = createOptions;
   const createSecurityRuleType = createSecurityRuleTypeFactory({
-    indexAlias,
     lists,
     logger,
     mergeStrategy,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isString } from 'lodash/fp';
 import {
   LogMeta,
   SavedObjectMigrationMap,
@@ -13,6 +14,7 @@ import {
   SavedObjectMigrationContext,
   SavedObjectAttributes,
   SavedObjectAttribute,
+  SavedObjectReference,
 } from '../../../../../src/core/server';
 import { RawAlert, RawAlertAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -53,7 +55,8 @@ export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>)
   doc.attributes.alertTypeId === 'siem.signals';
 
 export function getMigrations(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  isPreconfigured: (connectorId: string) => boolean
 ): SavedObjectMigrationMap {
   const migrationWhenRBACWasIntroduced = createEsoMigration(
     encryptedSavedObjects,
@@ -91,12 +94,26 @@ export function getMigrations(
     pipeMigrations(removeNullAuthorFromSecurityRules)
   );
 
+  const migrationSecurityRules715 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    pipeMigrations(addExceptionListsToReferences)
+  );
+
+  const migrateRules716 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
+    pipeMigrations(setLegacyId, getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured))
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
     '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
     '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
     '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
+    '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
+    '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
   };
 }
 
@@ -465,6 +482,186 @@ function removeNullAuthorFromSecurityRules(
       },
     },
   };
+}
+
+/**
+ * This migrates exception list containers to saved object references on an upgrade.
+ * We only migrate if we find these conditions:
+ *   - exceptionLists are an array and not null, undefined, or malformed data.
+ *   - The exceptionList item is an object and id is a string and not null, undefined, or malformed data
+ *   - The existing references do not already have an exceptionItem reference already found within it.
+ * Some of these issues could crop up during either user manual errors of modifying things, earlier migration
+ * issues, etc...
+ * @param doc The document that might have exceptionListItems to migrate
+ * @returns The document migrated with saved object references
+ */
+function addExceptionListsToReferences(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: {
+      params: { exceptionsList },
+    },
+    references,
+  } = doc;
+  if (!Array.isArray(exceptionsList)) {
+    // early return if we are not an array such as being undefined or null or malformed.
+    return doc;
+  } else {
+    const exceptionsToTransform = removeMalformedExceptionsList(exceptionsList);
+    const newReferences = exceptionsToTransform.flatMap<SavedObjectReference>(
+      (exceptionItem, index) => {
+        const existingReferenceFound = references?.find((reference) => {
+          return (
+            reference.id === exceptionItem.id &&
+            ((reference.type === 'exception-list' && exceptionItem.namespace_type === 'single') ||
+              (reference.type === 'exception-list-agnostic' &&
+                exceptionItem.namespace_type === 'agnostic'))
+          );
+        });
+        if (existingReferenceFound) {
+          // skip if the reference already exists for some uncommon reason so we do not add an additional one.
+          // This enables us to be idempotent and you can run this migration multiple times and get the same output.
+          return [];
+        } else {
+          return [
+            {
+              name: `param:exceptionsList_${index}`,
+              id: String(exceptionItem.id),
+              type:
+                exceptionItem.namespace_type === 'agnostic'
+                  ? 'exception-list-agnostic'
+                  : 'exception-list',
+            },
+          ];
+        }
+      }
+    );
+    if (references == null && newReferences.length === 0) {
+      // Avoid adding an empty references array if the existing saved object never had one to begin with
+      return doc;
+    } else {
+      return { ...doc, references: [...(references ?? []), ...newReferences] };
+    }
+  }
+}
+
+/**
+ * This will do a flatMap reduce where we only return exceptionsLists and their items if:
+ *   - exceptionLists are an array and not null, undefined, or malformed data.
+ *   - The exceptionList item is an object and id is a string and not null, undefined, or malformed data
+ *
+ * Some of these issues could crop up during either user manual errors of modifying things, earlier migration
+ * issues, etc...
+ * @param exceptionsList The list of exceptions
+ * @returns The exception lists if they are a valid enough shape
+ */
+function removeMalformedExceptionsList(
+  exceptionsList: SavedObjectAttribute
+): SavedObjectAttributes[] {
+  if (!Array.isArray(exceptionsList)) {
+    // early return if we are not an array such as being undefined or null or malformed.
+    return [];
+  } else {
+    return exceptionsList.flatMap((exceptionItem) => {
+      if (!(exceptionItem instanceof Object) || !isString(exceptionItem.id)) {
+        // return early if we are not an object such as being undefined or null or malformed
+        // or the exceptionItem.id is not a string from being malformed
+        return [];
+      } else {
+        return [exceptionItem];
+      }
+    });
+  }
+}
+
+function setLegacyId(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const { id } = doc;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      legacyId: id,
+    },
+  };
+}
+
+function getRemovePreconfiguredConnectorsFromReferencesFn(
+  isPreconfigured: (connectorId: string) => boolean
+) {
+  return (doc: SavedObjectUnsanitizedDoc<RawAlert>) => {
+    return removePreconfiguredConnectorsFromReferences(doc, isPreconfigured);
+  };
+}
+
+function removePreconfiguredConnectorsFromReferences(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>,
+  isPreconfigured: (connectorId: string) => boolean
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: { actions },
+    references,
+  } = doc;
+
+  // Look for connector references
+  const connectorReferences = (references ?? []).filter((ref: SavedObjectReference) =>
+    ref.name.startsWith('action_')
+  );
+  if (connectorReferences.length > 0) {
+    const restReferences = (references ?? []).filter(
+      (ref: SavedObjectReference) => !ref.name.startsWith('action_')
+    );
+
+    const updatedConnectorReferences: SavedObjectReference[] = [];
+    const updatedActions: RawAlert['actions'] = [];
+
+    // For each connector reference, check if connector is preconfigured
+    // If yes, we need to remove from the references array and update
+    // the corresponding action so it directly references the preconfigured connector id
+    connectorReferences.forEach((connectorRef: SavedObjectReference) => {
+      // Look for the corresponding entry in the actions array
+      const correspondingAction = getCorrespondingAction(actions, connectorRef.name);
+      if (correspondingAction) {
+        if (isPreconfigured(connectorRef.id)) {
+          updatedActions.push({
+            ...correspondingAction,
+            actionRef: `preconfigured:${connectorRef.id}`,
+          });
+        } else {
+          updatedActions.push(correspondingAction);
+          updatedConnectorReferences.push(connectorRef);
+        }
+      } else {
+        // Couldn't find the matching action, leave as is
+        updatedConnectorReferences.push(connectorRef);
+      }
+    });
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        actions: [...updatedActions],
+      },
+      references: [...updatedConnectorReferences, ...restReferences],
+    };
+  }
+  return doc;
+}
+
+function getCorrespondingAction(
+  actions: SavedObjectAttribute,
+  connectorRef: string
+): RawAlertAction | null {
+  if (!Array.isArray(actions)) {
+    return null;
+  } else {
+    return actions.find(
+      (action) => (action as RawAlertAction)?.actionRef === connectorRef
+    ) as RawAlertAction;
+  }
 }
 
 function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {

@@ -7,7 +7,6 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
 import {
   getCaseDetailsUrl,
   getCaseDetailsUrlWithCommentId,
@@ -60,6 +59,7 @@ const TimelineDetailsPanel = () => {
     <DetailsPanel
       browserFields={browserFields}
       docValueFields={docValueFields}
+      entityType="alerts"
       isFlyoutView
       timelineId={TimelineId.casePage}
     />
