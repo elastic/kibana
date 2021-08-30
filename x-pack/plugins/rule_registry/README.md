@@ -47,20 +47,23 @@ await plugins.ruleRegistry.createOrUpdateComponentTemplate({
       // mappingFromFieldMap is a utility function that will generate an
       // ES mapping from a field map object. You can also define a literal
       // mapping.
-      mappings: mappingFromFieldMap({
-        [SERVICE_NAME]: {
-          type: 'keyword',
+      mappings: mappingFromFieldMap(
+        {
+          [SERVICE_NAME]: {
+            type: 'keyword',
+          },
+          [SERVICE_ENVIRONMENT]: {
+            type: 'keyword',
+          },
+          [TRANSACTION_TYPE]: {
+            type: 'keyword',
+          },
+          [PROCESSOR_EVENT]: {
+            type: 'keyword',
+          },
         },
-        [SERVICE_ENVIRONMENT]: {
-          type: 'keyword',
-        },
-        [TRANSACTION_TYPE]: {
-          type: 'keyword',
-        },
-        [PROCESSOR_EVENT]: {
-          type: 'keyword',
-        },
-      }, 'strict'),
+        'strict'
+      ),
     },
   },
 });
@@ -73,7 +76,7 @@ await plugins.ruleRegistry.createOrUpdateComponentTemplate({
 await plugins.ruleRegistry.createOrUpdateIndexTemplate({
   name: plugins.ruleRegistry.getFullAssetName('apm-index-template'),
   body: {
-    index_patterns: [plugins.ruleRegistry.getFullAssetName('observability-apm*')],
+    index_patterns: [plugins.ruleRegistry.getFullAssetName('observability.apm*')],
     composed_of: [
       // Technical component template, required
       plugins.ruleRegistry.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
@@ -85,7 +88,7 @@ await plugins.ruleRegistry.createOrUpdateIndexTemplate({
 // Finally, create the rule data client that can be injected into rule type
 // executors and API endpoints
 const ruleDataClient = new RuleDataClient({
-  alias: plugins.ruleRegistry.getFullAssetName('observability-apm'),
+  alias: plugins.ruleRegistry.getFullAssetName('observability.apm'),
   getClusterClient: async () => {
     const coreStart = await getCoreStart();
     return coreStart.elasticsearch.client.asInternalUser;
@@ -129,12 +132,11 @@ The following fields are defined in the technical field component template and s
 - `kibana.alert.rule.consumer`: the feature which produced the alert (inherited from the rule producer field). Usually a Kibana feature id like `apm`, `siem`...
 - `kibana.alert.id`: the id of the alert, that is unique within the context of the rule execution it was created in. E.g., for a rule that monitors latency for all services in all environments, this might be `opbeans-java:production`.
 - `kibana.alert.uuid`: the unique identifier for the alert during its lifespan. If an alert recovers (or closes), this identifier is re-generated when it is opened again.
-- `kibana.alert.status`: the status of the alert. Can be `open` or `closed`.
+- `kibana.alert.status`: the status of the alert. Can be `active` or `recovered`.
 - `kibana.alert.start`: the ISO timestamp of the time at which the alert started.
 - `kibana.alert.end`: the ISO timestamp of the time at which the alert recovered.
 - `kibana.alert.duration.us`: the duration of the alert, in microseconds. This is always the difference between either the current time, or the time when the alert recovered.
-- `kibana.alert.severity.level`: the severity of the alert, as a keyword (e.g. critical).
-- `kibana.alert.severity.value`: the severity of the alert, as a numerical value, which allows sorting.
+- `kibana.alert.severity`: the severity of the alert, as a keyword (e.g. critical).
 - `kibana.alert.evaluation.value`: The measured (numerical value).
 - `kibana.alert.threshold.value`: The threshold that was defined (or, in case of multiple thresholds, the one that was exceeded).
 - `kibana.alert.ancestors`: the array of ancestors (if any) for the alert.

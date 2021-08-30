@@ -7,13 +7,19 @@
  */
 
 import { parse } from 'hjson';
-import type { ElasticsearchClient } from 'src/core/server';
 
-import { VegaSavedObjectAttributes, VisTypeVegaPluginSetupDependencies } from '../types';
+import type { SavedObjectsClientContract, SavedObjectsFindResult } from '../../../../core/server';
+import type { SavedVisState } from '../../../visualizations/common';
+import type { VegaSavedObjectAttributes, VisTypeVegaPluginSetupDependencies } from '../types';
 
 type UsageCollectorDependencies = Pick<VisTypeVegaPluginSetupDependencies, 'home'>;
-
 type VegaType = 'vega' | 'vega-lite';
+
+export interface VegaUsage {
+  vega_lib_specs_total: number;
+  vega_lite_lib_specs_total: number;
+  vega_use_map_total: number;
+}
 
 function isVegaType(attributes: any): attributes is VegaSavedObjectAttributes {
   return attributes && attributes.type === 'vega' && attributes.params?.spec;
@@ -45,15 +51,8 @@ const getDefaultVegaVisualizations = (home: UsageCollectorDependencies['home']) 
   return titles;
 };
 
-export interface VegaUsage {
-  vega_lib_specs_total: number;
-  vega_lite_lib_specs_total: number;
-  vega_use_map_total: number;
-}
-
 export const getStats = async (
-  esClient: ElasticsearchClient,
-  index: string,
+  soClient: SavedObjectsClientContract,
   { home }: UsageCollectorDependencies
 ): Promise<VegaUsage | undefined> => {
   let shouldPublishTelemetry = false;
@@ -64,58 +63,54 @@ export const getStats = async (
     vega_use_map_total: 0,
   };
 
-  const searchParams = {
-    size: 10000,
-    index,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._id', 'hits.hits._source.visualization'],
-    body: {
-      query: {
-        bool: {
-          filter: { term: { type: 'visualization' } },
-        },
-      },
-    },
-  };
-
-  const { body: esResponse } = await esClient.search<{ visualization: { visState: string } }>(
-    searchParams
-  );
-  const size = esResponse?.hits?.hits?.length ?? 0;
-
-  if (!size) {
-    return;
-  }
-
   // we want to exclude the Vega Sample Data visualizations from the stats
   // in order to have more accurate results
   const excludedFromStatsVisualizations = getDefaultVegaVisualizations(home);
-  for (const hit of esResponse.hits.hits) {
-    const visualization = hit._source?.visualization;
-    const visState = JSON.parse(visualization?.visState ?? '{}');
 
-    if (isVegaType(visState) && !excludedFromStatsVisualizations.includes(visState.title)) {
-      try {
-        const spec = parse(visState.params.spec, { legacyRoot: false });
+  const finder = await soClient.createPointInTimeFinder({
+    type: 'visualization',
+    perPage: 1000,
+    namespaces: ['*'],
+  });
 
-        if (spec) {
-          shouldPublishTelemetry = true;
+  const doTelemetry = ({ params }: SavedVisState) => {
+    try {
+      const spec = parse(params.spec, { legacyRoot: false });
 
-          if (checkVegaSchemaType(spec.$schema, 'vega')) {
-            vegaUsage.vega_lib_specs_total++;
-          }
-          if (checkVegaSchemaType(spec.$schema, 'vega-lite')) {
-            vegaUsage.vega_lite_lib_specs_total++;
-          }
-          if (spec.config?.kibana?.type === 'map') {
-            vegaUsage.vega_use_map_total++;
-          }
+      if (spec) {
+        shouldPublishTelemetry = true;
+
+        if (checkVegaSchemaType(spec.$schema, 'vega')) {
+          vegaUsage.vega_lib_specs_total++;
         }
-      } catch (e) {
-        // Let it go, the data is invalid and we'll don't need to handle it
+        if (checkVegaSchemaType(spec.$schema, 'vega-lite')) {
+          vegaUsage.vega_lite_lib_specs_total++;
+        }
+        if (spec.config?.kibana?.type === 'map') {
+          vegaUsage.vega_use_map_total++;
+        }
       }
+    } catch (e) {
+      // Let it go, the data is invalid and we'll don't need to handle it
     }
+  };
+
+  for await (const response of finder.find()) {
+    (response.saved_objects || []).forEach(({ attributes }: SavedObjectsFindResult<any>) => {
+      if (attributes?.visState) {
+        try {
+          const visState: SavedVisState = JSON.parse(attributes.visState);
+
+          if (isVegaType(visState) && !excludedFromStatsVisualizations.includes(visState.title)) {
+            doTelemetry(visState);
+          }
+        } catch {
+          // nothing to be here, "so" not valid
+        }
+      }
+    });
   }
+  await finder.close();
 
   return shouldPublishTelemetry ? vegaUsage : undefined;
 };

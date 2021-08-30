@@ -11,7 +11,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { LogStream } from '../../../../../../infra/public';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import type { IUrlParams } from '../../../../context/url_params_context/types';
+import type { ApmUrlParams } from '../../../../context/url_params_context/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
 import { WaterfallContainer } from './waterfall_container';
@@ -19,7 +19,7 @@ import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/wa
 
 interface Props {
   transaction: Transaction;
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
   waterfall: IWaterfall;
   exceedsMax: boolean;
 }
@@ -101,7 +101,7 @@ function TimelineTabContent({
   waterfall,
   exceedsMax,
 }: {
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
   waterfall: IWaterfall;
   exceedsMax: boolean;
 }) {

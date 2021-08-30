@@ -16,10 +16,16 @@ import React, {
   ElementRef,
 } from 'react';
 import { PluggableList } from 'unified';
-import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import {
+  EuiMarkdownEditor,
+  EuiMarkdownEditorProps,
+  EuiMarkdownAstNode,
+  EuiMarkdownEditorUiPlugin,
+} from '@elastic/eui';
 import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
 import { CommentEditorContext } from './context';
+import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
@@ -43,12 +49,21 @@ export interface MarkdownEditorRef {
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
   ({ ariaLabel, dataTestSubj, editorId, height, onChange, value }, ref) => {
+    const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-    const onParse = useCallback((err, { messages }) => {
+    const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
       setMarkdownErrorMessages(err ? [err] : messages);
+      astRef.current = ast;
     }, []);
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
+
+    useLensButtonToggle({
+      astRef,
+      uiPlugins,
+      editorRef: ref as React.MutableRefObject<MarkdownEditorRef>,
+      value,
+    });
 
     const commentEditorContextValue = useMemo(
       () => ({

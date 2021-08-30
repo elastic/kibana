@@ -192,6 +192,9 @@ export interface GetAlertInstanceSummaryParams {
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 
+// NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
+const preconfiguredConnectorActionRefPrefix = 'preconfigured:';
+
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
   fieldNames: { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' },
@@ -1520,6 +1523,13 @@ export class RulesClient {
     references: SavedObjectReference[]
   ) {
     return actions.map((action) => {
+      if (action.actionRef.startsWith(preconfiguredConnectorActionRefPrefix)) {
+        return {
+          ...omit(action, 'actionRef'),
+          id: action.actionRef.replace(preconfiguredConnectorActionRefPrefix, ''),
+        };
+      }
+
       const reference = references.find((ref) => ref.name === action.actionRef);
       if (!reference) {
         throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
@@ -1729,17 +1739,25 @@ export class RulesClient {
       alertActions.forEach(({ id, ...alertAction }, i) => {
         const actionResultValue = actionResults.find((action) => action.id === id);
         if (actionResultValue) {
-          const actionRef = `action_${i}`;
-          references.push({
-            id,
-            name: actionRef,
-            type: 'action',
-          });
-          actions.push({
-            ...alertAction,
-            actionRef,
-            actionTypeId: actionResultValue.actionTypeId,
-          });
+          if (actionsClient.isPreconfigured(id)) {
+            actions.push({
+              ...alertAction,
+              actionRef: `${preconfiguredConnectorActionRefPrefix}${id}`,
+              actionTypeId: actionResultValue.actionTypeId,
+            });
+          } else {
+            const actionRef = `action_${i}`;
+            references.push({
+              id,
+              name: actionRef,
+              type: 'action',
+            });
+            actions.push({
+              ...alertAction,
+              actionRef,
+              actionTypeId: actionResultValue.actionTypeId,
+            });
+          }
         } else {
           actions.push({
             ...alertAction,

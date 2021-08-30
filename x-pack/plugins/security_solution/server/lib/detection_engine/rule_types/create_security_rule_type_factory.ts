@@ -33,6 +33,7 @@ import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory } from './factories';
 import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
@@ -50,6 +51,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
         alertId,
         params,
         previousStartedAt,
+        startedAt,
         services,
         spaceId,
         state,
@@ -277,7 +279,20 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
 
             logger.info(buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`));
 
-            if (createdSignalsCount) {
+            if (ruleSO.attributes.throttle != null) {
+              await scheduleThrottledNotificationActions({
+                alertInstance: services.alertInstanceFactory(alertId),
+                throttle: ruleSO.attributes.throttle,
+                startedAt,
+                id: ruleSO.id,
+                kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                  ?.kibana_siem_app_url,
+                outputIndex: ruleDataClient.indexName,
+                ruleId,
+                esClient: services.scopedClusterClient.asCurrentUser,
+                notificationRuleParams,
+              });
+            } else if (createdSignalsCount) {
               const alertInstance = services.alertInstanceFactory(alertId);
               scheduleNotificationActions({
                 alertInstance,

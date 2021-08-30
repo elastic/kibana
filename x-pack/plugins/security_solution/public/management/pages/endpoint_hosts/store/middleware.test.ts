@@ -19,6 +19,7 @@ import {
   HostResultList,
   HostIsolationResponse,
   ISOLATION_ACTIONS,
+  ActivityLog,
 } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
@@ -27,6 +28,7 @@ import { EndpointState, TransformStats } from '../types';
 import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import {
   createUninitialisedResourceState,
   createLoadingResourceState,
@@ -43,11 +45,16 @@ import {
   hostIsolationResponseMock,
 } from '../../../../common/lib/endpoint_isolation/mocks';
 import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
+import {
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+} from '../../../../../common/endpoint/constants';
 
 jest.mock('../../policy/store/services/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+  sendGetFleetAgentsWithEndpoint: () => Promise.resolve({ total: 0 }),
 }));
 
 jest.mock('../../../../common/lib/kibana');
@@ -127,8 +134,18 @@ describe('endpoint list middleware', () => {
     dispatch({
       type: 'appRequestedEndpointList',
     });
-    await waitForAction('serverReturnedEndpointList');
-    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
+
+    await Promise.all([
+      waitForAction('serverReturnedEndpointList'),
+      waitForAction('endpointPendingActionsStateChanged'),
+      waitForAction('serverReturnedEndpointsTotal'),
+      waitForAction('serverReturnedMetadataPatterns'),
+      waitForAction('serverCancelledPolicyItemsLoading'),
+      waitForAction('serverReturnedEndpointExistValue'),
+      waitForAction('serverReturnedAgenstWithEndpointsTotal'),
+    ]);
+
+    expect(fakeHttpServices.post).toHaveBeenCalledWith(HOST_METADATA_LIST_ROUTE, {
       body: JSON.stringify({
         paging_properties: [{ page_index: '0' }, { page_size: '10' }],
         filters: { kql: '' },
@@ -244,24 +261,40 @@ describe('endpoint list middleware', () => {
       });
     };
 
+    const dispatchGetActivityLogPaging = ({ page = 1 }: { page: number }) => {
+      dispatch({
+        type: 'endpointDetailsActivityLogUpdatePaging',
+        payload: {
+          page,
+          pageSize: 50,
+        },
+      });
+    };
+
+    const dispatchGetActivityLogUpdateInvalidDateRange = ({
+      isInvalidDateRange = false,
+    }: {
+      isInvalidDateRange: boolean;
+    }) => {
+      dispatch({
+        type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+        payload: {
+          isInvalidDateRange,
+        },
+      });
+    };
+
     it('should set ActivityLog state to loading', async () => {
       dispatchUserChangedUrl();
-      dispatchGetActivityLogLoading();
 
       const loadingDispatched = waitForAction('endpointDetailsActivityLogChanged', {
         validate(action) {
           return isLoadingResourceState(action.payload);
         },
       });
+      dispatchGetActivityLogLoading();
 
       const loadingDispatchedResponse = await loadingDispatched;
-      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
-        path: expect.any(String),
-        query: {
-          page: 1,
-          page_size: 50,
-        },
-      });
       expect(loadingDispatchedResponse.payload.type).toEqual('LoadingResourceState');
     });
 
@@ -283,6 +316,88 @@ describe('endpoint list middleware', () => {
         },
       });
       expect(activityLogResponse.payload.type).toEqual('LoadedResourceState');
+    });
+
+    it('should set ActivityLog to Failed if API call fails', async () => {
+      dispatchUserChangedUrl();
+
+      const apiError = new Error('oh oh');
+      const failedDispatched = waitForAction('endpointDetailsActivityLogChanged', {
+        validate(action) {
+          return isFailedResourceState(action.payload);
+        },
+      });
+
+      mockedApis.responseProvider.activityLogResponse.mockImplementation(() => {
+        throw apiError;
+      });
+
+      const failedAction = (await failedDispatched).payload as FailedResourceState<ActivityLog>;
+      expect(failedAction.error).toBe(apiError);
+    });
+
+    it('should not call API again if it fails', async () => {
+      dispatchUserChangedUrl();
+
+      const apiError = new Error('oh oh');
+      const failedDispatched = waitForAction('endpointDetailsActivityLogChanged', {
+        validate(action) {
+          return isFailedResourceState(action.payload);
+        },
+      });
+
+      mockedApis.responseProvider.activityLogResponse.mockImplementation(() => {
+        throw apiError;
+      });
+
+      await failedDispatched;
+
+      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not fetch Activity Log with invalid date ranges', async () => {
+      dispatchUserChangedUrl();
+
+      const updateInvalidDateRangeDispatched = waitForAction(
+        'endpointDetailsActivityLogUpdateIsInvalidDateRange'
+      );
+      dispatchGetActivityLogUpdateInvalidDateRange({ isInvalidDateRange: true });
+      await updateInvalidDateRangeDispatched;
+
+      expect(mockedApis.responseProvider.activityLogResponse).not.toHaveBeenCalled();
+    });
+
+    it('should call get Activity Log API with valid date ranges', async () => {
+      dispatchUserChangedUrl();
+
+      const updatePagingDispatched = waitForAction('endpointDetailsActivityLogUpdatePaging');
+      dispatchGetActivityLogPaging({ page: 1 });
+
+      const updateInvalidDateRangeDispatched = waitForAction(
+        'endpointDetailsActivityLogUpdateIsInvalidDateRange'
+      );
+      dispatchGetActivityLogUpdateInvalidDateRange({ isInvalidDateRange: false });
+      await updateInvalidDateRangeDispatched;
+      await updatePagingDispatched;
+
+      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalled();
+    });
+
+    it('should call get Activity Log API with correct paging options', async () => {
+      dispatchUserChangedUrl();
+
+      const updatePagingDispatched = waitForAction('endpointDetailsActivityLogUpdatePaging');
+      dispatchGetActivityLogPaging({ page: 3 });
+
+      await updatePagingDispatched;
+
+      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
+        path: expect.any(String),
+        query: {
+          page: 3,
+          page_size: 50,
+        },
+      });
     });
   });
 
@@ -388,6 +503,66 @@ describe('endpoint list middleware', () => {
         TransformStats[]
       >;
       expect(failedAction.error).toBe(apiError);
+    });
+  });
+
+  describe('loads selected endpoint details', () => {
+    beforeEach(() => {
+      endpointPageHttpMock(fakeHttpServices);
+    });
+
+    const endpointList = getEndpointListApiResponse();
+    const agentId = endpointList.hosts[0].metadata.agent.id;
+    const search = getEndpointDetailsPath({
+      name: 'endpointDetails',
+      selected_endpoint: agentId,
+    });
+    const dispatchUserChangedUrl = () => {
+      dispatchUserChangedUrlToEndpointList({ search: `?${search.split('?').pop()}` });
+    };
+
+    it('triggers the endpoint details related actions when the url is changed', async () => {
+      dispatchUserChangedUrl();
+
+      // Note: these are left intenationally in sequence
+      // to test specific race conditions that currently exist in the middleware
+      await waitForAction('serverCancelledPolicyItemsLoading');
+
+      // loads the endpoints list
+      await waitForAction('serverReturnedEndpointList');
+
+      // loads the specific endpoint details
+      await waitForAction('serverReturnedEndpointDetails');
+
+      // loads the specific endpoint pending actions
+      await waitForAction('endpointPendingActionsStateChanged');
+
+      expect(fakeHttpServices.get).toHaveBeenCalledWith(
+        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId })
+      );
+    });
+
+    it('handles the endpointDetailsLoad action', async () => {
+      const endpointId = agentId;
+      dispatch({
+        type: 'endpointDetailsLoad',
+        payload: {
+          endpointId,
+        },
+      });
+
+      // note: this action does not load the endpoints list
+
+      // loads the specific endpoint details
+      await waitForAction('serverReturnedEndpointDetails');
+      await waitForAction('serverReturnedEndpointNonExistingPolicies');
+
+      // loads the specific endpoint pending actions
+      await waitForAction('endpointPendingActionsStateChanged');
+
+      expect(fakeHttpServices.get).toHaveBeenCalledWith(
+        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: endpointId })
+      );
     });
   });
 });
