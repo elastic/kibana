@@ -15,20 +15,15 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  /* ALERT_REASON, ALERT_RULE_ID, */ ALERT_RULE_NAME,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ComponentType, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 
 import type { BrowserFields, RowRenderer, TimelineItem } from '../../../../common';
-import { tGridActions } from '../../../store/t_grid';
 import { RuleName } from '../../rule_name';
 import { isEventBuildingBlockType } from '../body/helpers';
 
@@ -69,6 +64,7 @@ interface EventRenderedViewProps {
   events: TimelineItem[];
   leadingControlColumns: EuiDataGridControlColumn[];
   onChangePage: (newActivePage: number) => void;
+  onChangeItemsPerPage: (newItemsPerPage: number) => void;
   pageIndex: number;
   pageSize: number;
   pageSizeOptions: number[];
@@ -89,6 +85,7 @@ const EventRenderedViewComponent = ({
   events,
   leadingControlColumns,
   onChangePage,
+  onChangeItemsPerPage,
   pageIndex,
   pageSize,
   pageSizeOptions,
@@ -96,8 +93,6 @@ const EventRenderedViewComponent = ({
   timelineId,
   totalItemCount,
 }: EventRenderedViewProps) => {
-  const dispatch = useDispatch();
-
   const ActionTitle = useMemo(
     () => (
       <EuiFlexGroup gutterSize="m">
@@ -220,12 +215,10 @@ const EventRenderedViewComponent = ({
         onChangePage(pageChange.page.index);
       }
       if (pageChange.page.size !== pageSize) {
-        dispatch(
-          tGridActions.updateItemsPerPage({ id: timelineId, itemsPerPage: pageChange.page.size })
-        );
+        onChangeItemsPerPage(pageChange.page.size);
       }
     },
-    [dispatch, onChangePage, pageIndex, pageSize, timelineId]
+    [onChangePage, pageIndex, pageSize, onChangeItemsPerPage]
   );
 
   const pagination = useMemo(

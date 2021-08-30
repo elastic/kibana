@@ -72,6 +72,18 @@ function getLensTopNavConfig(options: {
       });
 
   topNavMenu.push({
+    label: i18n.translate('xpack.lens.app.inspect', {
+      defaultMessage: 'Inspect',
+    }),
+    run: actions.inspect,
+    testId: 'lnsApp_inspectButton',
+    description: i18n.translate('xpack.lens.app.inspectAriaLabel', {
+      defaultMessage: 'inspect',
+    }),
+    disableButton: false,
+  });
+
+  topNavMenu.push({
     label: i18n.translate('xpack.lens.app.downloadCSV', {
       defaultMessage: 'Download as CSV',
     }),
@@ -131,6 +143,7 @@ export const LensTopNavMenu = ({
   setHeaderActionMenu,
   initialInput,
   indicateNoData,
+  lensInspector,
   setIsSaveModalVisible,
   getIsByValueMode,
   runSave,
@@ -242,6 +255,7 @@ export const LensTopNavMenu = ({
           },
         },
         actions: {
+          inspect: lensInspector.inspect,
           exportToCSV: () => {
             if (!activeData) {
               return;
@@ -321,6 +335,7 @@ export const LensTopNavMenu = ({
       setIsSaveModalVisible,
       uiSettings,
       unsavedTitle,
+      lensInspector.inspect,
     ]
   );
 
