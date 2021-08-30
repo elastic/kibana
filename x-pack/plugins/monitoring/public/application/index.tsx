@@ -15,6 +15,7 @@ import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalStateProvider } from './global_state_context';
 import { createPreserveQueryHistory } from './preserve_query_history';
 import { RouteInit } from './route_init';
+import { NoData } from './pages/no_data';
 
 export const renderApp = (
   core: CoreStart,
@@ -65,10 +66,6 @@ const MonitoringApp: React.FC<{
       </GlobalStateProvider>
     </KibanaContextProvider>
   );
-};
-
-const NoData: React.FC<{}> = () => {
-  return <div>No data page</div>;
 };
 
 const Home: React.FC<{}> = () => {
