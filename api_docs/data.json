@@ -18172,14 +18172,6 @@
             "path": "src/plugins/visualize/public/plugin.ts"
           },
           {
-            "plugin": "timelion",
-            "path": "src/plugins/timelion/public/plugin.ts"
-          },
-          {
-            "plugin": "timelion",
-            "path": "src/plugins/timelion/public/plugin.ts"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.test.ts"
           },

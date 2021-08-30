@@ -1394,10 +1394,6 @@
                 "path": "src/plugins/kibana_overview/public/application.tsx"
               },
               {
-                "plugin": "timelion",
-                "path": "src/plugins/timelion/public/application.ts"
-              },
-              {
                 "plugin": "management",
                 "path": "src/plugins/management/target/types/public/application.d.ts"
               }
