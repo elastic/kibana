@@ -1273,7 +1273,7 @@ describe('Lens App', () => {
       currentObjectId: '1234',
       objectNoun: 'Lens visualization',
       otherObjectId: '2',
-      otherObjectPath: '/app/lens#/edit/2',
+      otherObjectPath: '/testbasepath/app/lens#/edit/2',
     });
   });
 });

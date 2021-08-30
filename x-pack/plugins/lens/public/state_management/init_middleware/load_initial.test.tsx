@@ -344,7 +344,7 @@ describe('Mounter', () => {
       });
 
       expect(services.spacesApi.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-        '/app/lens#/edit/id2',
+        '/testbasepath/app/lens#/edit/id2',
         'Lens visualization'
       );
     });

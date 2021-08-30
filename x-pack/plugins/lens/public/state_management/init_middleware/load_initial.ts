@@ -42,7 +42,7 @@ export const getPersisted = async ({
     if (spacesApi && sharingSavedObjectProps?.outcome === 'aliasMatch') {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
       const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
-      const newPath = getFullPath(newObjectId);
+      const newPath = lensServices.http.basePath.prepend(getFullPath(newObjectId));
       await spacesApi.ui.redirectLegacyUrl(
         newPath,
         i18n.translate('xpack.lens.appName', {

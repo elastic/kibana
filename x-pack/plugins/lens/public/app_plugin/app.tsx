@@ -72,6 +72,7 @@ export function App({
     savedObjectsTagging,
     getOriginatingAppName,
     spacesApi,
+    http,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
   } = lensAppServices;
@@ -180,7 +181,7 @@ export function App({
       // callout with a warning for the user, and provide a way for them to navigate to the other object.
       const currentObjectId = persistedDoc.savedObjectId;
       const otherObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'conflict'
-      const otherObjectPath = getFullPath(otherObjectId);
+      const otherObjectPath = http.basePath.prepend(getFullPath(otherObjectId));
       return spacesApi.ui.components.getLegacyUrlConflict({
         objectNoun: i18n.translate('xpack.lens.appName', {
           defaultMessage: 'Lens visualization',
@@ -191,7 +192,7 @@ export function App({
       });
     }
     return null;
-  }, [persistedDoc, sharingSavedObjectProps, spacesApi]);
+  }, [persistedDoc, sharingSavedObjectProps, spacesApi, http]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
