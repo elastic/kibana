@@ -5,9 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React from 'react';
 
-// required for i18nIdDirective
-import 'angular-sanitize';
-
-import './doc';
-import './context';
+export const LoadingIndicator = () => {
+  return (
+    <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="l" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
