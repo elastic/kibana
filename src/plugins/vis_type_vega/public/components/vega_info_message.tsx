@@ -30,6 +30,10 @@ const parseSpec = (spec: string) => {
 const InfoMessage = ({ spec }: { spec: string }) => {
   const vegaSpec: VegaSpec = useMemo(() => parseSpec(spec), [spec]);
 
+  if (!vegaSpec) {
+    return null;
+  }
+
   return (
     <>
       {shouldShowMapLayerInfo(vegaSpec) && <ExperimentalMapLayerInfo />}
