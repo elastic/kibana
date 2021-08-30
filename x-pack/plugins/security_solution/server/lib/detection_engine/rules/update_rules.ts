@@ -16,6 +16,7 @@ import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
+import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 export const updateRules = async ({
   spaceId,
@@ -73,17 +74,21 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions:
-      ruleUpdate.throttle === 'rule'
-        ? (ruleUpdate.actions ?? []).map(transformRuleToAlertAction)
-        : [],
-    throttle: null,
-    notifyWhen: null,
+    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
+    throttle: transformToAlertThrottle(ruleUpdate.throttle),
+    notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
   };
 
   const update = await rulesClient.update({
     id: existingRule.id,
     data: newInternalRule,
+  });
+
+  await maybeMute({
+    rulesClient,
+    muteAll: existingRule.muteAll,
+    throttle: ruleUpdate.throttle,
+    id: update.id,
   });
 
   if (existingRule.enabled && enabled === false) {
