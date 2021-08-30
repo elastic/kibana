@@ -18,22 +18,51 @@ import { VisualizeConstants } from './application/visualize_constants';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type VisualizeLocatorParams = {
+  /**
+   * The ID of the saved visualization to load.
+   */
   visId?: string;
 
+  /**
+   * Type of visualization.
+   *
+   * @note This is required to navigate to "create" page (i.e., when no `visId` has been provided).
+   */
   type?: string;
 
+  /**
+   * Global- and app-level filters to apply to data loaded by visualize.
+   */
   filters?: Filter[];
 
+  /**
+   * Time range to apply to data loaded by visualize.
+   */
   timeRange?: TimeRange;
 
+  /**
+   * How frequently to poll for data.
+   */
   refreshInterval?: RefreshInterval;
 
+  /**
+   * The query to use in to load data in visualize.
+   */
   query?: Query;
 
+  /**
+   * UI state to be passed on to the current visualization. This value is opaque from the perspective of visualize.
+   */
   uiState?: SerializableRecord;
 
+  /**
+   * Serialized visualization.
+   */
   vis?: SerializableRecord;
 
+  /**
+   * Whether this visualization is linked a saved search.
+   */
   linked?: boolean;
 };
 
@@ -42,8 +71,6 @@ export type VisualizeAppLocator = LocatorPublic<VisualizeLocatorParams>;
 export const VISUALIZE_APP_LOCATOR = 'VISUALIZE_APP_LOCATOR';
 
 export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLocatorParams> {
-  constructor() {}
-
   id = VISUALIZE_APP_LOCATOR;
 
   public async getLocation(params: VisualizeLocatorParams) {
