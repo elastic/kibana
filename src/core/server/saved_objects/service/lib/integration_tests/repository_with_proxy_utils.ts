@@ -19,7 +19,16 @@ const defaultProxyOptions = (hostname: string, port: string) => ({
 
 let proxyInterrupt: string | null | undefined = null;
 
-export const setProxyInterrupt = (testArg: string | null) => (proxyInterrupt = testArg);
+export const setProxyInterrupt = (
+  testArg:
+    | 'bulkCreate'
+    | 'bulkGetMyType'
+    | 'checkConficts'
+    | 'find'
+    | 'openPit'
+    | 'deleteByNamespace'
+    | null
+) => (proxyInterrupt = testArg);
 
 // passes the req/response directly as is
 const relayHandler = (h: Hapi.ResponseToolkit, hostname: string, port: string) => {
