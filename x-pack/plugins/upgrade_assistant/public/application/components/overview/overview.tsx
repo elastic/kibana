@@ -34,7 +34,7 @@ export const Overview: FunctionComponent = () => {
       api,
       core: { docLinks },
     },
-    plugins: { cloud }
+    plugins: { cloud },
   } = useAppContext();
 
   useEffect(() => {
