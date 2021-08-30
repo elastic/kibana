@@ -20,6 +20,11 @@ type BasicObjectProp = t.ObjectProperty & {
 const isBasicObjectProp = (n: t.Node): n is BasicObjectProp =>
   n.type === 'ObjectProperty' && n.key.type === 'StringLiteral';
 
+const isManaged = (node?: t.Node) =>
+  !!node?.leadingComments?.some(
+    (c) => c.type === 'CommentLine' && c.value.trim().toLocaleLowerCase() === '@managed'
+  );
+
 const isSelfManaged = (node?: t.Node) =>
   !!node?.leadingComments?.some(
     (c) => c.type === 'CommentLine' && c.value.trim().toLocaleLowerCase() === 'self managed'
@@ -88,16 +93,15 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
       continue;
     }
 
-    // discover all the managed child props so that we can keep track of which props we need to delete
-    // because they are no longer managed
+    // capture a reference to the properties of this specific managed setting
+    const childProps = existingProp.value.properties;
+
+    // discover all the current managed child props so that we can keep track of which
+    // props we need to delete because they are no longer managed
     const existingManagedChildProps = new Map(
-      existingProp.value.properties
-        .filter(
-          (n): n is BasicObjectProp =>
-            n.type === 'ObjectProperty' &&
-            n.key.type === 'StringLiteral' &&
-            !!n.leadingComments?.some((c) => c.value.trim() === '@managed')
-        )
+      childProps
+        .filter(isBasicObjectProp)
+        .filter(isManaged)
         .map((n) => {
           return [n.key.value, n];
         })
@@ -117,9 +121,9 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
       }
 
       // find existing child props with the same key so we can detect if it's self managed
-      const unmanagedChildProp = existingProp.value.properties.find(
-        (p) => p.type === 'ObjectProperty' && p.key.type === 'StringLiteral' && p.key.value === k
-      );
+      const unmanagedChildProp = childProps
+        .filter(isBasicObjectProp)
+        .find((p) => p.key.value === k);
 
       if (unmanagedChildProp && isSelfManaged(unmanagedChildProp)) {
         // ignore this key in `value` because it already exists and is "// self managed"
@@ -129,17 +133,17 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
       // take over the unmanaged child prop by deleting the previous prop and replacing it
       // with a brand new one
       if (unmanagedChildProp) {
-        remove(existingProp.value.properties, unmanagedChildProp);
+        remove(childProps, unmanagedChildProp);
       }
 
       // add the new managed prop
-      existingProp.value.properties.push(createManagedChildProp(k, v));
+      childProps.push(createManagedChildProp(k, v));
     }
 
     // iterate through the remaining managed props which weren't updated and delete them, they
     // were managed but are no longer managed
     for (const oldPropProp of existingManagedChildProps.values()) {
-      remove(existingProp.value.properties, oldPropProp);
+      remove(childProps, oldPropProp);
     }
   }
 
