@@ -47,12 +47,12 @@ export const UserPrivilegesProvider = ({
     read: false,
   });
   const crud: boolean = kibanaCapabilities[SERVER_APP_ID].crud === true;
-  const read: boolean = kibanaCapabilities[SERVER_APP_ID].read === true;
+  const read: boolean = kibanaCapabilities[SERVER_APP_ID].show === true;
 
   useEffect(() => {
     setKibanaSecuritySolutionsPrivileges((currPrivileges) => {
       if (currPrivileges.read !== read || currPrivileges.crud !== crud) {
-        return { read: currPrivileges.read, crud: currPrivileges.crud };
+        return { read, crud };
       }
       return currPrivileges;
     });
