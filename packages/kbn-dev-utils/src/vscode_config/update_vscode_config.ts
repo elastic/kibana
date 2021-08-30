@@ -42,10 +42,18 @@ const createManagedChildProp = (key: string, value: any) => {
 
 /**
  * Update the settings.json file used by VSCode in the Kibana repository. If the file starts
- * with the comment "// self managed" then it is not touched. Otherwise managed settings are
- * overwritten in the file. We don't just use `JSON.parse()` and `JSON.stringify()` in order
- * to maintain comments. After the config file is updated it is formatted with prettier.
+ * with the comment "// self managed" then it is not touched. If a top-level keys is prefixed with
+ * `// self managed` then all the properties of that setting are left untouched. And finally, if
+ * a specific child property of a setting like `search.exclude` is prefixed with `// self managed`
+ * then it is left untouched.
  *
+ * We don't just use `JSON.parse()` and `JSON.stringify()` in order to support this customization and
+ * also to support users using comments in this file, which is very useful for temporarily disabling settings.
+ *
+ * After the config file is updated it is formatted with prettier.
+ *
+ * @param keys The config keys which are managed
+ * @param infoText The text which should be written to the top of the file to educate users how to customize the settings
  * @param json The settings file as a string
  */
 export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, json?: string) {
