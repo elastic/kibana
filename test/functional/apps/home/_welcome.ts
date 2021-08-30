@@ -26,5 +26,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('home', undefined, { disableWelcomePrompt: false });
       expect(await PageObjects.home.isWelcomeInterstitialDisplayed()).to.be(true);
     });
+
+    it('clicking on "Explore on my own" redirects to the "home" page', async () => {
+      await PageObjects.common.navigateToUrl('home', undefined, { disableWelcomePrompt: false });
+      expect(await PageObjects.home.isWelcomeInterstitialDisplayed()).to.be(true);
+      await PageObjects.common.clickAndValidate('skipWelcomeScreen', 'homeApp');
+    });
   });
 }

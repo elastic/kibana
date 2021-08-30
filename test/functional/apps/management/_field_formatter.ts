@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['settings', 'common']);
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
   const es = getService('es');
   const indexPatterns = getService('indexPatterns');
   const toasts = getService('toasts');
@@ -26,9 +27,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_field_formatters',
+        'test_logstash_reader',
+      ]);
       await esArchiver.load('test/functional/fixtures/es_archiver/discover');
       await kibanaServer.uiSettings.replace({});
-      await kibanaServer.uiSettings.update({});
     });
 
     after(async function afterAll() {
