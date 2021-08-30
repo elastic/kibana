@@ -14,6 +14,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { Legacy } from './legacy_shims';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import {
   FeatureCatalogueCategory,
@@ -94,6 +95,7 @@ export class MonitoringPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { AngularApp } = await import('./angular');
+        const externalConfig = this.getExternalConfig();
         const deps: MonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           kibanaLegacy: pluginsStart.kibanaLegacy,
@@ -102,27 +104,47 @@ export class MonitoringPlugin
           data: pluginsStart.data,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
-          externalConfig: this.getExternalConfig(),
+          externalConfig,
           triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
           appMountParameters: params,
         };
 
-        const monitoringApp = new AngularApp(deps);
-        const removeHistoryListener = params.history.listen((location) => {
-          if (location.pathname === '' && location.hash === '') {
-            monitoringApp.applyScope();
-          }
+        Legacy.init({
+          core: deps.core,
+          element: deps.element,
+          data: deps.data,
+          navigation: deps.navigation,
+          isCloud: deps.isCloud,
+          pluginInitializerContext: deps.pluginInitializerContext,
+          externalConfig: deps.externalConfig,
+          kibanaLegacy: deps.kibanaLegacy,
+          triggersActionsUi: deps.triggersActionsUi,
+          usageCollection: deps.usageCollection,
+          appMountParameters: deps.appMountParameters,
         });
 
-        const removeHashChange = this.setInitialTimefilter(deps);
-        return () => {
-          if (removeHashChange) {
-            removeHashChange();
-          }
-          removeHistoryListener();
-          monitoringApp.destroy();
-        };
+        const config = Object.fromEntries(externalConfig);
+        if (config.renderReactApp) {
+          const { renderApp } = await import('./application');
+          return renderApp(coreStart, pluginsStart, params);
+        } else {
+          const monitoringApp = new AngularApp(deps);
+          const removeHistoryListener = params.history.listen((location) => {
+            if (location.pathname === '' && location.hash === '') {
+              monitoringApp.applyScope();
+            }
+          });
+
+          const removeHashChange = this.setInitialTimefilter(deps);
+          return () => {
+            if (removeHashChange) {
+              removeHashChange();
+            }
+            removeHistoryListener();
+            monitoringApp.destroy();
+          };
+        }
       },
     };
 
@@ -163,6 +185,7 @@ export class MonitoringPlugin
       ['showLicenseExpiration', monitoring.ui.show_license_expiration],
       ['showCgroupMetricsElasticsearch', monitoring.ui.container.elasticsearch.enabled],
       ['showCgroupMetricsLogstash', monitoring.ui.container.logstash.enabled],
+      ['renderReactApp', monitoring.ui.render_react_app],
     ];
   }
 

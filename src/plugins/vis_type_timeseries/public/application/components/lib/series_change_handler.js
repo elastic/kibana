@@ -7,7 +7,7 @@
  */
 
 import { newMetricAggFn } from './new_metric_agg_fn';
-import { isBasicAgg } from '../../../../common/agg_lookup';
+import { isBasicAgg } from '../../../../common/agg_utils';
 import { handleAdd, handleChange } from './collection_actions';
 
 export const seriesChangeHandler = (props, items) => (doc) => {

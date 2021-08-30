@@ -128,6 +128,7 @@ export class HttpService
 
         prebootSetup.registerRouterAfterListening(router);
       },
+      getServerInfo: prebootSetup.getServerInfo,
     };
 
     return this.internalPreboot;
