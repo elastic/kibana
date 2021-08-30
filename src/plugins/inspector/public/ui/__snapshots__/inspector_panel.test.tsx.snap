@@ -287,267 +287,267 @@ exports[`InspectorPanel should render as expected 1`] = `
       }
     }
   >
-    <RedirectAppLinks
-      application={
-        Object {
-          "applications$": BehaviorSubject {
-            "_isScalar": false,
-            "_value": Map {},
-            "closed": false,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
-          "capabilities": Object {
-            "catalogue": Object {},
-            "management": Object {},
-            "navLinks": Object {},
-          },
-          "currentAppId$": Observable {
-            "_isScalar": false,
-            "source": Subject {
-              "_isScalar": false,
-              "closed": false,
-              "hasError": false,
-              "isStopped": false,
-              "observers": Array [
-                Subscriber {
-                  "_parentOrParents": null,
-                  "_subscriptions": Array [
-                    SubjectSubscription {
-                      "_parentOrParents": [Circular],
-                      "_subscriptions": null,
-                      "closed": false,
-                      "subject": [Circular],
-                      "subscriber": [Circular],
-                    },
-                  ],
-                  "closed": false,
-                  "destination": SafeSubscriber {
-                    "_complete": undefined,
-                    "_context": [Circular],
-                    "_error": undefined,
-                    "_next": [Function],
-                    "_parentOrParents": null,
-                    "_parentSubscriber": [Circular],
-                    "_subscriptions": null,
-                    "closed": false,
-                    "destination": Object {
-                      "closed": true,
-                      "complete": [Function],
-                      "error": [Function],
-                      "next": [Function],
-                    },
-                    "isStopped": false,
-                    "syncErrorThrowable": false,
-                    "syncErrorThrown": false,
-                    "syncErrorValue": null,
-                  },
-                  "isStopped": false,
-                  "syncErrorThrowable": true,
-                  "syncErrorThrown": false,
-                  "syncErrorValue": null,
-                },
-              ],
-              "thrownError": null,
-            },
-          },
-          "getUrlForApp": [MockFunction],
-          "navigateToApp": [MockFunction],
-          "navigateToUrl": [MockFunction],
-        }
-      }
+    <EuiFlyoutHeader
+      hasBorder={true}
     >
       <div
-        className="kbnRedirectCrossAppLinks"
+        className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
       >
-        <EuiFlyoutHeader
-          hasBorder={true}
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
         >
           <div
-            className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
+            <EuiFlexItem
+              grow={true}
             >
               <div
-                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                className="euiFlexItem"
               >
-                <EuiFlexItem
-                  grow={true}
+                <EuiTitle
+                  size="s"
                 >
-                  <div
-                    className="euiFlexItem"
+                  <h1
+                    className="euiTitle euiTitle--small"
                   >
-                    <EuiTitle
-                      size="s"
-                    >
-                      <h1
-                        className="euiTitle euiTitle--small"
+                    Inspector
+                  </h1>
+                </EuiTitle>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <InspectorViewChooser
+                  onViewSelected={[Function]}
+                  selectedView={
+                    Object {
+                      "component": [Function],
+                      "order": 200,
+                      "title": "View 1",
+                    }
+                  }
+                  views={
+                    Array [
+                      Object {
+                        "component": [Function],
+                        "order": 200,
+                        "title": "View 1",
+                      },
+                      Object {
+                        "component": [Function],
+                        "order": 100,
+                        "shouldShow": [Function],
+                        "title": "Foo View",
+                      },
+                      Object {
+                        "component": [Function],
+                        "order": 200,
+                        "shouldShow": [Function],
+                        "title": "Never",
+                      },
+                    ]
+                  }
+                >
+                  <EuiPopover
+                    anchorPosition="downRight"
+                    button={
+                      <EuiButtonEmpty
+                        data-test-subj="inspectorViewChooser"
+                        iconSide="right"
+                        iconType="arrowDown"
+                        onClick={[Function]}
+                        size="s"
                       >
-                        Inspector
-                      </h1>
-                    </EuiTitle>
-                  </div>
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow={false}
-                >
-                  <div
-                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                        <FormattedMessage
+                          defaultMessage="View: {viewName}"
+                          id="inspector.view"
+                          values={
+                            Object {
+                              "viewName": "View 1",
+                            }
+                          }
+                        />
+                      </EuiButtonEmpty>
+                    }
+                    closePopover={[Function]}
+                    display="inlineBlock"
+                    hasArrow={true}
+                    id="inspectorViewChooser"
+                    isOpen={false}
+                    ownFocus={true}
+                    panelPaddingSize="none"
+                    repositionOnScroll={true}
                   >
-                    <InspectorViewChooser
-                      onViewSelected={[Function]}
-                      selectedView={
-                        Object {
-                          "component": [Function],
-                          "order": 200,
-                          "title": "View 1",
-                        }
-                      }
-                      views={
-                        Array [
-                          Object {
-                            "component": [Function],
-                            "order": 200,
-                            "title": "View 1",
-                          },
-                          Object {
-                            "component": [Function],
-                            "order": 100,
-                            "shouldShow": [Function],
-                            "title": "Foo View",
-                          },
-                          Object {
-                            "component": [Function],
-                            "order": 200,
-                            "shouldShow": [Function],
-                            "title": "Never",
-                          },
-                        ]
-                      }
+                    <div
+                      className="euiPopover euiPopover--anchorDownRight"
+                      id="inspectorViewChooser"
                     >
-                      <EuiPopover
-                        anchorPosition="downRight"
-                        button={
-                          <EuiButtonEmpty
+                      <div
+                        className="euiPopover__anchor"
+                      >
+                        <EuiButtonEmpty
+                          data-test-subj="inspectorViewChooser"
+                          iconSide="right"
+                          iconType="arrowDown"
+                          onClick={[Function]}
+                          size="s"
+                        >
+                          <button
+                            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
                             data-test-subj="inspectorViewChooser"
-                            iconSide="right"
-                            iconType="arrowDown"
+                            disabled={false}
                             onClick={[Function]}
-                            size="s"
+                            type="button"
                           >
-                            <FormattedMessage
-                              defaultMessage="View: {viewName}"
-                              id="inspector.view"
-                              values={
+                            <EuiButtonContent
+                              className="euiButtonEmpty__content"
+                              iconSide="right"
+                              iconSize="m"
+                              iconType="arrowDown"
+                              textProps={
                                 Object {
-                                  "viewName": "View 1",
+                                  "className": "euiButtonEmpty__text",
                                 }
                               }
-                            />
-                          </EuiButtonEmpty>
-                        }
-                        closePopover={[Function]}
-                        display="inlineBlock"
-                        hasArrow={true}
-                        id="inspectorViewChooser"
-                        isOpen={false}
-                        ownFocus={true}
-                        panelPaddingSize="none"
-                        repositionOnScroll={true}
-                      >
-                        <div
-                          className="euiPopover euiPopover--anchorDownRight"
-                          id="inspectorViewChooser"
-                        >
-                          <div
-                            className="euiPopover__anchor"
-                          >
-                            <EuiButtonEmpty
-                              data-test-subj="inspectorViewChooser"
-                              iconSide="right"
-                              iconType="arrowDown"
-                              onClick={[Function]}
-                              size="s"
                             >
-                              <button
-                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
-                                data-test-subj="inspectorViewChooser"
-                                disabled={false}
-                                onClick={[Function]}
-                                type="button"
+                              <span
+                                className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                               >
-                                <EuiButtonContent
-                                  className="euiButtonEmpty__content"
-                                  iconSide="right"
-                                  iconSize="m"
-                                  iconType="arrowDown"
-                                  textProps={
-                                    Object {
-                                      "className": "euiButtonEmpty__text",
-                                    }
-                                  }
+                                <EuiIcon
+                                  className="euiButtonContent__icon"
+                                  color="inherit"
+                                  size="m"
+                                  type="arrowDown"
                                 >
                                   <span
-                                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                    className="euiButtonContent__icon"
+                                    color="inherit"
+                                    data-euiicon-type="arrowDown"
+                                    size="m"
+                                  />
+                                </EuiIcon>
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="View: {viewName}"
+                                    id="inspector.view"
+                                    values={
+                                      Object {
+                                        "viewName": "View 1",
+                                      }
+                                    }
                                   >
-                                    <EuiIcon
-                                      className="euiButtonContent__icon"
-                                      color="inherit"
-                                      size="m"
-                                      type="arrowDown"
-                                    >
-                                      <span
-                                        className="euiButtonContent__icon"
-                                        color="inherit"
-                                        data-euiicon-type="arrowDown"
-                                        size="m"
-                                      />
-                                    </EuiIcon>
-                                    <span
-                                      className="euiButtonEmpty__text"
-                                    >
-                                      <FormattedMessage
-                                        defaultMessage="View: {viewName}"
-                                        id="inspector.view"
-                                        values={
-                                          Object {
-                                            "viewName": "View 1",
-                                          }
-                                        }
-                                      >
-                                        View: View 1
-                                      </FormattedMessage>
-                                    </span>
-                                  </span>
-                                </EuiButtonContent>
-                              </button>
-                            </EuiButtonEmpty>
-                          </div>
-                        </div>
-                      </EuiPopover>
-                    </InspectorViewChooser>
-                  </div>
-                </EuiFlexItem>
+                                    View: View 1
+                                  </FormattedMessage>
+                                </span>
+                              </span>
+                            </EuiButtonContent>
+                          </button>
+                        </EuiButtonEmpty>
+                      </div>
+                    </div>
+                  </EuiPopover>
+                </InspectorViewChooser>
               </div>
-            </EuiFlexGroup>
+            </EuiFlexItem>
           </div>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody
-          className="insInspectorPanel__flyoutBody"
+        </EuiFlexGroup>
+      </div>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody
+      className="insInspectorPanel__flyoutBody"
+    >
+      <div
+        className="euiFlyoutBody insInspectorPanel__flyoutBody"
+      >
+        <div
+          className="euiFlyoutBody__overflow"
+          tabIndex={0}
         >
           <div
-            className="euiFlyoutBody insInspectorPanel__flyoutBody"
+            className="euiFlyoutBody__overflowContent"
           >
-            <div
-              className="euiFlyoutBody__overflow"
-              tabIndex={0}
+            <RedirectAppLinks
+              application={
+                Object {
+                  "applications$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Map {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "capabilities": Object {
+                    "catalogue": Object {},
+                    "management": Object {},
+                    "navLinks": Object {},
+                  },
+                  "currentAppId$": Observable {
+                    "_isScalar": false,
+                    "source": Subject {
+                      "_isScalar": false,
+                      "closed": false,
+                      "hasError": false,
+                      "isStopped": false,
+                      "observers": Array [
+                        Subscriber {
+                          "_parentOrParents": null,
+                          "_subscriptions": Array [
+                            SubjectSubscription {
+                              "_parentOrParents": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "subject": [Circular],
+                              "subscriber": [Circular],
+                            },
+                          ],
+                          "closed": false,
+                          "destination": SafeSubscriber {
+                            "_complete": undefined,
+                            "_context": [Circular],
+                            "_error": undefined,
+                            "_next": [Function],
+                            "_parentOrParents": null,
+                            "_parentSubscriber": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "destination": Object {
+                              "closed": true,
+                              "complete": [Function],
+                              "error": [Function],
+                              "next": [Function],
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": false,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": true,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                      ],
+                      "thrownError": null,
+                    },
+                  },
+                  "getUrlForApp": [MockFunction],
+                  "navigateToApp": [MockFunction],
+                  "navigateToUrl": [MockFunction],
+                }
+              }
             >
               <div
-                className="euiFlyoutBody__overflowContent"
+                className="kbnRedirectCrossAppLinks"
               >
                 <Suspense
                   fallback={<EuiLoadingSpinner />}
@@ -569,11 +569,11 @@ exports[`InspectorPanel should render as expected 1`] = `
                   </component>
                 </Suspense>
               </div>
-            </div>
+            </RedirectAppLinks>
           </div>
-        </EuiFlyoutBody>
+        </div>
       </div>
-    </RedirectAppLinks>
+    </EuiFlyoutBody>
   </Provider>
 </InspectorPanel>
 `;
