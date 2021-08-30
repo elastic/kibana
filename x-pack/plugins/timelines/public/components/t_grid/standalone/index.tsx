@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
@@ -43,6 +43,7 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup }
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
+import { TGridLoading } from '../loading';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const STANDALONE_ID = 'standalone-t-grid';
@@ -332,7 +333,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   return (
     <InspectButtonContainer data-test-subj="events-viewer-panel">
       <AlertsTableWrapper>
-        {isFirstUpdate.current && <EuiLoadingContent data-test-subj="loading-alerts-panel" />}
+        {isFirstUpdate.current && <TGridLoading />}
         {canQueryTimeline ? (
           <>
             <EventsContainerLoading

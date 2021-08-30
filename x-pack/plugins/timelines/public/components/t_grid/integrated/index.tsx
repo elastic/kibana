@@ -8,7 +8,7 @@
 import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
 // @ts-expect-error
 import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-import { EuiEmptyPrompt, EuiLoadingContent, EuiPanel } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -47,6 +47,7 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem }
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
+import { TGridLoading } from '../loading';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
@@ -278,7 +279,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         data-test-subj="events-viewer-panel"
         $isFullScreen={globalFullScreen}
       >
-        {isFirstUpdate.current && <EuiLoadingContent data-test-subj="loading-alerts-panel" />}
+        {isFirstUpdate.current && <TGridLoading />}
 
         {graphOverlay}
 
