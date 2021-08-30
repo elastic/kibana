@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RawResponseBase } from '../types';
+
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from './constants';
 
 export interface FailedTransactionsCorrelationValue {
@@ -25,4 +27,10 @@ export type FailureCorrelationImpactThreshold = typeof FAILED_TRANSACTIONS_IMPAC
 export interface CorrelationsTerm {
   fieldName: string;
   fieldValue: string;
+}
+
+export interface FailedTransactionsCorrelationsAsyncSearchServiceRawResponse
+  extends RawResponseBase {
+  log: string[];
+  values: FailedTransactionsCorrelationValue[];
 }

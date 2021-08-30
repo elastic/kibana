@@ -13,10 +13,8 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../src/plugins/data/public';
-import type {
-  SearchServiceParams,
-  SearchServiceRawResponse,
-} from '../../common/search_strategies/latency_correlations/types';
+import type { SearchServiceParams } from '../../common/search_strategies/types';
+import type { LatencyCorrelationsAsyncSearchServiceRawResponse } from '../../common/search_strategies/latency_correlations/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { APM_SEARCH_STRATEGIES } from '../../common/search_strategies/constants';
 import { ApmPluginStartDeps } from '../plugin';
@@ -26,10 +24,10 @@ interface TransactionDistributionFetcherState {
   isComplete: boolean;
   isRunning: boolean;
   loaded: number;
-  ccsWarning: SearchServiceRawResponse['ccsWarning'];
-  log: SearchServiceRawResponse['log'];
-  transactionDistribution?: SearchServiceRawResponse['overallHistogram'];
-  percentileThresholdValue?: SearchServiceRawResponse['percentileThresholdValue'];
+  ccsWarning: LatencyCorrelationsAsyncSearchServiceRawResponse['ccsWarning'];
+  log: LatencyCorrelationsAsyncSearchServiceRawResponse['log'];
+  transactionDistribution?: LatencyCorrelationsAsyncSearchServiceRawResponse['overallHistogram'];
+  percentileThresholdValue?: LatencyCorrelationsAsyncSearchServiceRawResponse['percentileThresholdValue'];
   timeTook?: number;
   total: number;
 }
@@ -55,7 +53,7 @@ export function useTransactionDistributionFetcher() {
   const searchSubscription$ = useRef<Subscription>();
 
   function setResponse(
-    response: IKibanaSearchResponse<SearchServiceRawResponse>
+    response: IKibanaSearchResponse<LatencyCorrelationsAsyncSearchServiceRawResponse>
   ) {
     setFetchState((prevState) => ({
       ...prevState,
@@ -106,13 +104,15 @@ export function useTransactionDistributionFetcher() {
       searchSubscription$.current = data.search
         .search<
           IKibanaSearchRequest,
-          IKibanaSearchResponse<SearchServiceRawResponse>
+          IKibanaSearchResponse<LatencyCorrelationsAsyncSearchServiceRawResponse>
         >(req, {
           strategy: APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
           abortSignal: abortCtrl.current.signal,
         })
         .subscribe({
-          next: (res: IKibanaSearchResponse<SearchServiceRawResponse>) => {
+          next: (
+            res: IKibanaSearchResponse<LatencyCorrelationsAsyncSearchServiceRawResponse>
+          ) => {
             setResponse(res);
             if (isCompleteResponse(res)) {
               searchSubscription$.current?.unsubscribe();

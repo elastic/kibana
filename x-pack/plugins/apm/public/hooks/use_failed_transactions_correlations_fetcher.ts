@@ -13,7 +13,7 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../src/plugins/data/public';
-import type { SearchServiceParams } from '../../common/search_strategies/latency_correlations/types';
+import type { SearchServiceParams } from '../../common/search_strategies/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import type { ApmPluginStartDeps } from '../plugin';
 import type { FailedTransactionsCorrelationValue } from '../../common/search_strategies/failed_transactions_correlations/types';

@@ -9,9 +9,9 @@ import { range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
 import type {
   SearchServiceParams,
-  SearchServiceRawResponse,
   SearchServiceFetchParams,
-} from '../../../../common/search_strategies/latency_correlations/types';
+} from '../../../../common/search_strategies/types';
+import type { LatencyCorrelationsAsyncSearchServiceRawResponse } from '../../../../common/search_strategies/latency_correlations/types';
 
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 
@@ -30,7 +30,7 @@ import type { AsyncSearchServiceProvider } from '../search_strategy_provider';
 
 import { asyncSearchServiceStateProvider } from './async_search_service_state';
 
-export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServiceProvider<SearchServiceRawResponse> = (
+export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServiceProvider<LatencyCorrelationsAsyncSearchServiceRawResponse> = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   searchServiceParams: SearchServiceParams,
@@ -242,7 +242,7 @@ export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServicePr
       isPartial: isRunning,
     };
 
-    const rawResponse: SearchServiceRawResponse = {
+    const rawResponse: LatencyCorrelationsAsyncSearchServiceRawResponse = {
       ccsWarning,
       log: getLogMessages(),
       took,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/latency_correlations/types';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/types';
 
 export const getRequestBase = ({
   index,

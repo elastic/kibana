@@ -16,15 +16,11 @@ import {
   IKibanaSearchResponse,
 } from '../../../../../../src/plugins/data/common';
 
-import type { SearchServiceParams } from '../../../common/search_strategies/latency_correlations/types';
+import type { SearchServiceParams } from '../../../common/search_strategies/types';
+import type { RawResponseBase } from '../../../common/search_strategies/types';
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 export type PartialSearchRequest = IKibanaSearchRequest<SearchServiceParams>;
-
-interface RawResponseBase {
-  ccsWarning: boolean;
-  took: number;
-}
 
 interface AsyncSearchServiceState<RawResponse extends RawResponseBase> {
   cancel: () => void;

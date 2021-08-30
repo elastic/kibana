@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RawResponseBase } from '../types';
+
 export interface HistogramItem {
   key: number;
   doc_count: number;
@@ -16,23 +18,6 @@ export interface ResponseHitSource {
 
 export interface ResponseHit {
   _source: ResponseHitSource;
-}
-
-export interface SearchServiceParams {
-  environment: string;
-  kuery: string;
-  serviceName?: string;
-  transactionName?: string;
-  transactionType?: string;
-  start?: string;
-  end?: string;
-  percentileThreshold?: number;
-  analyzeCorrelations?: boolean;
-}
-
-export interface SearchServiceFetchParams extends SearchServiceParams {
-  index: string;
-  includeFrozen?: boolean;
 }
 
 export interface SearchServiceValue {
@@ -53,11 +38,10 @@ export interface AsyncSearchProviderProgress {
   loadedHistograms: number;
 }
 
-export interface SearchServiceRawResponse {
-  ccsWarning: boolean;
+export interface LatencyCorrelationsAsyncSearchServiceRawResponse
+  extends RawResponseBase {
   log: string[];
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number;
-  took: number;
   values: SearchServiceValue[];
 }
