@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
+import styled from 'styled-components';
 
 import type {
   BrowserFields,
@@ -35,6 +36,12 @@ const useKibanaServices = () => {
   return { timelines, filterManager };
 };
 
+const EuiActionContainer = styled.div`
+  span.euiButtonEmpty__text {
+    display: none;
+  }
+`;
+
 /** the default actions shown in `EuiDataGrid` cells */
 export const defaultCellActions: TGridCellAction[] = [
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
@@ -55,17 +62,17 @@ export const defaultCellActions: TGridCellAction[] = [
     });
 
     return (
-      <>
+      <EuiActionContainer>
         {timelines.getHoverActions().getFilterForValueButton({
           Component,
           field: columnId,
           filterManager,
           onFilterAdded,
           ownFocus: false,
-          showTooltip: false,
+          showTooltip: true,
           value,
         })}
-      </>
+      </EuiActionContainer>
     );
   },
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
@@ -86,17 +93,17 @@ export const defaultCellActions: TGridCellAction[] = [
     });
 
     return (
-      <>
+      <EuiActionContainer>
         {timelines.getHoverActions().getFilterOutValueButton({
           Component,
           field: columnId,
           filterManager,
           onFilterAdded,
           ownFocus: false,
-          showTooltip: false,
+          showTooltip: true,
           value,
         })}
-      </>
+      </EuiActionContainer>
     );
   },
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
@@ -135,15 +142,15 @@ export const defaultCellActions: TGridCellAction[] = [
     );
 
     return (
-      <>
+      <EuiActionContainer>
         {timelines.getHoverActions().getAddToTimelineButton({
           Component,
           dataProvider,
           field: columnId,
           ownFocus: false,
-          showTooltip: false,
+          showTooltip: true,
         })}
-      </>
+      </EuiActionContainer>
     );
   },
   ({
@@ -171,27 +178,26 @@ export const defaultCellActions: TGridCellAction[] = [
     });
 
     return (
-      <>
-        {allowTopN({
-          browserField: getAllFieldsByName(browserFields)[columnId],
-          fieldName: columnId,
-          hideTopN: false,
-        }) && (
-          <ShowTopNButton
-            Component={Component}
-            enablePopOver
-            data-test-subj="hover-actions-show-top-n"
-            field={columnId}
-            onClick={onClick}
-            onFilterAdded={onFilterAdded}
-            ownFocus={false}
-            showTopN={showTopN}
-            showTooltip={false}
-            timelineId={timelineId}
-            value={value}
-          />
-        )}
-      </>
+      <EuiActionContainer>
+        <ShowTopNButton
+          Component={Component}
+          enablePopOver
+          data-test-subj="hover-actions-show-top-n"
+          field={columnId}
+          onClick={onClick}
+          onFilterAdded={onFilterAdded}
+          ownFocus={false}
+          showTopN={showTopN}
+          showTooltip={true}
+          timelineId={timelineId}
+          value={value}
+          disabled={!allowTopN({
+            browserField: getAllFieldsByName(browserFields)[columnId],
+            fieldName: columnId,
+            hideTopN: false,
+          })}
+        />
+      </EuiActionContainer>
     );
   },
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
@@ -212,16 +218,16 @@ export const defaultCellActions: TGridCellAction[] = [
     });
 
     return (
-      <>
+      <EuiActionContainer>
         {timelines.getHoverActions().getCopyButton({
           Component,
           field: columnId,
           isHoverAction: false,
           ownFocus: false,
-          showTooltip: false,
+          showTooltip: true,
           value,
         })}
-      </>
+      </EuiActionContainer>
     );
   },
 ];
