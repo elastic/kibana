@@ -7,6 +7,7 @@
  */
 
 import type { Capabilities, IUiSettingsClient } from 'kibana/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ISearchSource } from '../../../../../../data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import type { SavedSearch, SortOrder } from '../../../../saved_searches/types';
@@ -19,7 +20,8 @@ import { AppState } from '../services/discover_state';
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: AppState | SavedSearch,
-  config: IUiSettingsClient
+  config: IUiSettingsClient,
+  data: DataPublicPluginStart
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
@@ -28,6 +30,7 @@ export async function getSharingData(
     'sort',
     getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
   );
+  searchSource.removeField('filter'); // Remove the time range filter on this search source. We pass relative time range to reporting separately.
   searchSource.removeField('highlight');
   searchSource.removeField('highlightAll');
   searchSource.removeField('aggs');
@@ -51,6 +54,7 @@ export async function getSharingData(
   return {
     searchSource: searchSource.getSerializedFields(true),
     columns,
+    timeRange: data.query.timefilter.timefilter.getTime(),
   };
 }
 

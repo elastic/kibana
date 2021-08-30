@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { SearchSourceFields } from 'src/plugins/data/common';
+import type { SearchSourceFields, TimeRange } from 'src/plugins/data/common';
 import { ExportPanelShareOpts } from '.';
 import type { ShareContext } from '../../../../../src/plugins/share/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
@@ -52,6 +52,7 @@ export const ReportingCsvShareProvider = ({
       title: sharingData.title as string,
       objectType,
       searchSource: sharingData.searchSource as SearchSourceFields,
+      timeRange: sharingData.timeRange as TimeRange,
       columns: sharingData.columns as string[] | undefined,
     };
 
