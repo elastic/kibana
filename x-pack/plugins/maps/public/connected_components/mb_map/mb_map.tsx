@@ -49,10 +49,10 @@ import {
 } from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { MapExtentState } from '../../actions';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
 import { TiledVectorLayer } from '../../classes/layers/tiled_vector_layer/tiled_vector_layer';
+import type { MapExtentState } from '../../reducers/map/types';
 
 export interface Props {
   isMapReady: boolean;
@@ -150,7 +150,7 @@ export class MbMap extends Component<Props, State> {
     }
   }, 256);
 
-  _getMapExtentState() {
+  _getMapExtentState(): MapExtentState {
     const zoom = this.state.mbMap!.getZoom();
     const mbCenter = this.state.mbMap!.getCenter();
     const mbBounds = this.state.mbMap!.getBounds();

@@ -13,7 +13,7 @@ import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { Geometry, Position } from 'geojson';
 import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
-import type { MapContext } from '../reducers/map/types';
+import type { MapExtentState, MapViewContext } from '../reducers/map/types';
 import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
@@ -53,24 +53,12 @@ import {
 import { autoFitToBounds, syncDataForAllLayers, syncDataForLayer } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
-import {
-  DrawState,
-  MapCenter,
-  MapCenterAndZoom,
-  MapExtent,
-  Timeslice,
-} from '../../common/descriptor_types';
+import { DrawState, MapCenterAndZoom, MapExtent, Timeslice } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { VectorLayer } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE } from './ui_actions';
 import { expandToTileBoundaries } from '../../common/geo_tile_utils';
-
-export interface MapExtentState {
-  zoom: number;
-  extent: MapExtent;
-  center: MapCenter;
-}
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -171,7 +159,7 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
           !prevBuffer || !doesPrevBufferContainNextExtent || prevZoom !== nextZoom
             ? expandToTileBoundaries(extent, Math.ceil(nextZoom))
             : prevBuffer,
-      } as Pick<MapContext, 'center' | 'zoom' | 'extent' | 'buffer'>,
+      } as MapViewContext,
     });
 
     if (prevZoom !== nextZoom) {
