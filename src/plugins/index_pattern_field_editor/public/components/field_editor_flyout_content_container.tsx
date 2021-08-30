@@ -156,25 +156,15 @@ export const FieldEditorFlyoutContentContainer = ({
 
   const updateRuntimeField = useCallback(
     (updatedField: Field | RuntimeCompositeWithSubFields): IndexPatternField[] => {
-      try {
-        usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
-        // eslint-disable-next-line no-empty
-      } catch {}
-
       return (updatedField as RuntimeCompositeWithSubFields).subFields !== undefined
         ? saveCompositeRuntime(updatedField as RuntimeCompositeWithSubFields)
         : saveRuntimeField(updatedField as Field);
     },
-    [usageCollection, saveCompositeRuntime, saveRuntimeField]
+    [saveCompositeRuntime, saveRuntimeField]
   );
 
   const updateConcreteField = useCallback(
     (updatedField: Field): IndexPatternField[] => {
-      try {
-        usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
-        // eslint-disable-next-line no-empty
-      } catch {}
-
       const editedField = indexPattern.getFieldByName(updatedField.name);
 
       if (!editedField) {
@@ -195,11 +185,20 @@ export const FieldEditorFlyoutContentContainer = ({
 
       return [editedField];
     },
-    [usageCollection, indexPattern]
+    [indexPattern]
   );
 
   const saveField = useCallback(
     async (updatedField: Field | RuntimeCompositeWithSubFields) => {
+      try {
+        usageCollection.reportUiCounter(
+          pluginName,
+          METRIC_TYPE.COUNT,
+          fieldTypeToProcess === 'runtime' ? 'save_runtime' : 'save_concrete'
+        );
+        // eslint-disable-next-line no-empty
+      } catch {}
+
       setIsSaving(true);
 
       const editedFields: IndexPatternField[] =
@@ -234,6 +233,7 @@ export const FieldEditorFlyoutContentContainer = ({
       fieldTypeToProcess,
       updateConcreteField,
       updateRuntimeField,
+      usageCollection,
     ]
   );
 
