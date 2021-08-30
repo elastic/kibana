@@ -123,6 +123,36 @@ export const defaultCellActions: TGridCellAction[] = [
       fieldName: columnId,
     });
 
+    return (
+      <EuiActionContainer>
+        {timelines.getHoverActions().getCopyButton({
+          Component,
+          field: columnId,
+          isHoverAction: false,
+          ownFocus: false,
+          showTooltip: true,
+          value,
+        })}
+      </EuiActionContainer>
+    );
+  },
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
+    rowIndex,
+    columnId,
+    Component,
+  }) => {
+    const { timelines } = useKibanaServices();
+
+    const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+    if (pageRowIndex >= data.length) {
+      return null;
+    }
+
+    const value = getMappedNonEcsValue({
+      data: data[pageRowIndex],
+      fieldName: columnId,
+    });
+
     const dataProvider: DataProvider[] = useMemo(
       () =>
         value?.map((x) => ({
@@ -177,7 +207,11 @@ export const defaultCellActions: TGridCellAction[] = [
       fieldName: columnId,
     });
 
-    return (
+    return allowTopN({
+      browserField: getAllFieldsByName(browserFields)[columnId],
+      fieldName: columnId,
+      hideTopN: false,
+    }) ? (
       <EuiActionContainer>
         <ShowTopNButton
           Component={Component}
@@ -191,43 +225,8 @@ export const defaultCellActions: TGridCellAction[] = [
           showTooltip={true}
           timelineId={timelineId}
           value={value}
-          disabled={!allowTopN({
-            browserField: getAllFieldsByName(browserFields)[columnId],
-            fieldName: columnId,
-            hideTopN: false,
-          })}
         />
       </EuiActionContainer>
-    );
-  },
-  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
-    rowIndex,
-    columnId,
-    Component,
-  }) => {
-    const { timelines } = useKibanaServices();
-
-    const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-    if (pageRowIndex >= data.length) {
-      return null;
-    }
-
-    const value = getMappedNonEcsValue({
-      data: data[pageRowIndex],
-      fieldName: columnId,
-    });
-
-    return (
-      <EuiActionContainer>
-        {timelines.getHoverActions().getCopyButton({
-          Component,
-          field: columnId,
-          isHoverAction: false,
-          ownFocus: false,
-          showTooltip: true,
-          value,
-        })}
-      </EuiActionContainer>
-    );
+    ) : null;
   },
 ];

@@ -42,7 +42,6 @@ interface Props {
   showTooltip?: boolean;
   timelineId?: string | null;
   value?: string[] | string | null;
-  disabled?: boolean
 }
 
 export const ShowTopNButton: React.FC<Props> = React.memo(
@@ -57,7 +56,6 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     showTopN,
     timelineId,
     value,
-    disabled = false,
   }) => {
     const activeScope: SourcererScopeName =
       timelineId === TimelineId.active
@@ -80,7 +78,6 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
             iconType="visBarVertical"
             onClick={onClick}
             title={SHOW_TOP(field)}
-            disabled={disabled}
           >
             {SHOW_TOP(field)}
           </Component>
@@ -92,7 +89,6 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
             iconSize="s"
             iconType="visBarVertical"
             onClick={onClick}
-            disabled={disabled}
           />
         ),
       [Component, field, onClick]
