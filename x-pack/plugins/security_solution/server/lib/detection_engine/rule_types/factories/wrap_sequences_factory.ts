@@ -18,11 +18,11 @@ export const wrapSequencesFactory = ({
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   mergeStrategy: ConfigType['alertMergeStrategy'];
   spaceId: string | null | undefined;
-}): WrapSequences => (sequences) =>
+}): WrapSequences => (sequences, buildReasonMessage) =>
   sequences.reduce(
     (acc: WrappedRACAlert[], sequence) => [
       ...acc,
-      ...buildAlertGroupFromSequence(sequence, ruleSO, mergeStrategy, spaceId),
+      ...buildAlertGroupFromSequence(sequence, ruleSO, mergeStrategy, spaceId, buildReasonMessage),
     ],
     []
   );

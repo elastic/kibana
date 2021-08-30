@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_OWNER } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortId } from '../../../signals/__mocks__/es_results';
 import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
@@ -77,7 +77,7 @@ describe('buildAlert', () => {
             },
           ],
           [ALERT_DEPTH]: 1,
-          [ALERT_OWNER]: SERVER_APP_ID,
+          [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
           [ALERT_BUILDING_BLOCK_TYPE]: 'default',
         }),
       })
@@ -94,7 +94,7 @@ describe('buildAlert', () => {
             },
           ],
           [ALERT_DEPTH]: 1,
-          [ALERT_OWNER]: SERVER_APP_ID,
+          [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
           [ALERT_BUILDING_BLOCK_TYPE]: 'default',
         }),
       })
@@ -131,7 +131,7 @@ describe('buildAlert', () => {
             },
           ]),
           [ALERT_DEPTH]: 2,
-          [ALERT_OWNER]: SERVER_APP_ID,
+          [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
           [ALERT_BUILDING_BLOCK_TYPE]: 'default',
         }),
       })

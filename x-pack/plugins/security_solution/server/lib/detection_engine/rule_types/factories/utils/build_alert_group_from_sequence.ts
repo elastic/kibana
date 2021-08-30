@@ -15,6 +15,7 @@ import { buildBulkBody } from './build_bulk_body';
 import { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
 import { objectArrayIntersection } from '../../../signals/build_bulk_body';
+import { BuildReasonMessage } from '../../../signals/reason_formatters';
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -
@@ -27,7 +28,8 @@ export const buildAlertGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
   ruleSO: SavedObject<AlertAttributes>,
   mergeStrategy: ConfigType['alertMergeStrategy'],
-  spaceId: string | null | undefined
+  spaceId: string | null | undefined,
+  buildReasonMessage: BuildReasonMessage
 ): WrappedRACAlert[] => {
   const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
   if (ancestors.some((ancestor) => ancestor?.rule === ruleSO.id)) {
@@ -35,7 +37,7 @@ export const buildAlertGroupFromSequence = (
   }
 
   const buildingBlocks: RACAlert[] = sequence.events.map((event) => ({
-    ...buildBulkBody(spaceId, ruleSO, event, mergeStrategy, false),
+    ...buildBulkBody(spaceId, ruleSO, event, mergeStrategy, false, buildReasonMessage),
     'kibana.alert.building_block_type': 'default',
   }));
 
@@ -51,7 +53,7 @@ export const buildAlertGroupFromSequence = (
   // Now that we have an array of building blocks for the events in the sequence,
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
-  const doc = buildAlertFromSequence(wrappedBuildingBlocks, ruleSO, spaceId);
+  const doc = buildAlertFromSequence(wrappedBuildingBlocks, ruleSO, spaceId, buildReasonMessage);
   const sequenceAlert = {
     _id: generateAlertId(doc),
     _index: '', // TODO: output index
@@ -71,10 +73,12 @@ export const buildAlertGroupFromSequence = (
 export const buildAlertFromSequence = (
   alerts: WrappedRACAlert[],
   ruleSO: SavedObject<AlertAttributes>,
-  spaceId: string | null | undefined
+  spaceId: string | null | undefined,
+  buildReasonMessage: BuildReasonMessage
 ): RACAlert => {
   const rule = buildRuleWithoutOverrides(ruleSO);
-  const doc = buildAlert(alerts, rule, spaceId);
+  const reason = buildReasonMessage({ rule });
+  const doc = buildAlert(alerts, rule, spaceId, reason);
   const mergedAlerts = objectArrayIntersection(alerts.map((alert) => alert._source));
   return {
     ...mergedAlerts,

@@ -7,7 +7,6 @@
 
 import { sampleDocNoSortId } from './__mocks__/es_results';
 import { buildEventTypeSignal, isEventTypeSignal } from './build_event_type_signal';
-import { BaseSignalHit } from './types';
 
 describe('buildEventTypeSignal', () => {
   beforeEach(() => {
@@ -53,7 +52,7 @@ describe('buildEventTypeSignal', () => {
   });
 
   test('It validates a sample doc with a signal type as "true"', () => {
-    const doc: BaseSignalHit = ({
+    const doc = {
       ...sampleDocNoSortId(),
       _source: {
         ...sampleDocNoSortId()._source,
@@ -61,34 +60,34 @@ describe('buildEventTypeSignal', () => {
           rule: { id: 'id-123' },
         },
       },
-    } as unknown) as BaseSignalHit;
+    };
     expect(isEventTypeSignal(doc)).toEqual(true);
   });
 
   test('It validates a numeric signal string as "false"', () => {
-    const doc: BaseSignalHit = ({
+    const doc = {
       ...sampleDocNoSortId(),
       _source: {
         ...sampleDocNoSortId()._source,
         signal: 'something',
       },
-    } as unknown) as BaseSignalHit;
+    };
     expect(isEventTypeSignal(doc)).toEqual(false);
   });
 
   test('It validates an empty object as "false"', () => {
-    const doc: BaseSignalHit = ({
+    const doc = {
       ...sampleDocNoSortId(),
       _source: {
         ...sampleDocNoSortId()._source,
         signal: {},
       },
-    } as unknown) as BaseSignalHit;
+    };
     expect(isEventTypeSignal(doc)).toEqual(false);
   });
 
   test('It validates an empty rule object as "false"', () => {
-    const doc: BaseSignalHit = ({
+    const doc = {
       ...sampleDocNoSortId(),
       _source: {
         ...sampleDocNoSortId()._source,
@@ -96,7 +95,7 @@ describe('buildEventTypeSignal', () => {
           rule: {},
         },
       },
-    } as unknown) as BaseSignalHit;
+    };
     expect(isEventTypeSignal(doc)).toEqual(false);
   });
 });

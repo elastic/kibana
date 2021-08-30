@@ -12,7 +12,7 @@ import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
 import type { estypes } from '@elastic/elasticsearch';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
-import { ALERT_OWNER } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
@@ -985,7 +985,7 @@ export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit 
 };
 
 export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
-  return (event as WrappedRACAlert)?._source?.[ALERT_OWNER] != null;
+  return (event as WrappedRACAlert)?._source?.[ALERT_RULE_CONSUMER] != null;
 };
 
 export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
