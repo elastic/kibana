@@ -14,6 +14,7 @@ export {
   SendRequestResponse,
   useRequest,
   UseRequestConfig,
+  UseRequestResponse,
   SectionLoading,
   GlobalFlyout,
 } from '../../../../src/plugins/es_ui_shared/public/';
