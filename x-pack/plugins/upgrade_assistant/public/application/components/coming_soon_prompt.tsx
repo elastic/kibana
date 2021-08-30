@@ -8,13 +8,15 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiPageContent, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useAppContext, useServices } from '../app_context';
+import { useAppContext } from '../app_context';
 
 export const ComingSoonPrompt: React.FunctionComponent = () => {
   const {
-    core: { docLinks },
-  } = useServices();
-  const { kibanaVersionInfo } = useAppContext();
+    kibanaVersionInfo,
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
 
   const { nextMajor, currentMajor } = kibanaVersionInfo;
   const { ELASTIC_WEBSITE_URL } = docLinks;

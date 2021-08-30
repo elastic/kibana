@@ -20,10 +20,12 @@ jest.mock('../../../../../app_context', () => {
   );
 
   return {
-    useServices: () => {
+    useAppContext: () => {
       return {
-        core: {
-          docLinks: docLinksServiceMock.createStartContract(),
+        services: {
+          core: {
+            docLinks: docLinksServiceMock.createStartContract(),
+          },
         },
       };
     },

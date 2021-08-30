@@ -27,7 +27,3 @@ export const useAppContext = () => {
   }
   return ctx;
 };
-
-export const useServices = () => useAppContext().services;
-
-export const usePlugins = () => useAppContext().plugins;

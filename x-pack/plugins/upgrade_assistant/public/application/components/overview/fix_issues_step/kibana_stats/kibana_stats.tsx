@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import type { DomainDeprecationDetails } from 'kibana/public';
 import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { getDeprecationsUpperLimit } from '../../../../lib/utils';
-import { useServices } from '../../../../app_context';
+import { useAppContext } from '../../../../app_context';
 import { NoDeprecations } from '../no_deprecations';
 
 const i18nTexts = {
@@ -71,8 +71,10 @@ const i18nTexts = {
 export const KibanaDeprecationStats: FunctionComponent = () => {
   const history = useHistory();
   const {
-    core: { deprecations },
-  } = useServices();
+    services: {
+      core: { deprecations },
+    },
+  } = useAppContext();
 
   const [kibanaDeprecations, setKibanaDeprecations] = useState<
     DomainDeprecationDetails[] | undefined

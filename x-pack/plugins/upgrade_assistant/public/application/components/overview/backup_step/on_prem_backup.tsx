@@ -10,10 +10,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { usePlugins } from '../../../app_context';
+import { useAppContext } from '../../../app_context';
 
 const SnapshotRestoreAppLink: React.FunctionComponent = () => {
-  const { share } = usePlugins();
+  const {
+    plugins: { share },
+  } = useAppContext();
 
   const snapshotRestoreUrl = share.url.locators
     .get('SNAPSHOT_RESTORE_LOCATOR')

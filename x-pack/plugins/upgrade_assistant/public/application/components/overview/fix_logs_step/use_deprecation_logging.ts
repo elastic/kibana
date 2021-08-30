@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { useServices } from '../../../app_context';
+import { useAppContext } from '../../../app_context';
 import { ResponseError } from '../../../lib/api';
 import { DeprecationLoggingPreviewProps } from '../../types';
 
@@ -30,9 +30,11 @@ const i18nTexts = {
 
 export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
   const {
-    api,
-    core: { notifications },
-  } = useServices();
+    services: {
+      api,
+      core: { notifications },
+    },
+  } = useAppContext();
   const { data, error: fetchError, isLoading, resendRequest } = api.useLoadDeprecationLogging();
 
   const [isDeprecationLogIndexingEnabled, setIsDeprecationLogIndexingEnabled] = useState(false);

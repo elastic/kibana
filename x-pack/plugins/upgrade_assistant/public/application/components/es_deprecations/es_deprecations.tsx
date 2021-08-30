@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { SectionLoading } from '../../../shared_imports';
-import { useServices } from '../../app_context';
+import { useAppContext } from '../../app_context';
 import { EsDeprecationsTable } from './es_deprecations_table';
 import { EsDeprecationErrors } from './es_deprecation_errors';
 import { NoDeprecationsPrompt } from '../shared';
@@ -71,7 +71,9 @@ const i18nTexts = {
 };
 
 export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
-  const { api, breadcrumbs } = useServices();
+  const {
+    services: { api, breadcrumbs },
+  } = useAppContext();
 
   const {
     data: esDeprecations,

@@ -16,7 +16,7 @@ import {
   ReindexAction,
   ReindexStatus,
 } from '../../../../../../../common/types';
-import { useServices } from '../../../../../app_context';
+import { useAppContext } from '../../../../../app_context';
 
 import type { ReindexStateContext } from '../context';
 import { ChecklistFlyoutStep } from './checklist_step';
@@ -83,8 +83,10 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
   const { status, reindexWarnings } = reindexState;
   const { index, correctiveAction } = deprecation;
   const {
-    core: { docLinks },
-  } = useServices();
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
   // If there are any warnings and we haven't started reindexing, show the warnings step first.
   const [currentFlyoutStep, setCurrentFlyoutStep] = useState<ReindexFlyoutStep>(
     reindexWarnings && reindexWarnings.length > 0 && status === undefined
