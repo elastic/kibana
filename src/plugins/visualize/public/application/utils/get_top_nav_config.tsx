@@ -34,7 +34,7 @@ import {
 import { APP_NAME, VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
-import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../locator';
+import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
