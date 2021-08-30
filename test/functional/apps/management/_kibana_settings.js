@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-      });      
+      });
     });
 
     it('should allow setting advanced settings', async function () {
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
         if (match) return match[2];
         throw new Error('State in url is missing or malformed: ' + currentUrl);
       }
-  
+
       it('defaults to null', async () => {
         await PageObjects.settings.clickKibanaSettings();
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
