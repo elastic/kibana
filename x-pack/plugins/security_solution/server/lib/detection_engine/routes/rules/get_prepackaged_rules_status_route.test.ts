@@ -66,6 +66,7 @@ describe.each([
   let securitySetup: SecurityPluginSetup;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -77,6 +78,12 @@ describe.each([
     } as unknown) as SecurityPluginSetup;
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+
+    (checkTimelinesStatus as jest.Mock).mockResolvedValue({
+      timelinesToInstall: [],
+      timelinesToUpdate: [],
+      prepackagedTimelines: [],
+    });
 
     getPrepackagedRulesStatusRoute(
       server.router,

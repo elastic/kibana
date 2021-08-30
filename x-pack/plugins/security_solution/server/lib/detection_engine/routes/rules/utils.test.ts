@@ -284,14 +284,18 @@ describe.each([
 
   describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transform(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      const output = transform(
+        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+        undefined,
+        isRuleRegistryEnabled
+      );
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
       const unsafeCast = ({ data: [{ random: 1 }] } as unknown) as PartialAlert;
-      const output = transform(unsafeCast);
+      const output = transform(unsafeCast, undefined, isRuleRegistryEnabled);
       expect(output).toBeNull();
     });
   });

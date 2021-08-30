@@ -107,7 +107,11 @@ export const createRulesRoute = (
           ruleId: createdRule.id,
           spaceId: context.securitySolution.getSpaceId(),
         });
-        const [validated, errors] = newTransformValidate(createdRule, ruleStatuses[0]);
+        const [validated, errors] = newTransformValidate(
+          createdRule,
+          ruleStatuses[0],
+          isRuleRegistryEnabled
+        );
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {
