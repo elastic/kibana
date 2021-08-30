@@ -395,9 +395,6 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
         title: i18n.translate('xpack.maps.mapActions.addFeatureError', {
           defaultMessage: `Error adding feature to index`,
         }),
-        toastMessage: i18n.translate('xpack.maps.mapActions.addFeatureErrorNotificationMsg', {
-          defaultMessage: `Only index patterns associated with a single index can be edited`,
-        }),
       });
     }
   };
@@ -424,9 +421,6 @@ export function deleteFeatureFromIndex(featureId: string) {
       getToasts().addError(e, {
         title: i18n.translate('xpack.maps.mapActions.removeFeatureError', {
           defaultMessage: `Error removing feature from index`,
-        }),
-        toastMessage: i18n.translate('xpack.maps.mapActions.removeFeatureErrorNotificationMsg', {
-          defaultMessage: `Only index patterns associated with a single index can be edited`,
         }),
       });
     }
