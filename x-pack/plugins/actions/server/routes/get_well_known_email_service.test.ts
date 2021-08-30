@@ -59,6 +59,44 @@ describe('getWellKnownEmailServiceRoute', () => {
     });
   });
 
+  it('returns config for elastic cloud email service', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getWellKnownEmailServiceRoute(router, licenseState);
+
+    const [config, handler] = router.get.mock.calls[0];
+    expect(config.path).toMatchInlineSnapshot(
+      `"/internal/actions/connector/_email_config/{service}"`
+    );
+
+    const [context, req, res] = mockHandlerArguments(
+      {},
+      {
+        params: { service: 'elastic_cloud' },
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "host": "dockerhost",
+          "port": 10025,
+          "secure": false,
+        },
+      }
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: {
+        host: 'dockerhost',
+        port: 10025,
+        secure: false,
+      },
+    });
+  });
+
   it('returns empty for unknown service', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

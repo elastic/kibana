@@ -32,16 +32,25 @@ export const getWellKnownEmailServiceRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const { service } = req.params;
-        const serviceEntry = nodemailerGetService(service);
 
         let response: SMTPConnection.Options = {};
-        if (serviceEntry) {
+        if (service === 'elastic_cloud') {
           response = {
-            host: serviceEntry.host,
-            port: serviceEntry.port,
-            secure: serviceEntry.secure,
+            host: 'dockerhost',
+            port: 10025,
+            secure: false,
           };
+        } else {
+          const serviceEntry = nodemailerGetService(service);
+          if (serviceEntry) {
+            response = {
+              host: serviceEntry.host,
+              port: serviceEntry.port,
+              secure: serviceEntry.secure,
+            };
+          }
         }
+
         return res.ok({
           body: response,
         });
