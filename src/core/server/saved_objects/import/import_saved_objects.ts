@@ -89,6 +89,7 @@ export async function importSavedObjectsFromStream({
     savedObjects: collectSavedObjectsResult.collectedObjects,
     savedObjectsClient,
     typeRegistry,
+    importNamespaces,
     namespace,
   });
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];

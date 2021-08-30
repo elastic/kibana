@@ -33,12 +33,14 @@ const getObjectsToSkip = (
 export async function getNonExistingReferenceAsKeys({
   savedObjects,
   savedObjectsClient,
+  importNamespaces,
   typeRegistry,
   namespace,
   retries,
 }: {
   savedObjects: Array<SavedObject<{ title?: string }>>;
   savedObjectsClient: SavedObjectsClientContract;
+  importNamespaces: boolean;
   typeRegistry: ISavedObjectTypeRegistry;
   namespace?: string;
   retries?: SavedObjectsImportRetry[];
@@ -94,7 +96,16 @@ export async function getNonExistingReferenceAsKeys({
     if (savedObject.error) {
       continue;
     }
-    collector.delete(getObjKey(savedObject, typeRegistry, namespace));
+    // the (non-agnostic) objects returned from bulkGet will always have a `namespaces` field populated,
+    // but the keys we're using in the rest of the algorithm don't have it, so in that case, we exclude the namespaces
+    // when generating the key from the fetched object.
+    collector.delete(
+      getObjKey(
+        { ...savedObject, ...(importNamespaces ? {} : { namespaces: undefined }) },
+        typeRegistry,
+        namespace
+      )
+    );
   }
 
   return [...collector.keys()];
@@ -104,12 +115,14 @@ export async function validateReferences({
   savedObjects,
   savedObjectsClient,
   typeRegistry,
+  importNamespaces,
   namespace,
   retries,
 }: {
   savedObjects: Array<SavedObject<{ title?: string }>>;
   savedObjectsClient: SavedObjectsClientContract;
   typeRegistry: ISavedObjectTypeRegistry;
+  importNamespaces: boolean;
   namespace?: string;
   retries?: SavedObjectsImportRetry[];
 }) {
@@ -119,6 +132,7 @@ export async function validateReferences({
     savedObjects,
     savedObjectsClient,
     typeRegistry,
+    importNamespaces,
     namespace,
     retries,
   });

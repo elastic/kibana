@@ -116,9 +116,9 @@ export const createSavedObjects = async <T>({
   // remap results to reflect the object IDs that were submitted for import
   // this ensures that consumers understand the results
   const remappedResults = expectedResults.map<CreatedObject<T>>((result) => {
-    // the (non-agnostic) created objects will always have a `namespaces` field populated is spaces is enabled,
-    // but the keys we're using in rest of the algorithm don't have it, so in that case, we exclude the namespaces
-    // when generating the remapping key.
+    // the (non-agnostic) created objects will always have a `namespaces` field populated,
+    // but the keys we're using in the rest of the algorithm don't have it, so in that case, we exclude the namespaces
+    // when generating the key from the created object.
     const resultKey = getObjKey(
       importNamespaces
         ? result
