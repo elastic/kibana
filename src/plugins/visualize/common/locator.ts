@@ -8,15 +8,12 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { omitBy } from 'lodash';
-
+import rison from 'rison-node';
+import type { Filter, Query, RefreshInterval, TimeRange } from 'src/plugins/data/public';
 import type { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common';
-import type { Filter, TimeRange, RefreshInterval, Query } from 'src/plugins/data/public';
-import { esFilters } from '../../data/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
-
-import { VisualizeConstants } from './application/visualize_constants';
-
-import type { PureVisState } from './application/types';
+import { isFilterPinned } from '../../data/common';
+import { VisualizeConstants } from './constants';
+import { PureVisState } from './types';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type VisualizeLocatorParams = {
@@ -80,37 +77,28 @@ export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLo
       ? `#${VisualizeConstants.EDIT_PATH}/${params.visId}`
       : `#${VisualizeConstants.CREATE_PATH}`;
 
+    const globalUrlState = omitBy(
+      {
+        time: params.timeRange,
+        filters: params.filters?.filter((f) => isFilterPinned(f)),
+        refreshInterval: params.refreshInterval,
+      },
+      (v) => v == null
+    );
+    const appUrlState = omitBy(
+      {
+        linked: params.linked,
+        filters: params.filters?.filter((f) => !isFilterPinned(f)),
+        uiState: params.uiState,
+        query: params.query,
+        vis: params.vis,
+      },
+      (v) => v == null
+    );
+
+    path = `${path}?_g=${rison.encode(globalUrlState)}&_a=${rison.encode(appUrlState)}`;
+
     path = params.type ? `${path}?type=${params.type}` : path;
-
-    path = setStateToKbnUrl(
-      '_g',
-      omitBy(
-        {
-          time: params.timeRange,
-          filters: params.filters?.filter((f) => esFilters.isFilterPinned(f)),
-          refreshInterval: params.refreshInterval,
-        },
-        (v) => v == null
-      ),
-      { useHash: false },
-      path
-    );
-
-    path = setStateToKbnUrl(
-      '_a',
-      omitBy(
-        {
-          linked: params.linked,
-          filters: params.filters?.filter((f) => !esFilters.isFilterPinned(f)),
-          uiState: params.uiState,
-          query: params.query,
-          vis: params.vis,
-        },
-        (v) => v == null
-      ),
-      { useHash: false },
-      path
-    );
 
     return {
       app: VisualizeConstants.APP_ID,

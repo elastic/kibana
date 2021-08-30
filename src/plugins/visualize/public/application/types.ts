@@ -21,7 +21,6 @@ import type {
 } from 'kibana/public';
 
 import type {
-  SavedVisState,
   VisualizationsStart,
   Vis,
   VisualizeEmbeddableContract,
@@ -47,7 +46,7 @@ import type { DashboardStart } from '../../../dashboard/public';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../../usage_collection/public';
 
-export type PureVisState = SavedVisState;
+import { PureVisState } from '../../common/types';
 
 export interface VisualizeAppState {
   filters: Filter[];
@@ -149,3 +148,5 @@ export interface EditorRenderProps {
    */
   linked: boolean;
 }
+
+export { PureVisState };

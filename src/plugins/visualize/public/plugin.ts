@@ -47,7 +47,7 @@ import type { UsageCollectionStart } from '../../usage_collection/public';
 
 import { setVisEditorsRegistry, setUISettings, setUsageCollector } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
-import { VisualizeLocatorDefinition } from './locator';
+import { VisualizeLocatorDefinition } from '../common/locator';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;

@@ -7,8 +7,8 @@
  */
 
 import { VisualizeLocatorDefinition } from './locator';
-import { esFilters } from '../../data/public';
-import type { PureVisState } from './application/types';
+import { FilterStateStore } from '../../data/common';
+import type { PureVisState } from './types';
 
 describe('visualize locator', () => {
   let definition: VisualizeLocatorDefinition;
@@ -56,7 +56,7 @@ describe('visualize locator', () => {
           },
           query: { query: 'hi' },
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
         },
       ],
