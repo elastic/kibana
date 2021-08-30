@@ -7,44 +7,43 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
+import nodemailerGetService from 'nodemailer/lib/well-known';
+import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { ILicenseState } from '../lib';
-import { INTERNAL_BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
-import { ActionResult, ActionsRequestHandlerContext } from '../types';
+import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  service: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
-  actionTypeId,
-  isPreconfigured,
-  isMissingSecrets,
-  ...res
-}) => ({
-  ...res,
-  connector_type_id: actionTypeId,
-  is_preconfigured: isPreconfigured,
-  is_missing_secrets: isMissingSecrets,
-});
-
-export const getActionRoute = (
+export const getWellKnownEmailServiceRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{id}`,
+      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/_email_config/{service}`,
       validate: {
         params: paramSchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
-        const { id } = req.params;
+        const { service } = req.params;
+        const serviceEntry = nodemailerGetService(service);
+
+        let response: SMTPConnection.Options = {};
+        if (serviceEntry) {
+          response = {
+            host: serviceEntry.host,
+            port: serviceEntry.port,
+            secure: serviceEntry.secure,
+          };
+        }
         return res.ok({
-          body: rewriteBodyRes(await actionsClient.get({ id })),
+          body: response,
         });
       })
     )
