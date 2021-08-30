@@ -18,6 +18,8 @@ const querySchema = schema.object({
     schema.literal('indices'),
     schema.literal('durationInMillis'),
     schema.literal('startTimeInMillis'),
+    schema.literal('shards.total'),
+    schema.literal('shards.failed'),
   ]),
   sortDirection: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
   pageIndex: schema.number(),

@@ -7,7 +7,13 @@
 
 import { Direction } from '@elastic/eui';
 
-export type SortField = 'snapshot' | 'indices' | 'startTimeInMillis' | 'durationInMillis';
+export type SortField =
+  | 'snapshot'
+  | 'indices'
+  | 'startTimeInMillis'
+  | 'durationInMillis'
+  | 'shards.total'
+  | 'shards.failed';
 export type SortDirection = Direction;
 export interface SnapshotTableOptions {
   sortField: SortField;
@@ -28,6 +34,8 @@ const sortFieldToESParams = {
   indices: 'index_count',
   startTimeInMillis: 'start_time',
   durationInMillis: 'duration',
+  'shards.total': 'shard_count',
+  'shards.failed': 'failed_shard_count',
 };
 export const convertSortFieldToES = (sortField: SortField): string => {
   return sortFieldToESParams[sortField];
