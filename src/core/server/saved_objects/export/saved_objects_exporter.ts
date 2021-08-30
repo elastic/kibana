@@ -131,12 +131,16 @@ export class SavedObjectsExporter {
       ? exportedObjects
       : exportedObjects.map<SavedObject<unknown>>(({ namespaces, ...object }) => object);
 
+    const redactedExcludedObjects = includeNamespaces
+      ? excludedObjects
+      : excludedObjects.map(({ namespaces, ...object }) => object);
+
     const exportDetails: SavedObjectsExportResultDetails = {
       exportedCount: exportedObjects.length,
       missingRefCount: missingReferences.length,
       missingReferences,
       excludedObjectsCount: excludedObjects.length,
-      excludedObjects,
+      excludedObjects: redactedExcludedObjects,
     };
     this.#log.debug(`Exporting [${redactedObjects.length}] saved objects.`);
     return createListStream([...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
