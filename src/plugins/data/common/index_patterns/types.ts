@@ -11,35 +11,55 @@ import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notificatio
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
-import { RUNTIME_FIELD_TYPES } from './constants';
 import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES, IndexPatternField } from '..';
 import { FieldFormat } from '../../../field_formats/common';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
-export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export type RuntimeType = estypes.MappingRuntimeFieldType | 'composite';
 
-export interface RuntimeField {
+/**
+ * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
+ * We extends the object until @elastic/elasticsearch supports "composite" type
+ * and its "fields" object
+ */
+export interface ESRuntimeField extends Omit<estypes.MappingRuntimeField, 'type'> {
   type: RuntimeType;
-  script?: {
-    source: string;
-  };
-  parentComposite?: string;
   fields?: Record<
     string,
     {
+      // It is not recursive, we can't create a composite inside a composite.
       type: Omit<RuntimeType, 'composite'>;
     }
   >;
 }
 
-export interface EnhancedRuntimeField extends RuntimeField {
+/**
+ * The RuntimeField which is saved in the Data View saved object. We extend it to
+ * keep a reference to a possible parent composite object.
+ */
+export interface RuntimeField extends ESRuntimeField {
+  parentComposite?: string;
+}
+
+/**
+ * Runtime fields are like other fields when it comes to formatting or giving
+ * them a custom label. When adding a new runtime field in the Data view we allow the
+ * consumer to pass along a "format", "customLabel" or "popularity".
+ */
+export interface EnhancedRuntimeField extends Omit<RuntimeField, 'format'> {
   format?: SerializedFieldFormat;
   customLabel?: string;
   popularity?: number;
 }
 
+/**
+ * When we add a runtime field of "composite" type we are actually adding a _holder_
+ * object with runtime fields inside of it.
+ * The RuntimeComposite interface is this holder of fields.
+ * It has a name, a script and an array references to the runtime fields it holds.
+ */
 export interface RuntimeComposite {
   name: string;
   script: {
@@ -48,6 +68,13 @@ export interface RuntimeComposite {
   subFields: string[];
 }
 
+/**
+ * This is the same as the RuntimeComposite interface but instead of
+ * returning an array of references to the subFields we return a **map** of subfields
+ * with their possible format, custom label and popularity.
+ *
+ * @see {@link RuntimeComposite}
+ */
 export type RuntimeCompositeWithSubFields = Omit<RuntimeComposite, 'subFields'> & {
   subFields: Record<string, EnhancedRuntimeField>;
 };

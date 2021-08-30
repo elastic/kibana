@@ -16,6 +16,7 @@ import type {
   RuntimeType,
   RuntimeComposite,
   RuntimeCompositeWithSubFields,
+  ESRuntimeField,
 } from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
@@ -204,7 +205,7 @@ export class IndexPattern implements IIndexPattern {
       };
     });
 
-    const runtimeFields = {
+    const runtimeFields: Record<string, ESRuntimeField> = {
       ...this.getComputedRuntimeFields(),
       ...this.getComputedRuntimeComposites(),
     };
@@ -222,7 +223,7 @@ export class IndexPattern implements IIndexPattern {
    * from a parent composite runtime field.
    * @returns A map of runtime fields
    */
-  private getComputedRuntimeFields(): Record<string, RuntimeField> {
+  private getComputedRuntimeFields(): Record<string, ESRuntimeField> {
     return Object.entries(this.runtimeFieldMap).reduce((acc, [name, field]) => {
       const { type, script, parentComposite } = field;
 
@@ -263,7 +264,7 @@ export class IndexPattern implements IIndexPattern {
    *
    * @returns A map of runtime fields
    */
-  private getComputedRuntimeComposites(): Record<string, RuntimeField> {
+  private getComputedRuntimeComposites(): Record<string, ESRuntimeField> {
     return Object.entries(this.runtimeCompositeMap).reduce((acc, [name, runtimeComposite]) => {
       const { script, subFields } = runtimeComposite;
 
@@ -290,7 +291,7 @@ export class IndexPattern implements IIndexPattern {
         return acc;
       }
 
-      const runtimeFieldRequest: RuntimeField = {
+      const runtimeFieldRequest: ESRuntimeField = {
         type: 'composite',
         script,
         fields,
@@ -526,7 +527,7 @@ export class IndexPattern implements IIndexPattern {
    * Replaces all existing runtime fields with new fields
    * @param newFields
    */
-  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
+  replaceAllRuntimeFields(newFields: Record<string, EnhancedRuntimeField>) {
     const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
     oldRuntimeFieldNames.forEach((name) => {
       this.removeRuntimeField(name);
