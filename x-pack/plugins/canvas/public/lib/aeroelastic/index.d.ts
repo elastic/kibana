@@ -44,6 +44,8 @@ export type TypeName = string;
 export type Payload = JsonMap;
 export type UpdaterFunction = (arg: State) => State;
 
+export type CommitFn = (type: TypeName, payload: Payload) => void;
+
 export interface Store {
   getCurrentState: () => State;
   setCurrentState: (state: State) => void;
