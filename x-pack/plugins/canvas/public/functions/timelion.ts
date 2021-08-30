@@ -7,6 +7,8 @@
 
 import { flatten } from 'lodash';
 import moment from 'moment-timezone';
+import { i18n } from '@kbn/i18n';
+
 import { TimeRange } from 'src/plugins/data/common';
 import { ExpressionFunctionDefinition, DatatableRow } from 'src/plugins/expressions/public';
 import { fetch } from '../../common/lib/fetch';
@@ -16,6 +18,15 @@ import { Datatable, ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 import { InitializeArguments } from './';
 
+const errors = {
+  timelionError: () =>
+    new Error(
+      i18n.translate('xpack.canvas.functions.timelion.executionError', {
+        defaultMessage:
+          'There was an error executing the Timelion query.  Check your syntax and try again.',
+      })
+    ),
+};
 export interface Arguments {
   query: string;
   interval: string;
@@ -92,7 +103,7 @@ export function timelionFunctionFactory(initialize: InitializeArguments): () => 
           default: 'UTC',
         },
       },
-      fn: (input, args): Promise<Datatable> => {
+      fn: async (input, args) => {
         // Timelion requires a time range. Use the time range from the timefilter element in the
         // workpad, if it exists. Otherwise fall back on the function args.
         const timeFilter = input.and.find((and) => and.filterType === 'time');
@@ -118,35 +129,41 @@ export function timelionFunctionFactory(initialize: InitializeArguments): () => 
           },
         };
 
-        return fetch(initialize.prependBasePath(`/api/timelion/run`), {
-          method: 'POST',
-          responseType: 'json',
-          data: body,
-        }).then((resp) => {
-          const seriesList = resp.data.sheet[0].list;
-          const rows = flatten(
-            seriesList.map((series: { data: any[]; label: string }) =>
-              series.data.map((row) => ({
-                '@timestamp': row[0],
-                value: row[1],
-                label: series.label,
-              }))
-            )
-          ) as DatatableRow[];
+        let result: any;
 
-          return {
-            type: 'datatable',
-            meta: {
-              source: 'timelion',
-            },
-            columns: [
-              { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
-              { id: 'value', name: 'value', meta: { type: 'number' } },
-              { id: 'label', name: 'label', meta: { type: 'string' } },
-            ],
-            rows,
-          };
-        });
+        try {
+          result = await fetch(initialize.prependBasePath(`/api/timelion/run`), {
+            method: 'POST',
+            responseType: 'json',
+            data: body,
+          });
+        } catch (e) {
+          throw errors.timelionError();
+        }
+
+        const seriesList = result.data.sheet[0].list;
+        const rows = flatten(
+          seriesList.map((series: { data: any[]; label: string }) =>
+            series.data.map((row) => ({
+              '@timestamp': row[0],
+              value: row[1],
+              label: series.label,
+            }))
+          )
+        ) as DatatableRow[];
+
+        return {
+          type: 'datatable',
+          meta: {
+            source: 'timelion',
+          },
+          columns: [
+            { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
+            { id: 'value', name: 'value', meta: { type: 'number' } },
+            { id: 'label', name: 'label', meta: { type: 'string' } },
+          ],
+          rows,
+        };
       },
     };
   };

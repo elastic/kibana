@@ -220,7 +220,11 @@ export function ErrorGroupDetails() {
       </EuiPanel>
       <EuiSpacer size="s" />
       {showDetails && (
-        <DetailView errorGroup={errorGroupData} urlParams={urlParams} />
+        <DetailView
+          errorGroup={errorGroupData}
+          urlParams={urlParams}
+          kuery={kuery}
+        />
       )}
     </>
   );
