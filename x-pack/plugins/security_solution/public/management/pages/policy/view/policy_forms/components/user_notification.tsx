@@ -117,7 +117,7 @@ export const UserNotification = React.memo(
         />
         {userNotificationSelected && (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
