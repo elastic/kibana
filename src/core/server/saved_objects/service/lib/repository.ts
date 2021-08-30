@@ -561,12 +561,10 @@ export class SavedObjectsRepository {
     }
 
     const namespace = normalizeNamespace(options.namespace);
-    const getNamespaceId = (namespaces?: string[]) =>
-      namespaces !== undefined ? SavedObjectsUtils.namespaceStringToId(namespaces[0]) : namespace;
 
     let bulkGetRequestIndexCounter = 0;
     const expectedBulkGetResults: Either[] = objects.map((object) => {
-      const { type, id, namespaces = [namespace] } = object;
+      const { type, id, namespaces } = object;
 
       if (!this._allowedTypes.includes(type)) {
         return {
@@ -589,6 +587,9 @@ export class SavedObjectsRepository {
         },
       };
     });
+
+    const getNamespaceId = (namespaces?: string[]) =>
+      namespaces !== undefined ? SavedObjectsUtils.namespaceStringToId(namespaces[0]) : namespace;
 
     const bulkGetDocs = expectedBulkGetResults
       .filter(isRight)
