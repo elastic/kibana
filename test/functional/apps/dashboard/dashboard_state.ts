@@ -187,26 +187,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       const changeQuery = async (useHardRefresh: boolean, newQuery: string) => {
+        await queryBar.clickQuerySubmitButton();
+        const oldQuery = await queryBar.getQueryString();
         const currentUrl = await getUrlFromShare();
-        const newUrl = currentUrl.replace(`query:''`, `query:'${newQuery}'`);
+        const newUrl = currentUrl.replace(`query:'${oldQuery}'`, `query:'${newQuery}'`);
 
         await browser.get(newUrl.toString(), !useHardRefresh);
         const queryBarContentsAfterRefresh = await queryBar.getQueryString();
         expect(queryBarContentsAfterRefresh).to.equal(newQuery);
       };
 
-      it('for query parameter with hard refresh', async function () {
-        const currentQuery = await queryBar.getQueryString();
-        expect(currentQuery).to.equal('');
-        changeQuery(true, 'hi:hello');
-        await queryBar.clearQuery();
-        await queryBar.clickQuerySubmitButton();
+      it('for query parameter with soft refresh', async function () {
+        await changeQuery(false, 'hi:goodbye');
       });
 
-      it('for query parameter with soft refresh', async function () {
-        const currentQuery = await queryBar.getQueryString();
-        expect(currentQuery).to.equal('');
-        changeQuery(false, 'hi:goodbye');
+      it('for query parameter with hard refresh', async function () {
+        await changeQuery(true, 'hi:hello');
         await queryBar.clearQuery();
         await queryBar.clickQuerySubmitButton();
       });
