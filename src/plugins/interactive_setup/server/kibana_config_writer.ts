@@ -15,11 +15,19 @@ import type { Logger } from 'src/core/server';
 
 import { getDetailedErrorMessage } from './errors';
 
-export interface WriteConfigParameters {
+export type WriteConfigParameters = {
   host: string;
-  ca: string;
-  serviceAccountToken: { name: string; value: string };
-}
+  caCert?: string;
+} & (
+  | {
+      username: string;
+      password: string;
+    }
+  | {
+      serviceAccountToken: { name: string; value: string };
+    }
+  | {}
+);
 
 export class KibanaConfigWriter {
   constructor(private readonly configPath: string, private readonly logger: Logger) {}
@@ -54,31 +62,37 @@ export class KibanaConfigWriter {
   public async writeConfig(params: WriteConfigParameters) {
     const caPath = path.join(path.dirname(this.configPath), `ca_${Date.now()}.crt`);
 
-    this.logger.debug(`Writing CA certificate to ${caPath}.`);
-    try {
-      await fs.writeFile(caPath, params.ca);
-      this.logger.debug(`Successfully wrote CA certificate to ${caPath}.`);
-    } catch (err) {
-      this.logger.error(
-        `Failed to write CA certificate to ${caPath}: ${getDetailedErrorMessage(err)}.`
-      );
-      throw err;
+    if (params.caCert) {
+      this.logger.debug(`Writing CA certificate to ${caPath}.`);
+      try {
+        await fs.writeFile(caPath, params.caCert);
+        this.logger.debug(`Successfully wrote CA certificate to ${caPath}.`);
+      } catch (err) {
+        this.logger.error(
+          `Failed to write CA certificate to ${caPath}: ${getDetailedErrorMessage(err)}.`
+        );
+        throw err;
+      }
+    }
+
+    const config: Record<string, any> = { 'elasticsearch.hosts': [params.host] };
+    if ('serviceAccountToken' in params) {
+      config['elasticsearch.serviceAccountToken'] = params.serviceAccountToken.value;
+    } else if ('username' in params) {
+      config['elasticsearch.password'] = params.password;
+      config['elasticsearch.username'] = params.username;
+    }
+    if (params.caCert) {
+      config['elasticsearch.ssl.certificateAuthorities'] = [caPath];
     }
 
     this.logger.debug(`Writing Elasticsearch configuration to ${this.configPath}.`);
     try {
       await fs.appendFile(
         this.configPath,
-        `\n\n# This section was automatically generated during setup (service account token name is "${
-          params.serviceAccountToken.name
-        }").\n${yaml.safeDump(
-          {
-            'elasticsearch.hosts': [params.host],
-            'elasticsearch.serviceAccountToken': params.serviceAccountToken.value,
-            'elasticsearch.ssl.certificateAuthorities': [caPath],
-          },
-          { flowLevel: 1 }
-        )}\n`
+        `\n\n# This section was automatically generated during setup.\n${yaml.safeDump(config, {
+          flowLevel: 1,
+        })}\n`
       );
       this.logger.debug(`Successfully wrote Elasticsearch configuration to ${this.configPath}.`);
     } catch (err) {
