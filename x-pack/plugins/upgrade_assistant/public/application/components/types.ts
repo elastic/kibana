@@ -7,6 +7,12 @@
 
 import { ResponseError } from '../lib/api';
 
+export enum LoadingState {
+  Loading,
+  Success,
+  Error,
+}
+
 export type DeprecationTableColumns =
   | 'type'
   | 'index'

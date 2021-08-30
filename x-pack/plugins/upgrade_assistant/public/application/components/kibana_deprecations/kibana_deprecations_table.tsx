@@ -74,6 +74,12 @@ const i18nTexts = {
       defaultMessage: 'Type',
     }
   ),
+  criticalFilterLabel: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.table.criticalFilterLabel',
+    {
+      defaultMessage: 'Critical',
+    }
+  ),
   getDeprecationIssue: (domainId: string) => {
     return i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.table.issueCellDescription', {
       defaultMessage: '{domainId} is using a deprecated feature',
@@ -192,9 +198,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       {
         type: 'is',
         field: 'level',
-        name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isManagedFilterLabel', {
-          defaultMessage: 'Critical',
-        }),
+        name: i18nTexts.criticalFilterLabel,
       },
       {
         type: 'field_value_selection',
