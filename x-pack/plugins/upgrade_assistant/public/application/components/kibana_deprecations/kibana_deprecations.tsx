@@ -6,8 +6,8 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
+import uuid from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-
 import { EuiPageContent, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -61,25 +61,48 @@ const i18nTexts = {
   }),
 };
 
-export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponentProps) => {
+export interface DeprecationResolutionState {
+  id: string;
+  resolveDeprecationStatus: 'ok' | 'fail' | 'in_progress';
+  resolveDeprecationError?: string;
+}
+
+export interface KibanaDeprecationDetails extends DomainDeprecationDetails {
+  id: string;
+}
+
+export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) => {
   const [kibanaDeprecations, setKibanaDeprecations] = useState<
-    DomainDeprecationDetails[] | undefined
+    KibanaDeprecationDetails[] | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [flyoutContent, setFlyoutContent] = useState<undefined | DomainDeprecationDetails>(
+  const [flyoutContent, setFlyoutContent] = useState<undefined | KibanaDeprecationDetails>(
     undefined
   );
-  // const [isResolvingDeprecation, setIsResolvingDeprecation] = useState(false);
+  const [deprecationResolutionState, setDeprecationResolutionState] = useState<
+    DeprecationResolutionState | undefined
+  >(undefined);
 
   const { deprecations, breadcrumbs, api } = useAppContext();
+
+  const {
+    addContent: addContentToGlobalFlyout,
+    removeContent: removeContentFromGlobalFlyout,
+  } = useGlobalFlyout();
 
   const getAllDeprecations = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      const response = await deprecations.getAllDeprecations();
-      setKibanaDeprecations(response);
+      const newKibanaDeprecations = await deprecations.getAllDeprecations();
+      const newKibanaDeprecationsWithIds = newKibanaDeprecations.map((deprecation) => {
+        return {
+          ...deprecation,
+          id: uuid.v4(),
+        };
+      });
+      setKibanaDeprecations(newKibanaDeprecationsWithIds);
     } catch (e) {
       setError(e);
     }
@@ -87,19 +110,34 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
     setIsLoading(false);
   }, [deprecations]);
 
-  const toggleFlyout = (newFlyoutContent?: DomainDeprecationDetails) => {
+  const toggleFlyout = (newFlyoutContent?: KibanaDeprecationDetails) => {
     setFlyoutContent(newFlyoutContent);
   };
-
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
 
   const closeFlyout = useCallback(() => {
     toggleFlyout();
     removeContentFromGlobalFlyout('deprecationDetails');
   }, [removeContentFromGlobalFlyout]);
+
+  const resolveDeprecation = useCallback(
+    async (deprecationDetails: KibanaDeprecationDetails) => {
+      setDeprecationResolutionState({
+        id: deprecationDetails.id,
+        resolveDeprecationStatus: 'in_progress',
+      });
+
+      const response = await deprecations.resolveDeprecation(deprecationDetails);
+
+      setDeprecationResolutionState({
+        id: deprecationDetails.id,
+        resolveDeprecationStatus: response.status,
+        resolveDeprecationError: response.status === 'fail' ? response.reason : undefined,
+      });
+
+      closeFlyout();
+    },
+    [closeFlyout, deprecations]
+  );
 
   useEffect(() => {
     if (flyoutContent) {
@@ -109,6 +147,11 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
         props: {
           deprecation: flyoutContent,
           closeFlyout,
+          resolveDeprecation,
+          deprecationResolutionState:
+            deprecationResolutionState && flyoutContent.id === deprecationResolutionState.id
+              ? deprecationResolutionState
+              : undefined,
         },
         flyoutProps: {
           onClose: closeFlyout,
@@ -117,30 +160,13 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
         },
       });
     }
-  }, [addContentToGlobalFlyout, closeFlyout, flyoutContent]);
-
-  // TODO finish implementing
-  // const resolveDeprecation = async (deprecationDetails: DomainDeprecationDetails) => {
-  //   setIsResolvingDeprecation(true);
-
-  //   const response = await deprecations.resolveDeprecation(deprecationDetails);
-
-  //   setIsResolvingDeprecation(false);
-  //   // toggleResolveModal();
-
-  //   // Handle error case
-  //   if (response.status === 'fail') {
-  //     notifications.toasts.addError(new Error(response.reason), {
-  //       title: i18nTexts.errorMessage,
-  //     });
-
-  //     return;
-  //   }
-
-  //   notifications.toasts.addSuccess(i18nTexts.successMessage);
-  //   // Refetch deprecations
-  //   getAllDeprecations();
-  // };
+  }, [
+    addContentToGlobalFlyout,
+    closeFlyout,
+    deprecationResolutionState,
+    flyoutContent,
+    resolveDeprecation,
+  ]);
 
   useEffect(() => {
     async function sendTelemetryData() {
@@ -194,6 +220,7 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
           deprecations={kibanaDeprecations}
           reload={getAllDeprecations}
           toggleFlyout={toggleFlyout}
+          deprecationResolutionState={deprecationResolutionState}
         />
       </div>
     );

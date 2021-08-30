@@ -13,10 +13,7 @@ import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public
 import { KibanaContextProvider, APP_WRAPPER_CLASS, GlobalFlyout } from '../shared_imports';
 import { AppServicesContext } from '../types';
 import { AppContextProvider, ContextValue, useAppContext } from './app_context';
-import { ComingSoonPrompt } from './components/coming_soon_prompt';
-import { EsDeprecations } from './components/es_deprecations';
-import { KibanaDeprecationsContent } from './components/kibana_deprecations';
-import { Overview } from './components/overview';
+import { EsDeprecations, ComingSoonPrompt, KibanaDeprecations, Overview } from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 export interface AppDependencies extends ContextValue {
@@ -38,7 +35,7 @@ const App: React.FunctionComponent = () => {
     <Switch>
       <Route exact path="/overview" component={Overview} />
       <Route exact path="/es_deprecations" component={EsDeprecations} />
-      <Route exact path="/kibana_deprecations" component={KibanaDeprecationsContent} />
+      <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
       <Redirect from="/" to="/overview" />
     </Switch>
   );

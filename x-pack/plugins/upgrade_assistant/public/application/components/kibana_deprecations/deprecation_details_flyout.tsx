@@ -24,14 +24,26 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import type { DomainDeprecationDetails } from 'kibana/public';
+import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
+
+import './_deprecation_details_flyout.scss';
 
 export interface DeprecationDetailsFlyoutProps {
-  deprecation: DomainDeprecationDetails;
+  deprecation: KibanaDeprecationDetails;
   closeFlyout: () => void;
+  resolveDeprecation: (deprecationDetails: KibanaDeprecationDetails) => Promise<void>;
+  deprecationResolutionState?: DeprecationResolutionState;
 }
 
 const i18nTexts = {
+  getDeprecationTitle: (domainId: string) => {
+    return i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.flyout.flyoutTitle', {
+      defaultMessage: "'{domainId}' is using a deprecated feature",
+      values: {
+        domainId,
+      },
+    });
+  },
   learnMoreLinkLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.learnMoreLinkLabel',
     {
@@ -50,10 +62,34 @@ const i18nTexts = {
       defaultMessage: 'Quick resolve',
     }
   ),
+  retryQuickResolveButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.flyout.retryQuickResolveButtonLabel',
+    {
+      defaultMessage: 'Try again',
+    }
+  ),
+  resolvedButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.flyout.resolvedButtonLabel',
+    {
+      defaultMessage: 'Resolved',
+    }
+  ),
+  quickResolveInProgressButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveInProgressButtonLabel',
+    {
+      defaultMessage: 'Resolution in progress…',
+    }
+  ),
   quickResolveCalloutTitle: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveCalloutTitle',
     {
       defaultMessage: 'Quick resolve action available',
+    }
+  ),
+  quickResolveErrorTitle: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecations.flyout.quickResolveErrorTitle',
+    {
+      defaultMessage: 'Error resolving deprecation',
     }
   ),
   quickResolveCalloutDescription: (
@@ -79,20 +115,53 @@ const i18nTexts = {
   ),
 };
 
+const getQuickResolveButtonLabel = (deprecationResolutionState?: DeprecationResolutionState) => {
+  if (deprecationResolutionState?.resolveDeprecationStatus === 'in_progress') {
+    return i18nTexts.quickResolveInProgressButtonLabel;
+  }
+
+  if (deprecationResolutionState?.resolveDeprecationStatus === 'ok') {
+    return i18nTexts.resolvedButtonLabel;
+  }
+
+  if (deprecationResolutionState?.resolveDeprecationError) {
+    return i18nTexts.retryQuickResolveButtonLabel;
+  }
+
+  return i18nTexts.quickResolveButtonLabel;
+};
+
 export const DeprecationDetailsFlyout = ({
   deprecation,
   closeFlyout,
+  resolveDeprecation,
+  deprecationResolutionState,
 }: DeprecationDetailsFlyoutProps) => {
-  const { documentationUrl, message, correctiveActions } = deprecation;
+  const { documentationUrl, message, correctiveActions, domainId } = deprecation;
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>Deprecation title goes here...</h2>
+          {/* This will be replaced with a custom title once https://github.com/elastic/kibana/pull/109840 is merged  */}
+          <h2>{i18nTexts.getDeprecationTitle(domainId)}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {deprecationResolutionState?.resolveDeprecationStatus === 'fail' && (
+          <>
+            <EuiCallOut
+              title={i18nTexts.quickResolveErrorTitle}
+              color="danger"
+              iconType="alert"
+              data-test-subj="deleteSettingsError"
+            >
+              {deprecationResolutionState.resolveDeprecationError}
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
+
         <EuiText>
           <p>{message}</p>
 
@@ -107,38 +176,43 @@ export const DeprecationDetailsFlyout = ({
 
         <EuiSpacer />
 
-        {correctiveActions.api && (
+        {/* Hide resolution steps if already resolved */}
+        {deprecationResolutionState?.resolveDeprecationStatus !== 'ok' && (
           <>
-            <EuiCallOut
-              title={i18nTexts.quickResolveCalloutTitle}
-              color="primary"
-              iconType="iInCircle"
-              data-test-subj="quickResolveCallout"
-            >
-              <p>{i18nTexts.quickResolveCalloutDescription}</p>
-            </EuiCallOut>
+            {correctiveActions.api && (
+              <>
+                <EuiCallOut
+                  title={i18nTexts.quickResolveCalloutTitle}
+                  color="primary"
+                  iconType="iInCircle"
+                  data-test-subj="quickResolveCallout"
+                >
+                  <p>{i18nTexts.quickResolveCalloutDescription}</p>
+                </EuiCallOut>
+
+                <EuiSpacer />
+              </>
+            )}
+
+            <EuiTitle size="s">
+              <h3>{i18nTexts.manualFixTitle}</h3>
+            </EuiTitle>
 
             <EuiSpacer />
+
+            <EuiText>
+              <ol>
+                {correctiveActions.manualSteps.map((step, stepIndex) => (
+                  <li key={`step-${stepIndex}`} className="upgResolveStep">
+                    {step}
+                  </li>
+                ))}
+              </ol>
+            </EuiText>
           </>
         )}
-
-        <EuiTitle size="s">
-          <h3>{i18nTexts.manualFixTitle}</h3>
-        </EuiTitle>
-
-        <EuiSpacer />
-
-        <EuiText>
-          <ol>
-            {correctiveActions.manualSteps.map((step, stepIndex) => (
-              // TODO temp inline style
-              <li key={`step-${stepIndex}`} style={{ marginBottom: '15px' }}>
-                {step}
-              </li>
-            ))}
-          </ol>
-        </EuiText>
       </EuiFlyoutBody>
+
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -147,12 +221,18 @@ export const DeprecationDetailsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          {/* Only show the Quick resolve button if deprecation supports it */}
+          {/* Only show the "Quick resolve" button if deprecation supports it */}
           {correctiveActions.api && (
             <EuiFlexItem grow={false}>
-              {/* TODO implement onClick */}
-              <EuiButton fill onClick={() => {}}>
-                {i18nTexts.quickResolveButtonLabel}
+              <EuiButton
+                fill
+                onClick={() => resolveDeprecation(deprecation)}
+                isLoading={Boolean(
+                  deprecationResolutionState?.resolveDeprecationStatus === 'in_progress'
+                )}
+                disabled={Boolean(deprecationResolutionState?.resolveDeprecationStatus === 'ok')}
+              >
+                {getQuickResolveButtonLabel(deprecationResolutionState)}
               </EuiButton>
             </EuiFlexItem>
           )}

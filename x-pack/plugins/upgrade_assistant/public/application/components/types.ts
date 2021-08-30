@@ -7,20 +7,6 @@
 
 import { ResponseError } from '../lib/api';
 
-export enum LoadingState {
-  Loading,
-  Success,
-  Error,
-}
-
-export type LevelFilterOption = 'all' | 'critical';
-
-export enum GroupByOption {
-  message = 'message',
-  index = 'index',
-  node = 'node',
-}
-
 export type DeprecationTableColumns =
   | 'type'
   | 'index'

@@ -12,14 +12,11 @@ import {
   EuiButton,
   EuiLink,
   EuiBadge,
-  EuiToolTip,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
+  Search,
 } from '@elastic/eui';
 
-import type { DomainDeprecationDetails } from 'kibana/public';
+import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
+import { ResolutionTableCell } from './resolution_table_cell';
 
 const i18nTexts = {
   refreshButtonLabel: i18n.translate(
@@ -52,24 +49,6 @@ const i18nTexts = {
       defaultMessage: 'Resolution',
     }
   ),
-  manualCellLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.manualCellLabel',
-    {
-      defaultMessage: 'Manual',
-    }
-  ),
-  manualCellTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.manualCellTooltipLabel',
-    {
-      defaultMessage: 'Resolve this deprecation manually.',
-    }
-  ),
-  automatedCellLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.automatedCellLabel',
-    {
-      defaultMessage: 'Automated',
-    }
-  ),
   configDeprecationTypeCellLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.configDeprecationTypeCellLabel',
     {
@@ -86,12 +65,6 @@ const i18nTexts = {
     'xpack.upgradeAssistant.kibanaDeprecations.table.unknownDeprecationTypeCellLabel',
     {
       defaultMessage: 'Unknown',
-    }
-  ),
-  automatedCellTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.kibanaDeprecations.table.automatedCellTooltipLabel',
-    {
-      defaultMessage: 'This is an automated resolution.',
     }
   ),
   typeFilterLabel: i18n.translate(
@@ -123,24 +96,26 @@ const i18nTexts = {
 };
 
 interface Props {
-  deprecations?: DomainDeprecationDetails[];
+  deprecations?: KibanaDeprecationDetails[];
   reload: () => void;
-  toggleFlyout: (newFlyoutContent?: DomainDeprecationDetails) => void;
+  toggleFlyout: (newFlyoutContent?: KibanaDeprecationDetails) => void;
+  deprecationResolutionState?: DeprecationResolutionState;
 }
 
 export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
   deprecations,
   reload,
   toggleFlyout,
+  deprecationResolutionState,
 }) => {
-  const columns: Array<EuiBasicTableColumn<DomainDeprecationDetails>> = [
+  const columns: Array<EuiBasicTableColumn<KibanaDeprecationDetails>> = [
     {
       field: 'level',
       name: i18nTexts.statusColumnTitle,
       width: '5%',
       truncateText: true,
       sortable: true,
-      render: (level: DomainDeprecationDetails['level']) => {
+      render: (level: KibanaDeprecationDetails['level']) => {
         if (level === 'critical') {
           return <EuiBadge color="danger">{i18nTexts.criticalBadgeLabel}</EuiBadge>;
         }
@@ -155,11 +130,12 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (
-        domainId: DomainDeprecationDetails['domainId'],
-        deprecation: DomainDeprecationDetails
+        domainId: KibanaDeprecationDetails['domainId'],
+        deprecation: KibanaDeprecationDetails
       ) => {
         return (
           <EuiLink onClick={() => toggleFlyout(deprecation)}>
+            {/* This will be replaced with a custom title once https://github.com/elastic/kibana/pull/109840 is merged  */}
             {i18nTexts.getDeprecationIssue(domainId)}
           </EuiLink>
         );
@@ -171,7 +147,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       width: '20%',
       truncateText: true,
       sortable: true,
-      render: (deprecationType: DomainDeprecationDetails['deprecationType']) => {
+      render: (deprecationType: KibanaDeprecationDetails['deprecationType']) => {
         switch (deprecationType) {
           case 'config':
             return i18nTexts.configDeprecationTypeCellLabel;
@@ -188,28 +164,16 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       width: '30%',
       truncateText: true,
       sortable: true,
-      render: (correctiveActions: DomainDeprecationDetails['correctiveActions']) => {
-        if (correctiveActions.api) {
-          return (
-            <EuiToolTip position="top" content={i18nTexts.automatedCellTooltipLabel}>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="indexSettings" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">{i18nTexts.automatedCellLabel}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiToolTip>
-          );
-        }
-
+      render: (
+        correctiveActions: KibanaDeprecationDetails['correctiveActions'],
+        deprecation: KibanaDeprecationDetails
+      ) => {
         return (
-          <EuiToolTip position="top" content={i18nTexts.manualCellTooltipLabel}>
-            <EuiText size="s" color="subdued">
-              {i18nTexts.manualCellLabel}
-            </EuiText>
-          </EuiToolTip>
+          <ResolutionTableCell
+            deprecationId={deprecation.id}
+            isAutomated={Boolean(correctiveActions?.api)}
+            deprecationResolutionState={deprecationResolutionState}
+          />
         );
       },
     },
@@ -227,9 +191,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
     },
   } as const;
 
-  const searchConfig = {
-    // TODO fix
-    // query: {},
+  const searchConfig: Search = {
     filters: [
       {
         type: 'is',
@@ -252,11 +214,6 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
             value: 'feature',
             name: i18nTexts.featureDeprecationTypeCellLabel,
           },
-          // TODO not working yet
-          {
-            value: 'unknown',
-            name: i18nTexts.unknownDeprecationTypeCellLabel,
-          },
         ],
       },
     ],
@@ -267,7 +224,6 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
     toolsRight: [
       <EuiButton
         iconType="refresh"
-        // TODO implement
         onClick={reload}
         data-test-subj="reloadButton"
         key="reloadButton"
