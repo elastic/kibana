@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { partition } from 'lodash';
 
-import type { ChromeStart, NotificationsStart, SavedObjectReference } from 'kibana/public';
+import type { SavedObjectReference } from 'kibana/public';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, injectFilterReferences } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import type { LensAttributeService } from '../lens_attribute_service';
-import { DataPublicPluginStart, esFilters } from '../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../src/plugins/data/public';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
@@ -51,10 +50,9 @@ export function SaveModalContainer({
   redirectToOrigin,
   getAppNameFromId = () => undefined,
   isSaveable = true,
-  lastKnownDoc: initLastKnowDoc,
+  lastKnownDoc,
   lensServices,
 }: SaveModalContainerProps) {
-  const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnowDoc);
   let title = '';
   let description;
   let savedObjectId;
@@ -64,41 +62,7 @@ export function SaveModalContainer({
     savedObjectId = lastKnownDoc.savedObjectId;
   }
 
-  const {
-    attributeService,
-    notifications,
-    data,
-    chrome,
-    savedObjectsTagging,
-    application,
-    dashboardFeatureFlag,
-  } = lensServices;
-
-  useEffect(() => {
-    setLastKnownDoc(initLastKnowDoc);
-  }, [initLastKnowDoc]);
-
-  useEffect(() => {
-    let isMounted = true;
-    async function loadPersistedDoc() {
-      if (initialInput) {
-        getPersistedDoc({
-          data,
-          initialInput,
-          chrome,
-          notifications,
-          attributeService,
-        }).then((doc) => {
-          if (doc && isMounted) setLastKnownDoc(doc);
-        });
-      }
-    }
-
-    loadPersistedDoc();
-    return () => {
-      isMounted = false;
-    };
-  }, [chrome, data, initialInput, notifications, attributeService]);
+  const { attributeService, savedObjectsTagging, application, dashboardFeatureFlag } = lensServices;
 
   const tagsIds =
     persistedDoc && savedObjectsTagging
@@ -383,52 +347,6 @@ export function getLastKnownDocWithoutPinnedFilters(doc?: Document) {
       }
     : doc;
 }
-
-export const getPersistedDoc = async ({
-  initialInput,
-  attributeService,
-  data,
-  notifications,
-  chrome,
-}: {
-  initialInput: LensEmbeddableInput;
-  attributeService: LensAttributeService;
-  data: DataPublicPluginStart;
-  notifications: NotificationsStart;
-  chrome: ChromeStart;
-}): Promise<Document | undefined> => {
-  let doc: Document;
-
-  try {
-    const attributes = await attributeService.unwrapAttributes(initialInput);
-
-    doc = {
-      ...initialInput,
-      ...attributes,
-      type: LENS_EMBEDDABLE_TYPE,
-    };
-
-    if (attributeService.inputIsRefType(initialInput)) {
-      chrome.recentlyAccessed.add(
-        getFullPath(initialInput.savedObjectId),
-        attributes.title,
-        initialInput.savedObjectId
-      );
-    }
-
-    // Don't overwrite any pinned filters
-    data.query.filterManager.setAppFilters(
-      injectFilterReferences(doc.state.filters, doc.references)
-    );
-    return doc;
-  } catch (e) {
-    notifications.toasts.addDanger(
-      i18n.translate('xpack.lens.app.docLoadingError', {
-        defaultMessage: 'Error loading saved document',
-      })
-    );
-  }
-};
 
 // eslint-disable-next-line import/no-default-export
 export default SaveModalContainer;
