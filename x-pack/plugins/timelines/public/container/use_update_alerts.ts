@@ -21,21 +21,22 @@ import {
  * @param status to update to('open' / 'closed' / 'acknowledged')
  * @param index index to be updated
  * @param query optional query object to update alerts by query.
- * @param timelineId we need to know who is asking for this update for now
+
  *
  * @throws An error if response is not OK
  */
-export const useUpdateAlertsStatus = (): {
+export const useUpdateAlertsStatus = (
+  timelineId: string
+): {
   updateAlertStatus: (params: {
     status: AlertStatus;
     index: string;
     query: object;
-    timelineId: string;
   }) => Promise<estypes.UpdateByQueryResponse>;
 } => {
   const { http } = useKibana<CoreStart>().services;
   return {
-    updateAlertStatus: async ({ status, index, query, timelineId }) => {
+    updateAlertStatus: async ({ status, index, query }) => {
       if (timelineId === 'detections-page') {
         return http!.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
           method: 'POST',

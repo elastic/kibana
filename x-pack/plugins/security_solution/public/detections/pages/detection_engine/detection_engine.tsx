@@ -17,7 +17,6 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { AlertsFeatureNoPermissions } from '@kbn/alerts';
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -117,8 +116,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       isAuthenticated: isUserAuthenticated,
       hasEncryptionKey,
       signalIndexName,
-      hasIndexWrite,
-      hasIndexMaintenance,
+      hasIndexWrite = false,
+      hasIndexMaintenance = false,
+      canUserCRUD = false,
     },
   ] = useUserData();
   const {
@@ -132,7 +132,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const {
     application: { navigateToUrl },
     timelines: timelinesUi,
-    docLinks,
   } = useKibana().services;
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
@@ -339,8 +338,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             <AlertsTable
               timelineId={TimelineId.detectionsPage}
               loading={loading}
-              hasIndexWrite={hasIndexWrite ?? false}
-              hasIndexMaintenance={hasIndexMaintenance ?? false}
+              hasIndexWrite={(hasIndexWrite ?? false) && (canUserCRUD ?? false)}
+              hasIndexMaintenance={(hasIndexMaintenance ?? false) && (canUserCRUD ?? false)}
               from={from}
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}

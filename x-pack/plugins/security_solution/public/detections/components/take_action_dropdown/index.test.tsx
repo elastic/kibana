@@ -29,9 +29,6 @@ jest.mock('../../../cases/components/use_insert_timeline');
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
-jest.mock('@kbn/alerts', () => {
-  return { useGetUserAlertsPermissions: jest.fn().mockReturnValue({ crud: true }) };
-});
 
 jest.mock('../../../common/utils/endpoint_alert_check', () => {
   return { endpointAlertCheck: jest.fn().mockReturnValue(true) };

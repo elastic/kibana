@@ -56,7 +56,7 @@ export const missingPrivilegesCallOutBody = ({
 }: MissingPrivileges) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.messageDetail"
-    defaultMessage="{essence} {indexPrivileges} {featurePrivileges} Related documentation: {docs}"
+    defaultMessage="{essence} {indexPrivileges} Related documentation: {docs}"
     values={{
       essence: (
         <p>
@@ -77,23 +77,26 @@ export const missingPrivilegesCallOutBody = ({
               {indexPrivileges.map(([index, missingPrivileges]) => (
                 <li key={index}>{missingIndexPrivileges(index, missingPrivileges)}</li>
               ))}
-            </ul>
-          </>
-        ) : null,
-      featurePrivileges:
-        featurePrivileges.length > 0 ? (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
-              defaultMessage="Missing Kibana feature privileges:"
-            />
-            <ul>
               {featurePrivileges.map(([feature, missingPrivileges]) => (
                 <li key={feature}>{missingFeaturePrivileges(feature, missingPrivileges)}</li>
               ))}
             </ul>
           </>
         ) : null,
+      // featurePrivileges:
+      //   featurePrivileges.length > 0 ? (
+      //     <>
+      //       <FormattedMessage
+      //         id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
+      //         defaultMessage="Missing Kibana feature privileges:"
+      //       />
+      //       <ul>
+      //         {featurePrivileges.map(([feature, missingPrivileges]) => (
+      //           <li key={feature}>{missingFeaturePrivileges(feature, missingPrivileges)}</li>
+      //         ))}
+      //       </ul>
+      //     </>
+      //   ) : null,
       docs: (
         <ul>
           <li>
