@@ -13,14 +13,12 @@ import Prettier from 'prettier';
 
 import { ManagedConfigKey } from './managed_config_keys';
 
-type ManagedPropAst = t.ObjectProperty & {
+type BasicObjectProp = t.ObjectProperty & {
   key: t.StringLiteral;
-  value: t.ObjectExpression;
 };
 
-type ManagedPropProp = t.ObjectProperty & {
-  key: t.StringLiteral;
-};
+const isBasicObjectProp = (n: t.Node): n is BasicObjectProp =>
+  n.type === 'ObjectProperty' && n.key.type === 'StringLiteral';
 
 const isSelfManaged = (node?: t.Node) =>
   !!node?.leadingComments?.some(
@@ -69,20 +67,18 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
   }
 
   for (const { key, value } of keys) {
-    const existingProp = ast.properties.find(
-      (p): p is ManagedPropAst =>
-        p.type === 'ObjectProperty' &&
-        p.key.type === 'StringLiteral' &&
-        p.key.value === key &&
-        p.value.type === 'ObjectExpression'
-    );
+    const existingProp = ast.properties.filter(isBasicObjectProp).find((p) => p.key.value === key);
 
     if (isSelfManaged(existingProp)) {
       continue;
     }
 
-    // setting isn't in config file so create it and attach `@managed` comments to each property
-    if (!existingProp) {
+    // setting isn't in config file, or is not an object, so create it and attach `@managed` comments to each property
+    if (!existingProp || existingProp.value.type !== 'ObjectExpression') {
+      if (existingProp) {
+        remove(ast.properties, existingProp);
+      }
+
       ast.properties.push(
         t.objectProperty(
           t.stringLiteral(key),
@@ -97,7 +93,7 @@ export function updateVscodeConfig(keys: ManagedConfigKey[], infoText: string, j
     const existingManagedChildProps = new Map(
       existingProp.value.properties
         .filter(
-          (n): n is ManagedPropProp =>
+          (n): n is BasicObjectProp =>
             n.type === 'ObjectProperty' &&
             n.key.type === 'StringLiteral' &&
             !!n.leadingComments?.some((c) => c.value.trim() === '@managed')

@@ -69,6 +69,21 @@ it('initialized empty or undefined json values', () => {
   `);
 });
 
+it('replaces conflicting managed keys which do not have object values', () => {
+  expect(run(`{ "key": false }`)).toMatchInlineSnapshot(`
+    // @managed
+    {
+      "key": {
+        // @managed
+        "hello": true,
+        // @managed
+        "world": [1, 2, 3]
+      }
+    }
+
+  `);
+});
+
 it(`throws if the JSON file doesn't contain an object`, () => {
   expect(() => run('[]')).toThrowErrorMatchingInlineSnapshot(
     `expected VSCode config to contain a JSON object`
