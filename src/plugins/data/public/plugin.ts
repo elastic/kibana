@@ -131,7 +131,6 @@ export class DataPublicPlugin
         usageCollection,
       }),
       search: searchService,
-      fieldFormats,
       query: queryService,
     };
   }

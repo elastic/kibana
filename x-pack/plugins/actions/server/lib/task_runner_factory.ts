@@ -33,7 +33,8 @@ import {
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { asSavedObjectExecutionSource } from './action_execution_source';
-import { validatedRelatedSavedObjects } from './related_saved_objects';
+import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
+import { injectSavedObjectReferences } from './action_task_params_utils';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -178,11 +179,30 @@ async function getActionTaskParams(
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
   if (isPersistedActionTask(executorParams)) {
-    return encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+    const actionTask = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
       ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       executorParams.actionTaskParamsId,
       { namespace }
     );
+
+    const {
+      attributes: { relatedSavedObjects },
+      references,
+    } = actionTask;
+
+    const {
+      actionId,
+      relatedSavedObjects: injectedRelatedSavedObjects,
+    } = injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
+
+    return {
+      ...actionTask,
+      attributes: {
+        ...actionTask.attributes,
+        ...(actionId ? { actionId } : {}),
+        ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
+      },
+    };
   } else {
     return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
   }
