@@ -27,6 +27,7 @@ import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../../../field_formats/common';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
+import { getRuntimeFieldsFromMap, getRuntimeCompositeFieldsFromMap } from './index_pattern_utils';
 
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;
@@ -206,8 +207,11 @@ export class IndexPattern implements IIndexPattern {
     });
 
     const runtimeFields: Record<string, ESRuntimeField> = {
-      ...this.getComputedRuntimeFields(),
-      ...this.getComputedRuntimeComposites(),
+      ...getRuntimeFieldsFromMap(this.runtimeFieldMap),
+      ...getRuntimeCompositeFieldsFromMap(
+        this.runtimeCompositeMap,
+        this.getRuntimeField.bind(this)
+      ),
     };
 
     return {
@@ -216,92 +220,6 @@ export class IndexPattern implements IIndexPattern {
       docvalueFields,
       runtimeFields,
     };
-  }
-
-  /**
-   * Method to aggregate all the runtime fields which are **not** created
-   * from a parent composite runtime field.
-   * @returns A map of runtime fields
-   */
-  private getComputedRuntimeFields(): Record<string, ESRuntimeField> {
-    return Object.entries(this.runtimeFieldMap).reduce((acc, [name, field]) => {
-      const { type, script, parentComposite } = field;
-
-      if (parentComposite !== undefined) {
-        return acc;
-      }
-
-      const runtimeFieldRequest: RuntimeField = {
-        type,
-        script,
-      };
-
-      return {
-        ...acc,
-        [name]: runtimeFieldRequest,
-      };
-    }, {});
-  }
-
-  /**
-   * This method reads all the runtime composite fields
-   * and aggregate the subFields
-   *
-   * {
-   *   "compositeName": {
-   *     "type": "composite",
-   *     "script": "emit(...)" // script that emits multiple values
-   *     "fields": {  // map of subFields available in the Query
-   *       "field_1": {
-   *         "type": "keyword"
-   *       },
-   *       "field_2": {
-   *         "type": "ip"
-   *       },
-   *     }
-   *   }
-   * }
-   *
-   * @returns A map of runtime fields
-   */
-  private getComputedRuntimeComposites(): Record<string, ESRuntimeField> {
-    return Object.entries(this.runtimeCompositeMap).reduce((acc, [name, runtimeComposite]) => {
-      const { script, subFields } = runtimeComposite;
-
-      // Aggregate all the subFields belonging to this runtimeComposite
-      const fields: Record<string, { type: RuntimeType }> = subFields.reduce(
-        (accFields, subFieldName) => {
-          const subField = this.getRuntimeField(`${name}.${subFieldName}`);
-
-          if (!subField) {
-            return accFields;
-          }
-
-          return {
-            ...accFields,
-            [subFieldName]: { type: subField.type },
-          };
-        },
-        {} as Record<string, { type: RuntimeType }>
-      );
-
-      if (Object.keys(fields).length === 0) {
-        // This should never happen, but sending a composite runtime field
-        // with an empty "fields" will break the Query
-        return acc;
-      }
-
-      const runtimeFieldRequest: ESRuntimeField = {
-        type: 'composite',
-        script,
-        fields,
-      };
-
-      return {
-        ...acc,
-        [name]: runtimeFieldRequest,
-      };
-    }, {});
   }
 
   /**
@@ -469,22 +387,24 @@ export class IndexPattern implements IIndexPattern {
 
   /**
    * Add a runtime field - Appended to existing mapped field or a new field is
-   * created as appropriate
+   * created as appropriate. We can pass along with the fields a "format" definition or "customLabel" to avoid calling
+   * separately `setFieldCustomLabel()` and `setFieldFormat()`.
    * @param name Field name
-   * @param runtimeField Runtime field definition
+   * @param enhancedRuntimeField Runtime field definition
    */
   addRuntimeField(name: string, enhancedRuntimeField: EnhancedRuntimeField): IndexPatternField {
     const { type, script, parentComposite, customLabel, format, popularity } = enhancedRuntimeField;
 
     const runtimeField: RuntimeField = { type, script, parentComposite };
+    this.runtimeFieldMap[name] = runtimeField;
 
-    let fieldCreated: IndexPatternField;
+    // Create the field if it does not exist or update an existing one
+    let createdField: IndexPatternField | undefined;
     const existingField = this.getFieldByName(name);
     if (existingField) {
       existingField.runtimeField = runtimeField;
-      fieldCreated = existingField;
     } else {
-      fieldCreated = this.fields.add({
+      createdField = this.fields.add({
         name,
         runtimeField,
         type: castEsToKbnFieldTypeName(type),
@@ -494,17 +414,16 @@ export class IndexPattern implements IIndexPattern {
         readFromDocValues: false,
       });
     }
-    this.runtimeFieldMap[name] = runtimeField;
 
+    // Apply configuration to the field
     this.setFieldCustomLabel(name, customLabel);
-
     if (format) {
       this.setFieldFormat(name, format);
     } else {
       this.deleteFieldFormat(name);
     }
 
-    return fieldCreated;
+    return existingField ?? createdField!;
   }
 
   /**
@@ -576,6 +495,8 @@ export class IndexPattern implements IIndexPattern {
       throw new Error(`Can't save runtime composite [name = ${name}] without subfields.`);
     }
 
+    // We first remove the runtime composite with the same name which will remove all of its subFields.
+    // This guarantees that we don't leave behind orphan runtime fields (with a "compositeParent").
     this.removeRuntimeComposite(name);
 
     const { script, subFields } = runtimeComposite;
@@ -613,13 +534,13 @@ export class IndexPattern implements IIndexPattern {
    * @param name
    */
   getRuntimeCompositeWithSubFields(name: string): RuntimeCompositeWithSubFields | null {
-    const existingRuntimeComposite = this.runtimeCompositeMap[name];
+    const runtimeComposite = this.getRuntimeComposite(name);
 
-    if (!existingRuntimeComposite) {
+    if (!runtimeComposite) {
       return null;
     }
 
-    const subFields = existingRuntimeComposite.subFields.reduce((acc, subFieldName) => {
+    const subFields = runtimeComposite.subFields.reduce((acc, subFieldName) => {
       const field = this.getFieldByName(subFieldName);
 
       if (!field) {
@@ -642,7 +563,7 @@ export class IndexPattern implements IIndexPattern {
     }, {} as Record<string, EnhancedRuntimeField>);
 
     return {
-      ...existingRuntimeComposite,
+      ...runtimeComposite,
       subFields,
     };
   }
@@ -655,7 +576,7 @@ export class IndexPattern implements IIndexPattern {
     const existingRuntimeComposite = this.getRuntimeComposite(name);
 
     if (!!existingRuntimeComposite) {
-      // Remove all previous subFields
+      // Remove all subFields
       for (const subFieldName of existingRuntimeComposite.subFields) {
         this.removeRuntimeField(`${name}.${subFieldName}`);
       }
