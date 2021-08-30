@@ -88,7 +88,7 @@ export const initRoutes = (
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);
   importRulesRoute(router, config, ml, isRuleRegistryEnabled);
-  exportRulesRoute(router, config);
+  exportRulesRoute(router, config, isRuleRegistryEnabled);
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);

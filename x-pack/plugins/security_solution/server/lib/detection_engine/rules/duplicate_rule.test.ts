@@ -100,6 +100,7 @@ describe('duplicateRule', () => {
           "license": "",
           "maxSignals": 100,
           "meta": undefined,
+          "namespace": undefined,
           "note": undefined,
           "outputIndex": ".siem-signals-default",
           "query": "process.args : \\"chmod\\"",

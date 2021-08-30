@@ -48,7 +48,9 @@ describe.each([
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+    clients.rulesClient.update.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    );
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
@@ -169,7 +171,9 @@ describe.each([
 
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
-      clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      clients.rulesClient.create.mockResolvedValue(
+        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      );
       const response = await server.inject(request, context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -202,7 +206,9 @@ describe.each([
 
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
+        clients.rulesClient.find.mockResolvedValue(
+          getFindResultWithSingleHit(isRuleRegistryEnabled)
+        ); // extant rule
         const response = await server.inject(request, context);
 
         expect(response.status).toEqual(200);
@@ -222,7 +228,9 @@ describe.each([
       });
 
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
+        clients.rulesClient.find.mockResolvedValue(
+          getFindResultWithSingleHit(isRuleRegistryEnabled)
+        ); // extant rule
         const overwriteRequest = getImportRulesRequestOverwriteTrue(
           buildHapiStream(ruleIdsToNdJsonString(['rule-1']))
         );
@@ -342,7 +350,9 @@ describe.each([
 
     describe('rules with existing rule_id', () => {
       beforeEach(() => {
-        clients.rulesClient.find.mockResolvedValueOnce(getFindResultWithSingleHit()); // extant rule
+        clients.rulesClient.find.mockResolvedValueOnce(
+          getFindResultWithSingleHit(isRuleRegistryEnabled)
+        ); // extant rule
       });
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {

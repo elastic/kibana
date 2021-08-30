@@ -22,8 +22,8 @@ describe.each([
 ])('getExportAll - %s', (_, isRuleRegistryEnabled) => {
   test('it exports everything from the alerts client', async () => {
     const rulesClient = rulesClientMock.create();
-    const result = getFindResultWithSingleHit();
-    const alert = getAlertMock(getQueryRuleParams());
+    const result = getFindResultWithSingleHit(isRuleRegistryEnabled);
+    const alert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
     alert.params = {
       ...alert.params,
       filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],

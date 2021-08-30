@@ -19,10 +19,10 @@ describe.each([
     const rulesOptionsMock = getUpdateRulesOptionsMock(isRuleRegistryEnabled);
     rulesOptionsMock.ruleUpdate.enabled = false;
     ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
-      getAlertMock(getQueryRuleParams())
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(getQueryRuleParams())
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
 
     await updateRules(rulesOptionsMock);
@@ -39,11 +39,11 @@ describe.each([
     rulesOptionsMock.ruleUpdate.enabled = true;
 
     ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue({
-      ...getAlertMock(getQueryRuleParams()),
+      ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
       enabled: false,
     });
     ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(getQueryRuleParams())
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
 
     await updateRules(rulesOptionsMock);
@@ -60,11 +60,11 @@ describe.each([
     rulesOptionsMock.ruleUpdate.enabled = true;
 
     ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).update.mockResolvedValue(
-      getAlertMock(getMlRuleParams())
+      getAlertMock(isRuleRegistryEnabled, getMlRuleParams())
     );
 
     ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
-      getAlertMock(getMlRuleParams())
+      getAlertMock(isRuleRegistryEnabled, getMlRuleParams())
     );
 
     await updateRules(rulesOptionsMock);

@@ -94,8 +94,10 @@ describe.each([
 
     mockExceptionsClient = listMock.getExceptionListClient();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    clients.rulesClient.update.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    );
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({

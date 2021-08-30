@@ -204,8 +204,9 @@ export const isAlertType = (
   isRuleRegistryEnabled: boolean,
   partialAlert: PartialAlert<RuleParams>
 ): partialAlert is RuleAlertType => {
+  const ruleTypeValues = (Object.values(ruleTypeMappings) as unknown) as string[];
   return isRuleRegistryEnabled
-    ? Object.values(ruleTypeMappings).includes(partialAlert.alertTypeId as string)
+    ? ruleTypeValues.includes(partialAlert.alertTypeId as string)
     : partialAlert.alertTypeId === SIGNALS_ID;
 };
 

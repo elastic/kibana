@@ -29,7 +29,7 @@ describe.each([
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
     clients.rulesClient.delete.mockResolvedValue({}); // successful deletion
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // rule status request
 

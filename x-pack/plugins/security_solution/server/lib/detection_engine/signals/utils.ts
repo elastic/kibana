@@ -62,6 +62,14 @@ import {
 import { WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
+import {
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+} from '../../../../common/constants';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -1001,16 +1009,10 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
 };
 
 export const ruleTypeMappings = {
-  eql: 'siem.eql',
-  machine_learning: 'siem.machine_learning',
-  query: 'siem.query',
-  saved_query: 'siem.saved_query',
-  threat_match: 'siem.threat_match',
-  threshold: 'siem.threshold',
-};
-
-export const getRACRuleType = (
-  ruleType: 'eql' | 'machine_learning' | 'query' | 'saved_query' | 'threat_match' | 'threshold'
-): string => {
-  return ruleTypeMappings[ruleType];
+  eql: EQL_RULE_TYPE_ID,
+  machine_learning: ML_RULE_TYPE_ID,
+  query: QUERY_RULE_TYPE_ID,
+  saved_query: SAVED_QUERY_RULE_TYPE_ID,
+  threat_match: INDICATOR_RULE_TYPE_ID,
+  threshold: THRESHOLD_RULE_TYPE_ID,
 };

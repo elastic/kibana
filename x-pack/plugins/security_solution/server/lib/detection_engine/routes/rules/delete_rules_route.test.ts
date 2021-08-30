@@ -30,7 +30,7 @@ describe.each([
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
     clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses());
 
@@ -45,7 +45,9 @@ describe.each([
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
-      clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      clients.rulesClient.get.mockResolvedValue(
+        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      );
       const response = await server.inject(getDeleteRequestById(), context);
 
       expect(response.status).toEqual(200);

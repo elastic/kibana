@@ -53,6 +53,7 @@ describe('schedule_throttle_notification_actions', () => {
       to: 'now',
       type: 'query',
       references: ['http://www.example.com'],
+      namespace: 'a namespace',
       note: '# sample markdown',
       version: 1,
       exceptionsList: [],

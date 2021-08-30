@@ -36,7 +36,7 @@ describe.each([
     ];
     const outputIndex = 'outputIndex';
     const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
     await updatePrepackagedRules(
       rulesClient,

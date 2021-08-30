@@ -6,14 +6,22 @@
  */
 
 import { getFilter } from './find_rules';
-import { SIGNALS_ID } from '../../../../common/constants';
+import {
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  SIGNALS_ID,
+  THRESHOLD_RULE_TYPE_ID,
+} from '../../../../common/constants';
 
-const allAlertTypeIds = `(alert.attributes.alertTypeId: siem.eql
- OR alert.attributes.alertTypeId: siem.machine_learning
- OR alert.attributes.alertTypeId: siem.query
- OR alert.attributes.alertTypeId: siem.saved_query
- OR alert.attributes.alertTypeId: siem.threat_match
- OR alert.attributes.alertTypeId: siem.threshold)`.replace(/[\n\r]/g, '');
+const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
+ OR alert.attributes.alertTypeId: ${ML_RULE_TYPE_ID}
+ OR alert.attributes.alertTypeId: ${QUERY_RULE_TYPE_ID}
+ OR alert.attributes.alertTypeId: ${SAVED_QUERY_RULE_TYPE_ID}
+ OR alert.attributes.alertTypeId: ${INDICATOR_RULE_TYPE_ID}
+ OR alert.attributes.alertTypeId: ${THRESHOLD_RULE_TYPE_ID})`.replace(/[\n\r]/g, '');
 
 describe('find_rules', () => {
   const fullFilterTestCases: Array<[boolean, string]> = [

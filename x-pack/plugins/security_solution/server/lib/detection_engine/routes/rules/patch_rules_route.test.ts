@@ -38,9 +38,13 @@ describe.each([
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
+    clients.rulesClient.get.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // existing rule
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // existing rule
+    clients.rulesClient.update.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // successful update
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
     clients.savedObjectsClient.create.mockResolvedValue(getRuleExecutionStatuses()[0]); // successful transform
     clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses());
@@ -72,7 +76,7 @@ describe.each([
     });
 
     test('returns error if requesting a non-rule', async () => {
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(isRuleRegistryEnabled));
       const response = await server.inject(getPatchRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({

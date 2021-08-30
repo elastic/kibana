@@ -38,7 +38,9 @@ describe.each([
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
-    clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // creation succeeds
+    clients.rulesClient.create.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // creation succeeds
     clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses()); // needed to transform: ;
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
@@ -113,7 +115,7 @@ describe.each([
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
-      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
       const response = await server.inject(getCreateRequest(), context);
 
       expect(response.status).toEqual(409);

@@ -35,8 +35,10 @@ describe.each([
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // update succeeds
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
+    clients.rulesClient.update.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // update succeeds
 
     patchRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
   });

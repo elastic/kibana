@@ -36,9 +36,13 @@ describe.each([
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
+    clients.rulesClient.get.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // existing rule
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
+    clients.rulesClient.update.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // successful update
     clients.ruleExecutionLogClient.find.mockResolvedValue([]); // successful transform: ;
 
     updateRulesRoute(server.router, ml, isRuleRegistryEnabled);
@@ -78,7 +82,7 @@ describe.each([
     });
 
     test('returns error when updating non-rule', async () => {
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(isRuleRegistryEnabled));
       const response = await server.inject(getUpdateRequest(), context);
 
       expect(response.status).toEqual(404);

@@ -19,7 +19,8 @@ import {
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { PartialFilter, RuleTypeParams } from '../types';
-import { ruleTypeMappings, transformToAlertThrottle, transformToNotifyWhen } from './utils';
+import { transformToAlertThrottle, transformToNotifyWhen } from './utils';
+import { ruleTypeMappings } from '../signals/utils';
 
 export const createRules = async ({
   rulesClient,
