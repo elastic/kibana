@@ -352,7 +352,6 @@ describe('endpoint list middleware', () => {
 
       await failedDispatched;
 
-      expect(mockedApis.responseProvider.activityLogResponse).not.toHaveBeenCalledTimes(2);
       expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledTimes(1);
     });
 
