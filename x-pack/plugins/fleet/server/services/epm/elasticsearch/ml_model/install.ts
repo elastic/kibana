@@ -61,7 +61,7 @@ export const installMlModel = async (
     const mlModelObject = JSON.parse(content);
 
     const mlModelRef = {
-      id: mlModelObject.model_id, // getMlModelNameForInstallation(installablePackage, mlModelPath, installNameSuffix),
+      id: mlModelObject.model_id,
       type: ElasticsearchAssetType.mlModel,
     };
 
@@ -70,11 +70,6 @@ export const installMlModel = async (
 
     const mlModel: MlModelInstallation = {
       installationName: mlModelObject.model_id,
-      // installationName: getMlModelNameForInstallation(
-      //   installablePackage,
-      //   path,
-      //   installNameSuffix
-      // ),
       content,
     };
 
@@ -130,14 +125,3 @@ async function handleMlModelInstall({
 
   return { id: mlModel.installationName, type: ElasticsearchAssetType.mlModel };
 }
-
-// const getMlModelNameForInstallation = (
-//   installablePackage: InstallablePackage,
-//   path: string,
-//   suffix: string
-// ) => {
-//   const pathPaths = path.split('/');
-//   const filename = pathPaths?.pop()?.split('.')[0];
-//   const folderName = pathPaths?.pop();
-//   return `${installablePackage.name}.${folderName}-${filename}-${suffix}`;
-// };
