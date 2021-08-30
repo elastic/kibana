@@ -19031,7 +19031,6 @@
     "xpack.osquery.scheduledQueryDetails.pageTitle": "{queryName} 详细信息",
     "xpack.osquery.scheduledQueryDetails.viewAllScheduledQueriesListTitle": "查看所有已计划查询组",
     "xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel": "编辑",
-    "xpack.osquery.scheduledQueryGroup.form.advancedSectionToggleButtonLabel": "高级",
     "xpack.osquery.scheduledQueryGroup.form.agentPolicyFieldLabel": "代理策略",
     "xpack.osquery.scheduledQueryGroup.form.cancelButtonLabel": "取消",
     "xpack.osquery.scheduledQueryGroup.form.createSuccessToastMessageText": "已成功计划 {scheduledQueryGroupName}",
