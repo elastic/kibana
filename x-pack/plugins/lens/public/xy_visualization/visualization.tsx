@@ -444,7 +444,7 @@ export const getXyVisualization = ({
   },
 
   getWarningMessages(state, frame) {
-    if (!state || state?.layers.length === 0 || !frame.activeData) {
+    if (state?.layers.length === 0 || !frame.activeData) {
       return;
     }
 
