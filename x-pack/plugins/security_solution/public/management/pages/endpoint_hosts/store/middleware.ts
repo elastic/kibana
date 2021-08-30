@@ -39,7 +39,7 @@ import {
   getIsOnEndpointDetailsActivityLog,
   getMetadataTransformStats,
   isMetadataTransformStatsLoading,
-  getActivityLogUninitialized,
+  getActivityLogIsUninitializedOrHasSubsequentAPIError,
 } from './selectors';
 import {
   AgentIdsPendingActions,
@@ -127,9 +127,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       action.type === 'userChangedUrl' &&
       hasSelectedEndpoint(getState()) === true &&
       getIsOnEndpointDetailsActivityLog(getState()) &&
-      (getActivityLogUninitialized(getState()) ||
-        (!!getLastLoadedActivityLogData(getState())?.data.length &&
-          !getActivityLogError(getState())))
+      getActivityLogIsUninitializedOrHasSubsequentAPIError(getState())
     ) {
       await endpointDetailsActivityLogChangedMiddleware({ store, coreStart });
     }

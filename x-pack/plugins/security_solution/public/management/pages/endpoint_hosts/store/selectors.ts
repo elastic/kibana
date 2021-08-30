@@ -419,6 +419,19 @@ export const getActivityLogError: (
   }
 });
 
+// returns a true if either lgo is uninitialised
+// or if it has failed an api call after having fetched a non empty log list earlier
+export const getActivityLogIsUninitializedOrHasSubsequentAPIError: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(
+  getActivityLogUninitialized,
+  getLastLoadedActivityLogData,
+  getActivityLogError,
+  (isUninitialized, lastLoadedLogData, isAPIError) => {
+    return isUninitialized || (!isAPIError && !!lastLoadedLogData?.data.length);
+  }
+);
+
 export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
   return (details && isEndpointHostIsolated(details)) || false;
 });
