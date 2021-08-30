@@ -29,7 +29,7 @@ describe('EmailActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <EmailActionConnectorFields
         action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [] }}
+        errors={{ from: [], port: [], host: [], user: [], password: [], serverType: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
@@ -39,6 +39,7 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="emailFromInput"]').first().prop('value')).toBe(
       'test@test.com'
     );
+    expect(wrapper.find('[data-test-subj="emailServerTypeSelectInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailHostInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeTruthy();
@@ -59,7 +60,7 @@ describe('EmailActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <EmailActionConnectorFields
         action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [] }}
+        errors={{ from: [], port: [], host: [], user: [], password: [], serverType: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
@@ -73,6 +74,68 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeFalsy();
     expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeFalsy();
+  });
+
+  test('server type field defaults to empty when not defined', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+      },
+    } as EmailActionConnector;
+    const wrapper = mountWithIntl(
+      <EmailActionConnectorFields
+        action={actionConnector}
+        errors={{ from: [], port: [], host: [], user: [], password: [], serverType: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="emailFromInput"]').first().prop('value')).toBe(
+      'test@test.com'
+    );
+    expect(wrapper.find('[data-test-subj="emailServerTypeSelectInput"]').length > 0).toBeTruthy();
+    expect(
+      wrapper.find('select[data-test-subj="emailServerTypeSelectInput"]').prop('value')
+    ).toEqual('');
+  });
+
+  test('server type field is correctly selected when defined', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        hasAuth: true,
+        serverType: 'gmail',
+      },
+    } as EmailActionConnector;
+    const wrapper = mountWithIntl(
+      <EmailActionConnectorFields
+        action={actionConnector}
+        errors={{ from: [], port: [], host: [], user: [], password: [], serverType: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="emailServerTypeSelectInput"]').length > 0).toBeTruthy();
+    expect(
+      wrapper.find('select[data-test-subj="emailServerTypeSelectInput"]').prop('value')
+    ).toEqual('gmail');
   });
 
   test('should display a message to remember username and password when creating a connector with authentication', () => {

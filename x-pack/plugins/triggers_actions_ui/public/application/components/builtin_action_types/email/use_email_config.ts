@@ -12,11 +12,9 @@ import { getServerConfig } from './api';
 
 export function useEmailConfig(
   http: HttpSetup,
-  config: EmailConfig,
   editActionConfig: (property: string, value: unknown) => void
 ) {
-  const { serverType } = config;
-  const [emailServerType, setEmailServerType] = useState<string>(serverType);
+  const [emailServerType, setEmailServerType] = useState<string | undefined>(undefined);
 
   const getEmailServerTypeConfig = useCallback(
     async (server: string) => {

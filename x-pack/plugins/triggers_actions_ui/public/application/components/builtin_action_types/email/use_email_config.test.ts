@@ -7,7 +7,6 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { HttpSetup } from 'kibana/public';
-import { EmailConfig } from '../types';
 import { useEmailConfig } from './use_email_config';
 
 const http = {
@@ -17,9 +16,7 @@ const http = {
 const editActionConfig = jest.fn();
 
 const renderUseEmailConfigHook = () =>
-  renderHook(() =>
-    useEmailConfig((http as unknown) as HttpSetup, {} as EmailConfig, editActionConfig)
-  );
+  renderHook(() => useEmailConfig((http as unknown) as HttpSetup, editActionConfig));
 
 describe('useEmailConfig', () => {
   beforeEach(() => jest.resetAllMocks);

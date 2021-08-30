@@ -35,7 +35,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
   const { from, host, port, secure, hasAuth, serverType } = action.config;
   const { user, password } = action.secrets;
 
-  const { setEmailServerType } = useEmailConfig(http, action.config, editActionConfig);
+  const { setEmailServerType } = useEmailConfig(http, editActionConfig);
 
   useEffect(() => {
     if (!action.id) {
@@ -118,7 +118,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               value={serverType}
               disabled={readOnly}
               isInvalid={isServerTypeInvalid}
-              data-test-subj="emailServerTypeSelect"
+              data-test-subj="emailServerTypeSelectInput"
               options={emailServerTypes}
               onChange={(e) => {
                 setEmailServerType(e.target.value);
