@@ -279,7 +279,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         data-test-subj="events-viewer-panel"
         $isFullScreen={globalFullScreen}
       >
-        {isFirstUpdate.current && <TGridLoading />}
+        {isFirstUpdate.current && <TGridLoading height="short" />}
 
         {graphOverlay}
 
@@ -304,7 +304,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
             {!graphEventId && graphOverlay == null && (
               <>
-                {totalCountMinusDeleted === 0 && loading === false && <TGridEmpty />}
+                {totalCountMinusDeleted === 0 && loading === false && <TGridEmpty height="short" />}
                 {totalCountMinusDeleted > 0 && (
                   <StatefulBody
                     hasAlertsCrud={hasAlertsCrud}

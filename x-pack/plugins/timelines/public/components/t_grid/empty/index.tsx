@@ -9,17 +9,20 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { FullWidthFlexGroup } from '../styles';
+import { FullWidthFlexGroup, FullWidthFlexGroupHeight } from '../styles';
 
 const panelStyle = {
   maxWidth: 500,
 };
 
-export const TGridEmpty: React.FC = () => {
+export const TGridEmpty: React.FC<{ height?: FullWidthFlexGroupHeight }> = ({
+  height = 'tall',
+}) => {
   const { http } = useKibana().services;
 
   return (
     <FullWidthFlexGroup
+      $height={height}
       $visible={true}
       $color="subdued"
       alignItems="center"

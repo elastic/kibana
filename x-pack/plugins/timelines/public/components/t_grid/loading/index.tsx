@@ -7,11 +7,14 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { FullWidthFlexGroup } from '../styles';
+import { FullWidthFlexGroup, FullWidthFlexGroupHeight } from '../styles';
 
-export const TGridLoading: React.FC = () => {
+export const TGridLoading: React.FC<{ height?: FullWidthFlexGroupHeight }> = ({
+  height = 'tall',
+}) => {
   return (
     <FullWidthFlexGroup
+      $height={height}
       $color="subdued"
       alignItems="center"
       justifyContent="center"
