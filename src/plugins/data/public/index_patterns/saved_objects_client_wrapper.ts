@@ -14,7 +14,6 @@ import {
   SavedObject,
   DataViewSavedObjectConflictError,
 } from '../../common/index_patterns';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../common/';
 
 type SOClient = Pick<SavedObjectsClient, 'find' | 'resolve' | 'update' | 'create' | 'delete'>;
 
@@ -34,31 +33,27 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     return response.map<SavedObject<T>>(simpleSavedObjectToSavedObject);
   }
 
-  async get<T = unknown>(id: string) {
-    const response = await this.savedObjectClient.resolve<T>(INDEX_PATTERN_SAVED_OBJECT_TYPE, id);
+  async get<T = unknown>(type: string, id: string) {
+    const response = await this.savedObjectClient.resolve<T>(type, id);
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
     return simpleSavedObjectToSavedObject<T>(response.saved_object);
   }
-  async update(id: string, attributes: Record<string, any>, options: Record<string, any>) {
-    const response = await this.savedObjectClient.update(
-      INDEX_PATTERN_SAVED_OBJECT_TYPE,
-      id,
-      attributes,
-      options
-    );
+  async update(
+    type: string,
+    id: string,
+    attributes: Record<string, any>,
+    options: Record<string, any>
+  ) {
+    const response = await this.savedObjectClient.update(type, id, attributes, options);
     return simpleSavedObjectToSavedObject(response);
   }
-  async create(attributes: Record<string, any>, options: Record<string, any>) {
-    const response = await this.savedObjectClient.create(
-      INDEX_PATTERN_SAVED_OBJECT_TYPE,
-      attributes,
-      options
-    );
+  async create(type: string, attributes: Record<string, any>, options: Record<string, any>) {
+    const response = await this.savedObjectClient.create(type, attributes, options);
     return simpleSavedObjectToSavedObject(response);
   }
-  delete(id: string) {
-    return this.savedObjectClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, id);
+  delete(type: string, id: string) {
+    return this.savedObjectClient.delete(type, id);
   }
 }

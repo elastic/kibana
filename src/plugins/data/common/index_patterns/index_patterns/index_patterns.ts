@@ -414,7 +414,10 @@ export class IndexPatternsService {
   };
 
   private getSavedObjectAndInit = async (id: string): Promise<IndexPattern> => {
-    const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(id);
+    const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
+      INDEX_PATTERN_SAVED_OBJECT_TYPE,
+      id
+    );
 
     if (!savedObject.version) {
       throw new SavedObjectNotFound(
@@ -567,6 +570,7 @@ export class IndexPatternsService {
 
     const body = indexPattern.getAsSavedObjectBody();
     const response: SavedObject<IndexPatternAttributes> = (await this.savedObjectsClient.create(
+      INDEX_PATTERN_SAVED_OBJECT_TYPE,
       body,
       {
         id: indexPattern.id,
@@ -607,7 +611,7 @@ export class IndexPatternsService {
     });
 
     return this.savedObjectsClient
-      .update(indexPattern.id, body, {
+      .update(INDEX_PATTERN_SAVED_OBJECT_TYPE, indexPattern.id, body, {
         version: indexPattern.version,
       })
       .then((resp) => {
@@ -677,7 +681,7 @@ export class IndexPatternsService {
    */
   async delete(indexPatternId: string) {
     this.indexPatternCache.clear(indexPatternId);
-    return this.savedObjectsClient.delete(indexPatternId);
+    return this.savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, indexPatternId);
   }
 }
 

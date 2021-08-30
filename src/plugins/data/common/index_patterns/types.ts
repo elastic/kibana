@@ -102,14 +102,19 @@ export interface SavedObjectsClientCommonFindArgs {
 
 export interface SavedObjectsClientCommon {
   find: <T = unknown>(options: SavedObjectsClientCommonFindArgs) => Promise<Array<SavedObject<T>>>;
-  get: <T = unknown>(id: string) => Promise<SavedObject<T>>;
+  get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
   update: (
+    type: string,
     id: string,
     attributes: Record<string, any>,
     options: Record<string, any>
   ) => Promise<SavedObject>;
-  create: (attributes: Record<string, any>, options: Record<string, any>) => Promise<SavedObject>;
-  delete: (id: string) => Promise<{}>;
+  create: (
+    type: string,
+    attributes: Record<string, any>,
+    options: Record<string, any>
+  ) => Promise<SavedObject>;
+  delete: (type: string, id: string) => Promise<{}>;
 }
 
 export interface GetFieldsOptions {
