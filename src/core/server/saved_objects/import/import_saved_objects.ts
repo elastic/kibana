@@ -155,7 +155,7 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
 
   const successResults = createSavedObjectsResult.createdObjects.map((createdObject) => {
-    const { type, id, destinationId, originId } = createdObject;
+    const { type, id, destinationId, originId, namespaces } = createdObject;
     const getTitle = typeRegistry.getType(type)?.management?.getTitle;
     const meta = {
       title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
@@ -166,6 +166,7 @@ export async function importSavedObjectsFromStream({
       type,
       id,
       meta,
+      ...(importNamespaces && { namespaces }),
       ...(attemptedOverwrite && { overwrite: true }),
       ...(destinationId && { destinationId }),
       ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
@@ -176,6 +177,7 @@ export async function importSavedObjectsFromStream({
     const attemptedOverwrite = pendingOverwrites.has(getObjKey(error));
     return {
       ...error,
+      namespaces: importNamespaces ? error.namespaces : undefined,
       meta: { ...error.meta, icon },
       ...(attemptedOverwrite && { overwrite: true }),
     };

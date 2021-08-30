@@ -205,8 +205,8 @@ export async function resolveSavedObjectsImportErrors({
         return {
           type,
           id,
-          namespaces,
           meta,
+          ...(importNamespaces && { namespaces }),
           ...(overwrite && { overwrite }),
           ...(destinationId && { destinationId }),
           ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
@@ -229,6 +229,7 @@ export async function resolveSavedObjectsImportErrors({
     );
     return {
       ...error,
+      namespaces: importNamespaces ? error.namespaces : undefined,
       meta: { ...error.meta, icon },
       ...(attemptedOverwrite && { overwrite: true }),
     };
