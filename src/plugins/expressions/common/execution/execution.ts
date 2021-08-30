@@ -25,7 +25,7 @@ import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { abortSignalToPromise, now } from '../../../kibana_utils/common';
-import { RequestAdapter, Adapters } from '../../../inspector/common';
+import { Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstArgument,
@@ -42,8 +42,7 @@ import { ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
-import { TablesAdapter } from '../util/tables_adapter';
-import { ExpressionsInspectorAdapter } from '../util/expressions_inspector_adapter';
+import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
 
 /**
  * The result returned after an expression function execution.
@@ -89,12 +88,6 @@ export interface ExecutionParams {
   expression?: string;
   params: ExpressionExecutionParams;
 }
-
-const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
-  requests: new RequestAdapter(),
-  tables: new TablesAdapter(),
-  expression: new ExpressionsInspectorAdapter(),
-});
 
 export class Execution<
   Input = unknown,
