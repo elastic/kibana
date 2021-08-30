@@ -21,6 +21,7 @@ import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 // We'll mock these values to avoid testing the locators themselves.
 const idToUrlMap = {
   SNAPSHOT_RESTORE_LOCATOR: 'snapshotAndRestoreUrl',
+  DISCOVER_APP_LOCATOR: 'discoverUrl',
 };
 
 const shareMock = sharePluginMock.createSetupContract();

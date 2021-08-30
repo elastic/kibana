@@ -13,7 +13,6 @@ import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
 
 export interface AppServicesContext {
-  discover: DiscoverStart;
   data: DataPublicPluginStart;
   cloud?: CloudSetup;
 }
