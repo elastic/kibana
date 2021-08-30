@@ -1082,6 +1082,51 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.useStatusBulkActionItems",
+        "type": "Function",
+        "tags": [],
+        "label": "useStatusBulkActionItems",
+        "description": [],
+        "signature": [
+          "({ eventIds, currentStatus, query, indexName, setEventsLoading, setEventsDeleted, onUpdateSuccess, onUpdateFailure, }: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.StatusBulkActionsProps",
+            "text": "StatusBulkActionsProps"
+          },
+          ") => JSX.Element[]"
+        ],
+        "path": "x-pack/plugins/timelines/public/hooks/use_status_bulk_action_items.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.useStatusBulkActionItems.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.StatusBulkActionsProps",
+                "text": "StatusBulkActionsProps"
+              }
+            ],
+            "path": "x-pack/plugins/timelines/public/hooks/use_status_bulk_action_items.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1517,21 +1562,56 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-public.SortDirection",
+        "type": "Type",
+        "tags": [],
+        "label": "SortDirection",
+        "description": [],
+        "signature": [
+          "\"none\" | \"asc\" | \"desc\" | ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.Direction",
+            "text": "Direction"
+          }
+        ],
+        "path": "x-pack/plugins/timelines/common/types/timeline/store.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-public.TGridModelForTimeline",
         "type": "Type",
         "tags": [],
         "label": "TGridModelForTimeline",
         "description": [],
         "signature": [
-          "{ columns: ",
+          "{ columns: (Pick<",
+          "EuiDataGridColumn",
+          ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
+          "EuiDataGridColumn",
+          ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
             "docId": "kibTimelinesPluginApi",
-            "section": "def-common.ColumnHeaderOptions",
-            "text": "ColumnHeaderOptions"
+            "section": "def-common.TGridCellAction",
+            "text": "TGridCellAction"
           },
-          "[]; filters?: ",
+          "[] | undefined; category?: string | undefined; columnHeaderType: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.ColumnHeaderType",
+            "text": "ColumnHeaderType"
+          },
+          "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "IFieldSubType",
+          " | undefined; type?: string | undefined; })[]; filters?: ",
           "Filter",
           "[] | undefined; title: string; id: string; sort: ",
           {
@@ -1541,7 +1621,29 @@
             "section": "def-common.SortColumnTimeline",
             "text": "SortColumnTimeline"
           },
-          "[]; version: string | null; isLoading: boolean; dateRange: { start: string; end: string; }; savedObjectId: string | null; dataProviders: ",
+          "[]; version: string | null; isLoading: boolean; dateRange: { start: string; end: string; }; defaultColumns: (Pick<",
+          "EuiDataGridColumn",
+          ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
+          "EuiDataGridColumn",
+          ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TGridCellAction",
+            "text": "TGridCellAction"
+          },
+          "[] | undefined; category?: string | undefined; columnHeaderType: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.ColumnHeaderType",
+            "text": "ColumnHeaderType"
+          },
+          "; description?: string | undefined; example?: string | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "IFieldSubType",
+          " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; dataProviders: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1584,6 +1686,20 @@
           "[]>; }"
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.TGridType",
+        "type": "Type",
+        "tags": [],
+        "label": "TGridType",
+        "description": [],
+        "signature": [
+          "\"standalone\" | \"embedded\""
+        ],
+        "path": "x-pack/plugins/timelines/public/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1655,7 +1771,13 @@
           "description": [],
           "signature": [
             "<T extends ",
-            "TGridType",
+            {
+              "pluginId": "timelines",
+              "scope": "public",
+              "docId": "kibTimelinesPluginApi",
+              "section": "def-public.TGridType",
+              "text": "TGridType"
+            },
             " = \"embedded\">(props: ",
             "GetTGridProps",
             "<T>) => React.ReactElement<",
@@ -1910,6 +2032,108 @@
             {
               "parentPluginId": "timelines",
               "id": "def-public.TimelinesUIStart.getAddToCaseAction.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "AddToCaseActionProps"
+              ],
+              "path": "x-pack/plugins/timelines/public/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "timelines",
+          "id": "def-public.TimelinesUIStart.getAddToCasePopover",
+          "type": "Function",
+          "tags": [],
+          "label": "getAddToCasePopover",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "AddToCaseActionProps",
+            ") => React.ReactElement<",
+            "AddToCaseActionProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/timelines/public/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "timelines",
+              "id": "def-public.TimelinesUIStart.getAddToCasePopover.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "AddToCaseActionProps"
+              ],
+              "path": "x-pack/plugins/timelines/public/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "timelines",
+          "id": "def-public.TimelinesUIStart.getAddToExistingCaseButton",
+          "type": "Function",
+          "tags": [],
+          "label": "getAddToExistingCaseButton",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "AddToCaseActionProps",
+            ") => React.ReactElement<",
+            "AddToCaseActionProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/timelines/public/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "timelines",
+              "id": "def-public.TimelinesUIStart.getAddToExistingCaseButton.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "AddToCaseActionProps"
+              ],
+              "path": "x-pack/plugins/timelines/public/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "timelines",
+          "id": "def-public.TimelinesUIStart.getAddToNewCaseButton",
+          "type": "Function",
+          "tags": [],
+          "label": "getAddToNewCaseButton",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "AddToCaseActionProps",
+            ") => React.ReactElement<",
+            "AddToCaseActionProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/timelines/public/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "timelines",
+              "id": "def-public.TimelinesUIStart.getAddToNewCaseButton.$1",
               "type": "Object",
               "tags": [],
               "label": "props",
@@ -4885,6 +5109,64 @@
           },
           {
             "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.setEventsLoading",
+            "type": "Function",
+            "tags": [],
+            "label": "setEventsLoading",
+            "description": [],
+            "signature": [
+              "(params: { eventIds: string[]; isLoading: boolean; }) => void"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "timelines",
+                "id": "def-common.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ eventIds: string[]; isLoading: boolean; }"
+                ],
+                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.ActionProps.setEventsDeleted",
+            "type": "Function",
+            "tags": [],
+            "label": "setEventsDeleted",
+            "description": [],
+            "signature": [
+              "(params: { eventIds: string[]; isDeleted: boolean; }) => void"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "timelines",
+                "id": "def-common.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ eventIds: string[]; isDeleted: boolean; }"
+                ],
+                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "timelines",
             "id": "def-common.ActionProps.refetch",
             "type": "Function",
             "tags": [],
@@ -5192,6 +5474,72 @@
               "{ [key: string]: unknown; nested?: { path: string; } | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.BulkActionsObjectProp",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkActionsObjectProp",
+        "description": [],
+        "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.BulkActionsObjectProp.alertStatusActions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alertStatusActions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.BulkActionsObjectProp.onAlertStatusActionSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onAlertStatusActionSuccess",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.OnUpdateAlertStatusSuccess",
+                "text": "OnUpdateAlertStatusSuccess"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.BulkActionsObjectProp.onAlertStatusActionFailure",
+            "type": "Function",
+            "tags": [],
+            "label": "onAlertStatusActionFailure",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.OnUpdateAlertStatusError",
+                "text": "OnUpdateAlertStatusError"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
             "deprecated": false
           }
         ],
@@ -5549,7 +5897,7 @@
         "tags": [],
         "label": "ColumnRenderer",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
         "children": [
           {
@@ -5570,7 +5918,7 @@
               },
               "[]) => boolean"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
             "deprecated": false,
             "children": [
               {
@@ -5583,7 +5931,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -5604,7 +5952,7 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -5629,7 +5977,7 @@
               },
               "; timelineId: string; truncate?: boolean | undefined; values: string[] | null | undefined; linkValues?: string[] | null | undefined; }) => React.ReactNode"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
             "deprecated": false,
             "children": [
               {
@@ -5639,7 +5987,7 @@
                 "tags": [],
                 "label": "{\n    columnName,\n    eventId,\n    field,\n    timelineId,\n    truncate,\n    values,\n    linkValues,\n  }",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                 "deprecated": false,
                 "children": [
                   {
@@ -5649,7 +5997,7 @@
                     "tags": [],
                     "label": "columnName",
                     "description": [],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -5659,7 +6007,7 @@
                     "tags": [],
                     "label": "eventId",
                     "description": [],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -5672,7 +6020,15 @@
                     "signature": [
                       "Pick<",
                       "EuiDataGridColumn",
-                      ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & { aggregatable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+                      ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+                      {
+                        "pluginId": "timelines",
+                        "scope": "common",
+                        "docId": "kibTimelinesPluginApi",
+                        "section": "def-common.TGridCellAction",
+                        "text": "TGridCellAction"
+                      },
+                      "[] | undefined; category?: string | undefined; columnHeaderType: ",
                       {
                         "pluginId": "timelines",
                         "scope": "common",
@@ -5684,7 +6040,7 @@
                       "IFieldSubType",
                       " | undefined; type?: string | undefined; }"
                     ],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -5694,7 +6050,7 @@
                     "tags": [],
                     "label": "timelineId",
                     "description": [],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -5707,7 +6063,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -5720,7 +6076,7 @@
                     "signature": [
                       "string[] | null | undefined"
                     ],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   },
                   {
@@ -5733,7 +6089,7 @@
                     "signature": [
                       "string[] | null | undefined"
                     ],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+                    "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
                     "deprecated": false
                   }
                 ]
@@ -9200,6 +9556,166 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-common.StatusBulkActionsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "StatusBulkActionsProps",
+        "description": [],
+        "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.StatusBulkActionsProps.eventIds",
+            "type": "Array",
+            "tags": [],
+            "label": "eventIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.StatusBulkActionsProps.currentStatus",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "currentStatus",
+            "description": [],
+            "signature": [
+              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\" | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.StatusBulkActionsProps.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.StatusBulkActionsProps.indexName",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.StatusBulkActionsProps.setEventsLoading",
+            "type": "Function",
+            "tags": [],
+            "label": "setEventsLoading",
+            "description": [],
+            "signature": [
+              "(params: { eventIds: string[]; isLoading: boolean; }) => void"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "timelines",
+                "id": "def-common.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ eventIds: string[]; isLoading: boolean; }"
+                ],
+                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.StatusBulkActionsProps.setEventsDeleted",
+            "type": "Function",
+            "tags": [],
+            "label": "setEventsDeleted",
+            "description": [],
+            "signature": [
+              "(params: { eventIds: string[]; isDeleted: boolean; }) => void"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "timelines",
+                "id": "def-common.params",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ eventIds: string[]; isDeleted: boolean; }"
+                ],
+                "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.StatusBulkActionsProps.onUpdateSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpdateSuccess",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.OnUpdateAlertStatusSuccess",
+                "text": "OnUpdateAlertStatusSuccess"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.StatusBulkActionsProps.onUpdateFailure",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpdateFailure",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.OnUpdateAlertStatusError",
+                "text": "OnUpdateAlertStatusError"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-common.TimelineEdges",
         "type": "Interface",
         "tags": [],
@@ -9280,7 +9796,7 @@
             "section": "def-common.TimelineEventsAllRequestOptions",
             "text": "TimelineEventsAllRequestOptions"
           },
-          ", \"id\" | \"sort\" | \"fields\" | \"timerange\" | \"language\" | \"defaultIndex\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"alertConsumers\" | \"fieldRequested\" | \"excludeEcsData\" | \"authFilter\">"
+          ", \"id\" | \"sort\" | \"fields\" | \"timerange\" | \"language\" | \"defaultIndex\" | \"pagination\" | \"filterQuery\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"fieldRequested\" | \"excludeEcsData\" | \"authFilter\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
@@ -9877,7 +10393,7 @@
             "section": "def-common.TimelineRequestBasicOptions",
             "text": "TimelineRequestBasicOptions"
           },
-          ", \"id\" | \"params\" | \"defaultIndex\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\" | \"alertConsumers\">"
+          ", \"id\" | \"params\" | \"defaultIndex\" | \"docValueFields\" | \"factoryQueryType\" | \"indexType\" | \"entityType\">"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
@@ -10898,28 +11414,7 @@
             "label": "entityType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.EntityType",
-                "text": "EntityType"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.TimelineRequestBasicOptions.alertConsumers",
-            "type": "Array",
-            "tags": [],
-            "label": "alertConsumers",
-            "description": [],
-            "signature": [
-              "AlertConsumers",
-              "[] | undefined"
+              "\"alerts\" | \"events\" | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/index.ts",
             "deprecated": false
@@ -11628,17 +12123,6 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-common.EntityType",
-        "type": "Enum",
-        "tags": [],
-        "label": "EntityType",
-        "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
         "id": "def-common.FlowDirection",
         "type": "Enum",
         "tags": [],
@@ -11751,6 +12235,34 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.AlertStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "AlertStatus",
+        "description": [],
+        "signature": [
+          "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+        ],
+        "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.AlertWorkflowStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "AlertWorkflowStatus",
+        "description": [],
+        "signature": [
+          "\"open\" | \"closed\" | \"acknowledged\""
+        ],
+        "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "timelines",
         "id": "def-common.AllTimelineSavedObject",
@@ -11927,6 +12439,27 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-common.BulkActionsProp",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkActionsProp",
+        "description": [],
+        "signature": [
+          "boolean | ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.BulkActionsObjectProp",
+            "text": "BulkActionsObjectProp"
+          }
+        ],
+        "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-common.CellValueElementProps",
         "type": "Type",
         "tags": [],
@@ -11952,7 +12485,25 @@
             "section": "def-common.ColumnHeaderOptions",
             "text": "ColumnHeaderOptions"
           },
-          "; isDraggable: boolean; linkValues: string[] | undefined; timelineId: string; setFlyoutAlert?: ((data: any) => void) | undefined; }"
+          "; isDraggable: boolean; linkValues: string[] | undefined; timelineId: string; setFlyoutAlert?: ((data: any) => void) | undefined; ecsData?: ",
+          "Ecs",
+          " | undefined; rowRenderers?: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.RowRenderer",
+            "text": "RowRenderer"
+          },
+          "[] | undefined; browserFields?: Readonly<Record<string, Partial<",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.BrowserField",
+            "text": "BrowserField"
+          },
+          ">>> | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": false,
@@ -11970,7 +12521,15 @@
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & { aggregatable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+          ", \"id\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TGridCellAction",
+            "text": "TGridCellAction"
+          },
+          "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -11982,7 +12541,7 @@
           "IFieldSubType",
           " | undefined; type?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11996,7 +12555,7 @@
         "signature": [
           "\"not-filtered\" | \"text-filter\""
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12012,7 +12571,7 @@
         "signature": [
           "string"
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.ts",
+        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12120,6 +12679,20 @@
           "[]"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.EntityType",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityType",
+        "description": [],
+        "signature": [
+          "\"alerts\" | \"events\""
+        ],
+        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -12429,6 +13002,23 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.InProgressStatus",
+        "type": "Type",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "InProgressStatus",
+        "description": [],
+        "signature": [
+          "\"in-progress\""
+        ],
+        "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+        "deprecated": true,
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -12827,6 +13417,103 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-common.OnUpdateAlertStatusError",
+        "type": "Type",
+        "tags": [],
+        "label": "OnUpdateAlertStatusError",
+        "description": [],
+        "signature": [
+          "(status: ",
+          "STATUS_VALUES",
+          ", error: Error) => void"
+        ],
+        "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.OnUpdateAlertStatusSuccess",
+        "type": "Type",
+        "tags": [],
+        "label": "OnUpdateAlertStatusSuccess",
+        "description": [],
+        "signature": [
+          "(updated: number, conflicts: number, status: ",
+          "STATUS_VALUES",
+          ") => void"
+        ],
+        "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.updated",
+            "type": "number",
+            "tags": [],
+            "label": "updated",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.conflicts",
+            "type": "number",
+            "tags": [],
+            "label": "conflicts",
+            "description": [],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\""
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-common.OnUpdateColumns",
         "type": "Type",
         "tags": [],
@@ -13146,6 +13833,66 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-common.SetEventsDeleted",
+        "type": "Type",
+        "tags": [],
+        "label": "SetEventsDeleted",
+        "description": [],
+        "signature": [
+          "(params: { eventIds: string[]; isDeleted: boolean; }) => void"
+        ],
+        "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ eventIds: string[]; isDeleted: boolean; }"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.SetEventsLoading",
+        "type": "Type",
+        "tags": [],
+        "label": "SetEventsLoading",
+        "description": [],
+        "signature": [
+          "(params: { eventIds: string[]; isLoading: boolean; }) => void"
+        ],
+        "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ eventIds: string[]; isLoading: boolean; }"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-common.SingleTimelineResponse",
         "type": "Type",
         "tags": [],
@@ -13320,6 +14067,72 @@
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.TGridCellAction",
+        "type": "Type",
+        "tags": [],
+        "label": "TGridCellAction",
+        "description": [
+          "\nA `TGridCellAction` function accepts `data`, where each row of data is\nrepresented as a `TimelineNonEcsData[]`. For example, `data[0]` would\ncontain a `TimelineNonEcsData[]` with the first row of data.\n\nA `TGridCellAction` returns a function that has access to all the\n`EuiDataGridColumnCellActionProps`, _plus_ access to `data`,\n which enables code like the following example to be written:\n\nExample:\n```\n({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {\n  const value = getMappedNonEcsValue({\n    data: data[rowIndex], // access a specific row's values\n    fieldName: columnId,\n  });\n\n  return (\n    <Component onClick={() => alert(`row ${rowIndex} col ${columnId} has value ${value}`)} iconType=\"heart\">\n      {'Love it'}\n     </Component>\n  );\n};\n```"
+        ],
+        "signature": [
+          "({ browserFields, data, timelineId, }: { browserFields: Readonly<Record<string, Partial<",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.BrowserField",
+            "text": "BrowserField"
+          },
+          ">>>; data: ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimelineNonEcsData",
+            "text": "TimelineNonEcsData"
+          },
+          "[][]; timelineId: string; }) => (props: ",
+          "EuiDataGridColumnCellActionProps",
+          ") => React.ReactNode"
+        ],
+        "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.__0",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ browserFields: Readonly<Record<string, Partial<",
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.BrowserField",
+                "text": "BrowserField"
+              },
+              ">>>; data: ",
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.TimelineNonEcsData",
+                "text": "TimelineNonEcsData"
+              },
+              "[][]; timelineId: string; }"
+            ],
+            "path": "x-pack/plugins/timelines/common/types/timeline/columns/index.tsx",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -15891,6 +16704,20 @@
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.EntityType",
+        "type": "Object",
+        "tags": [],
+        "label": "EntityType",
+        "description": [],
+        "signature": [
+          "{ readonly ALERTS: \"alerts\"; readonly EVENTS: \"events\"; }"
+        ],
+        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
