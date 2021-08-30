@@ -47,6 +47,7 @@ const createStartContractMock = () => {
               keystoreConfigured: false,
               truststoreConfigured: false,
             },
+            username: 'none',
           },
           http: {
             basePathConfigured: false,
