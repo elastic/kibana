@@ -183,6 +183,10 @@ export const validatePackagePolicy = (
   if (Object.entries(validationResults.inputs!).length === 0) {
     validationResults.inputs = null;
   }
+
+  // eslint-disable-next-line no-console
+  console.log(validationResults);
+
   return validationResults;
 };
 

@@ -74,6 +74,10 @@ export const apmConfigMapping: Record<
     type: 'text',
     getValue: ({ cloudPluginSetup }) => cloudPluginSetup?.apm?.url,
   },
+  'apm-server.rum.allow_service_names': {
+    name: 'rum_allow_service_names',
+    type: 'text',
+  },
   'apm-server.rum.enabled': {
     name: 'enable_rum',
     type: 'bool',
