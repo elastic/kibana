@@ -47,7 +47,6 @@ export const requestIndexFieldSearch = async (
   beatFields: BeatFields
 ): Promise<IndexFieldsStrategyResponse> => {
   const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
-  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
 
   const dedupeIndices = dedupeIndexName(request.indices);
 
@@ -65,15 +64,9 @@ export const requestIndexFieldSearch = async (
           });
           return get(searchResponse, 'body.hits.total.value', 0) > 0;
         } else {
-          if (index.startsWith('.alerts-security.alerts')) {
-            return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-              pattern: index,
-            });
-          } else {
-            return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
-              pattern: index,
-            });
-          }
+          return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
+            pattern: index,
+          });
         }
       })
       .map((p) => p.catch((e) => false))

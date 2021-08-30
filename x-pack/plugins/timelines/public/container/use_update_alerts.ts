@@ -10,7 +10,10 @@ import { CoreStart } from '../../../../../src/core/public';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { AlertStatus } from '../../../timelines/common';
-import { RAC_ALERTS_BULK_UPDATE_URL } from '../../common/constants';
+import {
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  RAC_ALERTS_BULK_UPDATE_URL,
+} from '../../common/constants';
 
 /**
  * Update alert status by query
@@ -18,7 +21,7 @@ import { RAC_ALERTS_BULK_UPDATE_URL } from '../../common/constants';
  * @param status to update to('open' / 'closed' / 'acknowledged')
  * @param index index to be updated
  * @param query optional query object to update alerts by query.
- * @param ids optional array of alert ids to update. Ignored if query passed.
+ * @param timelineId we need to know who is asking for this update for now
  *
  * @throws An error if response is not OK
  */
@@ -26,17 +29,26 @@ export const useUpdateAlertsStatus = (): {
   updateAlertStatus: (params: {
     status: AlertStatus;
     index: string;
-    ids?: string[];
-    query?: object;
+    query: object;
+    timelineId: string;
   }) => Promise<estypes.UpdateByQueryResponse>;
 } => {
   const { http } = useKibana<CoreStart>().services;
   return {
-    updateAlertStatus: async ({ status, index, ids, query }) => {
-      const { body } = await http.post(RAC_ALERTS_BULK_UPDATE_URL, {
-        body: JSON.stringify({ index, status, ...(query ? { query } : { ids }) }),
-      });
-      return body;
+    updateAlertStatus: async ({ status, index, query, timelineId }) => {
+      if (timelineId === 'detections-page') {
+        return http!.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ status, query }),
+        });
+      } else {
+        const { body } = await http.post(RAC_ALERTS_BULK_UPDATE_URL, {
+          body: JSON.stringify({ index, status, query }),
+        });
+        return body;
+      }
     },
   };
 };
+
+//
