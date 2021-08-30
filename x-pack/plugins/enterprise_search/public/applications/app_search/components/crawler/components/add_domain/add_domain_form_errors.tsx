@@ -25,7 +25,7 @@ export const AddDomainFormErrors: React.FC = () => {
         title={i18n.translate(
           'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.errorsTitle',
           {
-            defaultMessage: 'Something went wrong. Please address the errors and try again.',
+            defaultMessage: 'Please address the errors.',
           }
         )}
       >

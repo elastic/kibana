@@ -11,7 +11,7 @@ export const FLYOUT_ARIA_LABEL_ID = 'documentCreationFlyoutHeadingId';
 
 export const DOCUMENT_CREATION_ERRORS = {
   TITLE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.errorsTitle', {
-    defaultMessage: 'Something went wrong. Please address the errors and try again.',
+    defaultMessage: 'Please address the errors.',
   }),
   NO_FILE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.noFileFound', {
     defaultMessage: 'No file found.',

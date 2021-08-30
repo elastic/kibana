@@ -62,7 +62,7 @@ export const ValidDocumentsSummary: React.FC = () => {
         'xpack.enterpriseSearch.appSearch.documentCreation.showSummary.newDocuments',
         {
           defaultMessage:
-            'Added {newDocuments, number} {newDocuments, plural, one {document} other {documents}}.',
+            '{newDocuments, number} {newDocuments, plural, one {document} other {documents}} added',
           values: { newDocuments: validDocuments.total },
         }
       )}
@@ -95,7 +95,7 @@ export const SchemaFieldsSummary: React.FC = () => {
         'xpack.enterpriseSearch.appSearch.documentCreation.showSummary.newSchemaFields',
         {
           defaultMessage:
-            "Added {newFields, number} {newFields, plural, one {field} other {fields}} to the Engine's schema.",
+            "{newFields, number} {newFields, plural, one {field} other {fields}} added to the Engine's schema.",
           values: { newFields: newSchemaFields.length },
         }
       )}
