@@ -16,7 +16,7 @@ Search for hidden insights, visualize what you've found in charts, gauges,
 maps and more, and combine them in a dashboard.
 
 * *Manage, monitor, and secure the Elastic Stack.*
-Manage your indices and ingest pipelines, monitor the health of your
+Manage your data, monitor the health of your
 Elastic Stack cluster, and control which users have access to
 which features.
 
@@ -32,21 +32,15 @@ you want to view existing dashboards and drill down into details.
 
 *{kib} works with all types of data.* Your data can be structured or unstructured text,
 numerical data, time-series data, geospatial data, logs, metrics, security events,
-and more.  Kibana is designed to use Elasticsearch as a data store.
+and more.
 No matter your data, {kib} can help you uncover patterns and relationships and visualize the results.
 
 [float]
 [[kibana-home-page]]
 === Where to start
 
-Start with the home page, which provides access to the *Enterprise Search*,
-*Observability*, and *Security* solutions,
-and everything you need to visualize and analyze your data.
-
-To access other {kib} managment features, use the main menu.
-Open this menu by clicking the
-menu icon.
-For a quick reference of all {kib} features, refer to <<whats-the-right-app,What’s the right app for you?>>
+Start with the home page, which provides access to *Enterprise Search*,
+*Observability*, *Security*, and *Analytics*. For more options, open the main menu.
 
 [role="screenshot"]
 image::images/kibana-main-menu.png[Kibana main menu]
@@ -70,7 +64,7 @@ your organization from threats before damage and loss occur.
 
 [float]
 [[visualize-and-analyze]]
-=== Visualize and analyze
+=== Analyze
 
 Data analysis is a core functionality of {kib}.
 You can quickly search through large amounts of data, explore fields and values,
@@ -97,35 +91,19 @@ You can limit your results to the most recent documents added to {es}.
 aggregation-based data to time series data to geo data.
 <<dashboard, *Dashboard*>> is your starting point to create visualizations,
 and then pulling them together to show your data from multiple perspectives.
+You can also use *Graph* to explore relationships.
 
 | *4*
-| *Present.*  With <<canvas, *Canvas*>>, you can display your data on a visually
-compelling, pixel-perfect workpad. **Canvas** can give your data
-the “wow” factor needed to impress your CEO and captivate coworkers with a big-screen display.
+| *Advanced analysis.*  With <<canvas, *Canvas*>>, you can display your data on a visually
+compelling, pixel-perfect workpad and give your data
+the “wow” factor for display on a big screen.
+Use <<xpack-ml, *{ml-cap}*>> to model the behavior of your data&mdash;forecast unusual behavior and
+perform outlier detection, regression, and classification analysis.
 
 | *5*
 | *Share.* Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
 a dashboard, share a link, export to PDF, and more.
 |===
-
-[float]
-==== Plot location data on a map
-If you’re looking to better understand the “where’’ in your data, your data
-analysis journey will also include <<maps, *Maps*>>. This app is the right
-choice when you’re looking for a spatial pattern, performing ad-hoc location-driven analysis,
-or analyzing metrics with a geographic perspective. With *Maps*, you can build
-world country maps, administrative region maps, and point-to-point origin-destination maps.
-You can also visualize and track movement over space and through time.
-
-[float]
-==== Graph relationships
-
-Looking to uncover how items in your data are related?
-<<xpack-graph, *Graph*>> is your app. Graphing relationships is useful in a variety of use cases,
-from fraud detection to recommendation engines. For example, graph exploration
-can help you uncover website vulnerabilities that hackers are targeting,
-so you can harden your website. Or, you might provide graph-based
-personalized recommendations to your e-commerce customers.
 
 [float]
 [[manage-all-things-stack]]
@@ -159,13 +137,8 @@ that exists in almost every use case. For example, you might set a rule to notif
 * System resources, such as memory, CPU and disk space, take a dip.
 * An unusually high number of service requests, suspicious processes, and login attempts occurs.
 
-A rule triggers when a specified condition is met. For example,
-you can create a rule when the average or max of one of
-your metrics exceeds a threshold within a specified time frame.
-
 When the rule triggers, you can send a notification to a system that is part of
-your daily workflow. {kib} integrates with email, Slack, PagerDuty, and ServiceNow,
-to name a few.
+your daily workflow: email, Slack, PagerDuty, and ServiceNow, to name a few.
 
 A dedicated view for creating, searching, and editing rules is in <<create-and-manage-rules,*Rules and Connectors*>>.
 
@@ -182,25 +155,11 @@ with <<xpack-spaces, Spaces>>, built for organizing your visualizations, dashboa
 Think of a space as its own mini {kib} installation&mdash;it’s isolated from all other spaces,
 so you can tailor it to your specific needs without impacting others.
 
-[role="screenshot"]
-image::images/select-your-space.png[Space selector view]
-
 Most of {kib}’s entities are space-aware, including dashboards, visualizations, index patterns,
 *Canvas* workpads, graphs, tags, and machine learning jobs.
 
-[float]
-==== Control feature visibility
-
-You can take spaces one step further and control which features are visible
-within each space. For example, you might hide **Dev Tools** in your "Marketing"
-space or show **Stack Monitoring** only in your "Engineering" space.
-
-Controlling feature visibility is not a security feature. To secure access
-to specific features on a per-user basis, you must configure
-<<xpack-security-authorization,{kib} Security>>.
-
 [role="screenshot"]
-image::spaces/images/edit-space-feature-visibility.png[Features Controls view]
+image::images/select-your-space.png[Space selector view]
 
 [float]
 [[intro-kibana-Security]]
@@ -253,7 +212,7 @@ users’ behavior. For more information, see <<xpack-security-audit-logging,{kib
 [[kibana-navigation-search]]
 === Quickly find apps and objects
 
-Using the search field in the global header, you can
+Use the search field in the global header to
 search for applications and objects, such as
 dashboards and visualizations. Search suggestions include deep links into applications,
 allowing you to directly navigate to the views you need most.
@@ -261,7 +220,7 @@ allowing you to directly navigate to the views you need most.
 [role="screenshot"]
 image::images/app-navigation-search.png[Example of searching for apps]
 
-When searching for objects, you can search by type, name, and tag.
+You can search for objects by type, name, and tag.
 Tags are keywords or labels that you assign to {kib} objects,
 so you can classify the objects in a way that is meaningful to you.
 You can then quickly search for related objects based on shared tags.
@@ -299,7 +258,6 @@ Available types: `application`, `canvas-workpad`, `dashboard`, `index-pattern`, 
 [[whats-the-right-app]]
 === What’s the right app for you?
 
-{kib} has a wealth of apps, each with its own area of specialty.
 Scan this table to quickly find the app that gets you to our goal.
 
 [cols=2*]
