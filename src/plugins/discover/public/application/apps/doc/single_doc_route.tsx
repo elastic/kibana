@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { IndexPattern } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { Doc } from '../../components/doc/doc';
+import { LoadingIndicator } from '../../components/common/loading_indicator';
+import { useIndexPattern } from '../../helpers/use_index_pattern';
 
 export interface SingleDocRouteProps {
   /**
@@ -33,7 +34,6 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
   const { chrome, timefilter, indexPatterns } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
 
   const query = useQuery();
   const docId = query.get('id') || '';
@@ -52,15 +52,10 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
     timefilter.disableTimeRangeSelector();
   });
 
-  async function getIndexPattern() {
-    const ip = await services.indexPatterns.get(indexPatternId);
-    setIndexPattern(ip);
-  }
-
-  getIndexPattern();
+  const indexPattern = useIndexPattern(services.indexPatterns, indexPatternId);
 
   if (!indexPattern) {
-    return null;
+    return <LoadingIndicator />;
   }
 
   return (

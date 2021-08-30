@@ -18,12 +18,12 @@ import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { SpaceListProps } from 'src/plugins/spaces_oss/public';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import { useSpaces } from '../spaces_context';
-import type { ShareToSpacesData, ShareToSpaceTarget } from '../types';
+import type { SpacesData, SpacesDataEntry } from '../types';
+import type { SpaceListProps } from './types';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
@@ -31,6 +31,7 @@ const LazySpaceAvatar = lazy(() =>
 );
 
 const DEFAULT_DISPLAY_LIMIT = 5;
+type SpaceTarget = Omit<SpacesDataEntry, 'isAuthorizedForPurpose'>;
 
 /**
  * Displays a corresponding list of spaces for a given list of saved object namespaces. It shows up to five spaces (and an indicator for any
@@ -43,16 +44,16 @@ export const SpaceListInternal = ({
   displayLimit = DEFAULT_DISPLAY_LIMIT,
   behaviorContext,
 }: SpaceListProps) => {
-  const { shareToSpacesDataPromise } = useSpaces();
+  const { spacesDataPromise } = useSpaces();
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [shareToSpacesData, setShareToSpacesData] = useState<ShareToSpacesData>();
+  const [shareToSpacesData, setShareToSpacesData] = useState<SpacesData>();
 
   useEffect(() => {
-    shareToSpacesDataPromise.then((x) => {
+    spacesDataPromise.then((x) => {
       setShareToSpacesData(x);
     });
-  }, [shareToSpacesDataPromise]);
+  }, [spacesDataPromise]);
 
   if (!shareToSpacesData) {
     return null;
@@ -61,7 +62,7 @@ export const SpaceListInternal = ({
   const isSharedToAllSpaces = namespaces.includes(ALL_SPACES_ID);
   const unauthorizedSpacesCount = namespaces.filter((namespace) => namespace === UNKNOWN_SPACE)
     .length;
-  let displayedSpaces: ShareToSpaceTarget[];
+  let displayedSpaces: SpaceTarget[];
   let button: ReactNode = null;
 
   if (isSharedToAllSpaces) {
@@ -77,8 +78,8 @@ export const SpaceListInternal = ({
     ];
   } else {
     const authorized = namespaces.filter((namespace) => namespace !== UNKNOWN_SPACE);
-    const enabledSpaceTargets: ShareToSpaceTarget[] = [];
-    const disabledSpaceTargets: ShareToSpaceTarget[] = [];
+    const enabledSpaceTargets: SpaceTarget[] = [];
+    const disabledSpaceTargets: SpaceTarget[] = [];
     authorized.forEach((namespace) => {
       const spaceTarget = shareToSpacesData.spacesMap.get(namespace);
       if (spaceTarget === undefined) {

@@ -54,7 +54,7 @@ describe('Discover router', () => {
 
   it('should show ContextAppRoute component for /context/:indexPatternId/:id route', () => {
     expect(pathMap['/context/:indexPatternId/:id']).toMatchObject(
-      <ContextAppRoute services={mockDiscoverServices} indexPatternList={[]} />
+      <ContextAppRoute services={mockDiscoverServices} />
     );
   });
 });

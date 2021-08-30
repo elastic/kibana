@@ -62,13 +62,16 @@ export {
   FilterMeta,
   ExistsFilter,
   RangeFilter,
+  ScriptedRangeFilter,
   PhraseFilter,
+  ScriptedPhraseFilter,
   PhrasesFilter,
   RangeFilterMeta,
   MatchAllFilter,
   CustomFilter,
   MissingFilter,
   RangeFilterParams,
+  QueryStringFilter,
 } from './build_filters';
 
 export { FilterStateStore, FILTERS } from './build_filters/types';

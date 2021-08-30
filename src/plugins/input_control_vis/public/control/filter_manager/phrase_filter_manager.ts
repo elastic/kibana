@@ -8,10 +8,17 @@
 
 import _ from 'lodash';
 
+import {
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  Filter,
+  getPhraseFilterField,
+  getPhraseFilterValue,
+  isPhraseFilter,
+  PhraseFilter,
+} from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
 import {
-  PhraseFilter,
-  esFilters,
   IndexPatternsContract,
   FilterManager as QueryFilterManager,
 } from '../../../../data/public';
@@ -27,9 +34,9 @@ export class PhraseFilterManager extends FilterManager {
     super(controlId, fieldName, indexPatternId, indexPatternsService, queryFilter);
   }
 
-  createFilter(phrases: any): PhraseFilter {
+  createFilter(phrases: any): Filter {
     const indexPattern = this.getIndexPattern()!;
-    let newFilter: PhraseFilter;
+    let newFilter: Filter;
     const value = indexPattern.fields.getByName(this.fieldName);
 
     if (!value) {
@@ -37,9 +44,9 @@ export class PhraseFilterManager extends FilterManager {
     }
 
     if (phrases.length === 1) {
-      newFilter = esFilters.buildPhraseFilter(value, phrases[0], indexPattern);
+      newFilter = buildPhraseFilter(value, phrases[0], indexPattern);
     } else {
-      newFilter = esFilters.buildPhrasesFilter(value, phrases, indexPattern);
+      newFilter = buildPhrasesFilter(value, phrases, indexPattern);
     }
 
     newFilter.meta.key = this.fieldName;
@@ -74,7 +81,7 @@ export class PhraseFilterManager extends FilterManager {
    * @param  {PhraseFilter} kbnFilter
    * @return {Array.<string>} array of values pulled from filter
    */
-  private getValueFromFilter(kbnFilter: PhraseFilter): any {
+  private getValueFromFilter(kbnFilter: Filter): any {
     // bool filter - multiple phrase filters
     if (_.has(kbnFilter, 'query.bool.should')) {
       return _.get(kbnFilter, 'query.bool.should')
@@ -95,12 +102,12 @@ export class PhraseFilterManager extends FilterManager {
     }
 
     // single phrase filter
-    if (esFilters.isPhraseFilter(kbnFilter)) {
-      if (esFilters.getPhraseFilterField(kbnFilter) !== this.fieldName) {
+    if (isPhraseFilter(kbnFilter)) {
+      if (getPhraseFilterField(kbnFilter) !== this.fieldName) {
         return;
       }
 
-      return esFilters.getPhraseFilterValue(kbnFilter);
+      return getPhraseFilterValue(kbnFilter);
     }
 
     // single phrase filter from bool filter

@@ -5,19 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { ContextApp } from '../../components/context_app/context_app';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
+import { LoadingIndicator } from '../../components/common/loading_indicator';
+import { useIndexPattern } from '../../helpers/use_index_pattern';
 
-export interface ContextMainProps {
-  /**
-   * List of available index patterns
-   */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+export interface ContextAppProps {
   /**
    * Kibana core services used by discover
    */
@@ -29,12 +26,11 @@ export interface ContextUrlParams {
   id: string;
 }
 
-export function ContextAppRoute(props: ContextMainProps) {
+export function ContextAppRoute(props: ContextAppProps) {
   const { services } = props;
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -45,19 +41,12 @@ export function ContextAppRoute(props: ContextMainProps) {
         }),
       },
     ]);
-  }, [chrome, id]);
+  }, [chrome]);
 
-  useEffect(() => {
-    async function getIndexPattern() {
-      const ip = await services.indexPatterns.get(indexPatternId);
-      setIndexPattern(ip);
-    }
-
-    getIndexPattern();
-  }, [indexPatternId, services.indexPatterns]);
+  const indexPattern = useIndexPattern(services.indexPatterns, indexPatternId);
 
   if (!indexPattern) {
-    return null;
+    return <LoadingIndicator />;
   }
 
   return <ContextApp indexPatternId={indexPatternId} anchorId={id} indexPattern={indexPattern} />;

@@ -96,6 +96,7 @@ export interface PluginSetupContract {
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
+  isPreconfiguredConnector(connectorId: string): boolean;
 }
 
 export interface PluginStartContract {
@@ -229,7 +230,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
-      plugins.taskManager.index
+      plugins.taskManager.index,
+      this.preconfiguredActions
     );
 
     registerBuiltInActionTypes({
@@ -287,6 +289,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ) => {
         ensureSufficientLicense(actionType);
         actionTypeRegistry.register(actionType);
+      },
+      isPreconfiguredConnector: (connectorId: string): boolean => {
+        return !!this.preconfiguredActions.find(
+          (preconfigured) => preconfigured.id === connectorId
+        );
       },
     };
   }

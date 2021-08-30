@@ -7,10 +7,10 @@
 
 import type { Capabilities, CoreSetup } from 'src/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
 import type { KibanaFeature } from '../../../features/server';
 import { featuresPluginMock } from '../../../features/server/mocks';
+import type { Space } from '../../common';
 import type { PluginsStart } from '../plugin';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';

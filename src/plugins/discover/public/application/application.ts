@@ -22,7 +22,6 @@ export async function renderApp(moduleName: string, element: HTMLElement) {
 function buildDiscoverElement(mountpoint: HTMLElement) {
   // due to legacy angular tags, we need some manual DOM intervention here
   const appWrapper = document.createElement('div');
-  appWrapper.setAttribute('ng-view', '');
   const discoverApp = document.createElement('discover-app');
   const discover = document.createElement('discover');
   appWrapper.appendChild(discoverApp);

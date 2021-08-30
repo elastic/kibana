@@ -28,7 +28,7 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
         <Switch>
           <Route
             path="/context/:indexPatternId/:id"
-            children={<ContextAppRoute indexPatternList={[]} services={services} />}
+            children={<ContextAppRoute services={services} />}
           />
           <Route
             path="/doc/:indexPattern/:index/:type"
