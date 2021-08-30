@@ -36,9 +36,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-securitysolution-list-utils",
   "//packages/kbn-securitysolution-utils",
   "@npm//@testing-library/react-hooks",
-#  "@npm//tslib",
   "@npm//react",
-#  "@npm//react-intl",
 ]
 
 TYPES_DEPS = [
@@ -51,7 +49,6 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
-#  "@npm//@types/react-intl",
   "@npm//@types/testing-library__react-hooks",
 ]
 
