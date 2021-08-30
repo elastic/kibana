@@ -8,8 +8,7 @@
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 
-import type { Space } from 'src/plugins/spaces_oss/common';
-
+import type { Space } from '../../common';
 import type { SpacesManager } from './spaces_manager';
 
 function createSpacesManagerMock() {

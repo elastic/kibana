@@ -31,7 +31,7 @@ export const Overview: FunctionComponent = () => {
 
   useEffect(() => {
     async function sendTelemetryData() {
-      await api.sendTelemetryData({
+      await api.sendPageTelemetryData({
         overview: true,
       });
     }

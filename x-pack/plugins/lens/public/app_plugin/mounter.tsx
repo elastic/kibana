@@ -48,6 +48,7 @@ export async function getLensServices(
 ): Promise<LensAppServices> {
   const {
     data,
+    inspector,
     navigation,
     embeddable,
     savedObjectsTagging,
@@ -62,6 +63,7 @@ export async function getLensServices(
   return {
     data,
     storage,
+    inspector,
     navigation,
     fieldFormats,
     stateTransfer,
@@ -82,7 +84,6 @@ export async function getLensServices(
         ? stateTransfer?.getAppNameFromId(embeddableEditorIncomingState.originatingApp)
         : undefined;
     },
-
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
   };
