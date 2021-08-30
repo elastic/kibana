@@ -117,16 +117,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       request,
       refetch,
     } = useQueryAlerts<{}, AlertsAggregation>({
-      fetchMethod: fetchQueryRuleRegistryAlerts,
-      query: {
-        index: signalIndexName,
-        ...getAlertsHistogramQuery(
-          selectedStackByOption,
-          from,
-          to,
-          buildCombinedQueries(combinedQueries)
-        ),
-      },
+      query: getAlertsHistogramQuery(
+        selectedStackByOption,
+        from,
+        to,
+        buildCombinedQueries(combinedQueries)
+      ),
       indexName: signalIndexName,
     });
 
