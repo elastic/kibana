@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useContext } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -14,6 +14,7 @@ import {
   EuiI18nNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ThemeContext } from 'styled-components';
 
 export interface AgentsSummaryProps {
   total: number;
@@ -73,6 +74,8 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
     ];
   }, []);
 
+  const theme = useContext(ThemeContext);
+
   return (
     <EuiFlexGroup gutterSize="l" responsive={false} data-test-subj="policyAgentsSummary">
       {stats.map(({ key, title, health }) => {
@@ -86,7 +89,12 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
                   title,
                   description: (
                     <>
-                      {health && <EuiHealth color={health} className="eui-alignMiddle" />}
+                      {health && (
+                        <EuiHealth
+                          color={health === 'warning' ? theme.eui.euiColorWarning : health}
+                          className="eui-alignMiddle"
+                        />
+                      )}
                       <EuiI18nNumber value={props[key]} />
                     </>
                   ),
