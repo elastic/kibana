@@ -44,14 +44,58 @@ const getAllFieldsByName = (
 ): { [fieldName: string]: Partial<BrowserField> } =>
   keyBy('name', getAllBrowserFields(browserFields));
 
+/**
+ * Valid built-in schema types for the `schema` property of `EuiDataGridColumn`
+ * are enumerated in the following comment in the EUI repository (permalink):
+ * https://github.com/elastic/eui/blob/edc71160223c8d74e1293501f7199fba8fa57c6c/src/components/datagrid/data_grid_types.ts#L417
+ */
+export type BUILT_IN_SCHEMA = 'boolean' | 'currency' | 'datetime' | 'numeric' | 'json';
+
+/**
+ * Returns a valid value for the `EuiDataGridColumn` `schema` property, or
+ * `undefined` when the specified `BrowserFields` `type` doesn't match a
+ * built-in schema type
+ *
+ * Notes:
+ *
+ * - At the time of this writing, the type definition of the
+ * `EuiDataGridColumn` `schema` property is:
+ *
+ * ```ts
+ * schema?: string;
+ * ```
+ * - At the time of this writing, Elasticsearch Field data types are documented here:
+ * https://www.elastic.co/guide/en/elasticsearch/reference/7.14/mapping-types.html
+ */
+export const getSchema = (type: string | undefined): BUILT_IN_SCHEMA | undefined => {
+  switch (type) {
+    case 'date': // fall through
+    case 'date_nanos':
+      return 'datetime';
+    case 'double': // fall through
+    case 'long': // fall through
+    case 'number':
+      return 'numeric';
+    case 'object':
+      return 'json';
+    case 'boolean':
+      return 'boolean';
+    default:
+      return undefined;
+  }
+};
+
 /** Enriches the column headers with field details from the specified browserFields */
 export const getColumnHeaders = (
   headers: ColumnHeaderOptions[],
   browserFields: BrowserFields
 ): ColumnHeaderOptions[] => {
+  const browserFieldByName = getAllFieldsByName(browserFields);
   return headers
     ? headers.map((header) => {
         const splitHeader = header.id.split('.'); // source.geo.city_name -> [source, geo, city_name]
+
+        const browserField: Partial<BrowserField> | undefined = browserFieldByName[header.id];
 
         // augment the header with metadata from browserFields:
         const augmentedHeader = {
@@ -60,6 +104,7 @@ export const getColumnHeaders = (
             [splitHeader.length > 1 ? splitHeader[0] : 'base', 'fields', header.id],
             browserFields
           ),
+          schema: header.schema ?? getSchema(browserField?.type),
         };
 
         const content = <>{header.display ?? header.displayAsText ?? header.id}</>;
@@ -71,7 +116,7 @@ export const getColumnHeaders = (
           defaultSortDirection: 'desc', // the default action when a user selects a field via `EuiDataGrid`'s `Pick fields to sort by` UI
           display: <>{content}</>,
           isSortable: allowSorting({
-            browserField: getAllFieldsByName(browserFields)[header.id],
+            browserField,
             fieldName: header.id,
           }),
         };
