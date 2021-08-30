@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies a suspicious image load (wmiutils.dll) from Microsoft Office processes. This behavior may indicate adversarial activity where child processes are spawned via Windows Management Instrumentation (WMI). This technique can be used to execute code and evade traditional parent/child processes spawned from MS Office products.",
+  "description": "Identifies a suspicious image load (wmiutils.dll) from Microsoft Office processes. This behavior may indicate adversarial activity where child processes are spawned via Windows Management Instrumentation (WMI). This technique can be used to execute code and evade traditional parent/child processes spawned from Microsoft Office products.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -45,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }
