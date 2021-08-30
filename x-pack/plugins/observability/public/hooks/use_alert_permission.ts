@@ -12,7 +12,7 @@ import { Capabilities } from '../../../../../src/core/types';
 export interface UseGetUserAlertsPermissionsProps {
   crud: boolean;
   read: boolean;
-  loading: boolean;
+  loading?: boolean;
   featureId: string | null;
 }
 
