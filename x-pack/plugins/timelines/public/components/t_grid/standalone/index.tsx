@@ -249,6 +249,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
     [deletedEventIds.length, totalCount]
   );
+  const hasAlerts = totalCountMinusDeleted > 0;
+
   const activeCaseFlowId = useSelector((state: State) => tGridSelectors.activeCaseFlowId(state));
   const selectedEvent = useMemo(() => {
     const matchedEvent = events.find((event) => event.ecs._id === activeCaseFlowId);
@@ -340,17 +342,17 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
               data-test-subj={`events-container-loading-${loading}`}
             >
               <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="baseline">
-                <UpdatedFlexItem grow={false} $show={!loading}>
+                <UpdatedFlexItem grow={false} $show={!loading && hasAlerts}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} $show={!loading}>
+                <UpdatedFlexItem grow={false} $show={!loading && hasAlerts}>
                   <LastUpdatedAt updatedAt={updatedAt} />
                 </UpdatedFlexItem>
               </UpdatedFlexGroup>
 
-              {totalCountMinusDeleted === 0 && loading === false && <TGridEmpty />}
+              {!hasAlerts && loading === false && <TGridEmpty />}
 
-              {totalCountMinusDeleted > 0 && (
+              {hasAlerts && (
                 <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
                   <ScrollableFlexItem grow={1}>
                     <StatefulBody

@@ -252,6 +252,8 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [deletedEventIds.length, totalCount]
   );
 
+  const hasAlerts = totalCountMinusDeleted > 0;
+
   const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
     deletedEventIds,
     events,
@@ -289,14 +291,14 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
             data-test-subj={`events-container-loading-${loading}`}
           >
             <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
-              <UpdatedFlexItem grow={false} $show={!loading}>
+              <UpdatedFlexItem grow={false} $show={!loading && hasAlerts}>
                 <InspectButton title={justTitle} inspect={inspect} loading={loading} />
               </UpdatedFlexItem>
-              <UpdatedFlexItem grow={false} $show={!loading}>
+              <UpdatedFlexItem grow={false} $show={!loading && hasAlerts}>
                 {!resolverIsShowing(graphEventId) && additionalFilters}
               </UpdatedFlexItem>
               {tGridEventRenderedViewEnabled && entityType === 'alerts' && (
-                <UpdatedFlexItem grow={false} $show={!loading}>
+                <UpdatedFlexItem grow={false} $show={!loading && hasAlerts}>
                   <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
                 </UpdatedFlexItem>
               )}
@@ -304,8 +306,8 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
             {!graphEventId && graphOverlay == null && (
               <>
-                {totalCountMinusDeleted === 0 && loading === false && <TGridEmpty height="short" />}
-                {totalCountMinusDeleted > 0 && (
+                {!hasAlerts && loading === false && <TGridEmpty height="short" />}
+                {hasAlerts && (
                   <StatefulBody
                     hasAlertsCrud={hasAlertsCrud}
                     activePage={pageInfo.activePage}
