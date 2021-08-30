@@ -294,7 +294,11 @@ export class ElasticsearchService {
     try {
       await client.asInternalUser.ping();
     } catch (error) {
-      if (error instanceof errors.ConnectionError || error instanceof errors.TimeoutError) {
+      if (
+        error instanceof errors.ConnectionError ||
+        error instanceof errors.TimeoutError ||
+        error instanceof errors.ProductNotSupportedError
+      ) {
         this.logger.error(`Unable to connect to host "${host}": ${getDetailedErrorMessage(error)}`);
         throw error;
       }

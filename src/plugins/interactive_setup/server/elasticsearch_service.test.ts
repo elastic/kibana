@@ -527,6 +527,16 @@ some weird+ca/with
         );
       });
 
+      it('fails if host is not supported', async () => {
+        mockPingClient.asInternalUser.ping.mockRejectedValue(
+          new errors.ProductNotSupportedError(interactiveSetupMock.createApiResponse({ body: {} }))
+        );
+
+        await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
+          `[ProductNotSupportedError: The client noticed that the server is not Elasticsearch and we do not support this unknown product.]`
+        );
+      });
+
       it('succeeds if host does not require authentication', async () => {
         mockPingClient.asInternalUser.ping.mockResolvedValue(
           interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
