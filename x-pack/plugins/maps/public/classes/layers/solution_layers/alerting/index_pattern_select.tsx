@@ -7,8 +7,14 @@
 
 import React, { ChangeEvent, Component } from 'react';
 import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
+import minimatch from 'minimatch';
 import { i18n } from '@kbn/i18n';
-import { getSecurityIndexPatterns, IndexPatternMeta } from './alerting_index_pattern_utils';
+import { getIndexPatternService } from '../../../../kibana_services';
+
+interface IndexPatternMeta {
+  id: string;
+  title: string;
+}
 
 interface Props {
   value: string;
@@ -37,8 +43,27 @@ export class IndexPatternSelect extends Component<Props, State> {
     this._loadOptions();
   }
 
+  async getAlertingIndexPatterns(): Promise<IndexPatternMeta[]> {
+    const indexPatternCache = await getIndexPatternService().getCache();
+    // TODO: Get this value dynamically?
+    const alertingIndexPatternTitles: string[] = ['.alerts-stack-alerts*'];
+    return indexPatternCache!
+      .filter((savedObject) => {
+        return (alertingIndexPatternTitles as string[]).some((indexPatternTitle) => {
+          // glob matching index pattern title
+          return minimatch(indexPatternTitle, savedObject?.attributes?.title);
+        });
+      })
+      .map((savedObject) => {
+        return {
+          id: savedObject.id,
+          title: savedObject.attributes.title,
+        };
+      });
+  }
+
   async _loadOptions() {
-    const indexPatterns = await getSecurityIndexPatterns();
+    const indexPatterns = await this.getAlertingIndexPatterns();
     if (!this._isMounted) {
       return;
     }
@@ -82,7 +107,7 @@ export class IndexPatternSelect extends Component<Props, State> {
 
     return (
       <EuiFormRow
-        label={i18n.translate('xpack.maps.alerting.indexPatternLabel', {
+        label={i18n.translate('xpack.maps.security.indexPatternLabel', {
           defaultMessage: 'Index pattern',
         })}
       >

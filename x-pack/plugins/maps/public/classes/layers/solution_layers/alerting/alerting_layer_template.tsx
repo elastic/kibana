@@ -8,9 +8,9 @@
 import React, { Component } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
-import { IndexPatternSelect } from './index_pattern_select';
 import { createAlertingLayerDescriptors } from './create_layer_descriptors';
 import { IndexPatternMeta } from './alerting_index_pattern_utils';
+import { IndexPatternSelect } from './index_pattern_select';
 
 interface State {
   indexPatternId: string | null;

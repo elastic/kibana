@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { createSecurityLayerDescriptors } from './create_layer_descriptors';
+export { createAlertingLayerDescriptors } from './create_layer_descriptors';
 export { AlertingLayerWizardConfig } from './alerting_layer_wizard';
