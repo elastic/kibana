@@ -78,7 +78,7 @@ export class AzureCloudService extends CloudService {
     return null;
   };
 
-  _checkIfService = async () => {
+  protected _checkIfService = async () => {
     const response = await fetch(SERVICE_ENDPOINT, {
       method: 'GET',
       headers: {

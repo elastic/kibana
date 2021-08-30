@@ -38,7 +38,7 @@ describe('AWS', () => {
         ok: true,
       });
 
-      const response = await awsService._checkIfService();
+      const response = await awsService['_checkIfService']();
       expect(readFile).toBeCalledTimes(0);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith(
@@ -70,7 +70,7 @@ describe('AWS', () => {
         ok: true,
       });
 
-      const response = await awsService._checkIfService();
+      const response = await awsService['_checkIfService']();
 
       expect(response.isConfirmed()).toBe(true);
       expect(response.toJSON()).toMatchInlineSnapshot(`
@@ -91,7 +91,7 @@ describe('AWS', () => {
         ok: false,
       });
 
-      const response = await awsService._checkIfService();
+      const response = await awsService['_checkIfService']();
 
       expect(response.isConfirmed()).toBe(true);
       expect(response.toJSON()).toMatchInlineSnapshot(`
@@ -115,7 +115,7 @@ describe('AWS', () => {
 
       mockIsWindows.mockReturnValue(true);
 
-      const response = await awsService._checkIfService();
+      const response = await awsService['_checkIfService']();
       expect(mockIsWindows).toBeCalledTimes(1);
       expect(readFile).toBeCalledTimes(0);
 
@@ -179,12 +179,12 @@ describe('AWS', () => {
     });
   });
 
-  describe('_tryToDetectUuid', () => {
+  describe('tryToDetectUuid', () => {
     describe('checks the file system for UUID if not Windows', () => {
       beforeAll(() => mockIsWindows.mockReturnValue(false));
 
       it('checks /sys/hypervisor/uuid and /sys/devices/virtual/dmi/id/product_uuid', async () => {
-        const response = await awsService._tryToDetectUuid();
+        const response = await awsService['tryToDetectUuid']();
 
         readFile.mockImplementation(async (filename: string, encoding: string) => {
           expect(['/sys/hypervisor/uuid', '/sys/devices/virtual/dmi/id/product_uuid']).toContain(
@@ -213,7 +213,7 @@ describe('AWS', () => {
         readFile.mockRejectedValueOnce(new Error('oops'));
         readFile.mockResolvedValueOnce('ec2Uuid');
 
-        const response = await awsService._tryToDetectUuid();
+        const response = await awsService['tryToDetectUuid']();
         expect(readFile).toBeCalledTimes(2);
 
         expect(response.isConfirmed()).toEqual(true);
@@ -232,21 +232,21 @@ describe('AWS', () => {
       it('returns unconfirmed if all files return errors', async () => {
         readFile.mockRejectedValue(new Error('oops'));
 
-        const response = await awsService._tryToDetectUuid();
+        const response = await awsService['tryToDetectUuid']();
         expect(response.isConfirmed()).toEqual(false);
       });
 
       it('ignores UUID if it does not start with ec2', async () => {
         readFile.mockResolvedValue('notEC2');
 
-        const response = await awsService._tryToDetectUuid();
+        const response = await awsService['tryToDetectUuid']();
         expect(response.isConfirmed()).toEqual(false);
       });
     });
 
     it('does NOT check the file system for UUID on Windows', async () => {
       mockIsWindows.mockReturnValue(true);
-      const response = await awsService._tryToDetectUuid();
+      const response = await awsService['tryToDetectUuid']();
 
       expect(response.isConfirmed()).toEqual(false);
     });

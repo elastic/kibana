@@ -24,7 +24,7 @@ export class GCPCloudService extends CloudService {
     super('gcp');
   }
 
-  _checkIfService = async () => {
+  protected _checkIfService = async () => {
     // we need to call GCP individually for each field we want metadata for
     const fields = ['id', 'machine-type', 'zone'];
 

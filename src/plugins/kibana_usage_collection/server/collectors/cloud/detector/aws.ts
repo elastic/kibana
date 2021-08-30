@@ -95,7 +95,7 @@ export class AWSCloudService extends CloudService {
     return process.platform.startsWith('win');
   };
 
-  _checkIfService = async () => {
+  protected _checkIfService = async () => {
     try {
       const response = await fetch(SERVICE_ENDPOINT, {
         method: 'GET',
@@ -108,7 +108,7 @@ export class AWSCloudService extends CloudService {
       const jsonBody: AWSResponse = await response.json();
       return this._parseResponse(jsonBody, this.parseBody);
     } catch (_) {
-      return this._tryToDetectUuid();
+      return this.tryToDetectUuid();
     }
   };
 
@@ -117,7 +117,7 @@ export class AWSCloudService extends CloudService {
    *
    * This is a fallback option if the metadata service is unavailable for some reason.
    */
-  _tryToDetectUuid = async () => {
+  private tryToDetectUuid = async () => {
     const isWindows = this._isWindows();
     // Windows does not have an easy way to check
     if (!isWindows) {

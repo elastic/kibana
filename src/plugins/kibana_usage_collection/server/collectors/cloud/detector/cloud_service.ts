@@ -23,7 +23,7 @@ export abstract class CloudService {
   /**
    * Get the search-friendly name of the Cloud Service.
    */
-  getName = () => {
+  public getName = () => {
     return this._name;
   };
 
@@ -31,7 +31,7 @@ export abstract class CloudService {
    * Using whatever mechanism is required by the current Cloud Service,
    * determine if Kibana is running in it and return relevant metadata.
    */
-  checkIfService = async () => {
+  public checkIfService = async () => {
     try {
       return await this._checkIfService();
     } catch (e) {
@@ -39,7 +39,7 @@ export abstract class CloudService {
     }
   };
 
-  _checkIfService = async (): Promise<CloudServiceResponse> => {
+  protected _checkIfService = async (): Promise<CloudServiceResponse> => {
     // should always be overridden by a subclass
     return Promise.reject(new Error('not implemented'));
   };
@@ -48,14 +48,14 @@ export abstract class CloudService {
    * Create a new CloudServiceResponse that denotes that this cloud service
    * is not being used by the current machine / VM.
    */
-  _createUnconfirmedResponse = () => {
+  protected _createUnconfirmedResponse = () => {
     return CloudServiceResponse.unconfirmed(this._name);
   };
 
   /**
    * Strictly parse JSON.
    */
-  _stringToJson = (value: string) => {
+  protected _stringToJson = (value: string) => {
     // note: this will throw an error if this is not a string
     value = value.trim();
 
@@ -78,7 +78,7 @@ export abstract class CloudService {
    * If the response cannot be parsed as a JSON object, or if it fails to be
    * useful, then parseBody should return null.
    */
-  _parseResponse = <Body>(
+  protected _parseResponse = <Body>(
     body: string | Body,
     parseBodyFn: (body: Body) => CloudServiceResponse | null
   ): CloudServiceResponse => {
