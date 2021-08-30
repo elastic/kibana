@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickAggBasedVisualizations();
       const expectedChartTypes = [
         'Area',
-        'Coordinate Map',
         'Data table',
         'Gauge',
         'Goal',
@@ -44,7 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Line',
         'Metric',
         'Pie',
-        'Region Map',
         'Tag cloud',
         'Timelion',
         'Vertical bar',

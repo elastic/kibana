@@ -16,7 +16,7 @@ import 'angular-sanitize';
 import { EuiIcon } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, PluginInitializerContext } from 'kibana/public';
-import { DataPublicPluginStart } from '../../../../data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Storage } from '../../../../kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../navigation/public';
 import { createContextAppLegacy } from '../components/context_app/context_app_legacy_directive';
@@ -30,7 +30,6 @@ import {
 import { PromiseServiceCreator } from './helpers';
 import { DiscoverStartPlugins } from '../../plugin';
 import { getScopedHistory } from '../../kibana_services';
-import { createDiscoverDirective } from './create_discover_directive';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -94,7 +93,6 @@ export function initializeInnerAngularModule(
   return angular
     .module(name, [
       'ngSanitize',
-      'ngRoute',
       'react',
       'ui.bootstrap',
       'discoverI18n',
@@ -104,8 +102,7 @@ export function initializeInnerAngularModule(
       'discoverDocTable',
     ])
     .config(watchMultiDecorator)
-    .run(registerListenEventListener)
-    .directive('discover', createDiscoverDirective);
+    .run(registerListenEventListener);
 }
 
 function createLocalPromiseModule() {
