@@ -5688,7 +5688,6 @@
     "xpack.apm.serviceNodeMetrics.unidentifiedServiceNodesWarningTitle": "找不到 JVM",
     "xpack.apm.serviceNodeNameMissing": "（空）",
     "xpack.apm.serviceOveriew.errorsTableOccurrences": "{occurrencesCount} 次",
-    "xpack.apm.serviceOverview.dependenciesTableColumnBackend": "后端",
     "xpack.apm.serviceOverview.dependenciesTableTitle": "依赖项",
     "xpack.apm.serviceOverview.errorsTableColumnLastSeen": "最后看到时间",
     "xpack.apm.serviceOverview.errorsTableColumnName": "名称",
