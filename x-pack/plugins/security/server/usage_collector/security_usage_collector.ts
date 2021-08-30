@@ -12,6 +12,7 @@ import type { ConfigType } from '../config';
 
 interface Usage {
   auditLoggingEnabled: boolean;
+  auditLoggingType?: 'ecs' | 'legacy';
   loginSelectorEnabled: boolean;
   accessAgreementEnabled: boolean;
   authProviderCount: number;
@@ -56,6 +57,13 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         _meta: {
           description:
             'Indicates if audit logging is both enabled and supported by the current license.',
+        },
+      },
+      auditLoggingType: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'If auditLoggingEnabled is true, indicates what type is enabled (ECS or legacy).',
         },
       },
       loginSelectorEnabled: {
@@ -118,8 +126,15 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       }
 
       const legacyAuditLoggingEnabled = allowLegacyAuditLogging && config.audit.enabled;
-      const auditLoggingEnabled =
+      const ecsAuditLoggingEnabled =
         allowAuditLogging && config.audit.enabled && config.audit.appender != null;
+
+      let auditLoggingType: Usage['auditLoggingType'];
+      if (ecsAuditLoggingEnabled) {
+        auditLoggingType = 'ecs';
+      } else if (legacyAuditLoggingEnabled) {
+        auditLoggingType = 'legacy';
+      }
 
       const loginSelectorEnabled = config.authc.selector.enabled;
       const authProviderCount = config.authc.sortedProviders.length;
@@ -140,7 +155,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       );
 
       return {
-        auditLoggingEnabled: legacyAuditLoggingEnabled || auditLoggingEnabled,
+        auditLoggingEnabled: legacyAuditLoggingEnabled || ecsAuditLoggingEnabled,
+        auditLoggingType,
         loginSelectorEnabled,
         accessAgreementEnabled,
         authProviderCount,

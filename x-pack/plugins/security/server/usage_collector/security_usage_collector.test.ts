@@ -357,16 +357,21 @@ describe('Security UsageCollector', () => {
   });
 
   describe('audit logging', () => {
-    it('reports when audit logging is enabled', async () => {
+    it('reports when legacy audit logging is enabled (and ECS audit logging is not enabled)', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({
           audit: {
             enabled: true,
+            appender: undefined,
           },
         })
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
-      const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: true });
+      const license = createSecurityLicense({
+        isLicenseAvailable: true,
+        allowLegacyAuditLogging: true,
+        allowAuditLogging: true,
+      });
       registerSecurityUsageCollector({ usageCollection, config, license });
 
       const usage = await usageCollection
@@ -375,6 +380,39 @@ describe('Security UsageCollector', () => {
 
       expect(usage).toEqual({
         auditLoggingEnabled: true,
+        auditLoggingType: 'legacy',
+        accessAgreementEnabled: false,
+        authProviderCount: 1,
+        enabledAuthProviders: ['basic'],
+        loginSelectorEnabled: false,
+        httpAuthSchemes: ['apikey'],
+      });
+    });
+
+    it('reports when ECS audit logging is enabled (and legacy audit logging is not enabled)', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          audit: {
+            enabled: true,
+            appender: { type: 'console', layout: { type: 'json' } },
+          },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({
+        isLicenseAvailable: true,
+        allowLegacyAuditLogging: true,
+        allowAuditLogging: true,
+      });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        auditLoggingEnabled: true,
+        auditLoggingType: 'ecs',
         accessAgreementEnabled: false,
         authProviderCount: 1,
         enabledAuthProviders: ['basic'],
