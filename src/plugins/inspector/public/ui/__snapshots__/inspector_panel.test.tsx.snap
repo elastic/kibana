@@ -12,6 +12,8 @@ exports[`InspectorPanel should render as expected 1`] = `
   }
   dependencies={
     Object {
+      "application": Object {},
+      "http": Object {},
       "uiSettings": Object {},
     }
   }
@@ -143,6 +145,8 @@ exports[`InspectorPanel should render as expected 1`] = `
   <Provider
     services={
       Object {
+        "application": Object {},
+        "http": Object {},
         "uiSettings": Object {},
       }
     }
