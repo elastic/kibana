@@ -53,6 +53,8 @@ interface QueryOptionsEventsBySavedObjectFilter {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AliasAny = any;
 
+const KIBANA_VERSION_8_0_0 = '8.0.0';
+
 export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string } = Doc> {
   private readonly logger: Logger;
   private readonly elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -264,14 +266,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
       namespaceQuery,
     ];
-    if (!legacyIds || legacyIds.length === 0) {
-      savedObjectsQueryMust.push({
-        terms: {
-          // default maximum of 65,536 terms, configurable by index.max_terms_count
-          'kibana.saved_objects.id': ids,
-        },
-      });
-    }
+
     const musts: estypes.QueryDslQueryContainer[] = [
       {
         nested: {
@@ -284,77 +279,75 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         },
       },
     ];
-    if (legacyIds && legacyIds.length > 0) {
-      musts.push({
+
+    const shouldQuery = [
+      {
         bool: {
-          should: [
+          must: [
             {
-              bool: {
-                must: [
-                  {
-                    nested: {
-                      path: 'kibana.saved_objects',
-                      query: {
-                        bool: {
-                          must: [
-                            {
-                              terms: {
-                                // default maximum of 65,536 terms, configurable by index.max_terms_count
-                                'kibana.saved_objects.id': legacyIds,
-                              },
-                            },
-                          ],
+              nested: {
+                path: 'kibana.saved_objects',
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        terms: {
+                          // default maximum of 65,536 terms, configurable by index.max_terms_count
+                          'kibana.saved_objects.id': ids,
                         },
                       },
-                    },
+                    ],
                   },
-                  {
-                    bool: {
-                      should: [
-                        {
-                          range: {
-                            'kibana.version': {
-                              lt: '8.0.0',
-                            },
-                          },
+                },
+              },
+            },
+            {
+              range: {
+                'kibana.version': {
+                  gte: '8.0.0',
+                },
+              },
+            },
+          ],
+        },
+      },
+    ];
+
+    if (legacyIds && legacyIds.length > 0) {
+      shouldQuery.push({
+        bool: {
+          must: [
+            {
+              nested: {
+                path: 'kibana.saved_objects',
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        terms: {
+                          // default maximum of 65,536 terms, configurable by index.max_terms_count
+                          'kibana.saved_objects.id': legacyIds,
                         },
-                        {
-                          term: {
-                            'kibana.version': {
-                              value: 'NULL',
-                            },
-                          },
-                        },
-                      ],
-                    },
+                      },
+                    ],
                   },
-                ],
+                },
               },
             },
             {
               bool: {
-                must: [
+                should: [
                   {
-                    nested: {
-                      path: 'kibana.saved_objects',
-                      query: {
-                        bool: {
-                          must: [
-                            {
-                              terms: {
-                                // default maximum of 65,536 terms, configurable by index.max_terms_count
-                                'kibana.saved_objects.id': ids,
-                              },
-                            },
-                          ],
-                        },
+                    range: {
+                      'kibana.version': {
+                        lt: KIBANA_VERSION_8_0_0,
                       },
                     },
                   },
                   {
-                    range: {
+                    term: {
                       'kibana.version': {
-                        gte: '8.0.0',
+                        value: 'NULL',
                       },
                     },
                   },
@@ -365,6 +358,13 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         },
       });
     }
+
+    musts.push({
+      bool: {
+        should: shouldQuery,
+      },
+    });
+
     if (start) {
       musts.push({
         range: {
