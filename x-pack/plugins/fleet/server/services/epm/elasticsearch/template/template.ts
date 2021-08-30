@@ -277,7 +277,7 @@ function generateTextMapping(field: Field): IndexTemplateMapping {
 function getDefaultProperties(field: Field): Properties {
   const properties: Properties = {};
 
-  if (field.index) {
+  if (field.index !== undefined) {
     properties.index = field.index;
   }
   if (field.doc_values) {
