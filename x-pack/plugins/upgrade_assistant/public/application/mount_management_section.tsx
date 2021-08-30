@@ -7,13 +7,26 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+
+import type { ManagementAppMountParams } from 'src/plugins/management/public';
 import { RootComponent } from './app';
 import { AppDependencies } from '../types';
 
-export const renderApp = (element: HTMLElement, dependencies: AppDependencies) => {
+import { apiService } from './lib/api';
+import { breadcrumbService } from './lib/breadcrumbs';
+
+export function mountManagementSection(
+  params: ManagementAppMountParams,
+  dependencies: AppDependencies
+) {
+  const { element, setBreadcrumbs } = params;
+
+  apiService.setup(dependencies.services.core.http);
+  breadcrumbService.setup(setBreadcrumbs);
+
   render(<RootComponent {...dependencies} />, element);
 
   return () => {
     unmountComponentAtNode(element);
   };
-};
+}

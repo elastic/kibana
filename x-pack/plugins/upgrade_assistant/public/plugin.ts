@@ -44,15 +44,12 @@ export class UpgradeAssistantUIPlugin
       order: 1,
       async mount(params) {
         const [coreStart, { discover, data }] = await coreSetup.getStartServices();
-        const { element, setBreadcrumbs, history } = params;
 
         const {
           chrome: { docTitle },
         } = coreStart;
 
         docTitle.change(pluginName);
-        apiService.setup(coreStart.http);
-        breadcrumbService.setup(setBreadcrumbs);
 
         const appDependencies: AppDependencies = {
           kibanaVersionInfo,
@@ -64,15 +61,15 @@ export class UpgradeAssistantUIPlugin
           services: {
             core: coreStart,
             data,
-            history,
+            history: params.history,
             discover,
             api: apiService,
             breadcrumbs: breadcrumbService,
           },
         };
 
-        const { renderApp } = await import('./application/render_app');
-        const unmountAppCallback = renderApp(element, appDependencies);
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        const unmountAppCallback = mountManagementSection(params, appDependencies);
 
         return () => {
           docTitle.reset();
