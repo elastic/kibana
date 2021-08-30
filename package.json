@@ -377,7 +377,6 @@
     "redux-thunks": "^1.0.0",
     "remark-stringify": "^9.0.0",
     "regenerator-runtime": "^0.13.3",
-    "request": "^2.88.0",
     "require-in-the-middle": "^5.0.2",
     "reselect": "^4.0.0",
     "resize-observer-polyfill": "^1.5.0",
