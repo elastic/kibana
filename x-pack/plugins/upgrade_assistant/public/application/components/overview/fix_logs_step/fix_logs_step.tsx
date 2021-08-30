@@ -8,9 +8,11 @@
 import React, { FunctionComponent } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiSpacer, EuiPanel, EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiText, EuiSpacer, EuiPanel, EuiLink, EuiCallOut } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import { useAppContext } from '../../../app_context';
 import { ExternalLinks } from './external_links';
 import { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
 import { useDeprecationLogging } from './use_deprecation_logging';
@@ -32,6 +34,25 @@ const i18nTexts = {
       defaultMessage: 'Resolve deprecation issues and verify your changes',
     }
   ),
+  apiCompatibilityNoteTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.apiCompatibilityNoteTitle',
+    {
+      defaultMessage: 'Apply API compatibility headers (optional)',
+    }
+  ),
+  apiCompatibilityNoteBody: (docLink: string) => (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.overview.apiCompatibilityNoteBody"
+      defaultMessage="We advise bringing your log count down to zero to guarantee your upgrade will be free of issues. However, it can be challenging to be certain that all requests have been fixed, and by applying the compatibility header to all requests provides an additional safety net. {learnMoreLink}."
+      values={{
+        learnMoreLink: (
+          <EuiLink href={docLink} target="_blank">
+            Learn more
+          </EuiLink>
+        ),
+      }}
+    />
+  ),
   onlyLogWritingEnabledTitle: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningTitle',
     {
@@ -48,6 +69,7 @@ const i18nTexts = {
 };
 
 const FixLogsStep: FunctionComponent = () => {
+  const { docLinks } = useAppContext();
   const state = useDeprecationLogging();
 
   return (
@@ -89,6 +111,15 @@ const FixLogsStep: FunctionComponent = () => {
           </EuiText>
           <EuiSpacer size="m" />
           <DeprecationsCountCheckpoint />
+
+          <EuiSpacer size="xl" />
+          <EuiText data-test-subj="apiCompatibilityNoteTitle">
+            <h4>{i18nTexts.apiCompatibilityNoteTitle}</h4>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiText>
+            <p>{i18nTexts.apiCompatibilityNoteBody(docLinks.links.elasticsearch.docsBase)}</p>
+          </EuiText>
         </>
       )}
     </>
