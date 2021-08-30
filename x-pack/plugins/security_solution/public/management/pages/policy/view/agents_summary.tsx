@@ -74,13 +74,13 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
   }, []);
 
   return (
-    <EuiFlexGroup gutterSize="xl" responsive={false} data-test-subj="policyAgentsSummary">
+    <EuiFlexGroup gutterSize="l" responsive={false} data-test-subj="policyAgentsSummary">
       {stats.map(({ key, title, health }) => {
         return (
           <EuiFlexItem grow={false} key={key}>
             <EuiDescriptionList
               textStyle="reverse"
-              align="center"
+              style={{ textAlign: 'right' }}
               listItems={[
                 {
                   title,
