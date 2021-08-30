@@ -293,7 +293,6 @@ export const getTopNavConfig = (
             uiState: currentState.uiState,
             query: currentState.query,
             vis: (currentState.vis as unknown) as SerializableRecord,
-            searchSourceFields: (vis.data.searchSource?.getSerializedFields() as unknown) as SerializableRecord,
           };
           // TODO: support sharing in by-value mode
           share.toggleShareContextMenu({
