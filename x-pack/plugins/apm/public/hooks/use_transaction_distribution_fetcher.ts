@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import {
   IKibanaSearchRequest,
@@ -14,31 +14,21 @@ import {
   isErrorResponse,
 } from '../../../../../src/plugins/data/public';
 import type {
-  HistogramItem,
   SearchServiceParams,
-  SearchServiceValue,
+  SearchServiceRawResponse,
 } from '../../common/search_strategies/correlations/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../plugin';
-
-interface RawResponse {
-  percentileThresholdValue?: number;
-  took: number;
-  values: SearchServiceValue[];
-  overallHistogram: HistogramItem[];
-  log: string[];
-  ccsWarning: boolean;
-}
 
 interface TransactionDistributionFetcherState {
   error?: Error;
   isComplete: boolean;
   isRunning: boolean;
   loaded: number;
-  ccsWarning: RawResponse['ccsWarning'];
-  log: RawResponse['log'];
-  transactionDistribution?: RawResponse['overallHistogram'];
-  percentileThresholdValue?: RawResponse['percentileThresholdValue'];
+  ccsWarning: SearchServiceRawResponse['ccsWarning'];
+  log: SearchServiceRawResponse['log'];
+  transactionDistribution?: SearchServiceRawResponse['overallHistogram'];
+  percentileThresholdValue?: SearchServiceRawResponse['percentileThresholdValue'];
   timeTook?: number;
   total: number;
 }
@@ -63,7 +53,9 @@ export function useTransactionDistributionFetcher() {
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
 
-  function setResponse(response: IKibanaSearchResponse<RawResponse>) {
+  function setResponse(
+    response: IKibanaSearchResponse<SearchServiceRawResponse>
+  ) {
     setFetchState((prevState) => ({
       ...prevState,
       isRunning: response.isRunning || false,
@@ -83,71 +75,81 @@ export function useTransactionDistributionFetcher() {
               response.rawResponse?.percentileThresholdValue,
           }
         : {}),
+      // if loading is done but didn't return any data for the overall histogram,
+      // set it to an empty array so the consuming chart component knows loading is done.
+      ...(!response.isRunning &&
+      response.rawResponse?.overallHistogram === undefined
+        ? { transactionDistribution: [] }
+        : {}),
     }));
   }
 
-  const startFetch = (
-    params: Omit<SearchServiceParams, 'analyzeCorrelations'>
-  ) => {
-    setFetchState((prevState) => ({
-      ...prevState,
-      error: undefined,
-      isComplete: false,
-    }));
-    searchSubscription$.current?.unsubscribe();
-    abortCtrl.current.abort();
-    abortCtrl.current = new AbortController();
+  const startFetch = useCallback(
+    (params: Omit<SearchServiceParams, 'analyzeCorrelations'>) => {
+      setFetchState((prevState) => ({
+        ...prevState,
+        error: undefined,
+        isComplete: false,
+      }));
+      searchSubscription$.current?.unsubscribe();
+      abortCtrl.current.abort();
+      abortCtrl.current = new AbortController();
 
-    const searchServiceParams: SearchServiceParams = {
-      ...params,
-      analyzeCorrelations: false,
-    };
-    const req = { params: searchServiceParams };
+      const searchServiceParams: SearchServiceParams = {
+        ...params,
+        analyzeCorrelations: false,
+      };
+      const req = { params: searchServiceParams };
 
-    // Submit the search request using the `data.search` service.
-    searchSubscription$.current = data.search
-      .search<IKibanaSearchRequest, IKibanaSearchResponse<RawResponse>>(req, {
-        strategy: 'apmCorrelationsSearchStrategy',
-        abortSignal: abortCtrl.current.signal,
-      })
-      .subscribe({
-        next: (res: IKibanaSearchResponse<RawResponse>) => {
-          setResponse(res);
-          if (isCompleteResponse(res)) {
-            searchSubscription$.current?.unsubscribe();
+      // Submit the search request using the `data.search` service.
+      searchSubscription$.current = data.search
+        .search<
+          IKibanaSearchRequest,
+          IKibanaSearchResponse<SearchServiceRawResponse>
+        >(req, {
+          strategy: 'apmCorrelationsSearchStrategy',
+          abortSignal: abortCtrl.current.signal,
+        })
+        .subscribe({
+          next: (res: IKibanaSearchResponse<SearchServiceRawResponse>) => {
+            setResponse(res);
+            if (isCompleteResponse(res)) {
+              searchSubscription$.current?.unsubscribe();
+              setFetchState((prevState) => ({
+                ...prevState,
+                isRunnning: false,
+                isComplete: true,
+              }));
+            } else if (isErrorResponse(res)) {
+              searchSubscription$.current?.unsubscribe();
+              setFetchState((prevState) => ({
+                ...prevState,
+                error: (res as unknown) as Error,
+                isRunning: false,
+              }));
+            }
+          },
+          error: (error: Error) => {
             setFetchState((prevState) => ({
               ...prevState,
-              isRunnning: false,
-              isComplete: true,
+              error,
+              isRunning: false,
             }));
-          } else if (isErrorResponse(res)) {
-            searchSubscription$.current?.unsubscribe();
-            setFetchState((prevState) => ({
-              ...prevState,
-              error: (res as unknown) as Error,
-              setIsRunning: false,
-            }));
-          }
-        },
-        error: (error: Error) => {
-          setFetchState((prevState) => ({
-            ...prevState,
-            error,
-            setIsRunning: false,
-          }));
-        },
-      });
-  };
+          },
+        });
+    },
+    [data.search, setFetchState]
+  );
 
-  const cancelFetch = () => {
+  const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
     searchSubscription$.current = undefined;
     abortCtrl.current.abort();
     setFetchState((prevState) => ({
       ...prevState,
-      setIsRunning: false,
+      isRunning: false,
     }));
-  };
+  }, [setFetchState]);
 
   return {
     ...fetchState,
