@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
@@ -39,7 +39,12 @@ import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { LastUpdatedAt } from '../..';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
+import {
+  SELECTOR_TIMELINE_GLOBAL_CONTAINER,
+  UpdatedFlexItem,
+  UpdatedFlexGroup,
+  FullWidthFlexGroup,
+} from '../styles';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
@@ -67,12 +72,6 @@ const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   flex: 1;
   display: flex;
   flex-direction: column;
-`;
-
-const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
-  overflow: hidden;
-  margin: 0;
-  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
