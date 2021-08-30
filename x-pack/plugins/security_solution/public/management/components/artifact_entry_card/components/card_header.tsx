@@ -8,13 +8,14 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { DateField } from './date_field';
+import { ActionsContextMenu, ActionsContextMenuProps } from '../../actions_context_menu';
 
 export const CardHeader = memo<{
   name: string;
   createdDate: string;
   updatedDate: string;
   /** If defined, then an overflow menu will be shown with the actions provided */
-  actions?: string[];
+  actions?: ActionsContextMenuProps['items'];
 }>(({ name, createdDate, updatedDate, actions }) => {
   return (
     <EuiFlexGroup>
@@ -31,7 +32,11 @@ export const CardHeader = memo<{
           <EuiFlexItem>
             <DateField date={createdDate} type="create" />
           </EuiFlexItem>
-          {actions && <EuiFlexItem>Menu</EuiFlexItem>}
+          {actions && actions.length > 0 && (
+            <EuiFlexItem>
+              <ActionsContextMenu items={actions} icon="boxesVertical" />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

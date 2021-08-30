@@ -7,9 +7,13 @@
 
 import React, { memo } from 'react';
 import { CommonProps, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { CardHeader } from './components/card_header';
+import { APP_ID } from '../../../../common/constants';
 
-export interface ArtifactEntryCardProps<T extends {}> extends CommonProps {
+// FIXME:PT fix types for the artifact type
+
+export interface ArtifactEntryCardProps<T extends {} = {}> extends CommonProps {
   item: T;
 }
 
@@ -24,9 +28,27 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(({ item, ...common
           name={item.name}
           createdDate={item.createdDate}
           updatedDate={item.updatedDate}
+          actions={[
+            {
+              'data-test-subj': 'unIsolateLink',
+              icon: 'logoSecurity',
+              key: 'unIsolateHost',
+              navigateAppId: APP_ID,
+              navigateOptions: {
+                path: 'test/test',
+              },
+              href: 'test/test',
+              children: (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.actions.TEST_TEST"
+                  defaultMessage="Release host"
+                />
+              ),
+            },
+          ]}
         />
-        <div>Sub header section</div>
-        <div>Description</div>
+        <div>{'Sub header section'}</div>
+        <div>{'Description'}</div>
       </EuiPanel>
       <EuiHorizontalRule margin="xs" />
       <EuiPanel hasBorder={false} borderRadius="none" hasShadow={false}>
