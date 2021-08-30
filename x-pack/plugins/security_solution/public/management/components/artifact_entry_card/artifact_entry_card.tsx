@@ -6,11 +6,11 @@
  */
 
 import React, { memo } from 'react';
-import { CommonProps, EuiPanel } from '@elastic/eui';
+import { CommonProps, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import { CardHeader } from './components/card_header';
 
-export interface ArtifactEntryCardProps extends CommonProps {
-  item: {};
+export interface ArtifactEntryCardProps<T extends {}> extends CommonProps {
+  item: T;
 }
 
 /**
@@ -18,11 +18,20 @@ export interface ArtifactEntryCardProps extends CommonProps {
  */
 export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(({ item, ...commonProps }) => {
   return (
-    <EuiPanel hasBorder={true} {...commonProps}>
-      <CardHeader name={item.name} createdDate={item.createdDate} updatedDate={item.updatedDate} />
-      <div>Sub header section</div>
-      <div>Description</div>
-      <div>conditions here</div>
+    <EuiPanel hasBorder={true} {...commonProps} paddingSize="none">
+      <EuiPanel hasBorder={false} borderRadius="none" hasShadow={false}>
+        <CardHeader
+          name={item.name}
+          createdDate={item.createdDate}
+          updatedDate={item.updatedDate}
+        />
+        <div>Sub header section</div>
+        <div>Description</div>
+      </EuiPanel>
+      <EuiHorizontalRule margin="xs" />
+      <EuiPanel hasBorder={false} borderRadius="none" hasShadow={false}>
+        <div>{'conditions here'}</div>
+      </EuiPanel>
     </EuiPanel>
   );
 });
