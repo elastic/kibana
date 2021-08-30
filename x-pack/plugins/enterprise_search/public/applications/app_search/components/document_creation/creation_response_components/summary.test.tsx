@@ -51,7 +51,7 @@ describe('Summary', () => {
   describe('FlyoutHeader', () => {
     it('renders', () => {
       const wrapper = shallow(<FlyoutHeader />);
-      expect(wrapper.find('h2').text()).toEqual('Indexing summary');
+      expect(wrapper.find('h2').text()).toEqual('Summary of indexed documents');
     });
   });
 

@@ -48,7 +48,7 @@ export const FlyoutHeader: React.FC = () => {
       <EuiTitle size="m">
         <h2 id={FLYOUT_ARIA_LABEL_ID}>
           {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.showSummary.title', {
-            defaultMessage: 'Indexing summary',
+            defaultMessage: 'Summary of indexed documents',
           })}
         </h2>
       </EuiTitle>

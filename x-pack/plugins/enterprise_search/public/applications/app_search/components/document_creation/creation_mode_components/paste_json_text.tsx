@@ -73,7 +73,7 @@ export const FlyoutBody: React.FC = () => {
             'xpack.enterpriseSearch.appSearch.documentCreation.pasteJsonText.description',
             {
               defaultMessage:
-                'Paste an array of JSON documents. Ensure the JSON is valid and that each document object is less than {maxDocumentByteSize} bytes.',
+                'Enter an array of valid JSON documents.  Each document must be less than {maxDocumentByteSize} bytes.',
               values: { maxDocumentByteSize },
             }
           )}

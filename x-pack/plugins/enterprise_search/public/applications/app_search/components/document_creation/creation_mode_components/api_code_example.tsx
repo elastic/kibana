@@ -51,7 +51,7 @@ export const FlyoutHeader: React.FC = () => {
       <EuiTitle size="m">
         <h2 id={FLYOUT_ARIA_LABEL_ID}>
           {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.api.title', {
-            defaultMessage: 'Indexing by API',
+            defaultMessage: 'Index from API',
           })}
         </h2>
       </EuiTitle>
@@ -71,7 +71,7 @@ export const FlyoutBody: React.FC = () => {
         <p>
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.documentCreation.api.description"
-            defaultMessage="The {documentsApiLink} can be used to add new documents to your engine, update documents, retrieve documents by id, and delete documents. There are a variety of {clientLibrariesLink} to help you get started."
+            defaultMessage="Use the {documentsApiLink} to add, update, retrieve, and delete documents. The {clientLibrariesLink} can help you get started."
             values={{
               documentsApiLink: (
                 <EuiLink target="_blank" href={`${DOCS_PREFIX}/indexing-documents-guide.html`}>
@@ -89,7 +89,7 @@ export const FlyoutBody: React.FC = () => {
         <p>
           {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.api.example', {
             defaultMessage:
-              'To see the API in action, you can experiment with the example request below using a command line or a client library.',
+              'See the API in action. Experiment with this example request using a command line or client library.',
           })}
         </p>
       </EuiText>

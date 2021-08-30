@@ -40,7 +40,7 @@ describe('ApiCodeExample', () => {
   describe('FlyoutHeader', () => {
     it('renders', () => {
       const wrapper = shallow(<FlyoutHeader />);
-      expect(wrapper.find('h2').text()).toEqual('Indexing by API');
+      expect(wrapper.find('h2').text()).toEqual('Index from API');
     });
   });
 

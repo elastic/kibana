@@ -71,7 +71,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
               'xpack.enterpriseSearch.appSearch.documentCreation.paste.description',
               {
                 defaultMessage:
-                  'Paste a valid raw JSON array. Each document object must be less than 102400 bytes.',
+                  'Enter an array of valid JSON documents. Each document must be less than 102400 bytes.',
               }
             )}
             icon={<EuiIcon type="indexEdit" size="l" color="primary" />}
