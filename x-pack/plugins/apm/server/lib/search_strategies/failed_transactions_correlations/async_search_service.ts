@@ -23,7 +23,7 @@ import {
 } from '../queries';
 import type { AsyncSearchServiceProvider } from '../search_strategy_provider';
 
-import { asyncErrorCorrelationsSearchServiceStateProvider } from './async_search_service_state';
+import { asyncFailedTransactionsCorrelationsSearchServiceStateProvider } from './async_search_service_state';
 
 import { ERROR_CORRELATION_THRESHOLD } from '../constants';
 
@@ -35,7 +35,7 @@ export const failedTransactionsCorrelationsAsyncSearchServiceProvider: AsyncSear
 ) => {
   const { addLogMessage, getLogMessages } = asyncSearchServiceLogProvider();
 
-  const state = asyncErrorCorrelationsSearchServiceStateProvider();
+  const state = asyncFailedTransactionsCorrelationsSearchServiceStateProvider();
 
   async function fetchErrorCorrelations() {
     try {
@@ -97,7 +97,7 @@ export const failedTransactionsCorrelationsAsyncSearchServiceProvider: AsyncSear
           } finally {
             fieldCandidatesFetchedCount += batches[i].length;
             state.setProgress({
-              loadedErrorCorrelations:
+              loadedFailedTransactionsCorrelations:
                 fieldCandidatesFetchedCount / fieldCandidates.length,
             });
           }
@@ -125,28 +125,24 @@ export const failedTransactionsCorrelationsAsyncSearchServiceProvider: AsyncSear
   return () => {
     const { ccsWarning, error, isRunning, progress } = state.getState();
 
-    const meta = {
-      loaded: Math.round(state.getOverallProgress() * 100),
-      total: 100,
-      isRunning,
-      isPartial: isRunning,
-    };
-
-    const rawResponse = {
-      ccsWarning,
-      log: getLogMessages(),
-      took: Date.now() - progress.started,
-      values: state.getValuesSortedByScore(),
-    };
-
     return {
       cancel: () => {
         addLogMessage(`Service cancelled.`);
         state.setIsCancelled(true);
       },
       error,
-      meta,
-      rawResponse,
+      meta: {
+        loaded: Math.round(state.getOverallProgress() * 100),
+        total: 100,
+        isRunning,
+        isPartial: isRunning,
+      },
+      rawResponse: {
+        ccsWarning,
+        log: getLogMessages(),
+        took: Date.now() - progress.started,
+        values: state.getValuesSortedByScore(),
+      },
     };
   };
 };

@@ -10,9 +10,9 @@ import { FailedTransactionsCorrelationValue } from '../../../../common/search_st
 interface Progress {
   started: number;
   loadedFieldCandidates: number;
-  loadedErrorCorrelations: number;
+  loadedFailedTransactionsCorrelations: number;
 }
-export const asyncErrorCorrelationsSearchServiceStateProvider = () => {
+export const asyncFailedTransactionsCorrelationsSearchServiceStateProvider = () => {
   let ccsWarning = false;
   function setCcsWarning(d: boolean) {
     ccsWarning = d;
@@ -36,12 +36,12 @@ export const asyncErrorCorrelationsSearchServiceStateProvider = () => {
   let progress: Progress = {
     started: Date.now(),
     loadedFieldCandidates: 0,
-    loadedErrorCorrelations: 0,
+    loadedFailedTransactionsCorrelations: 0,
   };
   function getOverallProgress() {
     return (
       progress.loadedFieldCandidates * 0.025 +
-      progress.loadedErrorCorrelations * (1 - 0.025)
+      progress.loadedFailedTransactionsCorrelations * (1 - 0.025)
     );
   }
   function setProgress(d: Partial<Omit<Progress, 'started'>>) {
@@ -89,5 +89,5 @@ export const asyncErrorCorrelationsSearchServiceStateProvider = () => {
 };
 
 export type AsyncSearchServiceState = ReturnType<
-  typeof asyncErrorCorrelationsSearchServiceStateProvider
+  typeof asyncFailedTransactionsCorrelationsSearchServiceStateProvider
 >;

@@ -221,6 +221,11 @@ export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServicePr
     state.setIsRunning(false);
   }
 
+  function cancel() {
+    addLogMessage(`Service cancelled.`);
+    state.setIsCancelled(true);
+  }
+
   fetchCorrelations();
 
   return () => {
@@ -233,32 +238,23 @@ export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServicePr
       progress,
     } = state.getState();
 
-    const took = Date.now() - progress.started;
-
-    const meta = {
-      loaded: Math.round(state.getOverallProgress() * 100),
-      total: 100,
-      isRunning,
-      isPartial: isRunning,
-    };
-
-    const rawResponse: LatencyCorrelationsAsyncSearchServiceRawResponse = {
-      ccsWarning,
-      log: getLogMessages(),
-      took,
-      values: state.getValuesSortedByCorrelation(),
-      percentileThresholdValue,
-      overallHistogram,
-    };
-
     return {
-      cancel: () => {
-        addLogMessage(`Service cancelled.`);
-        state.setIsCancelled(true);
-      },
+      cancel,
       error,
-      meta,
-      rawResponse,
+      meta: {
+        loaded: Math.round(state.getOverallProgress() * 100),
+        total: 100,
+        isRunning,
+        isPartial: isRunning,
+      },
+      rawResponse: {
+        ccsWarning,
+        log: getLogMessages(),
+        took: Date.now() - progress.started,
+        values: state.getValuesSortedByCorrelation(),
+        percentileThresholdValue,
+        overallHistogram,
+      },
     };
   };
 };
