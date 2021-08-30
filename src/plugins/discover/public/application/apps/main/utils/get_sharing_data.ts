@@ -21,7 +21,7 @@ export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: AppState | SavedSearch,
   config: IUiSettingsClient,
-  timeRange: TimeRange
+  timeRange?: TimeRange
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
@@ -30,7 +30,6 @@ export async function getSharingData(
     'sort',
     getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
   );
-  searchSource.removeField('filter'); // Remove the time range filter on this search source. We pass relative time range to reporting separately.
   searchSource.removeField('highlight');
   searchSource.removeField('highlightAll');
   searchSource.removeField('aggs');
@@ -49,6 +48,10 @@ export async function getSharingData(
     if (timeFieldName && !columns.includes(timeFieldName)) {
       columns = [timeFieldName, ...columns];
     }
+  }
+
+  if (timeRange) {
+    searchSource.removeField('filter'); // Remove the time range filter on this search source. We pass relative time range to reporting separately.
   }
 
   return {
