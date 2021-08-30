@@ -13,9 +13,10 @@ import {
   ALERT_ID,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_CONSUMER,
-  ALERT_SEVERITY_LEVEL,
+  ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_UUID,
   SPACE_IDS,
   ALERT_RULE_UUID,
@@ -43,7 +44,7 @@ const alert: Alert = {
   'service.name': ['frontend-rum'],
   [ALERT_RULE_NAME]: ['Latency threshold | frontend-rum'],
   [ALERT_DURATION]: [62879000],
-  [ALERT_STATUS]: ['open'],
+  [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
   [SPACE_IDS]: ['myfakespaceid'],
   tags: ['apm', 'service.name:frontend-rum'],
   'transaction.type': ['page-load'],
@@ -163,7 +164,7 @@ describe('getAlertAnnotations', () => {
   describe('with an alert with a warning severity', () => {
     const warningAlert: Alert = {
       ...alert,
-      [ALERT_SEVERITY_LEVEL]: ['warning'],
+      [ALERT_SEVERITY]: ['warning'],
     };
 
     it('uses the warning color', () => {
@@ -196,7 +197,7 @@ describe('getAlertAnnotations', () => {
   describe('with an alert with a critical severity', () => {
     const criticalAlert: Alert = {
       ...alert,
-      [ALERT_SEVERITY_LEVEL]: ['critical'],
+      [ALERT_SEVERITY]: ['critical'],
     };
 
     it('uses the critical color', () => {

@@ -9,5 +9,5 @@ Returns authentication status for a request.
 <b>Signature:</b>
 
 ```typescript
-export declare type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+export declare type IsAuthenticated = (request: KibanaRequest) => boolean;
 ```

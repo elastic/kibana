@@ -13,7 +13,7 @@ import { CsmSharedContextProvider } from './CsmSharedContext';
 import { WebApplicationSelect } from './Panels/WebApplicationSelect';
 import { DatePicker } from '../../shared/DatePicker';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 
@@ -41,7 +41,7 @@ export function RumHome() {
                 rightSideItems: [
                   <DatePicker />,
                   <div style={envStyle}>
-                    <EnvironmentFilter />
+                    <UxEnvironmentFilter />
                   </div>,
                   <UserPercentile />,
                   <WebApplicationSelect />,
@@ -82,7 +82,7 @@ function PageHeader() {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div style={envStyle}>
-            <EnvironmentFilter />
+            <UxEnvironmentFilter />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

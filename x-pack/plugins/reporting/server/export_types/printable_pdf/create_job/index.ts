@@ -34,7 +34,6 @@ export const createJobFnFactory: CreateJobFnFactory<
     // return the payload
     return {
       ...jobParams,
-      isDeprecated: true,
       headers: serializedEncryptedHeaders,
       spaceId: reporting.getSpaceId(req, logger),
       forceNow: new Date().toISOString(),

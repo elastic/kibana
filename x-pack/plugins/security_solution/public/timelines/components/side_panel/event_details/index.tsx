@@ -17,7 +17,6 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -51,7 +50,6 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 `;
 
 interface EventDetailsPanelProps {
-  alertConsumers?: AlertConsumers[];
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   entityType?: EntityType;
@@ -69,10 +67,9 @@ interface EventDetailsPanelProps {
 }
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
-  alertConsumers,
   browserFields,
   docValueFields,
-  entityType,
+  entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
   isFlyoutView,
@@ -80,7 +77,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   timelineId,
 }) => {
   const [loading, detailsData] = useTimelineEventsDetails({
-    alertConsumers,
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',

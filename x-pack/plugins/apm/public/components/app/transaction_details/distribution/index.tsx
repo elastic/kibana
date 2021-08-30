@@ -5,41 +5,66 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BrushEndListener, XYBrushArea } from '@elastic/charts';
 import {
-  EuiButtonEmpty,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useTransactionDistributionFetcher } from '../../../../hooks/use_transaction_distribution_fetcher';
-import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
+import {
+  OnHasData,
+  TransactionDistributionChart,
+} from '../../../shared/charts/transaction_distribution_chart';
 import { useUiTracker } from '../../../../../../observability/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
+// Enforce min height so it's consistent across all tabs on the same level
+// to prevent "flickering" behavior
+const MIN_TAB_TITLE_HEIGHT = 56;
 
-interface Props {
+type Selection = [number, number];
+
+// Format the selected latency range for the "Clear selection" badge.
+// If the two values share the same unit, it will only displayed once.
+// For example: 12 - 23 ms / 12 ms - 3 s
+export function getFormattedSelection(selection: Selection): string {
+  const from = getDurationFormatter(selection[0])(selection[0]);
+  const to = getDurationFormatter(selection[1])(selection[1]);
+
+  return `${from.unit === to.unit ? from.value : from.formatted} - ${
+    to.formatted
+  }`;
+}
+
+interface TransactionDistributionProps {
   markerCurrentTransaction?: number;
   onChartSelection: BrushEndListener;
   onClearSelection: () => void;
-  selection?: [number, number];
+  onHasData: OnHasData;
+  selection?: Selection;
 }
 
 export function TransactionDistribution({
   markerCurrentTransaction,
   onChartSelection,
   onClearSelection,
+  onHasData,
   selection,
-}: Props) {
+}: TransactionDistributionProps) {
   const {
     core: { notifications },
   } = useApmPluginContext();
@@ -47,15 +72,34 @@ export function TransactionDistribution({
   const { serviceName, transactionType } = useApmServiceContext();
 
   const {
-    query: { kuery, environment },
-  } = useApmParams('/services/:serviceName');
+    query: { kuery, environment, rangeFrom, rangeTo },
+  } = useApmParams('/services/:serviceName/transactions/view');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { urlParams } = useUrlParams();
 
-  const { transactionName, start, end } = urlParams;
+  const { transactionName } = urlParams;
 
-  const clearSelectionButtonLabel = i18n.translate(
-    'xpack.apm.transactionDetails.clearSelectionButtonLabel',
+  const [showSelection, setShowSelection] = useState(false);
+
+  const onTransactionDistributionHasData: OnHasData = useCallback(
+    (hasData) => {
+      setShowSelection(hasData);
+      onHasData(hasData);
+    },
+    [onHasData]
+  );
+
+  const emptySelectionText = i18n.translate(
+    'xpack.apm.transactionDetails.emptySelectionText',
+    {
+      defaultMessage: 'Click and drag to select a range',
+    }
+  );
+
+  const clearSelectionAriaLabel = i18n.translate(
+    'xpack.apm.transactionDetails.clearSelectionAriaLabel',
     {
       defaultMessage: 'Clear selection',
     }
@@ -67,29 +111,34 @@ export function TransactionDistribution({
     startFetch,
     cancelFetch,
     transactionDistribution,
-  } = useTransactionDistributionFetcher({
+  } = useTransactionDistributionFetcher();
+
+  const startFetchHandler = useCallback(() => {
+    startFetch({
+      environment,
+      kuery,
+      serviceName,
+      transactionName,
+      transactionType,
+      start,
+      end,
+      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+    });
+  }, [
+    startFetch,
     environment,
-    kuery,
     serviceName,
     transactionName,
     transactionType,
+    kuery,
     start,
     end,
-    percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-  });
+  ]);
 
-  // start fetching on load
-  // we want this effect to execute exactly once after the component mounts
   useEffect(() => {
-    startFetch();
-
-    return () => {
-      // cancel any running async partial request when unmounting the component
-      // we want this effect to execute exactly once after the component mounts
-      cancelFetch();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    startFetchHandler();
+    return cancelFetch;
+  }, [cancelFetch, startFetchHandler]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -120,11 +169,11 @@ export function TransactionDistribution({
   };
 
   return (
-    <>
-      <EuiFlexGroup data-test-subj="apmCorrelationsTabContent">
+    <div data-test-subj="apmTransactionDistributionTabContent">
+      <EuiFlexGroup style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
-            <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
+            <h5 data-test-subj="apmTransactionDistributionChartTitle">
               {i18n.translate(
                 'xpack.apm.transactionDetails.distribution.panelTitle',
                 {
@@ -134,39 +183,45 @@ export function TransactionDistribution({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-        {selection && (
+        {showSelection && !selection && (
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               <EuiFlexItem
                 grow={false}
                 style={{ flexDirection: 'row', alignItems: 'center' }}
               >
-                <EuiText size="xs">
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.distribution.selectionText',
-                    {
-                      defaultMessage: `Selection: {selectionFrom} - {selectionTo}ms`,
-                      values: {
-                        selectionFrom: Math.round(selection[0] / 1000),
-                        selectionTo: Math.round(selection[1] / 1000),
-                      },
-                    }
-                  )}
-                </EuiText>
+                <EuiIcon type="iInCircle" title={emptySelectionText} size="s" />
               </EuiFlexItem>
               <EuiFlexItem
                 grow={false}
                 style={{ flexDirection: 'row', alignItems: 'center' }}
               >
-                <EuiButtonEmpty
-                  onClick={onTrackedClearSelection}
-                  iconType="cross"
-                  size="xs"
-                >
-                  {clearSelectionButtonLabel}
-                </EuiButtonEmpty>
+                <EuiText size="xs">{emptySelectionText}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+        {showSelection && selection && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge
+              iconType="cross"
+              iconSide="left"
+              onClick={onTrackedClearSelection}
+              onClickAriaLabel={clearSelectionAriaLabel}
+              iconOnClick={onTrackedClearSelection}
+              iconOnClickAriaLabel={clearSelectionAriaLabel}
+              data-test-sub="apmTransactionDetailsDistributionClearSelectionBadge"
+            >
+              {i18n.translate(
+                'xpack.apm.transactionDetails.distribution.selectionText',
+                {
+                  defaultMessage: `Selection: {formattedSelection}`,
+                  values: {
+                    formattedSelection: getFormattedSelection(selection),
+                  },
+                }
+              )}
+            </EuiBadge>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -179,8 +234,9 @@ export function TransactionDistribution({
         markerValue={percentileThresholdValue ?? 0}
         overallHistogram={transactionDistribution}
         onChartSelection={onTrackedChartSelection}
+        onHasData={onTransactionDistributionHasData}
         selection={selection}
       />
-    </>
+    </div>
   );
 }

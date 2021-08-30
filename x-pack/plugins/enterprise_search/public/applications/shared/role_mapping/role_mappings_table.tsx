@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
@@ -71,7 +71,11 @@ export const RoleMappingsTable: React.FC<Props> = ({
     return _rm;
   }) as SharedRoleMapping[];
 
-  const [items, setItems] = useState(standardizedRoleMappings);
+  const [items, setItems] = useState([] as SharedRoleMapping[]);
+
+  useEffect(() => {
+    setItems(standardizedRoleMappings);
+  }, [roleMappings]);
 
   const attributeNameCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'attribute',

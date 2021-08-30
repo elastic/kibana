@@ -15,6 +15,7 @@
     "fileUpload",
     "uiActions",
     "navigation",
+    "expressions",
     "visualizations",
     "dashboard",
     "embeddable",

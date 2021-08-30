@@ -15,20 +15,15 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  /* ALERT_REASON, ALERT_RULE_ID, */ ALERT_RULE_NAME,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ComponentType, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 
 import type { BrowserFields, RowRenderer, TimelineItem } from '../../../../common';
-import { tGridActions } from '../../../store/t_grid';
 import { RuleName } from '../../rule_name';
 import { isEventBuildingBlockType } from '../body/helpers';
 
@@ -38,6 +33,14 @@ const EventRenderedFlexItem = styled(EuiFlexItem)`
     div {
       margin: 0px;
     }
+  }
+`;
+
+const ActionsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  div div:first-child div.siemEventsTable__tdContent {
+    margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
   }
 `;
 
@@ -61,6 +64,7 @@ interface EventRenderedViewProps {
   events: TimelineItem[];
   leadingControlColumns: EuiDataGridControlColumn[];
   onChangePage: (newActivePage: number) => void;
+  onChangeItemsPerPage: (newItemsPerPage: number) => void;
   pageIndex: number;
   pageSize: number;
   pageSizeOptions: number[];
@@ -81,6 +85,7 @@ const EventRenderedViewComponent = ({
   events,
   leadingControlColumns,
   onChangePage,
+  onChangeItemsPerPage,
   pageIndex,
   pageSize,
   pageSizeOptions,
@@ -88,8 +93,6 @@ const EventRenderedViewComponent = ({
   timelineId,
   totalItemCount,
 }: EventRenderedViewProps) => {
-  const dispatch = useDispatch();
-
   const ActionTitle = useMemo(
     () => (
       <EuiFlexGroup gutterSize="m">
@@ -113,25 +116,31 @@ const EventRenderedViewComponent = ({
         name: ActionTitle,
         truncateText: false,
         hideForMobile: false,
+        // eslint-disable-next-line react/display-name
         render: (name: unknown, item: unknown) => {
           const alertId = get(item, '_id');
           const rowIndex = events.findIndex((evt) => evt._id === alertId);
-          return leadingControlColumns.length > 0
-            ? leadingControlColumns.map((action) => {
-                const getActions = action.rowCellRender as (
-                  props: EuiDataGridCellValueElementProps
-                ) => React.ReactNode;
-                return getActions({
-                  columnId: 'actions',
-                  isDetails: false,
-                  isExpandable: false,
-                  isExpanded: false,
-                  rowIndex,
-                  setCellProps: () => null,
-                });
-              })
-            : null;
+          return (
+            <ActionsContainer>
+              {leadingControlColumns.length > 0
+                ? leadingControlColumns.map((action) => {
+                    const getActions = action.rowCellRender as (
+                      props: EuiDataGridCellValueElementProps
+                    ) => React.ReactNode;
+                    return getActions({
+                      columnId: 'actions',
+                      isDetails: false,
+                      isExpandable: false,
+                      isExpanded: false,
+                      rowIndex,
+                      setCellProps: () => null,
+                    });
+                  })
+                : null}
+            </ActionsContainer>
+          );
         },
+        width: '120px',
       },
       {
         field: 'ecs.@timestamp',
@@ -156,7 +165,7 @@ const EventRenderedViewComponent = ({
         // eslint-disable-next-line react/display-name
         render: (name: unknown, item: TimelineItem) => {
           const ruleName = get(item, `ecs.signal.rule.name`); /* `ecs.${ALERT_RULE_NAME}`*/
-          const ruleId = get(item, `ecs.signal.rule.id}`); /* `ecs.${ALERT_RULE_ID}`*/
+          const ruleId = get(item, `ecs.signal.rule.id`); /* `ecs.${ALERT_RULE_ID}`*/
           return <RuleName name={ruleName} id={ruleId} />;
         },
       },
@@ -206,12 +215,10 @@ const EventRenderedViewComponent = ({
         onChangePage(pageChange.page.index);
       }
       if (pageChange.page.size !== pageSize) {
-        dispatch(
-          tGridActions.updateItemsPerPage({ id: timelineId, itemsPerPage: pageChange.page.size })
-        );
+        onChangeItemsPerPage(pageChange.page.size);
       }
     },
-    [dispatch, onChangePage, pageIndex, pageSize, timelineId]
+    [onChangePage, pageIndex, pageSize, onChangeItemsPerPage]
   );
 
   const pagination = useMemo(

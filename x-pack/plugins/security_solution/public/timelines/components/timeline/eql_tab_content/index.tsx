@@ -13,7 +13,6 @@ import {
   EuiFlyoutFooter,
   EuiBadge,
 } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useCallback } from 'react';
 import styled from 'styled-components';
@@ -151,8 +150,6 @@ const EMPTY_EVENTS: TimelineItem[] = [];
 export type Props = OwnProps & PropsFromRedux;
 
 const NO_SORTING: Sort[] = [];
-
-const alertConsumers: AlertConsumers[] = [AlertConsumers.SIEM];
 
 export const EqlTabContentComponent: React.FC<Props> = ({
   activeTab,
@@ -349,7 +346,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
               <DetailsPanel
-                alertConsumers={alertConsumers}
                 browserFields={browserFields}
                 docValueFields={docValueFields}
                 tabType={TimelineTabs.eql}

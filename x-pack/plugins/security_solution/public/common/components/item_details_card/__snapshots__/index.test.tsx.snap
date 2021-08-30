@@ -181,7 +181,9 @@ exports[`item_details_card ItemDetailsCard should render correctly with no actio
 
 exports[`item_details_card ItemDetailsPropertySummary should render correctly 1`] = `
 <Fragment>
-  <Styled(EuiDescriptionListTitle)>
+  <Styled(EuiDescriptionListTitle)
+    className="eui-textTruncate"
+  >
     name 1
   </Styled(EuiDescriptionListTitle)>
   <Styled(EuiDescriptionListDescription)

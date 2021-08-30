@@ -7,12 +7,15 @@
 
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { useGetUserAlertsPermissions } from '@kbn/alerts';
 
+import { useStatusBulkActionItems } from '../../../../../../timelines/public';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
-import { useStatusBulkActionItems } from '../../../../../../timelines/public';
 
+import { useKibana } from '../../../../common/lib/kibana';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 interface Props {
   alertStatus?: Status;
   closePopover: () => void;
@@ -31,6 +34,8 @@ export const useAlertsActions = ({
   refetch,
 }: Props) => {
   const dispatch = useDispatch();
+  const uiCapabilities = useKibana().services.application.capabilities;
+  const alertsPrivileges = useGetUserAlertsPermissions(uiCapabilities, SERVER_APP_ID);
 
   const onStatusUpdate = useCallback(() => {
     closePopover();
@@ -64,6 +69,6 @@ export const useAlertsActions = ({
   });
 
   return {
-    actionItems,
+    actionItems: alertsPrivileges.crud ? actionItems : [],
   };
 };

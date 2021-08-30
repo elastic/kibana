@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../../common/constants';
+import { FILTER_CLOSED, FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../common/constants';
 import * as i18n from '../components/t_grid/translations';
 import type { AlertStatus, StatusBulkActionsProps } from '../../common/types/timeline';
 import { useUpdateAlertsStatus } from '../container/use_update_alerts';
@@ -48,7 +48,8 @@ export const useStatusBulkActionItems = ({
             title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
             break;
           case 'in-progress':
-            title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated);
+          case 'acknowledged':
+            title = i18n.ACKNOWLEDGED_ALERT_SUCCESS_TOAST(updated);
         }
         addSuccess({ title });
       }
@@ -70,7 +71,8 @@ export const useStatusBulkActionItems = ({
           title = i18n.OPENED_ALERT_FAILED_TOAST;
           break;
         case 'in-progress':
-          title = i18n.IN_PROGRESS_ALERT_FAILED_TOAST;
+        case 'acknowledged':
+          title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
       addError(error.message, { title });
       if (onUpdateFailure) {
@@ -125,21 +127,19 @@ export const useStatusBulkActionItems = ({
           key="open"
           data-test-subj="open-alert-status"
           onClick={() => onClickUpdate(FILTER_OPEN)}
-          size="s"
         >
           {i18n.BULK_ACTION_OPEN_SELECTED}
         </EuiContextMenuItem>
       );
     }
-    if (currentStatus !== FILTER_IN_PROGRESS) {
+    if (currentStatus !== FILTER_ACKNOWLEDGED) {
       actionItems.push(
         <EuiContextMenuItem
-          key="progress"
-          data-test-subj="in-progress-alert-status"
-          onClick={() => onClickUpdate(FILTER_IN_PROGRESS)}
-          size="s"
+          key="acknowledge"
+          data-test-subj="acknowledged-alert-status"
+          onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED)}
         >
-          {i18n.BULK_ACTION_IN_PROGRESS_SELECTED}
+          {i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED}
         </EuiContextMenuItem>
       );
     }
@@ -149,7 +149,6 @@ export const useStatusBulkActionItems = ({
           key="close"
           data-test-subj="close-alert-status"
           onClick={() => onClickUpdate(FILTER_CLOSED)}
-          size="s"
         >
           {i18n.BULK_ACTION_CLOSE_SELECTED}
         </EuiContextMenuItem>
