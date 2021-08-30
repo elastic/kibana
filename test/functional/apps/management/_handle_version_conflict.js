@@ -19,7 +19,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const es = getService('es');
   const retry = getService('retry');
@@ -30,7 +30,11 @@ export default function ({ getService, getPageObjects }) {
   describe('index version conflict', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 
     it('Should be able to surface version conflict notification while creating scripted field', async function () {

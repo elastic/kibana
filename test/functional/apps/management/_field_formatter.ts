@@ -32,11 +32,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test_field_formatters',
         'test_logstash_reader',
       ]);
-      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
     });
 
     after(async function afterAll() {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.settings.navigateTo();
       await esArchiver.emptyKibanaIndex();
     });

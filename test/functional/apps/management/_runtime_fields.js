@@ -9,7 +9,6 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const browser = getService('browser');
@@ -23,13 +22,14 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({});
     });
 
     after(async function afterAll() {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
