@@ -12,7 +12,9 @@ import type { IBasePath, IRouter, Logger, PrebootServicePreboot } from 'src/core
 import type { ConfigType } from '../config';
 import type { ElasticsearchServiceSetup } from '../elasticsearch_service';
 import type { KibanaConfigWriter } from '../kibana_config_writer';
+import { defineConfigureRoute } from './configure';
 import { defineEnrollRoutes } from './enroll';
+import { definePingRoute } from './ping';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -31,4 +33,6 @@ export interface RouteDefinitionParams {
 
 export function defineRoutes(params: RouteDefinitionParams) {
   defineEnrollRoutes(params);
+  defineConfigureRoute(params);
+  definePingRoute(params);
 }
