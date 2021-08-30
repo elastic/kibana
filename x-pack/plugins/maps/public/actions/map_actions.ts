@@ -393,7 +393,7 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
     } catch (e) {
       getToasts().addError(e, {
         title: i18n.translate('xpack.maps.mapActions.addFeatureError', {
-          defaultMessage: `Error adding feature to index`,
+          defaultMessage: `Unable to add feature to index.`,
         }),
       });
     }
@@ -420,7 +420,7 @@ export function deleteFeatureFromIndex(featureId: string) {
     } catch (e) {
       getToasts().addError(e, {
         title: i18n.translate('xpack.maps.mapActions.removeFeatureError', {
-          defaultMessage: `Error removing feature from index`,
+          defaultMessage: `Unable to remove feature from index.`,
         }),
       });
     }

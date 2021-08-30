@@ -762,14 +762,14 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     if (indexList.length === 0) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.indexZeroLengthEditError', {
-          defaultMessage: `There are no indexes associated with this index pattern. Index pattern must be associated with a single index.`,
+          defaultMessage: `Your index pattern doesn't point to any indices.`,
         })
       );
     }
     if (indexList.length > 1) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.indexOverOneLengthEditError', {
-          defaultMessage: `Multiple indexes are associated with this index pattern. Index pattern must be associated with a single index.`,
+          defaultMessage: `Your index pattern points to multiple indices. Only one index is allowed per index pattern.`,
         })
       );
     }
