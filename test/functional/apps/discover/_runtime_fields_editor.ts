@@ -39,6 +39,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
 
+    after(async () => {
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover.json');
+    });
+
     it('allows adding custom label to existing fields', async function () {
       const customLabel = 'megabytes';
       await PageObjects.discover.editField('bytes');
