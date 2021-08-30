@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 
 import type {
   ISavedObjectTypeRegistry,
+  SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -36,6 +37,19 @@ import { spaceIdToNamespace } from '../lib/utils/namespace';
 import type { ISpacesClient } from '../spaces_client';
 import type { SpacesServiceStart } from '../spaces_service/spaces_service';
 
+interface Left<L> {
+  tag: 'Left';
+  value: L;
+}
+
+interface Right<R> {
+  tag: 'Right';
+  value: R;
+}
+
+type Either<L = unknown, R = L> = Left<L> | Right<R>;
+const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => either.tag === 'Left';
+
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
   request: any;
@@ -59,6 +73,7 @@ const throwErrorIfNamespaceSpecified = (options: any) => {
 
 export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly client: SavedObjectsClientContract;
+  private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly spaceId: string;
   private readonly types: string[];
   private readonly spacesClient: ISpacesClient;
@@ -70,6 +85,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     const spacesService = getSpacesService();
 
     this.client = baseClient;
+    this.typeRegistry = typeRegistry;
     this.spacesClient = spacesService.createSpacesClient(request);
     this.spaceId = spacesService.getSpaceId(request);
     this.types = typeRegistry.getAllTypes().map((t) => t.name);
@@ -219,10 +235,61 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   ) {
     throwErrorIfNamespaceSpecified(options);
 
-    return await this.client.bulkGet<T>(objects, {
-      ...options,
-      namespace: spaceIdToNamespace(this.spaceId),
-    });
+    let availableSpacesPromise: Promise<string[]> | undefined;
+    const getAvailableSpaces = async () => {
+      if (!availableSpacesPromise) {
+        availableSpacesPromise = this.getSearchableSpaces([ALL_SPACES_ID]).catch((err) => {
+          if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+            return []; // the user doesn't have access to any spaces
+          } else {
+            throw err;
+          }
+        });
+      }
+      return availableSpacesPromise;
+    };
+
+    const expectedResults = await Promise.all(
+      objects.map<Promise<Either<SavedObjectsBulkGetObject>>>(async (object) => {
+        const { namespaces, type } = object;
+        if (namespaces?.includes(ALL_SPACES_ID)) {
+          // If searching for an isolated object in all spaces, we may need to return a 400 error for consistency with the validation at the
+          // repository level. This is needed if there is only one space available *and* the user is authorized to access the object in that
+          // space; in that case, we don't want to unintentionally bypass the repository's validation by deconstructing the '*' identifier
+          // into all available spaces.
+          const tag =
+            !this.typeRegistry.isNamespaceAgnostic(type) && !this.typeRegistry.isShareable(type)
+              ? 'Left'
+              : 'Right';
+          return { tag, value: { ...object, namespaces: await getAvailableSpaces() } };
+        }
+        return { tag: 'Right', value: object };
+      })
+    );
+
+    const objectsToGet = expectedResults.map(({ value }) => value);
+    const { saved_objects: responseObjects } = objectsToGet.length
+      ? await this.client.bulkGet<T>(objectsToGet, {
+          ...options,
+          namespace: spaceIdToNamespace(this.spaceId),
+        })
+      : { saved_objects: [] };
+    return {
+      saved_objects: expectedResults.map((expectedResult, i) => {
+        const actualResult = responseObjects[i];
+        if (isLeft(expectedResult)) {
+          const { type, id } = expectedResult.value;
+          return ({
+            type,
+            id,
+            error: SavedObjectsErrorHelpers.createBadRequestError(
+              '"namespaces" can only specify a single space when used with space-isolated types'
+            ).output.payload,
+          } as unknown) as SavedObject<T>;
+        }
+        return actualResult;
+      }),
+    };
   }
 
   /**
@@ -383,7 +450,16 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     type: string | string[],
     options: SavedObjectsOpenPointInTimeOptions = {}
   ) {
-    const namespaces = await this.getSearchableSpaces(options.namespaces);
+    let namespaces: string[];
+    try {
+      namespaces = await this.getSearchableSpaces(options.namespaces);
+    } catch (err) {
+      if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+        // throw bad request since the user is unauthorized in any space
+        throw SavedObjectsErrorHelpers.createBadRequestError();
+      }
+      throw err;
+    }
     if (namespaces.length === 0) {
       // throw bad request if no valid spaces were found.
       throw SavedObjectsErrorHelpers.createBadRequestError();
