@@ -31,29 +31,28 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   const appDeps = useAppDependencies();
   const indexPatternsClient = appDeps.data.indexPatterns;
 
-  useEffect(() => {
-    let unmounted = false;
-    const getDateFields = async () => {
+  useEffect(
+    function getDateFields() {
+      let unmounted = false;
       if (indexPatternId !== undefined) {
-        const indexPattern = await indexPatternsClient.get(indexPatternId);
-        if (indexPattern) {
-          const dateTimeFields = indexPattern.fields
-            .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
-            .map((f) => f.name)
-            .sort();
-          if (!unmounted) {
-            setDateFieldNames(dateTimeFields);
+        indexPatternsClient.get(indexPatternId).then((indexPattern) => {
+          if (indexPattern) {
+            const dateTimeFields = indexPattern.fields
+              .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
+              .map((f) => f.name)
+              .sort();
+            if (!unmounted) {
+              setDateFieldNames(dateTimeFields);
+            }
           }
-        }
+        });
+        return () => {
+          unmounted = true;
+        };
       }
-    };
-
-    getDateFields();
-
-    return () => {
-      unmounted = true;
-    };
-  }, [indexPatternId, indexPatternsClient]);
+    },
+    [indexPatternId, indexPatternsClient]
+  );
 
   const retentionDateFieldOptions = useMemo(() => {
     return Array.isArray(dateFieldNames) ? dateFieldNames.map((text: string) => ({ text })) : [];
