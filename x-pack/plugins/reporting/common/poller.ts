@@ -17,7 +17,6 @@ interface PollerOptions {
   errorFunction?: (error: Error) => void;
 }
 
-// @TODO Maybe move to observables someday
 export class Poller {
   private readonly functionToPoll: () => Promise<void>;
   private readonly successFunction: (...args: unknown[]) => void;
