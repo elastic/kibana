@@ -11,7 +11,7 @@ import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_na
 import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
-import { useGetUserCasesPermissions, useKibana } from '../../../lib/kibana';
+import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import { NavTab } from '../types';
 
@@ -61,7 +61,6 @@ export const usePrimaryNavigationItems = ({
 };
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
-  const uiCapabilities = useKibana().services.application.capabilities;
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
   return useMemo(
     () => [

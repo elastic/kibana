@@ -74,11 +74,6 @@ describe('useSecuritySolutionNavigation', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ urlState: mockUrlState });
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
-    (useGetUserAlertsPermissions as jest.Mock).mockReturnValue({
-      loading: false,
-      crud: true,
-      read: true,
-    });
 
     (useKibana as jest.Mock).mockReturnValue({
       services: {

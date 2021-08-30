@@ -43,7 +43,6 @@ import type { AlertsStackByField } from '../common/types';
 import { KpiPanel, StackBySelect } from '../common/components';
 
 import { useInspectButton } from '../common/hooks';
-import { fetchQueryRuleRegistryAlerts } from '../../../containers/detection_engine/alerts/api';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
