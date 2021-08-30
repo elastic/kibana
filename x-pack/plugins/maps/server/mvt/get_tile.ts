@@ -51,20 +51,19 @@ function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
 }
 
-
 export async function getEsTile({
-                                logger,
-                                context,
-                                index,
-                                geometryFieldName,
-                                x,
-                                y,
-                                z,
-                                requestBody = {},
-                                geoFieldType,
-                                searchSessionId,
-                                abortSignal,
-                              }: {
+  logger,
+  context,
+  index,
+  geometryFieldName,
+  x,
+  y,
+  z,
+  requestBody = {},
+  geoFieldType,
+  searchSessionId,
+  abortSignal,
+}: {
   x: number;
   y: number;
   z: number;
@@ -82,7 +81,7 @@ export async function getEsTile({
     console.log('op', path);
     const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'GET',
-      path: path,
+      path,
     });
     console.log('t', tile);
     return tile;
@@ -96,21 +95,19 @@ export async function getEsTile({
   }
 }
 
-
-
 export async function getEsGridTile({
-                                    logger,
-                                    context,
-                                    index,
-                                    geometryFieldName,
-                                    x,
-                                    y,
-                                    z,
-                                    requestBody = {},
-                                    requestType = RENDER_AS.POINT,
-                                    searchSessionId,
-                                    abortSignal,
-                                  }: {
+  logger,
+  context,
+  index,
+  geometryFieldName,
+  x,
+  y,
+  z,
+  requestBody = {},
+  requestType = RENDER_AS.POINT,
+  searchSessionId,
+  abortSignal,
+}: {
   x: number;
   y: number;
   z: number;
@@ -129,12 +126,12 @@ export async function getEsGridTile({
     console.log('getTileP', path);
     const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'GET',
-      path: path,
+      path,
     });
     // let buffer = Buffer.from(tile.body, 'base64');
-    let buffer = tile.body;
+    const buffer = tile.body;
     console.log('buf length', buffer.length);
-    console.log('s', buffer.toString('base64'));
+    // console.log('s', buffer.toString('base64'));
     return buffer;
   } catch (e) {
     if (!isAbortError(e)) {
@@ -181,7 +178,6 @@ export async function getGridTile({
     );
     requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = tileBounds;
     requestBody.track_total_hits = false;
-
 
     const response = await context
       .search!.search(

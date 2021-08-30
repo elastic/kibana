@@ -12,17 +12,18 @@ import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 // @ts-ignore not typed
 import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
+import { VectorTile } from '@mapbox/vector-tile';
+import Protobuf from 'pbf';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
   MVT_GETGRIDTILE_API_PATH,
   ES_GEO_FIELD_TYPE,
-  RENDER_AS, MVT_GETESGRIDTILE_API_PATH, MVT_GETESTILE_API_PATH,
+  RENDER_AS,
+  MVT_GETESGRIDTILE_API_PATH,
+  MVT_GETESTILE_API_PATH,
 } from '../../common/constants';
 import { getGridTile, getTile, getEsGridTile, getEsTile } from './get_tile';
-
-import { VectorTile } from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
 
 const CACHE_TIMEOUT_SECONDS = 60 * 60;
 
@@ -200,7 +201,7 @@ export function initMVTRoutes({
           requestBody: schema.maybe(schema.string()),
           index: schema.maybe(schema.string()),
           requestType: schema.maybe(schema.string()),
-          geoFieldType:schema.maybe( schema.string()),
+          geoFieldType: schema.maybe(schema.string()),
           searchSessionId: schema.maybe(schema.string()),
           token: schema.maybe(schema.string()),
         }),
@@ -235,10 +236,10 @@ export function initMVTRoutes({
       });
 
       try {
-        // console.log('sdfsdl', tile.length, typeof tile);
+        console.log('sdfsdl', tile.length, typeof tile);
         const jsonTile = new VectorTile(new Protobuf(tile));
-        // console.log('jst', jsonTile);
-      }catch(e) {
+        console.log('jst', jsonTile);
+      } catch (e) {
         console.error('Cant parse vector tile');
         console.error(e);
       }
@@ -246,9 +247,6 @@ export function initMVTRoutes({
       return sendResponse(response, tile);
     }
   );
-
-
-
 }
 
 function sendResponse(response: KibanaResponseFactory, tile: any) {
