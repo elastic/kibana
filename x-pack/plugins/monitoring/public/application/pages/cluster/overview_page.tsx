@@ -12,13 +12,16 @@ import { PageTemplate } from '../page_template';
 import { useClusters } from '../../hooks/use_clusters';
 import { GlobalStateContext } from '../../global_state_context';
 import { TabMenuItem } from '../page_template';
-import { PageLoading } from '../components';
+import { PageLoading } from '../../../components';
+import { Overview } from '../../../components/cluster/overview';
+import { ExternalConfigContext } from '../../external_config_context';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
 export const ClusterOverview: React.FC<{}> = () => {
   // TODO: check how many requests with useClusters
   const state = useContext(GlobalStateContext);
+  const externalConfig = useContext(ExternalConfigContext);
   const { clusters, loaded } = useClusters(state.cluster_uuid, state.ccs, CODE_PATHS);
   let tabs: TabMenuItem[] = [];
 
@@ -45,7 +48,16 @@ export const ClusterOverview: React.FC<{}> = () => {
 
   return (
     <PageTemplate title={title} pageTitle={pageTitle} tabs={tabs}>
-      {loaded ? 'Page overview content' : <PageLoading />}
+      {loaded ? (
+        <Overview
+          cluster={clusters[0]}
+          alerts={[]}
+          setupMode={{}}
+          showLicenseExpiration={externalConfig.showLicenseExpiration}
+        />
+      ) : (
+        <PageLoading />
+      )}
     </PageTemplate>
   );
 };
