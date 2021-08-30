@@ -82,7 +82,7 @@ export {
   IndexPatternListItem,
 } from '../common';
 
-export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
+export { DuplicateDataViewError } from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:
