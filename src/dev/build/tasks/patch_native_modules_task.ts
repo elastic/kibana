@@ -31,17 +31,17 @@ interface Package {
 const packages: Package[] = [
   {
     name: 're2',
-    version: '1.15.4',
+    version: '1.16.0',
     destinationPath: 'node_modules/re2/build/Release/re2.node',
     extractMethod: 'gunzip',
     archives: {
       'darwin-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/darwin-x64-83.gz',
-        sha256: 'b45cd8296fd6eb2a091399c20111af43093ba30c99ed9e5d969278f5ff69ba8f',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/darwin-x64-83.gz',
+        sha256: 'ef49febcba972b488727ce329ea9d2b57590bb44001ed494f2aa1397c0ebc32b',
       },
       'linux-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/linux-x64-83.gz',
-        sha256: '1bbc3f90f0ba105772b37c04e3a718f69544b4df01dda00435c2b8e50b2ad0d9',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/linux-x64-83.gz',
+        sha256: '160217dd83eb7093b758e905ce09cb45182864c7df858bf2525a68924a23c509',
       },
 
       // ARM build is currently done manually as Github Actions used in upstream project
@@ -59,8 +59,8 @@ const packages: Package[] = [
         sha256: '4eb524ca9a79dea9c07342e487fbe91591166fdbc022ae987104840df948a4e9',
       },
       'win32-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-83.gz',
-        sha256: 'efe939d3cda1d64ee3ee3e60a20613b95166d55632e702c670763ea7e69fca06',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.16.0/win32-x64-83.gz',
+        sha256: '92ad420a6bfcedeb58dadf807a2f2901b05251d1edd3950051699929eda23073',
       },
     },
   },
