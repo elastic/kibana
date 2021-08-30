@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
@@ -21,7 +20,6 @@ import { NetworkDetailsPanel } from './network_details';
 import { EntityType } from '../../../../../timelines/common';
 
 interface DetailsPanelProps {
-  alertConsumers?: AlertConsumers[];
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   entityType?: EntityType;
@@ -38,7 +36,6 @@ interface DetailsPanelProps {
  */
 export const DetailsPanel = React.memo(
   ({
-    alertConsumers,
     browserFields,
     docValueFields,
     entityType,
@@ -77,7 +74,6 @@ export const DetailsPanel = React.memo(
       panelSize = 'm';
       visiblePanel = (
         <EventDetailsPanel
-          alertConsumers={alertConsumers}
           browserFields={browserFields}
           docValueFields={docValueFields}
           entityType={entityType}

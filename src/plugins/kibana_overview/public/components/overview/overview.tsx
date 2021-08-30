@@ -93,9 +93,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   useEffect(() => {
     const fetchIsNewKibanaInstance = async () => {
-      const resp = await indexPatternService.getTitles();
+      const hasUserIndexPattern = await indexPatternService.hasUserIndexPattern().catch(() => true);
 
-      setNewKibanaInstance(resp.length === 0);
+      setNewKibanaInstance(!hasUserIndexPattern);
     };
 
     fetchIsNewKibanaInstance();

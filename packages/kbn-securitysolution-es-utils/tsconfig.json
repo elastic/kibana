@@ -3,7 +3,8 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-    "outDir": "target",
+    "emitDeclarationOnly": true,
+    "outDir": "target_types",
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-securitysolution-es-utils/src",

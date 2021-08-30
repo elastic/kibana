@@ -94,6 +94,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       </Route>
       <Route path={PERSONAL_PATH}>
         <Switch>
+          <Redirect exact from={PERSONAL_PATH} to={PERSONAL_SOURCES_PATH} />
           <Route path={PERSONAL_SOURCES_PATH}>
             <SourcesRouter />
           </Route>
