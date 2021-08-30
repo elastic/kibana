@@ -45,12 +45,12 @@ export class InspectorService extends FtrService {
   /**
    * Opens inspector panel
    */
-  public async open(): Promise<void> {
+  public async open(openButton: string = 'openInspectorButton'): Promise<void> {
     this.log.debug('Inspector.open');
     const isOpen = await this.testSubjects.exists('inspectorPanel');
     if (!isOpen) {
       await this.retry.try(async () => {
-        await this.testSubjects.click('openInspectorButton');
+        await this.testSubjects.click(openButton);
         await this.testSubjects.exists('inspectorPanel');
       });
     }
