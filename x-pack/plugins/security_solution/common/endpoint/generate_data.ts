@@ -829,6 +829,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       },
       rule: {
         id: this.randomUUID(),
+        description: 'Behavior rule description',
       },
       event: {
         action: 'rule_detection',
@@ -871,6 +872,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         name: processName,
         entity_id: entityID,
         executable: `C:/fake_behavior/${processName}`,
+        code_signature: {
+          status: 'trusted',
+          subject_name: 'Microsoft Windows',
+        },
         parent: parentEntityID
           ? {
               entity_id: parentEntityID,
