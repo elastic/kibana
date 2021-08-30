@@ -1052,8 +1052,7 @@
           "description": [],
           "signature": [
             "{ addDocView(docViewRaw: ComponentDocViewInput | ",
-            "RenderDocViewInput",
-            " | DirectiveDocViewInput | ",
+            "RenderDocViewInput |",
             "DocViewInputFn",
             "): void; }"
           ],
