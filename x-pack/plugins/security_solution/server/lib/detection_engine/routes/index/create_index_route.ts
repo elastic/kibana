@@ -25,7 +25,6 @@ import { buildSiemResponse } from '../utils';
 import {
   createSignalsFieldAliases,
   getSignalsTemplate,
-  getRbacRequiredFields,
   SIGNALS_TEMPLATE_VERSION,
   SIGNALS_FIELD_ALIASES_VERSION,
   ALIAS_VERSION_FIELD,
