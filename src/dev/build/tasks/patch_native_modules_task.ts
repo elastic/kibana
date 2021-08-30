@@ -50,6 +50,7 @@ const packages: Package[] = [
       // From a AWS Graviton instance:
       // * checkout the node-re2 project,
       // * install Node using the same minor used by Kibana
+      // * git submodule update --init --recursive to download re2
       // * npm install, which will also create a build
       // * gzip -c build/Release/re2.node > linux-arm64-83.gz
       // * upload to kibana-ci-proxy-cache bucket
