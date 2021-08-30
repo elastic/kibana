@@ -60,15 +60,15 @@ export const PolicyDetailsForm = memo(() => {
 
       <EuiSpacer size="s" />
       <MalwareProtections />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {isPlatinumPlus ? <Ransomware /> : <LockedPolicyCard title={LOCKED_CARD_RAMSOMWARE_TITLE} />}
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {isPlatinumPlus ? (
         <MemoryProtection />
       ) : (
         <LockedPolicyCard title={LOCKED_CARD_MEMORY_TITLE} />
       )}
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {isPlatinumPlus ? (
         <BehaviorProtection />
       ) : (
@@ -87,11 +87,11 @@ export const PolicyDetailsForm = memo(() => {
 
       <EuiSpacer size="s" />
       <WindowsEvents />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <MacEvents />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <LinuxEvents />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <AntivirusRegistrationForm />
 
       <EuiSpacer size="m" />

@@ -69,7 +69,7 @@ export const RadioButtons = React.memo(
         </ConfigFormHeading>
         <EuiSpacer size="xs" />
         <RadioFlexGroup>
-          <EuiFlexItem className="no-right-margin-radio" grow={2}>
+          <EuiFlexItem className="no-right-margin-radio" grow={1}>
             <ProtectionRadio
               protection={protection}
               protectionMode={radios[0].id}

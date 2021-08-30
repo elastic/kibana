@@ -59,7 +59,7 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
   ({ type, supportedOss, osRestriction, dataTestSubj, rightCorner, children }) => (
     <EuiPanel data-test-subj={dataTestSubj} hasBorder={true} hasShadow={false}>
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={1}>
           <ConfigFormHeading>{TITLES.type}</ConfigFormHeading>
           <EuiText size="s">{type}</EuiText>
         </EuiFlexItem>

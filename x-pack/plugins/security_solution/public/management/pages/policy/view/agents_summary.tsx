@@ -36,7 +36,7 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
         title: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetails.agentsSummary.totalTitle',
           {
-            defaultMessage: 'Agents',
+            defaultMessage: 'Total Agents',
           }
         ),
         health: '',
