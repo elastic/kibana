@@ -6,10 +6,17 @@
  * Side Public License, v 1.
  */
 
-export const capabilitiesProvider = () => ({
-  savedObjectsManagement: {
+import type { SavedObjectManagementCapabilities } from '../common';
+
+export const capabilitiesProvider = () => {
+  const capabilities: SavedObjectManagementCapabilities = {
     delete: true,
     edit: true,
     read: true,
-  },
-});
+    importAcrossSpaces: true,
+    exportAcrossSpaces: true,
+  };
+  return {
+    savedObjectsManagement: capabilities,
+  };
+};

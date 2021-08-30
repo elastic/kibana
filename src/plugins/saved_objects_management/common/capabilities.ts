@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type {
-  SavedObjectWithMetadata,
-  SavedObjectMetadata,
-  SavedObjectRelation,
-  SavedObjectRelationKind,
-  SavedObjectInvalidRelation,
-  SavedObjectGetRelationshipsResponse,
-} from './types';
-export type { SavedObjectManagementCapabilities } from './capabilities';
+export interface SavedObjectManagementCapabilities {
+  delete: boolean;
+  edit: boolean;
+  read: boolean;
+  importAcrossSpaces: boolean;
+  exportAcrossSpaces: boolean;
+}
