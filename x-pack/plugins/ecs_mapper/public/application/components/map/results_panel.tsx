@@ -15,7 +15,7 @@ interface Props {
 
 export const ResultsPanel: FC<Props> = ({ onManageIngestPipeline }) => {
   return (
-    <EuiCallOut title="Import complete" color="success" iconType="check">
+    <EuiCallOut title="Creation complete" color="success" iconType="check">
       <EuiText>
         <p>
           <FormattedMessage

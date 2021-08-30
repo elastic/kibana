@@ -50,6 +50,25 @@ export const Instructions: FC = () => {
         <EuiText>
           <p>
             <FormattedMessage
+              id="xpack.ecsMapper.file.informational.requiredHeaders"
+              defaultMessage="Two headers are required: 'source_field' and 'destination_field', but please see the linked template for more header information."
+              values={{
+                templateLink: (
+                  <EuiLink
+                    href="https://docs.google.com/spreadsheets/d/1m5JiOTeZtUueW3VOVqS8bFYqNGEEyp0jAsgO12NFkNM/edit#gid=0"
+                    target="_blank"
+                  >
+                    here
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiText>
+          <p>
+            <FormattedMessage
               id="xpack.ecsMapper.file.informational.instructions"
               defaultMessage="Please note that this tool generates starter pipelines. It will only 
               perform field rename and copy operations, as well as some field format adjustments. It's up to you to integrate them in a complete pipeline that ingests and outputs the data however you need."
@@ -67,6 +86,7 @@ export const Instructions: FC = () => {
           </p>
         </EuiText>
         <EuiSpacer size="s" />
+        
       </EuiFlexItem>
     </EuiFlexGroup>
   );

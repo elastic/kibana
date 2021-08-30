@@ -15,5 +15,9 @@
   "ui": true,
   "requiredBundles": [
     "kibanaReact"
-  ]
+  ],
+  "owner": {
+    "name": "Elastic Common Schema",
+    "githubTeam": "ecs"
+  }
 }

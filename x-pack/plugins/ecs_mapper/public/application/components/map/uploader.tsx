@@ -10,13 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { NavigateToAppOptions } from 'kibana/public';
 import { UploadPanel } from './upload_panel';
-import { ConfirmationPanel } from './confirmation_panel';
+import { PreviewPanel } from './pipeline_preview_panel';
+import { CreatePipelinePanel } from './create_pipeline_panel';
 import { ResultsPanel } from './results_panel';
 import { ErrorPanel } from './error_panel';
 import { readFile } from '../util/utils';
 import { FieldCopyAction } from '../../../../common';
 import { MapperProxy } from '../../mapper_api';
 import { FileUploadPluginStart } from '../../../../../file_upload/public';
+import fileSaver from 'file-saver';
 
 export interface Props {
   fileUpload: FileUploadPluginStart;
@@ -27,6 +29,7 @@ export interface Props {
 export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToApp }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
+  const [isCreatingPipeline, setIsCreatingPipeline] = useState<boolean>(false);
   const [isPipelineCreated, setIsPipelineCreated] = useState<boolean>(false);
   const [pipelineProcessors, setPipelineProcessors] = useState<object[]>([]);
   const [pipelineName, setPipelineName] = useState<string>('');
@@ -38,9 +41,9 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
     });
   };
 
-  const onFileUpload = async (action: FieldCopyAction, files: FileList, name: string) => {
+  const onFileUpload = async (action: FieldCopyAction, files: FileList) => {
     setError('');
-    setPipelineName(name);
+    //setPipelineName(name);
 
     if (files.length > 0) {
       setIsLoading(true);
@@ -71,13 +74,14 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
     }
   };
 
-  const onCreatePipeline = async () => {
+  const onCreatePipeline = async (name: string) => {
+    setPipelineName(name);
     try {
-      await mapper.createIngestNodePipeline(pipelineName, pipelineProcessors);
+      await mapper.createIngestNodePipeline(name, pipelineProcessors);
       setIsPipelineCreated(true);
     } catch (e) {
       if (e.body?.statusCode === 409) {
-        setError('There is already an existing Ingest Node Pipeline named ' + pipelineName);
+        setError('There is already an existing Ingest Node Pipeline named ' + name);
       } else {
         setError(
           i18n.translate('xpack.ecsMapper.createIngestNodePipeline.unexpectedError', {
@@ -89,12 +93,22 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
     }
   };
 
+  const onClickToCreatePipeline = () => {
+    setIsCreatingPipeline(true);
+  }
+
+  const onDownload = () => {
+    const jsonBlob = new Blob([JSON.stringify(pipelineProcessors)], { type: 'application/json' });
+    fileSaver.saveAs(jsonBlob, `my-mappings.json`);
+  };
+
   const onCancelCreate = () => {
     setError('');
     setIsUploaded(false);
     setPipelineName('');
     setPipelineProcessors([]);
     setIsPipelineCreated(false);
+    setIsCreatingPipeline(false);
   };
 
   const processFile = async (file: File, action: FieldCopyAction) => {
@@ -136,14 +150,22 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
           <EuiSpacer size="m" />
 
           {isUploaded && (
-            <ConfirmationPanel
-              pipelineName={pipelineName}
+            <PreviewPanel
               processors={pipelineProcessors}
-              onCreatePipeline={onCreatePipeline}
-              onCancel={onCancelCreate}
-              isPipelineCreated={isPipelineCreated}
+              onDownload={onDownload}
+              onClickToCreatePipeline={onClickToCreatePipeline}
+              isCreatingPipeline={isCreatingPipeline}
             />
           )}
+
+          {isCreatingPipeline && (
+            <CreatePipelinePanel
+              onCreatePipeline={onCreatePipeline}
+              onCancel={onCancelCreate}
+            />
+          )}
+
+          <EuiSpacer size="m" />
 
           {isPipelineCreated && <ResultsPanel onManageIngestPipeline={onManageIngestPipeline} />}
 

@@ -17,8 +17,7 @@ import {
   EuiButton,
   EuiSelect,
   EuiFormRow,
-  EuiDescribedFormGroup,
-  EuiFieldText,
+  EuiDescribedFormGroup
 } from '@elastic/eui';
 import { FieldCopyAction } from '../../../../common';
 import { Instructions } from './instructions';
@@ -27,7 +26,7 @@ import './mapper_upload.scss';
 
 interface Props {
   actionOptions: FieldCopyAction[];
-  onFileUpload(action: string | null, files: FileList | null, pipeline: string): void;
+  onFileUpload(action: string | null, files: FileList | null): void;
   isLoading: boolean;
   isUploaded: boolean;
 }
@@ -44,7 +43,6 @@ function getOptions(actions: FieldCopyAction[]) {
 export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading, isUploaded }) => {
   const [action, setAction] = useState<FieldCopyAction>(FieldCopyAction.Copy);
   const [file, setFile] = useState<FileList | null>(null);
-  const [pipelineName, setPipelineName] = useState('');
 
   const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
 
@@ -55,14 +53,13 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
 
   const options = getOptions(actionOptions);
 
-  const hasPipelineName = !!pipelineName || !!pipelineName.trim();
   const hasFile = file?.length;
 
   const onSubmit = async () => {
     setHasSubmitted(true);
 
-    if (hasPipelineName && hasFile) {
-      onFileUpload(action, file, pipelineName);
+    if (hasFile) {
+      onFileUpload(action, file);
     }
   };
 
@@ -77,7 +74,7 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
             <h3>
               <FormattedMessage
                 id="xpack.ecsMapper.file.upload.copyAction.title"
-                defaultMessage="Copy action"
+                defaultMessage="Default copy action"
               />
             </h3>
           }
@@ -85,7 +82,7 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
             <p>
               <FormattedMessage
                 id="xpack.ecsMapper.file.upload.copyAction.description"
-                defaultMessage="This is the default action for field renames."
+                defaultMessage="This is the default action for field renames, and will only be utilized if not provided for a field in the uploaded CSV."
               />
             </p>
           }
@@ -96,45 +93,6 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
               value={action}
               onChange={(option) => setAction(option.target.value as FieldCopyAction)}
               data-test-subj="copyAction"
-            />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-
-        <EuiDescribedFormGroup
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.ecsMapper.file.upload.pipelineName.title"
-                defaultMessage="Ingest Node Pipeline name"
-              />
-            </h3>
-          }
-          description={
-            <p>
-              <FormattedMessage
-                id="xpack.ecsMapper.file.upload.pipelineName.description"
-                defaultMessage="This is the name for the Ingest Node Pipeline that will be created from the CSV mapping."
-              />
-            </p>
-          }
-        >
-          <EuiFormRow
-            fullWidth
-            isInvalid={hasSubmitted && !hasPipelineName}
-            error={
-              !hasPipelineName
-                ? i18n.translate('xpack.ecsMapper.file.upload.pipelineName.nameErrorMessage', {
-                    defaultMessage: 'Name is required.',
-                  })
-                : null
-            }
-            hasEmptyLabelSpace
-          >
-            <EuiFieldText
-              onChange={(e) => {
-                setPipelineName(e.target.value);
-              }}
-              isInvalid={hasSubmitted && !hasPipelineName}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
