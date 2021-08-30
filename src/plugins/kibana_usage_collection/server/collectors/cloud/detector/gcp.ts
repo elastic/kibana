@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import fetch from 'node-fetch';
+import fetch, { Response } from 'node-fetch';
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
@@ -28,7 +28,7 @@ export class GCPCloudService extends CloudService {
     // we need to call GCP individually for each field we want metadata for
     const fields = ['id', 'machine-type', 'zone'];
 
-    const responses = await Promise.all(
+    const settledResponses = await Promise.allSettled(
       fields.map(async (field) => {
         return await fetch(`${SERVICE_ENDPOINT}/${field}`, {
           method: 'GET',
@@ -40,26 +40,36 @@ export class GCPCloudService extends CloudService {
       })
     );
 
+    const hasValidResponses = settledResponses.some(this.isValidResponse);
+
+    if (!hasValidResponses) {
+      throw new Error('GCP request failed');
+    }
+
     // Note: there is no fallback option for GCP;
     // responses are arrays containing [fullResponse, body];
     // because GCP returns plaintext, we have no way of validating
     // without using the response code.
     const [id, machineType, zone] = await Promise.all(
-      responses.map(async (response) => {
-        if (
-          !response.ok ||
-          response.status === 404 ||
-          response.headers.get('metadata-flavor') !== 'Google'
-        ) {
-          throw new Error('GCP request failed');
+      settledResponses.map(async (settledResponse) => {
+        if (this.isValidResponse(settledResponse)) {
+          // GCP does _not_ return JSON
+          return await settledResponse.value.text();
         }
-
-        // GCP does _not_ return JSON
-        return await response.text();
       })
     );
 
     return this.combineResponses(id, machineType, zone);
+  };
+
+  private isValidResponse = (
+    settledResponse: PromiseSettledResult<Response>
+  ): settledResponse is PromiseFulfilledResult<Response> => {
+    if (settledResponse.status === 'rejected') {
+      return false;
+    }
+    const { value } = settledResponse;
+    return value.ok && value.status !== 404 && value.headers.get('metadata-flavor') === 'Google';
   };
 
   /**
@@ -71,17 +81,11 @@ export class GCPCloudService extends CloudService {
    * machineType: 'projects/441331612345/machineTypes/f1-micro'
    * zone: 'projects/441331612345/zones/us-east4-c'
    */
-  private combineResponses = (id: string, machineType: string, zone: string) => {
+  private combineResponses = (id?: string, machineType?: string, zone?: string) => {
     const vmId = typeof id === 'string' ? id.trim() : undefined;
     const vmType = this.extractValue('machineTypes/', machineType);
     const vmZone = this.extractValue('zones/', zone);
-
-    let region;
-
-    if (vmZone) {
-      // converts 'us-east4-c' into 'us-east4'
-      region = vmZone.substring(0, vmZone.lastIndexOf('-'));
-    }
+    const region = vmZone ? vmZone.substring(0, vmZone.lastIndexOf('-')) : undefined;
 
     // ensure we actually have some data
     if (vmId || vmType || region || vmZone) {
@@ -98,15 +102,15 @@ export class GCPCloudService extends CloudService {
    * For example, this turns something like
    * 'projects/441331612345/machineTypes/f1-micro' into 'f1-micro'.
    */
-  private extractValue = (fieldPrefix: string, value: string) => {
-    if (typeof value === 'string') {
-      const index = value.lastIndexOf(fieldPrefix);
-
-      if (index !== -1) {
-        return value.substring(index + fieldPrefix.length).trim();
-      }
+  private extractValue = (fieldPrefix: string, value?: string) => {
+    if (typeof value !== 'string') {
+      return;
     }
 
-    return undefined;
+    const index = value.lastIndexOf(fieldPrefix);
+
+    if (index !== -1) {
+      return value.substring(index + fieldPrefix.length).trim();
+    }
   };
 }

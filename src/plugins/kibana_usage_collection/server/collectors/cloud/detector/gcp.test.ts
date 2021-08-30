@@ -79,8 +79,8 @@ describe('GCP', () => {
         text: () => undefined,
       });
 
-      expect(
-        async () => await gcpService['_checkIfService']()
+      await expect(() =>
+        gcpService['_checkIfService']()
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"unrecognized responses"`);
     });
 
@@ -92,16 +92,18 @@ describe('GCP', () => {
         text: () => 'xyz',
       });
 
-      expect(
-        async () => await gcpService['_checkIfService']()
+      await expect(() =>
+        gcpService['_checkIfService']()
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"GCP request failed"`);
     });
 
-    it('handles not running on GCP with error by rethrowing it', async () => {
+    it('handles not running on GCP', async () => {
       const someError = new Error('expected: request failed');
       fetchMock.mockRejectedValue(someError);
 
-      expect(async () => await gcpService['_checkIfService']()).rejects.toThrowError(someError);
+      await expect(() =>
+        gcpService['_checkIfService']()
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"GCP request failed"`);
     });
 
     it('handles not running on GCP with 404 response by throwing error', async () => {
@@ -112,9 +114,46 @@ describe('GCP', () => {
         text: () => 'This is some random error text',
       });
 
-      expect(
-        async () => await gcpService['_checkIfService']()
+      await expect(() =>
+        gcpService['_checkIfService']()
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"GCP request failed"`);
+    });
+
+    it('handles GCP response even if some requests fail', async () => {
+      fetchMock
+        .mockResolvedValueOnce({
+          status: 200,
+          ok: true,
+          headers,
+          text: () => 'some_id',
+        })
+        .mockRejectedValueOnce({
+          status: 500,
+          ok: false,
+          headers,
+          text: () => 'This is some random error text',
+        })
+        .mockResolvedValueOnce({
+          status: 404,
+          ok: false,
+          headers,
+          text: () => 'URI Not found',
+        });
+      const response = await gcpService['_checkIfService']();
+
+      expect(fetchMock).toBeCalledTimes(3);
+
+      expect(response.isConfirmed()).toEqual(true);
+      expect(response.toJSON()).toMatchInlineSnapshot(`
+        Object {
+          "id": "some_id",
+          "metadata": undefined,
+          "name": "gcp",
+          "region": undefined,
+          "vm_type": undefined,
+          "zone": undefined,
+        }
+      `);
     });
   });
 
@@ -177,9 +216,7 @@ describe('GCP', () => {
     });
 
     it('ignores unexpected response body', () => {
-      // @ts-expect-error
       expect(() => gcpService['combineResponses']()).toThrow();
-      // @ts-expect-error
       expect(() => gcpService['combineResponses'](undefined, undefined, undefined)).toThrow();
       // @ts-expect-error
       expect(() => gcpService['combineResponses'](null, null, null)).toThrow();

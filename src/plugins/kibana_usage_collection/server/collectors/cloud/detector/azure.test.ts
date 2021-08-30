@@ -62,20 +62,22 @@ describe('AzureCloudService', () => {
       const someError = new Error('expected: request failed');
       fetchMock.mockRejectedValue(someError);
 
-      expect(() => azureCloudService['_checkIfService']()).rejects.toThrowError(someError.message);
+      await expect(() => azureCloudService['_checkIfService']()).rejects.toThrowError(
+        someError.message
+      );
     });
 
     it('handles not running on Azure with 404 response by throwing error', async () => {
       fetchMock.mockResolvedValue({ status: 404 });
 
-      expect(() =>
+      await expect(() =>
         azureCloudService['_checkIfService']()
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Azure request failed"`);
     });
 
     it('handles not running on Azure with unexpected response by throwing error', async () => {
       fetchMock.mockResolvedValue({ ok: false });
-      expect(() =>
+      await expect(() =>
         azureCloudService['_checkIfService']()
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Azure request failed"`);
     });

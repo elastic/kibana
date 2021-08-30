@@ -30,9 +30,9 @@ describe('CloudService', () => {
 
   describe('_checkIfService', () => {
     it('throws an exception unless overridden', async () => {
-      expect(async () => {
-        await service._checkIfService(undefined);
-      }).rejects.toThrowErrorMatchingInlineSnapshot(`"not implemented"`);
+      await expect(() =>
+        service._checkIfService(undefined)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"not implemented"`);
     });
   });
 
@@ -88,7 +88,7 @@ describe('CloudService', () => {
   describe('_parseResponse', () => {
     const body = { some: { body: {} } };
 
-    it('throws error upon failure to parse body as object', async () => {
+    it('throws error upon failure to parse body as object', () => {
       expect(() => service._parseResponse()).toThrowErrorMatchingInlineSnapshot(
         `"Unable to handle body"`
       );
