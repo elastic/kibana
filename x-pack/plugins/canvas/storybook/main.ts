@@ -56,6 +56,10 @@ const canvasWebpack = {
   resolve: {
     alias: {
       'src/plugins': resolve(KIBANA_ROOT, 'src/plugins'),
+      '../../lib/es_service': resolve(
+        KIBANA_ROOT,
+        'x-pack/plugins/canvas/storybook/__mocks__/es_service.ts'
+      ),
     },
   },
 };

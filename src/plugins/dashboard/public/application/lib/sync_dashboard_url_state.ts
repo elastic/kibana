@@ -15,14 +15,13 @@ import { migrateLegacyQuery } from './migrate_legacy_query';
 import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
 import { applyDashboardFilterState } from './sync_dashboard_filter_state';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
-import { convertSavedDashboardPanelToPanelState } from '../../../common/embeddable/embeddable_saved_object_converters';
-import {
+import type {
   DashboardBuildContext,
   DashboardPanelMap,
   DashboardState,
   RawDashboardState,
-  SavedDashboardPanel,
 } from '../../types';
+import { convertSavedPanelsToPanelMap } from './convert_saved_panels_to_panel_map';
 
 type SyncDashboardUrlStateProps = DashboardBuildContext & { savedDashboard: DashboardSavedObject };
 
@@ -79,12 +78,10 @@ const loadDashboardUrlState = ({
   const rawAppStateInUrl = kbnUrlStateStorage.get<RawDashboardState>(DASHBOARD_STATE_STORAGE_KEY);
   if (!rawAppStateInUrl) return {};
 
-  const panelsMap: DashboardPanelMap = {};
+  let panelsMap: DashboardPanelMap = {};
   if (rawAppStateInUrl.panels && rawAppStateInUrl.panels.length > 0) {
     const rawState = migrateAppState(rawAppStateInUrl, kibanaVersion, usageCollection);
-    rawState.panels?.forEach((panel: SavedDashboardPanel) => {
-      panelsMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
-    });
+    panelsMap = convertSavedPanelsToPanelMap(rawState.panels);
   }
 
   const migratedQuery = rawAppStateInUrl.query

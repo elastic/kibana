@@ -25,7 +25,9 @@ import {
   DashboardRedirect,
   DashboardState,
 } from '../../types';
+import { DashboardAppLocatorParams } from '../../locator';
 import {
+  loadDashboardHistoryLocationState,
   tryDestroyDashboardContainer,
   syncDashboardContainerInput,
   savedObjectToDashboardState,
@@ -88,6 +90,7 @@ export const useDashboardAppState = ({
     savedObjectsTagging,
     dashboardCapabilities,
     dashboardSessionStorage,
+    scopedHistory,
   } = services;
   const { docTitle } = chrome;
   const { notifications } = core;
@@ -148,14 +151,21 @@ export const useDashboardAppState = ({
        * Combine initial state from the saved object, session storage, and URL, then dispatch it to Redux.
        */
       const dashboardSessionStorageState = dashboardSessionStorage.getState(savedDashboardId) || {};
+
+      const forwardedAppState = loadDashboardHistoryLocationState(
+        scopedHistory()?.location?.state as undefined | DashboardAppLocatorParams
+      );
+
       const { initialDashboardStateFromUrl, stopWatchingAppStateInUrl } = syncDashboardUrlState({
         ...dashboardBuildContext,
         savedDashboard,
       });
+
       const initialDashboardState = {
         ...savedDashboardState,
         ...dashboardSessionStorageState,
         ...initialDashboardStateFromUrl,
+        ...forwardedAppState,
 
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
@@ -316,6 +326,7 @@ export const useDashboardAppState = ({
     getStateTransfer,
     savedDashboards,
     usageCollection,
+    scopedHistory,
     notifications,
     indexPatterns,
     kibanaVersion,

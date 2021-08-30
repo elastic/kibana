@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import request, { Cookie } from 'request';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     const cookie = (response.headers['set-cookie'] || []).find((header) =>
       header.startsWith('sid=')
     );
-    return cookie ? request.cookie(cookie) : undefined;
+    return cookie ? parseCookie(cookie) : undefined;
   }
 
   async function createSessionCookie() {
@@ -157,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const cookie = request.cookie(cookies[0])!;
+        const cookie = parseCookie(cookies[0])!;
         expect(cookie.key).to.be('sid');
         expect(cookie.value).to.be.empty();
         expect(cookie.path).to.be('/');

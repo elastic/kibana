@@ -6,11 +6,12 @@
  */
 
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
-import { IndexPatternBase } from '@kbn/es-query';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertWorkflowStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
@@ -21,8 +22,8 @@ import { RouteParams } from '../../routes';
 import { callObservabilityApi } from '../../services/call_observability_api';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
-import { WorkflowStatusFilter } from './workflow_status_filter';
 import './styles.scss';
+import { WorkflowStatusFilter } from './workflow_status_filter';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
@@ -45,7 +46,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     query: {
       rangeFrom = 'now-15m',
       rangeTo = 'now',
-      kuery = 'kibana.alert.status: "open"', // TODO change hardcoded values as part of another PR
+      kuery = `${ALERT_STATUS}: "${ALERT_STATUS_ACTIVE}"`,
       workflowStatus = 'open',
     },
   } = routeParams;
@@ -72,7 +73,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           registrationContexts: [
             'observability.apm',
             'observability.logs',
-            'observability.infrastructure',
             'observability.metrics',
             'observability.uptime',
           ],
@@ -177,13 +177,11 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             <p>
               {i18n.translate('xpack.observability.alertsDisclaimerText', {
                 defaultMessage:
-                  'This page shows an experimental alerting view. The data shown here will probably not be an accurate representation of alerts. A non-experimental list of alerts is available in the Alerts and Actions settings in Stack Management.',
+                  'This page shows an experimental list of alerts. The data might not be accurate. All alerts are available in the ',
               })}
-            </p>
-            <p>
               <EuiLink href={prepend('/app/management/insightsAndAlerting/triggersActions/alerts')}>
                 {i18n.translate('xpack.observability.alertsDisclaimerLinkText', {
-                  defaultMessage: 'Alerts and Actions',
+                  defaultMessage: 'Rules and Connectors settings.',
                 })}
               </EuiLink>
             </p>
