@@ -10,8 +10,7 @@ import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { I18nStart, ScopedHistory } from 'src/core/public';
 import { ApplicationStart } from 'kibana/public';
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
-import { GlobalFlyout } from '../shared_imports';
-import { KibanaContextProvider } from '../shared_imports';
+import { KibanaContextProvider, APP_WRAPPER_CLASS, GlobalFlyout } from '../shared_imports';
 import { AppServicesContext } from '../types';
 import { AppContextProvider, ContextValue, useAppContext } from './app_context';
 import { ComingSoonPrompt } from './components/coming_soon_prompt';
@@ -61,7 +60,7 @@ export const RootComponent = ({
   ...contextValue
 }: AppDependencies) => {
   return (
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
       <i18n.Context>
         <KibanaContextProvider services={services}>
           <AppContextProvider value={contextValue}>

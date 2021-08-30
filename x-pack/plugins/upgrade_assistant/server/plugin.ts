@@ -20,6 +20,7 @@ import { InfraPluginSetup } from '../../infra/server';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { ReindexWorker } from './lib/reindexing';
@@ -32,7 +33,7 @@ import {
   reindexOperationSavedObjectType,
   mlSavedObjectType,
 } from './saved_object_types';
-import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX_PATTERN } from '../common/constants';
+import { handleEsError } from './shared_imports';
 
 import { RouteDependencies } from './types';
 
@@ -98,7 +99,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       description: 'deprecation logs',
       logIndices: {
         type: 'index_name',
-        indexName: DEPRECATION_LOGS_INDEX_PATTERN,
+        indexName: DEPRECATION_LOGS_INDEX,
       },
       logColumns: [
         { timestampColumn: { id: 'timestampField' } },
@@ -118,6 +119,9 @@ export class UpgradeAssistantServerPlugin implements Plugin {
           throw new Error('Saved Objects Start service not available');
         }
         return this.savedObjectsServiceStart;
+      },
+      lib: {
+        handleEsError,
       },
     };
 
