@@ -143,8 +143,8 @@ const mergeManagedProp = (
 
   // iterate through the remaining managed props which weren't updated and delete them, they
   // were managed but are no longer managed
-  for (const oldPropProp of existingManagedChildProps.values()) {
-    remove(childProps, oldPropProp);
+  for (const oldChildProp of existingManagedChildProps.values()) {
+    remove(childProps, oldChildProp);
   }
 };
 
