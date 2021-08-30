@@ -28,6 +28,13 @@ export const PORT_REQUIRED = i18n.translate(
   }
 );
 
+export const SERVER_TYPE_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServerTypeText',
+  {
+    defaultMessage: 'Server type is required.',
+  }
+);
+
 export const HOST_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredHostText',
   {

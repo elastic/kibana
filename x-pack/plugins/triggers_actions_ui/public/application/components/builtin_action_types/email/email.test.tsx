@@ -56,6 +56,7 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
+          serverType: [],
         },
       },
       secrets: {
@@ -93,6 +94,7 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
+          serverType: [],
         },
       },
       secrets: {
@@ -125,6 +127,7 @@ describe('connector validation', () => {
           from: [],
           port: ['Port is required.'],
           host: ['Host is required.'],
+          serverType: [],
         },
       },
       secrets: {
@@ -161,6 +164,7 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
+          serverType: [],
         },
       },
       secrets: {
@@ -197,11 +201,50 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
+          serverType: [],
         },
       },
       secrets: {
         errors: {
           user: ['Username is required when password is used.'],
+          password: [],
+        },
+      },
+    });
+  });
+  test('connector validation fails when server type is not selected', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'password',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      isPreconfigured: false,
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        port: 2323,
+        host: 'localhost',
+        test: 'test',
+        hasAuth: true,
+      },
+    };
+
+    expect(
+      await actionTypeModel.validateConnector((actionConnector as unknown) as EmailActionConnector)
+    ).toEqual({
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+          serverType: ['Server type is required.'],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
           password: [],
         },
       },

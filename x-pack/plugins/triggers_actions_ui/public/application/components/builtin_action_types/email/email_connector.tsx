@@ -44,6 +44,8 @@ export const EmailActionConnectorFields: React.FunctionComponent<
     from !== undefined && errors.from !== undefined && errors.from.length > 0;
   const isHostInvalid: boolean =
     host !== undefined && errors.host !== undefined && errors.host.length > 0;
+  const isServerTypeInvalid: boolean =
+    serverType !== undefined && errors.serverType !== undefined && errors.serverType.length > 0;
   const isPortInvalid: boolean =
     port !== undefined && errors.port !== undefined && errors.port.length > 0;
 
@@ -103,12 +105,15 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                 defaultMessage: 'Server type',
               }
             )}
+            error={errors.serverType}
+            isInvalid={isServerTypeInvalid}
           >
             <EuiSelect
               name="serverType"
               hasNoInitialSelection={true}
               value={serverType}
               disabled={readOnly}
+              isInvalid={isServerTypeInvalid}
               data-test-subj="emailServerTypeSelect"
               options={emailServerTypes}
               onChange={(e) => {

@@ -92,16 +92,14 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
     validateConnector: async (
       action: EmailActionConnector
     ): Promise<
-      ConnectorValidationResult<
-        Omit<EmailConfig, 'secure' | 'hasAuth' | 'serverType'>,
-        EmailSecrets
-      >
+      ConnectorValidationResult<Omit<EmailConfig, 'secure' | 'hasAuth'>, EmailSecrets>
     > => {
       const translations = await import('./translations');
       const configErrors = {
         from: new Array<string>(),
         port: new Array<string>(),
         host: new Array<string>(),
+        serverType: new Array<string>(),
       };
       const secretsErrors = {
         user: new Array<string>(),
@@ -129,6 +127,9 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
       }
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
         secretsErrors.password.push(translations.PASSWORD_REQUIRED);
+      }
+      if (!action.config.serverType) {
+        configErrors.serverType.push(translations.SERVER_TYPE_REQUIRED);
       }
       if (action.secrets.user && !action.secrets.password) {
         secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER_USED);
