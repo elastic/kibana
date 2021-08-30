@@ -517,7 +517,7 @@ describe('embeddable', () => {
       query,
       filters,
       renderMode: 'view',
-      noInteractivity: true,
+      disableTriggers: true,
     } as LensEmbeddableInput;
 
     const embeddable = new Embeddable(
