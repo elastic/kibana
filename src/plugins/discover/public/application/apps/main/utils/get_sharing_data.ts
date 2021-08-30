@@ -7,7 +7,7 @@
  */
 
 import type { Capabilities, IUiSettingsClient } from 'kibana/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { TimeRange } from 'src/plugins/data/public';
 import { ISearchSource } from '../../../../../../data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import type { SavedSearch, SortOrder } from '../../../../saved_searches/types';
@@ -21,7 +21,7 @@ export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: AppState | SavedSearch,
   config: IUiSettingsClient,
-  data: DataPublicPluginStart
+  timeRange: TimeRange
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
@@ -54,7 +54,7 @@ export async function getSharingData(
   return {
     searchSource: searchSource.getSerializedFields(true),
     columns,
-    timeRange: data.query.timefilter.timefilter.getTime(),
+    timeRange,
   };
 }
 

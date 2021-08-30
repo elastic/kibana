@@ -111,7 +111,7 @@ export const getTopNavLinks = ({
         searchSource,
         state.appStateContainer.getState(),
         services.uiSettings,
-        services.data
+        services.data.query.timefilter.timefilter.getTime()
       );
 
       services.share.toggleShareContextMenu({

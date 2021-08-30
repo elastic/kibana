@@ -32,7 +32,10 @@ describe('getSharingData', () => {
 
   test('returns valid data for sharing', async () => {
     const searchSourceMock = createSearchSourceMock({ index: indexPatternMock });
-    const result = await getSharingData(searchSourceMock, { columns: [] }, mockConfig);
+    const result = await getSharingData(searchSourceMock, { columns: [] }, mockConfig, {
+      from: 'test',
+      to: 'test',
+    });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [],
@@ -44,6 +47,10 @@ describe('getSharingData', () => {
             },
           ],
         },
+        "timeRange": Object {
+          "from": "test",
+          "to": "test",
+        },
       }
     `);
   });
@@ -53,7 +60,8 @@ describe('getSharingData', () => {
     const result = await getSharingData(
       searchSourceMock,
       { columns: ['column_a', 'column_b'] },
-      mockConfig
+      mockConfig,
+      { from: 'test', to: 'test' }
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -68,6 +76,10 @@ describe('getSharingData', () => {
               "_score": "desc",
             },
           ],
+        },
+        "timeRange": Object {
+          "from": "test",
+          "to": "test",
         },
       }
     `);
@@ -90,7 +102,8 @@ describe('getSharingData', () => {
           'cool-field-6',
         ],
       },
-      mockConfig
+      mockConfig,
+      { from: 'test', to: 'test' }
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -110,6 +123,10 @@ describe('getSharingData', () => {
               "_doc": "desc",
             },
           ],
+        },
+        "timeRange": Object {
+          "from": "test",
+          "to": "test",
         },
       }
     `);
@@ -141,7 +158,8 @@ describe('getSharingData', () => {
           'cool-field-6',
         ],
       },
-      mockConfig
+      mockConfig,
+      { from: 'test', to: 'test' }
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -160,6 +178,10 @@ describe('getSharingData', () => {
               "_doc": false,
             },
           ],
+        },
+        "timeRange": Object {
+          "from": "test",
+          "to": "test",
         },
       }
     `);
