@@ -203,14 +203,7 @@ export const validatePackagePolicyConfig = (
 
   if (varDef === undefined) {
     // eslint-disable-next-line no-console
-    console.debug(
-      i18n.translate('xpack.fleet.packagePolicyValidation.noVarDefErrorMessage', {
-        defaultMessage: 'No variable definition for {name} found ',
-        values: {
-          name: varName,
-        },
-      })
-    );
+    console.debug(`No variable definition for ${varName} found`);
 
     return null;
   }
