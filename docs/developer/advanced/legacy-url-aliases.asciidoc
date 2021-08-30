@@ -25,7 +25,7 @@ at the following URLs:
 * *Default space*: `http://localhost:5601/app/dashboards#/view/123`
 * *Bill's space*: `http://localhost:5601/s/bills-space/app/dashboards#/view/123`
 
-You use these two dashboards frequently, so you bookmark them in your web browser. After some time, you decide upgrade to {kib} 8.0. When
+You use these two dashboards frequently, so you bookmark them in your web browser. After some time, you decide to upgrade to {kib} 8.0. When
 these two dashboards go through the conversion process, the one in "Bill's space" will have its ID changed to "456". The URL to access that
 dashboard is different -- not to worry though, there is a legacy URL alias for that dashboard.
 

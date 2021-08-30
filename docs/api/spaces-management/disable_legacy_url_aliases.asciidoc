@@ -7,12 +7,13 @@
 experimental[] Disable a <<legacy-url-aliases,legacy URL alias>> in {kib}.
 
 [[spaces-api-disable-legacy-url-aliases-request]]
-==== Request
+==== {api-request-title}
 
 `POST <kibana host>:<port>/api/spaces/_disable_legacy_url_aliases`
 
+[role="child_attributes"]
 [[spaces-api-disable-legacy-url-aliases-request-body]]
-==== Request body
+==== {api-request-body-title}
 
 `aliases`::
   (Required, object array) The aliases to disable.
@@ -31,13 +32,13 @@ experimental[] Disable a <<legacy-url-aliases,legacy URL alias>> in {kib}.
 =====
 
 [[spaces-api-disable-legacy-url-aliases-response-codes]]
-==== Response codes
+==== {api-response-codes-title}
 
 `204`::
   Indicates a successful call.
 
 [[spaces-api-disable-legacy-url-aliases-example]]
-==== Example
+==== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
