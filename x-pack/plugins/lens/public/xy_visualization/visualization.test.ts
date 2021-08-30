@@ -690,7 +690,32 @@ describe('xy_visualization', () => {
         expect(bottom.groupId).toBe('xThreshold');
       });
 
-      it.todo('should ignore terms operation for xAccessor');
+      it('should ignore terms operation for xAccessor', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig![0].axisMode = 'bottom';
+        // set the xAccessor as top values
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'string',
+              isBucketed: true,
+              scale: 'ordinal',
+              label: 'top values',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
     });
 
     describe('color assignment', () => {
