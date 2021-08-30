@@ -56,6 +56,7 @@ describe('vis_type_table getStats', () => {
     expect(mockSoClient.createPointInTimeFinder).toHaveBeenCalledWith({
       type: 'visualization',
       perPage: 1000,
+      namespaces: ['*'],
     });
 
     expect(result).toEqual({
