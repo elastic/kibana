@@ -28,6 +28,7 @@ import { EndpointState, TransformStats } from '../types';
 import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import {
   createUninitialisedResourceState,
   createLoadingResourceState,
@@ -44,11 +45,16 @@ import {
   hostIsolationResponseMock,
 } from '../../../../common/lib/endpoint_isolation/mocks';
 import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
+import {
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+} from '../../../../../common/endpoint/constants';
 
 jest.mock('../../policy/store/services/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+  sendGetFleetAgentsWithEndpoint: () => Promise.resolve({ total: 0 }),
 }));
 
 jest.mock('../../../../common/lib/kibana');
@@ -128,8 +134,18 @@ describe('endpoint list middleware', () => {
     dispatch({
       type: 'appRequestedEndpointList',
     });
-    await waitForAction('serverReturnedEndpointList');
-    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
+
+    await Promise.all([
+      waitForAction('serverReturnedEndpointList'),
+      waitForAction('endpointPendingActionsStateChanged'),
+      waitForAction('serverReturnedEndpointsTotal'),
+      waitForAction('serverReturnedMetadataPatterns'),
+      waitForAction('serverCancelledPolicyItemsLoading'),
+      waitForAction('serverReturnedEndpointExistValue'),
+      waitForAction('serverReturnedAgenstWithEndpointsTotal'),
+    ]);
+
+    expect(fakeHttpServices.post).toHaveBeenCalledWith(HOST_METADATA_LIST_ROUTE, {
       body: JSON.stringify({
         paging_properties: [{ page_index: '0' }, { page_size: '10' }],
         filters: { kql: '' },
@@ -488,6 +504,66 @@ describe('endpoint list middleware', () => {
         TransformStats[]
       >;
       expect(failedAction.error).toBe(apiError);
+    });
+  });
+
+  describe('loads selected endpoint details', () => {
+    beforeEach(() => {
+      endpointPageHttpMock(fakeHttpServices);
+    });
+
+    const endpointList = getEndpointListApiResponse();
+    const agentId = endpointList.hosts[0].metadata.agent.id;
+    const search = getEndpointDetailsPath({
+      name: 'endpointDetails',
+      selected_endpoint: agentId,
+    });
+    const dispatchUserChangedUrl = () => {
+      dispatchUserChangedUrlToEndpointList({ search: `?${search.split('?').pop()}` });
+    };
+
+    it('triggers the endpoint details related actions when the url is changed', async () => {
+      dispatchUserChangedUrl();
+
+      // Note: these are left intenationally in sequence
+      // to test specific race conditions that currently exist in the middleware
+      await waitForAction('serverCancelledPolicyItemsLoading');
+
+      // loads the endpoints list
+      await waitForAction('serverReturnedEndpointList');
+
+      // loads the specific endpoint details
+      await waitForAction('serverReturnedEndpointDetails');
+
+      // loads the specific endpoint pending actions
+      await waitForAction('endpointPendingActionsStateChanged');
+
+      expect(fakeHttpServices.get).toHaveBeenCalledWith(
+        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId })
+      );
+    });
+
+    it('handles the endpointDetailsLoad action', async () => {
+      const endpointId = agentId;
+      dispatch({
+        type: 'endpointDetailsLoad',
+        payload: {
+          endpointId,
+        },
+      });
+
+      // note: this action does not load the endpoints list
+
+      // loads the specific endpoint details
+      await waitForAction('serverReturnedEndpointDetails');
+      await waitForAction('serverReturnedEndpointNonExistingPolicies');
+
+      // loads the specific endpoint pending actions
+      await waitForAction('endpointPendingActionsStateChanged');
+
+      expect(fakeHttpServices.get).toHaveBeenCalledWith(
+        resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: endpointId })
+      );
     });
   });
 });
