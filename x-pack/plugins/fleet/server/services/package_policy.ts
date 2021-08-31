@@ -958,11 +958,7 @@ export function overridePackageInputs(
     }
 
     if (override.vars) {
-      if (!originalInput.vars) {
-        originalInput.vars = { ...override.vars };
-      } else {
-        originalInput = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
-      }
+      originalInput = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
     }
 
     if (override.streams) {
@@ -981,11 +977,7 @@ export function overridePackageInputs(
         }
 
         if (stream.vars) {
-          if (!originalStream.vars) {
-            originalStream.vars = { ...stream.vars };
-          } else {
-            originalStream = deepMergeVars(originalStream, stream as InputsOverride);
-          }
+          originalStream = deepMergeVars(originalStream, stream as InputsOverride);
         }
       }
     }
@@ -1028,11 +1020,11 @@ export function overridePackageInputs(
 }
 
 function deepMergeVars(original: any, override: any): any {
-  const result = { ...original };
-
-  if (!result.vars || !override.vars) {
-    return;
+  if (!original.vars) {
+    original.vars = { ...override.vars };
   }
+
+  const result = { ...original };
 
   const overrideVars = Array.isArray(override.vars)
     ? override.vars
@@ -1043,11 +1035,6 @@ function deepMergeVars(original: any, override: any): any {
 
   for (const { name, ...overrideVal } of overrideVars) {
     const originalVar = original.vars[name];
-
-    if (!result.vars) {
-      result.vars = {};
-    }
-
     result.vars[name] = { ...overrideVal, ...originalVar };
   }
 
