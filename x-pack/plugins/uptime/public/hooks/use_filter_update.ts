@@ -8,28 +8,24 @@
 import { useEffect } from 'react';
 import { useUrlParams } from './use_url_params';
 
-export const parseFiltersMap = (currentFilters: string) => {
-  let filterKueries: Map<string, string[]>;
+export const parseFiltersMap = (currentFilters: string): Map<string, string[]> => {
   try {
-    filterKueries = new Map<string, string[]>(JSON.parse(currentFilters));
+    return new Map(JSON.parse(currentFilters));
   } catch {
-    filterKueries = new Map<string, string[]>();
+    return new Map();
   }
-
-  return filterKueries;
 };
 
 const getUpdateFilters = (
   filterKueries: Map<string, string[]>,
   fieldName: string,
   values?: string[]
-) => {
+): string => {
   // add new term to filter map, toggle it off if already present
   const updatedFilterMap = new Map<string, string[] | undefined>(filterKueries);
   updatedFilterMap.set(fieldName, values ?? []);
-  Array.from(updatedFilterMap.keys()).forEach((key) => {
-    const value = updatedFilterMap.get(key);
-    if (value && value.length === 0) {
+  updatedFilterMap.forEach((value, key) => {
+    if (typeof value !== 'undefined' && value.length === 0) {
       updatedFilterMap.delete(key);
     }
   });
@@ -47,31 +43,31 @@ export const useFilterUpdate = (
 ) => {
   const [getUrlParams, updateUrl] = useUrlParams();
 
-  const {
-    filters: currentFiltersString,
-    excludedFilters: currentExclusionsString,
-  } = getUrlParams();
+  const urlParams = getUrlParams();
 
   useEffect(() => {
     if (fieldName) {
-      const currentFiltersMap: Map<string, string[]> = parseFiltersMap(currentFiltersString);
-      const currentExclusionsMap: Map<string, string[]> = parseFiltersMap(currentExclusionsString);
+      const currentFiltersMap: Map<string, string[]> = parseFiltersMap(urlParams.filters);
+      const currentExclusionsMap: Map<string, string[]> = parseFiltersMap(
+        urlParams.excludedFilters
+      );
       const newFiltersString = getUpdateFilters(currentFiltersMap, fieldName, values);
       const newExclusionsString = getUpdateFilters(currentExclusionsMap, fieldName, notValues);
 
       const update: { [key: string]: string } = {};
-      if (currentFiltersString !== newFiltersString) {
+      if (urlParams.filters !== newFiltersString) {
         update.filters = newFiltersString;
       } else {
-        update.filters = currentFiltersString;
+        update.filters = urlParams.filters;
       }
 
-      if (currentExclusionsString !== newExclusionsString) {
+      if (urlParams.excludedFilters !== newExclusionsString) {
         update.excludedFilters = newExclusionsString;
       } else {
-        update.excludedFilters = currentExclusionsString;
+        update.excludedFilters = urlParams.excludedFilters;
       }
       if (shouldUpdateUrl && Object.keys(update).length > 0) {
+        // reset pagination whenever filters change
         updateUrl({ ...update, pagination: '' });
       }
     }
