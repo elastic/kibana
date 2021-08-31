@@ -107,7 +107,6 @@ describe('DetectionEnginePageComponent', () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         hasIndexRead: true,
-        canUserRead: true,
       },
     ]);
     (useSourcererScope as jest.Mock).mockReturnValue({

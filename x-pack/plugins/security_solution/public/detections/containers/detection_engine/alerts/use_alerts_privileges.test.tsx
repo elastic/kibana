@@ -121,7 +121,7 @@ describe('useAlertsPrivileges', () => {
     });
   });
 
-  test('if there is an error when fetching user privilege, we should get back false for every properties', async () => {
+  test('if there is an error when fetching user privilege, we should get back false for all index related properties', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.error = new Error('Something went wrong');
     });
@@ -141,8 +141,8 @@ describe('useAlertsPrivileges', () => {
         hasIndexUpdateDelete: false,
         hasKibanaCRUD: false,
         hasKibanaREAD: false,
-        isAuthenticated: false,
-        loading: false,
+        isAuthenticated: true,
+        loading: true,
       });
     });
   });

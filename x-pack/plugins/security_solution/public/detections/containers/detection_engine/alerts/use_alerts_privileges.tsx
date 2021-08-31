@@ -54,8 +54,8 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
         hasIndexMaintenance: false,
-        hasKibanaCRUD: false,
-        hasKibanaREAD: false,
+        hasKibanaCRUD,
+        hasKibanaREAD,
       });
     }
   }, [detectionEnginePrivileges.error, hasKibanaCRUD, hasKibanaREAD]);

@@ -43,7 +43,6 @@ describe('useUserInfo', () => {
       expect(result.all).toHaveLength(1);
       expect(result.current).toEqual({
         canUserCRUD: null,
-        canUserRead: null,
         hasEncryptionKey: null,
         hasIndexManage: null,
         hasIndexMaintenance: null,
