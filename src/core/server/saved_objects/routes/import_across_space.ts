@@ -26,7 +26,7 @@ interface FileStream extends Readable {
   };
 }
 
-export const registerImportRoute = (
+export const registerImportAcrossSpaceRoute = (
   router: IRouter,
   { config, coreUsageData }: RouteDependencies
 ) => {
@@ -34,13 +34,14 @@ export const registerImportRoute = (
 
   router.post(
     {
-      path: '/_import',
+      path: '/_import_across_space',
       options: {
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',
           accepts: 'multipart/form-data',
         },
+        tags: ['access:importAllSavedObjects'],
       },
       validate: {
         query: schema.object(
@@ -98,7 +99,7 @@ export const registerImportRoute = (
           readStream,
           overwrite,
           createNewCopies,
-          importNamespaces: false,
+          importNamespaces: true,
         });
 
         return res.ok({ body: result });

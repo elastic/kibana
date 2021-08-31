@@ -12,12 +12,13 @@ import { ImportMode } from '../management_section/objects_table/components/impor
 export async function importFile(
   http: HttpStart,
   file: File,
-  { createNewCopies, overwrite }: ImportMode
+  { createNewCopies, overwrite, importNamespaces }: ImportMode
 ) {
   const formData = new FormData();
   formData.append('file', file);
+  const endpoint = importNamespaces ? `_import_across_space` : `_import`;
   const query = createNewCopies ? { createNewCopies } : { overwrite };
-  return await http.post<SavedObjectsImportResponse>('/api/saved_objects/_import', {
+  return await http.post<SavedObjectsImportResponse>(`/api/saved_objects/${endpoint}`, {
     body: formData,
     headers: {
       // Important to be undefined, it forces proper headers to be set for FormData

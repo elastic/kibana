@@ -92,12 +92,14 @@ export class SavedObjectsImporter {
     createNewCopies,
     namespace,
     retries,
+    importNamespaces,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     return resolveSavedObjectsImportErrors({
       readStream,
       createNewCopies,
       namespace,
       retries,
+      importNamespaces,
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,

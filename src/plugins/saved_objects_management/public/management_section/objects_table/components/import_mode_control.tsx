@@ -27,6 +27,8 @@ export interface ImportModeControlProps {
 }
 
 export interface ImportMode {
+  // TODO: remove optional
+  importNamespaces?: boolean;
   createNewCopies: boolean;
   overwrite: boolean;
 }

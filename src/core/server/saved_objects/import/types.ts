@@ -184,6 +184,13 @@ export interface SavedObjectsResolveImportErrorsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  /**
+   * TODO: doc
+   * Defaults to false.
+   *
+   * Remarks: the stream of document will be validated accordingly
+   */
+  importNamespaces?: boolean;
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
