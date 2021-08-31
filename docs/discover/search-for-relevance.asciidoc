@@ -19,15 +19,15 @@ Warsaw OR Venice OR Clear
 ```
 . If you don't see any results, expand the <<set-time-filter,time range>>, for example to *Last 7 days*.
 . From the list of *Available fields*, add `_score` and any other fields you want to the document table.
-. To sort the `_score` column in descending order, hover over its header, and then click twice on
-the arrow icon
-image:images/double-arrow.png[Double arrow icon to indicate sorting] so it changes to
+. To sort the `_score` column in descending order, hover over its header, and set
+the sort icon to
 image:images/downward-arrow.png[Downward pointing arrow to indicate descending sorting].
 +
 At this point, you're doing a multi-column sort: first by `Time`, and then by `_score`.
-. To turn off sorting for the `Time` field, hover over its header, and then click the down arrow.
+. To turn off sorting for the `Time` field, hover over its header, and set the sort icon to
+image:images/double-arrow.png[Arrow on both ends of the icon indicates sorting is off].
 +
 Your table now sorts documents from most to least relevant.
 +
 [role="screenshot"]
-image::images/discover-search-for-relevance.png["Example of a search for relevance"]
+image::images/discover-search-for-relevance.png["Documents are sorted from most relevant to least relevant."]
