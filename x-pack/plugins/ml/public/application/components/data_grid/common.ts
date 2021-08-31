@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment-timezone';
+import { estypes } from '@elastic/elasticsearch';
 import { useEffect, useMemo } from 'react';
 
 import {
@@ -23,7 +24,6 @@ import {
   IFieldType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
-  RuntimeType,
 } from '../../../../../../../src/plugins/data/public';
 
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
@@ -181,7 +181,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 export const NON_AGGREGATABLE = 'non-aggregatable';
 
 export const getDataGridSchemaFromESFieldType = (
-  fieldType: ES_FIELD_TYPES | undefined | RuntimeType
+  fieldType: ES_FIELD_TYPES | undefined | estypes.MappingRuntimeField['type']
 ): string | undefined => {
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.
