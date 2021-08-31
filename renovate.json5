@@ -1,6 +1,7 @@
 {
   extends: [
     'config:base',
+    ':disableDependencyDashboard',
   ],
   ignorePaths: [
     '**/__fixtures__/**',
