@@ -54,7 +54,7 @@ export class DeprecationsClient {
       return {
         status: 'fail',
         reason: i18n.translate('core.deprecations.noCorrectiveAction', {
-          defaultMessage: 'deprecation has no correctiveAction via api.',
+          defaultMessage: 'This deprecation cannot be resolved automatically.',
         }),
       };
     }

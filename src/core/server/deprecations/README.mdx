@@ -112,18 +112,18 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
           defaultMessage: 'Setting "kibana.defaultAppId" is deprecated',
         }),
         message: i18n.translate('kibana_legacy.deprecations.defaultAppIdMessage', {
-          defaultMessage: '"kibana.defaultAppId" is deprecated and will be removed in 8.0. Please use the "defaultRoute" advanced setting instead.',
+          defaultMessage: 'Use the "defaultRoute" advanced setting instead of "kibana.defaultAppId".',
         }),
         correctiveActions: {
           manualSteps: [
             i18n.translate('kibana_legacy.deprecations.defaultAppId.manualStepOneMessage', {
-              defaultMessage: 'Go to Stack Management > Advanced Settings',
+              defaultMessage: 'Go to Stack Management > Advanced Settings.',
             }),
             i18n.translate('kibana_legacy.deprecations.defaultAppId.manualStepTwoMessage', {
-              defaultMessage: 'Update the "defaultRoute" setting under the General section',
+              defaultMessage: 'Update the "defaultRoute" setting in the General section.',
             }),
             i18n.translate('kibana_legacy.deprecations.defaultAppId.manualStepThreeMessage', {
-              defaultMessage: 'Remove "kibana.defaultAppId" from the kibana.yml config file',
+              defaultMessage: 'Remove "kibana.defaultAppId" from the kibana.yml config file.',
             }),
           ],
         },
@@ -167,42 +167,42 @@ async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecations
   const testDashboardUser = await getTestDashboardUser(savedObjectsClient);
 
   if (testDashboardUser) {
-  deprecations.push({
-    title: i18n.translate('security.deprecations.kibanaUserRoleTitle', {
-      defaultMessage: 'Found users using deprecated roles',
-    }),
-    message: i18n.translate('security.deprecations.kibanaUserRoleMessage', {
-      defaultMessage: 'User "test_dashboard_user" is using a deprecated role: "kibana_user".',
-    }),
-    documentationUrl: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html',
-    level: 'critical',
-    correctiveActions: {
-      api: {
-          path: '/internal/security/users/test_dashboard_user',
-          method: 'POST',
-          body: {
-            username: 'test_dashboard_user',
-            roles: [
-              'machine_learning_user',
-              'enrich_user',
-              'kibana_admin'
-            ],
-            full_name: 'Alison Goryachev',
-            email: 'alisongoryachev@gmail.com',
-            metadata: {},
-            enabled: true
-          }
+    deprecations.push({
+      title: i18n.translate('security.deprecations.kibanaUserRoleTitle', {
+        defaultMessage: 'Deprecated roles are assigned to some users',
+      }),
+      message: i18n.translate('security.deprecations.kibanaUserRoleMessage', {
+        defaultMessage: 'User "test_dashboard_user" is using a deprecated role: "kibana_user".',
+      }),
+      documentationUrl: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html',
+      level: 'critical',
+      correctiveActions: {
+        api: {
+            path: '/internal/security/users/test_dashboard_user',
+            method: 'POST',
+            body: {
+              username: 'test_dashboard_user',
+              roles: [
+                'machine_learning_user',
+                'enrich_user',
+                'kibana_admin'
+              ],
+              full_name: 'Alison Goryachev',
+              email: 'alisongoryachev@gmail.com',
+              metadata: {},
+              enabled: true
+            }
+        },
+        manualSteps: [
+          i18n.translate('security.deprecations.kibanaUserRole.manualStepOneMessage', {
+            defaultMessage: 'Switch all users with the "kibana_user" role to the kibana_admin role in Management > Security > Users.',
+          }),
+          i18n.translate('security.deprecations.kibanaUserRole.manualStepTwoMessage', {
+            defaultMessage: 'Update all mappings in Management > Security > Role Mappings to assign the "kibana_admin" role instead of the "kibana_user" role.'
+          }),
+        ],
       },
-      manualSteps: [
-        i18n.translate('security.deprecations.kibanaUserRole.manualStepOneMessage', {
-          defaultMessage: 'Using Kibana user management, change all users using the kibana_user role to the "kibana_admin" role.',
-        }),
-        i18n.translate('security.deprecations.kibanaUserRole.manualStepTwoMessage', {
-          defaultMessage: 'Using Kibana role-mapping management, change all role-mappings which assing the "kibana_user" role to the "kibana_admin" role.'
-        }),
-      ],
-    },
-  });
+    });
   }
 
   return deprecations;

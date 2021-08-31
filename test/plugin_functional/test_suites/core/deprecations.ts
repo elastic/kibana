@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       title: 'Setting "corePluginDeprecations.oldProperty" is deprecated',
       level: 'critical',
       message:
-        'Setting "corePluginDeprecations.oldProperty" is deprecated and has been replaced by "corePluginDeprecations.newProperty"',
+        'Setting "corePluginDeprecations.oldProperty" has been replaced by "corePluginDeprecations.newProperty"',
       correctiveActions: {
         manualSteps: [
           'Replace "corePluginDeprecations.oldProperty" with "corePluginDeprecations.newProperty" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
@@ -35,10 +35,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     {
       title: 'Setting "corePluginDeprecations.noLongerUsed" is deprecated',
       level: 'critical',
-      message: 'Setting corePluginDeprecations.noLongerUsed is deprecated and is no longer used',
+      message: 'You no longer need to configure "corePluginDeprecations.noLongerUsed".',
       correctiveActions: {
         manualSteps: [
-          'Remove "corePluginDeprecations.noLongerUsed" from the Kibana config file, CLI flag, or environment variable (in Docker only)',
+          'Remove "corePluginDeprecations.noLongerUsed" from the Kibana config file, CLI flag, or environment variable (in Docker only).',
         ],
       },
       deprecationType: 'config',
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           });
 
           expect(resolveResult).to.eql({
-            reason: 'deprecation has no correctiveAction via api.',
+            reason: 'This deprecation cannot be resolved automatically.',
             status: 'fail',
           });
         });

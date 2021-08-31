@@ -95,7 +95,7 @@ export class DeprecationsFactory {
                 values: { domainId },
               }),
               message: i18n.translate('core.deprecations.deprecations.fetchFailedMessage', {
-                defaultMessage: 'Failed to get deprecations info for plugin "{domainId}".',
+                defaultMessage: 'Unable to fetch deprecations info for plugin {domainId}.',
                 values: { domainId },
               }),
               level: 'fetch_error',

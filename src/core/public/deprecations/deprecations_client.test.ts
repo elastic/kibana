@@ -132,10 +132,12 @@ describe('DeprecationsClient', () => {
       };
       const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
-      expect(result).toEqual({
-        status: 'fail',
-        reason: 'deprecation has no correctiveAction via api.',
-      });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "reason": "This deprecation cannot be resolved automatically.",
+          "status": "fail",
+        }
+      `);
     });
 
     it('fetches the deprecation api', async () => {
