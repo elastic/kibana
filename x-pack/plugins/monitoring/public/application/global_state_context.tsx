@@ -14,9 +14,11 @@ interface GlobalStateProviderProps {
   children: React.ReactNode;
 }
 
-interface State {
+export interface State {
   cluster_uuid?: string;
   ccs?: any;
+  inSetupMode?: boolean;
+  save?: () => void;
 }
 
 export const GlobalStateContext = createContext({} as State);
