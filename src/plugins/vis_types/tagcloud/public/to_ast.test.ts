@@ -30,7 +30,7 @@ const mockSchemas = {
   ],
 };
 
-jest.mock('../../visualizations/public', () => ({
+jest.mock('../../../visualizations/public', () => ({
   getVisSchemas: () => mockSchemas,
 }));
 
