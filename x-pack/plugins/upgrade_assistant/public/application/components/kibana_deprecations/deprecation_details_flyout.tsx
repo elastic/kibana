@@ -154,7 +154,7 @@ export const DeprecationDetailsFlyout = ({
               title={i18nTexts.quickResolveErrorTitle}
               color="danger"
               iconType="alert"
-              data-test-subj="deleteSettingsError"
+              data-test-subj="quickResolveError"
             >
               {deprecationResolutionState.resolveDeprecationError}
             </EuiCallOut>

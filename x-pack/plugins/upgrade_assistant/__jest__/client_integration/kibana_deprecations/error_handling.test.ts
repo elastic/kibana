@@ -36,7 +36,11 @@ describe('Error handling', () => {
       ]);
 
       testBed = await setupKibanaPage({
-        deprecations: deprecationService,
+        services: {
+          core: {
+            deprecations: deprecationService,
+          },
+        },
       });
     });
 
@@ -57,7 +61,11 @@ describe('Error handling', () => {
         .mockRejectedValue(new Error('Internal Server Error'));
 
       testBed = await setupKibanaPage({
-        deprecations: deprecationService,
+        services: {
+          core: {
+            deprecations: deprecationService,
+          },
+        },
       });
     });
 

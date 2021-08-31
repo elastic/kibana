@@ -7,21 +7,15 @@
 
 import React from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { I18nStart, ScopedHistory } from 'src/core/public';
-import { ApplicationStart } from 'kibana/public';
+import { ScopedHistory } from 'src/core/public';
+
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
-import { KibanaContextProvider, APP_WRAPPER_CLASS, GlobalFlyout } from '../shared_imports';
-import { AppServicesContext } from '../types';
-import { AppContextProvider, ContextValue, useAppContext } from './app_context';
+import { APP_WRAPPER_CLASS, GlobalFlyout } from '../shared_imports';
+import { AppDependencies } from '../types';
+import { AppContextProvider, useAppContext } from './app_context';
 import { EsDeprecations, ComingSoonPrompt, KibanaDeprecations, Overview } from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
-export interface AppDependencies extends ContextValue {
-  i18n: I18nStart;
-  history: ScopedHistory;
-  application: ApplicationStart;
-  services: AppServicesContext;
-}
 
 const App: React.FunctionComponent = () => {
   const { isReadOnlyMode } = useAppContext();
@@ -49,23 +43,20 @@ export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
   );
 };
 
-export const RootComponent = ({
-  i18n,
-  history,
-  services,
-  application,
-  ...contextValue
-}: AppDependencies) => {
+export const RootComponent = (dependencies: AppDependencies) => {
+  const {
+    history,
+    core: { i18n, application },
+  } = dependencies.services;
+
   return (
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
       <i18n.Context>
-        <KibanaContextProvider services={services}>
-          <AppContextProvider value={contextValue}>
-            <GlobalFlyoutProvider>
-              <AppWithRouter history={history} />
-            </GlobalFlyoutProvider>
-          </AppContextProvider>
-        </KibanaContextProvider>
+        <AppContextProvider value={dependencies}>
+          <GlobalFlyoutProvider>
+            <AppWithRouter history={history} />
+          </GlobalFlyoutProvider>
+        </AppContextProvider>
       </i18n.Context>
     </RedirectAppLinks>
   );

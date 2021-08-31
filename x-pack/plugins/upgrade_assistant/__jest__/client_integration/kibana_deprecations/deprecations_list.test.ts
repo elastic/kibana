@@ -38,7 +38,11 @@ describe('Kibana deprecations table', () => {
         .mockReturnValue(kibanaDeprecationsMockResponse);
 
       testBed = await setupKibanaPage({
-        deprecations: deprecationService,
+        services: {
+          core: {
+            deprecations: deprecationService,
+          },
+        },
       });
     });
 

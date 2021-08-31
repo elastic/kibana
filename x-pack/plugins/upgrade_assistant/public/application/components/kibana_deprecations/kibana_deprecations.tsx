@@ -120,7 +120,13 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
     DeprecationResolutionState | undefined
   >(undefined);
 
-  const { deprecations, breadcrumbs, api } = useAppContext();
+  const {
+    services: {
+      core: { deprecations },
+      breadcrumbs,
+      api,
+    },
+  } = useAppContext();
 
   const {
     addContent: addContentToGlobalFlyout,

@@ -62,7 +62,9 @@ const i18nTexts = {
 
 export const ESDeprecationStats: FunctionComponent = () => {
   const history = useHistory();
-  const { api } = useAppContext();
+  const {
+    services: { api },
+  } = useAppContext();
 
   const { data: esDeprecations, isLoading, error } = api.useLoadEsDeprecations();
 

@@ -12,6 +12,7 @@ import { getInitialDatasourceId, getResolvedDateRange } from '../utils';
 import { LensAppState, LensStoreDeps } from './types';
 
 export const initialState: LensAppState = {
+  persistedDoc: undefined,
   searchSessionId: '',
   filters: [],
   query: { language: 'kuery', query: '' },
@@ -299,6 +300,7 @@ export const lensSlice = createSlice({
       payload: PayloadAction<{
         initialInput?: LensEmbeddableInput;
         redirectCallback: (savedObjectId?: string) => void;
+        emptyState: LensAppState;
       }>
     ) => state,
   },

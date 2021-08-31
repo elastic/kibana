@@ -28,7 +28,11 @@ describe('Kibana deprecation details flyout', () => {
         .mockReturnValue(kibanaDeprecationsMockResponse);
 
       testBed = await setupKibanaPage({
-        deprecations: deprecationService,
+        services: {
+          core: {
+            deprecations: deprecationService,
+          },
+        },
       });
     });
 
@@ -109,7 +113,7 @@ describe('Kibana deprecation details flyout', () => {
       // Reopen the flyout
       await actions.table.clickDeprecationAt(0);
 
-      expect(exists('deleteSettingsError')).toBe(true);
+      expect(exists('quickResolveError')).toBe(true);
       expect(exists('resolveSteps')).toBe(true);
       expect(find('resolveButton').props().disabled).toBe(false);
       expect(find('resolveButton').text()).toContain('Try again');
