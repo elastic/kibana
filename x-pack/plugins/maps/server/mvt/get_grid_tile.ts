@@ -35,7 +35,7 @@ import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { pluckRangeFieldMeta } from '../../common/pluck_range_field_meta';
 import { FieldMeta, TileMetaFeature } from '../../common/descriptor_types';
 import { pluckCategoryFieldMeta } from '../../common/pluck_category_field_meta';
-import { createMvtTile } from './util';
+import { createMvtTile, getTileSpatialFilter } from './util';
 
 // heuristic. largest color-palette has 30 colors. 1 color is used for 'other'.
 const TERM_COUNT = 30 - 1;

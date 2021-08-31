@@ -68,7 +68,7 @@ export function initMVTRoutes({
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
-      const tile = await getTile({
+      const tile = await getEsTile({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -81,6 +81,15 @@ export function initMVTRoutes({
         searchSessionId: query.searchSessionId,
         abortSignal: abortController.signal,
       });
+
+      try {
+        console.log('sdfsdl', tile.length, typeof tile);
+        const jsonTile = new VectorTile(new Protobuf(tile));
+        console.log('jst', jsonTile);
+      } catch (e) {
+        console.error('Cant parse vector tile');
+        console.error(e);
+      }
 
       return sendResponse(response, tile);
     }
@@ -133,117 +142,6 @@ export function initMVTRoutes({
         searchSessionId: query.searchSessionId,
         abortSignal: abortController.signal,
       });
-
-      return sendResponse(response, tile);
-    }
-  );
-  router.get(
-    {
-      path: `${API_ROOT_PATH}/${MVT_GETESTILE_API_PATH}/{z}/{x}/{y}.pbf`,
-      validate: {
-        params: schema.object({
-          x: schema.number(),
-          y: schema.number(),
-          z: schema.number(),
-        }),
-        query: schema.object({
-          geometryFieldName: schema.string(),
-          requestBody: schema.string(),
-          index: schema.string(),
-          geoFieldType: schema.string(),
-          searchSessionId: schema.maybe(schema.string()),
-          token: schema.maybe(schema.string()),
-        }),
-      },
-    },
-    async (
-      context: DataRequestHandlerContext,
-      request: KibanaRequest<unknown, Record<string, any>, unknown>,
-      response: KibanaResponseFactory
-    ) => {
-      const { query, params } = request;
-
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
-
-      const requestBodyDSL = rison.decode(query.requestBody as string);
-
-      const tile = await getEsTile({
-        logger,
-        context,
-        geometryFieldName: query.geometryFieldName as string,
-        x: parseInt((params as any).x, 10) as number,
-        y: parseInt((params as any).y, 10) as number,
-        z: parseInt((params as any).z, 10) as number,
-        index: query.index as string,
-        requestBody: requestBodyDSL as any,
-        geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
-        searchSessionId: query.searchSessionId,
-        abortSignal: abortController.signal,
-      });
-
-      return sendResponse(response, tile);
-    }
-  );
-
-  router.get(
-    {
-      path: `${API_ROOT_PATH}/${MVT_GETESGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
-      validate: {
-        params: schema.object({
-          x: schema.number(),
-          y: schema.number(),
-          z: schema.number(),
-        }),
-        query: schema.object({
-          geometryFieldName: schema.maybe(schema.string()),
-          requestBody: schema.maybe(schema.string()),
-          index: schema.maybe(schema.string()),
-          requestType: schema.maybe(schema.string()),
-          geoFieldType: schema.maybe(schema.string()),
-          searchSessionId: schema.maybe(schema.string()),
-          token: schema.maybe(schema.string()),
-        }),
-      },
-    },
-    async (
-      context: DataRequestHandlerContext,
-      request: KibanaRequest<unknown, Record<string, any>, unknown>,
-      response: KibanaResponseFactory
-    ) => {
-      const { query, params } = request;
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
-
-      // const requestBodyDSL = rison.decode((query.requestBody || '') as string);
-
-      const tile = await getEsGridTile({
-        logger,
-        context,
-        geometryFieldName: query.geometryFieldName as string,
-        x: parseInt((params as any).x, 10) as number,
-        y: parseInt((params as any).y, 10) as number,
-        z: parseInt((params as any).z, 10) as number,
-        index: query.index as string,
-        requestBody: {},
-        requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
-        geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
-        searchSessionId: query.searchSessionId,
-        abortSignal: abortController.signal,
-      });
-
-      try {
-        console.log('sdfsdl', tile.length, typeof tile);
-        const jsonTile = new VectorTile(new Protobuf(tile));
-        console.log('jst', jsonTile);
-      } catch (e) {
-        console.error('Cant parse vector tile');
-        console.error(e);
-      }
 
       return sendResponse(response, tile);
     }

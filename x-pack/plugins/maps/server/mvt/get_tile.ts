@@ -63,18 +63,21 @@ export async function getEsTile({
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
-    console.log('op', path);
+    console.log('getEsTileP', path);
     const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'GET',
       path,
     });
-    console.log('t', tile);
-    return tile;
+    // let buffer = Buffer.from(tile.body, 'base64');
+    const buffer = tile.body;
+    console.log('buf length', buffer.length);
+    // console.log('s', buffer.toString('base64'));
+    return buffer;
   } catch (e) {
     if (!isAbortError(e)) {
       // These are often circuit breaking exceptions
       // Should return a tile with some error message
-      logger.warn(`Cannot generate ES-tile for ${z}/${x}/${y}: ${e.message}`);
+      logger.warn(`Cannot generate ES-grid-tile for ${z}/${x}/${y}: ${e.message}`);
     }
     return null;
   }
