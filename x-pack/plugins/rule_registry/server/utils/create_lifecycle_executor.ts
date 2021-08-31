@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
-import { Mutable } from 'utility-types';
 import { v4 } from 'uuid';
 import {
   AlertExecutorOptions,
@@ -24,21 +23,34 @@ import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_ID,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
-  SPACE_IDS,
   TIMESTAMP,
+  VERSION,
 } from '../../common/technical_rule_data_field_names';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
-import { getRuleData } from './get_rule_executor_data';
+import {
+  CommonAlertFieldName,
+  CommonAlertIdFieldName,
+  getCommonAlertFields,
+} from './get_common_alert_fields';
+
+type ImplicitTechnicalFieldName = CommonAlertFieldName | CommonAlertIdFieldName;
+
+type ExplicitTechnicalAlertFields = Partial<
+  Omit<ParsedTechnicalFields, ImplicitTechnicalFieldName>
+>;
+
+type ExplicitAlertFields = Record<string, unknown> & // every field can have values of arbitrary types
+  ExplicitTechnicalAlertFields; // but technical fields must obey their respective type
 
 export type LifecycleAlertService<
   InstanceState extends AlertInstanceState = never,
@@ -46,7 +58,7 @@ export type LifecycleAlertService<
   ActionGroupIds extends string = never
 > = (alert: {
   id: string;
-  fields: Record<string, unknown> & Partial<Omit<ParsedTechnicalFields, typeof ALERT_ID>>;
+  fields: ExplicitAlertFields;
 }) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
 
 export interface LifecycleAlertServices<
@@ -128,13 +140,9 @@ export const createLifecycleExecutor = (
   >
 ): Promise<WrappedLifecycleRuleState<State>> => {
   const {
-    rule,
     services: { alertInstanceFactory },
     state: previousState,
-    spaceId,
   } = options;
-
-  const ruleExecutorData = getRuleData(options);
 
   const state = getOrElse(
     (): WrappedLifecycleRuleState<State> => ({
@@ -143,9 +151,9 @@ export const createLifecycleExecutor = (
     })
   )(wrappedStateRt<State>().decode(previousState));
 
-  const currentAlerts: Record<string, Partial<ParsedTechnicalFields>> = {};
+  const commonRuleFields = getCommonAlertFields(options);
 
-  const timestamp = options.startedAt.toISOString();
+  const currentAlerts: Record<string, ExplicitAlertFields> = {};
 
   const lifecycleAlertServices: LifecycleAlertServices<
     InstanceState,
@@ -153,12 +161,8 @@ export const createLifecycleExecutor = (
     ActionGroupIds
   > = {
     alertWithLifecycle: ({ id, fields }) => {
-      currentAlerts[id] = {
-        ...fields,
-        [ALERT_ID]: id,
-        [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
-        [ALERT_RULE_CONSUMER]: rule.consumer,
-      };
+      currentAlerts[id] = fields;
+
       return alertInstanceFactory(id);
     },
   };
@@ -178,19 +182,17 @@ export const createLifecycleExecutor = (
 
   const allAlertIds = [...new Set(currentAlertIds.concat(trackedAlertIds))];
 
-  const trackedAlertStatesOfRecovered = Object.values(state.trackedAlerts).filter(
-    (trackedAlertState) => !currentAlerts[trackedAlertState.alertId]
-  );
+  const trackedAlertStates = Object.values(state.trackedAlerts);
 
   logger.debug(
-    `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStatesOfRecovered.length} recovered)`
+    `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
   );
 
   const alertsDataMap: Record<string, Partial<ParsedTechnicalFields>> = {
     ...currentAlerts,
   };
 
-  if (trackedAlertStatesOfRecovered.length) {
+  if (trackedAlertStates.length) {
     const { hits } = await ruleDataClient.getReader().search({
       body: {
         query: {
@@ -198,12 +200,12 @@ export const createLifecycleExecutor = (
             filter: [
               {
                 term: {
-                  [ALERT_RULE_UUID]: ruleExecutorData[ALERT_RULE_UUID],
+                  [ALERT_RULE_UUID]: commonRuleFields[ALERT_RULE_UUID],
                 },
               },
               {
                 terms: {
-                  [ALERT_UUID]: trackedAlertStatesOfRecovered.map(
+                  [ALERT_UUID]: trackedAlertStates.map(
                     (trackedAlertState) => trackedAlertState.alertUuid
                   ),
                 },
@@ -211,7 +213,7 @@ export const createLifecycleExecutor = (
             ],
           },
         },
-        size: trackedAlertStatesOfRecovered.length,
+        size: trackedAlertStates.length,
         collapse: {
           field: ALERT_UUID,
         },
@@ -226,12 +228,10 @@ export const createLifecycleExecutor = (
 
     hits.hits.forEach((hit) => {
       const fields = parseTechnicalFields(hit.fields);
-      const alertId = fields[ALERT_ID]!;
+      const alertId = fields[ALERT_ID];
       alertsDataMap[alertId] = {
+        ...commonRuleFields,
         ...fields,
-        [ALERT_ID]: alertId,
-        [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
-        [ALERT_RULE_CONSUMER]: rule.consumer,
       };
     });
   }
@@ -243,58 +243,28 @@ export const createLifecycleExecutor = (
       logger.warn(`Could not find alert data for ${alertId}`);
     }
 
-    const event: Mutable<ParsedTechnicalFields> = {
-      ...alertData,
-      ...ruleExecutorData,
-      [TIMESTAMP]: timestamp,
-      [EVENT_KIND]: 'signal',
-      [ALERT_RULE_CONSUMER]: rule.consumer,
-      [ALERT_ID]: alertId,
-    } as ParsedTechnicalFields;
-
     const isNew = !state.trackedAlerts[alertId];
     const isRecovered = !currentAlerts[alertId];
-    const isActiveButNotNew = !isNew && !isRecovered;
     const isActive = !isRecovered;
 
     const { alertUuid, started } = state.trackedAlerts[alertId] ?? {
       alertUuid: v4(),
-      started: timestamp,
+      started: commonRuleFields[TIMESTAMP],
     };
-
-    event[ALERT_START] = started;
-    event[ALERT_UUID] = alertUuid;
-    event[ALERT_WORKFLOW_STATUS] = event[ALERT_WORKFLOW_STATUS] ?? 'open';
-
-    // not sure why typescript needs the non-null assertion here
-    // we already assert the value is not undefined with the ternary
-    // still getting an error with the ternary.. strange.
-
-    event[SPACE_IDS] =
-      event[SPACE_IDS] == null
-        ? [spaceId]
-        : [spaceId, ...event[SPACE_IDS]!.filter((sid) => sid !== spaceId)];
-
-    if (isNew) {
-      event[EVENT_ACTION] = 'open';
-    }
-
-    if (isRecovered) {
-      event[ALERT_END] = timestamp;
-      event[EVENT_ACTION] = 'close';
-      event[ALERT_STATUS] = 'closed';
-    }
-
-    if (isActiveButNotNew) {
-      event[EVENT_ACTION] = 'active';
-    }
-
-    if (isActive) {
-      event[ALERT_STATUS] = 'open';
-    }
-
-    event[ALERT_DURATION] =
-      (options.startedAt.getTime() - new Date(event[ALERT_START]!).getTime()) * 1000;
+    const event: ParsedTechnicalFields = {
+      ...alertData,
+      ...commonRuleFields,
+      [ALERT_DURATION]: (options.startedAt.getTime() - new Date(started).getTime()) * 1000,
+      [ALERT_ID]: alertId,
+      [ALERT_START]: started,
+      [ALERT_STATUS]: isActive ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED,
+      [ALERT_WORKFLOW_STATUS]: alertData[ALERT_WORKFLOW_STATUS] ?? 'open',
+      [ALERT_UUID]: alertUuid,
+      [EVENT_KIND]: 'signal',
+      [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
+      [VERSION]: ruleDataClient.kibanaVersion,
+      ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
+    };
 
     return event;
   });
