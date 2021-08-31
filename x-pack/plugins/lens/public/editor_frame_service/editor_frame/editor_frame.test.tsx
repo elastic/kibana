@@ -230,7 +230,7 @@ describe('editor_frame', () => {
         await mountWithProvider(<EditorFrame {...props} />, {
           data: props.plugins.data,
           preloadedState: {
-            visualization: { activeId: 'testVis', state: null },
+            visualization: { activeId: 'testVis', state: {} },
             datasourceStates: {
               testDatasource: {
                 isLoading: false,
@@ -285,7 +285,7 @@ describe('editor_frame', () => {
         await mountWithProvider(<EditorFrame {...props} />, {
           data: props.plugins.data,
           preloadedState: {
-            visualization: { activeId: 'testVis', state: null },
+            visualization: { activeId: 'testVis', state: {} },
             datasourceStates: {
               testDatasource: {
                 isLoading: false,
