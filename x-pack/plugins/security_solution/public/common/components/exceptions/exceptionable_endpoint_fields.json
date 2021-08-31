@@ -26,7 +26,7 @@
   "Target.process.Ext.memory_region.region_size",
   "Target.process.Ext.memory_region.region_protection",
   "Target.process.Ext.memory_region.memory_pe.imphash",
-  "Target.process.Ext.start_address_bytes",
+  "Target.process.thread.Ext.start_address_bytes",
   "agent.id",
   "agent.type",
   "agent.version",
