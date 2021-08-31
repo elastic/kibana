@@ -74,18 +74,6 @@ type SeriesSpec = InferPropType<typeof LineSeries> &
   InferPropType<typeof BarSeries> &
   InferPropType<typeof AreaSeries>;
 
-export {
-  legendConfig,
-  yAxisConfig,
-  tickLabelsConfig,
-  gridlinesConfig,
-  axisTitlesVisibilityConfig,
-  axisExtentConfig,
-  layerConfig,
-  xyChart,
-  labelsOrientationConfig,
-} from '../../common/expressions';
-
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];

@@ -45,7 +45,7 @@ import { getPreloadedState } from '../state_management/lens_slice';
 export async function getLensServices(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
-  attributeService: () => Promise<LensAttributeService>
+  attributeService: LensAttributeService
 ): Promise<LensAppServices> {
   const {
     data,
@@ -70,7 +70,7 @@ export async function getLensServices(
     stateTransfer,
     usageCollection,
     savedObjectsTagging,
-    attributeService: await attributeService(),
+    attributeService,
     http: coreStart.http,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
@@ -95,8 +95,8 @@ export async function mountApp(
   params: AppMountParameters,
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
-    attributeService: () => Promise<LensAttributeService>;
-    getPresentationUtilContext: () => Promise<FC>;
+    attributeService: LensAttributeService;
+    getPresentationUtilContext: () => FC;
   }
 ) {
   const { createEditorFrame, attributeService, getPresentationUtilContext } = mountProps;
@@ -248,7 +248,7 @@ export async function mountApp(
 
   params.element.classList.add('lnsAppWrapper');
 
-  const PresentationUtilContext = await getPresentationUtilContext();
+  const PresentationUtilContext = getPresentationUtilContext();
 
   render(
     <I18nProvider>
