@@ -111,6 +111,7 @@ async function handleMlModelInstall({
   try {
     await esClient.ml.putTrainedModel({
       model_id: mlModel.installationName,
+      timeout: '45s',
       body: mlModel.content,
     });
   } catch (err) {

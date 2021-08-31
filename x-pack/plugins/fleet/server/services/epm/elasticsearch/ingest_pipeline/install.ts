@@ -104,12 +104,17 @@ export const installPipelines = async (
         return acc;
       }, [])
     : [];
-  // @ts-ignore
-  const topLevelPipelines = await installTopLevelPipelines({
-    esClient,
-    paths: topLevelPipelinePaths,
-    pkgVersion: installablePackage.version,
-  });
+
+  if (topLevelPipelinePaths) {
+    pipelines.push(
+      installPipelinesForDataStream({
+        dataStream: undefined,
+        esClient,
+        paths: topLevelPipelinePaths,
+        pkgVersion: installablePackage.version,
+      })
+    );
+  }
 
   return await Promise.all(pipelines).then((results) => results.flat());
 };
@@ -135,52 +140,6 @@ export function rewriteIngestPipeline(
   return pipeline;
 }
 
-export async function installTopLevelPipelines({
-  esClient,
-  pkgVersion,
-  paths,
-}: {
-  esClient: ElasticsearchClient;
-  pkgVersion: string;
-  paths: string[];
-}) {
-  let pipelines: any[] = [];
-  const substitutions: RewriteSubstitution[] = [];
-
-  paths.forEach((path) => {
-    const { name, extension } = getNameAndExtension(path);
-    const nameForInstallation = getPipelineNameForInstallation({
-      pipelineName: name,
-      packageVersion: pkgVersion,
-    });
-    const content = getAsset(path).toString('utf-8');
-    pipelines.push({
-      name,
-      nameForInstallation,
-      content,
-      extension,
-    });
-    substitutions.push({
-      source: name,
-      target: nameForInstallation,
-      templateFunction: 'IngestPipeline',
-    });
-  });
-
-  pipelines = pipelines.map((pipeline) => {
-    return {
-      ...pipeline,
-      contentForInstallation: rewriteIngestPipeline(pipeline.content, substitutions),
-    };
-  });
-
-  const installationPromises = pipelines.map(async (pipeline) => {
-    return installPipeline({ esClient, pipeline });
-  });
-
-  return Promise.all(installationPromises);
-}
-
 export async function installPipelinesForDataStream({
   esClient,
   pkgVersion,
@@ -190,9 +149,11 @@ export async function installPipelinesForDataStream({
   esClient: ElasticsearchClient;
   pkgVersion: string;
   paths: string[];
-  dataStream: RegistryDataStream;
+  dataStream?: RegistryDataStream;
 }): Promise<EsAssetReference[]> {
-  const pipelinePaths = paths.filter((path) => isDataStreamPipeline(path, dataStream.path));
+  const pipelinePaths = dataStream
+    ? paths.filter((path) => isDataStreamPipeline(path, dataStream.path))
+    : paths;
   let pipelines: any[] = [];
   const substitutions: RewriteSubstitution[] = [];
 
