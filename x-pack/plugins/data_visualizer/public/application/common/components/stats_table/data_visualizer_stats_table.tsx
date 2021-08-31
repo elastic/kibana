@@ -163,8 +163,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           const displayName = item.displayName ?? item.fieldName;
 
           return (
-            <EuiText size="s">
-              <b data-test-subj={`dataVisualizerDisplayName-${item.fieldName}`}>{displayName}</b>
+            <EuiText size="s" data-test-subj={`dataVisualizerDisplayName-${item.fieldName}`}>
+              {displayName}
             </EuiText>
           );
         },
@@ -217,7 +217,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
                 iconType={showDistributions ? 'eye' : 'eyeClosed'}
                 onClick={() => toggleShowDistribution()}
                 aria-label={
-                  !showDistributions
+                  showDistributions
                     ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel', {
                         defaultMessage: 'Show distributions',
                       })
