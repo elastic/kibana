@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { FiltersExpressionsSelect } from './filters_expression_select';
 import { render } from '../../../../lib/helper/rtl_helpers';
@@ -19,8 +18,8 @@ describe('FiltersExpressionSelect', () => {
   const SCHEME_FIELD_NAME = 'monitor.type';
   const TAG_FIELD_NAME = 'tags';
 
-  it('is empty when no filters available', () => {
-    const component = shallowWithIntl(
+  it('is empty when no filters available', async () => {
+    const { queryByLabelText } = render(
       <FiltersExpressionsSelect
         alertParams={{}}
         newFilters={[]}
@@ -29,7 +28,12 @@ describe('FiltersExpressionSelect', () => {
         shouldUpdateUrl={false}
       />
     );
-    expect(component).toMatchInlineSnapshot(`<Fragment />`);
+
+    await waitFor(() => {
+      for (const label of Object.values(aria)) {
+        expect(queryByLabelText(label)).toBeNull();
+      }
+    });
   });
 
   it.each([
