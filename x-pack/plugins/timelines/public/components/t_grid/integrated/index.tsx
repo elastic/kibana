@@ -300,11 +300,12 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               <UpdatedFlexItem grow={false} $show={!loading}>
                 {!resolverIsShowing(graphEventId) && additionalFilters}
               </UpdatedFlexItem>
-              {tGridEventRenderedViewEnabled && id === 'detections-page' && (
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
-                </UpdatedFlexItem>
-              )}
+              {tGridEventRenderedViewEnabled &&
+                ['detections-page', 'detections-rules-details-page'].includes(id) && (
+                  <UpdatedFlexItem grow={false} $show={!loading}>
+                    <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                  </UpdatedFlexItem>
+                )}
             </UpdatedFlexGroup>
 
             {!graphEventId && graphOverlay == null && (
