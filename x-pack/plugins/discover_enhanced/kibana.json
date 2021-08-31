@@ -9,7 +9,7 @@
   "configPath": ["xpack", "discoverEnhanced"],
   "requiredBundles": ["kibanaUtils", "data"],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Data Discovery",
+    "githubTeam": "kibana-data-discovery"
   }
 }
