@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import createContainer from 'constate';
 
 interface TimeOptions {
