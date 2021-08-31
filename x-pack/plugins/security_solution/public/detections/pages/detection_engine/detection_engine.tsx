@@ -72,6 +72,7 @@ import {
   AlertsTableFilterGroup,
   FILTER_OPEN,
 } from '../../components/alerts_table/alerts_filter_group';
+import { EmptyPage } from '../../../common/components/empty_page';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -119,6 +120,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       hasIndexWrite = false,
       hasIndexMaintenance = false,
       canUserCRUD = false,
+      canUserRead = false,
+      hasIndexRead,
     },
   ] = useUserData();
   const {
@@ -132,6 +135,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const {
     application: { navigateToUrl },
     timelines: timelinesUi,
+    docLinks,
   } = useKibana().services;
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
@@ -248,6 +252,18 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  const emptyPageActions = useMemo(
+    () => ({
+      feature: {
+        icon: 'documents',
+        label: i18n.GO_TO_DOCUMENTATION,
+        url: `${docLinks.links.siem.privileges}`,
+        target: '_blank',
+      },
+    }),
+    [docLinks]
+  );
+
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
       <SecuritySolutionPageWrapper>
@@ -274,7 +290,15 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {indicesExist ? (
+      {indicesExist && (!hasIndexRead || !canUserRead) && (
+        <EmptyPage
+          actions={emptyPageActions}
+          message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
+          data-test-subj="no_feature_permissions-alerts"
+          title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
+        />
+      )}
+      {indicesExist && hasIndexRead && canUserRead && (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
@@ -351,7 +375,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
-      ) : (
+      )}
+      {!indicesExist && (
         <SecuritySolutionPageWrapper>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
           <OverviewEmpty />

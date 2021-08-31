@@ -15,6 +15,7 @@ import { useCreateTransforms } from '../../../transforms/containers/use_create_t
 
 export interface State {
   canUserCRUD: boolean | null;
+  canUserRead: boolean | null;
   hasIndexManage: boolean | null;
   hasIndexMaintenance: boolean | null;
   hasIndexWrite: boolean | null;
@@ -30,6 +31,7 @@ export interface State {
 
 export const initialState: State = {
   canUserCRUD: null,
+  canUserRead: null,
   hasIndexManage: null,
   hasIndexMaintenance: null,
   hasIndexWrite: null,
@@ -80,6 +82,10 @@ export type Action =
   | {
       type: 'updateCanUserCRUD';
       canUserCRUD: boolean | null;
+    }
+  | {
+      type: 'updateCanUserRead';
+      canUserRead: boolean | null;
     }
   | {
       type: 'updateSignalIndexName';
@@ -152,6 +158,12 @@ export const userInfoReducer = (state: State, action: Action): State => {
         canUserCRUD: action.canUserCRUD,
       };
     }
+    case 'updateCanUserRead': {
+      return {
+        ...state,
+        canUserRead: action.canUserRead,
+      };
+    }
     case 'updateSignalIndexName': {
       return {
         ...state,
@@ -187,6 +199,7 @@ export const useUserInfo = (): State => {
   const [
     {
       canUserCRUD,
+      canUserRead,
       hasIndexManage,
       hasIndexMaintenance,
       hasIndexWrite,
@@ -223,6 +236,7 @@ export const useUserInfo = (): State => {
 
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean = uiCapabilities.siem.crud === true;
+  const capabilitiesCanUserRead: boolean = uiCapabilities.siem.read === true;
 
   useEffect(() => {
     if (loading !== (privilegeLoading || indexNameLoading)) {
@@ -300,6 +314,12 @@ export const useUserInfo = (): State => {
   }, [dispatch, loading, canUserCRUD, capabilitiesCanUserCRUD]);
 
   useEffect(() => {
+    if (!loading && canUserRead !== capabilitiesCanUserRead) {
+      dispatch({ type: 'updateCanUserRead', canUserRead: capabilitiesCanUserRead });
+    }
+  }, [dispatch, loading, canUserRead, capabilitiesCanUserRead]);
+
+  useEffect(() => {
     if (!loading && signalIndexName !== apiSignalIndexName && apiSignalIndexName != null) {
       dispatch({ type: 'updateSignalIndexName', signalIndexName: apiSignalIndexName });
     }
@@ -351,6 +371,7 @@ export const useUserInfo = (): State => {
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
+    canUserRead,
     hasIndexManage,
     hasIndexMaintenance,
     hasIndexWrite,

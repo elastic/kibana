@@ -46,7 +46,7 @@ const CANNOT_EDIT_LISTS = i18n.translate(
 const CANNOT_EDIT_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.cannotEditAlerts',
   {
-    defaultMessage: 'Without these privileges, you cannot open or close alerts.',
+    defaultMessage: 'Without these privileges, you cannot interact with alerts.',
   }
 );
 
@@ -83,20 +83,20 @@ export const missingPrivilegesCallOutBody = ({
             </ul>
           </>
         ) : null,
-      // featurePrivileges:
-      //   featurePrivileges.length > 0 ? (
-      //     <>
-      //       <FormattedMessage
-      //         id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
-      //         defaultMessage="Missing Kibana feature privileges:"
-      //       />
-      //       <ul>
-      //         {featurePrivileges.map(([feature, missingPrivileges]) => (
-      //           <li key={feature}>{missingFeaturePrivileges(feature, missingPrivileges)}</li>
-      //         ))}
-      //       </ul>
-      //     </>
-      //   ) : null,
+      featurePrivileges:
+        featurePrivileges.length > 0 ? (
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
+              defaultMessage="Missing Kibana feature privileges:"
+            />
+            <ul>
+              {featurePrivileges.map(([feature, missingPrivileges]) => (
+                <li key={feature}>{missingFeaturePrivileges(feature, missingPrivileges)}</li>
+              ))}
+            </ul>
+          </>
+        ) : null,
       docs: (
         <ul>
           <li>
