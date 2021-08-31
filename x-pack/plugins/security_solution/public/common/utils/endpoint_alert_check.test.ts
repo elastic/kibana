@@ -63,6 +63,10 @@ describe('isAlertFromEndpointAlert', () => {
     expect(isAlertFromEndpointAlert({ ecsData: mockEcsData })).toBe(true);
   });
 
+  it('should return false if ecsData is undefined', () => {
+    expect(isAlertFromEndpointAlert({ ecsData: undefined })).toBeFalsy();
+  });
+
   it('should return false if it is not an Alert', () => {
     const mockEcsData = {
       _id: 'mockId',
