@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { TGridIntegratedProps } from '../components/t_grid/integrated';
 import { mockBrowserFields, mockDocValueFields } from './browser_fields';
 import { mockDataProviders } from './mock_data_providers';
+import { mockTimelineData } from './mock_timeline_data';
 import { ColumnHeaderOptions, TimelineId } from '../../common';
 import { mockIndexNames, mockIndexPattern } from './index_pattern';
+import { EventRenderedViewProps } from '../components/t_grid/event_rendered_view';
+
 const columnHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: 'not-filtered',
@@ -120,4 +124,18 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   start: '2021-05-01T18:14:07.522Z',
   tGridEventRenderedViewEnabled: true,
   trailingControlColumns: [],
+};
+
+export const eventRenderedProps: EventRenderedViewProps = {
+  alertToolbar: <></>,
+  browserFields: mockBrowserFields,
+  events: mockTimelineData,
+  leadingControlColumns: [],
+  onChangePage: () => null,
+  onChangeItemsPerPage: () => null,
+  pageIndex: 0,
+  pageSize: 10,
+  pageSizeOptions: [10, 25, 50, 100],
+  rowRenderers: [],
+  totalItemCount: 100,
 };
