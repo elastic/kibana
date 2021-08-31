@@ -69,9 +69,9 @@ For information about the 7.14.1 release, review the following information.
 [float]
 [[breaking-changes-v7.14.1]]
 === Breaking changes
-Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.14.14, review the <<breaking-changes-7.14.0,7.14.0 breaking changes>>, then mitigate the impact to your application.
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.14.1, review the <<breaking-changes-7.14.0,7.14.0 breaking changes>>.
 
-Review the breaking changes in previous versions: 
+To review the breaking changes in previous versions, refer to the following: 
 
 {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | {kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | {kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] |
 {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | {kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] |
@@ -95,7 +95,7 @@ Alerting::
 Canvas::
 * Fixes numeric variable casting {kibana-pull}109744[#109744]
 Dashboard::
-* Adds Ability to Defer Embeddable Loaded State {kibana-pull}107227[#107227]
+* Adds ability to defer embeddable loaded state {kibana-pull}107227[#107227]
 Design::
 * Fixes accessibility focus trap issue {kibana-pull}107292[#107292]
 Discover::
