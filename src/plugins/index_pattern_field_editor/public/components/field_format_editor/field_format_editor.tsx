@@ -8,7 +8,6 @@
 
 import React, { PureComponent } from 'react';
 import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,10 +18,11 @@ import {
 } from 'src/plugins/data/public';
 import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import { CoreStart } from 'src/core/public';
+
 import { castEsToKbnFieldTypeName } from '../../../../data/public';
-import { FormatEditor } from './format_editor';
 import { FormatEditorServiceStart } from '../../service';
-import { FieldFormatConfig } from '../../types';
+import { SerializedFieldFormat } from '../../shared_imports';
+import { FormatEditor } from './format_editor';
 
 export interface FormatSelectEditorProps {
   esTypes: ES_FIELD_TYPES[];
@@ -30,9 +30,9 @@ export interface FormatSelectEditorProps {
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   uiSettings: CoreStart['uiSettings'];
-  onChange: (change?: FieldFormatConfig) => void;
+  onChange: (change?: SerializedFieldFormat) => void;
   onError: (error?: string) => void;
-  value?: FieldFormatConfig;
+  value?: SerializedFieldFormat;
 }
 
 interface FieldTypeFormat {

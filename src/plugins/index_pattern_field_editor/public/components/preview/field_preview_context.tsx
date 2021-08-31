@@ -20,9 +20,9 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import type { FieldPreviewContext, FieldFormatConfig } from '../../types';
+import type { FieldPreviewContext } from '../../types';
 import { parseEsError } from '../../lib/runtime_field_validation';
-import { RuntimeType, RuntimeField } from '../../shared_imports';
+import { RuntimeType, RuntimeField, SerializedFieldFormat } from '../../shared_imports';
 import { useFieldEditorContext } from '../field_editor_context';
 
 type From = 'cluster' | 'custom';
@@ -47,7 +47,7 @@ interface Params {
   index: string | null;
   type: RuntimeType | null;
   script: Required<RuntimeField>['script'] | null;
-  format: FieldFormatConfig | null;
+  format: SerializedFieldFormat | null;
   document: EsDocument | null;
 }
 

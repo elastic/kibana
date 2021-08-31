@@ -46,8 +46,6 @@ export interface Field extends EnhancedRuntimeField {
   name: string;
 }
 
-export type FieldFormatConfig = EnhancedRuntimeField['format'];
-
 export type CloseEditor = () => void;
 
 export type FieldPreviewContext =
