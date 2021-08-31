@@ -6,49 +6,65 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
-import { SavedObjectsClientContract, ISavedObjectsRepository } from 'kibana/server';
 import { TIME_RANGE_DATA_MODES } from '../../common/enums';
 import { findByValueEmbeddables } from '../../../dashboard/server';
+
+import type {
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+  SavedObjectsFindResult,
+} from '../../../../core/server';
+import type { SavedVisState } from '../../../visualizations/common';
 
 export interface TimeseriesUsage {
   timeseries_use_last_value_mode_total: number;
 }
 
-interface VisState {
-  type?: string;
-  params?: any;
-}
+const doTelemetryFoVisualizations = async (
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository,
+  telemetryUseLastValueMode: (savedVis: SavedVisState) => void
+) => {
+  const finder = await soClient.createPointInTimeFinder({
+    type: 'visualization',
+    perPage: 1000,
+    namespaces: ['*'],
+  });
+
+  for await (const response of finder.find()) {
+    (response.saved_objects || []).forEach(({ attributes }: SavedObjectsFindResult<any>) => {
+      if (attributes?.visState) {
+        try {
+          const visState: SavedVisState = JSON.parse(attributes.visState);
+
+          telemetryUseLastValueMode(visState);
+        } catch {
+          // nothing to be here, "so" not valid
+        }
+      }
+    });
+  }
+  await finder.close();
+};
+
+const doTelemetryForByValueVisualizations = async (
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository,
+  telemetryUseLastValueMode: (savedVis: SavedVisState) => void
+) => {
+  const byValueVisualizations = await findByValueEmbeddables(soClient, 'visualization');
+
+  for (const item of byValueVisualizations) {
+    telemetryUseLastValueMode((item.savedVis as unknown) as SavedVisState);
+  }
+};
 
 export const getStats = async (
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract | ISavedObjectsRepository,
-  index: string
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository
 ): Promise<TimeseriesUsage | undefined> => {
   const timeseriesUsage = {
     timeseries_use_last_value_mode_total: 0,
   };
 
-  const searchParams = {
-    size: 10000,
-    index,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._id', 'hits.hits._source.visualization'],
-    body: {
-      query: {
-        bool: {
-          filter: { term: { type: 'visualization' } },
-        },
-      },
-    },
-  };
-
-  const { body: esResponse } = await esClient.search<{
-    visualization: { visState: string };
-    updated_at: string;
-  }>(searchParams);
-
-  function telemetryUseLastValueMode(visState: VisState) {
+  function telemetryUseLastValueMode(visState: SavedVisState) {
     if (
       visState.type === 'metrics' &&
       visState.params.type !== 'timeseries' &&
@@ -59,28 +75,10 @@ export const getStats = async (
     }
   }
 
-  if (esResponse?.hits?.hits?.length) {
-    for (const hit of esResponse.hits.hits) {
-      if (hit._source && 'visualization' in hit._source) {
-        const { visualization } = hit._source!;
-
-        let visState: VisState = {};
-        try {
-          visState = JSON.parse(visualization?.visState ?? '{}');
-        } catch (e) {
-          // invalid visState
-        }
-
-        telemetryUseLastValueMode(visState);
-      }
-    }
-  }
-
-  const byValueVisualizations = await findByValueEmbeddables(soClient, 'visualization');
-
-  for (const item of byValueVisualizations) {
-    telemetryUseLastValueMode(item.savedVis as VisState);
-  }
+  await Promise.all([
+    doTelemetryFoVisualizations(soClient, telemetryUseLastValueMode),
+    doTelemetryForByValueVisualizations(soClient, telemetryUseLastValueMode),
+  ]);
 
   return timeseriesUsage.timeseries_use_last_value_mode_total ? timeseriesUsage : undefined;
 };

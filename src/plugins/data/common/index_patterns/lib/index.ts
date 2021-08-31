@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { IndexPatternMissingIndices } from './errors';
+export { DataViewMissingIndices } from './errors';
 export { getTitle } from './get_title';
 export { isDefault } from './is_default';
 
 export * from './types';
-export { validateIndexPattern } from './validate_index_pattern';
+export { validateDataView } from './validate_index_pattern';

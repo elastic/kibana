@@ -8,6 +8,7 @@
 
 export {
   Adapters,
+  Request,
   RequestAdapter,
   RequestStatistic,
   RequestStatistics,
