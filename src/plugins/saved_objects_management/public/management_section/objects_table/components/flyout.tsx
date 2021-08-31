@@ -39,9 +39,9 @@ import {
 } from '../../../../../data/public';
 import {
   importFile,
-  importLegacyFile,
+  // importLegacyFile,
   resolveImportErrors,
-  logLegacyImport,
+  // logLegacyImport,
   processImportResponse,
   ProcessedImportResponse,
 } from '../../../lib';
@@ -89,7 +89,6 @@ export interface FlyoutState {
   indexPatterns?: IndexPattern[];
   importMode: ImportMode;
   loadingMessage?: string;
-  isLegacyFile: boolean;
   status: string;
 }
 
@@ -129,7 +128,6 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       indexPatterns: undefined,
       importMode: { createNewCopies: CREATE_NEW_COPIES_DEFAULT, overwrite: OVERWRITE_ALL_DEFAULT },
       loadingMessage: undefined,
-      isLegacyFile: false,
       status: 'idle',
     };
   }
@@ -152,14 +150,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
 
   setImportFile = (files: FileList | null) => {
     if (!files || !files[0]) {
-      this.setState({ file: undefined, isLegacyFile: false });
+      this.setState({ file: undefined });
       return;
     }
     const file = files[0];
-    this.setState({
-      file,
-      isLegacyFile: /\.json$/i.test(file.name) || file.type === 'application/json',
-    });
+    this.setState({ file });
   };
 
   /**
@@ -246,103 +241,6 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     }
   };
 
-  legacyImport = async () => {
-    const { serviceRegistry, indexPatterns, overlays, http, allowedTypes } = this.props;
-    const { file, importMode } = this.state;
-
-    this.setState({ status: 'loading', error: undefined });
-
-    // Log warning on server, don't wait for response
-    logLegacyImport(http);
-
-    let contents;
-    try {
-      contents = await importLegacyFile(file!);
-    } catch (e) {
-      this.setState({
-        status: 'error',
-        error: i18n.translate(
-          'savedObjectsManagement.objectsTable.flyout.importLegacyFileErrorMessage',
-          { defaultMessage: 'The file could not be processed.' }
-        ),
-      });
-      return;
-    }
-
-    if (!Array.isArray(contents)) {
-      this.setState({
-        status: 'error',
-        error: i18n.translate(
-          'savedObjectsManagement.objectsTable.flyout.invalidFormatOfImportedFileErrorMessage',
-          { defaultMessage: 'Saved objects file format is invalid and cannot be imported.' }
-        ),
-      });
-      return;
-    }
-
-    contents = contents
-      .filter((content) => allowedTypes.includes(content._type))
-      .map((doc) => ({
-        ...doc,
-        // The server assumes that documents with no migrationVersion are up to date.
-        // That assumption enables Kibana and other API consumers to not have to build
-        // up migrationVersion prior to creating new objects. But it means that imports
-        // need to set migrationVersion to something other than undefined, so that imported
-        // docs are not seen as automatically up-to-date.
-        _migrationVersion: doc._migrationVersion || {},
-      }));
-
-    const {
-      conflictedIndexPatterns,
-      conflictedSavedObjectsLinkedToSavedSearches,
-      conflictedSearchDocs,
-      importedObjectCount,
-      failedImports,
-    } = await resolveSavedObjects(
-      contents,
-      importMode.overwrite,
-      serviceRegistry.all().map((e) => e.service),
-      indexPatterns,
-      overlays.openConfirm
-    );
-
-    const byId: Record<string, any[]> = {};
-    conflictedIndexPatterns
-      .map(({ doc, obj }) => {
-        return { doc, obj: obj._serialize() };
-      })
-      .forEach(({ doc, obj }) =>
-        obj.references.forEach((ref: Record<string, any>) => {
-          byId[ref.id] = byId[ref.id] != null ? byId[ref.id].concat({ doc, obj }) : [{ doc, obj }];
-        })
-      );
-    const unmatchedReferences = Object.entries(byId).reduce(
-      (accum, [existingIndexPatternId, list]) => {
-        accum.push({
-          existingIndexPatternId,
-          newIndexPatternId: undefined,
-          list: list.map(({ doc }) => ({
-            id: existingIndexPatternId,
-            type: doc._type,
-            title: doc._source.title,
-          })),
-        });
-        return accum;
-      },
-      [] as any[]
-    );
-
-    this.setState({
-      conflictedIndexPatterns,
-      conflictedSavedObjectsLinkedToSavedSearches,
-      conflictedSearchDocs,
-      failedImports,
-      unmatchedReferences,
-      importCount: importedObjectCount,
-      status: unmatchedReferences.length === 0 ? 'success' : 'idle',
-    });
-  };
-
   public get hasUnmatchedReferences() {
     return this.state.unmatchedReferences && this.state.unmatchedReferences.length > 0;
   }
@@ -361,89 +259,6 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       [] as Array<{ oldId: string; newId: string }>
     );
   }
-
-  confirmLegacyImport = async () => {
-    const {
-      conflictedIndexPatterns,
-      importMode,
-      conflictedSavedObjectsLinkedToSavedSearches,
-      conflictedSearchDocs,
-      failedImports,
-    } = this.state;
-
-    const { serviceRegistry, indexPatterns, search } = this.props;
-
-    this.setState({
-      error: undefined,
-      status: 'loading',
-      loadingMessage: undefined,
-    });
-
-    let importCount = this.state.importCount;
-
-    if (this.hasUnmatchedReferences) {
-      try {
-        const resolutions = this.resolutions;
-
-        // Do not Promise.all these calls as the order matters
-        this.setState({
-          loadingMessage: i18n.translate(
-            'savedObjectsManagement.objectsTable.flyout.confirmLegacyImport.resolvingConflictsLoadingMessage',
-            { defaultMessage: 'Resolving conflicts…' }
-          ),
-        });
-        if (resolutions.length) {
-          importCount += await resolveIndexPatternConflicts(
-            resolutions,
-            conflictedIndexPatterns!,
-            importMode.overwrite,
-            { indexPatterns, search }
-          );
-        }
-        this.setState({
-          loadingMessage: i18n.translate(
-            'savedObjectsManagement.objectsTable.flyout.confirmLegacyImport.savingConflictsLoadingMessage',
-            { defaultMessage: 'Saving conflicts…' }
-          ),
-        });
-        importCount += await saveObjects(
-          conflictedSavedObjectsLinkedToSavedSearches!,
-          importMode.overwrite
-        );
-        this.setState({
-          loadingMessage: i18n.translate(
-            'savedObjectsManagement.objectsTable.flyout.confirmLegacyImport.savedSearchAreLinkedProperlyLoadingMessage',
-            { defaultMessage: 'Ensure saved searches are linked properly…' }
-          ),
-        });
-        importCount += await resolveSavedSearches(
-          conflictedSearchDocs!,
-          serviceRegistry.all().map((e) => e.service),
-          indexPatterns,
-          importMode.overwrite
-        );
-        this.setState({
-          loadingMessage: i18n.translate(
-            'savedObjectsManagement.objectsTable.flyout.confirmLegacyImport.retryingFailedObjectsLoadingMessage',
-            { defaultMessage: 'Retrying failed objects…' }
-          ),
-        });
-        importCount += await saveObjects(
-          failedImports!.map(({ obj }) => obj) as any[],
-          importMode.overwrite
-        );
-      } catch (e) {
-        this.setState({
-          status: 'error',
-          error: getErrorMessage(e),
-          loadingMessage: undefined,
-        });
-        return;
-      }
-    }
-
-    this.setState({ status: 'success', importCount });
-  };
 
   onIndexChanged = (id: string, e: any) => {
     const value = e.target.value;
@@ -616,7 +431,6 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       importCount,
       failedImports = [],
       successfulImports = [],
-      isLegacyFile,
       importMode,
       importWarnings,
     } = this.state;
@@ -635,7 +449,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
-    if (!isLegacyFile && status === 'success') {
+    // Import summary for completed non-legacy import
+    if (status === 'success') {
       return (
         <ImportSummary
           basePath={this.props.http.basePath}
@@ -646,7 +461,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
-    // Import summary for failed legacy import
+    // Import summary for failed legacy import. Not in use since we removed support for legacy imports
     if (failedImports.length && !this.hasUnmatchedReferences) {
       return (
         <EuiCallOut
@@ -708,7 +523,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
-    // Import summary for completed legacy import
+    // Import summary for completed legacy import. Not in use since we removed support for legacy imports
     if (status === 'success') {
       if (importCount === 0) {
         return (
@@ -768,7 +583,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           }
         >
           <EuiFilePicker
-            accept=".ndjson, .json"
+            accept=".ndjson"
             fullWidth
             initialPromptText={
               <FormattedMessage
@@ -782,7 +597,6 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         <EuiFormRow fullWidth>
           <ImportModeControl
             initialValues={importMode}
-            isLegacyFile={isLegacyFile}
             updateSelection={(newValues: ImportMode) => this.changeImportMode(newValues)}
           />
         </EuiFormRow>
@@ -791,7 +605,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderFooter() {
-    const { isLegacyFile, status } = this.state;
+    const { status } = this.state;
     const { done, close } = this.props;
 
     let confirmButton;
@@ -808,7 +622,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } else if (this.hasUnmatchedReferences) {
       confirmButton = (
         <EuiButton
-          onClick={isLegacyFile ? this.confirmLegacyImport : this.resolveImportErrors}
+          onClick={this.resolveImportErrors}
           size="s"
           fill
           isLoading={status === 'loading'}
@@ -823,7 +637,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } else {
       confirmButton = (
         <EuiButton
-          onClick={isLegacyFile ? this.legacyImport : this.import}
+          onClick={this.import}
           size="s"
           fill
           isLoading={status === 'loading'}
@@ -843,7 +657,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           <EuiButtonEmpty
             onClick={close}
             size="s"
-            disabled={status === 'loading' || (isLegacyFile === false && status === 'success')}
+            disabled={status === 'loading' || status === 'success'}
             data-test-subj="importSavedObjectsCancelBtn"
           >
             <FormattedMessage
@@ -860,33 +674,6 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   renderSubheader() {
     if (this.state.status === 'loading' || this.state.status === 'success') {
       return null;
-    }
-
-    let legacyFileWarning;
-    if (this.state.isLegacyFile) {
-      legacyFileWarning = (
-        <>
-          <EuiCallOut
-            data-test-subj="importSavedObjectsLegacyWarning"
-            title={
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
-                defaultMessage="Support for JSON files is going away"
-              />
-            }
-            color="warning"
-            iconType="help"
-          >
-            <p>
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
-                defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
-              />
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      );
     }
 
     let indexPatternConflictsWarning;
@@ -925,18 +712,12 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
-    if (!legacyFileWarning && !indexPatternConflictsWarning) {
+    if (!indexPatternConflictsWarning) {
       return null;
     }
 
     return (
       <Fragment>
-        {legacyFileWarning && (
-          <span>
-            <EuiSpacer size="s" />
-            {legacyFileWarning}
-          </span>
-        )}
         {indexPatternConflictsWarning && (
           <span>
             <EuiSpacer size="s" />

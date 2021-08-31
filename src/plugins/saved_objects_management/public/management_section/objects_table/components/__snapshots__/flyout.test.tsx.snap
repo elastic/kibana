@@ -593,7 +593,7 @@ exports[`Flyout should render import step 1`] = `
         labelType="label"
       >
         <EuiFilePicker
-          accept=".ndjson, .json"
+          accept=".ndjson"
           compressed={false}
           display="large"
           fullWidth={true}
