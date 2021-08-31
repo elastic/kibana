@@ -5,7 +5,27 @@
  * 2.0.
  */
 
-const localMousePosition = (canvasOrigin, clientX, clientY, zoomScale = 1) => {
+import { CommitFn } from '../../../lib/aeroelastic';
+import { WORKPAD_CONTAINER_ID } from '../../workpad_app/workpad_app.component';
+
+type CanvasOriginFn = () => { left: number; top: number };
+
+export interface Props {
+  commit: CommitFn | undefined;
+  canvasOrigin: CanvasOriginFn;
+  zoomScale: number;
+  canDragElement: (target: EventTarget | null) => boolean;
+}
+
+const isInCanvas = (target: EventTarget | null) =>
+  target instanceof Element && target.closest(`#${WORKPAD_CONTAINER_ID}`);
+
+const localMousePosition = (
+  canvasOrigin: CanvasOriginFn,
+  clientX: number,
+  clientY: number,
+  zoomScale = 1
+) => {
   const { left, top } = canvasOrigin();
   return {
     // commit unscaled coordinates
@@ -19,12 +39,26 @@ const resetHandler = () => {
   window.onmouseup = null;
 };
 
-const setupHandler = (commit, canvasOrigin, zoomScale) => {
+const setupHandler = (commit: CommitFn, canvasOrigin: CanvasOriginFn, zoomScale?: number) => {
   // Ancestor has to be identified on setup, rather than 1st interaction, otherwise events may be triggered on
   // DOM elements that had been removed: kibana-canvas github issue #1093
 
-  window.onmousemove = ({ buttons, clientX, clientY, altKey, metaKey, shiftKey, ctrlKey }) => {
+  window.onmousemove = ({
+    buttons,
+    clientX,
+    clientY,
+    altKey,
+    metaKey,
+    shiftKey,
+    ctrlKey,
+    target,
+  }: MouseEvent) => {
+    if (!isInCanvas(target)) {
+      return;
+    }
+
     const { x, y } = localMousePosition(canvasOrigin, clientX, clientY, zoomScale);
+
     // only commits the cursor position if there's a way to latch onto x/y calculation (canvasOrigin is knowable)
     // or if left button is being held down (i.e. an element is being dragged)
     if (buttons === 1 || canvasOrigin) {
@@ -34,9 +68,15 @@ const setupHandler = (commit, canvasOrigin, zoomScale) => {
       commit('cursorPosition', {});
     }
   };
-  window.onmouseup = (e) => {
+
+  window.onmouseup = (e: MouseEvent) => {
+    const { clientX, clientY, altKey, metaKey, shiftKey, ctrlKey, target } = e;
+
+    if (!isInCanvas(target)) {
+      return;
+    }
+
     e.stopPropagation();
-    const { clientX, clientY, altKey, metaKey, shiftKey, ctrlKey } = e;
     const { x, y } = localMousePosition(canvasOrigin, clientX, clientY, zoomScale);
     commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey, shiftKey, ctrlKey });
     resetHandler();
@@ -44,26 +84,46 @@ const setupHandler = (commit, canvasOrigin, zoomScale) => {
 };
 
 const handleMouseMove = (
-  commit,
-  { clientX, clientY, altKey, metaKey, shiftKey, ctrlKey },
-  canvasOrigin,
-  zoomScale
+  commit: CommitFn | undefined,
+  { clientX, clientY, altKey, metaKey, shiftKey, ctrlKey, target }: MouseEvent,
+  canvasOrigin: CanvasOriginFn,
+  zoomScale?: number
 ) => {
+  if (!isInCanvas(target)) {
+    return;
+  }
+
   const { x, y } = localMousePosition(canvasOrigin, clientX, clientY, zoomScale);
+
   if (commit) {
     commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
   }
 };
 
-const handleMouseLeave = (commit, { buttons }) => {
+const handleMouseLeave = (commit: CommitFn | undefined, { buttons, target }: MouseEvent) => {
+  if (!isInCanvas(target)) {
+    return;
+  }
+
   if (buttons !== 1 && commit) {
     commit('cursorPosition', {}); // reset hover only if we're not holding down left key (ie. drag in progress)
   }
 };
 
-const handleMouseDown = (commit, e, canvasOrigin, zoomScale, allowDrag = true) => {
+const handleMouseDown = (
+  commit: CommitFn | undefined,
+  e: MouseEvent,
+  canvasOrigin: CanvasOriginFn,
+  zoomScale: number,
+  allowDrag = true
+) => {
+  const { clientX, clientY, buttons, altKey, metaKey, shiftKey, ctrlKey, target } = e;
+
+  if (!isInCanvas(target)) {
+    return;
+  }
+
   e.stopPropagation();
-  const { clientX, clientY, buttons, altKey, metaKey, shiftKey, ctrlKey } = e;
   if (buttons !== 1 || !commit) {
     resetHandler();
     return; // left-click only
@@ -82,7 +142,7 @@ const handleMouseDown = (commit, e, canvasOrigin, zoomScale, allowDrag = true) =
 };
 
 export const eventHandlers = {
-  onMouseDown: (props) => (e) =>
+  onMouseDown: (props: Props) => (e: MouseEvent) =>
     handleMouseDown(
       props.commit,
       e,
@@ -90,9 +150,10 @@ export const eventHandlers = {
       props.zoomScale,
       props.canDragElement(e.target)
     ),
-  onMouseMove: (props) => (e) =>
+  onMouseMove: (props: Props) => (e: MouseEvent) =>
     handleMouseMove(props.commit, e, props.canvasOrigin, props.zoomScale),
-  onMouseLeave: (props) => (e) => handleMouseLeave(props.commit, e),
-  onWheel: (props) => (e) => handleMouseMove(props.commit, e, props.canvasOrigin),
+  onMouseLeave: (props: Props) => (e: MouseEvent) => handleMouseLeave(props.commit, e),
+  onWheel: (props: Props) => (e: WheelEvent) =>
+    handleMouseMove(props.commit, e, props.canvasOrigin),
   resetHandler: () => () => resetHandler(),
 };

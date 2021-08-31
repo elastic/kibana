@@ -60,6 +60,7 @@ interface ViewResultsInDiscoverActionProps {
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
+  mode?: string;
 }
 
 function getLensAttributes(
@@ -200,6 +201,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   buttonType,
   endDate,
   startDate,
+  mode,
 }) => {
   const lensService = useKibana().services.lens;
 
@@ -215,7 +217,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
           timeRange: {
             from: startDate ?? 'now-1d',
             to: endDate ?? 'now',
-            mode: startDate || endDate ? 'absolute' : 'relative',
+            mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
           },
           attributes: getLensAttributes(actionId, agentIds),
         },
@@ -224,7 +226,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         }
       );
     },
-    [actionId, agentIds, endDate, lensService, startDate]
+    [actionId, agentIds, endDate, lensService, mode, startDate]
   );
 
   if (buttonType === ViewResultsActionButtonType.button) {
@@ -537,6 +539,9 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
         actionId={getPackActionId(item.vars?.id.value, scheduledQueryGroupName)}
         agentIds={agentIds}
         buttonType={ViewResultsActionButtonType.icon}
+        startDate={`now-${item.vars?.interval.value * 2}s`}
+        endDate="now"
+        mode="relative"
       />
     ),
     [agentIds, scheduledQueryGroupName]
@@ -545,12 +550,15 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
   const renderLensResultsAction = useCallback(
     (item) => (
       <ViewResultsInLensAction
-        actionId={item.vars?.id.value}
+        actionId={getPackActionId(item.vars?.id.value, scheduledQueryGroupName)}
         agentIds={agentIds}
         buttonType={ViewResultsActionButtonType.icon}
+        startDate={`now-${item.vars?.interval.value * 2}s`}
+        endDate="now"
+        mode="relative"
       />
     ),
-    [agentIds]
+    [agentIds, scheduledQueryGroupName]
   );
 
   const getItemId = useCallback(
