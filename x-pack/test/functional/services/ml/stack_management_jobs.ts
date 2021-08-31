@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlADJobTable } from './job_table';
 import { MlDFAJobTable } from './data_frame_analytics_table';
+import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
 
 type SyncFlyoutObjectType =
   | 'MissingObjects'
@@ -227,6 +228,29 @@ export function MachineLearningStackManagementJobsProvider(
         `Expected job ids to be '${JSON.stringify(expectedJobIds)}' (got '${JSON.stringify(
           actualJobIds
         )}')`
+      );
+    },
+
+    async assertCorrectTitle(jobCount: number, jobType: JobType) {
+      const subj = await testSubjects.find('mlJobMgmtImportJobsADTitle');
+      const title = (await subj.parseDomContent()).html();
+
+      const jobTypeString =
+        jobType === 'anomaly-detector' ? 'anomaly detection' : 'data frame analytics';
+
+      const results = title.match(
+        /(\d) (anomaly detection|data frame analytics) jobs read from file$/
+      );
+      expect(results).to.not.eql(null, `Expected regex results to not be null`);
+      const foundCount = results![1];
+      const foundJobTypeString = results![2];
+      expect(foundCount).to.eql(
+        jobCount,
+        `Expected job count to be '${jobCount}' (got '${foundCount}')`
+      );
+      expect(foundJobTypeString).to.eql(
+        jobTypeString,
+        `Expected job count to be '${jobTypeString}' (got '${foundJobTypeString}')`
       );
     },
 

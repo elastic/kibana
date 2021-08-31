@@ -8,7 +8,8 @@
 import path from 'path';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
+// import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
+import { JobType } from '../../../../../plugins/ml/common/types/saved_objects';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -17,13 +18,14 @@ export default function ({ getService }: FtrProviderContext) {
     {
       filePath: path.join(__dirname, 'files_to_import', 'anomaly_detection_jobs.json'),
       expected: {
+        jobType: 'anomaly-detector' as JobType,
         jobIds: ['test1', 'test3'],
         skippedJobIds: ['test2'],
       },
     },
   ];
 
-  describe.only('import jobs', function () {
+  describe('import jobs', function () {
     this.tags(['mlqa']);
     before(async () => {
       await ml.api.cleanMlIndices();
@@ -47,6 +49,10 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.stackManagementJobs.selectFileToImport(testData.filePath);
       });
       it('has the correct importable jobs', async () => {
+        await ml.stackManagementJobs.assertCorrectTitle(
+          [...testData.expected.jobIds, ...testData.expected.skippedJobIds].length,
+          testData.expected.jobType
+        );
         await ml.stackManagementJobs.assertJobIdsExist(testData.expected.jobIds);
         await ml.stackManagementJobs.assertJobIdsSkipped(testData.expected.skippedJobIds);
       });

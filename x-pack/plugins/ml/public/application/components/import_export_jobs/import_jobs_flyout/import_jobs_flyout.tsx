@@ -381,19 +381,23 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                 <div data-test-subj="mlJobMgmtImportJobsFileRead">
                   <EuiSpacer size="l" />
                   {jobType === 'anomaly-detector' && (
-                    <FormattedMessage
-                      id="xpack.ml.importExport.importFlyout.selectedFiles.ad"
-                      defaultMessage="{num} anomaly detection {num, plural, one {job} other {jobs}} read from file"
-                      values={{ num: totalJobsRead }}
-                    />
+                    <div data-test-subj="mlJobMgmtImportJobsADTitle">
+                      <FormattedMessage
+                        id="xpack.ml.importExport.importFlyout.selectedFiles.ad"
+                        defaultMessage="{num} anomaly detection {num, plural, one {job} other {jobs}} read from file"
+                        values={{ num: totalJobsRead }}
+                      />
+                    </div>
                   )}
 
                   {jobType === 'data-frame-analytics' && (
-                    <FormattedMessage
-                      id="xpack.ml.importExport.importFlyout.selectedFiles.dfa"
-                      defaultMessage="{num} data frame analytics {num, plural, one {job} other {jobs}} read from file"
-                      values={{ num: totalJobsRead }}
-                    />
+                    <div data-test-subj="mlJobMgmtImportJobsDFATitle">
+                      <FormattedMessage
+                        id="xpack.ml.importExport.importFlyout.selectedFiles.dfa"
+                        defaultMessage="{num} data frame analytics {num, plural, one {job} other {jobs}} read from file"
+                        values={{ num: totalJobsRead }}
+                      />
+                    </div>
                   )}
 
                   <EuiSpacer size="m" />
