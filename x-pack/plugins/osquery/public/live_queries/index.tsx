@@ -7,6 +7,7 @@
 
 import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
@@ -52,13 +53,26 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
-        title={<h2>Permission denied</h2>}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.osquery.liveQuery.permissionDeniedPromptTitle"
+              defaultMessage="Permission denied"
+            />
+          </h2>
+        }
         titleSize="xs"
         body={
           <p>
-            To view query results, ask your administrator to update your user role to have index{' '}
-            <EuiCode>read</EuiCode> privileges on the{' '}
-            <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode> index.
+            <FormattedMessage
+              id="xpack.osquery.liveQuery.permissionDeniedPromptBody"
+              defaultMessage="To view query results, ask your administrator to update your user role to have index {read} privileges on the {logs} index."
+              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+              values={{
+                read: <EuiCode>read</EuiCode>,
+                logs: <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>,
+              }}
+            />
           </p>
         }
       />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cronToSecondsNormalizer, jsonToArrayOrObjectNormalizer } from './normalizers';
+import { cronToSecondsNormalizer, jsonToJavascriptNormalizer } from './normalizers';
 
 describe('normalizers', () => {
   describe('cronToSecondsNormalizer', () => {
@@ -14,15 +14,15 @@ describe('normalizers', () => {
     });
   });
 
-  describe('jsonToArrayOrObjectNormalizer', () => {
+  describe('jsonToJavascriptNormalizer', () => {
     it('takes a json object string and returns an object', () => {
-      expect(jsonToArrayOrObjectNormalizer('{\n    "key": "value"\n}')).toEqual({
+      expect(jsonToJavascriptNormalizer('{\n    "key": "value"\n}')).toEqual({
         key: 'value',
       });
     });
 
     it('takes a json array string and returns an array', () => {
-      expect(jsonToArrayOrObjectNormalizer('["tag1","tag2"]')).toEqual(['tag1', 'tag2']);
+      expect(jsonToJavascriptNormalizer('["tag1","tag2"]')).toEqual(['tag1', 'tag2']);
     });
   });
 });

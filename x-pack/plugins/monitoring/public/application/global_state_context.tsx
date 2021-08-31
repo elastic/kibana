@@ -16,6 +16,7 @@ interface GlobalStateProviderProps {
 
 interface State {
   cluster_uuid?: string;
+  ccs?: any;
 }
 
 export const GlobalStateContext = createContext({} as State);
