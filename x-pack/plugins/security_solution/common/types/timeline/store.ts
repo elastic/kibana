@@ -48,7 +48,6 @@ export interface TimelinePersistInput {
   expandedDetail?: TimelineExpandedDetail;
   filters?: Filter[];
   columns: ColumnHeaderOptions[];
-  defaultColumns?: ColumnHeaderOptions[];
   itemsPerPage?: number;
   indexNames: string[];
   kqlQuery?: {
