@@ -81,6 +81,7 @@ describe('percentile', () => {
           displayName: 'bytes',
           type: 'number',
           esTypes: ['long'],
+          searchable: true,
           aggregatable: true,
         })
       ).toEqual({
@@ -97,6 +98,7 @@ describe('percentile', () => {
           displayName: 'response_time',
           type: 'histogram',
           esTypes: ['histogram'],
+          searchable: true,
           aggregatable: true,
         })
       ).toEqual({
@@ -113,6 +115,7 @@ describe('percentile', () => {
           displayName: 'origin',
           type: 'string',
           esTypes: ['keyword'],
+          searchable: true,
           aggregatable: true,
         })
       ).toBeUndefined();
