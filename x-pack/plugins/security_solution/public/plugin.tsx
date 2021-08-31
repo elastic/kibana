@@ -339,27 +339,33 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             query: { features: SERVER_APP_ID },
           }
         );
+        console.log({ indexName });
         signal = { name: indexName[0] };
       } catch {
         signal = { name: null };
       }
       const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
       let defaultIndexPattern;
+      console.log('1', { configPatternList, signal });
       try {
         // check for/generate default Security Solution Kibana index pattern
         defaultIndexPattern = await coreStart.http.fetch(SOURCERER_API_URL, {
           method: 'POST',
           body: JSON.stringify({ patternList: [...configPatternList, signal.name] }),
         });
+        console.log('2');
       } catch (error) {
+        console.log('3');
         defaultIndexPattern = { id: null, ...error };
       }
+      console.log('4');
       const [{ createStore, createInitialState }, kibanaIndexPatterns] = await Promise.all([
         this.lazyApplicationDependencies(),
         // Note: this needs to be after defaultIndexPattern is defined in case the KIP is updated
         startPlugins.data.indexPatterns.getIdsWithTitle(),
       ]);
 
+      console.log('5');
       // check for/generate default Security Solution Kibana index pattern
       const kibanaIndexPatternLists: string[][] = await coreStart.http.fetch(SOURCERER_API_URL, {
         method: 'GET',

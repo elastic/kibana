@@ -31,15 +31,18 @@ export const getKibanaIndexPattern = async (
   patternList: string[],
   patternId: string
 ): Promise<IndexPattern> => {
+  console.log('start getKibanaIndexPattern');
   let indexPattern: IndexPattern;
   const patternListAsTitle = patternList.join();
   try {
     indexPattern = await indexPatternsService.get(patternId);
+    console.log('after indexPattern getKibanaIndexPattern');
     if (patternListAsTitle !== indexPattern.title) {
       indexPattern.title = patternListAsTitle;
       await indexPatternsService.updateSavedObject(indexPattern);
     }
   } catch (e) {
+    console.log('error getKibanaIndexPattern');
     const error = transformError(e);
     console.log('ERRRR', error);
     if (error.statusCode === 404) {
