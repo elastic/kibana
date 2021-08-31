@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiAvatar, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CREATED_BY, LAST_UPDATED_BY } from './translations';
+import { TextValueDisplay } from './text_value_display';
 
 export interface TouchedByUsersProps {
   createdBy: string;
@@ -45,7 +46,7 @@ const UserName = memo<UserNameProps>(({ label, value }) => {
             <EuiAvatar name={value} size="s" />
           </EuiFlexItem>
           <EuiFlexItem grow={false} className="eui-textTruncate">
-            {value}
+            <TextValueDisplay>{value}</TextValueDisplay>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

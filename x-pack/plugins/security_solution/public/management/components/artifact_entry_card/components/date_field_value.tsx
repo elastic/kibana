@@ -12,6 +12,7 @@ import {
   FormattedRelativePreferenceDate,
   FormattedRelativePreferenceDateProps,
 } from '../../../../common/components/formatted_date';
+import { TextValueDisplay } from './text_value_display';
 
 export interface DateFieldProps {
   date: FormattedRelativePreferenceDateProps['value'];
@@ -27,14 +28,12 @@ export const DateFieldValue = memo<DateFieldProps>(({ date, type }) => {
       <EuiFlexItem grow={true}>
         <EuiFlexGroup responsive={false} direction="column" alignItems="flexStart" gutterSize="xs">
           <EuiFlexItem className="eui-textTruncate">
-            <EuiText size="s">{type === 'update' ? LAST_UPDATED : CREATED}</EuiText>
+            <TextValueDisplay>{type === 'update' ? LAST_UPDATED : CREATED}</TextValueDisplay>
           </EuiFlexItem>
           <EuiFlexItem className="eui-textTruncate">
-            <EuiText size="s">
-              <strong>
-                <FormattedRelativePreferenceDate value={date} dateFormat="M/D/YYYY" />
-              </strong>
-            </EuiText>
+            <TextValueDisplay bold>
+              <FormattedRelativePreferenceDate value={date} dateFormat="M/D/YYYY" />
+            </TextValueDisplay>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

@@ -22,3 +22,19 @@ export const LAST_UPDATED_BY = i18n.translate('xpack.securitySolution.artifactCa
 export const CREATED_BY = i18n.translate('xpack.securitySolution.artifactCard.createdBy', {
   defaultMessage: 'Created by',
 });
+
+export const GLOBAL_EFFECT_SCOPE = i18n.translate(
+  'xpack.securitySolution.artifactCard.globalEffectScope',
+  {
+    defaultMessage: 'Applied globally',
+  }
+);
+
+export const POLICY_EFFECT_SCOPE = (policyCount = 0) => {
+  return i18n.translate('xpack.securitySolution.artifactCard.policyEffectScope', {
+    defaultMessage: 'Applied to {count} policies',
+    values: {
+      count: policyCount,
+    },
+  });
+};
