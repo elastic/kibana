@@ -26,13 +26,15 @@ export const createLegacyUrlForwardApp = (
     const [
       {
         application,
+        uiSettings,
         http: { basePath },
       },
     ] = await core.getStartServices();
 
     const { navigated } = navigateToLegacyKibanaUrl(hash, forwards, basePath, application);
     if (!navigated) {
-      application.navigateToUrl(basePath.get());
+      const defaultRoute = uiSettings.get<string>('defaultRoute');
+      application.navigateToUrl(basePath.prepend(defaultRoute));
     }
 
     return () => {};
