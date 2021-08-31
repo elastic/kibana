@@ -53,11 +53,13 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
 
           // @ts-expect-error
           expect(Object.keys(body._inspect[0])).to.eql([
-            'operationName',
+            'id',
+            'json',
+            'name',
             'response',
-            'duration',
-            'requestType',
-            'requestParams',
+            'startTime',
+            'stats',
+            'status',
           ]);
         });
       });

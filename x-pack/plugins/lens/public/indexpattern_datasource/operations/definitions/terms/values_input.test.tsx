@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow } from 'enzyme';
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { ValuesInput } from './values_input';
 
 jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
@@ -41,7 +41,7 @@ describe('Values', () => {
     expect(onChangeSpy.mock.calls[0][0]).toBe(7);
   });
 
-  it('should not run onChange function on update when value is out of 1-100 range', () => {
+  it('should not run onChange function on update when value is out of 1-1000 range', () => {
     const onChangeSpy = jest.fn();
     const instance = shallow(<ValuesInput value={5} onChange={onChangeSpy} />);
     act(() => {
@@ -53,5 +53,57 @@ describe('Values', () => {
     expect(instance.find(EuiFieldNumber).prop('value')).toEqual('1007');
     expect(onChangeSpy.mock.calls.length).toBe(1);
     expect(onChangeSpy.mock.calls[0][0]).toBe(1000);
+  });
+
+  it('should show an error message when the value is out of bounds', () => {
+    const instance = shallow(<ValuesInput value={-5} onChange={jest.fn()} />);
+
+    expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeTruthy();
+    expect(instance.find(EuiFormRow).prop('error')).toEqual(
+      expect.arrayContaining([expect.stringMatching('Value is lower')])
+    );
+
+    act(() => {
+      instance.find(EuiFieldNumber).prop('onChange')!({
+        currentTarget: { value: '1007' },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+    instance.update();
+
+    expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeTruthy();
+    expect(instance.find(EuiFormRow).prop('error')).toEqual(
+      expect.arrayContaining([expect.stringMatching('Value is higher')])
+    );
+  });
+
+  it('should fallback to last valid value on input blur', () => {
+    const instance = shallow(<ValuesInput value={123} onChange={jest.fn()} />);
+
+    function changeAndBlur(newValue: string) {
+      act(() => {
+        instance.find(EuiFieldNumber).prop('onChange')!({
+          currentTarget: { value: newValue },
+        } as React.ChangeEvent<HTMLInputElement>);
+      });
+      instance.update();
+      act(() => {
+        instance.find(EuiFieldNumber).prop('onBlur')!({} as React.FocusEvent<HTMLInputElement>);
+      });
+      instance.update();
+    }
+
+    changeAndBlur('-5');
+
+    expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeFalsy();
+    expect(instance.find(EuiFieldNumber).prop('value')).toBe('1');
+
+    changeAndBlur('5000');
+
+    expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeFalsy();
+    expect(instance.find(EuiFieldNumber).prop('value')).toBe('1000');
+
+    changeAndBlur('');
+    // as we're not handling the onChange state, it fallbacks to the value prop
+    expect(instance.find(EuiFieldNumber).prop('value')).toBe('123');
   });
 });

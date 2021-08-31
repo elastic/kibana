@@ -29,6 +29,7 @@ interface ConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isWriteEnabled: boolean;
+  isIndexUpgradeEnabled: boolean;
 }
 
 export class ResourceInstaller {
@@ -115,6 +116,7 @@ export class ResourceInstaller {
   public async installIndexLevelResources(indexInfo: IndexInfo): Promise<void> {
     await this.installWithTimeout(`resources for index ${indexInfo.baseName}`, async () => {
       const { componentTemplates, ilmPolicy } = indexInfo.indexOptions;
+      const { isIndexUpgradeEnabled } = this.options;
 
       if (ilmPolicy != null) {
         await this.createOrUpdateLifecyclePolicy({
@@ -138,9 +140,11 @@ export class ResourceInstaller {
         })
       );
 
-      // TODO: Update all existing namespaced index templates matching this index' base name
+      if (isIndexUpgradeEnabled) {
+        // TODO: Update all existing namespaced index templates matching this index' base name
 
-      await this.updateIndexMappings(indexInfo);
+        await this.updateIndexMappings(indexInfo);
+      }
     });
   }
 
