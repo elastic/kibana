@@ -35,7 +35,11 @@ export const EmailActionConnectorFields: React.FunctionComponent<
   const { from, host, port, secure, hasAuth, service } = action.config;
   const { user, password } = action.secrets;
 
-  const { setEmailService } = useEmailConfig(http, editActionConfig);
+  const { emailServiceConfigurable, setEmailService } = useEmailConfig(
+    http,
+    service,
+    editActionConfig
+  );
 
   useEffect(() => {
     if (!action.id) {
@@ -141,6 +145,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
           >
             <EuiFieldText
               fullWidth
+              disabled={!emailServiceConfigurable}
               readOnly={readOnly}
               isInvalid={isHostInvalid}
               name="host"
@@ -177,6 +182,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                   prepend=":"
                   isInvalid={isPortInvalid}
                   fullWidth
+                  disabled={!emailServiceConfigurable}
                   readOnly={readOnly}
                   name="port"
                   value={port || ''}
@@ -202,7 +208,8 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                         defaultMessage: 'Secure',
                       }
                     )}
-                    disabled={readOnly}
+                    data-test-subj="emailSecureSwitch"
+                    disabled={readOnly || !emailServiceConfigurable}
                     checked={secure || false}
                     onChange={(e) => {
                       editActionConfig('secure', e.target.checked);

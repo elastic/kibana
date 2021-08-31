@@ -27,7 +27,7 @@ export const emailServices: EuiSelectOption[] = [
   },
   {
     text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.exchangeServerTypeLabel',
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.outlookServerTypeLabel',
       {
         defaultMessage: 'Outlook',
       }
@@ -36,7 +36,7 @@ export const emailServices: EuiSelectOption[] = [
   },
   {
     text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.outlookServerTypeLabel',
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.amazonSesServerTypeLabel',
       {
         defaultMessage: 'Amazon SES',
       }
@@ -45,7 +45,7 @@ export const emailServices: EuiSelectOption[] = [
   },
   {
     text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.elastic_cloudServerTypeLabel',
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.elasticCloudServerTypeLabel',
       {
         defaultMessage: 'Elastic Cloud',
       }

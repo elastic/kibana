@@ -7,13 +7,16 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { HttpSetup } from 'kibana/public';
+import { isEmpty } from 'lodash';
 import { EmailConfig } from '../types';
 import { getServiceConfig } from './api';
 
 export function useEmailConfig(
   http: HttpSetup,
+  currentService: string | undefined,
   editActionConfig: (property: string, value: unknown) => void
 ) {
+  const [emailServiceConfigurable, setEmailServiceConfigurable] = useState<boolean>(true);
   const [emailService, setEmailService] = useState<string | undefined>(undefined);
 
   const getEmailServiceConfig = useCallback(
@@ -21,13 +24,13 @@ export function useEmailConfig(
       let serviceConfig: Partial<Pick<EmailConfig, 'host' | 'port' | 'secure'>>;
       try {
         serviceConfig = await getServiceConfig({ http, service });
+        setEmailServiceConfigurable(isEmpty(serviceConfig));
       } catch (err) {
         serviceConfig = {};
+        setEmailServiceConfigurable(true);
       }
 
-      editActionConfig('host', serviceConfig?.host ? serviceConfig.host : '');
-      editActionConfig('port', serviceConfig?.port ? serviceConfig.port : 0);
-      editActionConfig('secure', null != serviceConfig?.secure ? serviceConfig.secure : false);
+      return serviceConfig;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [editActionConfig]
@@ -36,14 +39,28 @@ export function useEmailConfig(
   useEffect(() => {
     (async () => {
       if (emailService) {
+        const serviceConfig = await getEmailServiceConfig(emailService);
+
         editActionConfig('service', emailService);
-        await getEmailServiceConfig(emailService);
+        editActionConfig('host', serviceConfig?.host ? serviceConfig.host : '');
+        editActionConfig('port', serviceConfig?.port ? serviceConfig.port : 0);
+        editActionConfig('secure', null != serviceConfig?.secure ? serviceConfig.secure : false);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emailService]);
 
+  useEffect(() => {
+    (async () => {
+      if (currentService) {
+        await getEmailServiceConfig(currentService);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentService]);
+
   return {
+    emailServiceConfigurable,
     setEmailService,
   };
 }
