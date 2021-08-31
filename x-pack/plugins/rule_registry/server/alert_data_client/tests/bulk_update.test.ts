@@ -8,6 +8,7 @@
 import {
   ALERT_RULE_CONSUMER,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   SPACE_IDS,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -93,7 +94,7 @@ describe('bulkUpdate()', () => {
                   _source: {
                     [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                     [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
@@ -150,7 +151,7 @@ describe('bulkUpdate()', () => {
                   _source: {
                     [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                     [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
@@ -196,7 +197,7 @@ describe('bulkUpdate()', () => {
                   _source: {
                     [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                     [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
@@ -206,7 +207,7 @@ describe('bulkUpdate()', () => {
                   _source: {
                     [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                     [ALERT_RULE_CONSUMER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
@@ -283,7 +284,7 @@ describe('bulkUpdate()', () => {
                     _source: {
                       [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                       [ALERT_RULE_CONSUMER]: 'apm',
-                      [ALERT_STATUS]: 'open',
+                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                       [SPACE_IDS]: [DEFAULT_SPACE],
                     },
                   },
@@ -303,7 +304,7 @@ describe('bulkUpdate()', () => {
 
         await alertsClient.bulkUpdate({
           ids: undefined,
-          query: `${ALERT_STATUS}: open`,
+          query: `${ALERT_STATUS}: ${ALERT_STATUS_ACTIVE}`,
           index: indexName,
           status: 'closed',
         });
@@ -343,7 +344,7 @@ describe('bulkUpdate()', () => {
                     _source: {
                       [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                       [ALERT_RULE_CONSUMER]: 'apm',
-                      [ALERT_STATUS]: 'open',
+                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                       [SPACE_IDS]: [DEFAULT_SPACE],
                     },
                   },
@@ -355,13 +356,13 @@ describe('bulkUpdate()', () => {
         await expect(
           alertsClient.bulkUpdate({
             ids: undefined,
-            query: `${ALERT_STATUS}: open`,
+            query: `${ALERT_STATUS}: ${ALERT_STATUS_ACTIVE}`,
             index: indexName,
             status: 'closed',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`
-                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: open\\" and operation update 
-                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: open\\" and operation update 
+                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: active\\" and operation update 
+                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: active\\" and operation update 
                 Error: Error: Unauthorized for fake.rule and apm"
               `);
 
@@ -404,7 +405,7 @@ describe('bulkUpdate()', () => {
                     _source: {
                       [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
                       [ALERT_RULE_CONSUMER]: 'apm',
-                      [ALERT_STATUS]: 'open',
+                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                       [SPACE_IDS]: [DEFAULT_SPACE],
                     },
                   },
@@ -414,7 +415,7 @@ describe('bulkUpdate()', () => {
                     _source: {
                       [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
                       [ALERT_RULE_CONSUMER]: 'apm',
-                      [ALERT_STATUS]: 'open',
+                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                       [SPACE_IDS]: [DEFAULT_SPACE],
                     },
                   },
@@ -426,13 +427,13 @@ describe('bulkUpdate()', () => {
         await expect(
           alertsClient.bulkUpdate({
             ids: undefined,
-            query: `${ALERT_STATUS}: open`,
+            query: `${ALERT_STATUS}: ${ALERT_STATUS_ACTIVE}`,
             index: indexName,
             status: 'closed',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`
-                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: open\\" and operation update 
-                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: open\\" and operation update 
+                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: active\\" and operation update 
+                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: active\\" and operation update 
                 Error: Error: Unauthorized for fake.rule and apm"
               `);
 
