@@ -62,7 +62,6 @@ export function logstashNodePipelinesRoute(server) {
       if (sort) {
         sort.field = sortMetricSetMap[sort.field] || sort.field;
       }
-      console.log('call from node pipelines');
 
       try {
         const response = await getPaginatedPipelines({
