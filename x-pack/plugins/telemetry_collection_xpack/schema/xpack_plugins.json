@@ -5508,6 +5508,12 @@
           "_meta": {
             "description": "The global session lifespan expiration that is configured, in minutes (0 if disabled)."
           }
+        },
+        "sessionCleanupInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
+          }
         }
       }
     },

@@ -49,6 +49,7 @@ describe('Security UsageCollector', () => {
     httpAuthSchemes: ['apikey'],
     sessionIdleTimeoutInMinutes: 60,
     sessionLifespanInMinutes: 43200,
+    sessionCleanupInMinutes: 60,
   };
 
   describe('initialization', () => {
@@ -108,6 +109,7 @@ describe('Security UsageCollector', () => {
       httpAuthSchemes: [],
       sessionIdleTimeoutInMinutes: 0,
       sessionLifespanInMinutes: 0,
+      sessionCleanupInMinutes: 0,
     });
   });
 
@@ -471,12 +473,12 @@ describe('Security UsageCollector', () => {
     });
   });
 
-  describe('session expirations', () => {
+  describe('session', () => {
     // Note: can't easily test deprecated 'sessionTimeout' value here because of the way that config deprecation renaming works
-    it('reports customized session idleTimeout and lifespan', async () => {
+    it('reports customized session idleTimeout, lifespan, and cleanupInterval', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({
-          session: { idleTimeout: '123m', lifespan: '456m' },
+          session: { idleTimeout: '123m', lifespan: '456m', cleanupInterval: '789m' },
         })
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -491,6 +493,7 @@ describe('Security UsageCollector', () => {
         ...DEFAULT_USAGE,
         sessionIdleTimeoutInMinutes: 123,
         sessionLifespanInMinutes: 456,
+        sessionCleanupInMinutes: 789,
       });
     });
   });

@@ -20,6 +20,7 @@ interface Usage {
   httpAuthSchemes: string[];
   sessionIdleTimeoutInMinutes: number;
   sessionLifespanInMinutes: number;
+  sessionCleanupInMinutes: number;
 }
 
 interface Deps {
@@ -122,6 +123,13 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
             'The global session lifespan expiration that is configured, in minutes (0 if disabled).',
         },
       },
+      sessionCleanupInMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The session cleanup interval that is configured, in minutes (0 if disabled).',
+        },
+      },
     },
     fetch: () => {
       const {
@@ -140,6 +148,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           httpAuthSchemes: [],
           sessionIdleTimeoutInMinutes: 0,
           sessionLifespanInMinutes: 0,
+          sessionCleanupInMinutes: 0,
         };
       }
 
@@ -175,6 +184,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       const sessionExpirations = config.session.getExpirationTimeouts(); // get global expiration values
       const sessionIdleTimeoutInMinutes = sessionExpirations.idleTimeout?.asMinutes() ?? 0;
       const sessionLifespanInMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
+      const sessionCleanupInMinutes = config.session.cleanupInterval?.asMinutes() ?? 0;
 
       return {
         auditLoggingEnabled: legacyAuditLoggingEnabled || ecsAuditLoggingEnabled,
@@ -186,6 +196,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         httpAuthSchemes,
         sessionIdleTimeoutInMinutes,
         sessionLifespanInMinutes,
+        sessionCleanupInMinutes,
       };
     },
   });
