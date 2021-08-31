@@ -30,7 +30,9 @@ export { AutoRefreshDoneFn };
 
 interface CreateFilterOptions {
   /**
-   * The time range values to use
+   * The time range values to use.
+   *
+   * @default TimeRange read from `timepicker:timeDefaults`
    */
   timeRange?: TimeRange;
 
