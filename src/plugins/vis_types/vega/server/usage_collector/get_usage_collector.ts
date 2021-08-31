@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-// import { parse } from 'hjson';
+import { parse } from 'hjson';
 
 import type {
   SavedObjectsClientContract,
@@ -16,7 +16,7 @@ import type { SavedVisState } from '../../../../visualizations/common';
 import type { VegaSavedObjectAttributes, VisTypeVegaPluginSetupDependencies } from '../types';
 
 type UsageCollectorDependencies = Pick<VisTypeVegaPluginSetupDependencies, 'home'>;
-// type VegaType = 'vega' | 'vega-lite';
+type VegaType = 'vega' | 'vega-lite';
 
 export interface VegaUsage {
   vega_lib_specs_total: number;
@@ -28,8 +28,8 @@ function isVegaType(attributes: any): attributes is VegaSavedObjectAttributes {
   return attributes && attributes.type === 'vega' && attributes.params?.spec;
 }
 
-// const checkVegaSchemaType = (schemaURL: string, type: VegaType) =>
-//   schemaURL.includes(`//vega.github.io/schema/${type}/`);
+const checkVegaSchemaType = (schemaURL: string, type: VegaType) =>
+  schemaURL.includes(`//vega.github.io/schema/${type}/`);
 
 const getDefaultVegaVisualizations = (home: UsageCollectorDependencies['home']) => {
   const titles: string[] = [];
@@ -58,7 +58,7 @@ export const getStats = async (
   soClient: SavedObjectsClientContract,
   { home }: UsageCollectorDependencies
 ): Promise<VegaUsage | undefined> => {
-  const shouldPublishTelemetry = false;
+  let shouldPublishTelemetry = false;
 
   const vegaUsage = {
     vega_lib_specs_total: 0,
@@ -76,27 +76,27 @@ export const getStats = async (
     namespaces: ['*'],
   });
 
-  // const doTelemetry = ({ params }: SavedVisState) => {
-  //   try {
-  //     const spec = parse(params.spec, { legacyRoot: false });
+  const doTelemetry = ({ params }: SavedVisState) => {
+    try {
+      const spec = parse(params.spec, { legacyRoot: false });
 
-  //     if (spec) {
-  //       shouldPublishTelemetry = true;
+      if (spec) {
+        shouldPublishTelemetry = true;
 
-  //       if (checkVegaSchemaType(spec.$schema, 'vega')) {
-  //         vegaUsage.vega_lib_specs_total++;
-  //       }
-  //       if (checkVegaSchemaType(spec.$schema, 'vega-lite')) {
-  //         vegaUsage.vega_lite_lib_specs_total++;
-  //       }
-  //       if (spec.config?.kibana?.type === 'map') {
-  //         vegaUsage.vega_use_map_total++;
-  //       }
-  //     }
-  //   } catch (e) {
-  //     // Let it go, the data is invalid and we'll don't need to handle it
-  //   }
-  // };
+        if (checkVegaSchemaType(spec.$schema, 'vega')) {
+          vegaUsage.vega_lib_specs_total++;
+        }
+        if (checkVegaSchemaType(spec.$schema, 'vega-lite')) {
+          vegaUsage.vega_lite_lib_specs_total++;
+        }
+        if (spec.config?.kibana?.type === 'map') {
+          vegaUsage.vega_use_map_total++;
+        }
+      }
+    } catch (e) {
+      // Let it go, the data is invalid and we'll don't need to handle it
+    }
+  };
 
   for await (const response of finder.find()) {
     (response.saved_objects || []).forEach(({ attributes }: SavedObjectsFindResult<any>) => {
@@ -105,7 +105,7 @@ export const getStats = async (
           const visState: SavedVisState = JSON.parse(attributes.visState);
 
           if (isVegaType(visState) && !excludedFromStatsVisualizations.includes(visState.title)) {
-            // doTelemetry(visState);
+            doTelemetry(visState);
           }
         } catch {
           // nothing to be here, "so" not valid
