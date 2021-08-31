@@ -189,6 +189,13 @@ export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 export const ruleParams = t.intersection([baseRuleParams, typeSpecificRuleParams]);
 export type RuleParams = t.TypeOf<typeof ruleParams>;
 
+export const notifyWhen = t.union([
+  t.literal('onActionGroupChange'),
+  t.literal('onActiveAlert'),
+  t.literal('onThrottleInterval'),
+  t.null,
+]);
+
 export const internalRuleCreate = t.type({
   name,
   tags,
@@ -201,7 +208,7 @@ export const internalRuleCreate = t.type({
   actions: actionsCamel,
   params: ruleParams,
   throttle: throttleOrNull,
-  notifyWhen: t.null,
+  notifyWhen,
 });
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
 
@@ -214,7 +221,7 @@ export const internalRuleUpdate = t.type({
   actions: actionsCamel,
   params: ruleParams,
   throttle: throttleOrNull,
-  notifyWhen: t.null,
+  notifyWhen,
 });
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
 

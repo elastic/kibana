@@ -6,21 +6,30 @@
  * Side Public License, v 1.
  */
 
+import type { FunctionComponent } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { I18nProvider } from '@kbn/i18n/react';
+import type { CoreSetup, CoreStart, HttpSetup, Plugin } from 'src/core/public';
 
 import { App } from './app';
+import { HttpProvider } from './use_http';
 
-export class UserSetupPlugin implements Plugin {
+export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
   public setup(core: CoreSetup) {
     core.application.register({
       id: 'interactiveSetup',
-      title: 'Interactive Setup',
+      title: 'Configure Elastic to get started',
+      appRoute: '/',
       chromeless: true,
       mount: (params) => {
-        ReactDOM.render(<App />, params.element);
+        ReactDOM.render(
+          <Providers http={core.http}>
+            <App />
+          </Providers>,
+          params.element
+        );
         return () => ReactDOM.unmountComponentAtNode(params.element);
       },
     });
@@ -28,3 +37,13 @@ export class UserSetupPlugin implements Plugin {
 
   public start(core: CoreStart) {}
 }
+
+export interface ProvidersProps {
+  http: HttpSetup;
+}
+
+export const Providers: FunctionComponent<ProvidersProps> = ({ http, children }) => (
+  <I18nProvider>
+    <HttpProvider http={http}>{children}</HttpProvider>
+  </I18nProvider>
+);
