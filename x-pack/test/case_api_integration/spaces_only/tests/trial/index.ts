@@ -12,7 +12,7 @@ import { createSpaces, deleteSpaces } from '../../../common/lib/authentication';
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases spaces only enabled: trial', function () {
     // Fastest ciGroup for the moment.
-    this.tags('ciGroup5');
+    this.tags('ciGroup10');
 
     before(async () => {
       await createSpaces(getService);
