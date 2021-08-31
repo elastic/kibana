@@ -293,7 +293,7 @@ export interface CoreConfigUsageData {
         };
         apiVersion: string;
         healthCheckDelayMs: number;
-        username: 'none' | 'elastic' | 'kibana' | 'kibana_system' | 'other';
+        principal: 'elastic_user' | 'kibana_user' | 'kibana_system_user' | 'other_user' | 'kibana_service_account' | 'other';
     };
     // (undocumented)
     http: {

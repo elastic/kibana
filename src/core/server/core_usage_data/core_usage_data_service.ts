@@ -254,7 +254,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             truststoreConfigured: isConfigured.record(es.ssl.truststore),
             keystoreConfigured: isConfigured.record(es.ssl.keystore),
           },
-          username: getEsUsernameUsage(es.username),
+          principal: getEsPrincipalUsage(es),
         },
         http: {
           basePathConfigured: isConfigured.string(http.basePath),
@@ -515,18 +515,21 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
   }
 }
 
-function getEsUsernameUsage(username: string | undefined) {
-  let value: CoreConfigUsageData['elasticsearch']['username'] = 'none';
+function getEsPrincipalUsage({ username, serviceAccountToken }: ElasticsearchConfigType) {
+  let value: CoreConfigUsageData['elasticsearch']['principal'] = 'other';
   if (isConfigured.string(username)) {
     switch (username) {
       case 'elastic': // deprecated
       case 'kibana': // deprecated
       case 'kibana_system':
-        value = username;
+        value = `${username}_user` as const;
         break;
       default:
-        value = 'other';
+        value = 'other_user';
     }
+  } else if (serviceAccountToken) {
+    // cannot be used with elasticsearch.username
+    value = 'kibana_service_account';
   }
   return value;
 }

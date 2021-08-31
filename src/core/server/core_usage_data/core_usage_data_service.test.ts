@@ -235,6 +235,7 @@ describe('CoreUsageDataService', () => {
                 "logQueries": false,
                 "numberOfHostsConfigured": 1,
                 "pingTimeoutMs": 30000,
+                "principal": "other",
                 "requestHeadersWhitelistConfigured": false,
                 "requestTimeoutMs": 30000,
                 "shardTimeoutMs": 30000,
@@ -250,7 +251,6 @@ describe('CoreUsageDataService', () => {
                   "truststoreConfigured": false,
                   "verificationMode": "full",
                 },
-                "username": "none",
               },
               "http": Object {
                 "basePathConfigured": false,
@@ -365,12 +365,22 @@ describe('CoreUsageDataService', () => {
         `);
       });
 
-      describe('elasticsearch.username', () => {
-        async function doTest({ username, expected }: { username: string; expected: string }) {
+      describe('elasticsearch.principal', () => {
+        async function doTest({
+          username,
+          serviceAccountToken,
+          expectedPrincipal,
+        }: {
+          username?: string;
+          serviceAccountToken?: string;
+          expectedPrincipal: string;
+        }) {
           const defaultMockImplementation = getConfigServiceAtPathMockImplementation();
           configService.atPath.mockImplementation((path) => {
             if (path === 'elasticsearch') {
-              return new BehaviorSubject(RawElasticsearchConfig.schema.validate({ username }));
+              return new BehaviorSubject(
+                RawElasticsearchConfig.schema.validate({ username, serviceAccountToken })
+              );
             }
             return defaultMockImplementation(path);
           });
@@ -378,26 +388,34 @@ describe('CoreUsageDataService', () => {
           return expect(getCoreUsageData()).resolves.toEqual(
             expect.objectContaining({
               config: expect.objectContaining({
-                elasticsearch: expect.objectContaining({ username: expected }),
+                elasticsearch: expect.objectContaining({ principal: expectedPrincipal }),
               }),
             })
           );
         }
 
-        it('returns expected usage data for "elastic"', async () => {
-          return doTest({ username: 'elastic', expected: 'elastic' });
+        it('returns expected usage data for elastic.username "elastic"', async () => {
+          return doTest({ username: 'elastic', expectedPrincipal: 'elastic_user' });
         });
 
-        it('returns expected usage data for "kibana"', async () => {
-          return doTest({ username: 'kibana', expected: 'kibana' });
+        it('returns expected usage data for elastic.username "kibana"', async () => {
+          return doTest({ username: 'kibana', expectedPrincipal: 'kibana_user' });
         });
 
-        it('returns expected usage data for "kibana_system"', async () => {
-          return doTest({ username: 'kibana_system', expected: 'kibana_system' });
+        it('returns expected usage data for elastic.username "kibana_system"', async () => {
+          return doTest({ username: 'kibana_system', expectedPrincipal: 'kibana_system_user' });
         });
 
-        it('returns expected usage data for anything else', async () => {
-          return doTest({ username: 'anything else', expected: 'other' });
+        it('returns expected usage data for elastic.username anything else', async () => {
+          return doTest({ username: 'anything else', expectedPrincipal: 'other_user' });
+        });
+
+        it('returns expected usage data for elastic.serviceAccountToken', async () => {
+          // Note: elastic.username and elastic.serviceAccountToken are mutually exclusive
+          return doTest({
+            serviceAccountToken: 'any',
+            expectedPrincipal: 'kibana_service_account',
+          });
         });
       });
     });
