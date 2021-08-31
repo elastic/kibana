@@ -1031,7 +1031,7 @@ describe('Exception helpers', () => {
       ]);
     });
 
-    test('it should return pre-populated memory shellcode items for event code `malicious_thread`', () => {
+    test('it should return pre-populated memory shellcode items for event code `shellcode_thread`', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         process: {
@@ -1049,7 +1049,7 @@ describe('Exception helpers', () => {
           self_injection: true,
         },
         event: {
-          code: 'malicious_thread',
+          code: 'shellcode_thread',
         },
         Target: {
           process: {
@@ -1153,7 +1153,7 @@ describe('Exception helpers', () => {
       ]);
     });
 
-    test('it should return pre-populated memory shellcode items for event code `malicious_thread` and skip empty', () => {
+    test('it should return pre-populated memory shellcode items for event code `shellcode_thread` and skip empty', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         process: {
@@ -1171,7 +1171,7 @@ describe('Exception helpers', () => {
           self_injection: true,
         },
         event: {
-          code: 'malicious_thread',
+          code: 'shellcode_thread',
         },
         Target: {
           process: {
