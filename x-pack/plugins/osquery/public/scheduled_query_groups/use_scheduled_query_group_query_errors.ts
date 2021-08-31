@@ -82,10 +82,8 @@ export const useScheduledQueryGroupQueryErrors = ({
       keepPreviousData: true,
       enabled: !!(!skip && actionId && interval && agentIds?.length),
       select: (response) => response.rawResponse.hits ?? [],
-      refetchOnMount: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
     }
   );
 };

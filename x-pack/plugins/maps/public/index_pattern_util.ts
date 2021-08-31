@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IFieldType, IndexPattern } from 'src/plugins/data/public';
+import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternService } from './kibana_services';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
 import { getIsGoldPlus } from './licensed_features';
 
-export function getGeoTileAggNotSupportedReason(field: IFieldType): string | null {
+export function getGeoTileAggNotSupportedReason(field: IndexPatternField): string | null {
   if (!field.aggregatable) {
     return i18n.translate('xpack.maps.geoTileAgg.disabled.docValues', {
       defaultMessage:
@@ -46,7 +46,7 @@ export async function getIndexPatternsFromIds(
   return await Promise.all(promises);
 }
 
-export function getTermsFields(fields: IFieldType[]): IFieldType[] {
+export function getTermsFields(fields: IndexPatternField[]): IndexPatternField[] {
   return fields.filter((field) => {
     return (
       field.aggregatable &&
@@ -56,7 +56,7 @@ export function getTermsFields(fields: IFieldType[]): IFieldType[] {
   });
 }
 
-export function getSortFields(fields: IFieldType[]): IFieldType[] {
+export function getSortFields(fields: IndexPatternField[]): IndexPatternField[] {
   return fields.filter((field) => {
     return field.sortable && !indexPatterns.isNestedField(field);
   });
@@ -70,23 +70,23 @@ export function getAggregatableGeoFieldTypes(): string[] {
   return aggregatableFieldTypes;
 }
 
-export function getGeoFields(fields: IFieldType[]): IFieldType[] {
+export function getGeoFields(fields: IndexPatternField[]): IndexPatternField[] {
   return fields.filter((field) => {
     return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPES.includes(field.type);
   });
 }
 
-export function getGeoPointFields(fields: IFieldType[]): IFieldType[] {
+export function getGeoPointFields(fields: IndexPatternField[]): IndexPatternField[] {
   return fields.filter((field) => {
     return !indexPatterns.isNestedField(field) && ES_GEO_FIELD_TYPE.GEO_POINT === field.type;
   });
 }
 
-export function getFieldsWithGeoTileAgg(fields: IFieldType[]): IFieldType[] {
+export function getFieldsWithGeoTileAgg(fields: IndexPatternField[]): IndexPatternField[] {
   return fields.filter(supportsGeoTileAgg);
 }
 
-export function supportsGeoTileAgg(field?: IFieldType): boolean {
+export function supportsGeoTileAgg(field?: IndexPatternField): boolean {
   return (
     !!field &&
     !!field.aggregatable &&
@@ -95,7 +95,7 @@ export function supportsGeoTileAgg(field?: IFieldType): boolean {
   );
 }
 
-export function getSourceFields(fields: IFieldType[]): IFieldType[] {
+export function getSourceFields(fields: IndexPatternField[]): IndexPatternField[] {
   return fields.filter((field) => {
     // Multi fields are not stored in _source and only exist in index.
     const isMultiField = field.subType && field.subType.multi;
