@@ -37,7 +37,7 @@ export const useUpdateAlertsStatus = (
   const { http } = useKibana<CoreStart>().services;
   return {
     updateAlertStatus: async ({ status, index, query }) => {
-      if (timelineId === 'detections-page') {
+      if (['detections-page', 'detections-rules-details-page'].includes(timelineId)) {
         return http!.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
           method: 'POST',
           body: JSON.stringify({ status, query }),
