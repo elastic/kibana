@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiIconTip, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiHealth, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 /**
  * We need to produce types and code transpilation at different folders during the build of the package.
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
@@ -14,19 +14,19 @@ import React, { useEffect } from 'react';
  */
 import type {
   ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
+  ALERT_REASON as ALERT_REASON_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
   ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
+  ALERT_REASON as ALERT_REASON_NON_TYPED,
   TIMESTAMP,
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
-
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../common/utils/formatters';
@@ -34,11 +34,12 @@ import { SeverityBadge } from './severity_badge';
 import { TopAlert } from '.';
 import { parseAlert } from './parse_alert';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useTheme } from '../../hooks/use_theme';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
+const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
-const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
+const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 export const getMappedNonEcsValue = ({
   data,
@@ -76,41 +77,40 @@ export const getRenderCellValue = ({
       fieldName: columnId,
     })?.reduce((x) => x[0]);
 
-    useEffect(() => {
-      if (columnId === ALERT_STATUS) {
-        setCellProps({
-          style: {
-            textAlign: 'center',
-          },
-        });
-      }
-    }, [columnId, setCellProps]);
+    const theme = useTheme();
 
     switch (columnId) {
       case ALERT_STATUS:
-        return value !== 'closed' ? (
-          <EuiIconTip
-            content={i18n.translate('xpack.observability.alertsTGrid.statusOpenDescription', {
-              defaultMessage: 'Open',
-            })}
-            color="danger"
-            type="alert"
-          />
-        ) : (
-          <EuiIconTip
-            content={i18n.translate('xpack.observability.alertsTGrid.statusClosedDescription', {
-              defaultMessage: 'Closed',
-            })}
-            type="check"
-          />
-        );
+        switch (value) {
+          case ALERT_STATUS_ACTIVE:
+            return (
+              <EuiHealth color="primary" textSize="xs">
+                {i18n.translate('xpack.observability.alertsTGrid.statusActiveDescription', {
+                  defaultMessage: 'Active',
+                })}
+              </EuiHealth>
+            );
+          case ALERT_STATUS_RECOVERED:
+            return (
+              <EuiHealth color={theme.eui.euiColorLightShade} textSize="xs">
+                <EuiText color={theme.eui.euiColorLightShade} size="relative">
+                  {i18n.translate('xpack.observability.alertsTGrid.statusRecoveredDescription', {
+                    defaultMessage: 'Recovered',
+                  })}
+                </EuiText>
+              </EuiHealth>
+            );
+          default:
+            // NOTE: This fallback shouldn't be needed. Status should be either "active" or "recovered".
+            return null;
+        }
       case TIMESTAMP:
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
         return asDuration(Number(value));
-      case ALERT_SEVERITY_LEVEL:
+      case ALERT_SEVERITY:
         return <SeverityBadge severityLevel={value ?? undefined} />;
-      case ALERT_RULE_NAME:
+      case ALERT_REASON:
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
         const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);
 

@@ -23,6 +23,9 @@ export interface EndpointAction {
   input_type: 'endpoint';
   agents: string[];
   user_id: string;
+  // the number of seconds Elastic Agent (on the host) should
+  // wait to send back an action result before it will timeout
+  timeout?: number;
   data: EndpointActionData;
 }
 

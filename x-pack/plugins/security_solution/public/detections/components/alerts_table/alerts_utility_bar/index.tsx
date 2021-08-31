@@ -27,7 +27,7 @@ import * as i18n from './translations';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import { UpdateAlertsStatus } from '../types';
-import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../alerts_filter_group';
+import { FILTER_CLOSED, FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../alerts_filter_group';
 
 export interface AlertsUtilityBarProps {
   areEventsLoading: boolean;
@@ -126,18 +126,18 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
         </EuiFlexItem>
       )}
 
-      {currentFilter !== FILTER_IN_PROGRESS && (
+      {currentFilter !== FILTER_ACKNOWLEDGED && (
         <EuiFlexItem>
           <Link
-            aria-label="markSelectedAlertsInProgress"
+            aria-label="markSelectedAlertsAcknowledged"
             onClick={() => {
               closePopover();
-              handleUpdateStatus('in-progress');
+              handleUpdateStatus('acknowledged');
             }}
             color="text"
-            data-test-subj="markSelectedAlertsInProgressButton"
+            data-test-subj="markSelectedAlertsAcknowledgedButton"
           >
-            {i18n.BATCH_ACTION_IN_PROGRESS_SELECTED}
+            {i18n.BATCH_ACTION_ACKNOWLEDGED_SELECTED}
           </Link>
         </EuiFlexItem>
       )}

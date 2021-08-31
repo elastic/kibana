@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME,
-  getSavedObjectNamePatternForExceptionsList,
-} from '.';
+import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './constants';
+import { getSavedObjectNamePatternForExceptionsList } from './get_saved_object_name_pattern_for_exception_list';
 
 describe('get_saved_object_name_pattern_for_exception_list', () => {
   test('returns expected pattern given a zero', () => {

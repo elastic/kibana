@@ -15,9 +15,13 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { isWriteBlockException } from './es_errors';
+import { isWriteBlockException, isIndexNotFoundException } from './es_errors';
 import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
-import type { TargetIndexHadWriteBlock, RequestEntityTooLargeException } from './index';
+import type {
+  TargetIndexHadWriteBlock,
+  RequestEntityTooLargeException,
+  IndexNotFound,
+} from './index';
 
 /** @internal */
 export interface BulkOverwriteTransformedDocumentsParams {
@@ -37,7 +41,10 @@ export const bulkOverwriteTransformedDocuments = ({
   transformedDocs,
   refresh = false,
 }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
-  RetryableEsClientError | TargetIndexHadWriteBlock | RequestEntityTooLargeException,
+  | RetryableEsClientError
+  | TargetIndexHadWriteBlock
+  | IndexNotFound
+  | RequestEntityTooLargeException,
   'bulk_index_succeeded'
 > => () => {
   return client
@@ -85,6 +92,12 @@ export const bulkOverwriteTransformedDocuments = ({
         if (errors.every(isWriteBlockException)) {
           return Either.left({
             type: 'target_index_had_write_block' as const,
+          });
+        }
+        if (errors.every(isIndexNotFoundException)) {
+          return Either.left({
+            type: 'index_not_found_exception' as const,
+            index,
           });
         }
         throw new Error(JSON.stringify(errors));

@@ -6,7 +6,7 @@
  */
 
 import { Logger, SavedObjectReference } from 'src/core/server';
-import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { getSavedObjectNamePatternForExceptionsList } from './utils';
 
@@ -35,7 +35,7 @@ export const extractExceptionsList = ({
     return exceptionsList.map((exceptionItem, index) => ({
       name: getSavedObjectNamePatternForExceptionsList(index),
       id: exceptionItem.id,
-      type: EXCEPTION_LIST_NAMESPACE,
+      type: getSavedObjectType({ namespaceType: exceptionItem.namespace_type }),
     }));
   }
 };

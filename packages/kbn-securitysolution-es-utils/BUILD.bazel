@@ -1,5 +1,6 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-securitysolution-es-utils"
 
@@ -27,18 +28,27 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md",
 ]
 
-SRC_DEPS = [
+RUNTIME_DEPS = [
   "@npm//@elastic/elasticsearch",
+  "@npm//@hapi/boom",
   "@npm//@hapi/hapi",
   "@npm//tslib",
 ]
 
 TYPES_DEPS = [
+  "@npm//@elastic/elasticsearch",
+  "@npm//@hapi/boom",
+  "@npm//tslib",
+  "@npm//@types/hapi__hapi",
   "@npm//@types/jest",
   "@npm//@types/node",
 ]
 
-DEPS = SRC_DEPS + TYPES_DEPS
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
 
 ts_config(
   name = "tsconfig",
@@ -50,24 +60,25 @@ ts_config(
 )
 
 ts_project(
-  name = "tsc",
-  srcs = SRCS,
+  name = "tsc_types",
   args = ["--pretty"],
+  srcs = SRCS,
+  deps = TYPES_DEPS,
   declaration = True,
   declaration_map = True,
-  out_dir = "target",
+  emit_declaration_only = True,
+  out_dir = "target_types",
   root_dir = "src",
   source_map = True,
   tsconfig = ":tsconfig",
-  deps = DEPS,
 )
 
 js_library(
   name = PKG_BASE_NAME,
-  package_name = PKG_REQUIRE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
-  deps = DEPS + [":tsc"],
 )
 
 pkg_npm(

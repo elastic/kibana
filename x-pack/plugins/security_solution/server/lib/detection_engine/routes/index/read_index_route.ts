@@ -30,7 +30,7 @@ export const readIndexRoute = (router: SecuritySolutionPluginRouter, config: Con
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = context.core.elasticsearch.client.asInternalUser;
         const siemClient = context.securitySolution?.getAppClient();
 
         if (!siemClient) {

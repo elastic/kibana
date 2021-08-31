@@ -78,6 +78,7 @@
   "host.os.version",
   "host.type",
   "process.command_line",
+  "process.code_signature.subject_name",
   "process.Ext.services",
   "process.Ext.user",
   "process.Ext.code_signature",

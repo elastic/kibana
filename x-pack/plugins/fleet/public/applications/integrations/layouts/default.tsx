@@ -32,7 +32,7 @@ const Illustration = styled(EuiImage)`
 `;
 
 const HeroImage = memo(() => {
-  const { toAssets } = useLinks();
+  const { toSharedAssets } = useLinks();
   const theme = useTheme() as EuiTheme;
   const IS_DARK_THEME = theme.darkMode;
 
@@ -43,8 +43,8 @@ const HeroImage = memo(() => {
       })}
       url={
         IS_DARK_THEME
-          ? toAssets('illustration_integrations_darkmode.svg')
-          : toAssets('illustration_integrations_lightmode.svg')
+          ? toSharedAssets('illustration_integrations_darkmode.svg')
+          : toSharedAssets('illustration_integrations_lightmode.svg')
       }
     />
   );

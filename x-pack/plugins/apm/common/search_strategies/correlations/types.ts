@@ -27,7 +27,7 @@ export interface SearchServiceParams {
   start?: string;
   end?: string;
   percentileThreshold?: number;
-  percentileThresholdValue?: number;
+  analyzeCorrelations?: boolean;
 }
 
 export interface SearchServiceFetchParams extends SearchServiceParams {
@@ -51,4 +51,13 @@ export interface AsyncSearchProviderProgress {
   loadedFieldCanditates: number;
   loadedFieldValuePairs: number;
   loadedHistograms: number;
+}
+
+export interface SearchServiceRawResponse {
+  ccsWarning: boolean;
+  log: string[];
+  overallHistogram?: HistogramItem[];
+  percentileThresholdValue?: number;
+  took: number;
+  values: SearchServiceValue[];
 }

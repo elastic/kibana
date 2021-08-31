@@ -876,6 +876,25 @@ describe('when on the endpoint list page', () => {
         expect(emptyState).toBe(null);
         expect(dateRangePicker).not.toBe(null);
       });
+
+      it('should display activity log when tab is loaded using the URL', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
+        });
+        const logEntries = await renderResult.queryAllByTestId('timelineEntry');
+        expect(logEntries.length).toEqual(2);
+      });
     });
 
     describe('when showing host Policy Response panel', () => {

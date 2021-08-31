@@ -39,6 +39,19 @@ describe('TableListView', () => {
     expect(component).toMatchSnapshot();
   });
 
+  // avoid trapping users in empty prompt that can not create new items
+  test('render default empty prompt with create action when createItem supplied', async () => {
+    const component = shallowWithIntl(<TableListView {...requiredProps} createItem={() => {}} />);
+
+    // Using setState to check the final render while sidestepping the debounced promise management
+    component.setState({
+      hasInitialFetchReturned: true,
+      isFetchingItems: false,
+    });
+
+    expect(component).toMatchSnapshot();
+  });
+
   test('render custom empty prompt', () => {
     const component = shallowWithIntl(
       <TableListView {...requiredProps} emptyPrompt={<EuiEmptyPrompt />} />

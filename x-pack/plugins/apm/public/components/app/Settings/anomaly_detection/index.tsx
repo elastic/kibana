@@ -45,7 +45,7 @@ export function AnomalyDetection() {
 
   if (!hasValidLicense) {
     return (
-      <EuiPanel>
+      <EuiPanel hasBorder={true}>
         <LicensePrompt text={ML_ERRORS.INVALID_LICENSE} />
       </EuiPanel>
     );

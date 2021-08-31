@@ -7,7 +7,9 @@
 
 export const ML_USAGE_EVENT = {
   IMPORTED_ANOMALY_DETECTOR_JOBS: 'imported_anomaly_detector_jobs',
+  IMPORT_FAILED_ANOMALY_DETECTOR_JOBS: 'import_failed_anomaly_detector_jobs',
   IMPORTED_DATA_FRAME_ANALYTICS_JOBS: 'imported_data_frame_analytics_jobs',
+  IMPORT_FAILED_DATA_FRAME_ANALYTICS_JOBS: 'import_failed_data_frame_analytics_jobs',
   EXPORTED_ANOMALY_DETECTOR_JOBS: 'exported_anomaly_detector_jobs',
   EXPORTED_DATA_FRAME_ANALYTICS_JOBS: 'exported_data_frame_analytics_jobs',
 } as const;

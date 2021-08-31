@@ -52,6 +52,7 @@ import {
 } from './components/fleet_integration';
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
+import { getLazyApmAgentsTabExtension } from './components/fleet_integration/lazy_apm_agents_tab_extension';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -95,10 +96,6 @@ const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
   defaultMessage: 'Backends',
 });
 
-const newBadgeLabel = i18n.translate('xpack.apm.navigation.newBadge', {
-  defaultMessage: 'NEW',
-});
-
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
@@ -131,7 +128,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                     label: backendsTitle,
                     app: 'apm',
                     path: '/backends',
-                    sideBadgeLabel: newBadgeLabel,
+                    isNewFeature: true,
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -368,6 +365,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         package: 'apm',
         view: 'package-policy-edit',
         Component: getLazyAPMPolicyEditExtension(),
+      });
+
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'package-policy-edit-tabs',
+        tabs: [
+          { title: 'APM Agents', Component: getLazyApmAgentsTabExtension() },
+        ],
       });
     }
   }

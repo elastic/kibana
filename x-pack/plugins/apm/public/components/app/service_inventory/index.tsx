@@ -16,8 +16,7 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
-import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 import { SearchBar } from '../../shared/search_bar';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
@@ -36,16 +35,17 @@ const initialData = {
 
 let hasDisplayedToast = false;
 
-function useServicesFetcher({
-  environment,
-  kuery,
-}: {
-  environment: string;
-  kuery: string;
-}) {
+function useServicesFetcher() {
   const {
-    urlParams: { start, end, comparisonEnabled, comparisonType },
+    urlParams: { comparisonEnabled, comparisonType },
   } = useUrlParams();
+
+  const {
+    query: { rangeFrom, rangeTo, environment, kuery },
+  } = useApmParams('/services/:serviceName', '/services');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { core } = useApmPluginContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
 
@@ -149,7 +149,6 @@ function useServicesFetcher({
     mainStatisticsData,
     mainStatisticsStatus,
     comparisonData,
-    isLoading: mainStatisticsStatus === FETCH_STATUS.LOADING,
   };
 }
 
@@ -157,18 +156,10 @@ export function ServiceInventory() {
   const { core } = useApmPluginContext();
 
   const {
-    query: { environment, kuery },
-  } = useApmParams('/services');
-
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
-    kuery,
-  });
-  const {
     mainStatisticsData,
     mainStatisticsStatus,
     comparisonData,
-    isLoading,
-  } = useServicesFetcher({ environment, kuery });
+  } = useServicesFetcher();
 
   const {
     anomalyDetectionJobsData,
@@ -188,6 +179,8 @@ export function ServiceInventory() {
     canCreateJob &&
     !userHasDismissedCallout;
 
+  const isLoading = mainStatisticsStatus === FETCH_STATUS.LOADING;
+
   return (
     <>
       <SearchBar showTimeComparison />
@@ -195,11 +188,6 @@ export function ServiceInventory() {
         {displayMlCallout && (
           <EuiFlexItem>
             <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
-          </EuiFlexItem>
-        )}
-        {fallbackToTransactions && (
-          <EuiFlexItem>
-            <AggregatedTransactionsCallout />
           </EuiFlexItem>
         )}
         <EuiFlexItem>

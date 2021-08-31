@@ -136,12 +136,16 @@ export function registerCrawlerRoutes({
           id: schema.string(),
         }),
         body: schema.object({
-          crawl_rules: schema.arrayOf(
-            schema.object({
-              order: schema.number(),
-              id: schema.string(),
-            })
+          crawl_rules: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                order: schema.number(),
+                id: schema.string(),
+              })
+            )
           ),
+          deduplication_enabled: schema.maybe(schema.boolean()),
+          deduplication_fields: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
