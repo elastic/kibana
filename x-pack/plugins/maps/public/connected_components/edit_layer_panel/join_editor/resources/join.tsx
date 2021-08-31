@@ -9,7 +9,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { IFieldType, IndexPattern, Query } from 'src/plugins/data/public';
+import type { IndexPatternField, IndexPattern, Query } from 'src/plugins/data/public';
 import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
@@ -38,7 +38,7 @@ interface Props {
 }
 
 interface State {
-  rightFields: IFieldType[];
+  rightFields: IndexPatternField[];
   indexPattern?: IndexPattern;
   loadError?: string;
 }
