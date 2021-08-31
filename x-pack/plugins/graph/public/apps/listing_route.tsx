@@ -5,30 +5,72 @@
  * 2.0.
  */
 
+import React, { Fragment, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import React, { Fragment } from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
-
-import { CoreStart, ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from 'kibana/public';
+import { useHistory, useLocation } from 'react-router-dom';
 import { TableListView } from '../../../../../src/plugins/kibana_react/public';
+import { deleteSavedWorkspace, findSavedWorkspace } from '../helpers/saved_workspace_utils';
+import { getEditPath, getEditUrl, getNewPath, setBreadcrumbs } from '../services/url';
 import { GraphWorkspaceSavedObject } from '../types';
+import { GraphServices } from '../application';
 
-export interface ListingProps {
-  coreStart: CoreStart;
-  createItem: () => void;
-  findItems: (query: string) => Promise<{ total: number; hits: GraphWorkspaceSavedObject[] }>;
-  deleteItems: (records: GraphWorkspaceSavedObject[]) => Promise<void>;
-  editItem: (record: GraphWorkspaceSavedObject) => void;
-  getViewUrl: (record: GraphWorkspaceSavedObject) => string;
-  listingLimit: number;
-  hideWriteControls: boolean;
-  capabilities: { save: boolean; delete: boolean };
-  initialFilter: string;
-  initialPageSize: number;
+export interface ListingRouteProps {
+  deps: GraphServices;
 }
 
-export function Listing(props: ListingProps) {
+export function ListingRoute({
+  deps: { chrome, savedObjects, savedObjectsClient, coreStart, capabilities, addBasePath },
+}: ListingRouteProps) {
+  const listingLimit = savedObjects.settings.getListingLimit();
+  const initialPageSize = savedObjects.settings.getPerPage();
+  const history = useHistory();
+  const query = new URLSearchParams(useLocation().search);
+  const initialFilter = query.get('filter') || '';
+
+  useEffect(() => {
+    setBreadcrumbs({ chrome });
+  }, [chrome]);
+
+  const createItem = useCallback(() => {
+    history.push(getNewPath());
+  }, [history]);
+
+  const findItems = useCallback(
+    (search: string) => {
+      return findSavedWorkspace(
+        { savedObjectsClient, basePath: coreStart.http.basePath },
+        search,
+        listingLimit
+      );
+    },
+    [coreStart.http.basePath, listingLimit, savedObjectsClient]
+  );
+
+  const editItem = useCallback(
+    (savedWorkspace: GraphWorkspaceSavedObject) => {
+      history.push(getEditPath(savedWorkspace));
+    },
+    [history]
+  );
+
+  const getViewUrl = useCallback(
+    (savedWorkspace: GraphWorkspaceSavedObject) => getEditUrl(addBasePath, savedWorkspace),
+    [addBasePath]
+  );
+
+  const deleteItems = useCallback(
+    async (savedWorkspaces: GraphWorkspaceSavedObject[]) => {
+      await deleteSavedWorkspace(
+        savedObjectsClient,
+        savedWorkspaces.map((cur) => cur.id!)
+      );
+    },
+    [savedObjectsClient]
+  );
+
   return (
     <I18nProvider>
       <TableListView
@@ -37,20 +79,20 @@ export function Listing(props: ListingProps) {
         })}
         headingId="graphListingHeading"
         rowHeader="title"
-        createItem={props.capabilities.save ? props.createItem : undefined}
-        findItems={props.findItems}
-        deleteItems={props.capabilities.delete ? props.deleteItems : undefined}
-        editItem={props.capabilities.save ? props.editItem : undefined}
-        tableColumns={getTableColumns(props.getViewUrl)}
-        listingLimit={props.listingLimit}
-        initialFilter={props.initialFilter}
-        initialPageSize={props.initialPageSize}
+        createItem={capabilities.graph.save ? createItem : undefined}
+        findItems={findItems}
+        deleteItems={capabilities.graph.delete ? deleteItems : undefined}
+        editItem={capabilities.graph.save ? editItem : undefined}
+        tableColumns={getTableColumns(getViewUrl)}
+        listingLimit={listingLimit}
+        initialFilter={initialFilter}
+        initialPageSize={initialPageSize}
         emptyPrompt={getNoItemsMessage(
-          props.capabilities.save === false,
-          props.createItem,
-          props.coreStart.application
+          capabilities.graph.save === false,
+          createItem,
+          coreStart.application
         )}
-        toastNotifications={props.coreStart.notifications.toasts}
+        toastNotifications={coreStart.notifications.toasts}
         entityName={i18n.translate('xpack.graph.listing.table.entityName', {
           defaultMessage: 'graph',
         })}
