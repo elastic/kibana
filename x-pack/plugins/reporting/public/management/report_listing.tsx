@@ -51,7 +51,7 @@ class ReportListingUi extends Component<Props, State> {
   private isInitialJobsFetch: boolean;
   private licenseSubscription?: Subscription;
   private mounted?: boolean;
-  private poller?: any;
+  private poller?: Poller;
 
   constructor(props: Props) {
     super(props);
@@ -119,7 +119,7 @@ class ReportListingUi extends Component<Props, State> {
 
   public componentWillUnmount() {
     this.mounted = false;
-    this.poller.stop();
+    this.poller?.stop();
 
     if (this.licenseSubscription) {
       this.licenseSubscription.unsubscribe();
