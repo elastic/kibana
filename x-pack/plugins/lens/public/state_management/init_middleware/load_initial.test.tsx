@@ -343,7 +343,7 @@ describe('Mounter', () => {
         savedObjectId: defaultSavedObjectId,
       });
 
-      expect(services.spacesApi.ui.redirectLegacyUrl).toHaveBeenCalledWith(
+      expect(services.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
         '/testbasepath/app/lens#/edit/id2',
         'Lens visualization'
       );

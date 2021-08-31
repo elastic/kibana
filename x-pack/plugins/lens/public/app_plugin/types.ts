@@ -117,7 +117,7 @@ export interface LensAppServices {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
   presentationUtil: PresentationUtilPluginStart;
-  spacesApi: SpacesApi;
+  spaces: SpacesApi;
 
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;

@@ -101,7 +101,7 @@ export interface LensPluginStartDependencies {
   presentationUtil: PresentationUtilPluginStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   inspector: InspectorStartContract;
-  spacesApi: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
 }
 

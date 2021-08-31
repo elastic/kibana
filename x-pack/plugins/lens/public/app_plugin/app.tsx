@@ -71,7 +71,7 @@ export function App({
     notifications,
     savedObjectsTagging,
     getOriginatingAppName,
-    spacesApi,
+    spaces,
     http,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
@@ -172,17 +172,13 @@ export function App({
 
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
-    if (
-      spacesApi &&
-      sharingSavedObjectProps?.outcome === 'conflict' &&
-      persistedDoc?.savedObjectId
-    ) {
+    if (spaces && sharingSavedObjectProps?.outcome === 'conflict' && persistedDoc?.savedObjectId) {
       // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
       // callout with a warning for the user, and provide a way for them to navigate to the other object.
       const currentObjectId = persistedDoc.savedObjectId;
       const otherObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'conflict'
       const otherObjectPath = http.basePath.prepend(getFullPath(otherObjectId));
-      return spacesApi.ui.components.getLegacyUrlConflict({
+      return spaces.ui.components.getLegacyUrlConflict({
         objectNoun: i18n.translate('xpack.lens.appName', {
           defaultMessage: 'Lens visualization',
         }),
@@ -192,7 +188,7 @@ export function App({
       });
     }
     return null;
-  }, [persistedDoc, sharingSavedObjectProps, spacesApi, http]);
+  }, [persistedDoc, sharingSavedObjectProps, spaces, http]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {

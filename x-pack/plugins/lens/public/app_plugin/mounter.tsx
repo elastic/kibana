@@ -55,7 +55,7 @@ export async function getLensServices(
     savedObjectsTagging,
     usageCollection,
     fieldFormats,
-    spacesApi,
+    spaces,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -88,7 +88,7 @@ export async function getLensServices(
     },
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
-    spacesApi,
+    spaces,
   };
 }
 

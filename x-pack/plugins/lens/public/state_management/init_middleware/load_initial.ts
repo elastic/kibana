@@ -32,7 +32,7 @@ export const getPersisted = async ({
 }): Promise<
   { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'errorJSON'> } | undefined
 > => {
-  const { notifications, spacesApi, attributeService } = lensServices;
+  const { notifications, spaces, attributeService } = lensServices;
   let doc: Document;
 
   try {
@@ -49,11 +49,11 @@ export const getPersisted = async ({
       };
     }
     const { sharingSavedObjectProps, ...attributes } = result;
-    if (spacesApi && sharingSavedObjectProps?.outcome === 'aliasMatch') {
+    if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
       const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
       const newPath = lensServices.http.basePath.prepend(getFullPath(newObjectId));
-      await spacesApi.ui.redirectLegacyUrl(
+      await spaces.ui.redirectLegacyUrl(
         newPath,
         i18n.translate('xpack.lens.appName', {
           defaultMessage: 'Lens visualization',

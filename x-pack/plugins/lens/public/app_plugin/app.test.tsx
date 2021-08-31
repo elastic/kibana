@@ -1269,7 +1269,7 @@ describe('Lens App', () => {
         },
       },
     });
-    expect(services.spacesApi.ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
+    expect(services.spaces.ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
       currentObjectId: '1234',
       objectNoun: 'Lens visualization',
       otherObjectId: '2',

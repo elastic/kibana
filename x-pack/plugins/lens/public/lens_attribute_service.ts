@@ -62,7 +62,7 @@ export function getLensAttributeService(
             ? JSON.stringify({
                 targetType: type,
                 sourceId: id,
-                targetSpace: startDependencies.spacesApi.getActiveSpace(),
+                targetSpace: startDependencies.spaces.getActiveSpace(),
               })
             : undefined,
       };

@@ -410,7 +410,7 @@ export function makeDefaultServices(
       remove: jest.fn(),
       clear: jest.fn(),
     },
-    spacesApi: spacesPluginMock.createStartContract(),
+    spaces: spacesPluginMock.createStartContract(),
   };
 }
 
