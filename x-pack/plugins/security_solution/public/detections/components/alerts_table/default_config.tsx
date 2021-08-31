@@ -275,7 +275,7 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
 
 export const requiredFieldMappingsForActionsRuleRegistry = {
   '@timestamp': '@timestamp',
-  'alert.id': ALERT_INSTANCE_ID,
+  'alert.instance.id': ALERT_INSTANCE_ID,
   'event.kind': 'event.kind',
   'alert.start': ALERT_START,
   'alert.uuid': ALERT_UUID,
