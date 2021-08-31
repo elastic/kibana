@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperDatePicker,
-  OnRefreshChangeProps,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, OnRefreshChangeProps } from '@elastic/eui';
 import React, { useContext, useCallback } from 'react';
 import { MonitoringTimeContainer } from '../../application/pages/use_monitoring_time';
 
