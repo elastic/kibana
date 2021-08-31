@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import Url from 'url';
 import cypress from 'cypress';
+import path from 'path';
 import { FtrProviderContext } from './ftr_provider_context';
 import archives_metadata from './cypress/fixtures/es_archiver/archives_metadata';
 import { createApmUsersAndRoles } from '../scripts/create-apm-users-and-roles/create_apm_users_and_roles';
@@ -59,11 +62,16 @@ async function cypressStart(
     },
   });
 
+  console.log('Loading esArchiver...');
   await esArchiverLoad('apm_8.0.0');
 
   const res = await cypressExecution({
     ...(spec !== undefined ? { spec } : {}),
-    config: { baseUrl: kibanaUrl },
+    configFile: path.join(__dirname, 'cypress.json'),
+    config: {
+      baseUrl: kibanaUrl,
+      integrationFolder: path.join(__dirname, 'cypress', 'integration'),
+    },
     env: {
       START_DATE: start,
       END_DATE: end,

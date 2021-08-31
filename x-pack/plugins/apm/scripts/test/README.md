@@ -6,14 +6,12 @@ node scripts/tests/jest [--watch]
 
 ## API Tests
 
-Start server and run tests
 ```
-node scripts/tests/ftr_api [--trial]
+node scripts/tests/api [--trial] [--help]
 ```
 
 ## E2E Tests (Cypress)
 
-Start server and run tests
 ```
-node scripts/tests/ftr_e2e [--trial]
+node scripts/tests/e2e [--trial] [--help]
 ```

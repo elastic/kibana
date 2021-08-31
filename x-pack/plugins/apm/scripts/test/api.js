@@ -8,8 +8,7 @@
 /* eslint-disable no-console */
 
 const yargs = require('yargs');
-const childProcess = require('child_process');
-const path = require('path');
+const runFTRScript = require('./ftr');
 
 const { argv } = yargs(process.argv.slice(2))
   .option('basic', {
@@ -33,37 +32,15 @@ const { argv } = yargs(process.argv.slice(2))
     description:
       'Run all tests (an instance of Elasticsearch and kibana are needs to be available)',
   })
-  .option('open', {
-    default: false,
-    type: 'boolean',
-    description: 'Opens the Cypress Test Runner',
-  })
   .help();
 
-const { basic, trial, server, runner } = argv;
-
-if (basic && trial) {
-  console.error('Error: Only one license should be provided');
-  process.exit();
-}
+const { trial, server, runner } = argv;
 
 const license = trial ? 'trial' : 'basic';
 console.log(`License: ${license}`);
 
-const testDir = path.join(__dirname, '../../../ftr_e2e');
-
-let testScript = 'functional_tests';
-
-if (server) {
-  testScript = 'functional_tests_server';
-} else if (runner) {
-  testScript = 'functional_test_runner';
-}
-
-childProcess.execSync(
-  `node ./../../../scripts/${testScript} --config ./cypress_run.ts`,
-  {
-    cwd: testDir,
-    stdio: 'inherit',
-  }
-);
+runFTRScript({
+  server,
+  runner,
+  configScript: `../../../../test/apm_api_integration/${license}/config.ts`,
+});
