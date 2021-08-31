@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { SetupUX } from '../routes/rum_client';
 import {
   AGENT_NAME,
   TRANSACTION_TYPE,
@@ -21,7 +22,7 @@ export function getRumPageLoadTransactionsProjection({
   urlQuery,
   checkFetchStartFieldExists = true,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   urlQuery?: string;
   checkFetchStartFieldExists?: boolean;
 }) {
@@ -72,7 +73,7 @@ export function getRumErrorsProjection({
   setup,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   urlQuery?: string;
 }) {
   const { start, end, uiFilters } = setup;

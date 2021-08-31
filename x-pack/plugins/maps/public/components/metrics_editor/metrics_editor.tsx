@@ -8,9 +8,9 @@
 import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiSpacer, EuiTextAlign } from '@elastic/eui';
+import type { IndexPatternField } from 'src/plugins/data/public';
 import { MetricEditor } from './metric_editor';
 import { DEFAULT_METRIC } from '../../classes/sources/es_agg_source';
-import { IFieldType } from '../../../../../../src/plugins/data/public';
 import { AggDescriptor, FieldedAggDescriptor } from '../../../common/descriptor_types';
 import { AGG_TYPE } from '../../../common/constants';
 
@@ -23,7 +23,7 @@ export function isMetricValid(aggDescriptor: AggDescriptor) {
 interface Props {
   allowMultipleMetrics: boolean;
   metrics: AggDescriptor[];
-  fields: IFieldType[];
+  fields: IndexPatternField[];
   onChange: (metrics: AggDescriptor[]) => void;
   metricsFilter?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
 }
