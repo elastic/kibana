@@ -9,7 +9,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTitle,
