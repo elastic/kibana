@@ -67,11 +67,7 @@ async function cypressStart(
 
   const res = await cypressExecution({
     ...(spec !== undefined ? { spec } : {}),
-    configFile: path.join(__dirname, 'cypress.json'),
-    config: {
-      baseUrl: kibanaUrl,
-      integrationFolder: path.join(__dirname, 'cypress', 'integration'),
-    },
+    config: { baseUrl: kibanaUrl },
     env: {
       START_DATE: start,
       END_DATE: end,
@@ -79,6 +75,7 @@ async function cypressStart(
     },
   });
 
+  console.log('Removing esArchiver...');
   await esArchiverUnload('apm_8.0.0');
 
   return res;

@@ -7,8 +7,9 @@
 
 /* eslint-disable no-console */
 
+const path = require('path');
 const yargs = require('yargs');
-const runFTRScript = require('./ftr');
+const childProcess = require('child_process');
 
 const { argv } = yargs(process.argv.slice(2))
   .option('server', {
@@ -31,10 +32,18 @@ const { argv } = yargs(process.argv.slice(2))
 
 const { server, runner, open } = argv;
 
-runFTRScript({
-  server,
-  runner: runner || open,
-  configScript: open
-    ? '../../ftr_e2e/cypress_open.ts'
-    : '../../ftr_e2e/cypress_run.ts',
-});
+const e2eDir = path.join(__dirname, '../../ftr_e2e');
+
+let ftrScript = 'functional_tests';
+if (server) {
+  ftrScript = 'functional_tests_server';
+} else if (runner || open) {
+  ftrScript = 'functional_test_runner';
+}
+
+childProcess.execSync(
+  `node ../../../../scripts/${ftrScript} --config ${
+    open ? './cypress_open.ts' : './cypress_run.ts'
+  }`,
+  { cwd: e2eDir, stdio: 'inherit' }
+);

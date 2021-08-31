@@ -8,7 +8,8 @@
 /* eslint-disable no-console */
 
 const yargs = require('yargs');
-const runFTRScript = require('./ftr');
+const path = require('path');
+const childProcess = require('child_process');
 
 const { argv } = yargs(process.argv.slice(2))
   .option('basic', {
@@ -39,8 +40,13 @@ const { trial, server, runner } = argv;
 const license = trial ? 'trial' : 'basic';
 console.log(`License: ${license}`);
 
-runFTRScript({
-  server,
-  runner,
-  configScript: `../../../../test/apm_api_integration/${license}/config.ts`,
-});
+let ftrScript = 'functional_tests';
+if (server) {
+  ftrScript = 'functional_tests_server';
+} else if (runner) {
+  ftrScript = 'functional_test_runner';
+}
+childProcess.execSync(
+  `node ../../../../scripts/${ftrScript} --config ../../../../test/apm_api_integration/${license}/config.ts`,
+  { cwd: path.join(__dirname), stdio: 'inherit' }
+);
