@@ -386,6 +386,12 @@ export const getLastLoadedActivityLogData: (
   return getLastLoadedResourceState(activityLog)?.data;
 });
 
+export const getActivityLogUninitialized: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getActivityLogData, (activityLog) =>
+  isUninitialisedResourceState(activityLog)
+);
+
 export const getActivityLogRequestLoading: (
   state: Immutable<EndpointState>
 ) => boolean = createSelector(getActivityLogData, (activityLog) =>
@@ -412,6 +418,19 @@ export const getActivityLogError: (
     return activityLog.error;
   }
 });
+
+// returns a true if either lgo is uninitialised
+// or if it has failed an api call after having fetched a non empty log list earlier
+export const getActivityLogIsUninitializedOrHasSubsequentAPIError: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(
+  getActivityLogUninitialized,
+  getLastLoadedActivityLogData,
+  getActivityLogError,
+  (isUninitialized, lastLoadedLogData, isAPIError) => {
+    return isUninitialized || (!isAPIError && !!lastLoadedLogData?.data.length);
+  }
+);
 
 export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
   return (details && isEndpointHostIsolated(details)) || false;
