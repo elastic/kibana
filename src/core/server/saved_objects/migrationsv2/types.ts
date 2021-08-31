@@ -92,7 +92,7 @@ export interface BaseState extends ControlState {
    * again.
    *
    * When writing batches, we limit the number of documents in a batch
-   * (batchSize) as well as the size of the batch in bytes (batchSizeBytes).
+   * (batchSize) as well as the size of the batch in bytes (maxBatchSizeBytes).
    */
   readonly batchSize: number;
   /**
@@ -100,7 +100,7 @@ export interface BaseState extends ControlState {
    * don't construct HTTP requests which would exceed Elasticsearch's
    * http.max_content_length which defaults to 100mb.
    */
-  readonly batchSizeBytes: number;
+  readonly maxBatchSizeBytes: number;
   readonly logs: MigrationLog[];
   /**
    * The current alias e.g. `.kibana` which always points to the latest

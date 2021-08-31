@@ -38,7 +38,7 @@ const createMigrator = (
     kibanaVersion: '8.0.0-testing',
     soMigrationsConfig: {
       batchSize: 100,
-      batchSizeBytes: new ByteSizeValue(30_000),
+      maxBatchSizeBytes: ByteSizeValue.parse('30kb'),
       scrollDuration: '15m',
       pollInterval: 1500,
       skip: false,

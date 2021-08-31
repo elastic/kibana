@@ -397,7 +397,7 @@ const mockOptions = ({ enableV2 }: { enableV2: boolean } = { enableV2: false }) 
     } as KibanaMigratorOptions['kibanaConfig'],
     soMigrationsConfig: {
       batchSize: 20,
-      batchSizeBytes: new ByteSizeValue(20_000),
+      maxBatchSizeBytes: ByteSizeValue.parse('20mb'),
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,

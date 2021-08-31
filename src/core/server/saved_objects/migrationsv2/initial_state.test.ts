@@ -22,7 +22,7 @@ describe('createInitialState', () => {
   const migrationsConfig = ({
     retryAttempts: 15,
     batchSize: 1000,
-    batchSizeBytes: new ByteSizeValue(1e8),
+    maxBatchSizeBytes: ByteSizeValue.parse('100mb'),
   } as unknown) as SavedObjectsMigrationConfigType;
   it('creates the initial state for the model based on the passed in parameters', () => {
     expect(
@@ -39,7 +39,7 @@ describe('createInitialState', () => {
       })
     ).toEqual({
       batchSize: 1000,
-      batchSizeBytes: new ByteSizeValue(ByteSizeValue.parse('100mb')),
+      maxBatchSizeBytes: ByteSizeValue.parse('100mb').getValueInBytes(),
       controlState: 'INIT',
       currentAlias: '.kibana_task_manager',
       excludeFromUpgradeFilterHooks: {},

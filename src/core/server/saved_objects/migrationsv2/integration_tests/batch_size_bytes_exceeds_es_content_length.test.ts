@@ -11,6 +11,7 @@ import fs from 'fs/promises';
 import JSON5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
+import { retryAsync } from '../test_helpers/retry_async';
 
 const logFilePath = Path.join(__dirname, 'batch_size_bytes_exceeds_es_content_length.log');
 
@@ -52,39 +53,44 @@ describe('migration v2', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
-  it('fails with a descriptive message when batchSizeBytes exceeds ES http.max_content_length', async () => {
-    root = createRoot({ batchSizeBytes: 1715275 });
+  it('fails with a descriptive message when maxBatchSizeBytes exceeds ES http.max_content_length', async () => {
+    root = createRoot({ maxBatchSizeBytes: 1715275 });
     esServer = await startES();
     await root.preboot();
     await root.setup();
     await expect(root.start()).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.kibana] index: While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.batchSize' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.]`
+      `[Error: Unable to complete saved object migrations for the [.kibana] index: While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.]`
     );
 
-    const logFileContent = await fs.readFile(logFilePath, 'utf-8');
-    const records = logFileContent
-      .split('\n')
-      .filter(Boolean)
-      .map((str) => JSON5.parse(str)) as any[];
+    await retryAsync(
+      async () => {
+        const logFileContent = await fs.readFile(logFilePath, 'utf-8');
+        const records = logFileContent
+          .split('\n')
+          .filter(Boolean)
+          .map((str) => JSON5.parse(str)) as any[];
 
-    expect(
-      records.find((rec) =>
-        rec.message.startsWith(
-          `Unable to complete saved object migrations for the [.kibana] index: While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.batchSize' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`
-        )
-      )
-    ).toBeDefined();
+        expect(
+          records.find((rec) =>
+            rec.message.startsWith(
+              `Unable to complete saved object migrations for the [.kibana] index: While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`
+            )
+          )
+        ).toBeDefined();
+      },
+      { retryAttempts: 10, retryDelayMs: 200 }
+    );
   });
 });
 
-function createRoot(options: { batchSizeBytes?: number }) {
+function createRoot(options: { maxBatchSizeBytes?: number }) {
   return kbnTestServer.createRootWithCorePlugins(
     {
       migrations: {
         skip: false,
         enableV2: true,
         batchSize: 1000,
-        batchSizeBytes: options.batchSizeBytes,
+        maxBatchSizeBytes: options.maxBatchSizeBytes,
       },
       logging: {
         appenders: {

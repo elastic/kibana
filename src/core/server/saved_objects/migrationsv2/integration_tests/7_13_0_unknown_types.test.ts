@@ -16,10 +16,12 @@ import { ElasticsearchClient } from '../../../elasticsearch';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
 import { getEnvOptions } from '../../../config/mocks';
+import { retryAsync } from '../test_helpers/retry_async';
+import { LogRecord } from '@kbn/logging';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const targetIndex = `.kibana_${kibanaVersion}_001`;
-const logFilePath = Path.join(__dirname, '7_13_unknown_types_test.log');
+const logFilePath = Path.join(__dirname, '7_13_unknown_types.log');
 
 async function removeLogFile() {
   // ignore errors if it doesn't exist
@@ -68,23 +70,30 @@ describe('migration v2', () => {
     await root.setup();
     await root.start();
 
-    const logFileContent = await fs.readFile(logFilePath, 'utf-8');
-    const records = logFileContent
-      .split('\n')
-      .filter(Boolean)
-      .map((str) => JSON5.parse(str));
+    let unknownDocsWarningLog: LogRecord;
 
-    const unknownDocsWarningLog = records.find((rec) =>
-      rec.message.startsWith(`[.kibana] CHECK_UNKNOWN_DOCUMENTS`)
+    await retryAsync(
+      async () => {
+        const logFileContent = await fs.readFile(logFilePath, 'utf-8');
+        const records = logFileContent
+          .split('\n')
+          .filter(Boolean)
+          .map((str) => JSON5.parse(str));
+
+        unknownDocsWarningLog = records.find((rec) =>
+          rec.message.startsWith(`[.kibana] CHECK_UNKNOWN_DOCUMENTS`)
+        );
+
+        expect(
+          unknownDocsWarningLog.message.startsWith(
+            '[.kibana] CHECK_UNKNOWN_DOCUMENTS Upgrades will fail for 8.0+ because documents were found for unknown saved ' +
+              'object types. To ensure that upgrades will succeed in the future, either re-enable plugins or delete ' +
+              `these documents from the "${targetIndex}" index after the current upgrade completes.`
+          )
+        ).toBeTruthy();
+      },
+      { retryAttempts: 10, retryDelayMs: 200 }
     );
-
-    expect(
-      unknownDocsWarningLog.message.startsWith(
-        '[.kibana] CHECK_UNKNOWN_DOCUMENTS Upgrades will fail for 8.0+ because documents were found for unknown saved ' +
-          'object types. To ensure that upgrades will succeed in the future, either re-enable plugins or delete ' +
-          `these documents from the "${targetIndex}" index after the current upgrade completes.`
-      )
-    ).toBeTruthy();
 
     const unknownDocs = [
       { type: 'space', id: 'space:default' },

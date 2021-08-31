@@ -58,7 +58,7 @@ describe('migrations v2 model', () => {
     retryDelay: 0,
     retryAttempts: 15,
     batchSize: 1000,
-    batchSizeBytes: 1e8,
+    maxBatchSizeBytes: 1e8,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -1177,7 +1177,7 @@ describe('migrations v2 model', () => {
         const newState = model(reindexSourceToTempIndexBulkState, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.batchSize' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option."`
+          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option."`
         );
       });
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK should throw a throwBadResponse error if action failed', () => {
@@ -1615,7 +1615,7 @@ describe('migrations v2 model', () => {
         const newState = model(transformedDocumentsBulkIndexState, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.batchSize' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option."`
+          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option."`
         );
       });
     });

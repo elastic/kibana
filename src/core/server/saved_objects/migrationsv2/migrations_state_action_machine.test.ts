@@ -41,7 +41,7 @@ describe('migrationsStateActionMachine', () => {
     indexPrefix: '.my-so-index',
     migrationsConfig: {
       batchSize: 1000,
-      batchSizeBytes: new ByteSizeValue(1e8),
+      maxBatchSizeBytes: new ByteSizeValue(1e8),
       pollInterval: 0,
       scrollDuration: '0s',
       skip: false,
@@ -260,7 +260,7 @@ describe('migrationsStateActionMachine', () => {
           kibana: {
             migrationState: {
               batchSize: 1000,
-              batchSizeBytes: 1e8,
+              maxBatchSizeBytes: 1e8,
               controlState: 'LEGACY_DELETE',
               currentAlias: '.my-so-index',
               excludeFromUpgradeFilterHooks: {},
@@ -309,7 +309,7 @@ describe('migrationsStateActionMachine', () => {
           kibana: {
             migrationState: {
               batchSize: 1000,
-              batchSizeBytes: 1e8,
+              maxBatchSizeBytes: 1e8,
               controlState: 'FATAL',
               currentAlias: '.my-so-index',
               excludeFromUpgradeFilterHooks: {},
@@ -454,7 +454,7 @@ describe('migrationsStateActionMachine', () => {
           kibana: {
             migrationState: {
               batchSize: 1000,
-              batchSizeBytes: 1e8,
+              maxBatchSizeBytes: 1e8,
               controlState: 'LEGACY_REINDEX',
               currentAlias: '.my-so-index',
               excludeFromUpgradeFilterHooks: {},
@@ -497,7 +497,7 @@ describe('migrationsStateActionMachine', () => {
           kibana: {
             migrationState: {
               batchSize: 1000,
-              batchSizeBytes: 1e8,
+              maxBatchSizeBytes: 1e8,
               controlState: 'LEGACY_DELETE',
               currentAlias: '.my-so-index',
               excludeFromUpgradeFilterHooks: {},

@@ -493,7 +493,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         const batches = createBatches(
           res.right.processedDocs,
           stateP.tempIndex,
-          stateP.batchSizeBytes
+          stateP.maxBatchSizeBytes
         );
         if (Either.isRight(batches)) {
           return {
@@ -507,7 +507,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which equals or exceeds the configured maximum batch size of ${batches.left.batchSizeBytes} bytes. To proceed, please increase the migrations.batchSizeBytes Kibana configuration option and ensure that the Elasticsearch http.max_content_length configuration option is set to an equal or larger value.`,
+            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which exceeds the configured maximum batch size of ${batches.left.maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`,
           };
         }
       } else {
@@ -571,7 +571,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.batchSize' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`,
+          reason: `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`,
         };
       }
       throwBadResponse(stateP, res.left);
@@ -703,7 +703,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         const batches = createBatches(
           res.right.processedDocs,
           stateP.targetIndex,
-          stateP.batchSizeBytes
+          stateP.maxBatchSizeBytes
         );
         if (Either.isRight(batches)) {
           return {
@@ -718,7 +718,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which equals or exceeds the configured maximum batch size of ${batches.left.batchSizeBytes} bytes. To proceed, please increase the migrations.batchSizeBytes Kibana configuration option and ensure that the Elasticsearch http.max_content_length configuration option is set to an equal or larger value.`,
+            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which exceeds the configured maximum batch size of ${batches.left.maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`,
           };
         }
       } else {
@@ -767,7 +767,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.batchSize' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`,
+          reason: `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`,
         };
       } else if (
         isLeftTypeof(res.left, 'target_index_had_write_block') ||

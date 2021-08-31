@@ -12,9 +12,13 @@ import { createBulkOperationBody } from '../actions/bulk_overwrite_transformed_d
 
 /**
  * Creates batches of documents to be used by the bulk API. Each batch will
- * have a request body content length that's <= batchSizeBytes
+ * have a request body content length that's <= maxBatchSizeBytes
  */
-export function createBatches(docs: SavedObjectsRawDoc[], index: string, batchSizeBytes: number) {
+export function createBatches(
+  docs: SavedObjectsRawDoc[],
+  index: string,
+  maxBatchSizeBytes: number
+) {
   /* To build up the NDJSON request body we construct an array of objects like:
    * [
    *   {"index": ...}
@@ -26,8 +30,9 @@ export function createBatches(docs: SavedObjectsRawDoc[], index: string, batchSi
    * two characters need to be removed from the size calculation.
    */
   const BRACKETS_BYTES = 2;
-  /* NDJSON needs to be terminated by a newline, so we need to account for an
-   * extra newline character at the end of each batch
+  /* Each document in the NDJSON (including the last one) needs to be
+   * terminated by a newline, so we need to account for an extra newline
+   * character
    */
   const NDJSON_NEW_LINE_BYTES = 1;
 
@@ -37,15 +42,17 @@ export function createBatches(docs: SavedObjectsRawDoc[], index: string, batchSi
   for (const doc of docs) {
     const bulkOperationBody = createBulkOperationBody(doc, index);
     const docSizeBytes =
-      Buffer.byteLength(JSON.stringify(bulkOperationBody), 'utf8') - BRACKETS_BYTES;
-    if (docSizeBytes + NDJSON_NEW_LINE_BYTES > batchSizeBytes) {
+      Buffer.byteLength(JSON.stringify(bulkOperationBody), 'utf8') -
+      BRACKETS_BYTES +
+      NDJSON_NEW_LINE_BYTES;
+    if (docSizeBytes > maxBatchSizeBytes) {
       return Either.left({
         type: 'document_exceeds_batch_size_bytes',
-        docSizeBytes: docSizeBytes + NDJSON_NEW_LINE_BYTES,
-        batchSizeBytes,
+        docSizeBytes,
+        maxBatchSizeBytes,
         document: doc,
       });
-    } else if (currBatchSizeBytes + docSizeBytes + NDJSON_NEW_LINE_BYTES <= batchSizeBytes) {
+    } else if (currBatchSizeBytes + docSizeBytes <= maxBatchSizeBytes) {
       batches[currBatch].push(doc);
       currBatchSizeBytes = currBatchSizeBytes + docSizeBytes;
     } else {
