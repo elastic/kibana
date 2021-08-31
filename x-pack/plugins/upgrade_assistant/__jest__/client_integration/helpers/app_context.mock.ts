@@ -21,27 +21,11 @@ import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { cloudMock } from '../../../../../../x-pack/plugins/cloud/public/mocks';
-import { discoverPluginMock, Start } from '../../../../../../src/plugins/discover/public/mocks';
-
-const discoverMock = discoverPluginMock.createStartContract();
 
 const servicesMock = {
   api: apiService,
   breadcrumbs: breadcrumbService,
   data: dataPluginMock.createStartContract(),
-  discover: {
-    ...discoverMock,
-    locator: {
-      ...discoverMock.locator,
-      getLocation: jest.fn(() =>
-        Promise.resolve({
-          app: '/discover',
-          path: 'logs',
-          state: {},
-        })
-      ),
-    },
-  } as Start,
 };
 
 // We'll mock these values to avoid testing the locators themselves.
@@ -74,12 +58,7 @@ export const getAppContextMock = () => ({
       notifications: notificationServiceMock.createStartContract(),
       docLinks: docLinksServiceMock.createStartContract(),
       history: scopedHistoryMock.create(),
-      application: {
-        ...applicationServiceMock.createStartContract(),
-        getUrlForApp: jest.fn((app, options) => {
-          return `${app}/${options.path}`;
-        }),
-      },
+      application: applicationServiceMock.createStartContract(),
     },
   },
   plugins: {
