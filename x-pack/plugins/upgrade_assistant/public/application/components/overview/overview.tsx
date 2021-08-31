@@ -25,6 +25,7 @@ import { getBackupStep } from './backup_step';
 import { getFixIssuesStep } from './fix_issues_step';
 import { getFixLogsStep } from './fix_logs_step';
 import { getUpgradeStep } from './upgrade_step';
+import { getUpgradeSystemIndicesStep } from './upgrade_system_indices';
 
 export const Overview: FunctionComponent = () => {
   const {
@@ -98,6 +99,7 @@ export const Overview: FunctionComponent = () => {
         <EuiSteps
           steps={[
             getBackupStep({ cloud, cloudBackupStatusResponse }),
+            getUpgradeSystemIndicesStep(),
             getFixIssuesStep({ nextMajor }),
             getFixLogsStep(),
             getUpgradeStep({ docLinks, nextMajor }),
