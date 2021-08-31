@@ -1108,48 +1108,6 @@ describe('Exception helpers', () => {
           value: 'high',
           id: '123',
         },
-        {
-          field: 'Target.process.thread.Ext.start_address_details',
-          type: 'nested',
-          entries: [
-            {
-              field: 'allocation_type',
-              operator: 'included',
-              type: 'match',
-              value: 'PRIVATE',
-              id: '123',
-            },
-            {
-              field: 'allocation_size',
-              operator: 'included',
-              type: 'match',
-              value: '4000',
-              id: '123',
-            },
-            {
-              field: 'region_size',
-              operator: 'included',
-              type: 'match',
-              value: '4000',
-              id: '123',
-            },
-            {
-              field: 'region_protection',
-              operator: 'included',
-              type: 'match',
-              value: 'RWX',
-              id: '123',
-            },
-            {
-              field: 'memory_pe.imphash',
-              operator: 'included',
-              type: 'match',
-              value: 'a hash',
-              id: '123',
-            },
-          ],
-          id: '123',
-        },
       ]);
     });
 
@@ -1215,41 +1173,6 @@ describe('Exception helpers', () => {
           operator: 'included',
           type: 'match',
           value: 'high',
-          id: '123',
-        },
-        {
-          field: 'Target.process.thread.Ext.start_address_details',
-          type: 'nested',
-          entries: [
-            {
-              field: 'allocation_size',
-              operator: 'included',
-              type: 'match',
-              value: '4000',
-              id: '123',
-            },
-            {
-              field: 'region_size',
-              operator: 'included',
-              type: 'match',
-              value: '4000',
-              id: '123',
-            },
-            {
-              field: 'region_protection',
-              operator: 'included',
-              type: 'match',
-              value: 'RWX',
-              id: '123',
-            },
-            {
-              field: 'memory_pe.imphash',
-              operator: 'included',
-              type: 'match',
-              value: 'a hash',
-              id: '123',
-            },
-          ],
           id: '123',
         },
       ]);
