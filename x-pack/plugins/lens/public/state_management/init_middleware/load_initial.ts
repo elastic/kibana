@@ -36,9 +36,19 @@ export const getPersisted = async ({
   let doc: Document;
 
   try {
-    const { sharingSavedObjectProps, ...attributes } = await attributeService.unwrapAttributes(
-      initialInput
-    );
+    const result = await attributeService.unwrapAttributes(initialInput);
+    if (!result) {
+      return {
+        doc: ({
+          ...initialInput,
+          type: LENS_EMBEDDABLE_TYPE,
+        } as unknown) as Document,
+        sharingSavedObjectProps: {
+          outcome: 'exactMatch',
+        },
+      };
+    }
+    const { sharingSavedObjectProps, ...attributes } = result;
     if (spacesApi && sharingSavedObjectProps?.outcome === 'aliasMatch') {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
       const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
@@ -50,7 +60,6 @@ export const getPersisted = async ({
         })
       );
     }
-
     doc = {
       ...initialInput,
       ...attributes,
