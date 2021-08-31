@@ -41,7 +41,7 @@ To troubleshoot the problem, start the {kib} server with environment variables t
 [float]
 [[grant-user-access]]
 === Grant users access to reporting
-When security is enabled, granting users privilege to generate reports can be controlled by <<kibana-privileges, {kib} application privileges>>. This lets you create custom roles that control the spaces and applications where users are allowed to generate reports.
+When security is enabled, you grant users access to generate reports with <<kibana-privileges, {kib} application privileges>>, which allow you to create custom roles that control the spaces and applications where users generate reports.
 
 . Enable **application privileges** in Reporting. To do this, you must turn off the default user access control features in `kibana.yml` with:
 +
