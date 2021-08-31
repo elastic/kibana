@@ -82,6 +82,15 @@ export const ValuesInput = ({
         aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
           defaultMessage: 'Number of values',
         })}
+        onBlur={() => {
+          if (inputValue === '') {
+            return setInputValue(String(value));
+          }
+          const inputNumber = Number(inputValue);
+          setInputValue(
+            String(Math.min(MAX_NUMBER_OF_VALUES, Math.max(inputNumber, MIN_NUMBER_OF_VALUES)))
+          );
+        }}
       />
     </EuiFormRow>
   );

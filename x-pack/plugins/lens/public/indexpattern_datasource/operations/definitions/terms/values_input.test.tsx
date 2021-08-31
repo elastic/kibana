@@ -75,4 +75,35 @@ describe('Values', () => {
       expect.arrayContaining([expect.stringMatching('Value is higher')])
     );
   });
+
+  it('should fallback to last valid value on input blur', () => {
+    const instance = shallow(<ValuesInput value={123} onChange={jest.fn()} />);
+
+    function changeAndBlur(newValue: string) {
+      act(() => {
+        instance.find(EuiFieldNumber).prop('onChange')!({
+          currentTarget: { value: newValue },
+        } as React.ChangeEvent<HTMLInputElement>);
+      });
+      instance.update();
+      act(() => {
+        instance.find(EuiFieldNumber).prop('onBlur')!({} as React.FocusEvent<HTMLInputElement>);
+      });
+      instance.update();
+    }
+
+    changeAndBlur('-5');
+
+    expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeFalsy();
+    expect(instance.find(EuiFieldNumber).prop('value')).toBe('1');
+
+    changeAndBlur('5000');
+
+    expect(instance.find(EuiFieldNumber).prop('isInvalid')).toBeFalsy();
+    expect(instance.find(EuiFieldNumber).prop('value')).toBe('1000');
+
+    changeAndBlur('');
+    // as we're not handling the onChange state, it fallbacks to the value prop
+    expect(instance.find(EuiFieldNumber).prop('value')).toBe('123');
+  });
 });
