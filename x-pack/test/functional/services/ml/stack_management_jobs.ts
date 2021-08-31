@@ -18,7 +18,7 @@ type SyncFlyoutObjectType =
   | 'ObjectsUnmatchedDatafeed';
 
 export function MachineLearningStackManagementJobsProvider(
-  { getService }: FtrProviderContext,
+  { getService, getPageObjects }: FtrProviderContext,
   mlADJobTable: MlADJobTable,
   mlDFAJobTable: MlDFAJobTable
 ) {
@@ -26,6 +26,9 @@ export function MachineLearningStackManagementJobsProvider(
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
+  const log = getService('log');
+
+  const PageObjects = getPageObjects(['common']);
 
   return {
     async openSyncFlyout() {
@@ -193,6 +196,69 @@ export function MachineLearningStackManagementJobsProvider(
         await testSubjects.click(`sts-space-selector-row-${spaceId}`, 1000);
       }
       await this.assertSpaceSelectionRowSelected(spaceId, shouldSelect);
+    },
+
+    async openImportFlyout() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('mlJobsImportButton', 1000);
+        await testSubjects.existOrFail('mlJobMgmtImportJobsFlyout');
+      });
+    },
+
+    async selectFileToImport(path: string, expectError: boolean = false) {
+      log.debug(`Importing file '${path}' ...`);
+      await PageObjects.common.setFileInputPath(path);
+
+      if (expectError) {
+        await testSubjects.existOrFail('~mlJobMgmtImportJobsFileReadErrorCallout');
+      } else {
+        await testSubjects.missingOrFail('~mlJobMgmtImportJobsFileReadErrorCallout');
+        await testSubjects.existOrFail('mlJobMgmtImportJobsFileRead');
+      }
+    },
+
+    async assertJobIdsExist(expectedJobIds: string[]) {
+      const subj = await testSubjects.find('mlJobMgmtImportJobsFileRead');
+      const inputs = await subj.findAllByTagName('input');
+      const actualJobIds = await Promise.all(inputs.map((i) => i.getAttribute('value')));
+
+      expect(actualJobIds.sort()).to.eql(
+        expectedJobIds.sort(),
+        `Expected job ids to be '${JSON.stringify(expectedJobIds)}' (got '${JSON.stringify(
+          actualJobIds
+        )}')`
+      );
+    },
+
+    async assertJobIdsSkipped(expectedJobIds: string[]) {
+      const subj = await testSubjects.find('mlJobMgmtImportJobsCannotBeImportedCallout');
+      const skippedJobTitles = await subj.findAllByTagName('h5');
+      const actualJobIds = (
+        await Promise.all(skippedJobTitles.map((i) => i.parseDomContent()))
+      ).map((t) => t.html());
+
+      expect(actualJobIds.sort()).to.eql(
+        expectedJobIds.sort(),
+        `Expected job ids to be '${JSON.stringify(expectedJobIds)}' (got '${JSON.stringify(
+          actualJobIds
+        )}')`
+      );
+    },
+
+    async importJobs() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('mlJobMgmtImportImportButton', 1000);
+      });
+      await retry.tryForTime(40000, async () => {
+        await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout');
+      });
+    },
+
+    async assertImportedJobIdsExist(expectedJobIds: string[]) {
+      await retry.tryForTime(40000, async () => {
+        await testSubjects.click('mlRefreshJobListButton', 1000);
+        await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout');
+      });
     },
   };
 }

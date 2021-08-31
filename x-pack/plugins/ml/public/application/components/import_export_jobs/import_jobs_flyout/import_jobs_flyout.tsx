@@ -341,7 +341,12 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       <FlyoutButton onClick={toggleFlyout} isDisabled={isDisabled} />
 
       {showFlyout === true && isDisabled === false && (
-        <EuiFlyout onClose={setShowFlyout.bind(null, false)} hideCloseButton size="m">
+        <EuiFlyout
+          onClose={setShowFlyout.bind(null, false)}
+          hideCloseButton
+          size="m"
+          data-test-subj="mlJobMgmtImportJobsFlyout"
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>
@@ -373,7 +378,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
               {showFileReadError ? <CannotReadFileCallout /> : null}
 
               {totalJobsRead > 0 && jobType !== null && (
-                <>
+                <div data-test-subj="mlJobMgmtImportJobsFileRead">
                   <EuiSpacer size="l" />
                   {jobType === 'anomaly-detector' && (
                     <FormattedMessage
@@ -465,7 +470,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                       <EuiSpacer size="m" />
                     </div>
                   ))}
-                </>
+                </div>
               )}
             </>
           </EuiFlyoutBody>
@@ -484,7 +489,12 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton disabled={importDisabled} onClick={onImport} fill>
+                <EuiButton
+                  disabled={importDisabled}
+                  onClick={onImport}
+                  fill
+                  data-test-subj="mlJobMgmtImportImportButton"
+                >
                   <FormattedMessage
                     id="xpack.ml.importExport.importFlyout.closeButton.importButton"
                     defaultMessage="Import"

@@ -211,7 +211,12 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
 
       {showFlyout === true && isDisabled === false && (
         <>
-          <EuiFlyout onClose={() => setShowFlyout(false)} hideCloseButton size="s">
+          <EuiFlyout
+            onClose={() => setShowFlyout(false)}
+            hideCloseButton
+            size="s"
+            data-test-subj="mlJobMgmtExportJobsFlyout"
+          >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="m">
                 <h2>

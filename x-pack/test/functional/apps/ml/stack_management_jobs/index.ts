@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./synchronize'));
     loadTestFile(require.resolve('./manage_spaces'));
+    loadTestFile(require.resolve('./import_jobs'));
   });
 }
