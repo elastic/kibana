@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const retry = getService('retry');
   const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
 
   const { timePicker, visChart, visualBuilder, visualize } = getPageObjects([
     'timePicker',
@@ -94,6 +95,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.setFieldForAggregation('machine.ram');
         const kibanaIndexPatternModeValue = await visualBuilder.getMetricValue();
 
+        await kibanaServer.uiSettings.update({ 'metrics:useStringIndices': true });
+        await browser.refresh();
         await visualBuilder.clickPanelOptions('metric');
         await visualBuilder.switchIndexPatternSelectionMode(false);
         const stringIndexPatternModeValue = await visualBuilder.getMetricValue();
