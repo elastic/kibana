@@ -78,6 +78,7 @@ type Props = OwnProps & PropsFromRedux;
 const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
   columns,
+  defaultColumns,
   dataProviders,
   defaultCellActions,
   deletedEventIds,
@@ -127,6 +128,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       createTimeline({
         id,
         columns,
+        defaultColumns,
         excludedRowRendererIds,
         indexNames: selectedPatterns,
         sort,
@@ -241,6 +243,7 @@ const makeMapStateToProps = () => {
     const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
     const {
       columns,
+      defaultColumns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
@@ -254,6 +257,7 @@ const makeMapStateToProps = () => {
 
     return {
       columns,
+      defaultColumns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
