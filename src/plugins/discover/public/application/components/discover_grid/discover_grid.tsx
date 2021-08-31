@@ -392,7 +392,7 @@ export const DiscoverGrid = ({
           />
           <EuiSpacer size="m" />
           <EuiSwitch
-            label="Apply to default view only"
+            label="Apply to custom tables"
             checked={defaultColsOnly}
             onChange={() => setDefaultColsOnly(!defaultColsOnly)}
             compressed
@@ -491,7 +491,7 @@ export const DiscoverGrid = ({
                   }
                 : {
                     defaultHeight: {
-                      lineCount: defaultColsOnly ? 1 : rowHeightValue,
+                      lineCount: !defaultColsOnly ? 1 : rowHeightValue,
                     },
                   }
             }

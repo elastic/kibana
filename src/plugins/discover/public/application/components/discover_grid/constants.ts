@@ -10,7 +10,7 @@
 export const kibanaJSON = 'kibana-json';
 export const gridStyle = {
   border: 'all',
-  fontSize: 's',
+  fontSize: 'm', // TODO hack to increase line height in PoC
   cellPadding: 's',
   rowHover: 'none',
 };
