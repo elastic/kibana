@@ -23,7 +23,8 @@ import {
   MVT_GETESGRIDTILE_API_PATH,
   MVT_GETESTILE_API_PATH,
 } from '../../common/constants';
-import { getGridTile, getTile, getEsGridTile, getEsTile } from './get_tile';
+import { getTile, getEsTile } from './get_tile';
+import { getGridTile, getEsGridTile } from './get_grid_tile';
 
 const CACHE_TIMEOUT_SECONDS = 60 * 60;
 
