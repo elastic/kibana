@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues, first, last, isNaN, isNumber } from 'lodash';
+import { mapValues, first, last, isNaN, isNumber, isObject, has } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
 import {
@@ -41,8 +41,10 @@ interface AggregationWithIntervals {
 
 type Aggregation = AggregationWithIntervals | AggregationWithoutIntervals;
 
-function isAggregationWithIntervals(subject: any): subject is AggregationWithIntervals {
-  return Boolean(subject.aggregatedIntervals);
+function isAggregationWithIntervals(
+  subject: Aggregation | undefined
+): subject is AggregationWithIntervals {
+  return isObject(subject) && has(subject, 'aggregatedIntervals');
 }
 
 interface CompositeAggregationsResponse {
