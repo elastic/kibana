@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiProgress,
   EuiLoadingContent,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
@@ -46,16 +45,10 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import {
-  calculateTotalPages,
-  buildCombinedQuery,
-  getCombinedFilterQuery,
-  resolverIsShowing,
-} from '../helpers';
+import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
-import { Footer, footerHeight } from '../footer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
