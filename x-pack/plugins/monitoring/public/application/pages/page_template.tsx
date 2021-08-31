@@ -10,10 +10,9 @@ import { useTitle } from '../hooks/use_title';
 
 interface PageTemplateProps {
   title: string;
-  children: React.ReactNode;
 }
 
-export const PageTemplate = ({ title, children }: PageTemplateProps) => {
+export const PageTemplate: React.FC<PageTemplateProps> = ({ title, children }) => {
   useTitle('', title);
 
   return <div>{children}</div>;
