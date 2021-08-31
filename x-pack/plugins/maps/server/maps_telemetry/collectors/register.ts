@@ -7,12 +7,8 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
-import { MapsConfigType } from '../../../config';
 
-export function registerMapsUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  config: MapsConfigType
-): void {
+export function registerMapsUsageCollector(usageCollection: UsageCollectionSetup): void {
   if (!usageCollection) {
     return;
   }
@@ -20,11 +16,8 @@ export function registerMapsUsageCollector(
   const mapsUsageCollector = usageCollection.makeUsageCollector<MapsUsage>({
     type: 'maps',
     isReady: () => true,
-    fetch: async () => await getMapsTelemetry(config),
+    fetch: async () => await getMapsTelemetry(),
     schema: {
-      settings: {
-        showMapVisualizationTypes: { type: 'boolean' },
-      },
       indexPatternsWithGeoFieldCount: { type: 'long' },
       indexPatternsWithGeoPointFieldCount: { type: 'long' },
       indexPatternsWithGeoShapeFieldCount: { type: 'long' },
@@ -132,18 +125,6 @@ export function registerMapsUsageCollector(
           total: {
             type: 'long',
             _meta: { description: 'total number of es track layers in cluster' },
-          },
-        },
-        kbn_region: {
-          min: { type: 'long', _meta: { description: 'min number of kbn region layers per map' } },
-          max: { type: 'long', _meta: { description: 'max number of kbn region layers per map' } },
-          avg: {
-            type: 'float',
-            _meta: { description: 'avg number of kbn region layers per map' },
-          },
-          total: {
-            type: 'long',
-            _meta: { description: 'total number of kbn region layers in cluster' },
           },
         },
         kbn_tms_raster: {

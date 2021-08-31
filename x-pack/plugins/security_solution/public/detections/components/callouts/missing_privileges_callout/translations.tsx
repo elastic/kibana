@@ -17,7 +17,7 @@ import {
   DEFAULT_ITEMS_INDEX,
   DEFAULT_LISTS_INDEX,
   DEFAULT_SIGNALS_INDEX,
-  SAVED_OBJECTS_MANAGEMENT_FEATURE_ID,
+  SECURITY_FEATURE_ID,
 } from '../../../../../common/constants';
 import { CommaSeparatedValues } from './comma_separated_values';
 import { MissingPrivileges } from './use_missing_privileges';
@@ -56,7 +56,7 @@ export const missingPrivilegesCallOutBody = ({
 }: MissingPrivileges) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.messageDetail"
-    defaultMessage="{essence} Missing privileges: {privileges} Related documentation: {docs}"
+    defaultMessage="{essence} {indexPrivileges} {featurePrivileges} Related documentation: {docs}"
     values={{
       essence: (
         <p>
@@ -66,16 +66,34 @@ export const missingPrivilegesCallOutBody = ({
           />
         </p>
       ),
-      privileges: (
-        <ul>
-          {indexPrivileges.map(([index, missingPrivileges]) => (
-            <li key={index}>{missingIndexPrivileges(index, missingPrivileges)}</li>
-          ))}
-          {featurePrivileges.map(([feature, missingPrivileges]) => (
-            <li key={feature}>{missingFeaturePrivileges(feature, missingPrivileges)}</li>
-          ))}
-        </ul>
-      ),
+      indexPrivileges:
+        indexPrivileges.length > 0 ? (
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.indexPrivilegesTitle"
+              defaultMessage="Missing Elasticsearch index privileges:"
+            />
+            <ul>
+              {indexPrivileges.map(([index, missingPrivileges]) => (
+                <li key={index}>{missingIndexPrivileges(index, missingPrivileges)}</li>
+              ))}
+            </ul>
+          </>
+        ) : null,
+      featurePrivileges:
+        featurePrivileges.length > 0 ? (
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
+              defaultMessage="Missing Kibana feature privileges:"
+            />
+            <ul>
+              {featurePrivileges.map(([feature, missingPrivileges]) => (
+                <li key={feature}>{missingFeaturePrivileges(feature, missingPrivileges)}</li>
+              ))}
+            </ul>
+          </>
+        ) : null,
       docs: (
         <ul>
           <li>
@@ -97,7 +115,7 @@ interface PrivilegeExplanations {
 }
 
 const PRIVILEGE_EXPLANATIONS: PrivilegeExplanations = {
-  [SAVED_OBJECTS_MANAGEMENT_FEATURE_ID]: {
+  [SECURITY_FEATURE_ID]: {
     all: CANNOT_EDIT_RULES,
   },
   [DEFAULT_SIGNALS_INDEX]: {

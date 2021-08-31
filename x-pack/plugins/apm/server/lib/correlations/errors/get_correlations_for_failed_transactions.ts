@@ -19,7 +19,7 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import {
   getTimeseriesAggregation,
-  getTransactionErrorRateTimeSeries,
+  getFailedTransactionRateTimeSeries,
 } from '../../helpers/transaction_error_rate';
 import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
 
@@ -145,7 +145,7 @@ export async function getErrorRateTimeSeries({
 
       return {
         ...topSig,
-        timeseries: getTransactionErrorRateTimeSeries(agg.timeseries.buckets),
+        timeseries: getFailedTransactionRateTimeSeries(agg.timeseries.buckets),
       };
     }),
   };

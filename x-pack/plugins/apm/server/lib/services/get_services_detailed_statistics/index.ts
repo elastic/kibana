@@ -18,8 +18,8 @@ export async function getServicesDetailedStatistics({
   offset,
 }: {
   serviceNames: string[];
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   offset?: string;

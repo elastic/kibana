@@ -70,7 +70,10 @@ const OverviewComponent = () => {
     setDismissMessage(true);
     addMessage('management', 'dismissEndpointNotice');
   }, [addMessage]);
-  const canAccessFleet = useUserPrivileges().endpointPrivileges.canAccessFleet;
+  const {
+    endpointPrivileges: { canAccessFleet },
+    alertsPrivileges,
+  } = useUserPrivileges();
   const isThreatIntelModuleEnabled = useIsThreatIntelModuleEnabled();
   return (
     <>
@@ -95,23 +98,27 @@ const OverviewComponent = () => {
 
               <EuiFlexItem grow={true}>
                 <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <SignalsByCategory filters={filters} query={query} />
-                    <EuiSpacer size="l" />
-                  </EuiFlexItem>
+                  {alertsPrivileges?.read && (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <SignalsByCategory filters={filters} query={query} />
+                        <EuiSpacer size="l" />
+                      </EuiFlexItem>
 
-                  <EuiFlexItem grow={false}>
-                    <AlertsByCategory
-                      deleteQuery={deleteQuery}
-                      filters={filters}
-                      from={from}
-                      indexPattern={indexPattern}
-                      indexNames={selectedPatterns}
-                      query={query}
-                      setQuery={setQuery}
-                      to={to}
-                    />
-                  </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <AlertsByCategory
+                          deleteQuery={deleteQuery}
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          indexNames={selectedPatterns}
+                          query={query}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                      </EuiFlexItem>
+                    </>
+                  )}
 
                   <EuiFlexItem grow={false}>
                     <EventsByDataset

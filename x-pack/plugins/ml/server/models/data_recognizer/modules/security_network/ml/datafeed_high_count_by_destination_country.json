@@ -1,9 +1,7 @@
 {
-  "job_id": "high_count_by_destination_country",
+  "job_id": "JOB_ID",
   "indices": [
-    "logs-*",
-    "filebeat-*",
-    "packetbeat-*"
+    "INDEX_PATTERN_NAME"
   ],
   "max_empty_searches": 10,
   "query": {

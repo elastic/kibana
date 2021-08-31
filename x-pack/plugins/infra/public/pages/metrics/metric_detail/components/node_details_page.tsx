@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import dateMath from '@elastic/datemath';
+import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
 import { InventoryMetric, InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useNodeDetails } from '../hooks/use_node_details';
 import { MetricsSideNav } from './side_nav';
@@ -28,7 +29,6 @@ interface Props {
   nodeType: InventoryItemType;
   sourceId: string;
   timeRange: MetricsTimeInput;
-  parsedTimeRange: InfraTimerangeInput;
   metadataLoading: boolean;
   isAutoReloading: boolean;
   refreshInterval: number;
@@ -40,20 +40,35 @@ interface Props {
   triggerRefresh(): void;
   setTimeRange(timeRange: MetricsTimeInput): void;
 }
+
+const parseRange = (range: MetricsTimeInput) => {
+  const parsedFrom = dateMath.parse(range.from.toString());
+  const parsedTo = dateMath.parse(range.to.toString(), { roundUp: true });
+  return {
+    ...range,
+    from: (parsedFrom && parsedFrom.valueOf()) || moment().subtract(1, 'hour').valueOf(),
+    to: (parsedTo && parsedTo.valueOf()) || moment().valueOf(),
+  };
+};
+
 export const NodeDetailsPage = (props: Props) => {
-  const { parsedTimeRange } = props;
+  const [parsedTimeRange, setParsedTimeRange] = useState(parseRange(props.timeRange));
   const { metrics, loading, makeRequest, error } = useNodeDetails(
     props.requiredMetrics,
     props.nodeId,
     props.nodeType,
     props.sourceId,
-    props.parsedTimeRange,
+    parsedTimeRange,
     props.cloudId
   );
 
   const refetch = useCallback(() => {
-    makeRequest();
-  }, [makeRequest]);
+    setParsedTimeRange(parseRange(props.timeRange));
+  }, [props.timeRange]);
+
+  useEffect(() => {
+    setParsedTimeRange(parseRange(props.timeRange));
+  }, [props.timeRange]);
 
   useEffect(() => {
     makeRequest();

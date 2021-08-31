@@ -8,6 +8,13 @@
 import { BASE_RAC_ALERTS_API_PATH } from '../../../common/constants';
 import { requestMock } from './server';
 
+export const getReadIndexRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: `${BASE_RAC_ALERTS_API_PATH}/index`,
+    query: { features: 'siem' },
+  });
+
 export const getReadRequest = () =>
   requestMock.create({
     method: 'get',
@@ -22,6 +29,6 @@ export const getUpdateRequest = () =>
     body: {
       status: 'closed',
       ids: ['alert-1'],
-      index: '.alerts-observability-apm*',
+      index: '.alerts-observability.apm.alerts*',
     },
   });

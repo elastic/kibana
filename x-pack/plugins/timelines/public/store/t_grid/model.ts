@@ -63,6 +63,8 @@ export interface TGridModel extends TGridModelSettings {
   /** Uniquely identifies the timeline */
   id: string;
   indexNames: string[];
+  isAddToExistingCaseOpen: boolean;
+  isCreateNewCaseOpen: boolean;
   isLoading: boolean;
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
@@ -80,11 +82,13 @@ export interface TGridModel extends TGridModelSettings {
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
   version: string | null;
+  initialized?: boolean;
 }
 
 export type TGridModelForTimeline = Pick<
   TGridModel,
   | 'columns'
+  | 'defaultColumns'
   | 'dataProviders'
   | 'dateRange'
   | 'deletedEventIds'
@@ -112,6 +116,7 @@ export type SubsetTGridModel = Readonly<
   Pick<
     TGridModel,
     | 'columns'
+    | 'defaultColumns'
     | 'dateRange'
     | 'deletedEventIds'
     | 'excludedRowRendererIds'

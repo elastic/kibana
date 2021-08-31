@@ -16,6 +16,7 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
+import { EntityType } from '../../../../../timelines/common';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
@@ -42,6 +43,7 @@ const testProps = {
   defaultCellActions,
   defaultModel: eventsDefaultModel,
   end: to,
+  entityType: EntityType.ALERTS,
   indexNames: [],
   id: TimelineId.test,
   renderCellValue: DefaultCellRenderer,
@@ -64,9 +66,7 @@ describe('StatefulEventsViewer', () => {
     await waitFor(() => {
       wrapper.update();
 
-      expect(wrapper.text()).toMatchInlineSnapshot(
-        `"Showing: 12 events1 fields sorted@timestamp1event.severityevent.categoryevent.actionhost.namesource.ipdestination.ipdestination.bytesuser.name_idmessage0 of 12 events123"`
-      );
+      expect(wrapper.text()).toMatchInlineSnapshot(`"hello grid"`);
     });
   });
 

@@ -38,8 +38,8 @@ function getGcTimeChart({
   serviceName,
   serviceNodeName,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;

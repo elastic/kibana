@@ -9,9 +9,10 @@ import 'brace/theme/textmate';
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeEditor, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { Repository } from '../../../../../../../common/types';
+import { EuiCodeEditor } from '../../../../../../shared_imports';
 
 interface Props {
   repository: Repository;

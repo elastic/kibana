@@ -24,6 +24,7 @@ export interface ExportPanelShareOpts {
 export interface ReportingSharingData {
   title: string;
   layout: LayoutParams;
+  [key: string]: unknown;
 }
 
 export interface JobParamsProviderOptions {

@@ -38,7 +38,8 @@ export type DependenciesItem = Omit<
 
 interface Props {
   dependencies: DependenciesItem[];
-  link: React.ReactNode;
+  fixedHeight?: boolean;
+  link?: React.ReactNode;
   title: React.ReactNode;
   nameColumnTitle: React.ReactNode;
   status: FETCH_STATUS;
@@ -48,6 +49,7 @@ interface Props {
 export function DependenciesTable(props: Props) {
   const {
     dependencies,
+    fixedHeight,
     link,
     title,
     nameColumnTitle,
@@ -78,10 +80,11 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnLatency', {
         defaultMessage: 'Latency (avg.)',
       }),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
+            compact
             color="euiColorVis1"
             series={currentStats.latency.timeseries}
             comparisonSeries={previousStats?.latency.timeseries}
@@ -96,7 +99,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnThroughput', {
         defaultMessage: 'Throughput',
       }),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
@@ -113,7 +116,7 @@ export function DependenciesTable(props: Props) {
     {
       field: 'errorRateValue',
       name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
-        defaultMessage: 'Error rate',
+        defaultMessage: 'Failed transaction rate',
       }),
       width: `${unit * 10}px`,
       render: (_, { currentStats, previousStats }) => {
@@ -176,12 +179,13 @@ export function DependenciesTable(props: Props) {
               <h2>{title}</h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+          {link && <EuiFlexItem grow={false}>{link}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
           <OverviewTableContainer
+            fixedHeight={fixedHeight}
             isEmptyAndLoading={
               items.length === 0 && status === FETCH_STATUS.LOADING
             }

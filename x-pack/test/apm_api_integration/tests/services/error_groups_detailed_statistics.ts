@@ -41,6 +41,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               numBuckets: 20,
               transactionType: 'request',
               groupIds: JSON.stringify(groupIds),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -67,6 +69,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               numBuckets: 20,
               transactionType: 'request',
               groupIds: JSON.stringify(groupIds),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -100,6 +104,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               numBuckets: 20,
               transactionType: 'request',
               groupIds: JSON.stringify(['foo']),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -135,6 +141,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -179,6 +187,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end,
               comparisonStart: start,
               comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );

@@ -20,6 +20,7 @@ import {
 import { policyFactory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { MANAGEMENT_ROUTING_POLICY_DETAILS_PATH } from '../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../types';
+import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
@@ -59,62 +60,13 @@ export const licensedPolicy: (
 );
 
 /**
- * Given a Policy Data (package policy) object, return back a new object with only the field
- * needed for an Update/Create API action
- * @param policy
- */
-export const getPolicyDataForUpdate = (
-  policy: PolicyData | Immutable<PolicyData>
-): NewPolicyData | Immutable<NewPolicyData> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
-
-  // trim custom malware notification string
-  return {
-    ...newPolicy,
-    inputs: (newPolicy as Immutable<NewPolicyData>).inputs.map((input) => ({
-      ...input,
-      config: input.config && {
-        ...input.config,
-        policy: {
-          ...input.config.policy,
-          value: {
-            ...input.config.policy.value,
-            windows: {
-              ...input.config.policy.value.windows,
-              popup: {
-                ...input.config.policy.value.windows.popup,
-                malware: {
-                  ...input.config.policy.value.windows.popup.malware,
-                  message: input.config.policy.value.windows.popup.malware.message.trim(),
-                },
-              },
-            },
-            mac: {
-              ...input.config.policy.value.mac,
-              popup: {
-                ...input.config.policy.value.mac.popup,
-                malware: {
-                  ...input.config.policy.value.mac.popup.malware,
-                  message: input.config.policy.value.mac.popup.malware.message.trim(),
-                },
-              },
-            },
-          },
-        },
-      },
-    })),
-  };
-};
-
-/**
  * Return only the policy structure accepted for update/create
  */
 export const policyDetailsForUpdate: (
   state: Immutable<PolicyDetailsState>
 ) => Immutable<NewPolicyData> | undefined = createSelector(licensedPolicy, (policy) => {
   if (policy) {
-    return getPolicyDataForUpdate(policy);
+    return getPolicyDataForUpdate(policy) as Immutable<NewPolicyData>;
   }
 });
 

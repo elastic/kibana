@@ -13,8 +13,7 @@ import { i18n } from '@kbn/i18n';
 import {
   clearFlashMessages,
   flashAPIErrors,
-  setSuccessMessage,
-  setQueuedSuccessMessage,
+  flashSuccessToast,
   setQueuedErrorMessage,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
@@ -206,7 +205,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
           }
         );
 
-        setQueuedSuccessMessage(GROUP_DELETED_MESSAGE);
+        flashSuccessToast(GROUP_DELETED_MESSAGE);
         KibanaLogic.values.navigateToUrl(GROUPS_PATH);
       } catch (e) {
         flashAPIErrors(e);
@@ -231,7 +230,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
             values: { groupName: response.name },
           }
         );
-        setSuccessMessage(GROUP_RENAMED_MESSAGE);
+        flashSuccessToast(GROUP_RENAMED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -256,7 +255,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
             defaultMessage: 'Successfully updated shared content sources.',
           }
         );
-        setSuccessMessage(GROUP_SOURCES_UPDATED_MESSAGE);
+        flashSuccessToast(GROUP_SOURCES_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -289,7 +288,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
           }
         );
 
-        setSuccessMessage(GROUP_PRIORITIZATION_UPDATED_MESSAGE);
+        flashSuccessToast(GROUP_PRIORITIZATION_UPDATED_MESSAGE);
         actions.onGroupPrioritiesChanged(response);
       } catch (e) {
         flashAPIErrors(e);

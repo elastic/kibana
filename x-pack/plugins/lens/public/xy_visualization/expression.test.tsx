@@ -24,6 +24,7 @@ import {
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { calculateMinInterval, XYChart, XYChartRenderProps, xyChart } from './expression';
 import type { LensMultiTable } from '../../common';
+import { layerTypes } from '../../common';
 import {
   layerConfig,
   legendConfig,
@@ -208,6 +209,7 @@ const dateHistogramData: LensMultiTable = {
 
 const dateHistogramLayer: LayerArgs = {
   layerId: 'timeLayer',
+  layerType: layerTypes.DATA,
   hide: false,
   xAccessor: 'xAccessorId',
   yScaleType: 'linear',
@@ -249,6 +251,7 @@ const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable => ({
 
 const sampleLayer: LayerArgs = {
   layerId: 'first',
+  layerType: layerTypes.DATA,
   seriesType: 'line',
   xAccessor: 'c',
   accessors: ['a', 'b'],
@@ -345,6 +348,7 @@ describe('xy_expression', () => {
     test('layerConfig produces the correct arguments', () => {
       const args: LayerArgs = {
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'line',
         xAccessor: 'c',
         accessors: ['a', 'b'],
@@ -506,6 +510,7 @@ describe('xy_expression', () => {
     describe('date range', () => {
       const timeSampleLayer: LayerArgs = {
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'line',
         xAccessor: 'c',
         accessors: ['a', 'b'],
@@ -984,6 +989,7 @@ describe('xy_expression', () => {
 
       const numberLayer: LayerArgs = {
         layerId: 'numberLayer',
+        layerType: layerTypes.DATA,
         hide: false,
         xAccessor: 'xAccessorId',
         yScaleType: 'linear',
@@ -1089,6 +1095,7 @@ describe('xy_expression', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 isHistogram: true,
                 seriesType: 'bar_stacked',
                 xAccessor: 'b',
@@ -1177,6 +1184,7 @@ describe('xy_expression', () => {
 
       const numberLayer: LayerArgs = {
         layerId: 'numberLayer',
+        layerType: layerTypes.DATA,
         hide: false,
         xAccessor: 'xAccessorId',
         yScaleType: 'linear',
@@ -1295,6 +1303,7 @@ describe('xy_expression', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'line',
                 xAccessor: 'd',
                 accessors: ['a', 'b'],
@@ -2140,6 +2149,7 @@ describe('xy_expression', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'line',
             xAccessor: 'a',
             accessors: ['c'],
@@ -2152,6 +2162,7 @@ describe('xy_expression', () => {
           },
           {
             layerId: 'second',
+            layerType: layerTypes.DATA,
             seriesType: 'line',
             xAccessor: 'a',
             accessors: ['c'],
@@ -2228,6 +2239,7 @@ describe('xy_expression', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'line',
             xAccessor: 'a',
             accessors: ['c'],
@@ -2302,6 +2314,7 @@ describe('xy_expression', () => {
         layers: [
           {
             layerId: 'first',
+            layerType: layerTypes.DATA,
             seriesType: 'line',
             xAccessor: 'a',
             accessors: ['c'],
@@ -2535,6 +2548,7 @@ describe('xy_expression', () => {
       };
       const timeSampleLayer: LayerArgs = {
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'line',
         xAccessor: 'c',
         accessors: ['a', 'b'],

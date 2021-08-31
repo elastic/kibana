@@ -35,7 +35,7 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
   state,
   action
 ) => {
-  const pagingOptions =
+  const updatedActivityLog =
     action.payload.type === 'LoadedResourceState'
       ? {
           ...state.endpointDetails.activityLog,
@@ -53,7 +53,7 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
     endpointDetails: {
       ...state.endpointDetails!,
       activityLog: {
-        ...pagingOptions,
+        ...updatedActivityLog,
         logData: action.payload,
       },
     },

@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
         signals = await getSignalsWithES({ es, indices: defaultSignalsIndex, ids: signalID });
 
         expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
-          CaseStatuses['in-progress']
+          'acknowledged'
         );
       });
 
@@ -200,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
           CaseStatuses['in-progress']
         );
         expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
-          CaseStatuses['in-progress']
+          'acknowledged'
         );
       });
 
@@ -321,7 +321,7 @@ export default function ({ getService }: FtrProviderContext) {
           CaseStatuses.closed
         );
         expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
-          CaseStatuses['in-progress']
+          'acknowledged'
         );
       });
 
@@ -470,7 +470,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // alerts should be updated now that the
         expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
-          CaseStatuses['in-progress']
+          'acknowledged'
         );
         expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
           CaseStatuses.closed

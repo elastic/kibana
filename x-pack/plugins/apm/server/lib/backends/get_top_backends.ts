@@ -25,9 +25,9 @@ export async function getTopBackends({
   start: number;
   end: number;
   numBuckets: number;
-  environment?: string;
+  environment: string;
   offset?: string;
-  kuery?: string;
+  kuery: string;
 }) {
   const statsItems = await getConnectionStats({
     setup,

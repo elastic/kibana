@@ -21,7 +21,7 @@ function isPngJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPNG {
   return (job as TaskPayloadPNG).relativeUrl !== undefined;
 }
 function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
-  return (job as TaskPayloadPDF).relativeUrls !== undefined;
+  return (job as TaskPayloadPDF).objects !== undefined;
 }
 
 export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskPayloadPNG) {
@@ -39,17 +39,17 @@ export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskP
   if (isPngJob(job)) {
     relativeUrls = [job.relativeUrl];
   } else if (isPdfJob(job)) {
-    relativeUrls = job.relativeUrls;
+    relativeUrls = job.objects.map((obj) => obj.relativeUrl);
   } else {
     throw new Error(
-      `No valid URL fields found in Job Params! Expected \`job.relativeUrl: string\` or \`job.relativeUrls: string[]\``
+      `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
     );
   }
 
   validateUrls(relativeUrls);
 
   const urls = relativeUrls.map((relativeUrl) => {
-    const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
+    const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl); // FIXME: '(urlStr: string): UrlWithStringQuery' is deprecated
     const jobUrl = getAbsoluteUrl({
       path: parsedRelative.pathname === null ? undefined : parsedRelative.pathname,
       hash: parsedRelative.hash === null ? undefined : parsedRelative.hash,

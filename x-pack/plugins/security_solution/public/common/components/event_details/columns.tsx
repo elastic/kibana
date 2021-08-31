@@ -67,7 +67,7 @@ export const getColumns = ({
     ),
     sortable: false,
     truncateText: false,
-    width: '180px',
+    width: '132px',
     render: (values: string[] | null | undefined, data: EventFieldsData) => {
       const label = data.isObjectArray
         ? i18n.NESTED_COLUMN(data.field)

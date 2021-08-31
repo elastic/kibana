@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { LayerType } from '../../types';
+
 export interface MetricState {
   layerId: string;
   accessor?: string;
+  layerType: LayerType;
 }
 
 export interface MetricConfig extends MetricState {

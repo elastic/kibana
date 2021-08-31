@@ -20,6 +20,10 @@ import {
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
+  EuiPopover,
+  EuiSelectable,
+  EuiText,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type {
@@ -30,7 +34,7 @@ import type {
 } from '../types';
 import { State, visualizationTypes, XYState } from './types';
 import type { FormatFactory } from '../../common';
-import type {
+import {
   SeriesType,
   YAxisMode,
   AxesSettingsConfig,
@@ -45,6 +49,7 @@ import { PalettePicker, TooltipWrapper } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getScaleType, getSortedAccessors } from './to_expression';
 import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
+import { ToolbarButton } from '../../../../../src/plugins/kibana_react/public';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -86,6 +91,90 @@ const legendOptions: Array<{
     }),
   },
 ];
+
+export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
+  const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+  const { state, layerId } = props;
+  const horizontalOnly = isHorizontalChart(state.layers);
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
+  const layer = state.layers[index];
+  if (!layer) {
+    return null;
+  }
+
+  const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
+
+  const createTrigger = function () {
+    return (
+      <ToolbarButton
+        data-test-subj="lns_layer_settings"
+        title={currentVisType.fullLabel || currentVisType.label}
+        onClick={() => setPopoverIsOpen(!isPopoverOpen)}
+        fullWidth
+        size="s"
+      >
+        <>
+          <EuiIcon type={currentVisType.icon} />
+          <EuiText size="s" className="lnsLayerPanelChartSwitch_title">
+            {currentVisType.fullLabel || currentVisType.label}
+          </EuiText>
+        </>
+      </ToolbarButton>
+    );
+  };
+
+  return (
+    <>
+      <EuiPopover
+        panelClassName="lnsChangeIndexPatternPopover"
+        button={createTrigger()}
+        isOpen={isPopoverOpen}
+        closePopover={() => setPopoverIsOpen(false)}
+        display="block"
+        panelPaddingSize="s"
+        ownFocus
+      >
+        <EuiPopoverTitle>
+          {i18n.translate('xpack.lens.layerPanel.layerVisualizationType', {
+            defaultMessage: 'Layer visualization type',
+          })}
+        </EuiPopoverTitle>
+        <div>
+          <EuiSelectable<{
+            key?: string;
+            label: string;
+            value?: string;
+            checked?: 'on' | 'off';
+          }>
+            singleSelection="always"
+            options={visualizationTypes
+              .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
+              .map((t) => ({
+                value: t.id,
+                key: t.id,
+                checked: t.id === currentVisType.id ? 'on' : undefined,
+                prepend: <EuiIcon type={t.icon} />,
+                label: t.fullLabel || t.label,
+                'data-test-subj': `lnsXY_seriesType-${t.id}`,
+              }))}
+            onChange={(newOptions) => {
+              const chosenType = newOptions.find(({ checked }) => checked === 'on');
+              if (!chosenType) {
+                return;
+              }
+              const id = chosenType.value!;
+              trackUiEvent('xy_change_layer_display');
+              props.setState(updateLayer(state, { ...layer, seriesType: id as SeriesType }, index));
+              setPopoverIsOpen(false);
+            }}
+          >
+            {(list) => <>{list}</>}
+          </EuiSelectable>
+        </div>
+      </EuiPopover>
+    </>
+  );
+}
 
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;
@@ -389,6 +478,21 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               setState({
                 ...state,
                 legend: { ...state.legend, floatingColumns: val },
+              });
+            }}
+            maxLines={state?.legend.maxLines}
+            onMaxLinesChange={(val) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, maxLines: val },
+              });
+            }}
+            shouldTruncate={state?.legend.shouldTruncate ?? true}
+            onTruncateLegendChange={() => {
+              const current = state?.legend.shouldTruncate ?? true;
+              setState({
+                ...state,
+                legend: { ...state.legend, shouldTruncate: !current },
               });
             }}
             onPositionChange={(id) => {

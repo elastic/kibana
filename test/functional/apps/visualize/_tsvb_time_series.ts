@@ -172,7 +172,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // click on specific coordinates
           await browser
             .getActions()
-            .move({ x: 105, y: 110, origin: el._webElement })
+            .move({ x: 105, y: 115, origin: el._webElement })
             .click()
             .perform();
 

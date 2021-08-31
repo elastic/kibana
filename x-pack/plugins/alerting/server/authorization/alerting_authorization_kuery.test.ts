@@ -37,14 +37,16 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
           },
         },
         'space1'
       )
     ).toEqual(
-      esKuery.fromKueryExpression(`((path.to.rule.id:myAppAlertType and consumer-field:(myApp)))`)
+      esKuery.fromKueryExpression(
+        `((path.to.rule_type_id:myAppAlertType and consumer-field:(myApp)))`
+      )
     );
   });
 
@@ -72,7 +74,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
           },
         },
@@ -80,7 +82,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
       )
     ).toEqual(
       esKuery.fromKueryExpression(
-        `((path.to.rule.id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp)))`
+        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp)))`
       )
     );
   });
@@ -144,7 +146,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
           },
         },
@@ -152,7 +154,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
       )
     ).toEqual(
       esKuery.fromKueryExpression(
-        `((path.to.rule.id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
       )
     );
   });
@@ -199,7 +201,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
             spaceIds: 'path.to.spaceIds',
           },
@@ -208,7 +210,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
       )
     ).toEqual(
       esKuery.fromKueryExpression(
-        `((path.to.rule.id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1) or (path.to.rule.id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1))`
+        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1))`
       )
     );
   });
@@ -255,7 +257,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
             spaceIds: 'path.to.spaceIds',
           },
@@ -264,7 +266,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
       )
     ).toEqual(
       esKuery.fromKueryExpression(
-        `((path.to.rule.id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule.id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+        `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
       )
     );
   });
@@ -293,7 +295,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
           },
         },
@@ -307,7 +309,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               should: [
                 {
                   match: {
-                    'path.to.rule.id': 'myAppAlertType',
+                    'path.to.rule_type_id': 'myAppAlertType',
                   },
                 },
               ],
@@ -355,7 +357,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
           },
         },
@@ -366,7 +368,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
         filter: [
           {
             bool: {
-              should: [{ match: { 'path.to.rule.id': 'myAppAlertType' } }],
+              should: [{ match: { 'path.to.rule_type_id': 'myAppAlertType' } }],
               minimum_should_match: 1,
             },
           },
@@ -459,7 +461,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
           },
         },
@@ -473,7 +475,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               filter: [
                 {
                   bool: {
-                    should: [{ match: { 'path.to.rule.id': 'myAppAlertType' } }],
+                    should: [{ match: { 'path.to.rule_type_id': 'myAppAlertType' } }],
                     minimum_should_match: 1,
                   },
                 },
@@ -516,7 +518,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               filter: [
                 {
                   bool: {
-                    should: [{ match: { 'path.to.rule.id': 'myOtherAppAlertType' } }],
+                    should: [{ match: { 'path.to.rule_type_id': 'myOtherAppAlertType' } }],
                     minimum_should_match: 1,
                   },
                 },
@@ -559,7 +561,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               filter: [
                 {
                   bool: {
-                    should: [{ match: { 'path.to.rule.id': 'mySecondAppAlertType' } }],
+                    should: [{ match: { 'path.to.rule_type_id': 'mySecondAppAlertType' } }],
                     minimum_should_match: 1,
                   },
                 },
@@ -611,7 +613,7 @@ describe('asFiltersBySpaceId', () => {
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
             spaceIds: 'path.to.space.id',
           },
@@ -629,7 +631,7 @@ describe('asFiltersBySpaceId', () => {
         {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
             spaceIds: 'path.to.space.id',
           },
@@ -645,7 +647,7 @@ describe('asFiltersBySpaceId', () => {
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
           },
         },
@@ -660,7 +662,7 @@ describe('asFiltersBySpaceId', () => {
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule.id',
+            ruleTypeId: 'path.to.rule_type_id',
             consumer: 'consumer-field',
             spaceIds: 'path.to.space.id',
           },

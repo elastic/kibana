@@ -11,6 +11,10 @@ import type { MlApiServices } from '../../../services/ml_api_service';
 import type { JobType } from '../../../../../common/types/saved_objects';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import type { DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
+import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
+
+export type JobDependencies = Array<{ jobId: string; calendarIds: string[]; filterIds: string[] }>;
+export type FiltersPerJob = Array<{ jobId: string; filterIds: string[] }>;
 
 type ExportableConfigs =
   | Array<
@@ -50,5 +54,83 @@ export class JobsExportService {
     return (
       (jobType === 'anomaly-detector' ? 'anomaly_detection' : 'data_frame_analytics') + '_jobs.json'
     );
+  }
+
+  public async getJobDependencies(jobs: Job[]): Promise<JobDependencies> {
+    const calendars = await this._mlApiServices.calendars();
+
+    // create a map of all jobs in groups
+    const groups = jobs.reduce((acc, cur) => {
+      if (Array.isArray(cur.groups)) {
+        cur.groups.forEach((g) => {
+          if (acc[g] === undefined) {
+            acc[g] = [];
+          }
+          acc[g].push(cur.job_id);
+        });
+      }
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    const isGroup = (id: string) => groups[id] !== undefined;
+
+    // create a map of all calendars in jobs
+    const calendarsPerJob = calendars.reduce((acc, cur) => {
+      cur.job_ids.forEach((jId) => {
+        if (jId === GLOBAL_CALENDAR) {
+          // add the calendar to all jobs
+          jobs.forEach((j) => {
+            if (acc[j.job_id] === undefined) {
+              acc[j.job_id] = [];
+            }
+            acc[j.job_id].push(cur.calendar_id);
+          });
+        } else if (isGroup(jId)) {
+          // add the calendar to every job in this group
+          groups[jId].forEach((jId2) => {
+            if (acc[jId2] === undefined) {
+              acc[jId2] = [];
+            }
+            acc[jId2].push(cur.calendar_id);
+          });
+        } else {
+          // add the calendar to just this job
+          if (acc[jId] === undefined) {
+            acc[jId] = [];
+          }
+          acc[jId].push(cur.calendar_id);
+        }
+      });
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    // create a map of all filters in jobs,
+    // by extracting the filters from the job's detectors
+    const filtersPerJob = jobs.reduce((acc, cur) => {
+      if (acc[cur.job_id] === undefined) {
+        acc[cur.job_id] = [];
+      }
+      cur.analysis_config.detectors.forEach((d) => {
+        if (d.custom_rules !== undefined) {
+          d.custom_rules.forEach((r) => {
+            if (r.scope !== undefined) {
+              Object.values(r.scope).forEach((scope) => {
+                acc[cur.job_id].push(scope.filter_id);
+              });
+            }
+          });
+        }
+      });
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    return jobs.map((j) => {
+      const jobId = j.job_id;
+      return {
+        jobId,
+        calendarIds: [...new Set(calendarsPerJob[jobId])] ?? [],
+        filterIds: [...new Set(filtersPerJob[jobId])] ?? [],
+      };
+    });
   }
 }

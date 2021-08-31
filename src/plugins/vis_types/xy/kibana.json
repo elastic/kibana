@@ -1,0 +1,14 @@
+{
+  "id": "visTypeXy",
+  "version": "kibana",
+  "ui": true,
+  "server": true,
+  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection"],
+  "requiredBundles": ["kibanaUtils", "visDefaultEditor"],
+  "extraPublicDirs": ["common/index"],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  },
+  "description": "Contains the new xy-axis chart using the elastic-charts library, which will eventually replace the vislib xy-axis charts including bar, area, and line."
+}

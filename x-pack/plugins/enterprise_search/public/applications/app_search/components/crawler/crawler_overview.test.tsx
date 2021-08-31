@@ -47,6 +47,9 @@ const domains: CrawlerDomainFromServer[] = [
       rule: CrawlerRules.regex,
       pattern: '.*',
     },
+    deduplication_enabled: false,
+    deduplication_fields: ['title'],
+    available_deduplication_fields: ['title', 'description'],
   },
   {
     id: 'y',
@@ -57,6 +60,9 @@ const domains: CrawlerDomainFromServer[] = [
     sitemaps: [],
     entry_points: [],
     crawl_rules: [],
+    deduplication_enabled: false,
+    deduplication_fields: ['title'],
+    available_deduplication_fields: ['title', 'description'],
   },
 ];
 

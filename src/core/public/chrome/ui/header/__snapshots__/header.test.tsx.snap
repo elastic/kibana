@@ -9,45 +9,7 @@ exports[`Header renders 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
-      ],
+      "observers": Array [],
       "thrownError": null,
     }
   }
@@ -4713,55 +4675,6 @@ exports[`Header renders 1`] = `
             </div>
           </EuiHeaderSection>
           <HeaderBreadcrumbs
-            appTitle$={
-              BehaviorSubject {
-                "_isScalar": false,
-                "_value": "test",
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [
-                  Subscriber {
-                    "_parentOrParents": null,
-                    "_subscriptions": Array [
-                      SubjectSubscription {
-                        "_parentOrParents": [Circular],
-                        "_subscriptions": null,
-                        "closed": false,
-                        "subject": [Circular],
-                        "subscriber": [Circular],
-                      },
-                    ],
-                    "closed": false,
-                    "destination": SafeSubscriber {
-                      "_complete": undefined,
-                      "_context": [Circular],
-                      "_error": undefined,
-                      "_next": [Function],
-                      "_parentOrParents": null,
-                      "_parentSubscriber": [Circular],
-                      "_subscriptions": null,
-                      "closed": false,
-                      "destination": Object {
-                        "closed": true,
-                        "complete": [Function],
-                        "error": [Function],
-                        "next": [Function],
-                      },
-                      "isStopped": false,
-                      "syncErrorThrowable": false,
-                      "syncErrorThrown": false,
-                      "syncErrorValue": null,
-                    },
-                    "isStopped": false,
-                    "syncErrorThrowable": true,
-                    "syncErrorThrown": false,
-                    "syncErrorValue": null,
-                  },
-                ],
-                "thrownError": null,
-              }
-            }
             breadcrumbs$={
               BehaviorSubject {
                 "_isScalar": false,
