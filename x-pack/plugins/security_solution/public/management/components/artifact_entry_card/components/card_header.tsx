@@ -18,27 +18,31 @@ export const CardHeader = memo<{
   actions?: ActionsContextMenuProps['items'];
 }>(({ name, createdDate, updatedDate, actions }) => {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={true}>
-        <EuiTitle size="s">
-          <h3>{name}</h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <DateField date={updatedDate} type="update" />
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={true}>
+            <EuiTitle size="s">
+              <h3>{name}</h3>
+            </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <DateField date={createdDate} type="create" />
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem>
+                <DateField date={updatedDate} type="update" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <DateField date={createdDate} type="create" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          {actions && actions.length > 0 && (
-            <EuiFlexItem>
-              <ActionsContextMenu items={actions} icon="boxesVertical" />
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       </EuiFlexItem>
+      {actions && actions.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <ActionsContextMenu items={actions} icon="boxesVertical" />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 });
