@@ -10,7 +10,7 @@ import Protobuf from 'pbf';
 import expect from '@kbn/expect';
 import {
   KBN_IS_CENTROID_FEATURE,
-  MVT_AGGS_SOURCE_LAYER_NAME
+  MVT_AGGS_SOURCE_LAYER_NAME,
 } from '../../../../plugins/maps/common/constants';
 
 export default function ({ getService }) {
