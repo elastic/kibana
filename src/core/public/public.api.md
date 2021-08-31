@@ -232,14 +232,6 @@ export interface ChromeBadge {
 }
 
 // @public (undocumented)
-export interface ChromeBrand {
-    // (undocumented)
-    logo?: string;
-    // (undocumented)
-    smallLogo?: string;
-}
-
-// @public (undocumented)
 export type ChromeBreadcrumb = EuiBreadcrumb;
 
 // @public
@@ -332,7 +324,6 @@ export interface ChromeNavLinks {
     getForceAppSwitcherNavigation$(): Observable<boolean>;
     getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
     has(id: string): boolean;
-    showOnly(id: string): void;
 }
 
 // @public
@@ -355,11 +346,8 @@ export interface ChromeRecentlyAccessedHistoryItem {
 
 // @public
 export interface ChromeStart {
-    addApplicationClass(className: string): void;
     docTitle: ChromeDocTitle;
-    getApplicationClasses$(): Observable<string[]>;
     getBadge$(): Observable<ChromeBadge | undefined>;
-    getBrand$(): Observable<ChromeBrand>;
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
     // Warning: (ae-forgotten-export) The symbol "ChromeBreadcrumbsAppendExtension" needs to be exported by the entry point index.d.ts
     getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | undefined>;
@@ -370,10 +358,7 @@ export interface ChromeStart {
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
-    removeApplicationClass(className: string): void;
-    setAppTitle(appTitle: string): void;
     setBadge(badge?: ChromeBadge): void;
-    setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
     setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension): void;
     setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
@@ -1007,6 +992,8 @@ export interface OverlayBannersStart {
 // @public (undocumented)
 export interface OverlayFlyoutOpenOptions {
     // (undocumented)
+    'aria-label'?: string;
+    // (undocumented)
     'data-test-subj'?: string;
     // (undocumented)
     className?: string;
@@ -1016,6 +1003,7 @@ export interface OverlayFlyoutOpenOptions {
     hideCloseButton?: boolean;
     // (undocumented)
     maxWidth?: boolean | number | string;
+    onClose?: (flyout: OverlayRef) => void;
     // (undocumented)
     ownFocus?: boolean;
     // (undocumented)

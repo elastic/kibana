@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const createRuleMock = () => ({
+import { RuleParams } from '../../schemas/rule_schemas';
+
+export const createRuleMock = (params: Partial<RuleParams>) => ({
   actions: [],
   author: [],
   buildingBlockType: undefined,
@@ -49,4 +51,5 @@ export const createRuleMock = () => ({
   updatedAt: '2020-01-10T21:11:45.839Z',
   updatedBy: 'elastic',
   version: 1,
+  ...params,
 });

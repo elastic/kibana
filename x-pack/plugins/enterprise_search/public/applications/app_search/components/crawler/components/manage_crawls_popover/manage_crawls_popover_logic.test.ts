@@ -76,7 +76,7 @@ describe('ManageCrawlsPopoverLogic', () => {
         } as CrawlerDomain);
         await nextTick();
 
-        expect(flashSuccessToast).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalledWith(expect.any(String));
         expect(ManageCrawlsPopoverLogic.actions.closePopover).toHaveBeenCalled();
       });
 

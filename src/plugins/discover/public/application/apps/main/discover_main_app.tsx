@@ -12,7 +12,7 @@ import { setBreadcrumbsTitle } from '../../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './services/use_discover_state';
 import { useUrl } from './services/use_url';
-import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
+import { IndexPatternAttributes, SavedObject } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 
@@ -20,37 +20,33 @@ const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
 export interface DiscoverMainProps {
   /**
-   * Current IndexPattern
+   * Instance of browser history
    */
-  indexPattern: IndexPattern;
-
-  opts: {
-    /**
-     * Use angular router for navigation
-     */
-    navigateTo: () => void;
-    /**
-     * Instance of browser history
-     */
-    history: History;
-    /**
-     * List of available index patterns
-     */
-    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-    /**
-     * Kibana core services used by discover
-     */
-    services: DiscoverServices;
-    /**
-     * Current instance of SavedSearch
-     */
-    savedSearch: SavedSearch;
-  };
+  history: History;
+  /**
+   * List of available index patterns
+   */
+  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  /**
+   * Kibana core services used by discover
+   */
+  services: DiscoverServices;
+  /**
+   * Current instance of SavedSearch
+   */
+  savedSearch: SavedSearch;
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { services, history, navigateTo, indexPatternList } = props.opts;
+  const { services, history, indexPatternList } = props;
   const { chrome, docLinks, uiSettings: config, data } = services;
+  const navigateTo = useCallback(
+    (path: string) => {
+      history.push(path);
+    },
+    [history]
+  );
+  const savedSearch = props.savedSearch;
 
   /**
    * State related logic
@@ -63,15 +59,13 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     onUpdateQuery,
     refetch$,
     resetSavedSearch,
-    savedSearch,
     searchSource,
     state,
     stateContainer,
   } = useDiscoverState({
     services,
     history,
-    initialIndexPattern: props.indexPattern,
-    initialSavedSearch: props.opts.savedSearch,
+    savedSearch,
   });
 
   /**

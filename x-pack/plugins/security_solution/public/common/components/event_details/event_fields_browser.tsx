@@ -89,14 +89,13 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
     font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
     font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 
-    .eventFieldsTable__hoverActionButtons {
-      &:focus-within {
-        .timelines__hoverActionButton,
-        .securitySolution__hoverActionButton {
-          opacity: 1;
-        }
+    .hoverActions-active {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
       }
     }
+
     &:hover {
       .timelines__hoverActionButton,
       .securitySolution__hoverActionButton {
@@ -110,9 +109,6 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
         opacity: 0;
       } */
       opacity: 0;
-      &:focus {
-        opacity: 1;
-      }
     }
   }
 

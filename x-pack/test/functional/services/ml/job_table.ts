@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommonUI } from './common_ui';
@@ -17,6 +18,8 @@ import {
   URL_TYPE,
 } from '../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
 
+export type MlADJobTable = ProvidedType<typeof MachineLearningJobTableProvider>;
+
 export function MachineLearningJobTableProvider(
   { getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
@@ -26,7 +29,9 @@ export function MachineLearningJobTableProvider(
   const retry = getService('retry');
 
   return new (class MlJobTable {
-    public async parseJobTable() {
+    public async parseJobTable(
+      tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
+    ) {
       const table = await testSubjects.find('~mlJobListTable');
       const $ = await table.parseDomContent();
       const rows = [];
@@ -47,7 +52,17 @@ export function MachineLearningJobTableProvider(
           $(el).remove();
         }
 
-        rows.push({
+        const rowObject: {
+          id: string;
+          description: string;
+          jobGroups: string[];
+          recordCount: string;
+          memoryStatus: string;
+          jobState: string;
+          datafeedState: string;
+          latestTimestamp?: string;
+          spaces?: string[];
+        } = {
           id: $tr.findTestSubject('mlJobListColumnId').find('.euiTableCellContent').text().trim(),
           description: $description
             .text()
@@ -74,12 +89,33 @@ export function MachineLearningJobTableProvider(
             .find('.euiTableCellContent')
             .text()
             .trim(),
-          latestTimestamp: $tr
+        };
+
+        if (tableEnvironment === 'mlAnomalyDetection') {
+          const latestTimestamp = $tr
             .findTestSubject('mlJobListColumnLatestTimestamp')
             .find('.euiTableCellContent')
             .text()
-            .trim(),
-        });
+            .trim();
+
+          rowObject.latestTimestamp = latestTimestamp;
+        }
+
+        if (tableEnvironment === 'stackMgmtJobList') {
+          const $spaces = $tr
+            .findTestSubject('mlJobListColumnSpaces')
+            .find('.euiTableCellContent')
+            .find('.euiAvatar--space');
+          const spaces = [];
+          for (const el of $spaces.toArray()) {
+            // extract the space id from data-test-subj and add to list
+            spaces.push($(el).attr('data-test-subj').replace('space-avatar-', ''));
+          }
+
+          rowObject.spaces = spaces;
+        }
+
+        rows.push(rowObject);
       }
 
       return rows;
@@ -191,7 +227,9 @@ export function MachineLearningJobTableProvider(
       const filteredRows = rows.filter((row) => row.id === filter);
       expect(filteredRows).to.have.length(
         expectedRowCount,
-        `Filtered AD job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
+        `Filtered AD job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${JSON.stringify(
+          filteredRows
+        )}')`
       );
     }
 

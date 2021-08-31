@@ -19,8 +19,8 @@ import {
 import { Setup } from '../helpers/setup_request';
 
 interface Options {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   searchAggregatedTransactions: boolean;
   serviceName: string;
   setup: Setup;

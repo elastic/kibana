@@ -7,22 +7,23 @@
  */
 
 import { groupBy, has, isEqual } from 'lodash';
+import { SerializableRecord } from '@kbn/utility-types';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
 import { Filter, Query } from '../filters';
-import { IndexPatternBase } from './types';
+import { BoolQuery, IndexPatternBase } from './types';
+import { KueryQueryOptions } from '../kuery';
 
 /**
  * Configurations to be used while constructing an ES query.
  * @public
  */
-export interface EsQueryConfig {
+export type EsQueryConfig = KueryQueryOptions & {
   allowLeadingWildcards: boolean;
-  queryStringOptions: Record<string, any>;
+  queryStringOptions: SerializableRecord;
   ignoreFilterIfFieldNotInIndex: boolean;
-  dateFormatTZ?: string;
-}
+};
 
 function removeMatchAll<T>(filters: T[]) {
   return filters.filter(
@@ -49,17 +50,18 @@ export function buildEsQuery(
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: false,
   }
-) {
+): { bool: BoolQuery } {
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
-  const validQueries = queries.filter((query: any) => has(query, 'query'));
+  const validQueries = queries.filter((query) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
   const kueryQuery = buildQueryFromKuery(
     indexPattern,
     queriesByLanguage.kuery,
     config.allowLeadingWildcards,
-    config.dateFormatTZ
+    config.dateFormatTZ,
+    config.filtersInMustClause
   );
   const luceneQuery = buildQueryFromLucene(
     queriesByLanguage.lucene,

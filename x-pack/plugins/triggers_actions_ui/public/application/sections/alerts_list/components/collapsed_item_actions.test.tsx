@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import * as React from 'react';
 
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
@@ -95,6 +94,20 @@ describe('CollapsedItemActions', () => {
     };
   };
 
+  test('renders panel items as disabled', async () => {
+    await setup();
+    const wrapper = mountWithIntl(
+      <CollapsedItemActions {...getPropsWithRule({ isEditable: false })} />
+    );
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    expect(
+      wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
+    ).toBeTruthy();
+  });
+
   test('renders closed popover initially and opens on click with all actions enabled', async () => {
     await setup();
     const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
@@ -117,6 +130,10 @@ describe('CollapsedItemActions', () => {
     expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="editAlert"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="deleteAlert"]').exists()).toBeTruthy();
+
+    expect(
+      wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
+    ).toBeFalsy();
 
     expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');

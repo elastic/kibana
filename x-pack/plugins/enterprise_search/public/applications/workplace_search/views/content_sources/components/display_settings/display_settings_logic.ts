@@ -11,7 +11,7 @@ import { cloneDeep, isEqual, differenceBy } from 'lodash';
 import { DropResult } from '@elastic/eui';
 
 import {
-  setSuccessMessage,
+  flashSuccessToast,
   clearFlashMessages,
   flashAPIErrors,
 } from '../../../../../shared/flash_messages';
@@ -405,7 +405,7 @@ export const DisplaySettingsLogic = kea<
       }
     },
     setServerResponseData: () => {
-      setSuccessMessage(SUCCESS_MESSAGE);
+      flashSuccessToast(SUCCESS_MESSAGE);
     },
     toggleFieldEditorModal: () => {
       clearFlashMessages();

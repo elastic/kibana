@@ -8,7 +8,6 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useComparison } from '../../../hooks/use_comparison';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -21,20 +20,20 @@ function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
 }
 
-export function BackendErrorRateChart({ height }: { height: number }) {
+export function BackendFailedTransactionRateChart({
+  height,
+}: {
+  height: number;
+}) {
   const { backendName } = useApmBackendContext();
 
   const theme = useTheme();
 
   const {
-    query: { rangeFrom, rangeTo },
+    query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/backends/:backendName/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const {
-    urlParams: { kuery, environment },
-  } = useUrlParams();
 
   const { offset, comparisonChartTheme } = useComparison();
 
@@ -72,7 +71,7 @@ export function BackendErrorRateChart({ height }: { height: number }) {
         type: 'linemark',
         color: theme.eui.euiColorVis7,
         title: i18n.translate('xpack.apm.backendErrorRateChart.chartTitle', {
-          defaultMessage: 'Error rate',
+          defaultMessage: 'Failed transaction rate',
         }),
       });
     }

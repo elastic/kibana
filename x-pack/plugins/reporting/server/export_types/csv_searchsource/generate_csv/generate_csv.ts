@@ -83,8 +83,9 @@ export class CsvGenerator {
   private async scan(
     index: IndexPattern,
     searchSource: ISearchSource,
-    scrollSettings: CsvExportSettings['scroll']
+    settings: CsvExportSettings
   ) {
+    const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody = searchSource.getSearchRequestBody();
     this.logger.debug(`executing search request`);
     const searchParams = {
@@ -93,8 +94,10 @@ export class CsvGenerator {
         index: index.title,
         scroll: scrollSettings.duration,
         size: scrollSettings.size,
+        ignore_throttled: !includeFrozen,
       },
     };
+
     const results = (
       await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
     ).rawResponse as estypes.SearchResponse<unknown>;
@@ -231,7 +234,6 @@ export class CsvGenerator {
 
     if (!builder.tryAppend(header)) {
       return {
-        size: 0,
         content: '',
         maxSizeReached: true,
         warnings: [],
@@ -327,7 +329,7 @@ export class CsvGenerator {
         let results: estypes.SearchResponse<unknown> | undefined;
         if (scrollId == null) {
           // open a scroll cursor in Elasticsearch
-          results = await this.scan(index, searchSource, scrollSettings);
+          results = await this.scan(index, searchSource, settings);
           scrollId = results?._scroll_id;
           if (results.hits?.total != null) {
             totalRecords = results.hits.total as number;
@@ -401,16 +403,12 @@ export class CsvGenerator {
       }
     }
 
-    const size = builder.getSizeInBytes();
-    this.logger.debug(
-      `Finished generating. Total size in bytes: ${size}. Row count: ${this.csvRowCount}.`
-    );
+    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     return {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
-      size,
       warnings,
     };
   }

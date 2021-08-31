@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { createContext } from 'react';
 
 import { PluginInitializerContext } from '../../../../src/core/public';
 
 import { TimelinesPlugin } from './plugin';
+import type { StatefulEventContextType } from './types';
 export * as tGridActions from './store/t_grid/actions';
 export * as tGridSelectors from './store/t_grid/selectors';
 export type {
@@ -22,6 +24,7 @@ export type {
 export { Direction } from '../common/search_strategy/common';
 export { tGridReducer } from './store/t_grid/reducer';
 export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
+export { TGridType, SortDirection } from './types';
 export {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
@@ -47,6 +50,7 @@ export {
   skipFocusInContainerTo,
   stopPropagationAndPreventDefault,
 } from '../common/utils/accessibility';
+export { getPageRowIndex } from '../common/utils/pagination';
 export {
   addFieldToTimelineColumns,
   getTimelineIdFromColumnDroppableId,
@@ -58,3 +62,5 @@ export { useStatusBulkActionItems } from './hooks/use_status_bulk_action_items';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new TimelinesPlugin(initializerContext);
 }
+
+export const StatefulEventContext = createContext<StatefulEventContextType | null>(null);

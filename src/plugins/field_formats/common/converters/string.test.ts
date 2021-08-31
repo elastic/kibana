@@ -111,4 +111,18 @@ describe('String Format', () => {
       '<span class="ffString__emptyValue">(empty)</span>'
     );
   });
+
+  test('does escape value while highlighting', () => {
+    const string = new StringFormat();
+    expect(
+      stripSpan(
+        string.convert('<img />', 'html', {
+          field: { name: 'foo' },
+          hit: {
+            highlight: { foo: ['@kibana-highlighted-field@<img />@/kibana-highlighted-field@'] },
+          },
+        })
+      )
+    ).toBe('<mark>&lt;img /&gt;</mark>');
+  });
 });

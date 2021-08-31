@@ -217,8 +217,8 @@ export const INVESTIGATE_IN_RESOLVER_DISABLED = i18n.translate(
   }
 );
 
-export const UNIT = (totalCount: number) =>
-  i18n.translate('xpack.timelines.timeline.body.unit', {
+export const ALERTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.timelines.timeline.alertsUnit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
+    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
   });

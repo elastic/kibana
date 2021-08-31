@@ -62,6 +62,7 @@ export function getColumns({
         return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
       },
       width: `${unit * 9}px`,
+      align: 'right',
     },
     {
       field: 'occurrences',

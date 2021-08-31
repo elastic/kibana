@@ -9,14 +9,8 @@ import { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import type { MlClient } from '../../lib/ml_client';
 
-// import { DetectorRule, DetectorRuleScope } from '../../../common/types/detector_rules';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
-
-export interface Filter {
-  filter_id: string;
-  description?: string;
-  items: string[];
-}
+import type { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { Filter, FilterStats } from '../../../common/types/filters';
 
 export interface FormFilter {
   filterId: string;
@@ -41,13 +35,6 @@ export interface FilterRequest {
 interface FilterUsage {
   jobs: string[];
   detectors: string[];
-}
-
-interface FilterStats {
-  filter_id: string;
-  description?: string;
-  item_count: number;
-  used_by: FilterUsage;
 }
 
 interface FiltersInUse {

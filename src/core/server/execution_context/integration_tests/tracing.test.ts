@@ -40,6 +40,9 @@ describe('trace', () => {
           allowFromAnyIp: true,
         },
       },
+      execution_context: {
+        enabled: true,
+      },
     });
     await root.preboot();
   }, 30000);

@@ -65,7 +65,6 @@ export const findList = async ({
 
   const { body: totalCount } = await esClient.count({
     body: {
-      // @ts-expect-error GetQueryFilterReturn is not compatible with QueryDslQueryContainer
       query,
     },
     ignore_unavailable: true,
@@ -78,7 +77,6 @@ export const findList = async ({
     // to explicitly define the type <T>.
     const { body: response } = await esClient.search<SearchEsListSchema>({
       body: {
-        // @ts-expect-error GetQueryFilterReturn is not compatible with QueryDslQueryContainer
         query,
         search_after: scroll.searchAfter,
         sort: getSortWithTieBreaker({ sortField, sortOrder }),

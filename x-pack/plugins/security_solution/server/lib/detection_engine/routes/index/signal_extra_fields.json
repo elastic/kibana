@@ -43,6 +43,17 @@
           }
         }
       },
+      "original_event": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "keyword"
+          }
+        }
+      },
+      "reason": {
+        "type": "keyword"
+      },
       "rule": {
         "type": "object",
         "properties": {

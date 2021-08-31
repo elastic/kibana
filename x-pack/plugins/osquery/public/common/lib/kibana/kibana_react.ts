@@ -15,6 +15,7 @@ import {
   useUiSetting$,
   withKibana,
   reactRouterNavigate,
+  FieldIcon,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../../types';
 
@@ -47,4 +48,5 @@ export {
   useUiSetting,
   useUiSetting$,
   withKibana,
+  FieldIcon,
 };

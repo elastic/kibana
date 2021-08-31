@@ -8,8 +8,7 @@
 import './config_panel.scss';
 
 import React, { useMemo, memo } from 'react';
-import { EuiFlexItem, EuiToolTip, EuiButton, EuiForm } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiForm } from '@elastic/eui';
 import { mapValues } from 'lodash';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
@@ -26,7 +25,9 @@ import {
   setToggleFullscreen,
   useLensSelector,
   selectVisualization,
+  VisualizationState,
 } from '../../../state_management';
+import { AddLayerButton } from './add_layer';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);
@@ -39,6 +40,18 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   ) : null;
 });
 
+function getRemoveOperation(
+  activeVisualization: Visualization,
+  visualizationState: VisualizationState['state'],
+  layerId: string,
+  layerCount: number
+) {
+  if (activeVisualization.getRemoveOperation) {
+    return activeVisualization.getRemoveOperation(visualizationState, layerId);
+  }
+  // fallback to generic count check
+  return layerCount === 1 ? 'clear' : 'remove';
+}
 export function LayerPanels(
   props: ConfigPanelWrapperProps & {
     activeVisualization: Visualization;
@@ -104,6 +117,10 @@ export function LayerPanels(
                 typeof newDatasourceState === 'function'
                   ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
                   : newDatasourceState;
+              const updatedVisualizationState =
+                typeof newVisualizationState === 'function'
+                  ? newVisualizationState(prevState.visualization.state)
+                  : newVisualizationState;
               return {
                 ...prevState,
                 datasourceStates: {
@@ -115,7 +132,7 @@ export function LayerPanels(
                 },
                 visualization: {
                   ...prevState.visualization,
-                  state: newVisualizationState,
+                  state: updatedVisualizationState,
                 },
                 stagedPreview: undefined,
               };
@@ -152,15 +169,26 @@ export function LayerPanels(
             updateDatasource={updateDatasource}
             updateDatasourceAsync={updateDatasourceAsync}
             updateAll={updateAll}
-            isOnlyLayer={layerIds.length === 1}
+            isOnlyLayer={
+              getRemoveOperation(
+                activeVisualization,
+                visualization.state,
+                layerId,
+                layerIds.length
+              ) === 'clear'
+            }
             onRemoveLayer={() => {
               dispatchLens(
                 updateState({
                   subType: 'REMOVE_OR_CLEAR_LAYER',
                   updater: (state) => {
-                    const isOnlyLayer = activeVisualization
-                      .getLayerIds(state.visualization.state)
-                      .every((id) => id === layerId);
+                    const isOnlyLayer =
+                      getRemoveOperation(
+                        activeVisualization,
+                        state.visualization.state,
+                        layerId,
+                        layerIds.length
+                      ) === 'clear';
 
                     return {
                       ...state,
@@ -195,51 +223,30 @@ export function LayerPanels(
           />
         ) : null
       )}
-      {activeVisualization.appendLayer && visualization.state && (
-        <EuiFlexItem grow={true} className="lnsConfigPanel__addLayerBtnWrapper">
-          <EuiToolTip
-            className="eui-fullWidth"
-            title={i18n.translate('xpack.lens.xyChart.addLayer', {
-              defaultMessage: 'Add a layer',
-            })}
-            content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
-              defaultMessage:
-                'Use multiple layers to combine visualization types or visualize different index patterns.',
-            })}
-            position="bottom"
-          >
-            <EuiButton
-              className="lnsConfigPanel__addLayerBtn"
-              fullWidth
-              size="s"
-              data-test-subj="lnsLayerAddButton"
-              aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-                defaultMessage: 'Add layer',
-              })}
-              fill
-              color="text"
-              onClick={() => {
-                const id = generateId();
-                dispatchLens(
-                  updateState({
-                    subType: 'ADD_LAYER',
-                    updater: (state) =>
-                      appendLayer({
-                        activeVisualization,
-                        generateId: () => id,
-                        trackUiEvent,
-                        activeDatasource: datasourceMap[activeDatasourceId!],
-                        state,
-                      }),
-                  })
-                );
-                setNextFocusedLayerId(id);
-              }}
-              iconType="plusInCircleFilled"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+      <AddLayerButton
+        visualization={activeVisualization}
+        visualizationState={visualization.state}
+        layersMeta={props.framePublicAPI}
+        onAddLayerClick={(layerType) => {
+          const id = generateId();
+          dispatchLens(
+            updateState({
+              subType: 'ADD_LAYER',
+              updater: (state) =>
+                appendLayer({
+                  activeVisualization,
+                  generateId: () => id,
+                  trackUiEvent,
+                  activeDatasource: datasourceMap[activeDatasourceId!],
+                  state,
+                  layerType,
+                }),
+            })
+          );
+
+          setNextFocusedLayerId(id);
+        }}
+      />
     </EuiForm>
   );
 }

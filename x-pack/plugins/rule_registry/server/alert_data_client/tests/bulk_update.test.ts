@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_OWNER, ALERT_STATUS, SPACE_IDS, RULE_ID } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  SPACE_IDS,
+  ALERT_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -13,6 +19,8 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 import { alertingAuthorizationMock } from '../../../../alerting/server/authorization/alerting_authorization.mock';
 import { AuditLogger } from '../../../../security/server';
 import { AlertingAuthorizationEntity } from '../../../../alerting/server';
+import { ruleDataPluginServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
+import { RuleDataPluginService } from '../../rule_data_plugin_service';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
@@ -25,6 +33,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   authorization: alertingAuthMock,
   esClient: esClientMock,
   auditLogger,
+  ruleDataService: (ruleDataPluginServiceMock.create() as unknown) as RuleDataPluginService,
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
@@ -36,6 +45,12 @@ beforeEach(() => {
   alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
     Promise.resolve({ filter: [] })
   );
+  // @ts-expect-error
+  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
+    const authorizedRuleTypes = new Set();
+    authorizedRuleTypes.add({ producer: 'apm' });
+    return Promise.resolve({ authorizedRuleTypes });
+  });
   alertingAuthMock.ensureAuthorized.mockImplementation(
     // @ts-expect-error
     async ({
@@ -67,7 +82,7 @@ describe('bulkUpdate()', () => {
   describe('ids', () => {
     describe('audit log', () => {
       test('logs successful event in audit logger', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -77,9 +92,9 @@ describe('bulkUpdate()', () => {
                   _id: fakeAlertId,
                   _index: indexName,
                   _source: {
-                    [RULE_ID]: 'apm.error_rate',
-                    [ALERT_OWNER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                    [ALERT_RULE_CONSUMER]: 'apm',
+                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
@@ -96,7 +111,7 @@ describe('bulkUpdate()', () => {
                 {
                   update: {
                     _id: fakeAlertId,
-                    _index: '.alerts-observability-apm.alerts',
+                    _index: '.alerts-observability.apm.alerts',
                     result: 'updated',
                     status: 200,
                   },
@@ -124,7 +139,7 @@ describe('bulkUpdate()', () => {
       });
 
       test('audit error access if user is unauthorized for given alert', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -134,9 +149,9 @@ describe('bulkUpdate()', () => {
                   _id: fakeAlertId,
                   _index: indexName,
                   _source: {
-                    [RULE_ID]: fakeRuleTypeId,
-                    [ALERT_OWNER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                    [ALERT_RULE_CONSUMER]: 'apm',
+                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
@@ -170,7 +185,7 @@ describe('bulkUpdate()', () => {
       });
 
       test('logs multiple error events in audit logger', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -180,9 +195,9 @@ describe('bulkUpdate()', () => {
                   _id: successfulAuthzHit,
                   _index: indexName,
                   _source: {
-                    [RULE_ID]: 'apm.error_rate',
-                    [ALERT_OWNER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                    [ALERT_RULE_CONSUMER]: 'apm',
+                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
@@ -190,9 +205,9 @@ describe('bulkUpdate()', () => {
                   _id: unsuccessfulAuthzHit,
                   _index: indexName,
                   _source: {
-                    [RULE_ID]: fakeRuleTypeId,
-                    [ALERT_OWNER]: 'apm',
-                    [ALERT_STATUS]: 'open',
+                    [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                    [ALERT_RULE_CONSUMER]: 'apm',
+                    [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                     [SPACE_IDS]: [DEFAULT_SPACE],
                   },
                 },
@@ -246,7 +261,7 @@ describe('bulkUpdate()', () => {
   describe('query', () => {
     describe('audit log', () => {
       test('logs successful event in audit logger', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.search.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -265,11 +280,11 @@ describe('bulkUpdate()', () => {
                 hits: [
                   {
                     _id: fakeAlertId,
-                    _index: '.alerts-observability-apm.alerts',
+                    _index: '.alerts-observability.apm.alerts',
                     _source: {
-                      [RULE_ID]: 'apm.error_rate',
-                      [ALERT_OWNER]: 'apm',
-                      [ALERT_STATUS]: 'open',
+                      [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                      [ALERT_RULE_CONSUMER]: 'apm',
+                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                       [SPACE_IDS]: [DEFAULT_SPACE],
                     },
                   },
@@ -289,7 +304,7 @@ describe('bulkUpdate()', () => {
 
         await alertsClient.bulkUpdate({
           ids: undefined,
-          query: `${ALERT_STATUS}: open`,
+          query: `${ALERT_STATUS}: ${ALERT_STATUS_ACTIVE}`,
           index: indexName,
           status: 'closed',
         });
@@ -306,7 +321,7 @@ describe('bulkUpdate()', () => {
       });
 
       test('audit error access if user is unauthorized for given alert', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.search.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -325,11 +340,11 @@ describe('bulkUpdate()', () => {
                 hits: [
                   {
                     _id: fakeAlertId,
-                    _index: '.alerts-observability-apm.alerts',
+                    _index: '.alerts-observability.apm.alerts',
                     _source: {
-                      [RULE_ID]: fakeRuleTypeId,
-                      [ALERT_OWNER]: 'apm',
-                      [ALERT_STATUS]: 'open',
+                      [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                      [ALERT_RULE_CONSUMER]: 'apm',
+                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                       [SPACE_IDS]: [DEFAULT_SPACE],
                     },
                   },
@@ -341,13 +356,13 @@ describe('bulkUpdate()', () => {
         await expect(
           alertsClient.bulkUpdate({
             ids: undefined,
-            query: `${ALERT_STATUS}: open`,
+            query: `${ALERT_STATUS}: ${ALERT_STATUS_ACTIVE}`,
             index: indexName,
             status: 'closed',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`
-                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: open\\" and operation update 
-                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: open\\" and operation update 
+                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: active\\" and operation update 
+                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: active\\" and operation update 
                 Error: Error: Unauthorized for fake.rule and apm"
               `);
 
@@ -367,7 +382,7 @@ describe('bulkUpdate()', () => {
       });
 
       test('logs multiple error events in audit logger', async () => {
-        const indexName = '.alerts-observability-apm.alerts';
+        const indexName = '.alerts-observability.apm.alerts';
         const alertsClient = new AlertsClient(alertsClientParams);
         esClientMock.search.mockResolvedValueOnce(
           elasticsearchClientMock.createApiResponse({
@@ -386,21 +401,21 @@ describe('bulkUpdate()', () => {
                 hits: [
                   {
                     _id: successfulAuthzHit,
-                    _index: '.alerts-observability-apm.alerts',
+                    _index: '.alerts-observability.apm.alerts',
                     _source: {
-                      [RULE_ID]: 'apm.error_rate',
-                      [ALERT_OWNER]: 'apm',
-                      [ALERT_STATUS]: 'open',
+                      [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+                      [ALERT_RULE_CONSUMER]: 'apm',
+                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                       [SPACE_IDS]: [DEFAULT_SPACE],
                     },
                   },
                   {
                     _id: unsuccessfulAuthzHit,
-                    _index: '.alerts-observability-apm.alerts',
+                    _index: '.alerts-observability.apm.alerts',
                     _source: {
-                      [RULE_ID]: fakeRuleTypeId,
-                      [ALERT_OWNER]: 'apm',
-                      [ALERT_STATUS]: 'open',
+                      [ALERT_RULE_TYPE_ID]: fakeRuleTypeId,
+                      [ALERT_RULE_CONSUMER]: 'apm',
+                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
                       [SPACE_IDS]: [DEFAULT_SPACE],
                     },
                   },
@@ -412,13 +427,13 @@ describe('bulkUpdate()', () => {
         await expect(
           alertsClient.bulkUpdate({
             ids: undefined,
-            query: `${ALERT_STATUS}: open`,
+            query: `${ALERT_STATUS}: ${ALERT_STATUS_ACTIVE}`,
             index: indexName,
             status: 'closed',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`
-                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: open\\" and operation update 
-                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: open\\" and operation update 
+                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: active\\" and operation update 
+                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: active\\" and operation update 
                 Error: Error: Unauthorized for fake.rule and apm"
               `);
 

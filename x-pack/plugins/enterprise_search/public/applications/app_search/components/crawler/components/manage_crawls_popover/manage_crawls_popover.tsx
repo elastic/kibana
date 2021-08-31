@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CrawlerDomain } from '../../types';
 
-// import { AutomaticCrawlScheduler } from './automatic_crawl_scheduler';
+import { AutomaticCrawlScheduler } from './automatic_crawl_scheduler';
 
 import { ManageCrawlsPopoverLogic } from './manage_crawls_popover_logic';
 
@@ -40,19 +40,25 @@ export const ManageCrawlsPopover: React.FC<ManageCrawlsPopoverProps> = ({ domain
           icon: 'refresh',
           onClick: () => reApplyCrawlRules(domain),
         },
-        // {
-        //   name: 'Automatic Crawling',
-        //   icon: 'gear',
-        //   panel: 1,
-        // },
+        {
+          name: i18n.translate(
+            'xpack.enterpriseSearch.appSearch.crawler.manageCrawlsPopover.automaticCrawlingButtonLabel',
+            { defaultMessage: 'Automatic crawling' }
+          ),
+          icon: 'gear',
+          panel: 1,
+        },
       ],
     },
-    // {
-    //   id: 1,
-    //   title: 'Automatic Crawling',
-    //   width: 400,
-    //   content: <AutomaticCrawlScheduler />,
-    // },
+    {
+      id: 1,
+      title: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.manageCrawlsPopover.automaticCrawlingTitle',
+        { defaultMessage: 'Automatic crawling' }
+      ),
+      width: 400,
+      content: <AutomaticCrawlScheduler />,
+    },
   ];
 
   return (

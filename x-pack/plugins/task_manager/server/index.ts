@@ -65,5 +65,16 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
         });
       }
     },
+    (settings, fromPath, addDeprecation) => {
+      const taskManager = get(settings, fromPath);
+      if (taskManager?.enabled === false || taskManager?.enabled === true) {
+        addDeprecation({
+          message: `"xpack.task_manager.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
+          correctiveActions: {
+            manualSteps: [`Remove "xpack.task_manager.enabled" from your kibana configs.`],
+          },
+        });
+      }
+    },
   ],
 };

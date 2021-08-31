@@ -58,7 +58,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disa
         />
         <EuiSpacer />
         <EuiFormRow fullWidth labelAppend={<OsquerySchemaLink />}>
-          {!permissions.writeLiveQueries ? (
+          {!permissions.writeLiveQueries || disabled ? (
             <StyledEuiCodeBlock
               language="sql"
               fontSize="m"
@@ -68,7 +68,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disa
               {value}
             </StyledEuiCodeBlock>
           ) : (
-            <OsqueryEditor defaultValue={value} disabled={disabled} onChange={handleEditorChange} />
+            <OsqueryEditor defaultValue={value} onChange={handleEditorChange} />
           )}
         </EuiFormRow>
       </>

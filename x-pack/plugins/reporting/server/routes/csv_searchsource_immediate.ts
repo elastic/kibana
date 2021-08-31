@@ -13,7 +13,7 @@ import { runTaskFnFactory } from '../export_types/csv_searchsource_immediate/exe
 import { JobParamsDownloadCSV } from '../export_types/csv_searchsource_immediate/types';
 import { LevelLogger as Logger } from '../lib';
 import { TaskRunResult } from '../lib/tasks';
-import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { authorizedUserPreRouting } from './lib/authorized_user_pre_routing';
 import { HandlerErrorFunction } from './types';
 
 const API_BASE_URL_V1 = '/api/reporting/v1';
@@ -36,7 +36,6 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   parentLogger: Logger
 ) {
   const setupDeps = reporting.getPluginSetupDeps();
-  const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
 
   // TODO: find a way to abstract this using ExportTypeRegistry: it needs a new
@@ -63,47 +62,54 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         tags: kibanaAccessControlTags,
       },
     },
-    userHandler(async (_user, context, req: CsvFromSavedObjectRequest, res) => {
-      const logger = parentLogger.clone(['csv_searchsource_immediate']);
-      const runTaskFn = runTaskFnFactory(reporting, logger);
+    authorizedUserPreRouting(
+      reporting,
+      async (_user, context, req: CsvFromSavedObjectRequest, res) => {
+        const logger = parentLogger.clone(['csv_searchsource_immediate']);
+        const runTaskFn = runTaskFnFactory(reporting, logger);
 
-      try {
-        let buffer = Buffer.from('');
-        const stream = new Writable({
-          write(chunk, encoding, callback) {
-            buffer = Buffer.concat([
-              buffer,
-              Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
-            ]);
-            callback();
-          },
-        });
+        try {
+          let buffer = Buffer.from('');
+          const stream = new Writable({
+            write(chunk, encoding, callback) {
+              buffer = Buffer.concat([
+                buffer,
+                Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
+              ]);
+              callback();
+            },
+          });
 
-        const {
-          content_type: jobOutputContentType,
-          size: jobOutputSize,
-        }: TaskRunResult = await runTaskFn(null, req.body, context, stream, req);
-        stream.end();
-        const jobOutputContent = buffer.toString();
+          const { content_type: jobOutputContentType }: TaskRunResult = await runTaskFn(
+            null,
+            req.body,
+            context,
+            stream,
+            req
+          );
+          stream.end();
+          const jobOutputContent = buffer.toString();
+          const jobOutputSize = buffer.byteLength;
 
-        logger.info(`Job output size: ${jobOutputSize} bytes`);
+          logger.info(`Job output size: ${jobOutputSize} bytes.`);
 
-        // convert null to undefined so the value can be sent to h.response()
-        if (jobOutputContent === null) {
-          logger.warn('CSV Job Execution created empty content result');
+          // convert null to undefined so the value can be sent to h.response()
+          if (jobOutputContent === null) {
+            logger.warn('CSV Job Execution created empty content result');
+          }
+
+          return res.ok({
+            body: jobOutputContent || '',
+            headers: {
+              'content-type': jobOutputContentType ? jobOutputContentType : [],
+              'accept-ranges': 'none',
+            },
+          });
+        } catch (err) {
+          logger.error(err);
+          return handleError(res, err);
         }
-
-        return res.ok({
-          body: jobOutputContent || '',
-          headers: {
-            'content-type': jobOutputContentType ? jobOutputContentType : [],
-            'accept-ranges': 'none',
-          },
-        });
-      } catch (err) {
-        logger.error(err);
-        return handleError(res, err);
       }
-    })
+    )
   );
 }
