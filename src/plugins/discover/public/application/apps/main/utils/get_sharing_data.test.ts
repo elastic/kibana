@@ -44,10 +44,6 @@ describe('getSharingData', () => {
             },
           ],
         },
-        "timeRange": Object {
-          "from": "test",
-          "to": "test",
-        },
       }
     `);
   });
@@ -72,10 +68,6 @@ describe('getSharingData', () => {
               "_score": "desc",
             },
           ],
-        },
-        "timeRange": Object {
-          "from": "test",
-          "to": "test",
         },
       }
     `);
@@ -118,10 +110,6 @@ describe('getSharingData', () => {
               "_doc": "desc",
             },
           ],
-        },
-        "timeRange": Object {
-          "from": "test",
-          "to": "test",
         },
       }
     `);
@@ -172,10 +160,6 @@ describe('getSharingData', () => {
               "_doc": false,
             },
           ],
-        },
-        "timeRange": Object {
-          "from": "test",
-          "to": "test",
         },
       }
     `);
