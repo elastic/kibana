@@ -69,14 +69,15 @@ export async function getEsGridTile({
 
     const aggs = {};
 
-    for (const key in requestBody.aggs) {
-      if (requestBody.aggs.hasOwnProperty(key)) {
-        if (key !== GEOTILE_GRID_AGG_NAME && key !== GEOCENTROID_AGG_NAME) {
-          aggs[key] = requestBody.aggs[key];
+    for (const key in requestBody.aggs[GEOTILE_GRID_AGG_NAME].aggs) {
+      if (requestBody.aggs[GEOTILE_GRID_AGG_NAME].aggs.hasOwnProperty(key)) {
+        if (key !== GEOCENTROID_AGG_NAME) {
+          aggs[key] = requestBody.aggs[GEOTILE_GRID_AGG_NAME].aggs[key];
         }
       }
     }
 
+    console.log('a', aggs, requestBody.aggs);
     const fields = requestBody.fields;
     const body = {
       size: 0, // no hits

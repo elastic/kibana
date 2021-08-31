@@ -309,6 +309,8 @@ export class DynamicStyleProperty<T>
   pluckOrdinalStyleMetaFromTileMetaFeatures(
     metaFeatures: TileMetaFeature[]
   ): RangeFieldMeta | null {
+
+    console.log('pluck ordinal stylemeta', metaFeatures);
     if (!this.isOrdinal()) {
       return null;
     }

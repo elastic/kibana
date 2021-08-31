@@ -37,11 +37,11 @@ export type JoinDescriptor = {
 
 export type TileMetaFeature = Feature & {
   properties: {
-    [KBN_METADATA_FEATURE]: true;
-    [KBN_IS_TILE_COMPLETE]: boolean;
+    [KBN_METADATA_FEATURE]: true; //not supported
+    [KBN_IS_TILE_COMPLETE]: boolean; //not supported
     [KBN_FEATURE_COUNT]: number;
-    [KBN_VECTOR_SHAPE_TYPE_COUNTS]: VectorShapeTypeCounts;
-    fieldMeta?: FieldMeta;
+    [KBN_VECTOR_SHAPE_TYPE_COUNTS]: VectorShapeTypeCounts;//not supported
+    fieldMeta?: FieldMeta; //not supported
   };
 };
 
