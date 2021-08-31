@@ -2,10 +2,7 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
-
-.buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
+source .buildkite/scripts/steps/functional/common.sh
 
 echo --- Capture Kibana Saved Objects field count metrics
 checks-reporter-with-killswitch "Capture Kibana Saved Objects field count metrics" \

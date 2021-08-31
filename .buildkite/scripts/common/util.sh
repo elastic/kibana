@@ -49,3 +49,7 @@ docker_run() {
 
   docker run "${args[@]}" "$@"
 }
+
+is_test_execution_step() {
+  buildkite-agent meta-data set 'is_test_execution_step' 'true'
+}

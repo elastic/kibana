@@ -2,7 +2,9 @@
 
 set -euo pipefail
 
-if [[ -d target && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* && "${BUILDKITE_COMMAND:-}" != ".buildkite/scripts/lifecycle/post_build.sh" ]]; then
+IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get is_test_execution_step --default '')"
+
+if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'target/junit/**/*'
   buildkite-agent artifact upload 'target/kibana-*'
   buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
@@ -19,4 +21,6 @@ if [[ -d target && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"
   buildkite-agent artifact upload 'x-pack/test/functional/apps/reporting/reports/session/*.pdf'
   buildkite-agent artifact upload 'x-pack/test/functional/failure_debug/html/*.html'
   buildkite-agent artifact upload '.es/**/*.hprof'
+
+  node scripts/report_failed_tests 'target/junit/**/*.xml'
 fi

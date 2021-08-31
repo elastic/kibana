@@ -2,10 +2,7 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
-
-.buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
+source .buildkite/scripts/steps/functional/common.sh
 
 echo --- Build kbn_sample_panel_action
 
