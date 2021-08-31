@@ -7,25 +7,34 @@
  */
 
 import './index.scss';
-import angular from 'angular';
+import { renderApp as renderReactApp } from './index';
 
 /**
  * Here's where Discover's inner angular is mounted and rendered
  */
 export async function renderApp(moduleName: string, element: HTMLElement) {
-  await import('./angular');
-  const $injector = mountDiscoverApp(moduleName, element);
-  return () => $injector.get('$rootScope').$destroy();
+  const app = mountDiscoverApp(moduleName, element);
+  return () => {
+    app();
+  };
+}
+
+function buildDiscoverElement(mountpoint: HTMLElement) {
+  // due to legacy angular tags, we need some manual DOM intervention here
+  const appWrapper = document.createElement('div');
+  const discoverApp = document.createElement('discover-app');
+  const discover = document.createElement('discover');
+  appWrapper.appendChild(discoverApp);
+  discoverApp.append(discover);
+  mountpoint.appendChild(appWrapper);
+  return discover;
 }
 
 function mountDiscoverApp(moduleName: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  const appWrapper = document.createElement('div');
-  appWrapper.setAttribute('ng-view', '');
-  mountpoint.appendChild(appWrapper);
-  // bootstrap angular into detached element and attach it later to
-  // make angular-within-angular possible
-  const $injector = angular.bootstrap(mountpoint, [moduleName]);
+  const discoverElement = buildDiscoverElement(mountpoint);
+  // @ts-expect-error
+  const app = renderReactApp({ element: discoverElement });
   element.appendChild(mountpoint);
-  return $injector;
+  return app;
 }
