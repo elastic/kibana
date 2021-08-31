@@ -56,7 +56,7 @@ describe('UptimeDatePicker component', () => {
 
     expect(customHistory.push).toHaveBeenCalledWith({
       pathname: '/',
-      search: 'dateRangeStart=now-30m&dateRangeEnd=now-15m',
+      search: 'dateRangeEnd=now-15m&dateRangeStart=now-30m',
     });
   });
 
