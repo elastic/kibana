@@ -350,7 +350,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                 </UpdatedFlexItem>
               </UpdatedFlexGroup>
 
-              {!hasAlerts && loading === false && <TGridEmpty />}
+              {!hasAlerts && !loading && <TGridEmpty />}
 
               {hasAlerts && (
                 <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">

@@ -306,7 +306,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
             {!graphEventId && graphOverlay == null && (
               <>
-                {!hasAlerts && loading === false && <TGridEmpty height="short" />}
+                {!hasAlerts && !loading && <TGridEmpty height="short" />}
                 {hasAlerts && (
                   <StatefulBody
                     hasAlertsCrud={hasAlertsCrud}
