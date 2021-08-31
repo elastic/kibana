@@ -18,7 +18,7 @@ export interface DateFieldProps {
   type: 'update' | 'create';
 }
 
-export const DateField = memo<DateFieldProps>(({ date, type }) => {
+export const DateFieldValue = memo<DateFieldProps>(({ date, type }) => {
   return (
     <EuiFlexGroup responsive={false} gutterSize="m">
       <EuiFlexItem grow={false}>
@@ -41,4 +41,4 @@ export const DateField = memo<DateFieldProps>(({ date, type }) => {
     </EuiFlexGroup>
   );
 });
-DateField.displayName = 'DateField';
+DateFieldValue.displayName = 'DateField';

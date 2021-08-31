@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { DateField } from './date_field';
+import { DateFieldValue } from './date_field_value';
 import { ActionsContextMenu, ActionsContextMenuProps } from '../../actions_context_menu';
 
 export const CardHeader = memo<{
@@ -29,10 +29,10 @@ export const CardHeader = memo<{
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false}>
               <EuiFlexItem>
-                <DateField date={updatedDate} type="update" />
+                <DateFieldValue date={updatedDate} type="update" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <DateField date={createdDate} type="create" />
+                <DateFieldValue date={createdDate} type="create" />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
