@@ -1,8 +1,8 @@
 {
   "id": "kbnTpCustomVisualizations",
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   },
   "version": "0.0.1",
   "kibanaVersion": "kibana",
