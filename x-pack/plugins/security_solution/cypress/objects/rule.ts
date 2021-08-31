@@ -164,7 +164,7 @@ const getRunsEvery = (): Interval => ({
 });
 
 const getLookBack = (): Interval => ({
-  interval: '17520',
+  interval: '50000',
   timeType: 'Hours',
   type: 'h',
 });
