@@ -1,0 +1,44 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies process execution events where the command line value contains a long sequence of whitespace characters or multiple occurrences of contiguous whitespace. Attackers may attempt to evade signature-based detections by padding their malicious command with unnecessary whitespace characters. These observations should be investigated for malicious behavior.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Whitespace Padding in Process Command Line",
+  "note": "## Triage and analysis\n\n- Analyze the command line of the process in question for evidence of malicious code execution.\n- Review the ancestry and child processes spawned by the process in question for indicators of further malicious code execution.",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.command_line regex \".*[ ]{20,}.*\" or \n  \n  /* this will match on 3 or more separate occurrences of 5+ contiguous whitespace characters */\n  process.command_line regex \".*(.*[ ]{5,}[^ ]*){3,}.*\"\n",
+  "references": [
+    "https://twitter.com/JohnLaTwC/status/1419251082736201737"
+  ],
+  "risk_score": 47,
+  "rule_id": "e0dacebe-4311-4d50-9387-b17e89c2e7fd",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

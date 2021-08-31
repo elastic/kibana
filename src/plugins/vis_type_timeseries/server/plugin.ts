@@ -120,7 +120,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     fieldsRoutes(router, framework);
 
     if (plugins.usageCollection) {
-      registerTimeseriesUsageCollector(plugins.usageCollection, globalConfig$);
+      registerTimeseriesUsageCollector(plugins.usageCollection);
     }
 
     return {
