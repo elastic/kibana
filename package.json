@@ -99,9 +99,6 @@
     "@elastic/apm-rum-react": "^1.2.11",
     "@elastic/charts": "33.2.2",
     "@babel/runtime": "^7.12.5",
-    "@elastic/apm-rum": "^5.9.1",
-    "@elastic/apm-rum-react": "^1.3.1",
-    "@elastic/charts": "34.2.1",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.19",
     "@elastic/ems-client": "7.15.0",
@@ -836,10 +833,7 @@
     "terminal-link": "^2.1.1",
     "terser": "^5.7.1",
     "terser-webpack-plugin": "^2.1.2",
-<<<<<<< HEAD
-=======
     "tough-cookie": "^4.0.0",
->>>>>>> 23a178895f7fe2d762cd5587359fe4099118233b
     "ts-loader": "^7.0.5",
     "ts-morph": "^9.1.0",
     "tsd": "^0.13.1",
