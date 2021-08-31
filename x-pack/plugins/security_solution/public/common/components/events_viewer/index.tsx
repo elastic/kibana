@@ -25,6 +25,7 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 import type { EntityType } from '../../../../../timelines/common';
+import type { TGridType } from '../../../../../timelines/public';
 import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
@@ -160,9 +161,82 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     [graphEventId, id, isDataGridExpanded]
   );
 
+  const tGridProps = useMemo(() => {
+    const type: TGridType = 'embedded';
+    return {
+      id,
+      type,
+      browserFields,
+      columns,
+      dataProviders: dataProviders!,
+      defaultCellActions,
+      deletedEventIds,
+      docValueFields,
+      end,
+      entityType,
+      filters: globalFilters,
+      globalFullScreen,
+      graphOverlay,
+      hasAlertsCrud,
+      indexNames: selectedPatterns,
+      indexPattern,
+      isLive,
+      isLoadingIndexPattern,
+      itemsPerPage,
+      itemsPerPageOptions: itemsPerPageOptions!,
+      kqlMode,
+      query,
+      onRuleChange,
+      renderCellValue,
+      rowRenderers,
+      start,
+      sort,
+      additionalFilters,
+      graphEventId,
+      filterStatus: currentFilter,
+      leadingControlColumns,
+      trailingControlColumns,
+      tGridEventRenderedViewEnabled,
+      unit,
+    };
+  }, [
+    additionalFilters,
+    browserFields,
+    columns,
+    currentFilter,
+    dataProviders,
+    defaultCellActions,
+    deletedEventIds,
+    docValueFields,
+    end,
+    entityType,
+    globalFilters,
+    globalFullScreen,
+    graphEventId,
+    graphOverlay,
+    hasAlertsCrud,
+    id,
+    indexPattern,
+    isLive,
+    isLoadingIndexPattern,
+    itemsPerPage,
+    itemsPerPageOptions,
+    kqlMode,
+    onRuleChange,
+    query,
+    renderCellValue,
+    rowRenderers,
+    selectedPatterns,
+    sort,
+    start,
+    tGridEventRenderedViewEnabled,
+    trailingControlColumns,
+    unit,
+  ]);
+
   return (
     <EuiMutationObserver
-      observerOptions={{ subtree: true, attributes: true, childList: true }}
+      observerOptions={{ subtree: true, attributeFilter: ['class'] }}
       onMutation={onMutation}
     >
       {(mutationRef) => (
@@ -170,42 +244,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           <FullScreenContainer $isFullScreen={globalFullScreen} ref={mutationRef}>
             <InspectButtonContainer>
               {tGridEnabled ? (
-                timelinesUi.getTGrid<'embedded'>({
-                  id,
-                  type: 'embedded',
-                  browserFields,
-                  columns,
-                  dataProviders: dataProviders!,
-                  defaultCellActions,
-                  deletedEventIds,
-                  docValueFields,
-                  end,
-                  entityType,
-                  filters: globalFilters,
-                  globalFullScreen,
-                  graphOverlay,
-                  hasAlertsCrud,
-                  indexNames: selectedPatterns,
-                  indexPattern,
-                  isLive,
-                  isLoadingIndexPattern,
-                  itemsPerPage,
-                  itemsPerPageOptions: itemsPerPageOptions!,
-                  kqlMode,
-                  query,
-                  onRuleChange,
-                  renderCellValue,
-                  rowRenderers,
-                  start,
-                  sort,
-                  additionalFilters,
-                  graphEventId,
-                  filterStatus: currentFilter,
-                  leadingControlColumns,
-                  trailingControlColumns,
-                  tGridEventRenderedViewEnabled,
-                  unit,
-                })
+                timelinesUi.getTGrid<'embedded'>(tGridProps)
               ) : (
                 <EventsViewer
                   browserFields={browserFields}

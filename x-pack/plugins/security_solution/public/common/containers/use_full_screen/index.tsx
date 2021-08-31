@@ -29,13 +29,13 @@ export const resetScroll = () => {
   }, 0);
 };
 
-export const closeDataGrid = () => {
-  const escapePress = new KeyboardEvent('click', {
+const setDataGridFullScreen = (isExpanded: boolean) => {
+  const clickEvent = new KeyboardEvent('click', {
     view: window,
     bubbles: true,
     cancelable: true,
   });
-  const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
+  const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
   const dataGridFullScreenButtonNew = document.querySelector(
     '[data-test-subj="dataGridFullScrenButton"]'
   );
@@ -43,8 +43,27 @@ export const closeDataGrid = () => {
     '[data-test-subj="dataGridFullScreenButton"]'
   );
   const dataGridFullScreenButton = dataGridFullScreenButtonNew || dataGridFullScreenButtonOld;
+  if (dataGridIsFullScreen !== isExpanded && dataGridFullScreenButton) {
+    dataGridFullScreenButton.dispatchEvent(clickEvent);
+  }
+};
+
+export const closeDataGrid = () => {
+  const clickEvent = new KeyboardEvent('click', {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+  });
+  const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
+  const dataGridFullScreenButtonOld = document.querySelector(
+    '[data-test-subj="dataGridFullScrenButton"]'
+  );
+  const dataGridFullScreenButtonNew = document.querySelector(
+    '[data-test-subj="dataGridFullScreenButton"]'
+  );
+  const dataGridFullScreenButton = dataGridFullScreenButtonNew || dataGridFullScreenButtonOld;
   if (dataGridIsFullScreen && dataGridFullScreenButton) {
-    dataGridFullScreenButton.dispatchEvent(escapePress);
+    dataGridFullScreenButton.dispatchEvent(clickEvent);
   }
 };
 
@@ -55,10 +74,10 @@ export const expandDataGrid = () => {
     cancelable: true,
   });
   const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
-  const dataGridFullScreenButtonNew = document.querySelector(
+  const dataGridFullScreenButtonOld = document.querySelector(
     '[data-test-subj="dataGridFullScrenButton"]'
   );
-  const dataGridFullScreenButtonOld = document.querySelector(
+  const dataGridFullScreenButtonNew = document.querySelector(
     '[data-test-subj="dataGridFullScreenButton"]'
   );
   const dataGridFullScreenButton = dataGridFullScreenButtonNew || dataGridFullScreenButtonOld;
@@ -84,11 +103,11 @@ export const useGlobalFullScreen = (): GlobalFullScreen => {
   const setGlobalFullScreen = useCallback(
     (fullScreen: boolean) => {
       if (fullScreen) {
-        expandDataGrid();
+        setDataGridFullScreen(true);
         document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME);
         resetScroll();
       } else {
-        closeDataGrid();
+        setDataGridFullScreen(false);
         document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME);
         resetScroll();
       }
@@ -114,9 +133,9 @@ export const useTimelineFullScreen = (): TimelineFullScreen => {
   const setTimelineFullScreen = useCallback(
     (fullScreen: boolean) => {
       if (fullScreen) {
-        expandDataGrid();
+        setDataGridFullScreen(true);
       } else {
-        closeDataGrid();
+        setDataGridFullScreen(false);
       }
       dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen }));
     },

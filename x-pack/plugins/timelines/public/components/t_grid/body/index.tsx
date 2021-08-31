@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiMutationObserver,
   EuiProgress,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
@@ -733,7 +734,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [id, loadPage, dispatch, clearSelected]
     );
 
-    const height = useDataGridHeightHack(pageSize, data.length);
+    const { height, onMutation } = useDataGridHeightHack();
 
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
     const [activeStatefulEventContext] = useState({
@@ -746,30 +747,37 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       <>
         <StatefulEventContext.Provider value={activeStatefulEventContext}>
           {tableView === 'gridView' && (
-            <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
-              <EuiDataGrid
-                height={height}
-                id={'body-data-grid'}
-                data-test-subj="body-data-grid"
-                aria-label={i18n.TGRID_BODY_ARIA_LABEL}
-                columns={columnsWithCellActions}
-                columnVisibility={{ visibleColumns, setVisibleColumns }}
-                gridStyle={gridStyle}
-                leadingControlColumns={leadingTGridControlColumns}
-                trailingControlColumns={trailingTGridControlColumns}
-                toolbarVisibility={toolbarVisibility}
-                rowCount={totalItems}
-                renderCellValue={renderTGridCellValue}
-                sorting={{ columns: sortingColumns, onSort }}
-                pagination={{
-                  pageIndex: activePage,
-                  pageSize,
-                  pageSizeOptions: itemsPerPageOptions,
-                  onChangeItemsPerPage,
-                  onChangePage,
-                }}
-              />
-            </EuiDataGridContainer>
+            <EuiMutationObserver
+              observerOptions={{ subtree: true, attributeFilter: ['class', 'tabindex'] }}
+              onMutation={onMutation}
+            >
+              {(mutationRef) => (
+                <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT} ref={mutationRef}>
+                  <EuiDataGrid
+                    height={height}
+                    id={'body-data-grid'}
+                    data-test-subj="body-data-grid"
+                    aria-label={i18n.TGRID_BODY_ARIA_LABEL}
+                    columns={columnsWithCellActions}
+                    columnVisibility={{ visibleColumns, setVisibleColumns }}
+                    gridStyle={gridStyle}
+                    leadingControlColumns={leadingTGridControlColumns}
+                    trailingControlColumns={trailingTGridControlColumns}
+                    toolbarVisibility={toolbarVisibility}
+                    rowCount={totalItems}
+                    renderCellValue={renderTGridCellValue}
+                    sorting={{ columns: sortingColumns, onSort }}
+                    pagination={{
+                      pageIndex: activePage,
+                      pageSize,
+                      pageSizeOptions: itemsPerPageOptions,
+                      onChangeItemsPerPage,
+                      onChangePage,
+                    }}
+                  />
+                </EuiDataGridContainer>
+              )}
+            </EuiMutationObserver>
           )}
           {tableView === 'eventRenderedView' && (
             <EventRenderedView

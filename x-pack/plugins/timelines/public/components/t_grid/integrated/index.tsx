@@ -8,9 +8,16 @@
 import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
 // @ts-expect-error
 import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-import { EuiEmptyPrompt, EuiLoadingContent, EuiPanel } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiProgress,
+  EuiLoadingContent,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -39,10 +46,16 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
+import {
+  calculateTotalPages,
+  buildCombinedQuery,
+  getCombinedFilterQuery,
+  resolverIsShowing,
+} from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
+import { Footer, footerHeight } from '../footer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
@@ -78,6 +91,16 @@ const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   flex: 1;
   display: flex;
   flex-direction: column;
+`;
+
+const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
+  overflow: hidden;
+  margin: 0;
+  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+`;
+
+const ScrollableFlexItem = styled(EuiFlexItem)`
+  overflow: auto;
 `;
 
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
@@ -141,6 +164,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   id,
   indexNames,
   indexPattern,
+  isLive,
   isLoadingIndexPattern,
   itemsPerPage,
   itemsPerPageOptions,
@@ -260,14 +284,14 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     setIsQueryLoading(loading);
   }, [loading]);
 
-  const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
-
   const isFirstUpdate = useRef(true);
   useEffect(() => {
     if (isFirstUpdate.current && !loading) {
       isFirstUpdate.current = false;
     }
   }, [loading]);
+
+  const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
 
   return (
     <InspectButtonContainer>
@@ -281,80 +305,85 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         {isFirstUpdate.current && <EuiLoadingContent data-test-subj="loading-alerts-panel" />}
 
         {graphOverlay}
-
-        {canQueryTimeline && (
-          <EventsContainerLoading
-            data-timeline-id={id}
-            data-test-subj={`events-container-loading-${loading}`}
-          >
-            <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
-              <UpdatedFlexItem grow={false} $show={!loading}>
-                <InspectButton title={justTitle} inspect={inspect} loading={loading} />
-              </UpdatedFlexItem>
-              <UpdatedFlexItem grow={false} $show={!loading}>
-                {!resolverIsShowing(graphEventId) && additionalFilters}
-              </UpdatedFlexItem>
-              {tGridEventRenderedViewEnabled && entityType === 'alerts' && (
+        {canQueryTimeline ? (
+          <>
+            <EventsContainerLoading
+              data-timeline-id={id}
+              data-test-subj={`events-container-loading-${loading}`}
+            >
+              <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
                 <UpdatedFlexItem grow={false} $show={!loading}>
-                  <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                  <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
-              )}
-            </UpdatedFlexGroup>
+                <UpdatedFlexItem grow={false} $show={!loading}>
+                  {!resolverIsShowing(graphEventId) && additionalFilters}
+                </UpdatedFlexItem>
+                {tGridEventRenderedViewEnabled && entityType === 'alerts' && (
+                  <UpdatedFlexItem grow={false} $show={!loading}>
+                    <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                  </UpdatedFlexItem>
+                )}
+              </UpdatedFlexGroup>
 
-            {!graphEventId && graphOverlay == null && (
-              <>
-                {totalCountMinusDeleted === 0 && loading === false && (
-                  <EuiEmptyPrompt
-                    title={
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaTitle"
-                          defaultMessage="No results match your search criteria"
-                        />
-                      </h2>
-                    }
-                    titleSize="s"
-                    body={
-                      <p>
-                        <FormattedMessage
-                          id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaDescription"
-                          defaultMessage="Try searching over a longer period of time or modifying your search."
-                        />
-                      </p>
-                    }
-                  />
-                )}
-                {totalCountMinusDeleted > 0 && (
-                  <StatefulBody
-                    hasAlertsCrud={hasAlertsCrud}
-                    activePage={pageInfo.activePage}
-                    browserFields={browserFields}
-                    filterQuery={filterQuery}
-                    data={nonDeletedEvents}
-                    defaultCellActions={defaultCellActions}
-                    id={id}
-                    isEventViewer={true}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    loadPage={loadPage}
-                    onRuleChange={onRuleChange}
-                    pageSize={itemsPerPage}
-                    renderCellValue={renderCellValue}
-                    rowRenderers={rowRenderers}
-                    tabType={TimelineTabs.query}
-                    tableView={tableView}
-                    totalItems={totalCountMinusDeleted}
-                    unit={unit}
-                    filterStatus={filterStatus}
-                    leadingControlColumns={leadingControlColumns}
-                    trailingControlColumns={trailingControlColumns}
-                    refetch={refetch}
-                    indexNames={indexNames}
-                  />
-                )}
-              </>
-            )}
-          </EventsContainerLoading>
-        )}
+              <FullWidthFlexGroup
+                $visible={!graphEventId && graphOverlay == null}
+                gutterSize="none"
+              >
+                <ScrollableFlexItem grow={1}>
+                  {nonDeletedEvents.length === 0 && loading === false ? (
+                    <EuiEmptyPrompt
+                      title={
+                        <h2>
+                          <FormattedMessage
+                            id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaTitle"
+                            defaultMessage="No results match your search criteria"
+                          />
+                        </h2>
+                      }
+                      titleSize="s"
+                      body={
+                        <p>
+                          <FormattedMessage
+                            id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaDescription"
+                            defaultMessage="Try searching over a longer period of time or modifying your search."
+                          />
+                        </p>
+                      }
+                    />
+                  ) : (
+                    <>
+                      <StatefulBody
+                        hasAlertsCrud={hasAlertsCrud}
+                        activePage={pageInfo.activePage}
+                        browserFields={browserFields}
+                        filterQuery={filterQuery}
+                        data={nonDeletedEvents}
+                        defaultCellActions={defaultCellActions}
+                        id={id}
+                        isEventViewer={true}
+                        itemsPerPageOptions={itemsPerPageOptions}
+                        loadPage={loadPage}
+                        onRuleChange={onRuleChange}
+                        pageSize={itemsPerPage}
+                        renderCellValue={renderCellValue}
+                        rowRenderers={rowRenderers}
+                        tabType={TimelineTabs.query}
+                        tableView={tableView}
+                        totalItems={totalCountMinusDeleted}
+                        unit={unit}
+                        filterStatus={filterStatus}
+                        leadingControlColumns={leadingControlColumns}
+                        trailingControlColumns={trailingControlColumns}
+                        refetch={refetch}
+                        indexNames={indexNames}
+                      />
+                    </>
+                  )}
+                </ScrollableFlexItem>
+              </FullWidthFlexGroup>
+            </EventsContainerLoading>
+          </>
+        ) : null}
       </StyledEuiPanel>
     </InspectButtonContainer>
   );
