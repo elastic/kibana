@@ -235,7 +235,7 @@ describe('CoreUsageDataService', () => {
                 "logQueries": false,
                 "numberOfHostsConfigured": 1,
                 "pingTimeoutMs": 30000,
-                "principal": "other",
+                "principal": "unknown",
                 "requestHeadersWhitelistConfigured": false,
                 "requestTimeoutMs": 30000,
                 "shardTimeoutMs": 30000,

@@ -516,7 +516,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
 }
 
 function getEsPrincipalUsage({ username, serviceAccountToken }: ElasticsearchConfigType) {
-  let value: CoreConfigUsageData['elasticsearch']['principal'] = 'other';
+  let value: CoreConfigUsageData['elasticsearch']['principal'] = 'unknown';
   if (isConfigured.string(username)) {
     switch (username) {
       case 'elastic': // deprecated

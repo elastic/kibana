@@ -211,7 +211,7 @@ export interface CoreConfigUsageData {
       | 'kibana_system_user'
       | 'other_user'
       | 'kibana_service_account'
-      | 'other';
+      | 'unknown';
   };
 
   http: {
