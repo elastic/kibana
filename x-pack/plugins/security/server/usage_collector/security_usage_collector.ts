@@ -181,7 +181,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         WELL_KNOWN_AUTH_SCHEMES.includes(scheme.toLowerCase())
       );
 
-      const sessionExpirations = config.session.getExpirationTimeouts(); // get global expiration values
+      const sessionExpirations = config.session.getExpirationTimeouts(undefined); // use `undefined` to get global expiration values
       const sessionIdleTimeoutInMinutes = sessionExpirations.idleTimeout?.asMinutes() ?? 0;
       const sessionLifespanInMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
       const sessionCleanupInMinutes = config.session.cleanupInterval?.asMinutes() ?? 0;
