@@ -5,7 +5,9 @@ set -euo pipefail
 .buildkite/scripts/bootstrap.sh
 
 echo '--- Lint: stylelint'
-node scripts/stylelint
+checks-reporter-with-killswitch "Lint: stylelint" \
+  node scripts/stylelint
 
 echo '--- Lint: eslint'
-node scripts/eslint --no-cache
+checks-reporter-with-killswitch "Lint: eslint" \
+  node scripts/eslint --no-cache
