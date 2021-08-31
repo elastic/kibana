@@ -24,6 +24,9 @@ jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
   useGetUserCasesPermissions: jest.fn().mockReturnValue({ crud: true }),
 }));
+jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
+  useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+}));
 jest.mock('../../../cases/components/use_insert_timeline');
 
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
