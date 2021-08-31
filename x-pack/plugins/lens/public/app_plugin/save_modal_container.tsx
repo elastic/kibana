@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { partition } from 'lodash';
@@ -21,6 +21,7 @@ import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
 import type { LensAppState } from '../state_management';
+import { getPersisted } from '../state_management/init_middleware/load_initial';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
@@ -50,12 +51,13 @@ export function SaveModalContainer({
   redirectToOrigin,
   getAppNameFromId = () => undefined,
   isSaveable = true,
-  lastKnownDoc,
+  lastKnownDoc: initLastKnownDoc,
   lensServices,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
   let savedObjectId;
+  const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnownDoc);
   if (lastKnownDoc) {
     title = lastKnownDoc.title;
     description = lastKnownDoc.description;
@@ -63,6 +65,27 @@ export function SaveModalContainer({
   }
 
   const { attributeService, savedObjectsTagging, application, dashboardFeatureFlag } = lensServices;
+
+  useEffect(() => {
+    setLastKnownDoc(initLastKnownDoc);
+  }, [initLastKnownDoc]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (initialInput) {
+      getPersisted({
+        initialInput,
+        lensServices,
+      }).then((persisted) => {
+        if (persisted?.doc && isMounted) setLastKnownDoc(persisted.doc);
+      });
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [initialInput, lensServices]);
 
   const tagsIds =
     persistedDoc && savedObjectsTagging
@@ -73,27 +96,25 @@ export function SaveModalContainer({
     if (runSave) {
       // inside lens, we use the function that's passed to it
       runSave(saveProps, options);
-    } else {
-      if (attributeService && lastKnownDoc) {
-        runSaveLensVisualization(
-          {
-            ...lensServices,
-            lastKnownDoc,
-            initialInput,
-            attributeService,
-            redirectTo,
-            redirectToOrigin,
-            originatingApp,
-            getIsByValueMode: () => false,
-            onAppLeave: () => {},
-          },
-          saveProps,
-          options
-        ).then(() => {
-          onSave?.();
-          onClose();
-        });
-      }
+    } else if (attributeService && lastKnownDoc) {
+      runSaveLensVisualization(
+        {
+          ...lensServices,
+          lastKnownDoc,
+          initialInput,
+          attributeService,
+          redirectTo,
+          redirectToOrigin,
+          originatingApp,
+          getIsByValueMode: () => false,
+          onAppLeave: () => {},
+        },
+        saveProps,
+        options
+      ).then(() => {
+        onSave?.();
+        onClose();
+      });
     }
   };
 

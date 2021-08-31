@@ -33,7 +33,7 @@ export const getPersisted = async ({
   let doc: Document;
 
   try {
-    const { ...attributes } = await attributeService.unwrapAttributes(initialInput);
+    const attributes = await attributeService.unwrapAttributes(initialInput);
 
     doc = {
       ...initialInput,
