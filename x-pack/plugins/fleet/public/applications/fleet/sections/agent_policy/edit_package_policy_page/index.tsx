@@ -695,7 +695,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
         </EuiPortal>
       )}
 
-      {isReadyForUpgrade ? (
+      {isReadyForUpgrade && currentPackagePolicy ? (
         <EuiCallOut
           title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.successTitle', {
             defaultMessage: 'Ready to upgrade',
