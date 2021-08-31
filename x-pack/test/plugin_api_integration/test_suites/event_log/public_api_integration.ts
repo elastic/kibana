@@ -184,6 +184,59 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/event_log_multiple_indicies');
       });
     });
+
+    describe(`Legacy Ids`, () => {
+      it('should support search event by ids and legacyIds', async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/event_log_multiple_indicies');
+
+        const legacyId = `521f2511-5cd1-44fd-95df-e0df83e354d5`;
+        const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
+
+        const {
+          body: { data, total },
+        } = await findEventsByIds(undefined, [id], {}, [legacyId]);
+
+        expect(data.length).to.be(8);
+        expect(total).to.be(8);
+
+        expect(data.map((foundEvent: IEvent) => foundEvent?.message)).to.eql([
+          'test 2020-10-28T15:19:53.825Z',
+          'test 2020-10-28T15:19:54.849Z',
+          'test 2020-10-28T15:19:54.881Z',
+          'test 2020-10-28T15:19:55.913Z',
+          'test legacy 2020-10-28T15:19:55.913Z',
+          'test 2020-10-28T15:19:55.938Z',
+          'test legacy 2020-10-28T15:19:55.962Z',
+          'test 2020-10-28T15:19:55.962Z',
+        ]);
+
+        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_multiple_indicies');
+      });
+
+      it('should search event only by ids if no legacyIds was setting', async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/event_log_multiple_indicies');
+
+        const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
+
+        const {
+          body: { data, total },
+        } = await findEventsByIds(undefined, [id], {});
+
+        expect(data.length).to.be(6);
+        expect(total).to.be(6);
+
+        expect(data.map((foundEvent: IEvent) => foundEvent?.message)).to.eql([
+          'test 2020-10-28T15:19:53.825Z',
+          'test 2020-10-28T15:19:54.849Z',
+          'test 2020-10-28T15:19:54.881Z',
+          'test 2020-10-28T15:19:55.913Z',
+          'test 2020-10-28T15:19:55.938Z',
+          'test 2020-10-28T15:19:55.962Z',
+        ]);
+
+        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_multiple_indicies');
+      });
+    });
   });
 
   async function findEvents(
@@ -202,6 +255,32 @@ export default function ({ getService }: FtrProviderContext) {
     await delay(1000); // wait for buffer to be written
     log.debug(`Finding Events for Saved Object with ${url}`);
     return await supertest.get(url).set('kbn-xsrf', 'foo').expect(200);
+  }
+
+  async function findEventsByIds(
+    namespace: string | undefined,
+    ids: string[],
+    query: Record<string, any> = {},
+    legacyIds: string[] = []
+  ) {
+    const urlPrefix = urlPrefixFromNamespace(namespace);
+    const url = `${urlPrefix}/api/event_log/event_log_test/_find${
+      isEmpty(query)
+        ? ''
+        : `?${Object.entries(query)
+            .map(([key, val]) => `${key}=${val}`)
+            .join('&')}`
+    }`;
+    await delay(1000); // wait for buffer to be written
+    log.debug(`Finding Events for Saved Object with ${url}`);
+    return await supertest
+      .post(url)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        ids,
+        legacyIds,
+      })
+      .expect(200);
   }
 
   function assertEventsFromApiMatchCreatedEvents(

@@ -280,38 +280,38 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       },
     ];
 
-    const shouldQuery = [
-      {
-        bool: {
-          must: [
-            {
-              nested: {
-                path: 'kibana.saved_objects',
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          // default maximum of 65,536 terms, configurable by index.max_terms_count
-                          'kibana.saved_objects.id': ids,
-                        },
+    const shouldQuery = [];
+
+    shouldQuery.push({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      terms: {
+                        // default maximum of 65,536 terms, configurable by index.max_terms_count
+                        'kibana.saved_objects.id': ids,
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
               },
             },
-            {
-              range: {
-                'kibana.version': {
-                  gte: '8.0.0',
-                },
+          },
+          {
+            range: {
+              'kibana.version': {
+                gte: KIBANA_VERSION_8_0_0,
               },
             },
-          ],
-        },
+          },
+        ],
       },
-    ];
+    });
 
     if (legacyIds && legacyIds.length > 0) {
       shouldQuery.push({
