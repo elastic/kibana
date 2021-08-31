@@ -18,7 +18,9 @@ export const SelectedFilters = ({ onChange }: Props) => {
   const indexPattern = useIndexPattern();
   const { filtersList } = useSelectedFilters();
 
-  return indexPattern ? (
+  if (!indexPattern) return null;
+
+  return (
     <EuiFlexGroup gutterSize="xs">
       {filtersList.map(({ field, selectedItems, excludedItems, label }) => (
         <Fragment key={field}>
@@ -63,5 +65,5 @@ export const SelectedFilters = ({ onChange }: Props) => {
         </Fragment>
       ))}
     </EuiFlexGroup>
-  ) : null;
+  );
 };
