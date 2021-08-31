@@ -70,15 +70,9 @@ export class Home extends Component {
         }
       }, 500);
 
-      const resp = await this.props.find({
-        type: 'index-pattern',
-        fields: ['title'],
-        search: `*`,
-        search_fields: ['title'],
-        perPage: 1,
-      });
+      const { isNewInstance } = await this.props.http.get('/internal/home/new_instance_status');
 
-      this.endLoading({ isNewKibanaInstance: resp.total === 0 });
+      this.endLoading({ isNewKibanaInstance: isNewInstance });
     } catch (err) {
       // An error here is relatively unimportant, as it only means we don't provide
       // some UI niceties.
