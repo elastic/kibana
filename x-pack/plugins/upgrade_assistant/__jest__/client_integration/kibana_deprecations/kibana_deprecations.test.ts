@@ -44,7 +44,11 @@ describe('Kibana deprecations', () => {
           .mockReturnValue(kibanaDeprecationsMockResponse);
 
         testBed = await setupKibanaPage({
-          deprecations: deprecationService,
+          services: {
+            core: {
+              deprecations: deprecationService,
+            },
+          },
         });
       });
 
@@ -176,7 +180,11 @@ describe('Kibana deprecations', () => {
           .mockRejectedValue(new Error('Internal Server Error'));
 
         testBed = await setupKibanaPage({
-          deprecations: deprecationService,
+          services: {
+            core: {
+              deprecations: deprecationService,
+            },
+          },
         });
       });
 
@@ -208,7 +216,11 @@ describe('Kibana deprecations', () => {
           .mockReturnValue(kibanaDeprecationsMockResponse);
 
         testBed = await setupKibanaPage({
-          deprecations: deprecationService,
+          services: {
+            core: {
+              deprecations: deprecationService,
+            },
+          },
         });
       });
 

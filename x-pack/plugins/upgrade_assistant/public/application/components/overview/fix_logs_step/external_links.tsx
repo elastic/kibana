@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 
 import { useAppContext } from '../../../app_context';
-import { useKibana, DataPublicPluginStart } from '../../../../shared_imports';
+import { DataPublicPluginStart } from '../../../../shared_imports';
 import {
   DEPRECATION_LOGS_INDEX_PATTERN,
   DEPRECATION_LOGS_SOURCE_ID,
@@ -39,8 +39,10 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
 };
 
 const DiscoverAppLink: FunctionComponent = () => {
-  const { share } = useAppContext();
-  const { data: dataService } = useKibana().services;
+  const {
+    services: { data: dataService },
+    plugins: { share },
+  } = useAppContext();
 
   const [discoveryUrl, setDiscoveryUrl] = useState<string | undefined>();
 
@@ -61,7 +63,7 @@ const DiscoverAppLink: FunctionComponent = () => {
   }, [dataService, share.url.locators]);
 
   return (
-    <EuiLink href={discoveryUrl} target="_blank" data-test-subj="viewDiscoverLogs">
+    <EuiLink href={discoveryUrl} data-test-subj="viewDiscoverLogs">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
         defaultMessage="Analyze logs in Discover"
@@ -71,13 +73,17 @@ const DiscoverAppLink: FunctionComponent = () => {
 };
 
 const ObservabilityAppLink: FunctionComponent = () => {
-  const { http } = useAppContext();
+  const {
+    services: {
+      core: { http },
+    },
+  } = useAppContext();
   const logStreamUrl = http?.basePath?.prepend(
     `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}`
   );
 
   return (
-    <EuiLink href={logStreamUrl} target="_blank" data-test-subj="viewObserveLogs">
+    <EuiLink href={logStreamUrl} data-test-subj="viewObserveLogs">
       <FormattedMessage
         id="xpack.upgradeAssistant.overview.viewObservabilityResultsAction"
         defaultMessage="View deprecation logs in Observability"

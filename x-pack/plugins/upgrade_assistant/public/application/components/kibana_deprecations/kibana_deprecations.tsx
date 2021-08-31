@@ -64,7 +64,13 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
   >(undefined);
   const [isResolvingDeprecation, setIsResolvingDeprecation] = useState(false);
 
-  const { deprecations, breadcrumbs, docLinks, api, notifications } = useAppContext();
+  const {
+    services: {
+      core: { deprecations, docLinks, notifications },
+      breadcrumbs,
+      api,
+    },
+  } = useAppContext();
 
   const getAllDeprecations = useCallback(async () => {
     setIsLoading(true);
