@@ -178,7 +178,7 @@ export const DeprecationDetailsFlyout = ({
 
         {/* Hide resolution steps if already resolved */}
         {deprecationResolutionState?.resolveDeprecationStatus !== 'ok' && (
-          <div data-test-subj="resolveSteps">
+          <div data-test-subj="resolveSection">
             {correctiveActions.api && (
               <>
                 <EuiCallOut

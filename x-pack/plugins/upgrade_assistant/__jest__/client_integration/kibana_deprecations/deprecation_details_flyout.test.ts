@@ -53,8 +53,10 @@ describe('Kibana deprecation details flyout', () => {
       expect(find('manualStepsList').find('li').length).toEqual(
         manualDeprecation.correctiveActions.manualSteps.length
       );
-      expect(exists('resolveButton')).toBe(false);
+
+      // Quick resolve callout and button should not display
       expect(exists('quickResolveCallout')).toBe(false);
+      expect(exists('resolveButton')).toBe(false);
     });
   });
 
@@ -63,26 +65,30 @@ describe('Kibana deprecation details flyout', () => {
       const { find, exists, actions } = testBed;
       const quickResolveDeprecation = kibanaDeprecationsMockResponse[0];
 
-      deprecationService.resolveDeprecation = jest.fn().mockReturnValue({ status: 'ok' });
-
       await actions.table.clickDeprecationAt(0);
 
       expect(exists('kibanaDeprecationDetails')).toBe(true);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
         `'${quickResolveDeprecation.domainId}' is using a deprecated feature`
       );
-      expect(exists('resolveSteps')).toBe(true);
+      expect(find('manualStepsList').find('li').length).toEqual(
+        quickResolveDeprecation.correctiveActions.manualSteps.length
+      );
+
+      // Quick resolve callout and button should display
       expect(exists('quickResolveCallout')).toBe(true);
       expect(exists('resolveButton')).toBe(true);
 
       await actions.flyout.clickResolveButton();
 
+      // Flyout should close after button click
       expect(exists('kibanaDeprecationDetails')).toBe(false);
 
       // Reopen the flyout
       await actions.table.clickDeprecationAt(0);
 
-      expect(exists('resolveSteps')).toBe(false);
+      // Resolve information should not display and Quick resolve button should be disabled
+      expect(exists('resolveSection')).toBe(false);
       expect(find('resolveButton').props().disabled).toBe(true);
       expect(find('resolveButton').text()).toContain('Resolved');
     });
@@ -91,9 +97,12 @@ describe('Kibana deprecation details flyout', () => {
       const { find, exists, actions } = testBed;
       const quickResolveDeprecation = kibanaDeprecationsMockResponse[0];
 
-      deprecationService.resolveDeprecation = jest
-        .fn()
-        .mockReturnValue({ status: 'fail', reason: 'resolve failed' });
+      deprecationService.resolveDeprecation.mockReturnValue(
+        Promise.resolve({
+          status: 'fail',
+          reason: 'resolve failed',
+        })
+      );
 
       await actions.table.clickDeprecationAt(0);
 
@@ -101,20 +110,23 @@ describe('Kibana deprecation details flyout', () => {
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
         `'${quickResolveDeprecation.domainId}' is using a deprecated feature`
       );
-      expect(exists('resolveSteps')).toBe(true);
+
+      // Quick resolve callout and button should display
       expect(exists('quickResolveCallout')).toBe(true);
       expect(exists('resolveButton')).toBe(true);
 
       await actions.flyout.clickResolveButton();
 
-      // Verify flyout closed
+      // Flyout should close after button click
       expect(exists('kibanaDeprecationDetails')).toBe(false);
 
       // Reopen the flyout
       await actions.table.clickDeprecationAt(0);
 
+      // Verify error displays
       expect(exists('quickResolveError')).toBe(true);
-      expect(exists('resolveSteps')).toBe(true);
+      // Resolve information should display and Quick resolve button should be enabled
+      expect(exists('resolveSection')).toBe(true);
       expect(find('resolveButton').props().disabled).toBe(false);
       expect(find('resolveButton').text()).toContain('Try again');
     });
