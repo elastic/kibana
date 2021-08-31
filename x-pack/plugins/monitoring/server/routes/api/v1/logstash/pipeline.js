@@ -61,7 +61,13 @@ export function logstashPipelineRoute(server) {
       // Figure out which version of the pipeline we want to show
       let versions;
       try {
-        versions = await getPipelineVersions(req, config, lsIndexPattern, clusterUuid, pipelineId);
+        versions = await getPipelineVersions({
+          req,
+          config,
+          lsIndexPattern,
+          clusterUuid,
+          pipelineId,
+        });
       } catch (err) {
         return handleError(err, req);
       }

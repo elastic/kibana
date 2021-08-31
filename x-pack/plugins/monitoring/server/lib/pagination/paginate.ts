@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
-
-export function sortPipelines(pipelines, sort) {
-  if (!sort) {
-    return pipelines;
-  }
-
-  return orderBy(pipelines, (pipeline) => pipeline[sort.field], sort.direction);
+export function paginate<T>({ size, index }: { size: number; index: number }, data: T[]): T[] {
+  const start = index * size;
+  return data.slice(start, start + size);
 }

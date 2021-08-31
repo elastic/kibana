@@ -7,16 +7,24 @@
 
 import moment from 'moment';
 import { get } from 'lodash';
-import { LegacyRequest, Bucket } from '../../types';
+import { LegacyRequest, Bucket, Pipeline } from '../../types';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 
-export async function getLogstashPipelineIds(
-  req: LegacyRequest,
-  logstashIndexPattern: string,
-  { clusterUuid, logstashUuid }: { clusterUuid: string; logstashUuid?: string },
-  size: number
-) {
+interface GetLogstashPipelineIdsParams {
+  req: LegacyRequest;
+  lsIndexPattern: string;
+  clusterUuid: string;
+  size: number;
+  logstashUuid?: string;
+}
+export async function getLogstashPipelineIds({
+  req,
+  lsIndexPattern,
+  clusterUuid,
+  logstashUuid,
+  size,
+}: GetLogstashPipelineIdsParams): Promise<Pipeline[]> {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
@@ -26,7 +34,7 @@ export async function getLogstashPipelineIds(
   }
 
   const params = {
-    index: logstashIndexPattern,
+    index: lsIndexPattern,
     size: 0,
     ignore_unavailable: true,
     filter_path: ['aggregations.nest.id.buckets', 'aggregations.nest_mb.id.buckets'],

@@ -8,6 +8,7 @@
 import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { getLogstashForClusters } from './get_logstash_for_clusters';
+import { LegacyRequest } from '../../types';
 
 /**
  * Get the cluster status for Logstash instances.
@@ -19,9 +20,12 @@ import { getLogstashForClusters } from './get_logstash_for_clusters';
  * @param {String} clusterUuid The cluster UUID for the associated Elasticsearch cluster.
  * @returns {Promise} The cluster status object.
  */
-export function getClusterStatus(req, lsIndexPattern, { clusterUuid }) {
+export function getClusterStatus(
+  req: LegacyRequest,
+  lsIndexPattern: string,
+  { clusterUuid }: { clusterUuid: string }
+) {
   checkParam(lsIndexPattern, 'lsIndexPattern in logstash/getClusterStatus');
-
   const clusters = [{ cluster_uuid: clusterUuid }];
   return getLogstashForClusters(req, lsIndexPattern, clusters).then((clusterStatus) =>
     get(clusterStatus, '[0].stats')

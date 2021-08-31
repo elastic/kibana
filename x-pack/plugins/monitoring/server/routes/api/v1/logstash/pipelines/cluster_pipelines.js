@@ -61,17 +61,16 @@ export function logstashClusterPipelinesRoute(server) {
       if (sort) {
         sort.field = sortMetricSetMap[sort.field] || sort.field;
       }
-
       try {
-        const response = await getPaginatedPipelines(
+        const response = await getPaginatedPipelines({
           req,
           lsIndexPattern,
-          { clusterUuid },
-          { throughputMetric, nodesCountMetric },
+          clusterUuid,
+          metrics: { throughputMetric, nodesCountMetric },
           pagination,
           sort,
-          queryText
-        );
+          queryText,
+        });
 
         return {
           ...response,
