@@ -64,5 +64,23 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(responseWithisMissingSecrets.status).to.eql(200);
       expect(responseWithisMissingSecrets.body.isMissingSecrets).to.eql(false);
     });
+
+    it('7.16.0 migrates email connector configurations to have `serverType` property', async () => {
+      const response1 = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7c`
+      );
+
+      expect(response1.status).to.eql(200);
+      expect(response1.body.config).key('serverType');
+      expect(response1.body.config.serverType).to.eql('other');
+
+      const response2 = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/1e0824a0-0a59-11ec-9a7c-fd0c2b83ff7c`
+      );
+
+      expect(response2.status).to.eql(200);
+      expect(response2.body.config).key('serverType');
+      expect(response2.body.config.serverType).to.eql('other');
+    });
   });
 }
