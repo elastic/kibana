@@ -65,7 +65,9 @@ const getPreviousCheckpointDate = () => {
 };
 
 export const DeprecationsCountCheckpoint: FunctionComponent = () => {
-  const { api } = useAppContext();
+  const {
+    services: { api },
+  } = useAppContext();
   const [previousCheck, setPreviousCheck] = useState(getPreviousCheckpointDate());
   const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
     previousCheck

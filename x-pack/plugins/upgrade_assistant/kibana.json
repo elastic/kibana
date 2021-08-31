@@ -8,7 +8,7 @@
     "githubTeam": "kibana-stack-management"
   },
   "configPath": ["xpack", "upgrade_assistant"],
-  "requiredPlugins": ["management", "discover", "data", "licensing", "features", "infra", "share"],
+  "requiredPlugins": ["management", "data", "licensing", "features", "infra", "share"],
   "optionalPlugins": ["usageCollection", "cloud"],
   "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils"]
 }

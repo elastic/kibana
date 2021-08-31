@@ -29,7 +29,9 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const reindexState = useReindexContext();
-  const { api } = useAppContext();
+  const {
+    services: { api },
+  } = useAppContext();
 
   const {
     addContent: addContentToGlobalFlyout,
@@ -94,7 +96,9 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
 };
 
 export const ReindexTableRow: React.FunctionComponent<TableRowProps> = (props) => {
-  const { api } = useAppContext();
+  const {
+    services: { api },
+  } = useAppContext();
 
   return (
     <ReindexStatusProvider indexName={props.deprecation.index!} api={api}>

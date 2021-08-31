@@ -26,7 +26,11 @@ describe('Overview - Fix deprecation issues step', () => {
         .mockReturnValue(mockedResponses.kibanaDeprecations);
 
       testBed = await setupOverviewPage({
-        deprecations: deprecationService,
+        services: {
+          core: {
+            deprecations: deprecationService,
+          },
+        },
       });
     });
 
@@ -172,7 +176,11 @@ describe('Overview - Fix deprecation issues step', () => {
         deprecationService.getAllDeprecations = jest.fn().mockRejectedValue([]);
 
         testBed = await setupOverviewPage({
-          deprecations: deprecationService,
+          services: {
+            core: {
+              deprecations: deprecationService,
+            },
+          },
         });
       });
 
@@ -201,7 +209,11 @@ describe('Overview - Fix deprecation issues step', () => {
             .mockRejectedValue(new Error('Internal Server Error'));
 
           testBed = await setupOverviewPage({
-            deprecations: deprecationService,
+            services: {
+              core: {
+                deprecations: deprecationService,
+              },
+            },
           });
         });
 

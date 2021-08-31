@@ -20,7 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useKibana } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { getBackupStep } from './backup_step';
 import { getFixIssuesStep } from './fix_issues_step';
@@ -29,10 +28,14 @@ import { getUpgradeStep } from './upgrade_step';
 
 export const Overview: FunctionComponent = () => {
   const {
-    services: { cloud },
-  } = useKibana();
-  const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
-  const { nextMajor } = kibanaVersionInfo;
+    kibanaVersionInfo: { nextMajor },
+    services: {
+      breadcrumbs,
+      api,
+      core: { docLinks },
+    },
+    plugins: { cloud },
+  } = useAppContext();
 
   useEffect(() => {
     async function sendTelemetryData() {
