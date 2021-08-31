@@ -631,8 +631,12 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  this.unblocklist = function (node) {
+  this.unblockNode = function (node) {
     self.arrRemove(self.blocklistedNodes, node);
+  };
+
+  this.unblockAll = function () {
+    self.arrRemoveAll(self.blocklistedNodes, self.blocklistedNodes);
   };
 
   this.blocklistSelection = function () {
