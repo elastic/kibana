@@ -12,11 +12,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { monaco } from '@kbn/monaco';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEsDocSearch } from '../../apps/doc/components/doc/use_es_doc_search';
+import { useEsDocSearch } from '../../apps/doc/services/use_es_doc_search';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor/json_code_editor_common';
-import { ElasticRequestState } from '../../apps/doc/components/doc/elastic_request_state';
-import { getServices } from '../../../../public/kibana_services';
+import { getServices } from '../../../kibana_services';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { ElasticRequestState } from '../../apps/doc/types';
 
 interface SourceViewerProps {
   id: string;

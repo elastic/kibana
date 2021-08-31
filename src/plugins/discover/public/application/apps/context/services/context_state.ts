@@ -17,7 +17,7 @@ import {
   ReduxLikeStateContainer,
 } from '../../../../../../kibana_utils/public';
 import { esFilters, FilterManager, Filter, SortDirection } from '../../../../../../data/public';
-import { handleSourceColumnState } from '../../../helpers';
+import { handleSourceColumnState } from '../../../helpers/state_helpers';
 
 export interface AppState {
   /**

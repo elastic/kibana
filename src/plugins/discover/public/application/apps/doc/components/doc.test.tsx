@@ -13,11 +13,11 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
-import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../../common';
 
 const mockSearchApi = jest.fn();
 
-jest.mock('../../../kibana_services', () => {
+jest.mock('../../../../kibana_services', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let registry: any[] = [];
 
