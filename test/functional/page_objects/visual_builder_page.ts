@@ -502,12 +502,21 @@ export class VisualBuilderPageObject extends FtrService {
     return await annotationTooltipDetails.getVisibleText();
   }
 
-  public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
+  public async toggleIndexPatternSelectionModePopover() {
     await this.testSubjects.click('switchIndexPatternSelectionModePopover');
+  }
+
+  public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
+    await this.toggleIndexPatternSelectionModePopover();
     await this.testSubjects.setEuiSwitch(
       'switchIndexPatternSelectionMode',
       useKibanaIndices ? 'check' : 'uncheck'
     );
+  }
+
+  public async checkIndexPatternSelectionModeSwitchIsEnabled() {
+    await this.toggleIndexPatternSelectionModePopover();
+    return await this.testSubjects.isEnabled('switchIndexPatternSelectionMode');
   }
 
   public async setIndexPatternValue(value: string, useKibanaIndices?: boolean) {
