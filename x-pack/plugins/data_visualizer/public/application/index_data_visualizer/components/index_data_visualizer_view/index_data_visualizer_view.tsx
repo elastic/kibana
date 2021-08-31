@@ -107,7 +107,7 @@ export const getDefaultDataVisualizerListState = (
   overrides?: Partial<DataVisualizerIndexBasedAppState>
 ): Required<DataVisualizerIndexBasedAppState> => ({
   pageIndex: 0,
-  pageSize: 10,
+  pageSize: 25,
   sortField: 'fieldName',
   sortDirection: 'asc',
   visibleFieldTypes: [],
