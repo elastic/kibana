@@ -7,10 +7,10 @@
 import { createContext } from 'react';
 
 export interface ExternalConfig {
-  minIntervalSeconds: number; // TODO: check is the correct type
+  minIntervalSeconds: number;
   showLicenseExpiration: boolean;
-  showCgroupMetricsElasticsearch: boolean; // TODO: check is the correct type
-  showCgroupMetricsLogstash: boolean; // TODO: check is the correct type
+  showCgroupMetricsElasticsearch: boolean;
+  showCgroupMetricsLogstash: boolean;
   renderReactApp: boolean;
 }
 
