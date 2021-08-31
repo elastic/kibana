@@ -49,7 +49,9 @@ export function ExpViewActionMenuContent({
                     timeRange,
                     attributes: lensAttributes,
                   },
-                  true
+                  {
+                    openInNewTab: true,
+                  }
                 );
               }
             }}
