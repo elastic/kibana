@@ -43,7 +43,8 @@ export function EditorFrame(props: EditorFrameProps) {
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const visualization = useLensSelector(selectVisualization);
-  const allLoaded = useLensSelector(selectAreDatasourcesLoaded);
+  const areDatasourcesLoaded = useLensSelector(selectAreDatasourcesLoaded);
+  const isVisualizationLoaded = !!visualization.state;
   const framePublicAPI: FramePublicAPI = useLensSelector((state) =>
     selectFramePublicAPI(state, datasourceMap)
   );
@@ -93,7 +94,7 @@ export function EditorFrame(props: EditorFrameProps) {
           />
         }
         configPanel={
-          allLoaded && (
+          areDatasourcesLoaded && (
             <ConfigPanelWrapper
               core={props.core}
               datasourceMap={datasourceMap}
@@ -103,7 +104,8 @@ export function EditorFrame(props: EditorFrameProps) {
           )
         }
         workspacePanel={
-          allLoaded && (
+          areDatasourcesLoaded &&
+          isVisualizationLoaded && (
             <WorkspacePanel
               core={props.core}
               plugins={props.plugins}
@@ -116,7 +118,7 @@ export function EditorFrame(props: EditorFrameProps) {
           )
         }
         suggestionsPanel={
-          allLoaded && (
+          areDatasourcesLoaded && (
             <SuggestionPanelWrapper
               ExpressionRenderer={props.ExpressionRenderer}
               datasourceMap={datasourceMap}

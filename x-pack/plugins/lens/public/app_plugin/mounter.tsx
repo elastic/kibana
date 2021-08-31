@@ -37,6 +37,7 @@ import {
   navigateAway,
   LensRootStore,
   loadInitial,
+  LensAppState,
   LensState,
 } from '../state_management';
 import { getPreloadedState } from '../state_management/lens_slice';
@@ -185,8 +186,9 @@ export async function mountApp(
     embeddableEditorIncomingState,
     initialContext,
   };
+  const emptyState = getPreloadedState(storeDeps) as LensAppState;
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
-    lens: getPreloadedState(storeDeps),
+    lens: emptyState,
   } as DeepPartial<LensState>);
 
   const EditorRenderer = React.memo(
@@ -199,7 +201,8 @@ export async function mountApp(
       );
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
-      lensStore.dispatch(loadInitial({ redirectCallback, initialInput }));
+
+      lensStore.dispatch(loadInitial({ redirectCallback, initialInput, emptyState }));
 
       return (
         <Provider store={lensStore}>
