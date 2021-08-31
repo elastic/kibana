@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
     const log = getService('log');
 
     before(async () => {
-      await browser.setWindowSize(1200, 800);
+      await browser.setWindowSize(1400, 1400);
       await PageObjects.common.navigateToApp('apm');
       await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
     });

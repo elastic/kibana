@@ -32,13 +32,23 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('Rule exception operators for endpoints', () => {
-    beforeEach(async () => {
-      await createSignalsIndex(supertest);
-      await createListsIndex(supertest);
+    before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/rule_exceptions/endpoint_without_host_type'
       );
       await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/agent');
+    });
+
+    after(async () => {
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/rule_exceptions/endpoint_without_host_type'
+      );
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/agent');
+    });
+
+    beforeEach(async () => {
+      await createSignalsIndex(supertest);
+      await createListsIndex(supertest);
     });
 
     afterEach(async () => {
@@ -46,10 +56,6 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllAlerts(supertest);
       await deleteAllExceptions(es);
       await deleteListsIndex(supertest);
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/rule_exceptions/endpoint_without_host_type'
-      );
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/agent');
     });
 
     describe('no exceptions set', () => {

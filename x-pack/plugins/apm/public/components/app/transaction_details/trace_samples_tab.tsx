@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 
@@ -34,11 +34,17 @@ function TraceSamplesTab({
     status: waterfallStatus,
   } = useWaterfallFetcher();
 
+  const [
+    transactionDistributionHasData,
+    setTransactionDistributionHasData,
+  ] = useState(false);
+
   return (
     <>
       <TransactionDistribution
         onChartSelection={selectSampleFromChartSelection}
         onClearSelection={clearChartSelection}
+        onHasData={setTransactionDistributionHasData}
         selection={
           sampleRangeFrom !== undefined && sampleRangeTo !== undefined
             ? [sampleRangeFrom, sampleRangeTo]
@@ -49,15 +55,19 @@ function TraceSamplesTab({
         }
       />
 
-      <EuiSpacer size="s" />
+      {transactionDistributionHasData && (
+        <>
+          <EuiSpacer size="s" />
 
-      <WaterfallWithSummary
-        urlParams={urlParams}
-        waterfall={waterfall}
-        isLoading={waterfallStatus === FETCH_STATUS.LOADING}
-        exceedsMax={exceedsMax}
-        traceSamples={traceSamples}
-      />
+          <WaterfallWithSummary
+            urlParams={urlParams}
+            waterfall={waterfall}
+            isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+            exceedsMax={exceedsMax}
+            traceSamples={traceSamples}
+          />
+        </>
+      )}
     </>
   );
 }

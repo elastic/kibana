@@ -6,15 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { first } from 'rxjs/operators';
 import { getStats, TimeseriesUsage } from './get_usage_collector';
-import { ConfigObservable } from '../types';
+import type { UsageCollectionSetup } from '../../../usage_collection/server';
 
-export function registerTimeseriesUsageCollector(
-  collectorSet: UsageCollectionSetup,
-  config: ConfigObservable
-) {
+export function registerTimeseriesUsageCollector(collectorSet: UsageCollectionSetup) {
   const collector = collectorSet.makeUsageCollector<TimeseriesUsage | undefined>({
     type: 'vis_type_timeseries',
     isReady: () => true,
@@ -24,11 +19,7 @@ export function registerTimeseriesUsageCollector(
         _meta: { description: 'Number of TSVB visualizations using "last value" as a time range' },
       },
     },
-    fetch: async ({ esClient, soClient }) => {
-      const { index } = (await config.pipe(first()).toPromise()).kibana;
-
-      return await getStats(esClient, soClient, index);
-    },
+    fetch: async ({ soClient }) => await getStats(soClient),
   });
 
   collectorSet.registerCollector(collector);

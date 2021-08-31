@@ -17,14 +17,17 @@ import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-i
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { ElasticsearchClient } from '@kbn/securitysolution-es-utils';
 
 import {
   TimestampOverrideOrUndefined,
   Privilege,
   RuleExecutionStatus,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import {
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
