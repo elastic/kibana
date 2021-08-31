@@ -8,7 +8,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -16,7 +16,6 @@ import type { DomainDeprecationDetails } from 'kibana/public';
 import { SectionLoading, GlobalFlyout } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { NoDeprecationsPrompt, DeprecationCount } from '../shared';
-import { KibanaDeprecationErrors } from './kibana_deprecation_errors';
 import { KibanaDeprecationsTable } from './kibana_deprecations_table';
 import {
   DeprecationDetailsFlyout,
@@ -68,6 +67,15 @@ const i18nTexts = {
         pluginIds: pluginIds.join(', '),
       },
     }),
+  requestErrorTitle: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.requestErrorTitle', {
+    defaultMessage: 'Could not retrieve Kibana deprecations',
+  }),
+  requestErrorDescription: i18n.translate(
+    'xpack.upgradeAssistant.kibanaDeprecationErrors.requestErrorDescription',
+    {
+      defaultMessage: 'Check the Kibana server logs for errors.',
+    }
+  ),
 };
 
 export interface DeprecationResolutionState {
@@ -293,7 +301,20 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
   }
 
   if (error) {
-    return <KibanaDeprecationErrors errorType="requestError" />;
+    return (
+      <EuiPageContent
+        verticalPosition="center"
+        horizontalPosition="center"
+        color="danger"
+        data-test-subj="kibanaRequestError"
+      >
+        <EuiEmptyPrompt
+          iconType="alert"
+          title={<h2>{i18nTexts.requestErrorTitle}</h2>}
+          body={<p>{i18nTexts.requestErrorDescription}</p>}
+        />
+      </EuiPageContent>
+    );
   }
 
   return null;

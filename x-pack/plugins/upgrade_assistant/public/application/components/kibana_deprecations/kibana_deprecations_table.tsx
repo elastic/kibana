@@ -141,7 +141,10 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
         deprecation: KibanaDeprecationDetails
       ) => {
         return (
-          <EuiLink onClick={() => toggleFlyout(deprecation)}>
+          <EuiLink
+            onClick={() => toggleFlyout(deprecation)}
+            data-test-subj="deprecationDetailsLink"
+          >
             {/* This will be replaced with a custom title once https://github.com/elastic/kibana/pull/109840 is merged  */}
             {i18nTexts.getDeprecationIssue(domainId)}
           </EuiLink>
@@ -196,9 +199,10 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
   const searchConfig: Search = {
     filters: [
       {
-        type: 'is',
-        field: 'level',
+        type: 'field_value_toggle',
         name: i18nTexts.criticalFilterLabel,
+        field: 'level',
+        value: 'critical',
       },
       {
         type: 'field_value_selection',

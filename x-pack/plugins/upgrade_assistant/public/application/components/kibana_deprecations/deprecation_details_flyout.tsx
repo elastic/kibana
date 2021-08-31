@@ -178,7 +178,7 @@ export const DeprecationDetailsFlyout = ({
 
         {/* Hide resolution steps if already resolved */}
         {deprecationResolutionState?.resolveDeprecationStatus !== 'ok' && (
-          <>
+          <div data-test-subj="resolveSteps">
             {correctiveActions.api && (
               <>
                 <EuiCallOut
@@ -201,7 +201,7 @@ export const DeprecationDetailsFlyout = ({
             <EuiSpacer />
 
             <EuiText>
-              <ol>
+              <ol data-test-subj="manualStepsList">
                 {correctiveActions.manualSteps.map((step, stepIndex) => (
                   <li key={`step-${stepIndex}`} className="upgResolveStep">
                     {step}
@@ -209,7 +209,7 @@ export const DeprecationDetailsFlyout = ({
                 ))}
               </ol>
             </EuiText>
-          </>
+          </div>
         )}
       </EuiFlyoutBody>
 
@@ -226,6 +226,7 @@ export const DeprecationDetailsFlyout = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
+                data-test-subj="resolveButton"
                 onClick={() => resolveDeprecation(deprecation)}
                 isLoading={Boolean(
                   deprecationResolutionState?.resolveDeprecationStatus === 'in_progress'

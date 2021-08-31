@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
 import { KibanaDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
@@ -22,12 +22,12 @@ export type KibanaTestBed = TestBed & {
 };
 
 const createActions = (testBed: TestBed) => {
-  const { component, find } = testBed;
+  const { component, find, table } = testBed;
 
   /**
    * User Actions
    */
-  const table = {
+  const tableActions = {
     clickRefreshButton: async () => {
       await act(async () => {
         find('refreshButton').simulate('click');
@@ -35,10 +35,65 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
+
+    clickDeprecationAt: async (index: number) => {
+      const { rows } = table.getMetaData('kibanaDeprecationsTable');
+
+      const deprecationDetailsLink = findTestSubject(
+        rows[index].reactWrapper,
+        'deprecationDetailsLink'
+      );
+
+      await act(async () => {
+        deprecationDetailsLink.simulate('click');
+      });
+      component.update();
+    },
+  };
+
+  const searchBarActions = {
+    clickTypeFilterDropdownAt: async (index: number) => {
+      await act(async () => {
+        // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
+        find('kibanaDeprecations')
+          .find('.euiSearchBar__filtersHolder')
+          .find('.euiPopover')
+          .find('.euiFilterButton')
+          .at(index)
+          .simulate('click');
+      });
+
+      component.update();
+    },
+
+    clickCriticalFilterButton: async () => {
+      await act(async () => {
+        // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
+        find('kibanaDeprecations')
+          .find('.euiSearchBar__filtersHolder')
+          .find('.euiFilterButton')
+          .at(0)
+          .simulate('click');
+      });
+
+      component.update();
+    },
+  };
+
+  const flyoutActions = {
+    clickResolveButton: async () => {
+      await act(async () => {
+        find('resolveButton').simulate('click');
+      });
+
+      component.update();
+    },
   };
 
   return {
-    table,
+    table: tableActions,
+    flyout: flyoutActions,
+    searchBar: searchBarActions,
   };
 };
 

@@ -10,6 +10,7 @@ import { deprecationsServiceMock } from 'src/core/public/mocks';
 
 import { setupEnvironment } from '../helpers';
 import { KibanaTestBed, setupKibanaPage } from './kibana_deprecations.helpers';
+import { kibanaDeprecationsMockResponse } from './mocked_responses';
 
 describe('Error handling', () => {
   let testBed: KibanaTestBed;
@@ -18,6 +19,35 @@ describe('Error handling', () => {
 
   afterAll(() => {
     server.restore();
+  });
+
+  test('handles plugin error', async () => {
+    await act(async () => {
+      deprecationService.getAllDeprecations = jest.fn().mockReturnValue([
+        ...kibanaDeprecationsMockResponse,
+        {
+          domainId: 'failed_plugin_id',
+          message: `Failed to get deprecations info for plugin "failed_plugin_id".`,
+          level: 'fetch_error',
+          correctiveActions: {
+            manualSteps: ['Check Kibana server logs for error message.'],
+          },
+        },
+      ]);
+
+      testBed = await setupKibanaPage({
+        deprecations: deprecationService,
+      });
+    });
+
+    const { component, exists, find } = testBed;
+
+    component.update();
+
+    expect(exists('kibanaDeprecationErrors')).toBe(true);
+    expect(find('kibanaDeprecationErrors').text()).toContain(
+      'Deprecation warnings may be incomplete'
+    );
   });
 
   test('handles request error', async () => {

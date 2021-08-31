@@ -8,32 +8,19 @@
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
 
-import type { DomainDeprecationDetails } from 'kibana/public';
 import { setupEnvironment } from '../helpers';
 import { KibanaTestBed, setupKibanaPage } from './kibana_deprecations.helpers';
+import { kibanaDeprecationsMockResponse } from './mocked_responses';
 
-const kibanaDeprecationsMockResponse: DomainDeprecationDetails[] = [
-  {
-    correctiveActions: {
-      manualSteps: ['Step 1', 'Step 2', 'Step 3'],
-      api: {
-        method: 'POST',
-        path: '/test',
-      },
-    },
-    domainId: 'test_domain',
-    level: 'critical',
-    message: 'Test deprecation message 1',
-  },
-  {
-    correctiveActions: {
-      manualSteps: ['Step 1', 'Step 2', 'Step 3'],
-    },
-    domainId: 'test_domain',
-    level: 'warning',
-    message: 'Test deprecation message 2',
-  },
-];
+const criticalDeprecations = kibanaDeprecationsMockResponse.filter(
+  (deprecation) => deprecation.level === 'critical'
+);
+const warningDeprecations = kibanaDeprecationsMockResponse.filter(
+  (deprecation) => deprecation.level === 'warning'
+);
+const configDeprecations = kibanaDeprecationsMockResponse.filter(
+  (deprecation) => deprecation.deprecationType === 'config'
+);
 
 describe('Kibana deprecations table', () => {
   let testBed: KibanaTestBed;
@@ -78,16 +65,51 @@ describe('Kibana deprecations table', () => {
 
   it('shows critical and warning deprecations count', () => {
     const { find } = testBed;
-    const criticalDeprecations = kibanaDeprecationsMockResponse.filter(
-      (deprecation) => deprecation.level === 'critical'
-    );
-    const warningDeprecations = kibanaDeprecationsMockResponse.filter(
-      (deprecation) => deprecation.level === 'warning'
-    );
 
     expect(find('criticalDeprecationsCount').text()).toContain(criticalDeprecations.length);
-
     expect(find('warningDeprecationsCount').text()).toContain(warningDeprecations.length);
+  });
+
+  describe('Search bar', () => {
+    it('filters by "critical" status', async () => {
+      const { actions, table } = testBed;
+
+      await actions.searchBar.clickCriticalFilterButton();
+
+      const { rows: criticalRows } = table.getMetaData('kibanaDeprecationsTable');
+
+      expect(criticalRows.length).toEqual(criticalDeprecations.length);
+
+      await actions.searchBar.clickCriticalFilterButton();
+
+      const { rows: allRows } = table.getMetaData('kibanaDeprecationsTable');
+
+      expect(allRows.length).toEqual(kibanaDeprecationsMockResponse.length);
+    });
+
+    it('filters by type', async () => {
+      const { component, table, actions } = testBed;
+
+      await actions.searchBar.clickTypeFilterDropdownAt(0);
+
+      // We need to read the document "body" as the filter dropdown options are added there and not inside
+      // the component DOM tree.
+      const configTypeFilterButton: HTMLButtonElement | null = document.body.querySelector(
+        '.euiFilterSelect__items .euiFilterSelectItem'
+      );
+
+      expect(configTypeFilterButton).not.toBeNull();
+
+      await act(async () => {
+        configTypeFilterButton!.click();
+      });
+
+      component.update();
+
+      const { rows: configRows } = table.getMetaData('kibanaDeprecationsTable');
+
+      expect(configRows.length).toEqual(configDeprecations.length);
+    });
   });
 
   describe('No deprecations', () => {
