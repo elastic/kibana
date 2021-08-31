@@ -23,6 +23,7 @@ import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { createStore, State } from '../../../common/store';
 import { mockHistory, Router } from '../../../common/mock/router';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
+import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -34,6 +35,7 @@ jest.mock('../../../common/components/query_bar', () => ({
 }));
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../components/user_info');
+jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/containers/use_global_time', () => ({
@@ -80,7 +82,7 @@ jest.mock('../../../common/lib/kibana', () => {
         docLinks: {
           links: {
             siem: {
-              gettingStarted: 'link',
+              privileges: 'link',
             },
           },
         },
@@ -109,6 +111,9 @@ describe('DetectionEnginePageComponent', () => {
         hasIndexRead: true,
       },
     ]);
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({
+      hasKibanaREAD: true,
+    });
     (useSourcererScope as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
