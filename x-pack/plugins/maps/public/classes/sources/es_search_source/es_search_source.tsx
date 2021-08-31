@@ -35,7 +35,7 @@ import {
   FIELD_ORIGIN,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
-  MVT_SOURCE_LAYER_NAME,
+  MVT_HITS_SOURCE_LAYER_NAME,
   MVT_TOKEN_PARAM_NAME,
   SCALING_TYPES,
   SOURCE_TYPES,
@@ -746,7 +746,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getLayerName(): string {
-    return MVT_SOURCE_LAYER_NAME;
+    return MVT_HITS_SOURCE_LAYER_NAME;
   }
 
   async addFeature(

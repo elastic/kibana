@@ -23,7 +23,8 @@ import {
   KBN_METADATA_FEATURE,
   KBN_VECTOR_SHAPE_TYPE_COUNTS,
   MAX_ZOOM,
-  MVT_SOURCE_LAYER_NAME,
+  MVT_HITS_SOURCE_LAYER_NAME,
+  MVT_AGGS_SOURCE_LAYER_NAME,
   RENDER_AS,
   SUPER_FINE_ZOOM_DELTA,
   VECTOR_SHAPE_TYPE,
@@ -273,7 +274,7 @@ export async function getGridTile({
       type: 'FeatureCollection',
     };
 
-    return createMvtTile(featureCollection, z, x, y);
+    return createMvtTile(featureCollection, MVT_AGGS_SOURCE_LAYER_NAME, z, x, y);
   } catch (e) {
     if (!isAbortError(e)) {
       // These are often circuit breaking exceptions
@@ -479,7 +480,7 @@ export async function getTile({
       type: 'FeatureCollection',
     };
 
-    return createMvtTile(featureCollection, z, x, y);
+    return createMvtTile(featureCollection,MVT_HITS_SOURCE_LAYER_NAME, z, x, y);
   } catch (e) {
     if (!isAbortError(e)) {
       logger.warn(`Cannot generate tile for ${z}/${x}/${y}: ${e.message}`);
@@ -523,6 +524,7 @@ function esBboxToGeoJsonPolygon(esBounds: ESBounds, tileBounds: ESBounds): Polyg
 
 function createMvtTile(
   featureCollection: FeatureCollection,
+  layerName: string,
   z: number,
   x: number,
   y: number
@@ -543,7 +545,7 @@ function createMvtTile(
   const tile = tileIndex.getTile(z, x, y);
 
   if (tile) {
-    const pbf = vtpbf.fromGeojsonVt({ [MVT_SOURCE_LAYER_NAME]: tile }, { version: 2 });
+    const pbf = vtpbf.fromGeojsonVt({ [layerName]: tile }, { version: 2 });
     return Buffer.from(pbf);
   } else {
     return null;

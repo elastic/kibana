@@ -8,7 +8,7 @@
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import expect from '@kbn/expect';
-import { MVT_SOURCE_LAYER_NAME } from '../../../../plugins/maps/common/constants';
+import { MVT_HITS_SOURCE_LAYER_NAME } from '../../../../plugins/maps/common/constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -28,7 +28,7 @@ export default function ({ getService }) {
         .expect(200);
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
-      const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
+      const layer = jsonTile.layers[MVT_HITS_SOURCE_LAYER_NAME];
       expect(layer.length).to.be(3); // 2 docs + the metadata feature
 
       // 1st doc
@@ -84,7 +84,7 @@ export default function ({ getService }) {
         .expect(200);
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
-      const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
+      const layer = jsonTile.layers[MVT_HITS_SOURCE_LAYER_NAME];
       expect(layer.length).to.be(1);
 
       const metadataFeature = layer.feature(0);
