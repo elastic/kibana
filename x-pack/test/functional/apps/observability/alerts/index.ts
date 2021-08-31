@@ -44,14 +44,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('Renders the correct number of cells', async () => {
         // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
-        const rows = await testSubjects.findAll('dataGridRowCell');
-        expect(rows.length).to.be(35);
-      });
-
-      it('Sets the correct default filter', async () => {
-        const queryInput = await testSubjects.find('queryInput');
-        const filter = await queryInput.getAttribute('value');
-        expect(filter).to.be(`kibana.alert.status: "open"`);
+        const cells = await testSubjects.findAll('dataGridRowCell');
+        expect(cells.length).to.be(140);
       });
     });
   });
