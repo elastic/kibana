@@ -192,6 +192,7 @@ test('executes the task by calling the executor with proper parameters, using st
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 
@@ -454,6 +455,7 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 });
@@ -554,9 +556,15 @@ test(`doesn't use API key when not provided`, async () => {
 });
 
 test(`throws an error when license doesn't support the action type`, async () => {
-  const taskRunner = taskRunnerFactory.create({
-    taskInstance: mockedTaskInstance,
-  });
+  const taskRunner = taskRunnerFactory.create(
+    {
+      taskInstance: {
+        ...mockedTaskInstance,
+        attempts: 1,
+      },
+    },
+    2
+  );
 
   mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -584,6 +592,6 @@ test(`throws an error when license doesn't support the action type`, async () =>
   } catch (e) {
     expect(e instanceof ExecutorError).toEqual(true);
     expect(e.data).toEqual({});
-    expect(e.retry).toEqual(false);
+    expect(e.retry).toEqual(true);
   }
 });

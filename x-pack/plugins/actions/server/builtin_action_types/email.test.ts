@@ -403,7 +403,6 @@ describe('execute()', () => {
       Object {
         "actionId": "some-id",
         "message": "error sending email",
-        "retry": false,
         "serviceMessage": "wops",
         "status": "error",
       }

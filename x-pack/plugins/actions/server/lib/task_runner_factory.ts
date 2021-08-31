@@ -136,8 +136,12 @@ export class TaskRunnerFactory {
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
-          // Intentionally swallow the alert to avoid persisting failed tasks
           logger.error(`Action '${actionId}' failed: ${e.message}`);
+          if (isRetryableBasedOnAttempts) {
+            // In order for retry to work, we need to indicate to task manager this task
+            // failed
+            throw new ExecutorError(e.message, {}, true);
+          }
         }
 
         if (
