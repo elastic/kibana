@@ -53,7 +53,7 @@ export const TGridEmpty: React.FC<{ height?: FullWidthFlexGroupHeight }> = ({
             <EuiFlexItem grow={false}>
               <EuiImage
                 size="200"
-                alt="Decorative image for the no results page"
+                alt=""
                 url={http.basePath.prepend(
                   '/plugins/timelines/assets/illustration_product_no_results_magnifying_glass.svg'
                 )}
