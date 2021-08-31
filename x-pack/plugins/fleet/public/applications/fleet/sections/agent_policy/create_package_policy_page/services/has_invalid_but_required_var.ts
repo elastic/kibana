@@ -22,7 +22,11 @@ export const hasInvalidButRequiredVar = (
             registryVar.required &&
             (!packagePolicyVars ||
               !packagePolicyVars[registryVar.name] ||
-              validatePackagePolicyConfig(packagePolicyVars[registryVar.name], registryVar)?.length)
+              validatePackagePolicyConfig(
+                packagePolicyVars[registryVar.name],
+                registryVar,
+                registryVar.name
+              )?.length)
         )
     )
   );
