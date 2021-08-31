@@ -101,4 +101,68 @@ describe('public search functions', () => {
     });
     expect(deepLinks.some((l) => l.id === SecurityPageName.ueba)).toBeTruthy();
   });
+
+  describe('Detections Alerts deep links', () => {
+    it('should return alerts link for basic license with only read_alerts capabilities', () => {
+      const basicLicense = 'basic';
+      const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
+        siem: { read_alerts: true, crud_alerts: false },
+      } as unknown) as Capabilities);
+
+      const detectionsDeepLinks =
+        basicLinks.find((l) => l.id === SecurityPageName.detections)?.deepLinks ?? [];
+
+      expect(
+        detectionsDeepLinks.length &&
+          detectionsDeepLinks.some((l) => l.id === SecurityPageName.alerts)
+      ).toBeTruthy();
+    });
+
+    it('should return alerts link with for basic license with crud_alerts capabilities', () => {
+      const basicLicense = 'basic';
+      const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
+        siem: { read_alerts: true, crud_alerts: true },
+      } as unknown) as Capabilities);
+
+      const detectionsDeepLinks =
+        basicLinks.find((l) => l.id === SecurityPageName.detections)?.deepLinks ?? [];
+
+      expect(
+        detectionsDeepLinks.length &&
+          detectionsDeepLinks.some((l) => l.id === SecurityPageName.alerts)
+      ).toBeTruthy();
+    });
+
+    it('should NOT return alerts link for basic license with NO read_alerts capabilities', () => {
+      const basicLicense = 'basic';
+      const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, ({
+        siem: { read_alerts: false, crud_alerts: false },
+      } as unknown) as Capabilities);
+
+      const detectionsDeepLinks =
+        basicLinks.find((l) => l.id === SecurityPageName.detections)?.deepLinks ?? [];
+
+      expect(
+        detectionsDeepLinks.length &&
+          detectionsDeepLinks.some((l) => l.id === SecurityPageName.alerts)
+      ).toBeFalsy();
+    });
+
+    it('should return alerts link for basic license with undefined capabilities', () => {
+      const basicLicense = 'basic';
+      const basicLinks = getDeepLinks(
+        mockGlobalState.app.enableExperimental,
+        basicLicense,
+        undefined
+      );
+
+      const detectionsDeepLinks =
+        basicLinks.find((l) => l.id === SecurityPageName.detections)?.deepLinks ?? [];
+
+      expect(
+        detectionsDeepLinks.length &&
+          detectionsDeepLinks.some((l) => l.id === SecurityPageName.alerts)
+      ).toBeTruthy();
+    });
+  });
 });

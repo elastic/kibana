@@ -8,6 +8,8 @@
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 export function useTransactionBreakdown({
   kuery,
@@ -17,8 +19,15 @@ export function useTransactionBreakdown({
   environment: string;
 }) {
   const {
-    urlParams: { start, end, transactionName },
+    urlParams: { transactionName },
   } = useUrlParams();
+
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/:serviceName');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { transactionType, serviceName } = useApmServiceContext();
 
   const { data = { timeseries: undefined }, error, status } = useFetcher(
