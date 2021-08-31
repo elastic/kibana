@@ -38,12 +38,9 @@ export const FilterGroup = () => {
 
   const indexPattern = useIndexPattern();
 
-  const [isOpen, setIsOpen] = useState('');
-
   const onFilterFieldChange = useCallback(
     (fieldName: string, values?: string[], notValues?: string[]) => {
       setUpdatedFieldValues({ fieldName, values, notValues });
-      setIsOpen('');
     },
     []
   );
@@ -64,10 +61,7 @@ export const FilterGroup = () => {
               onChange={(values, notValues) => onFilterFieldChange(field, values, notValues)}
               asCombobox={false}
               asFilterButton={true}
-              forceOpen={isOpen === field}
-              setForceOpen={() => {
-                setIsOpen('');
-              }}
+              forceOpen={false}
               filters={[]}
               cardinalityField="monitor.id"
               time={{ from: dateRangeStart, to: dateRangeEnd }}
