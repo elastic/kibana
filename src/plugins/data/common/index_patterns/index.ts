@@ -9,7 +9,17 @@
 export * from './constants';
 export * from './fields';
 export * from './types';
-export { IndexPatternsService, IndexPatternsContract } from './index_patterns';
-export type { IndexPattern, IndexPatternListItem } from './index_patterns';
+export {
+  IndexPatternsService,
+  IndexPatternsContract,
+  DataViewsService,
+  DataViewsContract,
+} from './index_patterns';
+export type {
+  IndexPattern,
+  IndexPatternListItem,
+  DataView,
+  DataViewListItem,
+} from './index_patterns';
 export * from './errors';
 export * from './expressions';
