@@ -47,7 +47,7 @@ const createStartContractMock = () => {
               keystoreConfigured: false,
               truststoreConfigured: false,
             },
-            principal: 'other',
+            principal: 'unknown',
           },
           http: {
             basePathConfigured: false,
