@@ -23,7 +23,7 @@ import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/tab
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useTransactionLatencyCorrelationsFetcher } from '../../../hooks/use_transaction_latency_correlations_fetcher';
+import { useTransactionDistributionFetcher } from '../../../hooks/use_transaction_distribution_fetcher';
 import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
 import { CorrelationsTable } from './correlations_table';
 import { push } from '../../shared/Links/url_helpers';
@@ -75,14 +75,14 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     ccsWarning,
     log,
     error,
-    histograms,
+    values,
     percentileThresholdValue,
     isRunning,
     progress,
     startFetch,
     cancelFetch,
     overallHistogram,
-  } = useTransactionLatencyCorrelationsFetcher();
+  } = useTransactionDistributionFetcher();
 
   const startFetchHandler = useCallback(() => {
     startFetch({
@@ -94,6 +94,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       start,
       end,
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+      analyzeCorrelations: true,
     });
   }, [
     startFetch,
@@ -131,17 +132,22 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   ] = useState<MlCorrelationsTerms | null>(null);
 
   const selectedHistogram = useMemo(() => {
-    let selected = histograms.length > 0 ? histograms[0] : undefined;
+    let selected =
+      Array.isArray(values) && values.length > 0 ? values[0] : undefined;
 
-    if (histograms.length > 0 && selectedSignificantTerm !== null) {
-      selected = histograms.find(
+    if (
+      Array.isArray(values) &&
+      values.length > 0 &&
+      selectedSignificantTerm !== null
+    ) {
+      selected = values.find(
         (h) =>
           h.field === selectedSignificantTerm.fieldName &&
           h.value === selectedSignificantTerm.fieldValue
       );
     }
     return selected;
-  }, [histograms, selectedSignificantTerm]);
+  }, [values, selectedSignificantTerm]);
 
   const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
@@ -269,11 +275,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   }, []);
 
   const { histogramTerms, sorting } = useMemo(() => {
-    if (!Array.isArray(histograms)) {
+    if (!Array.isArray(values)) {
       return { histogramTerms: [], sorting: undefined };
     }
     const orderedTerms = orderBy(
-      histograms.map((d) => {
+      values.map((d) => {
         return {
           fieldName: d.field,
           fieldValue: d.value,
@@ -295,7 +301,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         },
       } as EuiTableSortingType<MlCorrelationsTerms>,
     };
-  }, [histograms, sortField, sortDirection]);
+  }, [values, sortField, sortDirection]);
 
   return (
     <div data-test-subj="apmLatencyCorrelationsTabContent">

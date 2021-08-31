@@ -110,7 +110,7 @@ export function TransactionDistribution({
     percentileThresholdValue,
     startFetch,
     cancelFetch,
-    transactionDistribution,
+    overallHistogram,
   } = useTransactionDistributionFetcher();
 
   const startFetchHandler = useCallback(() => {
@@ -123,6 +123,7 @@ export function TransactionDistribution({
       start,
       end,
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+      analyzeCorrelations: false,
     });
   }, [
     startFetch,
@@ -232,7 +233,7 @@ export function TransactionDistribution({
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={percentileThresholdValue ?? 0}
-        overallHistogram={transactionDistribution}
+        overallHistogram={overallHistogram}
         onChartSelection={onTrackedChartSelection}
         onHasData={onTransactionDistributionHasData}
         selection={selection}

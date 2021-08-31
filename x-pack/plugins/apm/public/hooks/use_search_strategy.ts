@@ -14,61 +14,40 @@ import {
   isErrorResponse,
 } from '../../../../../src/plugins/data/public';
 import type { SearchServiceParams } from '../../common/search_strategies/types';
+import type { RawResponseBase } from '../../common/search_strategies/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import type { ApmPluginStartDeps } from '../plugin';
-import type { FailedTransactionsCorrelationValue } from '../../common/search_strategies/failed_transactions_correlations/types';
-import { APM_SEARCH_STRATEGIES } from '../../common/search_strategies/constants';
+import { ApmSearchStrategies } from '../../common/search_strategies/constants';
+import { ApmPluginStartDeps } from '../plugin';
 
-interface RawResponse {
-  took: number;
-  values: FailedTransactionsCorrelationValue[];
-  log: string[];
-  ccsWarning: boolean;
-}
-
-interface FailedTransactionsCorrelationsFetcherState {
+interface SearchStrategyFetcherState {
   error?: Error;
   isComplete: boolean;
   isRunning: boolean;
   loaded: number;
-  ccsWarning: RawResponse['ccsWarning'];
-  values: RawResponse['values'];
-  log: RawResponse['log'];
   total: number;
 }
 
-export const useFailedTransactionsCorrelationsFetcher = () => {
+export function useSearchStrategy<RawResponse extends RawResponseBase>(
+  searchStrategyName: ApmSearchStrategies
+) {
   const {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
 
-  const [
-    fetchState,
-    setFetchState,
-  ] = useState<FailedTransactionsCorrelationsFetcherState>({
+  const [rawResponse, setRawResponse] = useState<RawResponse>({
+    ccsWarning: false,
+    took: 0,
+  } as RawResponse);
+
+  const [fetchState, setFetchState] = useState<SearchStrategyFetcherState>({
     isComplete: false,
     isRunning: false,
     loaded: 0,
-    ccsWarning: false,
-    values: [],
-    log: [],
     total: 100,
   });
 
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
-
-  function setResponse(response: IKibanaSearchResponse<RawResponse>) {
-    setFetchState((prevState) => ({
-      ...prevState,
-      isRunning: response.isRunning || false,
-      ccsWarning: response.rawResponse?.ccsWarning ?? false,
-      values: response.rawResponse?.values ?? [],
-      log: response.rawResponse?.log ?? [],
-      loaded: response.loaded!,
-      total: response.total!,
-    }));
-  }
 
   const startFetch = useCallback(
     (params: SearchServiceParams) => {
@@ -86,12 +65,19 @@ export const useFailedTransactionsCorrelationsFetcher = () => {
       // Submit the search request using the `data.search` service.
       searchSubscription$.current = data.search
         .search<IKibanaSearchRequest, IKibanaSearchResponse<RawResponse>>(req, {
-          strategy: APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS,
+          strategy: searchStrategyName,
           abortSignal: abortCtrl.current.signal,
         })
         .subscribe({
           next: (res: IKibanaSearchResponse<RawResponse>) => {
-            setResponse(res);
+            setRawResponse(res.rawResponse);
+            setFetchState((prevState) => ({
+              ...prevState,
+              isRunning: res.isRunning || false,
+              loaded: res.loaded!,
+              total: res.total!,
+            }));
+
             if (isCompleteResponse(res)) {
               searchSubscription$.current?.unsubscribe();
               setFetchState((prevState) => ({
@@ -117,7 +103,7 @@ export const useFailedTransactionsCorrelationsFetcher = () => {
           },
         });
     },
-    [data.search, setFetchState]
+    [data.search, searchStrategyName, setFetchState, setRawResponse]
   );
 
   const cancelFetch = useCallback(() => {
@@ -131,9 +117,10 @@ export const useFailedTransactionsCorrelationsFetcher = () => {
   }, [setFetchState]);
 
   return {
-    ...fetchState,
+    fetchState,
+    rawResponse,
     progress: fetchState.loaded / fetchState.total,
     startFetch,
     cancelFetch,
   };
-};
+}

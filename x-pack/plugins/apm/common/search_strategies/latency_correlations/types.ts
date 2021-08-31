@@ -43,5 +43,5 @@ export interface LatencyCorrelationsAsyncSearchServiceRawResponse
   log: string[];
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number;
-  values: SearchServiceValue[];
+  values?: SearchServiceValue[];
 }
