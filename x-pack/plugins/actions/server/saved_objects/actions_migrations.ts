@@ -62,17 +62,11 @@ export function getActionsMigrations(
     pipeMigrations(addIsMissingSecretsField)
   );
 
-  const migrationActionsFifteen = createEsoMigration(
+  const migrationActionsSixteen = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      doc.attributes.actionTypeId === '.servicenow',
-    pipeMigrations(markOldServiceNowITSMConnectorAsLegacy)
-  );
-
-  const migrationEmailActionsSixteen = createEsoMigration(
-    encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => doc.attributes.actionTypeId === '.email',
-    pipeMigrations(setServiceConfigIfNotSet)
+      doc.attributes.actionTypeId === '.servicenow' || doc.attributes.actionTypeId === '.email',
+    pipeMigrations(markOldServiceNowITSMConnectorAsLegacy, setServiceConfigIfNotSet)
   );
 
   const migrationActions800 = createEsoMigration(
@@ -86,8 +80,7 @@ export function getActionsMigrations(
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
     '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
-    '7.15.0': executeMigrationWithErrorHandling(migrationActionsFifteen, '7.15.0'),
-    '7.16.0': executeMigrationWithErrorHandling(migrationEmailActionsSixteen, '7.16.0'),
+    '7.16.0': executeMigrationWithErrorHandling(migrationActionsSixteen, '7.16.0'),
     '8.0.0': executeMigrationWithErrorHandling(migrationActions800, '8.0.0'),
   };
 }
@@ -205,6 +198,10 @@ const addIsMissingSecretsField = (
 const markOldServiceNowITSMConnectorAsLegacy = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> => {
+  if (doc.attributes.actionTypeId !== '.servicenow') {
+    return doc;
+  }
+
   return {
     ...doc,
     attributes: {
