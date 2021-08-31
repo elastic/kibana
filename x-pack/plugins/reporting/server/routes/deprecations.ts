@@ -94,7 +94,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   );
 
   router.put(
-    { path: `${API_MIGRATE_ILM_POLICY_URL}/foo`, validate: false },
+    { path: API_MIGRATE_ILM_POLICY_URL, validate: false },
     authzWrapper(async ({ core: { elasticsearch } }, req, res) => {
       const store = await reporting.getStore();
       const {
