@@ -144,7 +144,9 @@ export const DeprecationDetailsFlyout = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           {/* This will be replaced with a custom title once https://github.com/elastic/kibana/pull/109840 is merged  */}
-          <h2>{i18nTexts.getDeprecationTitle(domainId)}</h2>
+          <h2 id="kibanaDeprecationDetailsFlyoutTitle">
+            {i18nTexts.getDeprecationTitle(domainId)}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -203,7 +205,7 @@ export const DeprecationDetailsFlyout = ({
             <EuiText>
               <ol data-test-subj="manualStepsList">
                 {correctiveActions.manualSteps.map((step, stepIndex) => (
-                  <li key={`step-${stepIndex}`} className="upgResolveStep">
+                  <li key={`step-${stepIndex}`} className="upgResolveStep eui-textBreakWord">
                     {step}
                   </li>
                 ))}

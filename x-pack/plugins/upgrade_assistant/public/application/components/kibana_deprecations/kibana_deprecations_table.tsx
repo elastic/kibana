@@ -248,8 +248,8 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       rowProps={() => ({
         'data-test-subj': 'row',
       })}
-      cellProps={() => ({
-        'data-test-subj': 'cell',
+      cellProps={(deprecation, field) => ({
+        'data-test-subj': `${field.name.toLowerCase()}Cell`,
       })}
       data-test-subj="kibanaDeprecationsTable"
       tableLayout="auto"
