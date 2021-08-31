@@ -28,10 +28,10 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     const legacyAuditLoggerEnabled = !settings?.xpack?.security?.audit?.appender;
     if (auditLoggingEnabled && legacyAuditLoggerEnabled) {
       addDeprecation({
-        title: i18n.translate('security.deprecations.auditLoggerTitle', {
+        title: i18n.translate('xpack.security.deprecations.auditLoggerTitle', {
           defaultMessage: 'The legacy audit logger is deprecated',
         }),
-        message: i18n.translate('Message', {
+        message: i18n.translate('xpack.security.deprecations.auditLoggerMessage', {
           defaultMessage:
             'The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.',
         }),
@@ -39,7 +39,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
           'https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#audit-logging-settings',
         correctiveActions: {
           manualSteps: [
-            i18n.translate('security.deprecations.auditLogger.manualStepOneMessage', {
+            i18n.translate('xpack.security.deprecations.auditLogger.manualStepOneMessage', {
               defaultMessage:
                 'Declare an audit logger "appender" via "xpack.security.audit.appender" to enable the ECS audit logger.',
             }),
@@ -53,17 +53,17 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation) => {
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
       addDeprecation({
-        title: i18n.translate('security.deprecations.authcProvidersTitle', {
+        title: i18n.translate('xpack.security.deprecations.authcProvidersTitle', {
           defaultMessage:
             'Defining "xpack.security.authc.providers" as an array of provider types is deprecated',
         }),
-        message: i18n.translate('security.deprecations.authcProvidersMessage', {
+        message: i18n.translate('xpack.security.deprecations.authcProvidersMessage', {
           defaultMessage:
             '"xpack.security.authc.providers" accepts an extended "object" format instead of an array of provider types.',
         }),
         correctiveActions: {
           manualSteps: [
-            i18n.translate('security.deprecations.authcProviders.manualStepOneMessage', {
+            i18n.translate('xpack.security.deprecations.authcProviders.manualStepOneMessage', {
               defaultMessage:
                 'Use the extended object format for "xpack.security.authc.providers" in your Kibana configuration.',
             }),
@@ -86,20 +86,23 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     if (hasProviderType('basic') && hasProviderType('token')) {
       addDeprecation({
-        title: i18n.translate('security.deprecations.basicAndTokenProvidersTitle', {
+        title: i18n.translate('xpack.security.deprecations.basicAndTokenProvidersTitle', {
           defaultMessage:
             'Both "basic" and "token" authentication providers are enabled in "xpack.security.authc.providers"',
         }),
-        message: i18n.translate('security.deprecations.basicAndTokenProvidersMessage', {
+        message: i18n.translate('xpack.security.deprecations.basicAndTokenProvidersMessage', {
           defaultMessage:
             'Enabling both "basic" and "token" authentication providers in "xpack.security.authc.providers" is deprecated. Login page will only use "token" provider.',
         }),
         correctiveActions: {
           manualSteps: [
-            i18n.translate('security.deprecations.basicAndTokenProviders.manualStepOneMessage', {
-              defaultMessage:
-                'Remove either the "basic" or "token" auth provider in "xpack.security.authc.providers" from your Kibana configuration.',
-            }),
+            i18n.translate(
+              'xpack.security.deprecations.basicAndTokenProviders.manualStepOneMessage',
+              {
+                defaultMessage:
+                  'Remove either the "basic" or "token" auth provider in "xpack.security.authc.providers" from your Kibana configuration.',
+              }
+            ),
           ],
         },
       });
@@ -112,17 +115,17 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     >;
     if (Object.values(samlProviders).find((provider) => !!provider.maxRedirectURLSize)) {
       addDeprecation({
-        title: i18n.translate('security.deprecations.maxRedirectURLSizeTitle', {
+        title: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeTitle', {
           defaultMessage:
             '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is deprecated',
         }),
-        message: i18n.translate('security.deprecations.maxRedirectURLSizeMessage', {
+        message: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeMessage', {
           defaultMessage:
             '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is is no longer used.',
         }),
         correctiveActions: {
           manualSteps: [
-            i18n.translate('security.deprecations.maxRedirectURLSize.manualStepOneMessage', {
+            i18n.translate('xpack.security.deprecations.maxRedirectURLSize.manualStepOneMessage', {
               defaultMessage:
                 'Remove "xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" from your Kibana configuration.',
             }),
@@ -134,19 +137,19 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   (settings, fromPath, addDeprecation) => {
     if (settings?.xpack?.security?.enabled === false) {
       addDeprecation({
-        title: i18n.translate('security.deprecations.enabledTitle', {
+        title: i18n.translate('xpack.security.deprecations.enabledTitle', {
           defaultMessage: 'Disabling the security plugin "xpack.security.enabled" is deprecated',
         }),
-        message: i18n.translate('security.deprecations.enabledMessage', {
+        message: i18n.translate('xpack.security.deprecations.enabledMessage', {
           defaultMessage:
             'Disabling the security plugin "xpack.security.enabled" will only be supported by disable security in Elasticsearch.',
         }),
         correctiveActions: {
           manualSteps: [
-            i18n.translate('security.deprecations.enabled.manualStepOneMessage', {
+            i18n.translate('xpack.security.deprecations.enabled.manualStepOneMessage', {
               defaultMessage: `Remove "xpack.security.enabled" from your Kibana configuration.`,
             }),
-            i18n.translate('security.deprecations.enabled.manualStepTwoMessage', {
+            i18n.translate('xpack.security.deprecations.enabled.manualStepTwoMessage', {
               defaultMessage: `To turn off security features, disable them in Elasticsearch instead.`,
             }),
           ],

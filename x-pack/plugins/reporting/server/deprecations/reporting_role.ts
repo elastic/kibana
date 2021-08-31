@@ -33,7 +33,7 @@ export const getDeprecationsInfo = async (
   if (numReportingUsers > 0) {
     deprecations.push({
       title: i18n.translate('xpack.reporting.deprecations.reportingRoleTitle', {
-        defaultMessage: 'Found deprecated reporting roles',
+        defaultMessage: 'Found deprecated reporting role',
       }),
       message: i18n.translate('xpack.reporting.deprecations.reportingRoleMessage', {
         defaultMessage:
