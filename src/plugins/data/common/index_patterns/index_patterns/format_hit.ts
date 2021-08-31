@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { IndexPattern } from './index_pattern';
+import { DataView } from './index_pattern';
 import { FieldFormatsContentType } from '../../../../field_formats/common';
 
 const formattedCache = new WeakMap();
@@ -15,7 +15,7 @@ const partialFormattedCache = new WeakMap();
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version
-export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any) {
+export function formatHitProvider(indexPattern: DataView, defaultFormat: any) {
   function convert(
     hit: Record<string, any>,
     val: any,

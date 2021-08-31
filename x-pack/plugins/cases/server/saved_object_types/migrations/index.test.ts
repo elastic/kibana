@@ -6,10 +6,15 @@
  */
 
 import { createCommentsMigrations } from './index';
-import { getLensVisualizations, parseCommentString } from '../../common';
+import {
+  getLensVisualizations,
+  parseCommentString,
+} from '../../../common/utils/markdown_plugins/utils';
 
 import { savedObjectsServiceMock } from '../../../../../../src/core/server/mocks';
 import { lensEmbeddableFactory } from '../../../../lens/server/embeddable/lens_embeddable_factory';
+import { LensDocShape715 } from '../../../../lens/server';
+import { SavedObjectReference } from 'kibana/server';
 
 const migrations = createCommentsMigrations({
   lensEmbeddableFactory,
@@ -216,7 +221,11 @@ describe('lens embeddable migrations for by value panels', () => {
       const result = migrations['7.14.0'](caseComment, contextMock);
 
       const parsedComment = parseCommentString(result.attributes.comment);
-      const lensVisualizations = getLensVisualizations(parsedComment.children);
+      const lensVisualizations = (getLensVisualizations(
+        parsedComment.children
+      ) as unknown) as Array<{
+        attributes: LensDocShape715 & { references: SavedObjectReference[] };
+      }>;
 
       const layers = Object.values(
         lensVisualizations[0].attributes.state.datasourceStates.indexpattern.layers

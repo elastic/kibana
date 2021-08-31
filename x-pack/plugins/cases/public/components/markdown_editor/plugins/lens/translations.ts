@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INSERT_LENS = i18n.translate(
-  'xpack.cases.markdownEditor.plugins.lens.insertLensButtonLabel',
+export const VISUALIZATION = i18n.translate(
+  'xpack.cases.markdownEditor.plugins.lens.visualizationButtonLabel',
   {
-    defaultMessage: 'Insert visualization',
+    defaultMessage: 'Visualization',
   }
 );
