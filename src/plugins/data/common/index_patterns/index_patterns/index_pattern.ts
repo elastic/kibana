@@ -386,14 +386,14 @@ export class DataView implements IIndexPattern {
    * @param name Field name
    * @param enhancedRuntimeField Runtime field definition
    */
-  addRuntimeField(name: string, enhancedRuntimeField: EnhancedRuntimeField): IndexPatternField {
+  addRuntimeField(name: string, enhancedRuntimeField: EnhancedRuntimeField): DataViewField {
     const { type, script, parentComposite, customLabel, format, popularity } = enhancedRuntimeField;
 
     const runtimeField: RuntimeField = { type, script, parentComposite };
     this.runtimeFieldMap[name] = runtimeField;
 
     // Create the field if it does not exist or update an existing one
-    let createdField: IndexPatternField | undefined;
+    let createdField: DataViewField | undefined;
     const existingField = this.getFieldByName(name);
     if (existingField) {
       existingField.runtimeField = runtimeField;
@@ -484,7 +484,7 @@ export class DataView implements IIndexPattern {
   addRuntimeComposite(
     name: string,
     runtimeComposite: RuntimeCompositeWithSubFields
-  ): IndexPatternField[] {
+  ): DataViewField[] {
     if (!runtimeComposite.subFields || Object.keys(runtimeComposite.subFields).length === 0) {
       throw new Error(`Can't save runtime composite [name = ${name}] without subfields.`);
     }
@@ -495,7 +495,7 @@ export class DataView implements IIndexPattern {
 
     const { script, subFields } = runtimeComposite;
 
-    const fieldsCreated: IndexPatternField[] = [];
+    const fieldsCreated: DataViewField[] = [];
 
     for (const [subFieldName, subField] of Object.entries(subFields)) {
       const field = this.addRuntimeField(`${name}.${subFieldName}`, {
