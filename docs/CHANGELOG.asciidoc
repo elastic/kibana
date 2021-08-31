@@ -91,7 +91,7 @@ Platform::
 [[fixes-v7.14.1]]
 === Bug Fixes
 Alerting::
-* Allow rule to execute if the value is 0 and that mets the condition {kibana-pull}105626[#105626]
+* Fixed bug that prevented the index threshold rule from properly working with a threshold below a value {kibana-pull}105626[#105626]
 Canvas::
 * Fixes numeric variable casting {kibana-pull}109744[#109744]
 Dashboard::
