@@ -35,14 +35,18 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
-import { useFailedTransactionsCorrelationsFetcher } from '../../../hooks/use_failed_transactions_correlations_fetcher';
+import { useSearchStrategy } from '../../../hooks/use_search_strategy';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failed_transactions_correlations/types';
+import type {
+  FailedTransactionsCorrelationValue,
+  FailedTransactionsCorrelationsAsyncSearchServiceRawResponse,
+} from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import { Summary } from '../../shared/Summary';
+import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
@@ -69,7 +73,22 @@ export function FailedTransactionsCorrelations({
 
   const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const result = useFailedTransactionsCorrelationsFetcher();
+  const {
+    fetchState,
+    rawResponse,
+    ...searchStrategy
+  } = useSearchStrategy<FailedTransactionsCorrelationsAsyncSearchServiceRawResponse>(
+    APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS
+  );
+
+  const result = useMemo(
+    () => ({
+      ...fetchState,
+      ...searchStrategy,
+      ...rawResponse,
+    }),
+    [fetchState, searchStrategy, rawResponse]
+  );
 
   const {
     ccsWarning,
@@ -503,7 +522,7 @@ export function FailedTransactionsCorrelations({
           <CorrelationsEmptyStatePrompt />
         )}
       </div>
-      {inspectEnabled && <CorrelationsLog logMessages={log} />}
+      {inspectEnabled && <CorrelationsLog logMessages={log ?? []} />}
     </div>
   );
 }
