@@ -427,9 +427,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.storage,
         [...(subPlugins.management.store.middleware ?? [])]
       );
-      if (startPlugins.timelines) {
-        startPlugins.timelines.setTGridEmbeddedStore(this._store);
-      }
+    }
+    if (startPlugins.timelines) {
+      startPlugins.timelines.setTGridEmbeddedStore(this._store);
     }
     return this._store;
   }
