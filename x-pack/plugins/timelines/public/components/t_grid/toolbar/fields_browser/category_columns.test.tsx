@@ -8,10 +8,11 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { mockBrowserFields } from '../../../../mock';
+import { mockBrowserFields, TestProviders } from '../../../../mock';
 
-import { CATEGORY_PANE_WIDTH, getFieldCount } from './helpers';
+import { CATEGORY_PANE_WIDTH, getFieldCount, VIEW_ALL_BUTTON_CLASS_NAME } from './helpers';
 import { CategoriesPane } from './categories_pane';
+import { ViewAllButton } from './category_columns';
 
 const timelineId = 'test';
 
@@ -119,5 +120,34 @@ describe('getCategoryColumns', () => {
       .simulate('click');
 
     expect(onCategorySelected).toHaveBeenCalledWith(notTheSelectedCategoryId);
+  });
+});
+
+describe('ViewAllButton', () => {
+  it(`should update fields with the timestamp and category fields`, () => {
+    const onUpdateColumns = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <ViewAllButton
+          browserFields={{ agent: mockBrowserFields.agent }}
+          categoryId="agent"
+          onUpdateColumns={onUpdateColumns}
+          timelineId={timelineId}
+        />
+      </TestProviders>
+    );
+
+    wrapper.find(`.${VIEW_ALL_BUTTON_CLASS_NAME}`).first().simulate('click');
+
+    expect(onUpdateColumns).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ id: '@timestamp' }),
+        expect.objectContaining({ id: 'agent.ephemeral_id' }),
+        expect.objectContaining({ id: 'agent.hostname' }),
+        expect.objectContaining({ id: 'agent.id' }),
+        expect.objectContaining({ id: 'agent.name' }),
+      ])
+    );
   });
 });
