@@ -27,8 +27,15 @@ import { getFixLogsStep } from './fix_logs_step';
 import { getUpgradeStep } from './upgrade_step';
 
 export const Overview: FunctionComponent = () => {
-  const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
-  const { nextMajor } = kibanaVersionInfo;
+  const {
+    kibanaVersionInfo: { nextMajor },
+    services: {
+      breadcrumbs,
+      api,
+      core: { docLinks },
+    },
+    plugins: { cloud },
+  } = useAppContext();
 
   useEffect(() => {
     async function sendTelemetryData() {
@@ -43,6 +50,12 @@ export const Overview: FunctionComponent = () => {
   useEffect(() => {
     breadcrumbs.setBreadcrumbs('overview');
   }, [breadcrumbs]);
+
+  let cloudBackupStatusResponse;
+
+  if (cloud?.isCloudEnabled) {
+    cloudBackupStatusResponse = api.useLoadCloudBackupStatus();
+  }
 
   return (
     <EuiPageBody restrictWidth={true}>
@@ -84,7 +97,7 @@ export const Overview: FunctionComponent = () => {
 
         <EuiSteps
           steps={[
-            getBackupStep(),
+            getBackupStep({ cloud, cloudBackupStatusResponse }),
             getFixIssuesStep({ nextMajor }),
             getFixLogsStep(),
             getUpgradeStep({ docLinks, nextMajor }),
