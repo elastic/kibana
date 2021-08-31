@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import type { CoreStart } from '../../../../../../../src/core/public';
 import { FullWidthFlexGroup, FullWidthFlexGroupHeight } from '../styles';
 
 const panelStyle = {
@@ -18,7 +19,7 @@ const panelStyle = {
 export const TGridEmpty: React.FC<{ height?: FullWidthFlexGroupHeight }> = ({
   height = 'tall',
 }) => {
-  const { http } = useKibana().services;
+  const { http } = useKibana<CoreStart>().services;
 
   return (
     <FullWidthFlexGroup
@@ -53,7 +54,7 @@ export const TGridEmpty: React.FC<{ height?: FullWidthFlexGroupHeight }> = ({
               <EuiImage
                 size="200"
                 alt="Decorative image for the no results page"
-                url={http!.basePath.prepend(
+                url={http.basePath.prepend(
                   '/plugins/timelines/assets/illustration_product_no_results_magnifying_glass.svg'
                 )}
               />
