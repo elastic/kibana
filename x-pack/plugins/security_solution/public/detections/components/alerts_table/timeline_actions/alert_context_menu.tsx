@@ -79,11 +79,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
 
-  const isEndpointAlert = useMemo(
-    (): boolean => isAlertFromEndpointAlert({ ecsData: ecsRowData }),
-    [ecsRowData]
-  );
-
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
   }, [isPopoverOpen]);
@@ -148,7 +143,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   }, [closePopover, onAddEventFilterClick]);
 
   const { exceptionActionItems } = useExceptionActions({
-    isEndpointAlert,
+    isEndpointAlert: isAlertFromEndpointAlert({ ecsData: ecsRowData }),
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
   });
   const investigateInResolverActionItems = useInvestigateInResolverContextItem({

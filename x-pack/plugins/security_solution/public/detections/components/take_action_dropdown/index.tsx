@@ -124,7 +124,7 @@ export const TakeActionDropdown = React.memo(
     );
 
     const { exceptionActionItems } = useExceptionActions({
-      isEndpointAlert: ecsData != null ? isAlertFromEndpointAlert({ ecsData }) : false,
+      isEndpointAlert: isAlertFromEndpointAlert({ ecsData }),
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
 

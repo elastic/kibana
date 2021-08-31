@@ -29,7 +29,11 @@ export const isAlertFromEndpointEvent = ({
   return findEndpointAlert ? findEndpointAlert[0] === 'endpoint' : false;
 };
 
-export const isAlertFromEndpointAlert = ({ ecsData }: { ecsData: Ecs }): boolean => {
+export const isAlertFromEndpointAlert = ({
+  ecsData,
+}: {
+  ecsData: Ecs | null | undefined;
+}): boolean => {
   if (ecsData == null) {
     return false;
   }
