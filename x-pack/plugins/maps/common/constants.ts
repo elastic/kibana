@@ -57,6 +57,10 @@ export const MVT_HITS_SOURCE_LAYER_NAME = 'hits';
 export const MVT_AGGS_SOURCE_LAYER_NAME = 'aggs';
 export const MVT_META_SOURCE_LAYER_NAME = 'meta';
 
+export const MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
+export const MVT_HITS_TOTAL_VALUE = 'hits.total.value';
+
+
 // Identifies vector tile "too many features" feature.
 // "too many features" feature is a box showing area that contains too many features for single ES search response
 export const KBN_METADATA_FEATURE = '__kbn_metadata_feature__';

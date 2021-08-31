@@ -30,7 +30,7 @@ import {
   FieldFormatter,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
   KBN_IS_TILE_COMPLETE,
-  MVT_META_SOURCE_LAYER_NAME,
+  MVT_META_SOURCE_LAYER_NAME, DEFAULT_MAX_RESULT_WINDOW, MVT_HITS_TOTAL_RELATION, MVT_HITS_TOTAL_VALUE,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -911,12 +911,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         mbTooManyFeaturesLayer['source-layer'] = MVT_META_SOURCE_LAYER_NAME;
       }
       mbMap.addLayer(mbTooManyFeaturesLayer);
-      // mbMap.setFilter(tooManyFeaturesLayerId, [
-      //   'all',
-      //   ['==', ['get', KBN_METADATA_FEATURE], true],
-      //   ['==', ['get', KBN_IS_TILE_COMPLETE], false],
-      // ]);
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', '#FFA500');
+      mbMap.setFilter(tooManyFeaturesLayerId, [
+        'all',
+        ['==', ['get', MVT_HITS_TOTAL_RELATION], 'gte'],
+        ['>=', ['get', MVT_HITS_TOTAL_VALUE], DEFAULT_MAX_RESULT_WINDOW],
+      ]);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', '#FF0000');
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 2);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-dasharray', [2, 1]);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-opacity', this.getAlpha());

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import { Feature, FeatureCollection, Polygon } from 'geojson';
@@ -63,20 +64,31 @@ export async function getEsTile({
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
-    // console.log('getEsTileP', path);
+    console.log('getEsTileP', path);
+    console.log('requestboy', requestBody);
+
+    let fields = _.uniq(requestBody.docvalue_fields.concat(requestBody.stored_fields));
+    fields = fields.filter(f => f !== geometryFieldName);
+    const body = {
+      size: DEFAULT_MAX_RESULT_WINDOW,
+      grid_precision: 0, // no aggs
+      exact_bounds: true,
+      extent: 4096, // full resolution,
+      query: requestBody.query,
+      fields: fields,
+      runtime_mappings: requestBody.runtime_mappings,
+      // script_fields: requestBody.script_fields,
+    };
+
+    console.log('bo---');
+    console.log(body);
     const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'GET',
       path,
-      body: {
-        size: DEFAULT_MAX_RESULT_WINDOW,
-        grid_precision: 0,
-        exact_bounds: true,
-      },
+      body,
     });
-    // let buffer = Buffer.from(tile.body, 'base64');
     const buffer = tile.body;
     console.log('buf length', buffer.length);
-    // console.log('s', buffer.toString('base64'));
     return buffer;
   } catch (e) {
     if (!isAbortError(e)) {

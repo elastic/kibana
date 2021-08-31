@@ -10,11 +10,11 @@ import type {
   GeoJSONSource as MbGeoJSONSource,
   VectorSource as MbVectorSource,
 } from '@kbn/mapbox-gl';
-import {Feature} from 'geojson';
+import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
-import {parse as parseUrl} from 'url';
-import {i18n} from '@kbn/i18n';
-import {IVectorStyle, VectorStyle} from '../../styles/vector/vector_style';
+import { parse as parseUrl } from 'url';
+import { i18n } from '@kbn/i18n';
+import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
   KBN_FEATURE_COUNT,
   KBN_IS_TILE_COMPLETE,
@@ -22,9 +22,13 @@ import {
   MVT_META_SOURCE_LAYER_NAME,
   SOURCE_DATA_REQUEST_ID,
 } from '../../../../common/constants';
-import {NO_RESULTS_ICON_AND_TOOLTIPCONTENT, VectorLayer, VectorLayerArguments,} from '../vector_layer';
-import {ITiledSingleLayerVectorSource} from '../../sources/tiled_single_layer_vector_source';
-import {DataRequestContext} from '../../../actions';
+import {
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
+  VectorLayer,
+  VectorLayerArguments,
+} from '../vector_layer';
+import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
+import { DataRequestContext } from '../../../actions';
 import {
   StyleMetaDescriptor,
   TileMetaFeature,
@@ -32,10 +36,10 @@ import {
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import {MVTSingleLayerVectorSourceConfig} from '../../sources/mvt_single_layer_vector_source/types';
-import {canSkipSourceUpdate} from '../../util/can_skip_fetch';
-import {isRefreshOnlyQuery} from '../../util/is_refresh_only_query';
-import {CustomIconAndTooltipContent} from '../layer';
+import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
+import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
+import { isRefreshOnlyQuery } from '../../util/is_refresh_only_query';
+import { CustomIconAndTooltipContent } from '../layer';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -266,7 +270,7 @@ export class TiledVectorLayer extends VectorLayer {
       // filter: ['==', ['get', KBN_METADATA_FEATURE], true],
     });
 
-    const metaFeatures: TileMetaFeature[] = mbFeatures.map((mbFeature: Feature) => {
+    const metaFeatures: TileMetaFeature[] = mbFeatures.map((mbFeature: Feature | null) => {
       console.log('m', mbFeature);
       const parsedProperties: Record<string, unknown> = {};
       for (const key in mbFeature.properties) {
@@ -280,17 +284,23 @@ export class TiledVectorLayer extends VectorLayer {
               : JSON.parse(mbFeature.properties[key]); // mvt properties cannot be nested geojson
         }
       }
-      return {
-        type: 'Feature',
-        id: mbFeature.id,
-        geometry: mbFeature.geometry,
-        properties: parsedProperties,
-      } as TileMetaFeature;
+
+      try {
+        return {
+          type: 'Feature',
+          id: mbFeature.id,
+          geometry: mbFeature.geometry, // this getter might throw with non-conforming geometries
+          properties: parsedProperties,
+        } as TileMetaFeature;
+      } catch (e) {
+        return null;
+      }
     });
 
     console.log('meta featyres', metaFeatures);
 
-    return metaFeatures as TileMetaFeature[];
+    const filtered = metaFeatures.filter(f => f!==null);
+    return filtered as TileMetaFeature[];
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
@@ -329,7 +339,11 @@ export class TiledVectorLayer extends VectorLayer {
       // The mapbox type in the spec is specified with `source-layer`
       // but the programmable JS-object uses camelcase `sourceLayer`
       // @ts-expect-error
-      if (mbLayer && mbLayer.sourceLayer !== tiledSourceMeta.layerName && mbLayer.sourceLayer !== MVT_META_SOURCE_LAYER_NAME) {
+      if (
+        mbLayer &&
+        mbLayer.sourceLayer !== tiledSourceMeta.layerName &&
+        mbLayer.sourceLayer !== MVT_META_SOURCE_LAYER_NAME
+      ) {
         // If the source-pointer of one of the layers is stale, they will all be stale.
         // In this case, all the mb-layers need to be removed and re-added.
         return true;
