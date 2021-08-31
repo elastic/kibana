@@ -256,10 +256,9 @@ export class ApplicationService {
         if (openInNewTab) {
           this.openInNewTab!(getAppUrl(availableMounters, appId, path));
           return;
-        } else {
-          this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
         }
 
+        this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
         this.currentAppId$.next(appId);
       }
     };
