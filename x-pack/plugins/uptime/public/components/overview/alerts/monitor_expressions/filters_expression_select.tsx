@@ -27,12 +27,12 @@ const { TYPE, TAGS, LOCATION, PORT } = FILTER_FIELDS;
 function hasTimerangeStart(
   params: any
 ): params is { timerangeCount: number; timerangeUnit: string } {
-  return !!params.timerangeCount && isNaN(params.timerangeCount) && params.timerangeUnit;
+  return !!params.timerangeCount && !isNaN(params.timerangeCount) && params.timerangeUnit;
 }
 
 export function formatParamsDateRange(alertParams: { [key: string]: unknown }) {
   if (!hasTimerangeStart(alertParams)) return undefined;
-  return `now-${alertParams.timerangeCount.toString()}${alertParams.timerangeCount}`;
+  return `now-${alertParams.timerangeCount.toString()}${alertParams.timerangeUnit}`;
 }
 
 export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = ({

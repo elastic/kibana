@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
-import { FiltersExpressionsSelect } from './filters_expression_select';
+import { formatParamsDateRange, FiltersExpressionsSelect } from './filters_expression_select';
 import { render } from '../../../../lib/helper/rtl_helpers';
 import { filterAriaLabels as aria } from './translations';
 import * as Hooks from '../../../../../../observability/public/hooks/use_values_list';
@@ -132,4 +132,15 @@ describe('FiltersExpressionSelect', () => {
       });
     }
   );
+
+  describe('formatParamsDateRange', () => {
+    it('returns undefined if missing timerange count', () =>
+      expect(formatParamsDateRange({ timerangeUnit: 'm' })).toBeUndefined());
+
+    it('returns undefined if missing timerange unit', () =>
+      expect(formatParamsDateRange({ timerangeCount: 23 })).toBeUndefined());
+
+    it('formats date range param', () =>
+      expect(formatParamsDateRange({ timerangeUnit: 'm', timerangeCount: 23 })).toEqual('now-23m'));
+  });
 });
