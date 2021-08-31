@@ -28,13 +28,13 @@ export const BehaviorProtection = React.memo(() => {
   const protectionLabel = i18n.translate(
     'xpack.securitySolution.endpoint.policy.protections.behavior',
     {
-      defaultMessage: 'Behavior protections',
+      defaultMessage: 'Behavior',
     }
   );
   return (
     <ConfigForm
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.behavior_protection', {
-        defaultMessage: 'Behavior Protection',
+        defaultMessage: 'Behavior',
       })}
       supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
       dataTestSubj="behaviorProtectionsForm"

@@ -54,6 +54,8 @@ export type ExpressionsServiceSetup = Pick<
   | 'registerType'
   | 'run'
   | 'fork'
+  | 'extract'
+  | 'inject'
 >;
 
 export interface ExpressionExecutionParams {

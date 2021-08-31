@@ -7,6 +7,9 @@
 
 export const ALL_OSQUERY_VERSIONS_OPTIONS = [
   {
+    label: '4.9.0',
+  },
+  {
     label: '4.8.0',
   },
   {

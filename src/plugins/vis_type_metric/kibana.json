@@ -7,8 +7,8 @@
   "requiredPlugins": ["data", "visualizations", "charts", "expressions"],
   "requiredBundles": ["kibanaUtils", "visDefaultEditor"],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   },
   "description": "Registers the Metric aggregation-based visualization."
 }
