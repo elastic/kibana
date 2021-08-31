@@ -15,7 +15,6 @@ import { FeedActivity } from './recent_activity';
 interface OverviewServerData {
   hasUsers: boolean;
   hasOrgSources: boolean;
-  canCreateContentSources: boolean;
   isOldAccount: boolean;
   sourcesCount: number;
   pendingInvitationsCount: number;
@@ -50,12 +49,6 @@ export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>
       false,
       {
         setServerData: (_, { hasOrgSources }) => hasOrgSources,
-      },
-    ],
-    canCreateContentSources: [
-      false,
-      {
-        setServerData: (_, { canCreateContentSources }) => canCreateContentSources,
       },
     ],
     isOldAccount: [

@@ -220,9 +220,7 @@ export function WaterfallItem({
           <ErrorOverviewLink
             serviceName={item.doc.service.name}
             query={{
-              kuery: encodeURIComponent(
-                `${TRACE_ID} : "${item.doc.trace.id}" and transaction.id : "${item.doc.transaction.id}"`
-              ),
+              kuery: `${TRACE_ID} : "${item.doc.trace.id}" and transaction.id : "${item.doc.transaction.id}"`,
             }}
             color="danger"
             style={{ textDecoration: 'none' }}

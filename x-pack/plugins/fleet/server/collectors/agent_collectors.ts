@@ -44,7 +44,7 @@ export const getAgentUsage = async (
     error,
     offline,
     updating,
-  } = await AgentService.getAgentStatusForAgentPolicy(soClient, esClient);
+  } = await AgentService.getAgentStatusForAgentPolicy(esClient);
   return {
     total_enrolled: total,
     healthy: online,

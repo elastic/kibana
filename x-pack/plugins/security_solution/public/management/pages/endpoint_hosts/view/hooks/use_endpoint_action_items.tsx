@@ -41,6 +41,7 @@ export const useEndpointActionItems = (
       const isolationSupported = isIsolationSupported({
         osName: endpointMetadata.host.os.name,
         version: endpointMetadata.agent.version,
+        capabilities: endpointMetadata.Endpoint.capabilities,
       });
       const {
         show,

@@ -345,7 +345,7 @@ To share the dashboard with a larger audience, click *Share* in the toolbar. For
 [[import-dashboards]]
 == Export dashboards
 
-To automate {kib}, you can export dashboards as JSON using the <<dashboard-api,import and export dashboard APIs>>. It is important to export dashboards with all necessary references.
+To automate {kib}, you can export dashboards as NDJSON using the <<saved-objects-api-export, Export objects API>>. It is important to export dashboards with all necessary references.
 
 --
 include::tutorial-create-a-dashboard-of-lens-panels.asciidoc[]

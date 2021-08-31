@@ -14,6 +14,8 @@ const TEST_INDEX = 'logs-log.log-test';
 
 const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
+const FINAL_PIPELINE_VERSION = 1;
+
 let pkgKey: string;
 
 export default function (providerContext: FtrProviderContext) {
@@ -81,11 +83,32 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+    it('should correctly update the final pipeline', async () => {
+      await es.ingest.putPipeline({
+        id: FINAL_PIPELINE_ID,
+        body: {
+          description: 'Test PIPELINE WITHOUT version',
+          processors: [
+            {
+              set: {
+                field: 'my-keyword-field',
+                value: 'foo',
+              },
+            },
+          ],
+        },
+      });
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
+      const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
+      expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
+      expect(pipelineRes.body[FINAL_PIPELINE_ID].version).to.be(1);
+    });
+
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
       expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
-      expect(res.body.index_templates.length).to.be(1);
+      expect(res.body.index_templates.length).to.be(FINAL_PIPELINE_VERSION);
       expect(res.body.index_templates[0]?.index_template?.composed_of).to.contain(
         '.fleet_component_template-1'
       );

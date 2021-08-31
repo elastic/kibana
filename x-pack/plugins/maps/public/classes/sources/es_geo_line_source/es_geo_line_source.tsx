@@ -10,6 +10,7 @@ import React from 'react';
 
 import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from 'src/plugins/data/public';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
@@ -202,6 +203,15 @@ export class ESGeoLineSource extends AbstractESAggSource {
         terms: addFieldToDSL(termsAgg, splitField),
       },
     });
+    if (splitField.type === 'string') {
+      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(splitField, '', indexPattern);
+      entityIsNotEmptyFilter.meta.negate = true;
+      entitySearchSource.setField('filter', [
+        ...(entitySearchSource.getField('filter') as Filter[]),
+        entityIsNotEmptyFilter,
+      ]);
+    }
+
     const entityResp = await this._runEsQuery({
       requestId: `${this.getId()}_entities`,
       requestName: i18n.translate('xpack.maps.source.esGeoLine.entityRequestName', {

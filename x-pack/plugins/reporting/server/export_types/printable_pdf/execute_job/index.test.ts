@@ -7,8 +7,8 @@
 
 jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
 
-import { Writable } from 'stream';
 import * as Rx from 'rxjs';
+import { Writable } from 'stream';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../lib';
@@ -65,7 +65,7 @@ afterEach(() => (generatePdfObservableFactory as jest.Mock).mockReset());
 test(`passes browserTimezone to generatePdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   const generatePdfObservable = (await generatePdfObservableFactory(mockReporting)) as jest.Mock;
-  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
+  generatePdfObservable.mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
   const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
@@ -91,11 +91,11 @@ test(`returns content_type of application/pdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = await generatePdfObservableFactory(mockReporting);
-  (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of(Buffer.from('')));
+  (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
   const { content_type: contentType } = await runTask(
     'pdfJobId',
-    getBasePayload({ relativeUrls: [], headers: encryptedHeaders }),
+    getBasePayload({ objects: [], headers: encryptedHeaders }),
     cancellationToken,
     stream
   );
@@ -111,10 +111,10 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   await runTask(
     'pdfJobId',
-    getBasePayload({ relativeUrls: [], headers: encryptedHeaders }),
+    getBasePayload({ objects: [], headers: encryptedHeaders }),
     cancellationToken,
     stream
   );
 
-  expect(content).toEqual(Buffer.from(testContent).toString('base64'));
+  expect(content).toEqual(testContent);
 });

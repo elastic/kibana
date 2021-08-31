@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
+import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
 import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
@@ -21,7 +21,7 @@ import { MobileFields } from './mobile_fields';
 
 export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
-    reportType: ReportTypes.DISTRIBUTION,
+    reportType: 'data-distribution',
     defaultSeriesType: 'bar',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {

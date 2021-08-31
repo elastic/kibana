@@ -64,6 +64,7 @@ describe('Elasticsearch Errors', () => {
         { ignore: [403] }
       );
 
+      // @ts-expect-error @elastic/elasticsearch doesn't declare error on IndexResponse
       expect(isWriteBlockException(res.body.error!)).toEqual(true);
     });
 
@@ -79,6 +80,7 @@ describe('Elasticsearch Errors', () => {
         { ignore: [403] }
       );
 
+      // @ts-expect-error @elastic/elasticsearch doesn't declare error on IndexResponse
       expect(isWriteBlockException(res.body.error!)).toEqual(true);
     });
 

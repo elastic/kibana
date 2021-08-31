@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
 import { StartServicesAccessor } from 'kibana/server';
-import { RuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -66,7 +66,7 @@ export const initRoutes = (
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
-  ruleDataClient: RuleDataClient | null,
+  ruleDataClient: IRuleDataClient | null,
   getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules

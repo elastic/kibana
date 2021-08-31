@@ -20,6 +20,8 @@ import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+
 jest.mock('./loader');
 jest.mock('../id_generator');
 jest.mock('./operations');
@@ -172,6 +174,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
@@ -1539,6 +1542,85 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
+    });
+  });
+  describe('#isTimeBased', () => {
+    it('should return true if date histogram exists in any layer', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records2',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+            },
+          },
+          second: {
+            indexPatternId: '1',
+            columnOrder: ['bucket1', 'bucket2', 'metric2'],
+            columns: {
+              metric2: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+              bucket1: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: '1d',
+                },
+              },
+              bucket2: {
+                label: 'Terms',
+                dataType: 'string',
+                isBucketed: true,
+                operationType: 'terms',
+                sourceField: 'geo.src',
+                params: {
+                  orderBy: { type: 'alphabetical' },
+                  orderDirection: 'asc',
+                  size: 10,
+                },
+              },
+            },
+          },
+        },
+      });
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
+    });
+    it('should return false if date histogram does not exist in any layer', () => {
+      const state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
     });
   });
 });

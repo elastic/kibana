@@ -8,14 +8,20 @@
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const security = getService('security');
   const PageObjects = getPageObjects(['settings', 'common']);
+  const soInfo = getService('savedObjectInfo');
+  const log = getService('log');
 
   describe('"Create Index Pattern" wizard', function () {
     before(async function () {
-      // delete .kibana index and then wait for Kibana to re-create it
+      await soInfo.logSoTypes(log);
+      await security.testUser.setRoles([
+        'global_index_pattern_management_all',
+        'test_logs_data_reader',
+      ]);
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
     });
 
     describe('data streams', () => {
@@ -43,13 +49,19 @@ export default function ({ getService, getPageObjects }) {
           method: 'PUT',
         });
 
+        await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.createIndexPattern('test_data_stream');
-
-        await es.transport.request({
-          path: '/_data_stream/test_data_stream',
-          method: 'DELETE',
-        });
       });
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
+      await es.transport.request({
+        path: '/_data_stream/test_data_stream',
+        method: 'DELETE',
+      });
+      await security.testUser.restoreDefaults();
+      await soInfo.logSoTypes(log);
     });
   });
 }

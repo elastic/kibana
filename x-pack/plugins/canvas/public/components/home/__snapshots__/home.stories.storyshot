@@ -2,7 +2,7 @@
 
 exports[`Storyshots Home Home Page 1`] = `
 <div
-  className="euiPage euiPage--grow euiPageTemplate"
+  className="euiPage euiPage--grow euiPageTemplate kbnPageTemplate"
   style={
     Object {
       "minHeight": 460,

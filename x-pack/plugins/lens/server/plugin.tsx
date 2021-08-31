@@ -10,6 +10,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
 import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { setupRoutes } from './routes';
 import {
@@ -20,6 +21,7 @@ import {
 import { setupSavedObjects } from './saved_objects';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { lensEmbeddableFactory } from './embeddable/lens_embeddable_factory';
+import { setupExpressions } from './expressions';
 
 export interface PluginSetupContract {
   usageCollection?: UsageCollectionSetup;
@@ -30,10 +32,15 @@ export interface PluginSetupContract {
 
 export interface PluginStartContract {
   taskManager?: TaskManagerStartContract;
+  fieldFormats: FieldFormatsStart;
   data: DataPluginStart;
 }
 
-export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
+export interface LensServerPluginSetup {
+  lensEmbeddableFactory: typeof lensEmbeddableFactory;
+}
+
+export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {}> {
   private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
   private readonly telemetryLogger: Logger;
 
@@ -44,6 +51,8 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     setupSavedObjects(core);
     setupRoutes(core, this.initializerContext.logger.get());
+    setupExpressions(core, plugins.expressions);
+
     if (plugins.usageCollection && plugins.taskManager) {
       registerLensUsageCollector(
         plugins.usageCollection,
@@ -58,8 +67,11 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
         plugins.taskManager
       );
     }
+
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
-    return {};
+    return {
+      lensEmbeddableFactory,
+    };
   }
 
   start(core: CoreStart, plugins: PluginStartContract) {

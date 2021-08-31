@@ -22,16 +22,26 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
         body: buildRouteValidation(
           t.union([
             t.strict({
-              status: t.union([t.literal('open'), t.literal('closed')]),
+              status: t.union([
+                t.literal('open'),
+                t.literal('closed'),
+                t.literal('in-progress'), // TODO: remove after migration to acknowledged
+                t.literal('acknowledged'),
+              ]),
               index: t.string,
               ids: t.array(t.string),
               query: t.undefined,
             }),
             t.strict({
-              status: t.union([t.literal('open'), t.literal('closed')]),
+              status: t.union([
+                t.literal('open'),
+                t.literal('closed'),
+                t.literal('in-progress'), // TODO: remove after migration to acknowledged
+                t.literal('acknowledged'),
+              ]),
               index: t.string,
               ids: t.undefined,
-              query: t.string,
+              query: t.union([t.object, t.string]),
             }),
           ])
         ),

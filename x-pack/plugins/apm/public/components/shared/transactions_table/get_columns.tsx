@@ -71,7 +71,7 @@ export function getColumns({
       field: 'latency',
       sortable: true,
       name: getLatencyColumnLabel(latencyAggregationType),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { latency, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.latency;
@@ -97,7 +97,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { throughput, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.throughput;
@@ -122,7 +122,7 @@ export function getColumns({
       sortable: true,
       name: i18n.translate(
         'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
-        { defaultMessage: 'Error rate' }
+        { defaultMessage: 'Failed transaction rate' }
       ),
       width: `${unit * 8}px`,
       render: (_, { errorRate, name }) => {

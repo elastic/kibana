@@ -46,7 +46,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   // We do not always have the alerts that each consumer wants due to licensing
   const { stateFilter = () => true } = props;
   const alertsList = Object.values(props.alerts).flat();
-  const alerts = alertsList.filter((alertItem) => Boolean(alertItem?.rawAlert));
+  const alerts = alertsList.filter((alertItem) => Boolean(alertItem?.sanitizedRule));
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
   const alertCount = inSetupMode

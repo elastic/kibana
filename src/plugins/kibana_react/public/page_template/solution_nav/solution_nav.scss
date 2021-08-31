@@ -14,6 +14,10 @@ $euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
     width: 248px;
     padding: $euiSizeL;
   }
+
+  .kbnPageTemplateSolutionNavAvatar {
+    margin-right: $euiSize;
+  }
 }
 
 .kbnPageTemplateSolutionNav--hidden {

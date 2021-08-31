@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiHorizontalRule,
 } from '@elastic/eui';
+
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -23,7 +24,10 @@ import styled from 'styled-components';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineActions } from '../../../store/timeline';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import {
+  useDeepEqualSelector,
+  useShallowEqualSelector,
+} from '../../../../common/hooks/use_selector';
 import { TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
 import { appSelectors } from '../../../../common/store/app';
 import { AddNote } from '../../notes/add_note';
@@ -33,6 +37,8 @@ import { NotePreviews } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
 import { getTimelineNoteSelector } from './selectors';
 import { DetailsPanel } from '../../side_panel';
+import { getScrollToTopSelector } from '../tabs_content/selectors';
+import { useScrollToTop } from '../../../../common/components/scroll_to_top';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -122,6 +128,12 @@ interface NotesTabContentProps {
 
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
+
+  const getScrollToTop = useMemo(() => getScrollToTopSelector(), []);
+  const scrollToTop = useShallowEqualSelector((state) => getScrollToTop(state, timelineId));
+
+  useScrollToTop('#scrollableNotes', !!scrollToTop);
+
   const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
   const {
     createdBy,
@@ -202,16 +214,26 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
 
   return (
     <FullWidthFlexGroup>
-      <ScrollableFlexItem grow={2}>
+      <ScrollableFlexItem grow={2} id="scrollableNotes">
         <StyledPanel paddingSize="s">
           <EuiTitle>
             <h3>{NOTES}</h3>
           </EuiTitle>
           <EuiSpacer />
-          <NotePreviews eventIdToNoteIds={eventIdToNoteIds} notes={notes} timelineId={timelineId} />
+          <NotePreviews
+            eventIdToNoteIds={eventIdToNoteIds}
+            notes={notes}
+            timelineId={timelineId}
+            showTimelineDescription
+          />
           <EuiSpacer size="s" />
           {!isImmutable && (
-            <AddNote associateNote={associateNote} newNote={newNote} updateNewNote={setNewNote} />
+            <AddNote
+              associateNote={associateNote}
+              newNote={newNote}
+              updateNewNote={setNewNote}
+              autoFocusDisabled={!!scrollToTop}
+            />
           )}
         </StyledPanel>
       </ScrollableFlexItem>

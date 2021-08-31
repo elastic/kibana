@@ -535,6 +535,100 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
               "onClick": [Function],
               "toolTipContent": null,
             },
+          ],
+          "title": "Layer actions",
+        },
+      ]
+    }
+    size="m"
+  />
+</EuiPopover>
+`;
+
+exports[`TOCEntryActionsPopover should show "show this layer only" action when there are more then 2 layers 1`] = `
+<EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
+  anchorPosition="leftUp"
+  button={
+    <Memo(Connect(TOCEntryButton))
+      displayName="layer 1"
+      escapedDisplayName="layer1"
+      layer={
+        LayerMock {
+          "_dataRequests": Array [],
+          "_descriptor": Object {
+            "__dataRequests": Array [],
+            "alpha": 0.75,
+            "id": "testLayer",
+            "includeInFitToBounds": true,
+            "label": null,
+            "maxZoom": 24,
+            "minZoom": 0,
+            "sourceDescriptor": Object {
+              "type": "mySourceType",
+            },
+            "style": null,
+            "visible": true,
+          },
+          "_source": MockSource {
+            "_descriptor": Object {
+              "type": "mySourceType",
+            },
+            "_inspectorAdapters": undefined,
+          },
+        }
+      }
+      onClick={[Function]}
+    />
+  }
+  className="mapLayTocActions"
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="testLayer"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <EuiContextMenu
+    data-test-subj="layerTocActionsPanellayer1"
+    initialPanelId={0}
+    panels={
+      Array [
+        Object {
+          "id": 0,
+          "items": Array [
+            Object {
+              "data-test-subj": "fitToBoundsButton",
+              "disabled": false,
+              "icon": <EuiIcon
+                size="m"
+                type="expand"
+              />,
+              "name": "Fit to data",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
+            Object {
+              "data-test-subj": "layerVisibilityToggleButton",
+              "icon": <EuiIcon
+                size="m"
+                type="eyeClosed"
+              />,
+              "name": "Hide layer",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
+            Object {
+              "data-test-subj": "showThisLayerOnlyButton",
+              "icon": <EuiIcon
+                size="m"
+                type="eye"
+              />,
+              "name": "Show this layer only",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
             Object {
               "data-test-subj": "layerSettingsButton",
               "disabled": false,
@@ -543,6 +637,26 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
                 type="pencil"
               />,
               "name": "Edit layer settings",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
+            Object {
+              "data-test-subj": "cloneLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="copy"
+              />,
+              "name": "Clone layer",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
+            Object {
+              "data-test-subj": "removeLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="trash"
+              />,
+              "name": "Remove layer",
               "onClick": [Function],
               "toolTipContent": null,
             },

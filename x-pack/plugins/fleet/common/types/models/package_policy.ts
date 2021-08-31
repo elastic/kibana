@@ -81,4 +81,5 @@ export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;
 
 export type DryRunPackagePolicy = NewPackagePolicy & {
   errors?: Array<{ key: string | undefined; message: string }>;
+  missingVars?: string[];
 };

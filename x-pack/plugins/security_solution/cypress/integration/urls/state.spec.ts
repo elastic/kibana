@@ -42,12 +42,14 @@ import { TIMELINE } from '../../screens/create_new_case';
 import { cleanKibana } from '../../tasks/common';
 
 const ABSOLUTE_DATE = {
-  endTime: '2019-08-01T20:33:29.186Z',
+  endTime: 'Aug 1, 2019 @ 20:33:29.186',
   endTimeTimeline: '2019-08-02T21:03:29.186Z',
+  endTimeTimelineFormatted: 'Aug 2, 2019 @ 21:03:29.186',
   newEndTimeTyped: 'Aug 01, 2019 @ 15:03:29.186',
   newStartTimeTyped: 'Aug 01, 2019 @ 14:33:29.186',
-  startTime: '2019-08-01T20:03:29.186Z',
+  startTime: 'Aug 1, 2019 @ 20:03:29.186',
   startTimeTimeline: '2019-08-02T20:03:29.186Z',
+  startTimeTimelineFormatted: 'Aug 2, 2019 @ 20:03:29.186',
   firefoxEndTimeTyped: '2019-08-01T15:03:29',
   firefoxStartTimeTyped: '2019-08-01T14:33:29',
 };
@@ -122,12 +124,12 @@ describe('url state', () => {
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE).should(
       'have.attr',
       'title',
-      ABSOLUTE_DATE.startTimeTimeline
+      ABSOLUTE_DATE.startTimeTimelineFormatted
     );
     cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE).should(
       'have.attr',
       'title',
-      ABSOLUTE_DATE.endTimeTimeline
+      ABSOLUTE_DATE.endTimeTimelineFormatted
     );
   });
 

@@ -8,6 +8,7 @@
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { getInputIndex, GetInputIndex } from './get_input_output_index';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 describe('get_input_output_index', () => {
   let servicesMock: AlertServicesMock;
@@ -33,12 +34,7 @@ describe('get_input_output_index', () => {
       version: '8.0.0',
       index: ['test-input-index-1'],
       experimentalFeatures: {
-        trustedAppsByPolicyEnabled: false,
-        excludePoliciesInFilterEnabled: false,
-        metricsEntitiesEnabled: false,
-        ruleRegistryEnabled: false,
-        tGridEnabled: false,
-        uebaEnabled: false,
+        ...allowedExperimentalValues,
       },
     };
   });

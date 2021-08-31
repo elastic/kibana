@@ -43,6 +43,7 @@ import {
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
+  areLayersLoaded,
   getGeoFieldNames,
   getMapCenter,
   getMapBuffer,
@@ -95,6 +96,7 @@ export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
   type = MAP_SAVED_OBJECT_TYPE;
+  deferEmbeddableLoad = true;
 
   private _isActive: boolean;
   private _savedMap: SavedMap;
@@ -112,6 +114,9 @@ export class MapEmbeddable
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
   private _controlledBy: string;
+  private _onInitialRenderComplete?: () => void = undefined;
+  private _hasInitialRenderCompleteFired = false;
+  private _isSharable = true;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
@@ -147,6 +152,9 @@ export class MapEmbeddable
       this.onFatalError(e);
       return;
     }
+
+    // deferred loading of this embeddable is complete
+    this.setInitializationFinished();
 
     this._isInitialized = true;
     if (this._domNode) {
@@ -226,6 +234,17 @@ export class MapEmbeddable
   setEventHandlers = (eventHandlers: EventHandlers) => {
     this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
   };
+
+  public setOnInitialRenderComplete(onInitialRenderComplete?: () => void): void {
+    this._onInitialRenderComplete = onInitialRenderComplete;
+  }
+
+  /*
+   * Set to false to exclude sharing attributes 'data-*'.
+   */
+  public setIsSharable(isSharable: boolean): void {
+    this._isSharable = isSharable;
+  }
 
   getInspectorAdapters() {
     return getInspectorAdapters(this._savedMap.getStore().getState());
@@ -347,6 +366,7 @@ export class MapEmbeddable
             title={this.getTitle()}
             description={this.getDescription()}
             waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
+            isSharable={this._isSharable}
           />
         </I18nContext>
       </Provider>,
@@ -504,6 +524,15 @@ export class MapEmbeddable
   _handleStoreChanges() {
     if (!this._isActive || !getMapReady(this._savedMap.getStore().getState())) {
       return;
+    }
+
+    if (
+      this._onInitialRenderComplete &&
+      !this._hasInitialRenderCompleteFired &&
+      areLayersLoaded(this._savedMap.getStore().getState())
+    ) {
+      this._hasInitialRenderCompleteFired = true;
+      this._onInitialRenderComplete();
     }
 
     const mapExtent = getMapExtent(this._savedMap.getStore().getState());

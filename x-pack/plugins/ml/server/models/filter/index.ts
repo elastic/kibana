@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { FilterManager, Filter, FormFilter, UpdateFilter } from './filter_manager';
+export { FilterManager, FormFilter, UpdateFilter } from './filter_manager';

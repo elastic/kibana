@@ -37,21 +37,6 @@ describe('IpAddress', () => {
     });
   });
 
-  describe('valueOf', () => {
-    it.each`
-      address            | expected
-      ${'0.0.0.0'}       | ${'0'}
-      ${'0.0.0.1'}       | ${'1'}
-      ${'126.45.211.34'} | ${'2116932386'}
-      ${'ffff::'}        | ${'340277174624079928635746076935438991360'}
-    `(
-      'should return $expected as a decimal representation of $address',
-      ({ address, expected }) => {
-        expect(new IpAddress(address).valueOf().toString()).toBe(expected);
-      }
-    );
-  });
-
   describe('toString()', () => {
     it.each`
       address                 | expected

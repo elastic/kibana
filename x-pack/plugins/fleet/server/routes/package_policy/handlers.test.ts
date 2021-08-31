@@ -12,7 +12,11 @@ import type { IRouter, RequestHandler, RouteConfig } from 'kibana/server';
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { appContextService, packagePolicyService } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
-import type { PackagePolicyServiceInterface, ExternalCallback } from '../..';
+import type {
+  PackagePolicyServiceInterface,
+  PostPackagePolicyCreateCallback,
+  PutPackagePolicyUpdateCallback,
+} from '../..';
 import type { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
 
 import { registerRoutes } from './index';
@@ -58,8 +62,11 @@ jest.mock('../../services/package_policy', (): {
       list: jest.fn(),
       listIds: jest.fn(),
       update: jest.fn(),
-      runExternalCallbacks: jest.fn((callbackType, newPackagePolicy, context, request) =>
-        Promise.resolve(newPackagePolicy)
+      // @ts-ignore
+      runExternalCallbacks: jest.fn((callbackType, packagePolicy, context, request) =>
+        callbackType === 'postPackagePolicyDelete'
+          ? Promise.resolve(undefined)
+          : Promise.resolve(packagePolicy)
       ),
       upgrade: jest.fn(),
       getUpgradeDryRunDiff: jest.fn(),
@@ -132,45 +139,49 @@ describe('When calling package policy', () => {
       const callbackCallingOrder: string[] = [];
 
       // Callback one adds an input that includes a `config` property
-      const callbackOne: ExternalCallback[1] = jest.fn(async (ds) => {
-        callbackCallingOrder.push('one');
-        const newDs = {
-          ...ds,
-          inputs: [
-            {
-              type: 'endpoint',
-              enabled: true,
-              streams: [],
-              config: {
-                one: {
-                  value: 'inserted by callbackOne',
+      const callbackOne: PostPackagePolicyCreateCallback | PutPackagePolicyUpdateCallback = jest.fn(
+        async (ds) => {
+          callbackCallingOrder.push('one');
+          const newDs = {
+            ...ds,
+            inputs: [
+              {
+                type: 'endpoint',
+                enabled: true,
+                streams: [],
+                config: {
+                  one: {
+                    value: 'inserted by callbackOne',
+                  },
                 },
               },
-            },
-          ],
-        };
-        return newDs;
-      });
+            ],
+          };
+          return newDs;
+        }
+      );
 
       // Callback two adds an additional `input[0].config` property
-      const callbackTwo: ExternalCallback[1] = jest.fn(async (ds) => {
-        callbackCallingOrder.push('two');
-        const newDs = {
-          ...ds,
-          inputs: [
-            {
-              ...ds.inputs[0],
-              config: {
-                ...ds.inputs[0].config,
-                two: {
-                  value: 'inserted by callbackTwo',
+      const callbackTwo: PostPackagePolicyCreateCallback | PutPackagePolicyUpdateCallback = jest.fn(
+        async (ds) => {
+          callbackCallingOrder.push('two');
+          const newDs = {
+            ...ds,
+            inputs: [
+              {
+                ...ds.inputs[0],
+                config: {
+                  ...ds.inputs[0].config,
+                  two: {
+                    value: 'inserted by callbackTwo',
+                  },
                 },
               },
-            },
-          ],
-        };
-        return newDs;
-      });
+            ],
+          };
+          return newDs;
+        }
+      );
 
       beforeEach(() => {
         appContextService.addExternalCallback('packagePolicyCreate', callbackOne);
