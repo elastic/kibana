@@ -20,6 +20,7 @@ import { ExceptionListSoSchema } from '../schemas/saved_objects/exceptions_list_
 
 import { migrations } from './migrations';
 import { onExport } from './on_export';
+import * as i18n from './translations';
 
 /**
  * This is a super set of exception list and exception list items. The switch
@@ -187,17 +188,16 @@ const combinedMappings: SavedObjectsType['mappings'] = {
 export const getExceptionListType = (
   startServices: Promise<[CoreStart, object, unknown]>
 ): SavedObjectsType => ({
-  hidden: false,
+  hidden: true,
   management: {
     getTitle(savedObject: SavedObject<ExceptionListSoSchema>): string {
-      // TODO: i18n all of this
       const type = savedObject.attributes.list_type;
       switch (type) {
         case 'list': {
-          return `Exception List: [${savedObject.attributes.name}]`;
+          return `${i18n.EXCEPTION_LIST_NAME}: [${savedObject.attributes.name}]`;
         }
         case 'item': {
-          return `Exception List Item: [${savedObject.attributes.name}]`;
+          return `${i18n.EXCEPTION_LIST_ITEM_NAME}: [${savedObject.attributes.name}]`;
         }
         default: {
           throw new Error(`Unhandled type for type: ${type}`);
@@ -221,17 +221,16 @@ export const getExceptionListType = (
 export const exceptionListAgnosticType = (
   startServices: Promise<[CoreStart, object, unknown]>
 ): SavedObjectsType => ({
-  hidden: false,
+  hidden: true,
   management: {
     getTitle(savedObject: SavedObject<ExceptionListSoSchema>): string {
-      // TODO: i18n all of this
       const type = savedObject.attributes.list_type;
       switch (type) {
         case 'list': {
-          return `Agnostic Exception List: [${savedObject.attributes.name}]`;
+          return `${i18n.AGNOSTIC_EXCEPTION_LIST_NAME}: [${savedObject.attributes.name}]`;
         }
         case 'item': {
-          return `Agnostic Exception List Item (Agnostic): [${savedObject.attributes.name}]`;
+          return `${i18n.AGNOSTIC_EXCEPTION_LIST_ITEM_NAME}: [${savedObject.attributes.name}]`;
         }
         default: {
           throw new Error(`Unhandled type for type: ${type}`);
