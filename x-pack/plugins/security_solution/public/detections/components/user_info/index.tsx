@@ -223,7 +223,6 @@ export const useUserInfo = (): State => {
 
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean = uiCapabilities.siem.crud === true;
-  const capabilitiesCanUserRead: boolean = uiCapabilities.siem.read === true;
 
   useEffect(() => {
     if (loading !== (privilegeLoading || indexNameLoading)) {

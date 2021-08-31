@@ -17,6 +17,10 @@ import {
 } from '../../../../../common/constants';
 import { CommaSeparatedValues } from './comma_separated_values';
 import { MissingPrivileges } from './use_missing_privileges';
+import {
+  DetectionsRequirementsLink,
+  SecuritySolutionRequirementsLink,
+} from '../../../../common/components/links_to_docs';
 
 export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageTitle',
@@ -48,7 +52,7 @@ const CANNOT_EDIT_ALERTS = i18n.translate(
 
 export const missingPrivilegesCallOutBody = ({
   indexPrivileges,
-  featurePrivileges,
+  featurePrivileges = [],
 }: MissingPrivileges) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.messageDetail"
@@ -73,9 +77,12 @@ export const missingPrivilegesCallOutBody = ({
               {indexPrivileges.map(([index, missingPrivileges]) => (
                 <li key={index}>{missingIndexPrivileges(index, missingPrivileges)}</li>
               ))}
-              {featurePrivileges.map(([feature, missingPrivileges]) => (
+              {
+                // TODO: Uncomment once RBAC for alerts is reenabled
+                /* {featurePrivileges.map(([feature, missingPrivileges]) => (
                 <li key={feature}>{missingFeaturePrivileges(feature, missingPrivileges)}</li>
-              ))}
+              ))} */
+              }
             </ul>
           </>
         ) : null,
@@ -94,16 +101,16 @@ export const missingPrivilegesCallOutBody = ({
       //       </ul>
       //     </>
       //   ) : null,
-      // docs: (
-      //   <ul>
-      //     <li>
-      //       <DetectionsRequirementsLink />
-      //     </li>
-      //     <li>
-      //       <SecuritySolutionRequirementsLink />
-      //     </li>
-      //   </ul>
-      // ),
+      docs: (
+        <ul>
+          <li>
+            <DetectionsRequirementsLink />
+          </li>
+          <li>
+            <SecuritySolutionRequirementsLink />
+          </li>
+        </ul>
+      ),
     }}
   />
 );
@@ -152,14 +159,15 @@ const missingIndexPrivileges = (index: string, privileges: string[]) => (
   />
 );
 
-const missingFeaturePrivileges = (feature: string, privileges: string[]) => (
-  <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges"
-    defaultMessage="Missing {privileges} privileges for the {index} feature. {explanation}"
-    values={{
-      privileges: <CommaSeparatedValues values={privileges} />,
-      index: <EuiCode>{feature}</EuiCode>,
-      explanation: getPrivilegesExplanation(privileges, feature),
-    }}
-  />
-);
+// TODO: Uncomment once RBAC for alerts is reenabled
+// const missingFeaturePrivileges = (feature: string, privileges: string[]) => (
+//   <FormattedMessage
+//     id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges"
+//     defaultMessage="Missing {privileges} privileges for the {index} feature. {explanation}"
+//     values={{
+//       privileges: <CommaSeparatedValues values={privileges} />,
+//       index: <EuiCode>{feature}</EuiCode>,
+//       explanation: getPrivilegesExplanation(privileges, feature),
+//     }}
+//   />
+// );

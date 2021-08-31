@@ -295,15 +295,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {indicesExist && (!hasIndexRead || !hasKibanaREAD) && (
+      {indicesExist && (!hasIndexRead || !hasKibanaREAD) ? (
         <EmptyPage
           actions={emptyPageActions}
           message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
           data-test-subj="no_feature_permissions-alerts"
           title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
         />
-      )}
-      {indicesExist && hasIndexRead && hasKibanaREAD ? (
+      ) : indicesExist && hasIndexRead && hasKibanaREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>

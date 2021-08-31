@@ -139,10 +139,10 @@ describe('useAlertsPrivileges', () => {
         hasIndexRead: false,
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
-        hasKibanaCRUD: false,
-        hasKibanaREAD: false,
-        isAuthenticated: true,
-        loading: true,
+        hasKibanaCRUD: true,
+        hasKibanaREAD: true,
+        isAuthenticated: false,
+        loading: false,
       });
     });
   });
