@@ -14,3 +14,4 @@ export const ROUTES = {
   FIELDS: '/api/metrics/fields',
 };
 export const USE_KIBANA_INDEXES_KEY = 'use_kibana_indexes';
+export const TSVB_DEFAULT_COLOR = '#68BC00';

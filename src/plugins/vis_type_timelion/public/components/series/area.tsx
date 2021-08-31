@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+// @ts-ignore
+import chroma from 'chroma-js';
 import React from 'react';
 import { AreaSeries, ScaleType, CurveType, AreaSeriesStyle, PointShape } from '@elastic/charts';
 import type { VisSeries } from '../../../common/vis_data';
@@ -18,6 +20,16 @@ interface AreaSeriesComponentProps {
 
 const isShowLines = (lines: VisSeries['lines'], points: VisSeries['points']) =>
   lines?.show ? true : points?.show ? false : true;
+
+const getPointFillColor = (points: VisSeries['points'], color: string | undefined) => {
+  const pointFillColor = points?.fillColor || points?.fill === undefined ? 'white' : color;
+  return (
+    pointFillColor &&
+    chroma(pointFillColor)
+      .alpha(points?.fill ?? 1)
+      .css()
+  );
+};
 
 const getAreaSeriesStyle = ({ color, lines, points }: AreaSeriesComponentProps['visData']) =>
   ({
@@ -33,8 +45,8 @@ const getAreaSeriesStyle = ({ color, lines, points }: AreaSeriesComponentProps['
       visible: lines?.show ?? points?.show ?? true,
     },
     point: {
-      fill: points?.fillColor ?? color,
-      opacity: points?.lineWidth !== undefined ? (points.fill || 1) * 10 : 10,
+      fill: getPointFillColor(points, color),
+      opacity: 1,
       radius: points?.radius ?? 3,
       stroke: color,
       strokeWidth: points?.lineWidth ?? 2,
@@ -53,7 +65,7 @@ export const AreaSeriesComponent = ({ index, groupId, visData }: AreaSeriesCompo
     yScaleType={ScaleType.Linear}
     xAccessor={0}
     yAccessors={[1]}
-    data={visData.data}
+    data={visData._hide ? [] : visData.data}
     sortIndex={index}
     color={visData.color}
     stackAccessors={visData.stack ? [0] : undefined}

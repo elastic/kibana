@@ -14,7 +14,7 @@ import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IndexPattern, IFieldType, IndexPatternSelectProps } from '../../../../data/public';
+import { IndexPattern, IndexPatternField, IndexPatternSelectProps } from '../../../../data/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 interface ListControlEditorState {
@@ -40,7 +40,7 @@ interface ListControlEditorProps {
   deps: InputControlVisDependencies;
 }
 
-function filterField(field: IFieldType) {
+function filterField(field: IndexPatternField) {
   return (
     Boolean(field.aggregatable) &&
     ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type)
@@ -116,7 +116,7 @@ export class ListControlEditor extends PureComponent<
       return;
     }
 
-    const field = (indexPattern.fields as IFieldType[]).find(
+    const field = (indexPattern.fields as IndexPatternField[]).find(
       ({ name }) => name === this.props.controlParams.fieldName
     );
     if (!field) {

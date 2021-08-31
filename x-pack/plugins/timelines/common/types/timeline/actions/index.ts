@@ -14,32 +14,54 @@ import { TimelineNonEcsData } from '../../../search_strategy';
 import { Ecs } from '../../../ecs';
 
 export interface ActionProps {
-  ariaRowindex: number;
   action?: RowCellRender;
-  width?: number;
+  ariaRowindex: number;
+  checked: boolean;
   columnId: string;
   columnValues: string;
-  checked: boolean;
-  onRowSelected: OnRowSelected;
-  eventId: string;
-  loadingEventIds: Readonly<string[]>;
-  onEventDetailsPanelOpened: () => void;
-  showCheckboxes: boolean;
   data: TimelineNonEcsData[];
+  disabled?: boolean;
   ecsData: Ecs;
-  index: number;
+  eventId: string;
   eventIdToNoteIds?: Readonly<Record<string, string[]>>;
+  index: number;
   isEventPinned?: boolean;
   isEventViewer?: boolean;
-  rowIndex: number;
-  refetch?: () => void;
+  loadingEventIds: Readonly<string[]>;
+  onEventDetailsPanelOpened: () => void;
+  onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
+  refetch?: () => void;
+  rowIndex: number;
+  setEventsDeleted: SetEventsDeleted;
+  setEventsLoading: SetEventsLoading;
+  showCheckboxes: boolean;
   showNotes?: boolean;
   tabType?: TimelineTabs;
   timelineId: string;
   toggleShowNotes?: () => void;
+  width?: number;
 }
 
+export type SetEventsLoading = (params: { eventIds: string[]; isLoading: boolean }) => void;
+export type SetEventsDeleted = (params: { eventIds: string[]; isDeleted: boolean }) => void;
+export type OnUpdateAlertStatusSuccess = (
+  updated: number,
+  conflicts: number,
+  status: AlertStatus
+) => void;
+export type OnUpdateAlertStatusError = (status: AlertStatus, error: Error) => void;
+
+export interface StatusBulkActionsProps {
+  eventIds: string[];
+  currentStatus?: AlertStatus;
+  query?: string;
+  indexName: string;
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
+  onUpdateSuccess?: OnUpdateAlertStatusSuccess;
+  onUpdateFailure?: OnUpdateAlertStatusError;
+}
 export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;
@@ -90,14 +112,19 @@ export type ControlColumnProps = Omit<
   keyof AdditionalControlColumnProps
 > &
   Partial<AdditionalControlColumnProps>;
-
-export type OnAlertStatusActionSuccess = (status: AlertStatus) => void;
-export type OnAlertStatusActionFailure = (status: AlertStatus, error: string) => void;
 export interface BulkActionsObjectProp {
   alertStatusActions?: boolean;
-  onAlertStatusActionSuccess?: OnAlertStatusActionSuccess;
-  onAlertStatusActionFailure?: OnAlertStatusActionFailure;
+  onAlertStatusActionSuccess?: OnUpdateAlertStatusSuccess;
+  onAlertStatusActionFailure?: OnUpdateAlertStatusError;
 }
 export type BulkActionsProp = boolean | BulkActionsObjectProp;
 
-export type AlertStatus = 'open' | 'closed' | 'in-progress';
+export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
+
+/**
+ * @deprecated
+ * TODO: remove when `acknowledged` migrations are finished
+ */
+export type InProgressStatus = 'in-progress';
+
+export type AlertStatus = AlertWorkflowStatus | InProgressStatus;

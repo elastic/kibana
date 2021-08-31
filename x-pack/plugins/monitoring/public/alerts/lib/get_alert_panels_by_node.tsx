@@ -37,8 +37,8 @@ export function getAlertPanelsByNode(
     [uuid: string]: CommonAlertState[];
   } = {};
 
-  for (const { states, rawAlert } of alerts) {
-    const { id: alertId } = rawAlert;
+  for (const { states, sanitizedRule } of alerts) {
+    const { id: alertId } = sanitizedRule;
     for (const alertState of states.filter(({ state: _state }) => stateFilter(_state))) {
       const { state } = alertState;
       statesByNodes[state.nodeId] = statesByNodes[state.nodeId] || [];
@@ -46,7 +46,7 @@ export function getAlertPanelsByNode(
 
       alertsByNodes[state.nodeId] = alertsByNodes[state.nodeId] || {};
       alertsByNodes[state.nodeId][alertId] = alertsByNodes[alertState.state.nodeId][alertId] || {
-        alert: rawAlert,
+        alert: sanitizedRule,
         states: [],
         count: 0,
       };

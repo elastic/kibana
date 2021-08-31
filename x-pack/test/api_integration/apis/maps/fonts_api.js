@@ -18,5 +18,19 @@ export default function ({ getService }) {
 
       expect(resp.body.length).to.be(74696);
     });
+
+    it('should return 404 when file not found', async () => {
+      await supertest
+        .get(`/api/maps/fonts/Open%20Sans%20Regular,Arial%20Unicode%20MS%20Regular/noGonaFindMe`)
+        .expect(404);
+    });
+
+    it('should return 404 when file is not in font folder (../)', async () => {
+      await supertest.get(`/api/maps/fonts/open_sans/..%2fopen_sans%2f0-255`).expect(404);
+    });
+
+    it('should return 404 when file is not in font folder (./../)', async () => {
+      await supertest.get(`/api/maps/fonts/open_sans/.%2f..%2fopen_sans%2f0-255`).expect(404);
+    });
   });
 }

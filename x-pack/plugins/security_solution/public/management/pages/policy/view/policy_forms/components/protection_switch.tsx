@@ -24,9 +24,11 @@ import { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '..
 export const ProtectionSwitch = React.memo(
   ({
     protection,
+    protectionLabel,
     osList,
   }: {
     protection: PolicyProtection;
+    protectionLabel?: string;
     osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
@@ -93,10 +95,9 @@ export const ProtectionSwitch = React.memo(
     return (
       <EuiSwitch
         label={i18n.translate('xpack.securitySolution.endpoint.policy.details.protectionsEnabled', {
-          defaultMessage:
-            '{protectionName} protections {mode, select, true {enabled} false {disabled}}',
+          defaultMessage: '{protectionLabel} {mode, select, true {enabled} false {disabled}}',
           values: {
-            protectionName: protection.charAt(0).toUpperCase() + protection.substring(1),
+            protectionLabel,
             mode: selected !== ProtectionModes.off,
           },
         })}

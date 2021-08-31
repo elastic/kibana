@@ -13,10 +13,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import { orderBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { ValuesType } from 'utility-types';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import {
+  BreakPoints,
+  useBreakPoints,
+} from '../../../../hooks/use_break_points';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
@@ -31,11 +35,15 @@ import {
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../utils/style';
+import { ApmRoutes } from '../../../routing/apm_route_config';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 
 type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
@@ -46,13 +54,6 @@ type ServiceListItem = ValuesType<Items>;
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
-
-const ToolTipWrapper = euiStyled.span`
-  width: 100%;
-  .apmServiceList__serviceNameTooltip {
-    width: 100%;
-  }
-`;
 
 const SERVICE_HEALTH_STATUS_ORDER = [
   ServiceHealthStatus.unknown,
@@ -65,11 +66,16 @@ export function getServiceColumns({
   query,
   showTransactionTypeColumn,
   comparisonData,
+  breakPoints,
 }: {
-  query: Record<string, string | undefined>;
+  query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
+  breakPoints: BreakPoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<ServiceListItem>> {
+  const { isSmall, isLarge, isXl } = breakPoints;
+  const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
+  const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
   return [
     {
       field: 'healthStatus',
@@ -94,34 +100,38 @@ export function getServiceColumns({
       width: '40%',
       sortable: true,
       render: (_, { serviceName, agentName }) => (
-        <ToolTipWrapper data-test-subj="apmServiceListAppLink">
-          <EuiToolTip
-            delay="long"
-            content={formatString(serviceName)}
-            id="service-name-tooltip"
-            anchorClassName="apmServiceList__serviceNameTooltip"
-          >
+        <TruncateWithTooltip
+          data-test-subj="apmServiceListAppLink"
+          text={formatString(serviceName)}
+          content={
             <ServiceLink
               agentName={agentName}
               query={query}
               serviceName={serviceName}
             />
-          </EuiToolTip>
-        </ToolTipWrapper>
+          }
+        />
       ),
     },
-    {
-      field: 'environments',
-      name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
-        defaultMessage: 'Environment',
-      }),
-      width: `${unit * 10}px`,
-      sortable: true,
-      render: (_, { environments }) => (
-        <EnvironmentBadge environments={environments ?? []} />
-      ),
-    },
-    ...(showTransactionTypeColumn
+    ...(showWhenSmallOrGreaterThanLarge
+      ? [
+          {
+            field: 'environments',
+            name: i18n.translate(
+              'xpack.apm.servicesTable.environmentColumnLabel',
+              {
+                defaultMessage: 'Environment',
+              }
+            ),
+            width: `${unit * 10}px`,
+            sortable: true,
+            render: (_, { environments }) => (
+              <EnvironmentBadge environments={environments ?? []} />
+            ),
+          } as ITableColumn<ServiceListItem>,
+        ]
+      : []),
+    ...(showTransactionTypeColumn && showWhenSmallOrGreaterThanXL
       ? [
           {
             field: 'transactionType',
@@ -147,12 +157,13 @@ export function getServiceColumns({
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.latency
           }
+          hideSeries={!showWhenSmallOrGreaterThanLarge}
           color="euiColorVis1"
           valueLabel={asMillisecondDuration(latency || 0)}
         />
       ),
       align: 'left',
-      width: `${unit * 10}px`,
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 11}px` : 'auto',
     },
     {
       field: 'throughput',
@@ -167,17 +178,18 @@ export function getServiceColumns({
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.throughput
           }
+          hideSeries={!showWhenSmallOrGreaterThanLarge}
           color="euiColorVis0"
           valueLabel={asTransactionRate(throughput)}
         />
       ),
       align: 'left',
-      width: `${unit * 10}px`,
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 11}px` : 'auto',
     },
     {
       field: 'transactionErrorRate',
       name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
-        defaultMessage: 'Error rate %',
+        defaultMessage: 'Failed transaction rate',
       }),
       sortable: true,
       dataType: 'number',
@@ -191,13 +203,14 @@ export function getServiceColumns({
             comparisonSeries={
               comparisonData?.previousPeriod[serviceName]?.transactionErrorRate
             }
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
             color="euiColorVis7"
             valueLabel={valueLabel}
           />
         );
       },
       align: 'left',
-      width: `${unit * 10}px`,
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : 'auto',
     },
   ];
 }
@@ -215,6 +228,7 @@ export function ServiceList({
   comparisonData,
   isLoading,
 }: Props) {
+  const breakPoints = useBreakPoints();
   const displayHealthStatus = items.some((item) => 'healthStatus' in item);
 
   const showTransactionTypeColumn = items.some(
@@ -225,10 +239,20 @@ export function ServiceList({
 
   const { query } = useApmParams('/services');
 
+  const { kuery } = query;
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
+
   const serviceColumns = useMemo(
     () =>
-      getServiceColumns({ query, showTransactionTypeColumn, comparisonData }),
-    [query, showTransactionTypeColumn, comparisonData]
+      getServiceColumns({
+        query,
+        showTransactionTypeColumn,
+        comparisonData,
+        breakPoints,
+      }),
+    [query, showTransactionTypeColumn, comparisonData, breakPoints]
   );
 
   const columns = displayHealthStatus
@@ -239,14 +263,18 @@ export function ServiceList({
     : 'transactionsPerMinute';
 
   return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      direction="column"
-      responsive={false}
-      alignItems="flexEnd"
-    >
+    <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
       <EuiFlexItem>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="xs"
+          justifyContent="flexEnd"
+        >
+          {fallbackToTransactions && (
+            <EuiFlexItem>
+              <AggregatedTransactionsBadge />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"

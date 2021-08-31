@@ -7,11 +7,17 @@
 
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { BreakPoints } from '../../../../hooks/use_break_points';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
 import { getServiceColumns, ServiceList } from './';
 import { items } from './__fixtures__/service_api_mock_data';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import {
+  getCallApmApiSpy,
+  getCreateCallApmApiSpy,
+} from '../../../../services/rest/callApmApiSpy';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -24,6 +30,17 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('ServiceList', () => {
   beforeAll(() => {
     mockMoment();
+
+    const callApmApiSpy = getCallApmApiSpy().mockImplementation(
+      ({ endpoint }) => {
+        if (endpoint === 'GET /api/apm/fallback_to_transactions') {
+          return Promise.resolve({ fallbackToTransactions: false });
+        }
+        return Promise.reject(`Response for ${endpoint} is not defined`);
+      }
+    );
+
+    getCreateCallApmApiSpy().mockImplementation(() => callApmApiSpy as any);
   });
 
   it('renders empty state', () => {
@@ -42,7 +59,14 @@ describe('ServiceList', () => {
     ).not.toThrowError();
   });
 
-  it('renders columns correctly', () => {
+  describe('responsive columns', () => {
+    const query = {
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
+    };
+
     const service: any = {
       serviceName: 'opbeans-python',
       agentName: 'python',
@@ -59,17 +83,132 @@ describe('ServiceList', () => {
         timeseries: [],
       },
       environments: ['test'],
+      transactionType: 'request',
     };
-    const renderedColumns = getServiceColumns({
-      query: {},
-      showTransactionTypeColumn: false,
-    }).map((c) => c.render!(service[c.field!], service));
+    describe('when small', () => {
+      it('shows environment, transaction type and sparklines', () => {
+        const renderedColumns = getServiceColumns({
+          query,
+          showTransactionTypeColumn: true,
+          breakPoints: {
+            isSmall: true,
+            isLarge: true,
+            isXl: true,
+          } as BreakPoints,
+        }).map((c) =>
+          c.render ? c.render!(service[c.field!], service) : service[c.field!]
+        );
+        expect(renderedColumns.length).toEqual(7);
+        expect(renderedColumns[2]).toMatchInlineSnapshot(`
+          <EnvironmentBadge
+            environments={
+              Array [
+                "test",
+              ]
+            }
+          />
+        `);
+        expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
+        expect(renderedColumns[4]).toMatchInlineSnapshot(`
+          <ServiceListMetric
+            color="euiColorVis1"
+            hideSeries={false}
+            valueLabel="0 ms"
+          />
+        `);
+      });
+    });
 
-    expect(renderedColumns[0]).toMatchInlineSnapshot(`
-      <HealthBadge
-        healthStatus="unknown"
-      />
-    `);
+    describe('when Large', () => {
+      it('hides environment, transaction type and sparklines', () => {
+        const renderedColumns = getServiceColumns({
+          query,
+          showTransactionTypeColumn: true,
+          breakPoints: {
+            isSmall: false,
+            isLarge: true,
+            isXl: true,
+          } as BreakPoints,
+        }).map((c) =>
+          c.render ? c.render!(service[c.field!], service) : service[c.field!]
+        );
+        expect(renderedColumns.length).toEqual(5);
+        expect(renderedColumns[2]).toMatchInlineSnapshot(`
+          <ServiceListMetric
+            color="euiColorVis1"
+            hideSeries={true}
+            valueLabel="0 ms"
+          />
+        `);
+      });
+
+      describe('when XL', () => {
+        it('hides transaction type', () => {
+          const renderedColumns = getServiceColumns({
+            query,
+            showTransactionTypeColumn: true,
+            breakPoints: {
+              isSmall: false,
+              isLarge: false,
+              isXl: true,
+            } as BreakPoints,
+          }).map((c) =>
+            c.render ? c.render!(service[c.field!], service) : service[c.field!]
+          );
+          expect(renderedColumns.length).toEqual(6);
+          expect(renderedColumns[2]).toMatchInlineSnapshot(`
+            <EnvironmentBadge
+              environments={
+                Array [
+                  "test",
+                ]
+              }
+            />
+          `);
+          expect(renderedColumns[3]).toMatchInlineSnapshot(`
+            <ServiceListMetric
+              color="euiColorVis1"
+              hideSeries={false}
+              valueLabel="0 ms"
+            />
+          `);
+        });
+      });
+
+      describe('when XXL', () => {
+        it('hides transaction type', () => {
+          const renderedColumns = getServiceColumns({
+            query,
+            showTransactionTypeColumn: true,
+            breakPoints: {
+              isSmall: false,
+              isLarge: false,
+              isXl: false,
+            } as BreakPoints,
+          }).map((c) =>
+            c.render ? c.render!(service[c.field!], service) : service[c.field!]
+          );
+          expect(renderedColumns.length).toEqual(7);
+          expect(renderedColumns[2]).toMatchInlineSnapshot(`
+          <EnvironmentBadge
+            environments={
+              Array [
+                "test",
+              ]
+            }
+          />
+        `);
+          expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
+          expect(renderedColumns[4]).toMatchInlineSnapshot(`
+          <ServiceListMetric
+            color="euiColorVis1"
+            hideSeries={false}
+            valueLabel="0 ms"
+          />
+        `);
+        });
+      });
+    });
   });
 
   describe('without ML data', () => {

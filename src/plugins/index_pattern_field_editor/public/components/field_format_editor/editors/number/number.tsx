@@ -66,6 +66,7 @@ export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorPa
           error={error}
         >
           <EuiFieldText
+            data-test-subj={'numberEditorFormatPattern'}
             value={formatParams.pattern}
             placeholder={defaultPattern}
             onChange={(e) => {

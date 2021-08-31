@@ -34,11 +34,19 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('Rule exception operators for data type text', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/text');
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/text_no_spaces');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/text');
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/text_no_spaces');
+    });
+
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       await createListsIndex(supertest);
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/text');
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/text_no_spaces');
     });
 
     afterEach(async () => {
@@ -46,8 +54,6 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllAlerts(supertest);
       await deleteAllExceptions(es);
       await deleteListsIndex(supertest);
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/text');
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/text_no_spaces');
     });
 
     describe('"is" operator', () => {

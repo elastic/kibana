@@ -7,7 +7,7 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib';
+import { DataViewMissingIndices } from '../../../common/index_patterns/lib';
 import {
   GetFieldsOptions,
   IIndexPatternsApiClient,
@@ -23,14 +23,14 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     this.http = http;
   }
 
-  private _request(url: string, query: any) {
+  private _request(url: string, query?: any) {
     return this.http
       .fetch(url, {
         query,
       })
       .catch((resp: any) => {
         if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
-          throw new IndexPatternMissingIndices(resp.body.message);
+          throw new DataViewMissingIndices(resp.body.message);
         }
 
         throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);
@@ -61,5 +61,10 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
     }).then((resp: any) => resp.fields || []);
+  }
+
+  async hasUserIndexPattern(): Promise<boolean> {
+    const response = await this._request(this._getUrl(['has_user_index_pattern']));
+    return response.result;
   }
 }

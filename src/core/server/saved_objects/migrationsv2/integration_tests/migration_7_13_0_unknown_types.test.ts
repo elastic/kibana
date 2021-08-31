@@ -15,7 +15,7 @@ import JSON5 from 'json5';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
-import { getEnvOptions } from '@kbn/config/target/mocks';
+import { getEnvOptions } from '../../../config/mocks';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const targetIndex = `.kibana_${kibanaVersion}_001`;

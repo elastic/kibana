@@ -44,23 +44,25 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
   );
 
   if (fieldsToAdd.length > 0) {
-    sirFields = alerts.reduce<Record<SirFieldKey, string | null>>((acc, alert) => {
-      fieldsToAdd.forEach((alertField) => {
-        const field = get(alertFieldMapping[alertField].alertPath, alert);
-        if (field && !manageDuplicate[alertFieldMapping[alertField].sirFieldKey].has(field)) {
-          manageDuplicate[alertFieldMapping[alertField].sirFieldKey].add(field);
-          acc = {
-            ...acc,
-            [alertFieldMapping[alertField].sirFieldKey]: `${
-              acc[alertFieldMapping[alertField].sirFieldKey] != null
-                ? `${acc[alertFieldMapping[alertField].sirFieldKey]},${field}`
-                : field
-            }`,
-          };
-        }
-      });
-      return acc;
-    }, sirFields);
+    sirFields = alerts
+      .filter((alert) => !alert.error && alert.source != null)
+      .reduce<Record<SirFieldKey, string | null>>((acc, alert) => {
+        fieldsToAdd.forEach((alertField) => {
+          const field = get(alertFieldMapping[alertField].alertPath, alert.source);
+          if (field && !manageDuplicate[alertFieldMapping[alertField].sirFieldKey].has(field)) {
+            manageDuplicate[alertFieldMapping[alertField].sirFieldKey].add(field);
+            acc = {
+              ...acc,
+              [alertFieldMapping[alertField].sirFieldKey]: `${
+                acc[alertFieldMapping[alertField].sirFieldKey] != null
+                  ? `${acc[alertFieldMapping[alertField].sirFieldKey]},${field}`
+                  : field
+              }`,
+            };
+          }
+        });
+        return acc;
+      }, sirFields);
   }
 
   return {

@@ -24,6 +24,7 @@ import { CrawlRequestsTable } from './components/crawl_requests_table';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DomainsTable } from './components/domains_table';
+import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerOverviewLogic } from './crawler_overview_logic';
 
@@ -42,7 +43,7 @@ export const CrawlerOverview: React.FC = () => {
       pageChrome={getEngineBreadcrumbs([CRAWLER_TITLE])}
       pageHeader={{
         pageTitle: CRAWLER_TITLE,
-        rightSideItems: [<CrawlerStatusIndicator />],
+        rightSideItems: [<ManageCrawlsPopover />, <CrawlerStatusIndicator />],
       }}
       isLoading={dataLoading}
     >

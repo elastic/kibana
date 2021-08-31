@@ -33,6 +33,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               transactionType: 'request',
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -59,6 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end,
               transactionType: 'request',
               environment: 'production',
+              kuery: '',
             },
           })
         );
@@ -108,7 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(firstItem).toMatchInline(`
           Object {
             "group_id": "d16d39e7fa133b8943cea035430a7b4e",
-            "last_seen": 1627975146078,
+            "lastSeen": 1627975146078,
             "name": "Response status 404",
             "occurrences": 17,
           }

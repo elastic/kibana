@@ -16,6 +16,7 @@ import { HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
 
+/** @public */
 export class ColorFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.COLOR;
   static title = i18n.translate('fieldFormats.color.title', {

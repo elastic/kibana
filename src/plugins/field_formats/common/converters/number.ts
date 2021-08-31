@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { NumeralFormat } from './numeral';
 import { FIELD_FORMAT_IDS } from '../types';
 
+/** @public */
 export class NumberFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.NUMBER;
   static title = i18n.translate('fieldFormats.number.title', {

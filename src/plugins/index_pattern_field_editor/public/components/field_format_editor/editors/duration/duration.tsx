@@ -103,6 +103,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
           error={hasDecimalError ? null : error}
         >
           <EuiSelect
+            data-test-subj={'durationEditorInputFormat'}
             value={formatParams.inputFormat}
             options={format.type.inputFormats.map((fmt: InputFormat) => {
               return {
@@ -126,6 +127,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
           isInvalid={!!error}
         >
           <EuiSelect
+            data-test-subj={'durationEditorOutputFormat'}
             value={formatParams.outputFormat}
             options={format.type.outputFormats.map((fmt: OutputFormat) => {
               return {

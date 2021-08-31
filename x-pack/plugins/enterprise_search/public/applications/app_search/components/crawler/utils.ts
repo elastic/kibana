@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   CrawlerDomain,
   CrawlerDomainFromServer,
@@ -27,6 +29,9 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
     crawl_rules: crawlRules,
     default_crawl_rule: defaultCrawlRule,
     entry_points: entryPoints,
+    deduplication_enabled: deduplicationEnabled,
+    deduplication_fields: deduplicationFields,
+    available_deduplication_fields: availableDeduplicationFields,
   } = payload;
 
   const clientPayload: CrawlerDomain = {
@@ -37,6 +42,9 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
     crawlRules,
     sitemaps,
     entryPoints,
+    deduplicationEnabled,
+    deduplicationFields,
+    availableDeduplicationFields,
   };
 
   if (lastCrawl) {
@@ -101,3 +109,28 @@ export function crawlDomainValidationToResult(
     state: 'valid',
   };
 }
+
+export const getDeleteDomainConfirmationMessage = (domainUrl: string) => {
+  return i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.action.deleteDomain.confirmationPopupMessage',
+    {
+      defaultMessage:
+        'Are you sure you want to remove the domain "{domainUrl}" and all of its settings?',
+      values: {
+        domainUrl,
+      },
+    }
+  );
+};
+
+export const getDeleteDomainSuccessMessage = (domainUrl: string) => {
+  return i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.action.deleteDomain.successMessage',
+    {
+      defaultMessage: "Domain '{domainUrl}' was deleted",
+      values: {
+        domainUrl,
+      },
+    }
+  );
+};

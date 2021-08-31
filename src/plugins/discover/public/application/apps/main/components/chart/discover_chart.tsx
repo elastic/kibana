@@ -22,7 +22,6 @@ import { DocumentViewModeToggle } from '../view_mode_toggle';
 const TimechartHeaderMemoized = memo(TimechartHeader);
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export function DiscoverChart({
-  isLegacy,
   resetQuery,
   savedSearch,
   savedSearchDataChart$,
@@ -34,7 +33,6 @@ export function DiscoverChart({
   discoverViewMode,
   setDiscoverViewMode,
 }: {
-  isLegacy: boolean;
   resetQuery: () => void;
   savedSearch: SavedSearch;
   savedSearchDataChart$: DataCharts$;
@@ -144,10 +142,7 @@ export function DiscoverChart({
             })}
             className="dscTimechart"
           >
-            <div
-              className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
-              data-test-subj="discoverChart"
-            >
+            <div className="dscHistogram" data-test-subj="discoverChart">
               <DiscoverHistogramMemoized
                 savedSearchData$={savedSearchDataChart$}
                 timefilterUpdateHandler={timefilterUpdateHandler}

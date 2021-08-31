@@ -12,6 +12,7 @@ import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 
+/** @public */
 export class BoolFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.BOOLEAN;
   static title = i18n.translate('fieldFormats.boolean.title', {

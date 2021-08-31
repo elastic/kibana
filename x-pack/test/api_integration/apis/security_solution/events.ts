@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 
 import {
   Direction,

@@ -27,7 +27,7 @@ import {
   waitForRuleSuccessOrStatus,
   getRuleForSignalTesting,
 } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 
 // eslint-disable-next-line import/no-default-export
@@ -68,15 +68,22 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('tests with auditbeat data', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        });
+
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        });
+
         beforeEach(async () => {
           await deleteAllAlerts(supertest);
           await createSignalsIndex(supertest);
-          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
+
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
           await deleteAllAlerts(supertest);
-          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         it('should be able to execute and get 10 signals', async () => {

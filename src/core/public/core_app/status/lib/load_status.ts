@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { UnwrapPromise } from '@kbn/utility-types';
-import type { ServerStatus, StatusResponse } from '../../../../types/status';
+import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../../../types/status';
 import type { HttpSetup } from '../../../http';
 import type { NotificationsSetup } from '../../../notifications';
 import type { DataType } from '../lib';
@@ -22,11 +22,16 @@ export interface Metric {
 export interface FormattedStatus {
   id: string;
   state: {
-    id: string;
+    id: ServiceStatusLevel;
     title: string;
     message: string;
     uiColor: string;
   };
+}
+
+interface StatusUIAttributes {
+  title: string;
+  uiColor: string;
 }
 
 /**
@@ -86,17 +91,46 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
 /**
  * Reformat the backend data to make the frontend views simpler.
  */
-function formatStatus(status: ServerStatus): FormattedStatus {
+function formatStatus(id: string, status: ServiceStatus): FormattedStatus {
+  const { title, uiColor } = STATUS_LEVEL_UI_ATTRS[status.level];
+
   return {
-    id: status.id,
+    id,
     state: {
-      id: status.state,
-      title: status.title,
-      message: status.message,
-      uiColor: status.uiColor,
+      id: status.level,
+      message: status.summary,
+      title,
+      uiColor,
     },
   };
 }
+
+const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevel, StatusUIAttributes> = {
+  critical: {
+    title: i18n.translate('core.status.redTitle', {
+      defaultMessage: 'Red',
+    }),
+    uiColor: 'danger',
+  },
+  unavailable: {
+    title: i18n.translate('core.status.redTitle', {
+      defaultMessage: 'Red',
+    }),
+    uiColor: 'danger',
+  },
+  degraded: {
+    title: i18n.translate('core.status.yellowTitle', {
+      defaultMessage: 'Yellow',
+    }),
+    uiColor: 'warning',
+  },
+  available: {
+    title: i18n.translate('core.status.greenTitle', {
+      defaultMessage: 'Green',
+    }),
+    uiColor: 'secondary',
+  },
+};
 
 /**
  * Get the status from the server API and format it for display.
@@ -111,7 +145,7 @@ export async function loadStatus({
   let response: StatusResponse;
 
   try {
-    response = await http.get('/api/status');
+    response = await http.get('/api/status', { query: { v8format: true } });
   } catch (e) {
     // API returns a 503 response if not all services are available.
     // In this case, we want to treat this as a successful API call, so that we can
@@ -144,8 +178,15 @@ export async function loadStatus({
   return {
     name: response.name,
     version: response.version,
-    statuses: response.status.statuses.map(formatStatus),
-    serverState: formatStatus(response.status.overall).state,
+    statuses: [
+      ...Object.entries(response.status.core).map(([serviceName, status]) =>
+        formatStatus(`core:${serviceName}`, status)
+      ),
+      ...Object.entries(response.status.plugins).map(([pluginName, status]) =>
+        formatStatus(`plugin:${pluginName}`, status)
+      ),
+    ],
+    serverState: formatStatus('overall', response.status.overall).state,
     metrics: formatMetrics(response),
   };
 }

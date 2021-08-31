@@ -63,6 +63,7 @@ const TRANSFORM_OPTIONS = [
 ];
 const DEFAULT_TRANSFORM_OPTION = false;
 
+/** @public */
 export class StringFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.STRING;
   static title = i18n.translate('fieldFormats.string.title', {
@@ -136,7 +137,7 @@ export class StringFormat extends FieldFormat {
     }
 
     return hit?.highlight?.[field?.name]
-      ? getHighlightHtml(val, hit.highlight[field.name])
+      ? getHighlightHtml(escape(val), hit.highlight[field.name])
       : escape(this.textConvert(val));
   };
 }

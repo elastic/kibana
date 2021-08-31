@@ -8,10 +8,10 @@
 
 import { DependencyList, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { LocatorGetUrlParams, LocatorPublic } from '../../../common/url_service';
 
-export const useLocatorUrl = <P extends SerializableState>(
+export const useLocatorUrl = <P extends SerializableRecord>(
   locator: LocatorPublic<P> | null | undefined,
   params: P,
   getUrlParams?: LocatorGetUrlParams,

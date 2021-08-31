@@ -20,7 +20,7 @@ export interface RulesByType {
 }
 export interface CommonAlertStatus {
   states: CommonAlertState[];
-  rawAlert: Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
+  sanitizedRule: Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 }
 
 export interface CommonAlertState {

@@ -360,6 +360,9 @@
               "provider": {
                 "type": "keyword"
               },
+              "reason": {
+                "type": "keyword"
+              },
               "risk_score": {
                 "type": "float"
               },
@@ -421,6 +424,9 @@
           },
           "depth": {
             "type": "integer"
+          },
+          "reason": {
+            "type": "keyword"
           }
         }
       }

@@ -60,6 +60,8 @@ describe('EventColumnView', () => {
     isEventPinned: false,
     leadingControlColumns: [],
     trailingControlColumns: [],
+    setEventsLoading: jest.fn(),
+    setEventsDeleted: jest.fn(),
   };
 
   // TODO: next 3 tests will be re-enabled in the future.

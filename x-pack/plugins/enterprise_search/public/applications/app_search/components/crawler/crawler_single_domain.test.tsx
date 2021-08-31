@@ -13,13 +13,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCode } from '@elastic/eui';
-
 import { getPageHeaderActions } from '../../../test_helpers';
 
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
-import { CrawlerOverview } from './crawler_overview';
+import { DeduplicationPanel } from './components/deduplication_panel';
+import { DeleteDomainPanel } from './components/delete_domain_panel';
+import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
 import { CrawlerSingleDomain } from './crawler_single_domain';
 
 const MOCK_VALUES = {
@@ -50,30 +50,50 @@ describe('CrawlerSingleDomain', () => {
   it('renders', () => {
     const wrapper = shallow(<CrawlerSingleDomain />);
 
-    expect(wrapper.find(EuiCode).render().text()).toContain('https://elastic.co');
+    expect(wrapper.find(DeleteDomainPanel)).toHaveLength(1);
     expect(wrapper.prop('pageHeader').pageTitle).toEqual('https://elastic.co');
   });
 
-  it('uses a placeholder for the page title and page chrome if a domain has not been set', () => {
+  it('does not render a page header and uses placeholder chrome while loading', () => {
     setMockValues({
       ...MOCK_VALUES,
+      dataLoading: true,
       domain: null,
     });
 
     const wrapper = shallow(<CrawlerSingleDomain />);
 
-    expect(wrapper.prop('pageHeader').pageTitle).toEqual('Loading...');
+    expect(wrapper.prop('pageChrome')).toContain('...');
+    expect(wrapper.prop('pageHeader')).toBeUndefined();
   });
 
   it('contains a crawler status banner', () => {
-    const wrapper = shallow(<CrawlerOverview />);
+    const wrapper = shallow(<CrawlerSingleDomain />);
 
     expect(wrapper.find(CrawlerStatusBanner)).toHaveLength(1);
   });
 
   it('contains a crawler status indicator', () => {
-    const wrapper = shallow(<CrawlerOverview />);
+    const wrapper = shallow(<CrawlerSingleDomain />);
 
     expect(getPageHeaderActions(wrapper).find(CrawlerStatusIndicator)).toHaveLength(1);
+  });
+
+  it('contains a popover to manage crawls', () => {
+    const wrapper = shallow(<CrawlerSingleDomain />);
+
+    expect(getPageHeaderActions(wrapper).find(ManageCrawlsPopover)).toHaveLength(1);
+  });
+
+  it('contains a panel to manage deduplication settings', () => {
+    const wrapper = shallow(<CrawlerSingleDomain />);
+
+    expect(wrapper.find(DeduplicationPanel)).toHaveLength(1);
+  });
+
+  it('contains a panel to delete the domain', () => {
+    const wrapper = shallow(<CrawlerSingleDomain />);
+
+    expect(wrapper.find(DeleteDomainPanel)).toHaveLength(1);
   });
 });

@@ -37,6 +37,7 @@ import {
   navigateAway,
   LensRootStore,
   loadInitial,
+  LensAppState,
   LensState,
 } from '../state_management';
 import { getPreloadedState } from '../state_management/lens_slice';
@@ -46,7 +47,15 @@ export async function getLensServices(
   startDependencies: LensPluginStartDependencies,
   attributeService: () => Promise<LensAttributeService>
 ): Promise<LensAppServices> {
-  const { data, navigation, embeddable, savedObjectsTagging, usageCollection } = startDependencies;
+  const {
+    data,
+    inspector,
+    navigation,
+    embeddable,
+    savedObjectsTagging,
+    usageCollection,
+    fieldFormats,
+  } = startDependencies;
 
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer();
@@ -55,7 +64,9 @@ export async function getLensServices(
   return {
     data,
     storage,
+    inspector,
     navigation,
+    fieldFormats,
     stateTransfer,
     usageCollection,
     savedObjectsTagging,
@@ -74,7 +85,6 @@ export async function getLensServices(
         ? stateTransfer?.getAppNameFromId(embeddableEditorIncomingState.originatingApp)
         : undefined;
     },
-
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
   };
@@ -139,6 +149,7 @@ export async function mountApp(
     if (stateTransfer && props?.input) {
       const { input, isCopied } = props;
       stateTransfer.navigateToWithEmbeddablePackage(embeddableEditorIncomingState?.originatingApp, {
+        path: embeddableEditorIncomingState?.originatingPath,
         state: {
           embeddableId: isCopied ? undefined : embeddableEditorIncomingState.embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
@@ -147,7 +158,9 @@ export async function mountApp(
         },
       });
     } else {
-      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp);
+      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp, {
+        path: embeddableEditorIncomingState?.originatingPath,
+      });
     }
   };
   const initialContext =
@@ -174,8 +187,9 @@ export async function mountApp(
     embeddableEditorIncomingState,
     initialContext,
   };
+  const emptyState = getPreloadedState(storeDeps) as LensAppState;
   const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
-    lens: getPreloadedState(storeDeps),
+    lens: emptyState,
   } as DeepPartial<LensState>);
 
   const EditorRenderer = React.memo(
@@ -188,7 +202,8 @@ export async function mountApp(
       );
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
-      lensStore.dispatch(loadInitial({ redirectCallback, initialInput }));
+
+      lensStore.dispatch(loadInitial({ redirectCallback, initialInput, emptyState }));
 
       return (
         <Provider store={lensStore}>

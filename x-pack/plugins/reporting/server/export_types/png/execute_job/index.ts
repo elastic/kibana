@@ -16,8 +16,8 @@ import {
   getConditionalHeaders,
   getFullUrls,
   omitBlockedHeaders,
+  generatePngObservableFactory,
 } from '../../common';
-import { generatePngObservableFactory } from '../lib/generate_png';
 import { TaskPayloadPNG } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<
@@ -51,10 +51,9 @@ export const runTaskFnFactory: RunTaskFnFactory<
           job.layout
         );
       }),
-      tap(({ base64 }) => stream.write(base64)),
-      map(({ base64, warnings }) => ({
+      tap(({ buffer }) => stream.write(buffer)),
+      map(({ warnings }) => ({
         content_type: 'image/png',
-        size: (base64 && base64.length) || 0,
         warnings,
       })),
       catchError((err) => {

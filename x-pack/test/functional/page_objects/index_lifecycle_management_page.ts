@@ -79,7 +79,7 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
 
     async increasePolicyListPageSize() {
       await testSubjects.click('tablePaginationPopoverButton');
-      await testSubjects.click(`tablePagination-100-rows`);
+      await testSubjects.click(`tablePagination-50-rows`);
     },
 
     async getPolicyRow(name: string) {

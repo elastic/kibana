@@ -6,9 +6,16 @@
  */
 
 import { cloneDeep } from 'lodash';
+import {
+  Query,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  buildEsQuery,
+  buildQueryFromFilters,
+  IndexPatternBase,
+} from '@kbn/es-query';
 import { IUiSettingsClient } from 'kibana/public';
-import { esQuery, Query, esKuery } from '../../../../../../../../src/plugins/data/public';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/public';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { getQueryFromSavedSearch } from '../../../util/index_utils';
@@ -31,7 +38,7 @@ export function getDefaultDatafeedQuery() {
 
 export function createSearchItems(
   kibanaConfig: IUiSettingsClient,
-  indexPattern: IIndexPattern | undefined,
+  indexPattern: IndexPatternBase | undefined,
   savedSearch: SavedSearchSavedObject | null
 ) {
   // query is only used by the data visualizer as it needs
@@ -53,11 +60,11 @@ export function createSearchItems(
     const filters = Array.isArray(filter) ? filter : [];
 
     if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
-      const ast = esKuery.fromKueryExpression(query.query);
+      const ast = fromKueryExpression(query.query);
       if (query.query !== '') {
-        combinedQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
+        combinedQuery = toElasticsearchQuery(ast, indexPattern);
       }
-      const filterQuery = esQuery.buildQueryFromFilters(filters, indexPattern);
+      const filterQuery = buildQueryFromFilters(filters, indexPattern);
 
       if (Array.isArray(combinedQuery.bool.filter) === false) {
         combinedQuery.bool.filter =
@@ -72,8 +79,8 @@ export function createSearchItems(
       combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
       combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
     } else {
-      const esQueryConfigs = esQuery.getEsQueryConfig(kibanaConfig);
-      combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+      const esQueryConfigs = getEsQueryConfig(kibanaConfig);
+      combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
     }
   }
 

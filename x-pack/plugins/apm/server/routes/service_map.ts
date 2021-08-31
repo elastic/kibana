@@ -50,9 +50,13 @@ const serviceMapRoute = createApmServerRoute({
       query: { serviceName, environment },
     } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      start: setup.start,
+      end: setup.end,
+      kuery: '',
+    });
     return getServiceMap({
       setup,
       serviceName,
@@ -88,9 +92,13 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
       query: { environment },
     } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      start: setup.start,
+      end: setup.end,
+      kuery: '',
+    });
 
     return getServiceMapServiceNodeInfo({
       environment,

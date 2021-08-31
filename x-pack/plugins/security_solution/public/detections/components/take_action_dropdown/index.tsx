@@ -6,29 +6,23 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { EuiContextMenu, EuiButton, EuiPopover } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
-
+import { isEmpty } from 'lodash/fp';
+import { TimelineEventsDetailsItem } from '../../../../common';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
-
-import { TimelineEventsDetailsItem, TimelineNonEcsData } from '../../../../common';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
-/* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
-import {
-    ACTION_ADD_TO_CASE
-} from '../alerts_table/translations';
-import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
-import { addToCaseActionItem } from './helpers'; */
+
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
-import { CHANGE_ALERT_STATUS } from './translations';
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
 
 interface ActionsData {
   alertStatus: Status;
@@ -38,37 +32,36 @@ interface ActionsData {
   ruleName: string;
 }
 
+export interface TakeActionDropdownProps {
+  detailsData: TimelineEventsDetailsItem[] | null;
+  ecsData?: Ecs;
+  handleOnEventClosed: () => void;
+  indexName: string;
+  isHostIsolationPanelOpen: boolean;
+  loadingEventDetails: boolean;
+  onAddEventFilterClick: () => void;
+  onAddExceptionTypeClick: (type: ExceptionListType) => void;
+  onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
+  refetch: (() => void) | undefined;
+  timelineId: string;
+}
+
 export const TakeActionDropdown = React.memo(
   ({
     detailsData,
     ecsData,
     handleOnEventClosed,
+    indexName,
     isHostIsolationPanelOpen,
     loadingEventDetails,
-    nonEcsData,
     onAddEventFilterClick,
     onAddExceptionTypeClick,
     onAddIsolationStatusClick,
     refetch,
     timelineId,
-  }: {
-    detailsData: TimelineEventsDetailsItem[] | null;
-    ecsData?: Ecs;
-    handleOnEventClosed: () => void;
-    isHostIsolationPanelOpen: boolean;
-    loadingEventDetails: boolean;
-    nonEcsData?: TimelineNonEcsData[];
-    refetch: (() => void) | undefined;
-    onAddEventFilterClick: () => void;
-    onAddExceptionTypeClick: (type: ExceptionListType) => void;
-    onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
-    timelineId: string;
-  }) => {
-    /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
-    const casePermissions = useGetUserCasesPermissions();
-    const { timelines: timelinesUi } = useKibana().services;
-    const insertTimelineHook = useInsertTimeline;
-    */
+  }: TakeActionDropdownProps) => {
+    const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const actionsData = useMemo(
@@ -89,7 +82,9 @@ export const TakeActionDropdown = React.memo(
       [detailsData]
     );
 
-    const alertIds = useMemo(() => [actionsData.eventId], [actionsData.eventId]);
+    const alertIds = useMemo(() => (isEmpty(actionsData.eventId) ? null : [actionsData.eventId]), [
+      actionsData.eventId,
+    ]);
     const isEvent = actionsData.eventKind === 'event';
 
     const isEndpointAlert = useMemo((): boolean => {
@@ -120,7 +115,7 @@ export const TakeActionDropdown = React.memo(
       [onAddIsolationStatusClick]
     );
 
-    const hostIsolationAction = useHostIsolationAction({
+    const hostIsolationActionItems = useHostIsolationAction({
       closePopover: closePopoverHandler,
       detailsData,
       onAddIsolationStatusClick: handleOnAddIsolationStatusClick,
@@ -135,7 +130,7 @@ export const TakeActionDropdown = React.memo(
       [onAddExceptionTypeClick]
     );
 
-    const exceptionActions = useExceptionActions({
+    const { exceptionActionItems } = useExceptionActions({
       isEndpointAlert,
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
@@ -145,18 +140,24 @@ export const TakeActionDropdown = React.memo(
       setIsPopoverOpen(false);
     }, [onAddEventFilterClick]);
 
-    const eventFilterActions = useEventFilterAction({
+    const { eventFilterActionItems } = useEventFilterAction({
       onAddEventFilterClick: handleOnAddEventFilterClick,
     });
 
-    const { statusActions } = useAlertsActions({
+    const afterCaseSelection = useCallback(() => {
+      closePopoverHandler();
+    }, [closePopoverHandler]);
+
+    const { actionItems: statusActionItems } = useAlertsActions({
       alertStatus: actionsData.alertStatus,
-      eventId: actionsData.eventId,
-      timelineId,
       closePopover: closePopoverAndFlyout,
+      eventId: actionsData.eventId,
+      indexName,
+      refetch,
+      timelineId,
     });
 
-    const { investigateInTimelineAction } = useInvestigateInTimeline({
+    const { investigateInTimelineActionItems } = useInvestigateInTimeline({
       alertIds,
       ecsRowData: ecsData,
       onInvestigateInTimelineAlertClick: closePopoverHandler,
@@ -165,75 +166,60 @@ export const TakeActionDropdown = React.memo(
     const alertsActionItems = useMemo(
       () =>
         !isEvent && actionsData.ruleId
-          ? [
-              {
-                name: CHANGE_ALERT_STATUS,
-                panel: 1,
-              },
-              ...exceptionActions,
-            ]
-          : [eventFilterActions],
-      [eventFilterActions, exceptionActions, isEvent, actionsData.ruleId]
+          ? [...statusActionItems, ...exceptionActionItems]
+          : eventFilterActionItems,
+      [eventFilterActionItems, exceptionActionItems, statusActionItems, isEvent, actionsData.ruleId]
     );
 
-    const panels = useMemo(
+    const { addToCaseActionItems } = useAddToCaseActions({
+      ecsData,
+      nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
+      afterCaseSelection,
+      timelineId,
+    });
+
+    const items: React.ReactElement[] = useMemo(
       () => [
-        {
-          id: 0,
-          items: [
-            ...alertsActionItems,
-            /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
-            ...addToCaseActionItem(timelineId),*/
-            ...hostIsolationAction,
-            ...investigateInTimelineAction,
-          ],
-        },
-        {
-          id: 1,
-          title: CHANGE_ALERT_STATUS,
-          items: statusActions,
-        },
-        /* Todo: Uncomment case action after getAddToCaseAction is split into action and modal
-        {
-          id: 2,
-          title: ACTION_ADD_TO_CASE,
-          content: (
-            <>
-              {ecsData &&
-                timelinesUi.getAddToCaseAction({
-                  ecsRowData: ecsData,
-                  useInsertTimeline: insertTimelineHook,
-                  casePermissions,
-                  showIcon: false,
-                })}
-            </>
-          ),
-        },*/
+        ...(tGridEnabled ? addToCaseActionItems : []),
+        ...alertsActionItems,
+        ...hostIsolationActionItems,
+        ...investigateInTimelineActionItems,
       ],
-      [alertsActionItems, hostIsolationAction, investigateInTimelineAction, statusActions]
+      [
+        tGridEnabled,
+        alertsActionItems,
+        addToCaseActionItems,
+        hostIsolationActionItems,
+        investigateInTimelineActionItems,
+      ]
     );
 
     const takeActionButton = useMemo(() => {
       return (
-        <EuiButton iconSide="right" fill iconType="arrowDown" onClick={togglePopoverHandler}>
+        <EuiButton
+          data-test-subj="take-action-dropdown-btn"
+          fill
+          iconSide="right"
+          iconType="arrowDown"
+          onClick={togglePopoverHandler}
+        >
           {TAKE_ACTION}
         </EuiButton>
       );
     }, [togglePopoverHandler]);
 
-    return panels[0].items?.length && !loadingEventDetails ? (
-      <>
-        <EuiPopover
-          id="hostIsolationTakeActionPanel"
-          button={takeActionButton}
-          isOpen={isPopoverOpen}
-          closePopover={closePopoverHandler}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
-        </EuiPopover>
-      </>
+    return items.length && !loadingEventDetails && ecsData ? (
+      <EuiPopover
+        id="AlertTakeActionPanel"
+        button={takeActionButton}
+        isOpen={isPopoverOpen}
+        closePopover={closePopoverHandler}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+        repositionOnScroll
+      >
+        <EuiContextMenuPanel data-test-subj="takeActionPanelMenu" size="s" items={items} />
+      </EuiPopover>
     ) : null;
   }
 );

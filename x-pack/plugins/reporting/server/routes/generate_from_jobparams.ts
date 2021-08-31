@@ -10,7 +10,7 @@ import rison from 'rison-node';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { BaseParams } from '../types';
-import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { authorizedUserPreRouting } from './lib/authorized_user_pre_routing';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
@@ -21,7 +21,6 @@ export function registerGenerateFromJobParams(
   handleError: HandlerErrorFunction
 ) {
   const setupDeps = reporting.getPluginSetupDeps();
-  const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
 
   // TODO: find a way to abstract this using ExportTypeRegistry: it needs a new
@@ -41,7 +40,7 @@ export function registerGenerateFromJobParams(
       },
       options: { tags: kibanaAccessControlTags },
     },
-    userHandler(async (user, context, req, res) => {
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
       let jobParamsRison: null | string = null;
 
       if (req.body) {

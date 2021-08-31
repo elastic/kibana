@@ -43,6 +43,7 @@ const URL_TYPES = [
 ];
 const DEFAULT_URL_TYPE = 'a';
 
+/** @public */
 export class UrlFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.URL;
   static title = i18n.translate('fieldFormats.url.title', {

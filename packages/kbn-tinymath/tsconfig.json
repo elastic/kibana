@@ -1,4 +1,4 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "include": ["index.d.ts"]
 }

@@ -13,6 +13,8 @@ import type {
   RequestHandlerContext,
   ElasticsearchClient,
 } from 'kibana/server';
+import type Boom from '@hapi/boom';
+import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
 import type {
@@ -172,3 +174,12 @@ export interface Bucket {
 export interface Aggregation {
   buckets: Bucket[];
 }
+export interface ClusterSettingsReasonResponse {
+  found: boolean;
+  reason?: {
+    property?: string;
+    data?: string;
+  };
+}
+
+export type ErrorTypes = Error | Boom.Boom | ResponseError | ElasticsearchClientError;

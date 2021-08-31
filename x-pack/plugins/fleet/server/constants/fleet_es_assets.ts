@@ -36,7 +36,10 @@ export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
   },
 };
 
+export const FLEET_FINAL_PIPELINE_VERSION = 1;
+// If the content is updated you probably need to update the FLEET_FINAL_PIPELINE_VERSION too to allow upgrade of the pipeline
 export const FLEET_FINAL_PIPELINE_CONTENT = `---
+version: ${FLEET_FINAL_PIPELINE_VERSION}
 description: >
   Final pipeline for processing all incoming Fleet Agent documents.
 processors:

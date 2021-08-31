@@ -22,6 +22,7 @@ import { CrawlRequestsTable } from './components/crawl_requests_table';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DomainsTable } from './components/domains_table';
+import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
 import { CrawlerOverview } from './crawler_overview';
 import {
   CrawlerDomainFromServer,
@@ -46,6 +47,9 @@ const domains: CrawlerDomainFromServer[] = [
       rule: CrawlerRules.regex,
       pattern: '.*',
     },
+    deduplication_enabled: false,
+    deduplication_fields: ['title'],
+    available_deduplication_fields: ['title', 'description'],
   },
   {
     id: 'y',
@@ -56,6 +60,9 @@ const domains: CrawlerDomainFromServer[] = [
     sitemaps: [],
     entry_points: [],
     crawl_rules: [],
+    deduplication_enabled: false,
+    deduplication_fields: ['title'],
+    available_deduplication_fields: ['title', 'description'],
   },
 ];
 
@@ -113,6 +120,12 @@ describe('CrawlerOverview', () => {
     const wrapper = shallow(<CrawlerOverview />);
 
     expect(getPageHeaderActions(wrapper).find(CrawlerStatusIndicator)).toHaveLength(1);
+  });
+
+  it('contains a popover to manage crawls', () => {
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(getPageHeaderActions(wrapper).find(ManageCrawlsPopover)).toHaveLength(1);
   });
 
   it('hides the domain and crawl request tables when there are no domains, and no crawl requests', () => {

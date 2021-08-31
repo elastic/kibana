@@ -35,6 +35,7 @@ const TemplateComponent = ({ defPairs }: Props) => {
   );
 };
 
+/** @public */
 export class SourceFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS._SOURCE;
   static title = '_source';
@@ -52,6 +53,7 @@ export class SourceFormat extends FieldFormat {
     }
 
     const highlights = (hit && hit.highlight) || {};
+    // TODO: remove index pattern dependency
     const formatted = indexPattern.formatHit(hit);
     const highlightPairs: any[] = [];
     const sourcePairs: any[] = [];

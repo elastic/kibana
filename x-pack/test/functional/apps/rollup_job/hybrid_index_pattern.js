@@ -11,8 +11,9 @@ import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'settings']);
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
@@ -30,6 +31,20 @@ export default function ({ getService, getPageObjects }) {
       datemath.parse('now-2d', { forceNow: now }),
       datemath.parse('now-3d', { forceNow: now }),
     ];
+
+    before(async () => {
+      // load visualize to have an index pattern ready, otherwise visualize will redirect
+      await security.testUser.setRoles([
+        'global_index_pattern_management_all',
+        'test_rollup_reader',
+      ]);
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup_hybrid'
+      );
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'rollup',
+      });
+    });
 
     it('create hybrid index pattern', async () => {
       //Create data for rollup job to recognize.
@@ -105,8 +120,9 @@ export default function ({ getService, getPageObjects }) {
         `${regularIndexPrefix}*`,
         `${rollupSourceIndexPrefix}*`,
       ]);
-
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup_hybrid'
+      );
     });
   });
 }
