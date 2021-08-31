@@ -427,6 +427,7 @@
   "devDependencies": {
     "@babel/cli": "^7.12.10",
     "@babel/core": "^7.12.10",
+    "@babel/generator": "^7.12.11",
     "@babel/parser": "^7.12.11",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/plugin-proposal-export-namespace-from": "^7.12.1",
