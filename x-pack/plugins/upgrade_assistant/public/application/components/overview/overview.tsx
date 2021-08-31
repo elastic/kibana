@@ -58,7 +58,7 @@ export const Overview: FunctionComponent = () => {
   }
 
   return (
-    <EuiPageBody restrictWidth={true}>
+    <EuiPageBody restrictWidth={true} data-test-subj="overview">
       <EuiPageContent horizontalPosition="center" color="transparent" paddingSize="none">
         <EuiPageHeader
           bottomBorder

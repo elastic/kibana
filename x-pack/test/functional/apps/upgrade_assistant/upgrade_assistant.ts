@@ -5,75 +5,109 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import { IndicesCreateRequest } from '@elastic/elasticsearch/api/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+const multiFieldsIndexDeprecation: IndicesCreateRequest = {
+  index: 'nested_multi_fields',
+  body: {
+    mappings: {
+      properties: {
+        text: {
+          type: 'text',
+          fields: {
+            english: {
+              type: 'text',
+              analyzer: 'english',
+              fields: {
+                english: {
+                  type: 'text',
+                  analyzer: 'english',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+const translogSettingsIndexDeprecation: IndicesCreateRequest = {
+  index: 'deprecated_settings',
+  body: {
+    settings: {
+      'translog.retention.size': '1b',
+      'translog.retention.age': '5m',
+      'index.soft_deletes.enabled': true,
+    },
+  },
+};
 
 export default function upgradeAssistantFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
+  const es = getService('es');
   const security = getService('security');
   const log = getService('log');
-  const retry = getService('retry');
 
   // Updated for the hiding of the UA UI.
   describe.skip('Upgrade Checkup', function () {
     this.tags('skipFirefox');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await security.testUser.setRoles(['global_upgrade_assistant_role']);
+
+      try {
+        // Create two indices that will trigger deprecation warnings to test the ES deprecations page
+        await es.indices.create(multiFieldsIndexDeprecation);
+        await es.indices.create(translogSettingsIndexDeprecation);
+      } catch (e) {
+        log.debug('[Setup error] Error creating indices');
+        throw e;
+      }
     });
 
     after(async () => {
-      await PageObjects.upgradeAssistant.waitForTelemetryHidden();
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      try {
+        await es.indices.delete({
+          index: [multiFieldsIndexDeprecation.index, translogSettingsIndexDeprecation.index],
+        });
+      } catch (e) {
+        log.debug('[Cleanup error] Error deleting indices');
+        throw e;
+      }
+
       await security.testUser.restoreDefaults();
     });
 
-    it.skip('allows user to navigate to upgrade checkup', async () => {
+    it('renders the Overview page', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
-    });
-
-    it.skip('allows user to toggle deprecation logging', async () => {
-      log.debug('expect initial state to be ON');
-      expect(await PageObjects.upgradeAssistant.deprecationLoggingEnabledLabel()).to.be('On');
-      expect(await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled()).to.be(true);
-
-      await retry.try(async () => {
-        log.debug('Now toggle to off');
-        await PageObjects.upgradeAssistant.toggleDeprecationLogging();
-
-        log.debug('expect state to be OFF after toggle');
-        expect(await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled()).to.be(false);
-        expect(await PageObjects.upgradeAssistant.deprecationLoggingEnabledLabel()).to.be('Off');
-      });
-
-      log.debug('Now toggle back on.');
-      await retry.try(async () => {
-        await PageObjects.upgradeAssistant.toggleDeprecationLogging();
-        log.debug('expect state to be ON after toggle');
-        expect(await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled()).to.be(true);
-        expect(await PageObjects.upgradeAssistant.deprecationLoggingEnabledLabel()).to.be('On');
+      await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
+        return testSubjects.exists('overview');
       });
     });
 
-    it.skip('allows user to open cluster tab', async () => {
+    it('renders the Elasticsearch deprecations page', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
-      await PageObjects.upgradeAssistant.clickTab('cluster');
-      expect(await PageObjects.upgradeAssistant.issueSummaryText()).to.be(
-        'You have no cluster issues.'
-      );
+      await PageObjects.upgradeAssistant.clickEsDeprecationsPanel();
+
+      await retry.waitFor('Elasticsearch deprecations table to be visible', async () => {
+        return testSubjects.exists('esDeprecationsTable');
+      });
     });
 
-    it.skip('allows user to open indices tab', async () => {
+    it('renders the Kibana deprecations page', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
-      await PageObjects.upgradeAssistant.clickTab('indices');
-      expect(await PageObjects.upgradeAssistant.issueSummaryText()).to.be(
-        'You have no index issues.'
-      );
+      await PageObjects.upgradeAssistant.clickKibanaDeprecationsPanel();
+
+      await retry.waitFor('Kibana deprecations table to be visible', async () => {
+        return testSubjects.exists('kibanaDeprecationsContent');
+      });
     });
   });
 }

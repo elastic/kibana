@@ -261,7 +261,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiTable>
+      <EuiTable data-test-subj="esDeprecationsTable">
         <EuiTableHeader>
           {Object.entries(cellToLabelMap).map(([fieldName, cell]) => {
             return (

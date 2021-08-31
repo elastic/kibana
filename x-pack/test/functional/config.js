@@ -438,7 +438,13 @@ export default async function ({ readConfigFile }) {
         // using this role even for remote clusters
         global_ccr_role: {
           elasticsearch: {
-            cluster: ['manage', 'manage_ccr'],
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['view_index_metadata'],
+              },
+            ],
           },
           kibana: [
             {
