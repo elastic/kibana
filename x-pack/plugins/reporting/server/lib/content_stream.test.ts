@@ -9,21 +9,26 @@ import { set } from 'lodash';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { createMockLevelLogger } from '../test_helpers';
 import { ContentStream } from './content_stream';
-import { ExportTypesRegistry } from './export_types_registry';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-  let exportTypesRegistry: jest.Mocked<ExportTypesRegistry>;
   let logger: ReturnType<typeof createMockLevelLogger>;
   let stream: ContentStream;
+  let base64Stream: ContentStream;
 
   beforeEach(() => {
     client = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    exportTypesRegistry = ({
-      get: jest.fn(() => ({})),
-    } as unknown) as typeof exportTypesRegistry;
     logger = createMockLevelLogger();
-    stream = new ContentStream(client, exportTypesRegistry, logger, {
+    stream = new ContentStream(
+      client,
+      logger,
+      {
+        id: 'something',
+        index: 'somewhere',
+      },
+      { encoding: 'raw' }
+    );
+    base64Stream = new ContentStream(client, logger, {
       id: 'something',
       index: 'somewhere',
     });
@@ -79,9 +84,6 @@ describe('ContentStream', () => {
     });
 
     it('should decode base64 encoded content', async () => {
-      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
-        typeof exportTypesRegistry.get
-      >);
       client.search.mockResolvedValueOnce(
         set<any>(
           {},
@@ -89,7 +91,7 @@ describe('ContentStream', () => {
           Buffer.from('encoded content').toString('base64')
         )
       );
-      const data = await new Promise((resolve) => stream.once('data', resolve));
+      const data = await new Promise((resolve) => base64Stream.once('data', resolve));
 
       expect(data).toEqual(Buffer.from('encoded content'));
     });
@@ -184,9 +186,6 @@ describe('ContentStream', () => {
     });
 
     it('should decode every chunk separately', async () => {
-      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
-        typeof exportTypesRegistry.get
-      >);
       client.search.mockResolvedValueOnce(
         set<any>({}, 'body.hits.hits.0._source', {
           jobtype: 'pdf',
@@ -211,7 +210,7 @@ describe('ContentStream', () => {
         )
       );
       let data = '';
-      for await (const chunk of stream) {
+      for await (const chunk of base64Stream) {
         data += chunk;
       }
 
@@ -275,12 +274,8 @@ describe('ContentStream', () => {
     });
 
     it('should encode using base64', async () => {
-      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
-        typeof exportTypesRegistry.get
-      >);
-
-      stream.end('12345');
-      await new Promise((resolve) => stream.once('finish', resolve));
+      base64Stream.end('12345');
+      await new Promise((resolve) => base64Stream.once('finish', resolve));
 
       expect(client.update).toHaveBeenCalledTimes(1);
 
@@ -347,14 +342,11 @@ describe('ContentStream', () => {
     });
 
     it('should encode every chunk separately', async () => {
-      exportTypesRegistry.get.mockReturnValueOnce({ jobContentEncoding: 'base64' } as ReturnType<
-        typeof exportTypesRegistry.get
-      >);
       client.cluster.getSettings.mockResolvedValueOnce(
         set<any>({}, 'body.defaults.http.max_content_length', 1028)
       );
-      stream.end('12345678');
-      await new Promise((resolve) => stream.once('finish', resolve));
+      base64Stream.end('12345678');
+      await new Promise((resolve) => base64Stream.once('finish', resolve));
 
       expect(client.update).toHaveBeenCalledTimes(1);
       expect(client.update).toHaveBeenCalledWith(
