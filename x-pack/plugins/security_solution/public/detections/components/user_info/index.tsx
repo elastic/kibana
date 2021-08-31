@@ -10,11 +10,11 @@ import React, { useEffect, useReducer, Dispatch, createContext, useContext } fro
 
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useSignalIndex } from '../../containers/detection_engine/alerts/use_signal_index';
-import { useKibana } from '../../../common/lib/kibana';
 import { useCreateTransforms } from '../../../transforms/containers/use_create_transforms';
 
 export interface State {
   canUserCRUD: boolean | null;
+  canUserREAD: boolean | null;
   hasIndexManage: boolean | null;
   hasIndexMaintenance: boolean | null;
   hasIndexWrite: boolean | null;
@@ -30,6 +30,7 @@ export interface State {
 
 export const initialState: State = {
   canUserCRUD: null,
+  canUserREAD: null,
   hasIndexManage: null,
   hasIndexMaintenance: null,
   hasIndexWrite: null,
@@ -76,10 +77,6 @@ export type Action =
   | {
       type: 'updateHasEncryptionKey';
       hasEncryptionKey: boolean | null;
-    }
-  | {
-      type: 'updateCanUserCRUD';
-      canUserCRUD: boolean | null;
     }
   | {
       type: 'updateSignalIndexName';
@@ -146,12 +143,6 @@ export const userInfoReducer = (state: State, action: Action): State => {
         hasEncryptionKey: action.hasEncryptionKey,
       };
     }
-    case 'updateCanUserCRUD': {
-      return {
-        ...state,
-        canUserCRUD: action.canUserCRUD,
-      };
-    }
     case 'updateSignalIndexName': {
       return {
         ...state,
@@ -186,7 +177,6 @@ export const ManageUserInfo = ({ children }: ManageUserInfoProps) => (
 export const useUserInfo = (): State => {
   const [
     {
-      canUserCRUD,
       hasIndexManage,
       hasIndexMaintenance,
       hasIndexWrite,
@@ -210,6 +200,8 @@ export const useUserInfo = (): State => {
     hasIndexUpdateDelete: hasApiIndexUpdateDelete,
     hasIndexWrite: hasApiIndexWrite,
     hasIndexRead: hasApiIndexRead,
+    hasKibanaCRUD: canUserCRUD,
+    hasKibanaREAD: canUserREAD,
   } = useAlertsPrivileges();
   const {
     loading: indexNameLoading,
@@ -220,9 +212,6 @@ export const useUserInfo = (): State => {
   } = useSignalIndex();
 
   const { createTransforms } = useCreateTransforms();
-
-  const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean = uiCapabilities.siem.crud === true;
 
   useEffect(() => {
     if (loading !== (privilegeLoading || indexNameLoading)) {
@@ -294,12 +283,6 @@ export const useUserInfo = (): State => {
   }, [dispatch, loading, hasEncryptionKey, isApiEncryptionKey]);
 
   useEffect(() => {
-    if (!loading && canUserCRUD !== capabilitiesCanUserCRUD) {
-      dispatch({ type: 'updateCanUserCRUD', canUserCRUD: capabilitiesCanUserCRUD });
-    }
-  }, [dispatch, loading, canUserCRUD, capabilitiesCanUserCRUD]);
-
-  useEffect(() => {
     if (!loading && signalIndexName !== apiSignalIndexName && apiSignalIndexName != null) {
       dispatch({ type: 'updateSignalIndexName', signalIndexName: apiSignalIndexName });
     }
@@ -351,6 +334,7 @@ export const useUserInfo = (): State => {
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
+    canUserREAD,
     hasIndexManage,
     hasIndexMaintenance,
     hasIndexWrite,

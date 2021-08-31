@@ -77,7 +77,6 @@ import {
   FILTER_OPEN,
 } from '../../components/alerts_table/alerts_filter_group';
 import { EmptyPage } from '../../../common/components/empty_page';
-import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -125,10 +124,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       hasIndexWrite = false,
       hasIndexMaintenance = false,
       canUserCRUD = false,
+      canUserREAD,
       hasIndexRead,
     },
   ] = useUserData();
-  const { hasKibanaREAD } = useAlertsPrivileges();
   const {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
@@ -295,14 +294,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {indicesExist && (!hasIndexRead || !hasKibanaREAD) ? (
+      {indicesExist && (!hasIndexRead || !canUserREAD) ? (
         <EmptyPage
           actions={emptyPageActions}
           message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
           data-test-subj="no_feature_permissions-alerts"
           title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
         />
-      ) : indicesExist && hasIndexRead && hasKibanaREAD ? (
+      ) : indicesExist && hasIndexRead && canUserREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
