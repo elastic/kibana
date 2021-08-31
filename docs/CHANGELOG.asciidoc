@@ -119,7 +119,7 @@ In {kib} 7.14.0 and earlier, Node.js version 14.17.3 is affected by the followin
 
 * https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-22939[CVE-2021-22939]
 
-We do not believe an attacker can exploit the security vulnerabilities against {kib}, but are upgrading Node.js out of an abudance of caution. {kib} 7.14.1 upgrades Node.js to version 14.17.5 to resolve the security vulnerabilities. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-XXXXX[CVE-2021-XXXXX]
+We do not believe an attacker can exploit the security vulnerabilities against {kib}, but are upgrading Node.js out of an abudance of caution. To resolve the security vulnerabilities, {kib} 7.14.1 upgrades Node.js to version 14.17.5.
 
 *Solution* +
 Upgrade to {kib} 7.14.1.
