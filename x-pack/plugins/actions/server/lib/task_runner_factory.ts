@@ -61,7 +61,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance }: RunContext, maxAttempts?: number) {
+  public create({ taskInstance }: RunContext, maxAttempts: number = 1) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -150,6 +150,7 @@ export class TaskRunnerFactory {
           executorResult?.retry !== undefined &&
           isRetryableBasedOnAttempts
         ) {
+          logger.error(`Action '${actionId}' failed: ${executorResult.message}`);
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
           throw new ExecutorError(
