@@ -25,6 +25,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./export'));
+    loadTestFile(require.resolve('./export_across_space'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./import'));

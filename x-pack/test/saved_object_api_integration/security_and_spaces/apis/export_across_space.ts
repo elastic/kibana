@@ -7,7 +7,6 @@
 
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
-import { SPACES } from '../../common/lib/spaces';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   exportTestSuiteFactory,
@@ -17,6 +16,7 @@ import {
 
 const createTestCases = (spaceId: string) => {
   const cases = getTestCases(spaceId);
+
   const exportableObjectsInCurrentSpace = [
     cases.singleNamespaceObjectFromCurrentSpace,
     cases.multiNamespaceObjectFromCurrentSpace,
@@ -31,6 +31,30 @@ const createTestCases = (spaceId: string) => {
     cases.namespaceAgnosticTypeFromCurrentSpace,
   ];
 
+  const exportableObjectsInOtherSpace = [
+    cases.singleNamespaceObjectFromOtherSpace,
+    cases.multiNamespaceObjectFromOtherSpace,
+    cases.multiNamespaceIsolatedObjectFromOtherSpace,
+  ];
+
+  const exportableTypesInOtherSpace = [
+    cases.singleNamespaceTypeFromOtherSpace,
+    cases.multiNamespaceTypeFromOtherSpace,
+    cases.namespaceAgnosticTypeFromOtherSpace,
+    cases.hiddenTypeFromOtherSpace,
+    cases.multiNamespaceIsolatedTypeFromOtherSpace,
+  ];
+
+  const exportableObjectsInMixedSpaces = [
+    cases.singleNamespaceObjectFromMixedSpaces,
+    cases.multiNamespaceObjectFromMixedSpaces,
+  ];
+
+  const exportableTypesInMixedSpaces = [
+    cases.singleNamespaceTypeFromMixedSpaces,
+    cases.multiNamespaceTypeFromMixedSpaces,
+  ];
+
   const nonExportableObjectsAndTypes = [
     cases.hiddenObjectFromCurrentSpace,
     cases.hiddenTypeFromCurrentSpace,
@@ -39,6 +63,10 @@ const createTestCases = (spaceId: string) => {
   return {
     exportableObjectsInCurrentSpace,
     exportableTypesInCurrentSpace,
+    exportableObjectsInOtherSpace,
+    exportableTypesInOtherSpace,
+    exportableObjectsInMixedSpaces,
+    exportableTypesInMixedSpaces,
     nonExportableObjectsAndTypes,
   };
 };
@@ -52,90 +80,68 @@ export default function ({ getService }: FtrProviderContext) {
     const {
       exportableObjectsInCurrentSpace,
       exportableTypesInCurrentSpace,
+      exportableObjectsInOtherSpace,
+      exportableTypesInOtherSpace,
+      exportableObjectsInMixedSpaces,
+      exportableTypesInMixedSpaces,
       nonExportableObjectsAndTypes,
     } = createTestCases(spaceId);
 
     const authorized = false as const;
-    const unauthorized = {
+    const forbidden = {
       statusCode: 403 as const,
-      reason: 'unauthorized' as const,
+      reason: 'forbidden' as const,
     };
-    const badRequest = {
-      statusCode: 400 as const,
-      reason: 'bad_request' as const,
-    };
-
-    const currentSpace = spaceId;
-    const otherSpace =
-      spaceId === SPACES.DEFAULT.spaceId ? SPACES.SPACE_1.spaceId : SPACES.DEFAULT.spaceId;
 
     return {
-      globallyUnauthorized: [
-        ...createTestDefinitions(exportableObjectsInCurrentSpace, unauthorized),
-        ...createTestDefinitions(exportableTypesInCurrentSpace, badRequest),
-        ...createTestDefinitions(nonExportableObjectsAndTypes, false),
+      unauthorized: [
+        ...createTestDefinitions(exportableObjectsInCurrentSpace, forbidden),
+        ...createTestDefinitions(exportableTypesInCurrentSpace, forbidden),
+        ...createTestDefinitions(exportableObjectsInOtherSpace, forbidden),
+        ...createTestDefinitions(exportableTypesInOtherSpace, forbidden),
+        ...createTestDefinitions(exportableObjectsInMixedSpaces, forbidden),
+        ...createTestDefinitions(exportableTypesInMixedSpaces, forbidden),
+        ...createTestDefinitions(nonExportableObjectsAndTypes, forbidden),
       ],
-      globallyAuthorized: [
+      authorized: [
         ...createTestDefinitions(exportableObjectsInCurrentSpace, authorized),
         ...createTestDefinitions(exportableTypesInCurrentSpace, authorized),
-        ...createTestDefinitions(nonExportableObjectsAndTypes, false),
-      ],
-      authorizedInCurrentSpace: [
-        ...createTestDefinitions(exportableObjectsInCurrentSpace, authorized, {
-          authorizedAtSpace: [currentSpace],
-        }),
-        ...createTestDefinitions(exportableTypesInCurrentSpace, authorized, {
-          authorizedAtSpace: [currentSpace],
-        }),
-        ...createTestDefinitions(nonExportableObjectsAndTypes, false),
-      ],
-      authorizedInOtherSpace: [
-        ...createTestDefinitions(exportableObjectsInCurrentSpace, unauthorized, {
-          authorizedAtSpace: [otherSpace],
-        }),
-        ...createTestDefinitions(exportableTypesInCurrentSpace, badRequest, {
-          authorizedAtSpace: [otherSpace],
-        }),
+        ...createTestDefinitions(exportableObjectsInOtherSpace, authorized),
+        ...createTestDefinitions(exportableTypesInOtherSpace, authorized),
+        ...createTestDefinitions(exportableObjectsInMixedSpaces, authorized),
+        ...createTestDefinitions(exportableTypesInMixedSpaces, authorized),
         ...createTestDefinitions(nonExportableObjectsAndTypes, false),
       ],
     };
   };
 
-  // TODO: remove grep prefix
-  describe('TOTO _export across spaces', () => {
+  describe('_export_across_space', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
-      const {
-        globallyAuthorized,
-        globallyUnauthorized,
-        authorizedInCurrentSpace,
-        authorizedInOtherSpace,
-      } = createTests(spaceId);
+      const { authorized, unauthorized } = createTests(spaceId);
 
       const _addTests = (user: TestUser, tests: AcrossSpaceExportTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
 
-      [users.noAccess /*, users.legacyAll*/].forEach((user) => {
-        _addTests(user, globallyUnauthorized);
-      });
-
-      [users.allAtSpace /*, users.readAtSpace*/].forEach((user) => {
-        _addTests(user, authorizedInCurrentSpace);
-      });
-
-      [users.allAtOtherSpace].forEach((user) => {
-        _addTests(user, authorizedInOtherSpace);
+      [
+        users.noAccess,
+        users.legacyAll,
+        users.allAtSpace,
+        users.readAtSpace,
+        users.allAtOtherSpace,
+      ].forEach((user) => {
+        _addTests(user, unauthorized);
       });
 
       [
-        // users.dualAll,
-        // users.dualRead,
-        // users.allGlobally,
-        // users.readGlobally,
+        users.allGlobally,
+        users.readGlobally,
         users.superuser,
+        users.dualAll,
+        users.dualRead,
       ].forEach((user) => {
-        _addTests(user, globallyAuthorized);
+        _addTests(user, authorized);
       });
     });
   });

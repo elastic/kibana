@@ -147,7 +147,14 @@ export class SavedObjectsExporter {
   }
 
   private async fetchByObjects({ objects, namespace }: SavedObjectsExportByObjectOptions) {
-    const bulkGetResult = await this.#savedObjectsClient.bulkGet(objects, { namespace });
+    const bulkGetResult = await this.#savedObjectsClient.bulkGet(
+      objects.map((object) => ({
+        type: object.type,
+        id: object.id,
+        ...(object.namespace ? { namespaces: [object.namespace] } : {}),
+      })),
+      { namespace }
+    );
     const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {
       throw SavedObjectsExportError.objectFetchError(erroredObjects);

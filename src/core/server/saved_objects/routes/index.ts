@@ -22,6 +22,7 @@ import { registerBulkCreateRoute } from './bulk_create';
 import { registerBulkUpdateRoute } from './bulk_update';
 import { registerLogLegacyImportRoute } from './log_legacy_import';
 import { registerExportRoute } from './export';
+import { registerExportAcrossSpaceRoute } from './export_across_space';
 import { registerImportRoute } from './import';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
 import { registerMigrateRoute } from './migrate';
@@ -52,6 +53,7 @@ export function registerRoutes({
   registerBulkUpdateRoute(router, { coreUsageData });
   registerLogLegacyImportRoute(router, logger);
   registerExportRoute(router, { config, coreUsageData });
+  registerExportAcrossSpaceRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });
 

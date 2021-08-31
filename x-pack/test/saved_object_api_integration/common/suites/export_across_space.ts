@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
-import { expectResponses, getUrlPrefix } from '../lib/saved_object_test_utils';
+import { getUrlPrefix } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestDefinition, TestSuite, TestCase } from '../lib/types';
 
 const {
@@ -36,7 +36,7 @@ interface CommonAcrossSpaceExportTestCase {
   successResult?: SuccessResult | SuccessResult[];
   failure?: {
     statusCode: 400 | 403; // if the user searches for only types they are not authorized for, they will get a 400 bad request
-    reason: 'unauthorized' | 'bad_request' | 'non_exportable';
+    reason: 'forbidden' | 'bad_request' | 'non_exportable';
   };
 }
 
@@ -245,6 +245,270 @@ export const getTestCases = (spaceId?: string): { [key: string]: AcrossSpaceExpo
       ),
     ].map(testCaseToSuccessResult),
   },
+
+  // exporting from other space
+
+  // a single NS object by id in the other space
+  singleNamespaceObjectFromOtherSpace: {
+    title: 'single-namespace object from other space',
+    objects: [
+      bySpace(
+        {
+          [SPACE_1_ID]: CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
+          [SPACE_2_ID]: CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
+          [DEFAULT_SPACE_ID]: CASES.SINGLE_NAMESPACE_SPACE_1,
+        },
+        spaceId
+      ),
+    ].map(testCaseToObj),
+  },
+  // a single NS object by type when requesting the other namespace
+  singleNamespaceTypeFromOtherSpace: {
+    // this test explicitly ensures that single-namespace objects from other spaces are not returned
+    title: 'single-namespace type from other space',
+    types: ['isolatedtype'],
+    namespaces: [
+      bySpace(
+        {
+          [SPACE_1_ID]: DEFAULT_SPACE_ID,
+          [SPACE_2_ID]: DEFAULT_SPACE_ID,
+          [DEFAULT_SPACE_ID]: SPACE_1_ID,
+        },
+        spaceId
+      ),
+    ],
+    successResult: [
+      bySpace(
+        {
+          [SPACE_1_ID]: CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
+          [SPACE_2_ID]: CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
+          [DEFAULT_SPACE_ID]: CASES.SINGLE_NAMESPACE_SPACE_1,
+        },
+        spaceId
+      ),
+    ].map(testCaseToSuccessResult),
+  },
+  multiNamespaceObjectFromOtherSpace: {
+    title: 'multi-namespace object from other space',
+    objects: [
+      bySpace(
+        {
+          [SPACE_1_ID]: CASES.MULTI_NAMESPACE_ONLY_SPACE_2,
+          [SPACE_2_ID]: CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+          [DEFAULT_SPACE_ID]: CASES.MULTI_NAMESPACE_ONLY_SPACE_2,
+        },
+        spaceId
+      ),
+    ].map(testCaseToObj),
+  },
+  multiNamespaceTypeFromOtherSpace: {
+    title: 'multi-namespace type from other space',
+    types: ['sharedtype'],
+    namespaces: [
+      bySpace(
+        {
+          [SPACE_1_ID]: DEFAULT_SPACE_ID,
+          [SPACE_2_ID]: DEFAULT_SPACE_ID,
+          [DEFAULT_SPACE_ID]: SPACE_1_ID,
+        },
+        spaceId
+      ),
+    ],
+    successResult: [
+      ...[
+        CASES.MULTI_NAMESPACE_ALL_SPACES,
+        ...bySpace(
+          {
+            [SPACE_1_ID]: [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1],
+            [SPACE_2_ID]: [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1],
+            [DEFAULT_SPACE_ID]: [
+              CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+              CASES.MULTI_NAMESPACE_ONLY_SPACE_1,
+            ],
+          },
+          spaceId
+        ),
+      ].map(testCaseToSuccessResult),
+      ...[CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ],
+    ],
+  },
+  namespaceAgnosticTypeFromOtherSpace: {
+    title: 'namespace-agnostic type from other space',
+    types: ['globaltype'],
+    namespaces: [
+      bySpace(
+        {
+          [SPACE_1_ID]: DEFAULT_SPACE_ID,
+          [SPACE_2_ID]: DEFAULT_SPACE_ID,
+          [DEFAULT_SPACE_ID]: SPACE_1_ID,
+        },
+        spaceId
+      ),
+    ],
+    successResult: [CASES.NAMESPACE_AGNOSTIC].map(testCaseToSuccessResult),
+  },
+  hiddenTypeFromOtherSpace: {
+    title: 'hidden type',
+    types: ['hiddentype'],
+    namespaces: [
+      bySpace(
+        {
+          [SPACE_1_ID]: DEFAULT_SPACE_ID,
+          [SPACE_2_ID]: DEFAULT_SPACE_ID,
+          [DEFAULT_SPACE_ID]: SPACE_1_ID,
+        },
+        spaceId
+      ),
+    ],
+    failure: { statusCode: 400, reason: 'non_exportable' },
+  },
+  ...(spaceId !== SPACE_2_ID && {
+    // we do not have a multi-namespace isolated object in Space 2
+    multiNamespaceIsolatedObjectFromOtherSpace: {
+      title: 'multi-namespace isolated object from other space',
+      objects: [
+        bySpace(
+          {
+            [SPACE_1_ID]: CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE,
+            [DEFAULT_SPACE_ID]: CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1,
+          },
+          spaceId
+        ),
+      ].map(testCaseToObj),
+    },
+  }),
+  multiNamespaceIsolatedTypeFromOtherSpace: {
+    title: 'multi-namespace isolated type from other space',
+    types: ['sharecapabletype'],
+    namespaces: [
+      bySpace(
+        {
+          [SPACE_1_ID]: DEFAULT_SPACE_ID,
+          [SPACE_2_ID]: DEFAULT_SPACE_ID,
+          [DEFAULT_SPACE_ID]: SPACE_1_ID,
+        },
+        spaceId
+      ),
+    ],
+
+    successResult: [
+      ...bySpace(
+        {
+          [SPACE_1_ID]: [CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE],
+          [SPACE_2_ID]: [CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE],
+          [DEFAULT_SPACE_ID]: [CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1],
+        },
+        spaceId
+      ),
+    ].map(testCaseToSuccessResult),
+  },
+
+  // mixed export
+
+  singleNamespaceObjectFromMixedSpaces: {
+    title: 'single-namespace object from mixed spaces',
+    objects: [
+      ...bySpace(
+        {
+          [SPACE_1_ID]: [CASES.SINGLE_NAMESPACE_SPACE_1, CASES.SINGLE_NAMESPACE_DEFAULT_SPACE],
+          [SPACE_2_ID]: [CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, CASES.SINGLE_NAMESPACE_SPACE_2],
+          [DEFAULT_SPACE_ID]: [
+            CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
+            CASES.SINGLE_NAMESPACE_SPACE_1,
+          ],
+        },
+        spaceId
+      ),
+    ].map(testCaseToObj),
+  },
+  singleNamespaceTypeFromMixedSpaces: {
+    // this test explicitly ensures that single-namespace objects from other spaces are not returned
+    title: 'single-namespace type from mixed spaces',
+    types: ['isolatedtype'],
+    namespaces: [
+      ...bySpace(
+        {
+          [SPACE_1_ID]: [DEFAULT_SPACE_ID, SPACE_1_ID],
+          [SPACE_2_ID]: [DEFAULT_SPACE_ID, SPACE_2_ID],
+          [DEFAULT_SPACE_ID]: [DEFAULT_SPACE_ID, SPACE_1_ID],
+        },
+        spaceId
+      ),
+    ],
+    successResult: [
+      ...bySpace(
+        {
+          [SPACE_1_ID]: [CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, CASES.SINGLE_NAMESPACE_SPACE_1],
+          [SPACE_2_ID]: [CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, CASES.SINGLE_NAMESPACE_SPACE_2],
+          [DEFAULT_SPACE_ID]: [
+            CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
+            CASES.SINGLE_NAMESPACE_SPACE_1,
+          ],
+        },
+        spaceId
+      ),
+    ].map(testCaseToSuccessResult),
+  },
+
+  multiNamespaceObjectFromMixedSpaces: {
+    title: 'multi-namespace object from mixed spaces',
+    objects: [
+      ...bySpace(
+        {
+          [SPACE_1_ID]: [
+            CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+            CASES.MULTI_NAMESPACE_ONLY_SPACE_1,
+          ],
+          [SPACE_2_ID]: [
+            CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+            CASES.MULTI_NAMESPACE_ONLY_SPACE_2,
+          ],
+          [DEFAULT_SPACE_ID]: [
+            CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+            CASES.MULTI_NAMESPACE_ONLY_SPACE_1,
+          ],
+        },
+        spaceId
+      ),
+    ].map(testCaseToObj),
+  },
+  multiNamespaceTypeFromMixedSpaces: {
+    title: 'multi-namespace type from mixed spaces',
+    types: ['sharedtype'],
+    namespaces: [
+      ...bySpace(
+        {
+          [SPACE_1_ID]: [DEFAULT_SPACE_ID, SPACE_1_ID],
+          [SPACE_2_ID]: [DEFAULT_SPACE_ID, SPACE_2_ID],
+          [DEFAULT_SPACE_ID]: [DEFAULT_SPACE_ID, SPACE_1_ID],
+        },
+        spaceId
+      ),
+    ],
+    successResult: [
+      ...[
+        CASES.MULTI_NAMESPACE_ALL_SPACES,
+        ...bySpace(
+          {
+            [SPACE_1_ID]: [
+              CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+              CASES.MULTI_NAMESPACE_ONLY_SPACE_1,
+            ],
+            [SPACE_2_ID]: [
+              CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+              CASES.MULTI_NAMESPACE_ONLY_SPACE_2,
+            ],
+            [DEFAULT_SPACE_ID]: [
+              CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+              CASES.MULTI_NAMESPACE_ONLY_SPACE_1,
+            ],
+          },
+          spaceId
+        ),
+      ].map(testCaseToSuccessResult),
+      ...[CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ],
+    ],
+  },
 });
 
 export const createRequest = (testCase: AcrossSpaceExportTestCase) => {
@@ -265,19 +529,7 @@ export const createRequest = (testCase: AcrossSpaceExportTestCase) => {
 const getTestTitle = ({ failure, title }: AcrossSpaceExportTestCase) =>
   `${failure?.reason || 'success'} ["${title}"]`;
 
-/*
-const EMPTY_RESULT = {
-  excludedObjects: [],
-  excludedObjectsCount: 0,
-  exportedCount: 0,
-  missingRefCount: 0,
-  missingReferences: [],
-};
-*/
-
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectSavedObjectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
-
   const expectResponseBody = (
     testCase: AcrossSpaceExportTestCase,
     { authorizedAtSpace }: { authorizedAtSpace?: string[] } = {}
@@ -286,20 +538,14 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
     if (failure) {
       const { reason, statusCode } = failure;
-      if (reason === 'unauthorized') {
-        // In export only, the API uses "bulkGet" or "find" depending on the parameters it receives.
+      if (reason === 'forbidden') {
+        // blocked by API security
         if (statusCode === 403) {
-          if (isByIdTestCase(testCase)) {
-            const types = testCase.objects.map((obj) => obj.type);
-            // "bulkGet" was unauthorized, which returns a forbidden error
-            await expectSavedObjectForbiddenBulkGet(types)(response);
-          } else {
-            expect(response.body).to.eql({
-              statusCode: 403,
-              error: 'Forbidden',
-              message: `unauthorized`,
-            });
-          }
+          expect(response.body).to.eql({
+            statusCode: 403,
+            error: 'Forbidden',
+            message: `Forbidden`,
+          });
         } else {
           throw new Error(`Unexpected failure status code: ${failure.statusCode}`);
         }
@@ -332,7 +578,6 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       }
     } else {
       // 2xx
-
       let { successResult } = testCase;
       if (!successResult) {
         if (isByIdTestCase(testCase)) {
@@ -435,7 +680,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
           await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export_across_space`)
             .auth(user?.username, user?.password)
             .send(test.request)
             .expect(test.responseStatusCode)
