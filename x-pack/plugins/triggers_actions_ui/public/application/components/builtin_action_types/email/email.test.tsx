@@ -46,7 +46,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
-        serverType: 'other',
+        service: 'other',
       },
     } as EmailActionConnector;
 
@@ -56,7 +56,7 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
-          serverType: [],
+          service: [],
         },
       },
       secrets: {
@@ -84,7 +84,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: false,
-        serverType: 'other',
+        service: 'other',
       },
     } as EmailActionConnector;
 
@@ -94,7 +94,7 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
-          serverType: [],
+          service: [],
         },
       },
       secrets: {
@@ -117,7 +117,7 @@ describe('connector validation', () => {
       config: {
         from: 'test@test.com',
         hasAuth: true,
-        serverType: 'other',
+        service: 'other',
       },
     } as EmailActionConnector;
 
@@ -127,7 +127,7 @@ describe('connector validation', () => {
           from: [],
           port: ['Port is required.'],
           host: ['Host is required.'],
-          serverType: [],
+          service: [],
         },
       },
       secrets: {
@@ -154,7 +154,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
-        serverType: 'other',
+        service: 'other',
       },
     } as EmailActionConnector;
 
@@ -164,7 +164,7 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
-          serverType: [],
+          service: [],
         },
       },
       secrets: {
@@ -191,7 +191,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
-        serverType: 'other',
+        service: 'other',
       },
     } as EmailActionConnector;
 
@@ -201,7 +201,7 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
-          serverType: [],
+          service: [],
         },
       },
       secrets: {
@@ -239,7 +239,7 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
-          serverType: ['Server type is required.'],
+          service: ['Service is required.'],
         },
       },
       secrets: {

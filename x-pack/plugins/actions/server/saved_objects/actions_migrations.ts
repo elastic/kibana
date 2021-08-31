@@ -65,7 +65,7 @@ export function getActionsMigrations(
   const migrationEmailActionsSixteen = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => doc.attributes.actionTypeId === '.email',
-    pipeMigrations(addServerTypeConfigurationObject)
+    pipeMigrations(setServiceConfigIfNotSet)
   );
 
   return {
@@ -156,10 +156,10 @@ const addHasAuthConfigurationObject = (
   };
 };
 
-const addServerTypeConfigurationObject = (
+const setServiceConfigIfNotSet = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> => {
-  if (doc.attributes.actionTypeId !== '.email') {
+  if (doc.attributes.actionTypeId !== '.email' || null != doc.attributes.config.service) {
     return doc;
   }
   return {
@@ -168,7 +168,7 @@ const addServerTypeConfigurationObject = (
       ...doc.attributes,
       config: {
         ...doc.attributes.config,
-        serverType: 'other',
+        service: 'other',
       },
     },
   };

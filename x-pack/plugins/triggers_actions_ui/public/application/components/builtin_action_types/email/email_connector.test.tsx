@@ -39,7 +39,7 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="emailFromInput"]').first().prop('value')).toBe(
       'test@test.com'
     );
-    expect(wrapper.find('[data-test-subj="emailServerTypeSelectInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="emailServiceSelectInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailHostInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeTruthy();
@@ -102,13 +102,13 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="emailFromInput"]').first().prop('value')).toBe(
       'test@test.com'
     );
-    expect(wrapper.find('[data-test-subj="emailServerTypeSelectInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('select[data-test-subj="emailServerTypeSelectInput"]').prop('value')
-    ).toEqual('');
+    expect(wrapper.find('[data-test-subj="emailServiceSelectInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('select[data-test-subj="emailServiceSelectInput"]').prop('value')).toEqual(
+      ''
+    );
   });
 
-  test('server type field is correctly selected when defined', () => {
+  test('service field is correctly selected when defined', () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -120,7 +120,7 @@ describe('EmailActionConnectorFields renders', () => {
       config: {
         from: 'test@test.com',
         hasAuth: true,
-        serverType: 'gmail',
+        service: 'gmail',
       },
     } as EmailActionConnector;
     const wrapper = mountWithIntl(
@@ -132,10 +132,10 @@ describe('EmailActionConnectorFields renders', () => {
         readOnly={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="emailServerTypeSelectInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('select[data-test-subj="emailServerTypeSelectInput"]').prop('value')
-    ).toEqual('gmail');
+    expect(wrapper.find('[data-test-subj="emailServiceSelectInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('select[data-test-subj="emailServiceSelectInput"]').prop('value')).toEqual(
+      'gmail'
+    );
   });
 
   test('should display a message to remember username and password when creating a connector with authentication', () => {

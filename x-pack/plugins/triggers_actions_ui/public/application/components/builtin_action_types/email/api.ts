@@ -9,12 +9,12 @@ import { HttpSetup } from 'kibana/public';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../constants';
 import { EmailConfig } from '../types';
 
-export async function getServerConfig({
+export async function getServiceConfig({
   http,
-  serverType,
+  service,
 }: {
   http: HttpSetup;
-  serverType: string;
+  service: string;
 }): Promise<Partial<Pick<EmailConfig, 'host' | 'port' | 'secure'>>> {
-  return await http.get(`${INTERNAL_BASE_ACTION_API_PATH}/connector/_email_config/${serverType}`);
+  return await http.get(`${INTERNAL_BASE_ACTION_API_PATH}/connector/_email_config/${service}`);
 }

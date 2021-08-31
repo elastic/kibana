@@ -25,17 +25,17 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
-import { emailServerTypes } from './email';
+import { emailServices } from './email';
 import { useEmailConfig } from './use_email_config';
 
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
   const { docLinks, http } = useKibana().services;
-  const { from, host, port, secure, hasAuth, serverType } = action.config;
+  const { from, host, port, secure, hasAuth, service } = action.config;
   const { user, password } = action.secrets;
 
-  const { setEmailServerType } = useEmailConfig(http, editActionConfig);
+  const { setEmailService } = useEmailConfig(http, editActionConfig);
 
   useEffect(() => {
     if (!action.id) {
@@ -48,8 +48,8 @@ export const EmailActionConnectorFields: React.FunctionComponent<
     from !== undefined && errors.from !== undefined && errors.from.length > 0;
   const isHostInvalid: boolean =
     host !== undefined && errors.host !== undefined && errors.host.length > 0;
-  const isServerTypeInvalid: boolean =
-    serverType !== undefined && errors.serverType !== undefined && errors.serverType.length > 0;
+  const isServiceInvalid: boolean =
+    service !== undefined && errors.service !== undefined && errors.service.length > 0;
   const isPortInvalid: boolean =
     port !== undefined && errors.port !== undefined && errors.port.length > 0;
 
@@ -104,24 +104,24 @@ export const EmailActionConnectorFields: React.FunctionComponent<
         <EuiFlexItem>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serverTypeTextFieldLabel',
+              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serviceTextFieldLabel',
               {
-                defaultMessage: 'Server type',
+                defaultMessage: 'Service',
               }
             )}
             error={errors.serverType}
-            isInvalid={isServerTypeInvalid}
+            isInvalid={isServiceInvalid}
           >
             <EuiSelect
-              name="serverType"
+              name="service"
               hasNoInitialSelection={true}
-              value={serverType}
+              value={service}
               disabled={readOnly}
-              isInvalid={isServerTypeInvalid}
-              data-test-subj="emailServerTypeSelectInput"
-              options={emailServerTypes}
+              isInvalid={isServiceInvalid}
+              data-test-subj="emailServiceSelectInput"
+              options={emailServices}
               onChange={(e) => {
-                setEmailServerType(e.target.value);
+                setEmailService(e.target.value);
               }}
             />
           </EuiFormRow>

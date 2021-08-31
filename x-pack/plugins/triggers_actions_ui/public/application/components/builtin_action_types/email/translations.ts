@@ -28,10 +28,10 @@ export const PORT_REQUIRED = i18n.translate(
   }
 );
 
-export const SERVER_TYPE_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServerTypeText',
+export const SERVICE_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServiceText',
   {
-    defaultMessage: 'Server type is required.',
+    defaultMessage: 'Service is required.',
   }
 );
 

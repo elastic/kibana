@@ -13,6 +13,7 @@ import { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
+import { AdditionalEmailServices, ELASTIC_CLOUD_SERVICE } from '../builtin_action_types/email';
 
 const paramSchema = schema.object({
   service: schema.string(),
@@ -34,12 +35,8 @@ export const getWellKnownEmailServiceRoute = (
         const { service } = req.params;
 
         let response: SMTPConnection.Options = {};
-        if (service === 'elastic_cloud') {
-          response = {
-            host: 'dockerhost',
-            port: 10025,
-            secure: false,
-          };
+        if (service === AdditionalEmailServices.ELASTIC_CLOUD) {
+          response = ELASTIC_CLOUD_SERVICE;
         } else {
           const serviceEntry = nodemailerGetService(service);
           if (serviceEntry) {

@@ -8,26 +8,26 @@
 import { useCallback, useEffect, useState } from 'react';
 import { HttpSetup } from 'kibana/public';
 import { EmailConfig } from '../types';
-import { getServerConfig } from './api';
+import { getServiceConfig } from './api';
 
 export function useEmailConfig(
   http: HttpSetup,
   editActionConfig: (property: string, value: unknown) => void
 ) {
-  const [emailServerType, setEmailServerType] = useState<string | undefined>(undefined);
+  const [emailService, setEmailService] = useState<string | undefined>(undefined);
 
-  const getEmailServerTypeConfig = useCallback(
-    async (server: string) => {
-      let serverConfig: Partial<Pick<EmailConfig, 'host' | 'port' | 'secure'>>;
+  const getEmailServiceConfig = useCallback(
+    async (service: string) => {
+      let serviceConfig: Partial<Pick<EmailConfig, 'host' | 'port' | 'secure'>>;
       try {
-        serverConfig = await getServerConfig({ http, serverType: server });
+        serviceConfig = await getServiceConfig({ http, service });
       } catch (err) {
-        serverConfig = {};
+        serviceConfig = {};
       }
 
-      editActionConfig('host', serverConfig?.host ? serverConfig.host : '');
-      editActionConfig('port', serverConfig?.port ? serverConfig.port : 0);
-      editActionConfig('secure', null != serverConfig?.secure ? serverConfig.secure : false);
+      editActionConfig('host', serviceConfig?.host ? serviceConfig.host : '');
+      editActionConfig('port', serviceConfig?.port ? serviceConfig.port : 0);
+      editActionConfig('secure', null != serviceConfig?.secure ? serviceConfig.secure : false);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [editActionConfig]
@@ -35,15 +35,15 @@ export function useEmailConfig(
 
   useEffect(() => {
     (async () => {
-      if (emailServerType) {
-        editActionConfig('serverType', emailServerType);
-        await getEmailServerTypeConfig(emailServerType);
+      if (emailService) {
+        editActionConfig('service', emailService);
+        await getEmailServiceConfig(emailService);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [emailServerType]);
+  }, [emailService]);
 
   return {
-    setEmailServerType,
+    setEmailService,
   };
 }

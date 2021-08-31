@@ -126,7 +126,7 @@
           "from" : "me@me.com",
           "host" : "smtp.myhost.com",
           "port" : 25,
-          "service" : null,
+          "service" : "someservice",
           "secure" : null
         },
         "secrets" : "V2EJEtTv3yTFi1kdglhNahnKYWCS+J7aWCJQU+eEqGPZEz6n7G1NsBWoh7IY0FteLTilTteQXyY/Eg3k/7bb0G8Mz+WBZ1mRvUggGTFqgoOptyUsvHoBhv0R/1bCTCabN3Pe88AfnC+VDXqwuMifpmgKEEsKF3H8VONv7TYO02FW"

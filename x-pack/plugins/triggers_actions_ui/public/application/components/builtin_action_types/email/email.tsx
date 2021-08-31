@@ -15,7 +15,7 @@ import {
 } from '../../../../types';
 import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
 
-export const emailServerTypes: EuiSelectOption[] = [
+export const emailServices: EuiSelectOption[] = [
   {
     text: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.gmailServerTypeLabel',
@@ -51,6 +51,15 @@ export const emailServerTypes: EuiSelectOption[] = [
       }
     ),
     value: 'elastic_cloud',
+  },
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.exchangeServerTypeLabel',
+      {
+        defaultMessage: 'MS Exchange Server',
+      }
+    ),
+    value: 'exchange_server',
   },
   {
     text: i18n.translate(
@@ -90,7 +99,7 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         from: new Array<string>(),
         port: new Array<string>(),
         host: new Array<string>(),
-        serverType: new Array<string>(),
+        service: new Array<string>(),
       };
       const secretsErrors = {
         user: new Array<string>(),
@@ -119,8 +128,8 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
         secretsErrors.password.push(translations.PASSWORD_REQUIRED);
       }
-      if (!action.config.serverType) {
-        configErrors.serverType.push(translations.SERVER_TYPE_REQUIRED);
+      if (!action.config.service) {
+        configErrors.service.push(translations.SERVICE_REQUIRED);
       }
       if (action.secrets.user && !action.secrets.password) {
         secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER_USED);
