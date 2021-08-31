@@ -182,19 +182,17 @@ export const createLifecycleExecutor = (
 
   const allAlertIds = [...new Set(currentAlertIds.concat(trackedAlertIds))];
 
-  const trackedAlertStatesOfRecovered = Object.values(state.trackedAlerts).filter(
-    (trackedAlertState) => !currentAlerts[trackedAlertState.alertId]
-  );
+  const trackedAlertStates = Object.values(state.trackedAlerts);
 
   logger.debug(
-    `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStatesOfRecovered.length} recovered)`
+    `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
   );
 
   const alertsDataMap: Record<string, Partial<ParsedTechnicalFields>> = {
     ...currentAlerts,
   };
 
-  if (trackedAlertStatesOfRecovered.length) {
+  if (trackedAlertStates.length) {
     const { hits } = await ruleDataClient.getReader().search({
       body: {
         query: {
@@ -207,7 +205,7 @@ export const createLifecycleExecutor = (
               },
               {
                 terms: {
-                  [ALERT_UUID]: trackedAlertStatesOfRecovered.map(
+                  [ALERT_UUID]: trackedAlertStates.map(
                     (trackedAlertState) => trackedAlertState.alertUuid
                   ),
                 },
@@ -215,7 +213,7 @@ export const createLifecycleExecutor = (
             ],
           },
         },
-        size: trackedAlertStatesOfRecovered.length,
+        size: trackedAlertStates.length,
         collapse: {
           field: ALERT_UUID,
         },

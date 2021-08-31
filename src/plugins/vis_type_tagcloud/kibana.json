@@ -6,8 +6,8 @@
   "requiredPlugins": ["data", "expressions", "visualizations", "charts"],
   "requiredBundles": ["kibanaReact", "visDefaultEditor"],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   },
   "description": "Registers the tagcloud visualization. It is based on elastic-charts wordcloud."
 

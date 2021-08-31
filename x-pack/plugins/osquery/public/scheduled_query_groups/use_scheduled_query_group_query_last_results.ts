@@ -79,10 +79,8 @@ export const useScheduledQueryGroupQueryLastResults = ({
       enabled: !!(!skip && actionId && interval && agentIds?.length),
       // @ts-expect-error update types
       select: (response) => response.rawResponse.aggregations?.runs?.buckets[0] ?? [],
-      refetchOnMount: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
     }
   );
 };

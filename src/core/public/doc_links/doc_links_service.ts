@@ -276,6 +276,7 @@ export class DocLinksService {
         alerting: {
           guide: `${KIBANA_DOCS}create-and-manage-rules.html`,
           actionTypes: `${KIBANA_DOCS}action-types.html`,
+          apmRules: `${KIBANA_DOCS}apm-alerts.html`,
           emailAction: `${KIBANA_DOCS}email-action-type.html`,
           emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
           generalSettings: `${KIBANA_DOCS}alert-action-settings-kb.html#general-alert-action-settings`,
