@@ -8,7 +8,7 @@
 
 import dateMath from '@elastic/datemath';
 import { buildRangeFilter } from '@kbn/es-query';
-import type { IIndexPattern, TimeRange, TimeRangeBounds } from '../..';
+import type { IIndexPattern, TimeRange, TimeRangeBounds, RangeFilterParams } from '../..';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;
@@ -38,13 +38,14 @@ export function getAbsoluteTimeRange(
 export function getTime(
   indexPattern: IIndexPattern | undefined,
   timeRange: TimeRange,
-  options?: { forceNow?: Date; fieldName?: string }
+  options?: { forceNow?: Date; fieldName?: string; coerceToAbsoluteTime?: boolean }
 ) {
   return createTimeRangeFilter(
     indexPattern,
     timeRange,
     options?.fieldName || indexPattern?.timeFieldName,
-    options?.forceNow
+    options?.forceNow,
+    options?.coerceToAbsoluteTime
   );
 }
 
@@ -52,7 +53,8 @@ function createTimeRangeFilter(
   indexPattern: IIndexPattern | undefined,
   timeRange: TimeRange,
   fieldName?: string,
-  forceNow?: Date
+  forceNow?: Date,
+  coerceToAbsoluteTime: boolean = true
 ) {
   if (!indexPattern) {
     return;
@@ -64,17 +66,20 @@ function createTimeRangeFilter(
     return;
   }
 
-  const bounds = calculateBounds(timeRange, { forceNow });
-  if (!bounds) {
-    return;
+  const rangeFilterParams: RangeFilterParams = {};
+
+  if (coerceToAbsoluteTime) {
+    const bounds = calculateBounds(timeRange, { forceNow });
+    if (!bounds) {
+      return;
+    }
+    if (bounds.min) rangeFilterParams.gte = bounds.min.toISOString();
+    if (bounds.max) rangeFilterParams.lte = bounds.max.toISOString();
+    rangeFilterParams.format = 'strict_date_optional_time';
+  } else {
+    rangeFilterParams.gte = timeRange.from;
+    rangeFilterParams.lte = timeRange.to;
   }
-  return buildRangeFilter(
-    field,
-    {
-      ...(bounds.min && { gte: bounds.min.toISOString() }),
-      ...(bounds.max && { lte: bounds.max.toISOString() }),
-      format: 'strict_date_optional_time',
-    },
-    indexPattern
-  );
+
+  return buildRangeFilter(field, rangeFilterParams, indexPattern);
 }

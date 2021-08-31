@@ -21,7 +21,6 @@ import {
   SearchFieldValue,
   SearchSourceFields,
   tabifyDocs,
-  getTime,
 } from '../../../../../../../src/plugins/data/common';
 import {
   FieldFormat,
@@ -290,13 +289,6 @@ export class CsvGenerator {
     ]);
 
     const index = searchSource.getField('index');
-
-    if (this.job.timeRange) {
-      this.logger.debug(
-        `setting time range on CSV search source from: "${this.job.timeRange.from}" and to: "${this.job.timeRange.to}"`
-      );
-      searchSource.setField('filter', getTime(index, this.job.timeRange, { forceNow: new Date() }));
-    }
 
     if (!index) {
       throw new Error(`The search must have a reference to an index pattern!`);

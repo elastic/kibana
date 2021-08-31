@@ -28,6 +28,20 @@ export { AutoRefreshDoneFn };
 
 // TODO: remove!
 
+interface CreateFilterOptions {
+  /**
+   * The time range values to use
+   */
+  timeRange?: TimeRange;
+
+  /**
+   * Whether to coerce the time range values to an absolute ISO time.
+   *
+   * @default true
+   */
+  coerceToAbsoluteTime?: boolean;
+}
+
 export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
   private enabledUpdated$ = new BehaviorSubject(false);
@@ -178,9 +192,13 @@ export class Timefilter {
     }
   };
 
-  public createFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
+  public createFilter = (
+    indexPattern: IIndexPattern,
+    { timeRange, coerceToAbsoluteTime }: CreateFilterOptions = {}
+  ) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, {
       forceNow: this.nowProvider.get(),
+      coerceToAbsoluteTime,
     });
   };
 

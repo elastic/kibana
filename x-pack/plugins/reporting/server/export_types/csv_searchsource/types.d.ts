@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { SearchSourceFields, TimeRange } from 'src/plugins/data/common';
+import type { SearchSourceFields } from 'src/plugins/data/common';
 import type { BaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
 interface BaseParamsCSV {
   searchSource: SearchSourceFields;
-  timeRange?: TimeRange;
   columns?: string[];
 }
 

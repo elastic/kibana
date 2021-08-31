@@ -32,10 +32,7 @@ describe('getSharingData', () => {
 
   test('returns valid data for sharing', async () => {
     const searchSourceMock = createSearchSourceMock({ index: indexPatternMock });
-    const result = await getSharingData(searchSourceMock, { columns: [] }, mockConfig, {
-      from: 'test',
-      to: 'test',
-    });
+    const result = await getSharingData(searchSourceMock, { columns: [] }, mockConfig);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [],
@@ -60,8 +57,7 @@ describe('getSharingData', () => {
     const result = await getSharingData(
       searchSourceMock,
       { columns: ['column_a', 'column_b'] },
-      mockConfig,
-      { from: 'test', to: 'test' }
+      mockConfig
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -102,8 +98,7 @@ describe('getSharingData', () => {
           'cool-field-6',
         ],
       },
-      mockConfig,
-      { from: 'test', to: 'test' }
+      mockConfig
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -158,8 +153,7 @@ describe('getSharingData', () => {
           'cool-field-6',
         ],
       },
-      mockConfig,
-      { from: 'test', to: 'test' }
+      mockConfig
     );
     expect(result).toMatchInlineSnapshot(`
       Object {

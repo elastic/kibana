@@ -7,6 +7,7 @@
  */
 
 import { RangeFilter } from '@kbn/es-query';
+import type { IIndexPattern } from '../..';
 import moment from 'moment';
 import sinon from 'sinon';
 import { getTime, getAbsoluteTimeRange } from './get_time';
@@ -17,7 +18,7 @@ describe('get_time', () => {
       const clock = sinon.useFakeTimers(moment.utc([2000, 1, 1, 0, 0, 0, 0]).valueOf());
 
       const filter = getTime(
-        {
+        ({
           id: 'test',
           title: 'test',
           timeFieldName: 'date',
@@ -31,7 +32,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as any,
+        } as unknown) as IIndexPattern,
         { from: 'now-60y', to: 'now' }
       ) as RangeFilter;
       expect(filter.range.date).toEqual({
@@ -46,7 +47,7 @@ describe('get_time', () => {
       const clock = sinon.useFakeTimers(moment.utc([2000, 1, 1, 0, 0, 0, 0]).valueOf());
 
       const filter = getTime(
-        {
+        ({
           id: 'test',
           title: 'test',
           timeFieldName: 'date',
@@ -68,7 +69,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as any,
+        } as unknown) as IIndexPattern,
         { from: 'now-60y', to: 'now' },
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
@@ -78,6 +79,41 @@ describe('get_time', () => {
         format: 'strict_date_optional_time',
       });
       clock.restore();
+    });
+
+    test('do not coerce to absolute time when given flag', () => {
+      const filter = getTime(
+        ({
+          id: 'test',
+          title: 'test',
+          timeFieldName: 'date',
+          fields: [
+            {
+              name: 'date',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+              filterable: true,
+            },
+            {
+              name: 'myCustomDate',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+              filterable: true,
+            },
+          ],
+        } as unknown) as IIndexPattern,
+        { from: 'now-60y', to: 'now' },
+        { fieldName: 'myCustomDate', coerceToAbsoluteTime: false }
+      ) as RangeFilter;
+
+      expect(filter.range.myCustomDate).toEqual({
+        gte: 'now-60y',
+        lte: 'now',
+      });
     });
   });
   describe('getAbsoluteTimeRange', () => {
