@@ -28,10 +28,10 @@ export const CardHeader = memo<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false}>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <DateFieldValue date={updatedDate} type="update" />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <DateFieldValue date={createdDate} type="create" />
               </EuiFlexItem>
             </EuiFlexGroup>

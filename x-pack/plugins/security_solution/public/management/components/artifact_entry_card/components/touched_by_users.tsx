@@ -16,7 +16,7 @@ export interface TouchedByUsersProps {
 
 export const TouchedByUsers = memo<TouchedByUsersProps>(({ createdBy, updatedBy }) => {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="l">
+    <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
       <EuiFlexItem grow={false}>
         <UserName label={CREATED_BY} value={createdBy} />
       </EuiFlexItem>
@@ -35,7 +35,7 @@ interface UserNameProps {
 
 const UserName = memo<UserNameProps>(({ label, value }) => {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m" wrap={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="m" wrap={false} responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiBadge>{label}</EuiBadge>
       </EuiFlexItem>
