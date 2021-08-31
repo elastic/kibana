@@ -276,7 +276,6 @@ export function DiscoverLayout({
                         documents$={savedSearchData$.documents$}
                         expandedDoc={expandedDoc}
                         indexPattern={indexPattern}
-                        isMobile={isMobile}
                         navigateTo={navigateTo}
                         onAddFilter={onAddFilter as DocViewFilterFn}
                         savedSearch={savedSearch}

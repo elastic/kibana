@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import classNames from 'classnames';
 import {
   MetricDistributionChart,
@@ -17,7 +17,8 @@ import { FieldVisConfig } from '../../types';
 import { kibanaFieldFormat, formatSingleValue } from '../../../utils';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 150;
-const METRIC_DISTRIBUTION_CHART_HEIGHT = 80;
+// @todo: Re-enable
+// const METRIC_DISTRIBUTION_CHART_HEIGHT = 80;
 
 export interface NumberContentPreviewProps {
   config: FieldVisConfig;
@@ -48,9 +49,11 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
   return (
     <div data-test-subj={dataTestSubj}>
       <div className="dataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
+        {/** @todo: Use euiSizeM, make this small height only for embeddable
+         **/}
         <MetricDistributionChart
           width={METRIC_DISTRIBUTION_CHART_WIDTH}
-          height={METRIC_DISTRIBUTION_CHART_HEIGHT}
+          height={12}
           chartData={distributionChartData}
           fieldFormat={fieldFormat}
           hideXAxis={true}
@@ -59,7 +62,6 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
       <div className={'dataGridChart__legend'} data-test-subj={`${dataTestSubj}-legend`}>
         {legendText && (
           <>
-            <EuiSpacer size="s" />
             <EuiFlexGroup direction={'row'} data-test-subj={`${dataTestSubj}-legend`}>
               <EuiFlexItem className={'dataGridChart__legend'}>
                 {kibanaFieldFormat(legendText.min, fieldFormat)}

@@ -82,8 +82,11 @@ export const MetricDistributionChart: FC<Props> = ({
   };
 
   return (
-    <div data-test-subj="dataVisualizerFieldDataMetricDistributionChart">
-      <Chart size={{ width, height }}>
+    <div
+      data-test-subj="dataVisualizerFieldDataMetricDistributionChart"
+      className="dataGridChart__histogram"
+    >
+      <Chart size={{ height }}>
         <Settings theme={theme} tooltip={{ headerFormatter }} />
         <Axis
           id="bottom"
