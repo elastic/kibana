@@ -85,11 +85,18 @@ export const addTimelineInStorage = (
   id: TimelineIdLiteral,
   timeline: TimelineModel
 ) => {
+  const timelineToStore = cleanStorageTimeline(timeline);
   const timelines = getAllTimelinesInStorage(storage);
   storage.set(LOCAL_STORAGE_TIMELINE_KEY, {
     ...timelines,
-    [id]: timeline,
+    [id]: timelineToStore,
   });
+};
+
+const cleanStorageTimeline = (timeline: TimelineModel) => {
+  // clean filterManager as it contains circular references within observer subscriptions
+  const { filterManager, ...timelineToStore } = timeline;
+  return timelineToStore;
 };
 
 export const useTimelinesStorage = (): TimelinesStorage => {
