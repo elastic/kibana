@@ -6,21 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import querystring from 'querystring';
-import { authorizedUserPreRouting } from './lib/authorized_user_pre_routing';
-import { API_BASE_URL } from '../../common/constants';
-import { HandlerErrorFunction, HandlerFunction } from './types';
-import { ReportingCore } from '../core';
-import { LevelLogger } from '../lib';
+import querystring, { ParsedUrlQueryInput } from 'querystring';
+import { API_BASE_URL } from '../../../common/constants';
+import { ReportingCore } from '../../core';
+import { LevelLogger } from '../../lib';
+import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
+import { handleError, handleGenerateRequest } from '../lib/handle_request';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
-export function registerLegacy(
-  reporting: ReportingCore,
-  handler: HandlerFunction,
-  handleError: HandlerErrorFunction,
-  logger: LevelLogger
-) {
+export function registerLegacy(reporting: ReportingCore, logger: LevelLogger) {
   const { router } = reporting.getPluginSetupDeps();
 
   function createLegacyPdfRoute({ path, objectType }: { path: string; objectType: string }) {
@@ -32,8 +27,10 @@ export function registerLegacy(
         validate: {
           params: schema.object({
             savedObjectId: schema.string({ minLength: 3 }),
+            title: schema.string(),
+            browserTimezone: schema.string(),
           }),
-          query: schema.any(),
+          query: schema.maybe(schema.string()),
         },
       },
 
@@ -46,10 +43,11 @@ export function registerLegacy(
             title,
             savedObjectId,
             browserTimezone,
-          }: { title: string; savedObjectId: string; browserTimezone: string } = req.params as any;
-          const queryString = querystring.stringify(req.query as any);
+          }: { title: string; savedObjectId: string; browserTimezone: string } = req.params;
+          const queryString = querystring.stringify(req.query as ParsedUrlQueryInput | undefined);
 
-          return await handler(
+          return await handleGenerateRequest(
+            reporting,
             user,
             exportTypeId,
             {
@@ -62,7 +60,8 @@ export function registerLegacy(
             },
             context,
             req,
-            res
+            res,
+            logger
           );
         } catch (err) {
           throw handleError(res, err);

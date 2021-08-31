@@ -7,19 +7,16 @@
 
 import { schema } from '@kbn/config-schema';
 import rison from 'rison-node';
-import { ReportingCore } from '../';
-import { API_BASE_URL } from '../../common/constants';
-import { BaseParams } from '../types';
-import { authorizedUserPreRouting } from './lib/authorized_user_pre_routing';
-import { HandlerErrorFunction, HandlerFunction } from './types';
+import { ReportingCore } from '../..';
+import { API_BASE_URL } from '../../../common/constants';
+import { LevelLogger } from '../../lib';
+import { BaseParams } from '../../types';
+import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
+import { handleError, handleGenerateRequest } from '../lib/handle_request';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
-export function registerGenerateFromJobParams(
-  reporting: ReportingCore,
-  handler: HandlerFunction,
-  handleError: HandlerErrorFunction
-) {
+export function registerJobGenerationRoutes(reporting: ReportingCore, logger: LevelLogger) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
@@ -62,7 +59,6 @@ export function registerGenerateFromJobParams(
         });
       }
 
-      const { exportType } = req.params;
       let jobParams;
 
       try {
@@ -81,7 +77,16 @@ export function registerGenerateFromJobParams(
       }
 
       try {
-        return await handler(user, exportType, jobParams, context, req, res);
+        return await handleGenerateRequest(
+          reporting,
+          user,
+          req.params.exportType,
+          jobParams,
+          context,
+          req,
+          res,
+          logger
+        );
       } catch (err) {
         return handleError(res, err);
       }
