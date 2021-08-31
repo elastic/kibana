@@ -1,6 +1,6 @@
 .dataGridChart__histogram {
   width: 100%;
-  height: $euiSizeXL + $euiSizeXXL;
+  height: $euiSizeM;
 }
 
 .dataGridChart__legend {
@@ -14,6 +14,7 @@
   font-style: italic;
   font-weight: normal;
   text-align: left;
+  line-height: 1;
 }
 
 .dataGridChart__legend--numeric {
