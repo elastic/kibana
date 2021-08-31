@@ -15,11 +15,11 @@ export async function fetchExportObjects(
   includeReferencesDeep: boolean = false,
   includeNamespaces: boolean = false
 ): Promise<Blob> {
-  return http.post('/api/saved_objects/_export', {
+  const endpoint = includeNamespaces ? '_export_across_space' : '_export';
+  return http.post(`/api/saved_objects/${endpoint}`, {
     body: JSON.stringify({
       objects,
       includeReferencesDeep,
-      includeNamespaces,
     }),
   });
 }

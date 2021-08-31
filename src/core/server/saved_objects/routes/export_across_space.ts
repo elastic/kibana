@@ -41,7 +41,6 @@ interface ExportRawOptions {
   namespaces?: string[];
   includeReferencesDeep: boolean;
   excludeExportDetails: boolean;
-  includeNamespaces: boolean;
 }
 
 interface ExportOptions {
@@ -52,7 +51,6 @@ interface ExportOptions {
   namespaces?: string[];
   includeReferencesDeep: boolean;
   excludeExportDetails: boolean;
-  includeNamespaces: boolean;
 }
 
 const cleanOptions = ({
@@ -63,7 +61,6 @@ const cleanOptions = ({
   hasReference,
   excludeExportDetails,
   includeReferencesDeep,
-  includeNamespaces,
 }: ExportRawOptions): ExportOptions => {
   return {
     types: typeof type === 'string' ? [type] : type,
@@ -73,7 +70,6 @@ const cleanOptions = ({
     hasReference: hasReference && !Array.isArray(hasReference) ? [hasReference] : hasReference,
     excludeExportDetails,
     includeReferencesDeep,
-    includeNamespaces,
   };
 };
 
@@ -90,7 +86,6 @@ const validateOptions = (
     excludeExportDetails,
     hasReference,
     includeReferencesDeep,
-    includeNamespaces,
     search,
     namespaces,
   }: ExportOptions,
@@ -126,7 +121,6 @@ const validateOptions = (
       objects: objects!,
       excludeExportDetails,
       includeReferencesDeep,
-      includeNamespaces,
       request,
     };
   } else {
@@ -141,7 +135,6 @@ const validateOptions = (
       namespaces,
       excludeExportDetails,
       includeReferencesDeep,
-      includeNamespaces,
       request,
     };
   }
@@ -179,7 +172,6 @@ export const registerExportAcrossSpaceRoute = (
           ),
           search: schema.maybe(schema.string()),
           namespaces: schema.maybe(schema.arrayOf(schema.string())),
-          includeNamespaces: schema.boolean({ defaultValue: false }),
           includeReferencesDeep: schema.boolean({ defaultValue: false }),
           excludeExportDetails: schema.boolean({ defaultValue: false }),
         }),
@@ -220,8 +212,8 @@ export const registerExportAcrossSpaceRoute = (
 
       try {
         const exportStream = isExportByTypeOptions(options)
-          ? await exporter.exportByTypes(options)
-          : await exporter.exportByObjects(options);
+          ? await exporter.exportByTypes({ ...options, includeNamespaces: true })
+          : await exporter.exportByObjects({ ...options, includeNamespaces: true });
 
         const docsToExport: string[] = await createPromiseFromStreams([
           exportStream,

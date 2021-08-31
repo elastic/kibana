@@ -30,7 +30,6 @@ type EitherExportOptions = SavedObjectsExportByTypeOptions | SavedObjectsExportB
 interface ObjectIdentifier {
   id: string;
   type: string;
-  namespace?: string;
 }
 
 interface ExportRawOptions {
@@ -38,10 +37,8 @@ interface ExportRawOptions {
   hasReference?: { id: string; type: string } | Array<{ id: string; type: string }>;
   objects?: ObjectIdentifier[];
   search?: string;
-  namespaces?: string[];
   includeReferencesDeep: boolean;
   excludeExportDetails: boolean;
-  includeNamespaces: boolean;
 }
 
 interface ExportOptions {
@@ -49,31 +46,25 @@ interface ExportOptions {
   hasReference?: Array<{ id: string; type: string }>;
   objects?: ObjectIdentifier[];
   search?: string;
-  namespaces?: string[];
   includeReferencesDeep: boolean;
   excludeExportDetails: boolean;
-  includeNamespaces: boolean;
 }
 
 const cleanOptions = ({
   type,
   objects,
   search,
-  namespaces,
   hasReference,
   excludeExportDetails,
   includeReferencesDeep,
-  includeNamespaces,
 }: ExportRawOptions): ExportOptions => {
   return {
     types: typeof type === 'string' ? [type] : type,
     search,
     objects,
-    namespaces,
     hasReference: hasReference && !Array.isArray(hasReference) ? [hasReference] : hasReference,
     excludeExportDetails,
     includeReferencesDeep,
-    includeNamespaces,
   };
 };
 
@@ -90,9 +81,7 @@ const validateOptions = (
     excludeExportDetails,
     hasReference,
     includeReferencesDeep,
-    includeNamespaces,
     search,
-    namespaces,
   }: ExportOptions,
   {
     exportSizeLimit,
@@ -126,7 +115,6 @@ const validateOptions = (
       objects: objects!,
       excludeExportDetails,
       includeReferencesDeep,
-      includeNamespaces,
       request,
     };
   } else {
@@ -138,10 +126,8 @@ const validateOptions = (
       types: types!,
       hasReference,
       search,
-      namespaces,
       excludeExportDetails,
       includeReferencesDeep,
-      includeNamespaces,
       request,
     };
   }
@@ -172,14 +158,11 @@ export const registerExportRoute = (
               schema.object({
                 type: schema.string(),
                 id: schema.string(),
-                namespace: schema.maybe(schema.string()),
               }),
               { maxSize: maxImportExportSize }
             )
           ),
           search: schema.maybe(schema.string()),
-          namespaces: schema.maybe(schema.arrayOf(schema.string())),
-          includeNamespaces: schema.boolean({ defaultValue: false }),
           includeReferencesDeep: schema.boolean({ defaultValue: false }),
           excludeExportDetails: schema.boolean({ defaultValue: false }),
         }),
@@ -217,8 +200,8 @@ export const registerExportRoute = (
 
       try {
         const exportStream = isExportByTypeOptions(options)
-          ? await exporter.exportByTypes(options)
-          : await exporter.exportByObjects(options);
+          ? await exporter.exportByTypes({ ...options, includeNamespaces: false })
+          : await exporter.exportByObjects({ ...options, includeNamespaces: false });
 
         const docsToExport: string[] = await createPromiseFromStreams([
           exportStream,

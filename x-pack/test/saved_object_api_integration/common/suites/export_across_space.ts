@@ -515,13 +515,11 @@ export const createRequest = (testCase: AcrossSpaceExportTestCase) => {
   if (isByIdTestCase(testCase)) {
     return {
       objects: testCase.objects.map(({ type, id, namespace }) => ({ type, id, namespace })),
-      includeNamespaces: true,
     };
   } else {
     return {
       type: testCase.types,
       namespaces: testCase.namespaces,
-      includeNamespaces: true,
     };
   }
 };
