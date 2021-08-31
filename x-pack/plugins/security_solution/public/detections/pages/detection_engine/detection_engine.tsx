@@ -294,7 +294,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {indicesExist && (!hasIndexRead || !canUserREAD) ? (
+      {indicesExist && (hasIndexRead === false || canUserREAD === false) ? (
         <EmptyPage
           actions={emptyPageActions}
           message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
