@@ -14,3 +14,4 @@ export * from './series_type';
 export * from './tick_labels_config';
 export * from './xy_args';
 export * from './xy_chart';
+export * from './labels_orientation_config';

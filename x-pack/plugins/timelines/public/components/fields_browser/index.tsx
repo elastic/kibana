@@ -11,25 +11,17 @@ import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import type { FieldBrowserProps } from '../t_grid/toolbar/fields_browser/types';
 import { StatefulFieldsBrowser } from '../t_grid/toolbar/fields_browser';
-import {
-  FIELD_BROWSER_WIDTH,
-  FIELD_BROWSER_HEIGHT,
-} from '../t_grid/toolbar/fields_browser/helpers';
+export type { FieldBrowserProps } from '../t_grid/toolbar/fields_browser/types';
 
 const EMPTY_BROWSER_FIELDS = {};
-export type FieldBrowserWrappedProps = Omit<FieldBrowserProps, 'width' | 'height'> & {
-  width?: FieldBrowserProps['width'];
-  height?: FieldBrowserProps['height'];
-};
-export type FieldBrowserWrappedComponentProps = FieldBrowserWrappedProps & {
+
+export type FieldBrowserWrappedComponentProps = FieldBrowserProps & {
   store: Store;
 };
 
 export const FieldBrowserWrappedComponent = (props: FieldBrowserWrappedComponentProps) => {
   const { store, ...restProps } = props;
   const fieldsBrowseProps = {
-    width: FIELD_BROWSER_WIDTH,
-    height: FIELD_BROWSER_HEIGHT,
     ...restProps,
     browserFields: restProps.browserFields ?? EMPTY_BROWSER_FIELDS,
   };

@@ -75,7 +75,6 @@ export class ImportCompleteView extends Component<Props, {}> {
           <CodeEditor
             languageId="json"
             value={jsonAsString}
-            onChange={() => {}}
             options={{
               readOnly: true,
               lineNumbers: 'off',

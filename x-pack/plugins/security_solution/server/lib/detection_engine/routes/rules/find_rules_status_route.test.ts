@@ -17,8 +17,6 @@ import { RuleStatusResponse } from '../../rules/types';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
-jest.mock('../../signals/rule_status_service');
-
 describe('find_statuses', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -26,7 +24,7 @@ describe('find_statuses', () => {
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    clients.savedObjectsClient.find.mockResolvedValue(getFindBulkResultStatus()); // successful status search
+    clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus()); // successful status search
     clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
     findRulesStatusesRoute(server.router);
   });
@@ -45,7 +43,7 @@ describe('find_statuses', () => {
     });
 
     test('catch error when status search throws error', async () => {
-      clients.savedObjectsClient.find.mockImplementation(async () => {
+      clients.ruleExecutionLogClient.findBulk.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(ruleStatusRequest(), context);

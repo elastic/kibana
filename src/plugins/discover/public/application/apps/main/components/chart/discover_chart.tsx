@@ -5,53 +5,46 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, memo } from 'react';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import { IUiSettingsClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { HitsCounter } from '../hits_counter';
-import { DataPublicPluginStart, IndexPattern, search } from '../../../../../../../data/public';
+import { search } from '../../../../../../../data/public';
 import { TimechartHeader } from '../timechart_header';
 import { SavedSearch } from '../../../../../saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { TimechartBucketInterval } from '../timechart_header/timechart_header';
-import { Chart as IChart } from './point_series';
 import { DiscoverHistogram } from './histogram';
+import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
+import { DiscoverServices } from '../../../../../build_services';
 import { DocumentViewOption } from '../top_nav/open_options_popover';
 
-const TimechartHeaderMemoized = React.memo(TimechartHeader);
-const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
+const TimechartHeaderMemoized = memo(TimechartHeader);
+const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export function DiscoverChart({
-  config,
-  data,
-  bucketInterval,
-  chartData,
-  hits,
-  isLegacy,
   resetQuery,
   savedSearch,
+  savedSearchDataChart$,
+  savedSearchDataTotalHits$,
+  services,
   state,
   stateContainer,
   timefield,
   viewId,
   setViewId,
 }: {
-  config: IUiSettingsClient;
-  data: DataPublicPluginStart;
-  bucketInterval?: TimechartBucketInterval;
-  chartData?: IChart;
-  hits?: number;
-  indexPattern: IndexPattern;
-  isLegacy: boolean;
   resetQuery: () => void;
   savedSearch: SavedSearch;
+  savedSearchDataChart$: DataCharts$;
+  savedSearchDataTotalHits$: DataTotalHits$;
+  services: DiscoverServices;
   state: AppState;
   stateContainer: GetStateReturn;
   timefield?: string;
   viewId: string;
   setViewId: (viewId: string) => void;
 }) {
+  const { data, uiSettings: config } = services;
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
     moveFocus: false,
@@ -98,12 +91,11 @@ export function DiscoverChart({
             className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
           >
             <HitsCounter
-              hits={hits}
+              savedSearchData$={savedSearchDataTotalHits$}
               showResetButton={!!(savedSearch && savedSearch.id)}
               onResetQuery={resetQuery}
             />
           </EuiFlexItem>
-
           {!state.hideChart && (
             <EuiFlexItem className="dscResultCount__actions">
               <TimechartHeaderMemoized
@@ -112,7 +104,7 @@ export function DiscoverChart({
                 options={search.aggs.intervalOptions}
                 onChangeInterval={onChangeInterval}
                 stateInterval={state.interval || ''}
-                bucketInterval={bucketInterval}
+                savedSearchData$={savedSearchDataChart$}
               />
             </EuiFlexItem>
           )}
@@ -137,7 +129,7 @@ export function DiscoverChart({
           <DocumentViewOption viewId={viewId} setViewId={setViewId} />
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!state.hideChart && chartData && (
+      {timefield && !state.hideChart && (
         <EuiFlexItem grow={false}>
           <section
             ref={(element) => (chartRef.current.element = element)}
@@ -147,13 +139,11 @@ export function DiscoverChart({
             })}
             className="dscTimechart"
           >
-            <div
-              className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
-              data-test-subj="discoverChart"
-            >
+            <div className="dscHistogram" data-test-subj="discoverChart">
               <DiscoverHistogramMemoized
-                chartData={chartData}
+                savedSearchData$={savedSearchDataChart$}
                 timefilterUpdateHandler={timefilterUpdateHandler}
+                services={services}
               />
             </div>
           </section>

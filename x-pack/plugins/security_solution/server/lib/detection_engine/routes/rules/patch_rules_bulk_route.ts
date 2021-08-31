@@ -22,8 +22,6 @@ import { transformBulkError, buildSiemResponse } from '../utils';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 
@@ -47,6 +45,7 @@ export const patchRulesBulkRoute = (
       const siemResponse = buildSiemResponse(response);
 
       const rulesClient = context.alerting?.getRulesClient();
+      const ruleStatusClient = context.securitySolution.getExecutionLogClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
       if (!rulesClient) {
@@ -59,7 +58,6 @@ export const patchRulesBulkRoute = (
         request,
         savedObjectsClient,
       });
-      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
           const {
@@ -144,7 +142,8 @@ export const patchRulesBulkRoute = (
               license,
               outputIndex,
               savedId,
-              savedObjectsClient,
+              spaceId: context.securitySolution.getSpaceId(),
+              ruleStatusClient,
               timelineId,
               timelineTitle,
               meta,
@@ -168,6 +167,7 @@ export const patchRulesBulkRoute = (
               threatQuery,
               threatMapping,
               threatLanguage,
+              throttle,
               concurrentSearches,
               itemsPerSearch,
               timestampOverride,
@@ -180,23 +180,12 @@ export const patchRulesBulkRoute = (
               exceptionsList,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleActions = await updateRulesNotifications({
-                ruleAlertId: rule.id,
-                rulesClient,
-                savedObjectsClient,
-                enabled: rule.enabled,
-                actions,
-                throttle,
-                name: rule.name,
-              });
               const ruleStatuses = await ruleStatusClient.find({
-                perPage: 1,
-                sortField: 'statusDate',
-                sortOrder: 'desc',
-                search: rule.id,
-                searchFields: ['alertId'],
+                logsCount: 1,
+                ruleId: rule.id,
+                spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses);
             } else {
               return getIdBulkError({ id, ruleId });
             }

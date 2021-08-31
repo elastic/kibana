@@ -28,7 +28,7 @@ import {
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
 import { PalettePicker } from '../../palette_picker';
-import { getChartsSetup } from '../../../../services';
+import { getCharts } from '../../../../services';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
@@ -120,7 +120,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
   const selectedChartTypeOption = chartTypeOptions.find((option) => {
     return model.chart_type === option.value;
   });
-  const { palettes } = getChartsSetup();
+  const { palettes } = getCharts();
   const [palettesRegistry, setPalettesRegistry] = useState(null);
 
   useEffect(() => {
@@ -159,6 +159,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="seriesChartTypeComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -261,6 +262,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
               singleSelection={{ asPlainText: true }}
+              data-test-subj="seriesChartTypeComboBox"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -530,6 +532,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               value={model.override_index_pattern}
               name="override_index_pattern"
               onChange={props.onChange}
+              data-test-subj="seriesOverrideIndexPattern"
             />
           </EuiFormRow>
         </EuiFlexItem>

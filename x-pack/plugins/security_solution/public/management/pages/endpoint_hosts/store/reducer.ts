@@ -9,6 +9,7 @@ import {
   EndpointDetailsActivityLogChanged,
   EndpointPackageInfoStateChanged,
   EndpointPendingActionsStateChanged,
+  MetadataTransformStatsChanged,
 } from './action';
 import {
   isOnEndpointPage,
@@ -34,7 +35,7 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
   state,
   action
 ) => {
-  const pagingOptions =
+  const updatedActivityLog =
     action.payload.type === 'LoadedResourceState'
       ? {
           ...state.endpointDetails.activityLog,
@@ -52,7 +53,7 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
     endpointDetails: {
       ...state.endpointDetails!,
       activityLog: {
-        ...pagingOptions,
+        ...updatedActivityLog,
         logData: action.payload,
       },
     },
@@ -81,6 +82,14 @@ const handleEndpointPackageInfoStateChanged: CaseReducer<EndpointPackageInfoStat
     endpointPackageInfo: action.payload,
   };
 };
+
+const handleMetadataTransformStatsChanged: CaseReducer<MetadataTransformStatsChanged> = (
+  state,
+  action
+) => ({
+  ...state,
+  metadataTransformStats: action.payload,
+});
 
 /* eslint-disable-next-line complexity */
 export const endpointListReducer: StateReducer = (state = initialEndpointPageState(), action) => {
@@ -390,6 +399,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       },
       endpointsExist: true,
     };
+  } else if (action.type === 'metadataTransformStatsChanged') {
+    return handleMetadataTransformStatsChanged(state, action);
   }
 
   return state;

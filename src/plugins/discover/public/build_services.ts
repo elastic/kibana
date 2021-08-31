@@ -17,6 +17,7 @@ import {
   ToastsStart,
   IUiSettingsClient,
   PluginInitializerContext,
+  HttpStart,
 } from 'kibana/public';
 import {
   FilterManager,
@@ -66,6 +67,7 @@ export interface DiscoverServices {
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  http: HttpStart;
 }
 
 export async function buildServices(
@@ -111,5 +113,6 @@ export async function buildServices(
     uiSettings: core.uiSettings,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
     indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    http: core.http,
   };
 }

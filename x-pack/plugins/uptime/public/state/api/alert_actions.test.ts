@@ -58,7 +58,6 @@ describe('Alert Actions factory', () => {
     });
     expect(resp).toEqual([
       {
-        actionTypeId: '.pagerduty',
         group: 'recovered',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
@@ -69,7 +68,6 @@ describe('Alert Actions factory', () => {
         },
       },
       {
-        actionTypeId: '.pagerduty',
         group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
@@ -103,7 +101,6 @@ describe('Alert Actions factory', () => {
     });
     expect(resp).toEqual([
       {
-        actionTypeId: '.pagerduty',
         group: 'recovered',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
@@ -114,7 +111,6 @@ describe('Alert Actions factory', () => {
         },
       },
       {
-        actionTypeId: '.pagerduty',
         group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {

@@ -10,8 +10,8 @@
  * WARNING: these typings are incomplete
  */
 
-import { JsonValue } from '@kbn/common-utils';
-import { KueryNode } from '..';
+import { JsonValue } from '@kbn/utility-types';
+import { KueryNode, KueryQueryOptions } from '..';
 import { IndexPatternBase } from '../..';
 
 export type FunctionName =
@@ -31,7 +31,7 @@ interface FunctionType {
   toElasticsearchQuery: (
     node: any,
     indexPattern?: IndexPatternBase,
-    config?: Record<string, any>,
+    config?: KueryQueryOptions,
     context?: Record<string, any>
   ) => JsonValue;
 }

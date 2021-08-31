@@ -10,12 +10,13 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { search } from '../../../../../../plugins/data/public';
-const { parseEsInterval } = search.aggs;
 import { GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 import { AUTO_INTERVAL } from '../../../../common/constants';
 import { isVisTableData } from '../../../../common/vis_data_utils';
 import type { PanelData, TimeseriesVisData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
+
+const { parseEsInterval } = search.aggs;
 
 export const unitLookup = {
   s: i18n.translate('visTypeTimeseries.getInterval.secondsLabel', { defaultMessage: 'seconds' }),
@@ -76,7 +77,11 @@ export const getInterval = (visData: TimeseriesVisData, model: TimeseriesVisPara
   ) as PanelData[];
 
   return series.reduce((currentInterval, item) => {
-    if (item.data.length > 1) {
+    if (
+      item.data.length > 1 &&
+      typeof item.data[1][0] === 'number' &&
+      typeof item.data[0][0] === 'number'
+    ) {
       const seriesInterval = item.data[1][0] - item.data[0][0];
       if (!currentInterval || seriesInterval < currentInterval) return seriesInterval;
     }

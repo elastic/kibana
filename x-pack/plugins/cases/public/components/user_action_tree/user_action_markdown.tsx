@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../case_view/translations';
@@ -25,84 +25,96 @@ interface UserActionMarkdownProps {
   onChangeEditable: (id: string) => void;
   onSaveContent: (content: string) => void;
 }
-export const UserActionMarkdown = ({
-  id,
-  content,
-  isEditable,
-  onChangeEditable,
-  onSaveContent,
-}: UserActionMarkdownProps) => {
-  const initialState = { content };
-  const { form } = useForm<Content>({
-    defaultValue: initialState,
-    options: { stripEmptyFields: false },
-    schema,
-  });
 
-  const fieldName = 'content';
-  const { submit } = form;
+interface UserActionMarkdownRefObject {
+  setComment: (newComment: string) => void;
+}
 
-  const handleCancelAction = useCallback(() => {
-    onChangeEditable(id);
-  }, [id, onChangeEditable]);
+export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserActionMarkdownProps>(
+  ({ id, content, isEditable, onChangeEditable, onSaveContent }, ref) => {
+    const editorRef = useRef();
+    const initialState = { content };
+    const { form } = useForm<Content>({
+      defaultValue: initialState,
+      options: { stripEmptyFields: false },
+      schema,
+    });
 
-  const handleSaveAction = useCallback(async () => {
-    const { isValid, data } = await submit();
-    if (isValid) {
-      onSaveContent(data.content);
-    }
-    onChangeEditable(id);
-  }, [id, onChangeEditable, onSaveContent, submit]);
+    const fieldName = 'content';
+    const { setFieldValue, submit } = form;
 
-  const renderButtons = useCallback(
-    ({ cancelAction, saveAction }) => (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="user-action-cancel-markdown"
-            size="s"
-            onClick={cancelAction}
-            iconType="cross"
-          >
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="user-action-save-markdown"
-            color="secondary"
-            fill
-            iconType="save"
-            onClick={saveAction}
-            size="s"
-          >
-            {i18n.SAVE}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    []
-  );
+    const handleCancelAction = useCallback(() => {
+      onChangeEditable(id);
+    }, [id, onChangeEditable]);
 
-  return isEditable ? (
-    <Form form={form} data-test-subj="user-action-markdown-form">
-      <UseField
-        path={fieldName}
-        component={MarkdownEditorForm}
-        componentProps={{
-          'aria-label': 'Cases markdown editor',
-          value: content,
-          id,
-          bottomRightContent: renderButtons({
-            cancelAction: handleCancelAction,
-            saveAction: handleSaveAction,
-          }),
-        }}
-      />
-    </Form>
-  ) : (
-    <ContentWrapper data-test-subj="user-action-markdown">
-      <MarkdownRenderer>{content}</MarkdownRenderer>
-    </ContentWrapper>
-  );
-};
+    const handleSaveAction = useCallback(async () => {
+      const { isValid, data } = await submit();
+      if (isValid) {
+        onSaveContent(data.content);
+      }
+      onChangeEditable(id);
+    }, [id, onChangeEditable, onSaveContent, submit]);
+
+    const setComment = useCallback(
+      (newComment) => {
+        setFieldValue(fieldName, newComment);
+      },
+      [setFieldValue]
+    );
+
+    const EditorButtons = useMemo(
+      () => (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="user-action-cancel-markdown"
+              size="s"
+              onClick={handleCancelAction}
+              iconType="cross"
+            >
+              {i18n.CANCEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="user-action-save-markdown"
+              color="secondary"
+              fill
+              iconType="save"
+              onClick={handleSaveAction}
+              size="s"
+            >
+              {i18n.SAVE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      [handleCancelAction, handleSaveAction]
+    );
+
+    useImperativeHandle(ref, () => ({
+      setComment,
+      editor: editorRef.current,
+    }));
+
+    return isEditable ? (
+      <Form form={form} data-test-subj="user-action-markdown-form">
+        <UseField
+          path={fieldName}
+          component={MarkdownEditorForm}
+          componentProps={{
+            ref: editorRef,
+            'aria-label': 'Cases markdown editor',
+            value: content,
+            id,
+            bottomRightContent: EditorButtons,
+          }}
+        />
+      </Form>
+    ) : (
+      <ContentWrapper data-test-subj="user-action-markdown">
+        <MarkdownRenderer>{content}</MarkdownRenderer>
+      </ContentWrapper>
+    );
+  }
+);

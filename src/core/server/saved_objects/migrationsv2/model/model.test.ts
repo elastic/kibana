@@ -39,6 +39,7 @@ import type {
   TransformedDocumentsBulkIndex,
   ReindexSourceToTempIndexBulk,
   CheckUnknownDocumentsState,
+  CalculateExcludeFiltersState,
 } from '../types';
 import { SavedObjectsRawDoc } from '../../serialization';
 import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../../migrations/core';
@@ -91,6 +92,7 @@ describe('migrations v2 model', () => {
       },
     },
     knownTypes: ['dashboard', 'config'],
+    excludeFromUpgradeFilterHooks: {},
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -839,14 +841,69 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
-      test('SET_SOURCE_WRITE_BLOCK -> CREATE_REINDEX_TEMP if action succeeds with set_write_block_succeeded', () => {
+      test('SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS if action succeeds with set_write_block_succeeded', () => {
         const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.right(
           'set_write_block_succeeded'
         );
         const newState = model(setWriteBlockState, res);
-        expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
+        expect(newState.controlState).toEqual('CALCULATE_EXCLUDE_FILTERS');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+    });
+
+    describe('CALCULATE_EXCLUDE_FILTERS', () => {
+      const state: CalculateExcludeFiltersState = {
+        ...baseState,
+        controlState: 'CALCULATE_EXCLUDE_FILTERS',
+        versionIndexReadyActions: Option.none,
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        targetIndex: '.kibana_7.11.0_001',
+        tempIndexMappings: { properties: {} },
+      };
+      test('CALCULATE_EXCLUDE_FILTERS -> CALCULATE_EXCLUDE_FILTERS if action fails with retryable error', () => {
+        const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.left({
+          type: 'retryable_es_client_error',
+          message: 'Something temporarily broke!',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CALCULATE_EXCLUDE_FILTERS');
+      });
+      test('CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP if action succeeds with filters', () => {
+        const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.right({
+          excludeFilter: { bool: { must: { term: { fieldA: 'abc' } } } },
+          errorsByType: { type1: new Error('an error!') },
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
+        expect(newState.unusedTypesQuery).toEqual({
+          // New filter should be combined unused type query and filter from response
+          bool: {
+            filter: [
+              {
+                bool: {
+                  must_not: [
+                    {
+                      term: {
+                        type: 'unused-fleet-agent-events',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: { must: { term: { fieldA: 'abc' } } },
+              },
+            ],
+          },
+        });
+        // Logs should be added for any errors encountered from excludeOnUpgrade hooks
+        expect(newState.logs).toEqual([
+          {
+            level: 'warning',
+            message: `Ignoring excludeOnUpgrade hook on type [type1] that failed with error: "Error: an error!"`,
+          },
+        ]);
       });
     });
 
@@ -1096,6 +1153,26 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_CLOSE_PIT if response is left index_not_found_exception', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
+          type: 'index_not_found_exception',
+          index: 'the_temp_index',
+        });
+        const newState = model(reindexSourceToTempIndexBulkState, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> FATAL if action returns left request_entity_too_large_exception', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
+          type: 'request_entity_too_large_exception',
+        });
+        const newState = model(reindexSourceToTempIndexBulkState, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Try to use smaller batches by changing the Kibana 'migrations.batchSize' configuration option and restarting Kibana."`
+        );
       });
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK should throw a throwBadResponse error if action failed', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
@@ -1462,18 +1539,39 @@ describe('migrations v2 model', () => {
         hasTransformedDocs: false,
         progress: createInitialProgress(),
       };
-      test('TRANSFORMED_DOCUMENTS_BULK_INDEX should throw a throwBadResponse error if action failed', () => {
+
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX throws if action returns left index_not_found_exception', () => {
         const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
-          type: 'retryable_es_client_error',
-          message: 'random documents bulk index error',
+          type: 'index_not_found_exception',
+          index: 'the_target_index',
         });
-        const newState = model(
-          transformedDocumentsBulkIndexState,
-          res
-        ) as TransformedDocumentsBulkIndex;
-        expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
-        expect(newState.retryCount).toEqual(1);
-        expect(newState.retryDelay).toEqual(2000);
+        expect(() =>
+          model(transformedDocumentsBulkIndexState, res)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"TRANSFORMED_DOCUMENTS_BULK_INDEX received unexpected action response: {\\"type\\":\\"index_not_found_exception\\",\\"index\\":\\"the_target_index\\"}"`
+        );
+      });
+
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX throws if action returns left target_index_had_write_block', () => {
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
+          type: 'target_index_had_write_block',
+        });
+        expect(() =>
+          model(transformedDocumentsBulkIndexState, res)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"TRANSFORMED_DOCUMENTS_BULK_INDEX received unexpected action response: {\\"type\\":\\"target_index_had_write_block\\"}"`
+        );
+      });
+
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> FATAL if action returns left request_entity_too_large_exception', () => {
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
+          type: 'request_entity_too_large_exception',
+        });
+        const newState = model(transformedDocumentsBulkIndexState, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Try to use smaller batches by changing the Kibana 'migrations.batchSize' configuration option and restarting Kibana."`
+        );
       });
     });
 

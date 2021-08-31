@@ -5,15 +5,32 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback } from 'react';
+import React, {
+  memo,
+  forwardRef,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useImperativeHandle,
+  ElementRef,
+} from 'react';
 import { PluggableList } from 'unified';
-import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import {
+  EuiMarkdownEditor,
+  EuiMarkdownEditorProps,
+  EuiMarkdownAstNode,
+  EuiMarkdownEditorUiPlugin,
+} from '@elastic/eui';
+import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
+import { CommentEditorContext } from './context';
+import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
   dataTestSubj?: string;
-  editorId?: string;
+  editorId: string;
   height?: number;
   onChange: (content: string) => void;
   parsingPlugins?: PluggableList;
@@ -22,35 +39,73 @@ interface MarkdownEditorProps {
   value: string;
 }
 
-const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
-  ariaLabel,
-  dataTestSubj,
-  editorId,
-  height,
-  onChange,
-  value,
-}) => {
-  const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-  const onParse = useCallback((err, { messages }) => {
-    setMarkdownErrorMessages(err ? [err] : messages);
-  }, []);
-  const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
+type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
 
-  return (
-    <EuiMarkdownEditor
-      aria-label={ariaLabel}
-      editorId={editorId}
-      onChange={onChange}
-      value={value}
-      uiPlugins={uiPlugins}
-      parsingPluginList={parsingPlugins}
-      processingPluginList={processingPlugins}
-      onParse={onParse}
-      errors={markdownErrorMessages}
-      data-test-subj={dataTestSubj}
-      height={height}
-    />
-  );
-};
+export interface MarkdownEditorRef {
+  textarea: HTMLTextAreaElement | null;
+  replaceNode: ContextShape['replaceNode'];
+  toolbar: HTMLDivElement | null;
+}
+
+const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
+  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value }, ref) => {
+    const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
+    const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
+    const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
+      setMarkdownErrorMessages(err ? [err] : messages);
+      astRef.current = ast;
+    }, []);
+    const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
+    const editorRef = useRef<EuiMarkdownEditorRef>(null);
+
+    useLensButtonToggle({
+      astRef,
+      uiPlugins,
+      editorRef: ref as React.MutableRefObject<MarkdownEditorRef>,
+      value,
+    });
+
+    const commentEditorContextValue = useMemo(
+      () => ({
+        editorId,
+        value,
+      }),
+      [editorId, value]
+    );
+
+    // @ts-expect-error
+    useImperativeHandle(ref, () => {
+      if (!editorRef.current) {
+        return null;
+      }
+
+      const editorNode = editorRef.current?.textarea?.closest('.euiMarkdownEditor');
+
+      return {
+        ...editorRef.current,
+        toolbar: editorNode?.querySelector('.euiMarkdownEditorToolbar'),
+      };
+    });
+
+    return (
+      <CommentEditorContext.Provider value={commentEditorContextValue}>
+        <EuiMarkdownEditor
+          ref={editorRef}
+          aria-label={ariaLabel}
+          editorId={editorId}
+          onChange={onChange}
+          value={value}
+          uiPlugins={uiPlugins}
+          parsingPluginList={parsingPlugins}
+          processingPluginList={processingPlugins}
+          onParse={onParse}
+          errors={markdownErrorMessages}
+          data-test-subj={dataTestSubj}
+          height={height}
+        />
+      </CommentEditorContext.Provider>
+    );
+  }
+);
 
 export const MarkdownEditor = memo(MarkdownEditorComponent);

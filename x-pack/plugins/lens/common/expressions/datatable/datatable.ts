@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import type {
+  ExecutionContext,
   DatatableColumnMeta,
   ExpressionFunctionDefinition,
 } from '../../../../../../src/plugins/expressions/common';
@@ -46,15 +47,13 @@ function isRange(meta: { params?: { id?: string } } | undefined) {
   return meta?.params?.id === 'range';
 }
 
-export const getDatatable = ({
-  formatFactory,
-}: {
-  formatFactory: FormatFactory;
-}): ExpressionFunctionDefinition<
+export const getDatatable = (
+  getFormatFactory: (context: ExecutionContext) => FormatFactory | Promise<FormatFactory>
+): ExpressionFunctionDefinition<
   'lens_datatable',
   LensMultiTable,
   DatatableArgs,
-  DatatableRender
+  Promise<DatatableRender>
 > => ({
   name: 'lens_datatable',
   type: 'render',
@@ -87,12 +86,13 @@ export const getDatatable = ({
       help: '',
     },
   },
-  fn(data, args, context) {
+  async fn(data, args, context) {
     let untransposedData: LensMultiTable | undefined;
     // do the sorting at this level to propagate it also at CSV download
     const [firstTable] = Object.values(data.tables);
     const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
     const formatters: Record<string, ReturnType<FormatFactory>> = {};
+    const formatFactory = await getFormatFactory(context);
 
     firstTable.columns.forEach((column) => {
       formatters[column.id] = formatFactory(column.meta?.params);

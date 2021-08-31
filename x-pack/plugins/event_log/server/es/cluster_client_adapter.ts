@@ -12,9 +12,9 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from 'src/core/server';
 import util from 'util';
 import { estypes } from '@elastic/elasticsearch';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
-import { esKuery } from '../../../../../src/plugins/data/server';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
@@ -228,11 +228,9 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     const namespaceQuery = namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
 
     const esClient = await this.elasticsearchClientPromise;
-    let dslFilterQuery;
+    let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
     try {
-      dslFilterQuery = filter
-        ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(filter))
-        : [];
+      dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : [];
     } catch (err) {
       this.debug(`Invalid kuery syntax for the filter (${filter}) error:`, {
         message: err.message,
@@ -267,6 +265,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
                     'kibana.saved_objects.id': ids,
                   },
                 },
+                // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
                 namespaceQuery,
               ],
             },

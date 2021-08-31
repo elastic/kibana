@@ -9,4 +9,4 @@
 export * from './constants';
 export * from './types';
 
-export { getAvailableShapes } from './lib/available_shapes';
+export { getAvailableShapes, getAvailableProgressShapes } from './lib/available_shapes';

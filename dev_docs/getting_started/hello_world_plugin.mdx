@@ -1,0 +1,159 @@
+---
+id: kibHelloWorldApp
+slug: /kibana-dev-docs/hello-world-app
+title: Hello World
+summary: Build a very basic plugin that registers an application that says "Hello World!".
+date: 2021-08-03
+tags: ['kibana', 'dev', 'contributor', 'tutorials']
+---
+
+This tutorial walks you through two ways to create a plugin that registers an application that says "Hello World!".
+
+You can view the tested example plugin at [examples/hello_world](https://github.com/elastic/kibana/tree/master/examples/hello_world).
+
+## 1. Set up your development environment
+
+Read through <DocLink id="kibDevTutorialSetupDevEnv" text="these instructions"/> to get your development environment set up.
+
+## 2. Option 1 - Write it manually
+
+This is a good option if you want to understand the bare minimum needed to register a "Hello world" application. The example plugin is based off of this option.
+
+1. Create your plugin folder. Start off in the `kibana` folder.
+
+```
+$ cd examples
+$ mkdir hello_world
+$ cd hello_world
+```
+
+2. Create the <DocLink id="kibDevAnatomyOfAPlugin" section="kibanajson" text="kibana.json manifest file"/>.
+
+```
+$ touch kibana.json
+```
+
+and add the following:
+
+```
+{
+  "id": "helloWorld",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "ui": true
+}
+```
+
+3. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="tsconfigjson" text="tsconfig.json file" />.
+
+```
+$ touch tsconfig.json
+```
+
+And add the following to it:
+
+```
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../typings/**/*"
+  ],
+  "exclude": [],
+  "references": [
+    { "path": "../../src/core/tsconfig.json" }
+  ]
+}
+```
+
+4. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="publicindexts" text="`public/plugin.tsx` file "/>.
+
+```
+$ mkdir public
+$ touch plugin.tsx
+```
+
+And add the following to it:
+
+```ts
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
+
+export class HelloWorldPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    // Register an application into the side navigation menu
+    core.application.register({
+      id: 'helloWorld',
+      title: 'Hello World',
+      async mount({ element }: AppMountParameters) {
+        ReactDOM.render(<div>Hello World!</div>, element);
+        return () => ReactDOM.unmountComponentAtNode(element);
+      },
+    });
+  }
+  public start(core: CoreStart) {
+    return {};
+  }
+  public stop() {}
+}
+```
+
+5. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="publicplugints" text="`public/index.ts` file "/>.
+
+```
+$ touch index.ts
+```
+
+```ts
+import { HelloWorldPlugin } from './plugin';
+
+export function plugin() {
+  return new HelloWorldPlugin();
+}
+```
+
+## 2. Option 2 - Use the automatic plugin generator
+
+This is an easy option to get up and running ASAP and includes additional code.
+
+Use the Automatic plugin generator to get a basic structure for a new plugin. Plugins that are not part of the Kibana repo should be developed inside the plugins folder. If you are building a new plugin to check in to the Kibana repo, you will choose between a few locations:
+
+`x-pack/plugins` for plugins related to subscription features
+`src/plugins` for plugins related to free features
+`examples` for developer example plugins (these will not be included in the distributables)
+
+```
+% node scripts/generate_plugin hello_world
+? Plugin name (use camelCase) helloWorld
+? Will this plugin be part of the Kibana repository? Yes
+? What type of internal plugin would you like to create Kibana Example
+? Should an UI plugin be generated? Yes
+? Should a server plugin be generated? No
+ succ 🎉
+
+      Your plugin has been created in examples/hello_world
+```
+
+## 3. Build your new application
+
+Run `yarn kbn bootstrap`
+
+## 3. Start Kibana with examples and navigate to your new application
+
+In one terminal window, run `yarn es snapshot --license trial` to boot up Elasticsearch.
+
+In another terminal window, run `yarn start --run-examples` to boot up Kibana and include the example plugins. Your example plugin should show up in the navigation at the very bottom.
+
+If you build it manually it will look something like this:
+![hello world manual](./hello_world_manual.png)
+
+If you built it with the generator, it will look something like this:
+![hello world generated](./hello_world_generated.png)

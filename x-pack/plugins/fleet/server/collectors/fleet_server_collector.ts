@@ -76,7 +76,6 @@ export const getFleetServerUsage = async (
   }
 
   const { total, inactive, online, error, updating, offline } = await getAgentStatusForAgentPolicy(
-    soClient,
     esClient,
     undefined,
     Array.from(policyIds)

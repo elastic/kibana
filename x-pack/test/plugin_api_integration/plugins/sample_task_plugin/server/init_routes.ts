@@ -12,7 +12,7 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
-  CoreSetup,
+  IScopedClusterClient,
 } from 'src/core/server';
 import { EventEmitter } from 'events';
 import { TaskManagerStartContract } from '../../../../../plugins/task_manager/server';
@@ -36,12 +36,11 @@ const taskManagerQuery = {
 
 export function initRoutes(
   router: IRouter,
-  core: CoreSetup,
   taskManagerStart: Promise<TaskManagerStartContract>,
   taskTestingEvents: EventEmitter
 ) {
-  async function ensureIndexIsRefreshed() {
-    return await core.elasticsearch.legacy.client.callAsInternalUser('indices.refresh', {
+  async function ensureIndexIsRefreshed(client: IScopedClusterClient) {
+    return await client.asInternalUser.indices.refresh({
       index: '.kibana_task_manager',
     });
   }
@@ -250,7 +249,7 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       try {
-        await ensureIndexIsRefreshed();
+        await ensureIndexIsRefreshed(context.core.elasticsearch.client);
         const taskManager = await taskManagerStart;
         return res.ok({ body: await taskManager.get(req.params.taskId) });
       } catch ({ isBoom, output, message }) {
@@ -269,7 +268,7 @@ export function initRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
-      await ensureIndexIsRefreshed();
+      await ensureIndexIsRefreshed(context.core.elasticsearch.client);
       return res.ok({ body: {} });
     }
   );
@@ -285,7 +284,7 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       try {
-        await ensureIndexIsRefreshed();
+        await ensureIndexIsRefreshed(context.core.elasticsearch.client);
         let tasksFound = 0;
         const taskManager = await taskManagerStart;
         do {

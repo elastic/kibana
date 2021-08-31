@@ -27,7 +27,9 @@ import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
 import { KBN_FIELD_TYPES } from '../../../../../../data/public';
-import type { Metric, Panel, SanitizedFieldType } from '../../../../../common/types';
+import type { Metric, Panel, SanitizedFieldType, Series } from '../../../../../common/types';
+import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';
+
 import { DragHandleProps } from '../../../../types';
 import { PercentileHdr } from '../percentile_hdr';
 
@@ -40,6 +42,7 @@ interface PercentileRankAggProps {
   model: Metric;
   panel: Panel;
   siblings: Metric[];
+  series: Series;
   dragHandleProps: DragHandleProps;
   onAdd(): void;
   onChange(): void;
@@ -48,7 +51,7 @@ interface PercentileRankAggProps {
 
 export const PercentileRankAgg = (props: PercentileRankAggProps) => {
   const { panel, fields, indexPattern } = props;
-  const defaults = { values: [''] };
+  const defaults = { values: [''], colors: [TSVB_DEFAULT_COLOR] };
   const model = { ...defaults, ...props.model };
 
   const htmlId = htmlIdGenerator();
@@ -56,11 +59,17 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleNumberChange = createNumberHandler(handleChange);
+  const percentileRankSeries =
+    panel.series.find((s) => s.id === props.series.id) || panel.series[0];
+  // If the series is grouped by, then these colors are not respected, no need to display the color picker */
+  const isGroupedBy = panel.series.length > 0 && percentileRankSeries.split_mode !== 'everything';
+  const enableColorPicker = !isGroupedBy && !['table', 'metric', 'markdown'].includes(panel.type);
 
-  const handlePercentileRankValuesChange = (values: Metric['values']) => {
+  const handlePercentileRankValuesChange = (values: Metric['values'], colors: Metric['colors']) => {
     handleChange({
       ...model,
       values,
+      colors,
     });
   };
   return (
@@ -119,8 +128,10 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
               disableAdd={isTablePanel}
               disableDelete={isTablePanel}
               showOnlyLastRow={isTablePanel}
-              model={model.values!}
+              values={model.values!}
+              colors={model.colors!}
               onChange={handlePercentileRankValuesChange}
+              enableColorPicker={enableColorPicker}
             />
           </EuiFormRow>
         </EuiFlexItem>

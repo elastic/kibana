@@ -83,15 +83,15 @@ export function registerTelemetryOptInRoutes({
       );
 
       if (config.sendUsageFrom === 'server') {
-        const optInStatusUrl = config.optInStatusUrl;
+        const { sendUsageTo } = config;
         sendTelemetryOptInStatus(
           telemetryCollectionManager,
-          { optInStatusUrl, newOptInStatus, currentKibanaVersion },
+          { sendUsageTo, newOptInStatus, currentKibanaVersion },
           statsGetterConfig
         ).catch((err) => {
           // The server is likely behind a firewall and can't reach the remote service
           logger.warn(
-            `Failed to notify "${optInStatusUrl}" from the server about the opt-in selection. Possibly blocked by a firewall? - Error: ${err.message}`
+            `Failed to notify the telemetry endpoint about the opt-in selection. Possibly blocked by a firewall? - Error: ${err.message}`
           );
         });
       }

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import Supertest from 'supertest';
-import supertestAsPromised from 'supertest-as-promised';
+import type SuperTest from 'supertest';
 import uuid from 'uuid';
 import { TimelineType } from '../../../../../plugins/security_solution/common/types/timeline';
 
 export const createBasicTimeline = async (
-  supertest: Supertest.SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   titleToSaved: string
 ) =>
   await supertest
@@ -26,7 +25,7 @@ export const createBasicTimeline = async (
     });
 
 export const createBasicTimelineTemplate = async (
-  supertest: Supertest.SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   titleToSaved: string
 ) =>
   await supertest

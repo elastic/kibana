@@ -23,6 +23,10 @@ import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
+import type {
+  FieldFormatsSetup,
+  FieldFormatsStart,
+} from '../../../../src/plugins/field_formats/server';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -47,6 +51,7 @@ export interface SavedObjectsRouteDeps {
 export interface PluginsSetup {
   cloud: CloudSetup;
   data: DataPluginSetup;
+  fieldFormats: FieldFormatsSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
@@ -59,6 +64,7 @@ export interface PluginsSetup {
 
 export interface PluginsStart {
   data: DataPluginStart;
+  fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
 }
 

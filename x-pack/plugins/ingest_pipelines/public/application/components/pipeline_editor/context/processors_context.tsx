@@ -156,6 +156,8 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             // We manually add fields that we **don't** want to be treated as "unknownOptions"
             'internal_networks',
             'internal_networks_field',
+            'value',
+            'copy_from',
           ];
 
           // If the processor type is changed while editing, we need to ignore unkownOptions as they

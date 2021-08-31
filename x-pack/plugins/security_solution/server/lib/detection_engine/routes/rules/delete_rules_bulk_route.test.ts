@@ -13,8 +13,7 @@ import {
   getDeleteBulkRequestById,
   getDeleteAsPostBulkRequest,
   getDeleteAsPostBulkRequestById,
-  getFindResultStatusEmpty,
-  getFindResultStatus,
+  getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
@@ -29,7 +28,7 @@ describe('delete_rules', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.delete.mockResolvedValue({}); // successful deletion
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // rule status request
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // rule status request
 
     deleteRulesBulkRoute(server.router);
   });
@@ -41,7 +40,6 @@ describe('delete_rules', () => {
     });
 
     test('resturns 200 when deleting a single rule and related rule status', async () => {
-      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.status).toEqual(200);
     });

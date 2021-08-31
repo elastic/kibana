@@ -7,7 +7,8 @@
  */
 
 import { shapeRenderer } from './shape_renderer';
+import { progressRenderer } from './progress_renderer';
 
-export const renderers = [shapeRenderer];
+export const renderers = [shapeRenderer, progressRenderer];
 
-export { shapeRenderer };
+export { shapeRenderer, progressRenderer };

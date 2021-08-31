@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import { UxUIFilters } from '../../../typings/ui_filters';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import {
   ApmIndicesConfig,
@@ -35,7 +33,6 @@ export interface Setup {
   ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
   indices: ApmIndicesConfig;
-  uiFilters: UxUIFilters;
 }
 
 export interface SetupTimeRange {
@@ -43,7 +40,7 @@ export interface SetupTimeRange {
   end: number;
 }
 
-interface SetupRequestParams {
+export interface SetupRequestParams {
   query: {
     _inspect?: boolean;
 
@@ -56,13 +53,15 @@ interface SetupRequestParams {
      * Timestamp in ms since epoch
      */
     end?: number;
-    uiFilters?: string;
   };
 }
 
 type InferSetup<TParams extends SetupRequestParams> = Setup &
   (TParams extends { query: { start: number } } ? { start: number } : {}) &
-  (TParams extends { query: { end: number } } ? { end: number } : {});
+  (TParams extends { query: { end: number } } ? { end: number } : {}) &
+  (TParams extends { query: Partial<SetupTimeRange> }
+    ? Partial<SetupTimeRange>
+    : {});
 
 export async function setupRequest<TParams extends SetupRequestParams>({
   context,
@@ -71,7 +70,6 @@ export async function setupRequest<TParams extends SetupRequestParams>({
   plugins,
   request,
   config,
-  logger,
 }: APMRouteHandlerResources & {
   params: TParams;
 }): Promise<InferSetup<TParams>> {
@@ -87,8 +85,6 @@ export async function setupRequest<TParams extends SetupRequestParams>({
         context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
       ),
     ]);
-
-    const uiFilters = decodeUiFilters(logger, query.uiFilters);
 
     const coreSetupRequest = {
       indices,
@@ -113,7 +109,6 @@ export async function setupRequest<TParams extends SetupRequestParams>({
             )
           : undefined,
       config,
-      uiFilters,
     };
 
     return {
@@ -134,19 +129,4 @@ function getMlSetup(
     anomalyDetectors: ml.anomalyDetectorsProvider(request, savedObjectsClient),
     modules: ml.modulesProvider(request, savedObjectsClient),
   };
-}
-
-function decodeUiFilters(
-  logger: Logger,
-  uiFiltersEncoded?: string
-): UxUIFilters {
-  if (!uiFiltersEncoded) {
-    return {};
-  }
-  try {
-    return JSON.parse(uiFiltersEncoded);
-  } catch (error) {
-    logger.error(error);
-    return {};
-  }
 }

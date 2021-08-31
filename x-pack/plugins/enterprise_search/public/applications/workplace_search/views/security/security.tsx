@@ -16,7 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
-  EuiText,
+  EuiTitle,
   EuiSpacer,
   EuiPanel,
   EuiConfirmModal,
@@ -109,9 +109,9 @@ export const Security: React.FC = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="s">
-            <h4>{PRIVATE_SOURCES_TOGGLE_DESCRIPTION}</h4>
-          </EuiText>
+          <EuiTitle size="xxs">
+            <h2>{PRIVATE_SOURCES_TOGGLE_DESCRIPTION}</h2>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

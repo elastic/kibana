@@ -146,6 +146,7 @@ type TestSubject =
   | 'fieldNameField.input'
   | 'messageField.input'
   | 'mockCodeEditor'
+  | 'pathField.input'
   | 'tagField.input'
   | 'typeSelectorField'
   | 'dateRoundingField'
@@ -172,8 +173,6 @@ type TestSubject =
   | 'valueFieldInput'
   | 'mediaTypeSelectorField'
   | 'networkDirectionField.input'
-  | 'sourceIpField.input'
-  | 'destinationIpField.input'
   | 'toggleCustomField'
   | 'ignoreEmptyField.input'
   | 'overrideField.input'
@@ -189,4 +188,5 @@ type TestSubject =
   | 'ianaField.input'
   | 'transportField.input'
   | 'seedField.input'
+  | 'copyFromInput'
   | 'trimSwitch.input';

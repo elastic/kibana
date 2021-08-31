@@ -20,34 +20,27 @@ describe('interpreter/functions#filtersToAst', () => {
 
   it('converts a list of filters to an expression AST node', () => {
     const actual = filtersToAst([normalFilter, negatedFilter]);
+
     expect(actual).toHaveLength(2);
-    expect(actual[0].functions[0]).toHaveProperty('name', 'kibanaFilter');
-    expect(actual[0].functions[0].arguments).toMatchInlineSnapshot(`
-      Object {
-        "disabled": Array [
-          false,
-        ],
-        "negate": Array [
-          false,
-        ],
-        "query": Array [
-          "{\\"query\\":{\\"test\\":\\"something\\"}}",
-        ],
-      }
-    `);
-    expect(actual[1].functions[0]).toHaveProperty('name', 'kibanaFilter');
-    expect(actual[1].functions[0].arguments).toMatchInlineSnapshot(`
-      Object {
-        "disabled": Array [
-          false,
-        ],
-        "negate": Array [
-          true,
-        ],
-        "query": Array [
-          "{\\"query\\":{\\"test\\":\\"something\\"}}",
-        ],
-      }
-    `);
+    expect(actual).toHaveProperty('0.chain.0.function', 'kibanaFilter');
+    expect(actual).toHaveProperty(
+      '0.chain.0.arguments',
+      expect.objectContaining({
+        disabled: [false],
+        negate: [false],
+        query: ['{"query":{"test":"something"}}'],
+      })
+    );
+
+    expect(actual).toHaveLength(2);
+    expect(actual).toHaveProperty('1.chain.0.function', 'kibanaFilter');
+    expect(actual).toHaveProperty(
+      '1.chain.0.arguments',
+      expect.objectContaining({
+        disabled: [false],
+        negate: [true],
+        query: ['{"query":{"test":"something"}}'],
+      })
+    );
   });
 });

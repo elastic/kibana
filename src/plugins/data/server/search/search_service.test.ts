@@ -11,7 +11,7 @@ import { CoreSetup, CoreStart, SavedObject } from '../../../../core/server';
 import { coreMock } from '../../../../core/server/mocks';
 
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
-import { createFieldFormatsStartMock } from '../field_formats/mocks';
+import { createFieldFormatsStartMock } from '../../../field_formats/server/mocks';
 import { createIndexPatternsStartMock } from '../index_patterns/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';

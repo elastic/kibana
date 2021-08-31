@@ -323,7 +323,6 @@ export class DiscoverPlugin
       stopUrlTracker();
     };
 
-    this.docViewsRegistry.setAngularInjectorGetter(this.getEmbeddableInjector);
     core.application.register({
       id: 'discover',
       title: 'Discover',
@@ -343,6 +342,11 @@ export class DiscoverPlugin
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
         const {
           plugins: { data: dataStart },
         } = await this.initializeServices();
@@ -356,6 +360,7 @@ export class DiscoverPlugin
         const unmount = await renderApp(innerAngularName, params.element);
         return () => {
           params.element.classList.remove('dscAppWrapper');
+          unlistenParentHistory();
           unmount();
           appUnMounted();
         };

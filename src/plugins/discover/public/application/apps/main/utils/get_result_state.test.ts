@@ -6,40 +6,36 @@
  * Side Public License, v 1.
  */
 import { getResultState, resultStatuses } from './get_result_state';
-import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { FetchStatus } from '../../../types';
 
 describe('getResultState', () => {
   test('fetching uninitialized', () => {
-    const actual = getResultState(FetchStatus.UNINITIALIZED, []);
+    const actual = getResultState(FetchStatus.UNINITIALIZED, false);
     expect(actual).toBe(resultStatuses.UNINITIALIZED);
   });
 
   test('fetching complete with no records', () => {
-    const actual = getResultState(FetchStatus.COMPLETE, []);
+    const actual = getResultState(FetchStatus.COMPLETE, false);
     expect(actual).toBe(resultStatuses.NO_RESULTS);
   });
 
   test('fetching ongoing aka loading', () => {
-    const actual = getResultState(FetchStatus.LOADING, []);
+    const actual = getResultState(FetchStatus.LOADING, false);
     expect(actual).toBe(resultStatuses.LOADING);
   });
 
   test('fetching ready', () => {
-    const record = ({ _id: 123 } as unknown) as ElasticSearchHit;
-    const actual = getResultState(FetchStatus.COMPLETE, [record]);
+    const actual = getResultState(FetchStatus.COMPLETE, true);
     expect(actual).toBe(resultStatuses.READY);
   });
 
   test('re-fetching after already data is available', () => {
-    const record = ({ _id: 123 } as unknown) as ElasticSearchHit;
-    const actual = getResultState(FetchStatus.LOADING, [record]);
+    const actual = getResultState(FetchStatus.LOADING, true);
     expect(actual).toBe(resultStatuses.READY);
   });
 
   test('after a fetch error when data was successfully fetched before ', () => {
-    const record = ({ _id: 123 } as unknown) as ElasticSearchHit;
-    const actual = getResultState(FetchStatus.ERROR, [record]);
+    const actual = getResultState(FetchStatus.ERROR, true);
     expect(actual).toBe(resultStatuses.READY);
   });
 });

@@ -9,7 +9,7 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import {
   getTimeseriesAggregation,
-  getTransactionErrorRateTimeSeries,
+  getFailedTransactionRateTimeSeries,
 } from '../../helpers/transaction_error_rate';
 import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
 
@@ -43,7 +43,7 @@ export async function getOverallErrorTimeseries(options: CorrelationsOptions) {
 
   return {
     overall: {
-      timeseries: getTransactionErrorRateTimeSeries(
+      timeseries: getFailedTransactionRateTimeSeries(
         aggregations.timeseries.buckets
       ),
     },

@@ -7,7 +7,7 @@
 
 import { Request } from '@hapi/hapi';
 import { RulesClientFactory, RulesClientFactoryOpts } from './rules_client_factory';
-import { alertTypeRegistryMock } from './alert_type_registry.mock';
+import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { KibanaRequest } from '../../../../src/core/server';
 import {
@@ -21,7 +21,6 @@ import { securityMock } from '../../security/server/mocks';
 import { PluginStartContract as ActionsStartContract } from '../../actions/server';
 import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mocks';
 import { LegacyAuditLogger } from '../../security/server';
-import { ALERTS_FEATURE_ID } from '../common';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { alertingAuthorizationClientFactoryMock } from './alerting_authorization_client_factory.mock';
@@ -44,7 +43,7 @@ const alertingAuthorizationClientFactory = alertingAuthorizationClientFactoryMoc
 const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
   taskManager: taskManagerMock.createStart(),
-  alertTypeRegistry: alertTypeRegistryMock.create(),
+  ruleTypeRegistry: ruleTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
   encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
@@ -105,9 +104,7 @@ test('creates an alerts client with proper constructor arguments when security i
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
-  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request, [
-    ALERTS_FEATURE_ID,
-  ]);
+  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
 
   expect(rulesClientFactoryParams.actions.getActionsAuthorizationWithRequest).toHaveBeenCalledWith(
     request
@@ -119,7 +116,7 @@ test('creates an alerts client with proper constructor arguments when security i
     actionsAuthorization,
     logger: rulesClientFactoryParams.logger,
     taskManager: rulesClientFactoryParams.taskManager,
-    alertTypeRegistry: rulesClientFactoryParams.alertTypeRegistry,
+    ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
     spaceId: 'default',
     namespace: 'default',
     getUserName: expect.any(Function),
@@ -148,9 +145,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
-  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request, [
-    ALERTS_FEATURE_ID,
-  ]);
+  expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
 
   expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
     unsecuredSavedObjectsClient: savedObjectsClient,
@@ -158,7 +153,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     actionsAuthorization,
     logger: rulesClientFactoryParams.logger,
     taskManager: rulesClientFactoryParams.taskManager,
-    alertTypeRegistry: rulesClientFactoryParams.alertTypeRegistry,
+    ruleTypeRegistry: rulesClientFactoryParams.ruleTypeRegistry,
     spaceId: 'default',
     namespace: 'default',
     getUserName: expect.any(Function),

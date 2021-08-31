@@ -41,11 +41,11 @@ export type KibanaPageTemplateSolutionNavProps = EuiSideNavProps<{}> & {
   onCollapse?: () => void;
 };
 
-const negativeTabIndex = (items: Array<EuiSideNavItemType<{}>>) => {
+const setTabIndex = (items: Array<EuiSideNavItemType<{}>>, isHidden: boolean) => {
   return items.map((item) => {
     // @ts-ignore-next-line Can be removed on close of https://github.com/elastic/eui/issues/4925
-    item.tabIndex = -1;
-    item.items = item.items && negativeTabIndex(item.items);
+    item.tabIndex = isHidden ? -1 : undefined;
+    item.items = item.items && setTabIndex(item.items, isHidden);
     return item;
   });
 };
@@ -121,7 +121,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
         }
         toggleOpenOnMobile={toggleOpenOnMobile}
         isOpenOnMobile={isSideNavOpenOnMobile}
-        items={isHidden ? negativeTabIndex(items) : items}
+        items={setTabIndex(items, isHidden)}
         {...rest}
       />
     );
@@ -140,6 +140,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
               side="left"
               size={248}
               closeButtonPosition="outside"
+              className="kbnPageTemplateSolutionNav__flyout"
             >
               {sideNav}
             </EuiFlyout>

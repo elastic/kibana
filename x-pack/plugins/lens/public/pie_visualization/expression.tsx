@@ -22,7 +22,7 @@ import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plug
 export { pie } from '../../common/expressions';
 
 export const getPieRenderer = (dependencies: {
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
 }): ExpressionRenderDefinition<PieExpressionProps> => ({
@@ -33,20 +33,16 @@ export const getPieRenderer = (dependencies: {
   help: '',
   validate: () => undefined,
   reuseDomNode: true,
-  render: async (
-    domNode: Element,
-    config: PieExpressionProps,
-    handlers: IInterpreterRenderHandlers
-  ) => {
+  render: (domNode: Element, config: PieExpressionProps, handlers: IInterpreterRenderHandlers) => {
     const onClickValue = (data: LensFilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
     };
-    const formatFactory = await dependencies.formatFactory;
+
     ReactDOM.render(
       <I18nProvider>
         <MemoizedChart
           {...config}
-          formatFactory={formatFactory}
+          formatFactory={dependencies.formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           onClickValue={onClickValue}

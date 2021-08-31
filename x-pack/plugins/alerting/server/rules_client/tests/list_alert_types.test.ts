@@ -8,7 +8,7 @@
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
@@ -19,10 +19,10 @@ import {
 import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup } from './lib';
 import { RecoveredActionGroup } from '../../../common';
-import { RegistryAlertType } from '../../alert_type_registry';
+import { RegistryRuleType } from '../../rule_type_registry';
 
 const taskManager = taskManagerMock.createStart();
-const alertTypeRegistry = alertTypeRegistryMock.create();
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
@@ -32,7 +32,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
-  alertTypeRegistry,
+  ruleTypeRegistry,
   unsecuredSavedObjectsClient,
   authorization: (authorization as unknown) as AlertingAuthorization,
   actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
@@ -48,12 +48,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 beforeEach(() => {
-  getBeforeSetup(rulesClientParams, taskManager, alertTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
 });
 
 describe('listAlertTypes', () => {
   let rulesClient: RulesClient;
-  const alertingAlertType: RegistryAlertType = {
+  const alertingAlertType: RegistryRuleType = {
     actionGroups: [],
     actionVariables: undefined,
     defaultActionGroupId: 'default',
@@ -65,7 +65,7 @@ describe('listAlertTypes', () => {
     producer: 'alerts',
     enabledInLicense: true,
   };
-  const myAppAlertType: RegistryAlertType = {
+  const myAppAlertType: RegistryRuleType = {
     actionGroups: [],
     actionVariables: undefined,
     defaultActionGroupId: 'default',
@@ -90,7 +90,7 @@ describe('listAlertTypes', () => {
   });
 
   test('should return a list of AlertTypes that exist in the registry', async () => {
-    alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
+    ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
     authorization.filterByRuleTypeAuthorization.mockResolvedValue(
       new Set<RegistryAlertTypeWithAuth>([
         { ...myAppAlertType, authorizedConsumers },
@@ -106,7 +106,7 @@ describe('listAlertTypes', () => {
   });
 
   describe('authorization', () => {
-    const listedTypes = new Set<RegistryAlertType>([
+    const listedTypes = new Set<RegistryRuleType>([
       {
         actionGroups: [],
         actionVariables: undefined,
@@ -132,7 +132,7 @@ describe('listAlertTypes', () => {
       },
     ]);
     beforeEach(() => {
-      alertTypeRegistry.list.mockReturnValue(listedTypes);
+      ruleTypeRegistry.list.mockReturnValue(listedTypes);
     });
 
     test('should return a list of AlertTypes that exist in the registry only if the user is authorised to get them', async () => {

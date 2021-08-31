@@ -20,7 +20,7 @@ import {
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
@@ -31,9 +31,11 @@ export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/a
 const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false };
 
 export function AnomalyDetectionSetupLink() {
-  const {
-    urlParams: { environment },
-  } = useUrlParams();
+  const { query } = useApmParams('/*');
+
+  const environment =
+    ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
+
   const { core } = useApmPluginContext();
   const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
   const license = useLicenseContext();

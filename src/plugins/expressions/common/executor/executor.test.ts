@@ -10,8 +10,9 @@ import { Executor } from './executor';
 import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
 import { Execution } from '../execution';
-import { ExpressionAstFunction, parseExpression } from '../ast';
+import { ExpressionAstFunction, parseExpression, formatExpression } from '../ast';
 import { MigrateFunction } from '../../../kibana_utils/common/persistable_state';
+import { SavedObjectReference } from 'src/core/types';
 
 describe('Executor', () => {
   test('can instantiate', () => {
@@ -153,7 +154,7 @@ describe('Executor', () => {
     const executor = new Executor();
 
     const injectFn = jest.fn().mockImplementation((args, references) => args);
-    const extractFn = jest.fn().mockReturnValue({ args: {}, references: [] });
+    const extractFn = jest.fn().mockImplementation((state) => ({ state, references: [] }));
     const migrateFn = jest.fn().mockImplementation((args) => args);
 
     const fooFn = {
@@ -181,7 +182,50 @@ describe('Executor', () => {
       },
       fn: jest.fn(),
     };
+
+    const refFnRefName = 'ref.id';
+
+    const refFn = {
+      name: 'ref',
+      help: 'test',
+      args: {
+        id: {
+          types: ['string'],
+          help: 'will be extracted',
+        },
+        other: {
+          types: ['string'],
+          help: 'other arg',
+        },
+      },
+      extract: (state: ExpressionAstFunction['arguments']) => {
+        const references: SavedObjectReference[] = [
+          {
+            name: refFnRefName,
+            type: 'ref',
+            id: state.id[0] as string,
+          },
+        ];
+
+        return {
+          state: {
+            ...state,
+            id: [refFnRefName],
+          },
+          references,
+        };
+      },
+      inject: (state: ExpressionAstFunction['arguments'], references: SavedObjectReference[]) => {
+        const reference = references.find((ref) => ref.name === refFnRefName);
+        if (reference) {
+          state.id[0] = reference.id;
+        }
+        return state;
+      },
+      fn: jest.fn(),
+    };
     executor.registerFunction(fooFn);
+    executor.registerFunction(refFn);
 
     test('calls inject function for every expression function in expression', () => {
       executor.inject(
@@ -197,6 +241,18 @@ describe('Executor', () => {
           parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}')
         );
         expect(extractFn).toBeCalledTimes(5);
+      });
+
+      test('extracts references with the proper step key', () => {
+        const expression = `ref id="my-id" other={ref id="nested-id" other="other" | foo bar="baz"}`;
+        const { state, references } = executor.extract(parseExpression(expression));
+
+        expect(references[0].name).toBe('l0_ref.id');
+        expect(references[0].id).toBe('nested-id');
+        expect(references[1].name).toBe('l2_ref.id');
+        expect(references[1].id).toBe('my-id');
+
+        expect(formatExpression(executor.inject(state, references))).toBe(expression);
       });
     });
 

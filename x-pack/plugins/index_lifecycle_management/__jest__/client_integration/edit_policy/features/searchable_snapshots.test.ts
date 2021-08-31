@@ -145,7 +145,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
 
     describe('existing policy', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy()]);
         httpRequestsMockHelpers.setListNodes({
           isUsingDeprecatedDataRoleConfig: false,
           nodesByAttributes: { test: ['123'] },
@@ -182,7 +182,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
 
   describe('on non-enterprise license', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy()]);
       httpRequestsMockHelpers.setListNodes({
         isUsingDeprecatedDataRoleConfig: false,
         nodesByAttributes: { test: ['123'] },

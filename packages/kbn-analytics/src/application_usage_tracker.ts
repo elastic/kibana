@@ -156,8 +156,9 @@ export class ApplicationUsageTracker {
     const appKey = this.createKey(this.currentAppId, viewId);
     const serializedKey = ApplicationUsageTracker.serializeKey(appKey);
     const appViewMetric = this.trackedApplicationViews[serializedKey];
-    this.sendMetricsToReporter([appViewMetric]);
-
-    delete this.trackedApplicationViews[serializedKey];
+    if (appViewMetric) {
+      this.sendMetricsToReporter([appViewMetric]);
+      delete this.trackedApplicationViews[serializedKey];
+    }
   }
 }

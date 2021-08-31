@@ -82,10 +82,9 @@ export const FullScreenshotType = t.type({
   synthetics: t.intersection([
     t.partial({
       blob: t.string,
+      blob_mime: t.string,
     }),
     t.type({
-      blob: t.string,
-      blob_mime: t.string,
       step: t.type({
         name: t.string,
       }),
@@ -158,6 +157,10 @@ export const ScreenshotBlockDocType = t.type({
 
 export type ScreenshotBlockDoc = t.TypeOf<typeof ScreenshotBlockDocType>;
 
+export function isScreenshotBlockDoc(data: unknown): data is ScreenshotBlockDoc {
+  return isRight(ScreenshotBlockDocType.decode(data));
+}
+
 /**
  * Contains the fields requried by the Synthetics UI when utilizing screenshot refs.
  */
@@ -166,7 +169,6 @@ export const ScreenshotRefImageDataType = t.type({
   maxSteps: t.number,
   ref: t.type({
     screenshotRef: RefResultType,
-    blocks: t.array(ScreenshotBlockDocType),
   }),
 });
 

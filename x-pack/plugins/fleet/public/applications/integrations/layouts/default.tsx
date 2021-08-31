@@ -32,7 +32,7 @@ const Illustration = styled(EuiImage)`
 `;
 
 const HeroImage = memo(() => {
-  const { toAssets } = useLinks();
+  const { toSharedAssets } = useLinks();
   const theme = useTheme() as EuiTheme;
   const IS_DARK_THEME = theme.darkMode;
 
@@ -43,8 +43,8 @@ const HeroImage = memo(() => {
       })}
       url={
         IS_DARK_THEME
-          ? toAssets('illustration_integrations_darkmode.svg')
-          : toAssets('illustration_integrations_lightmode.svg')
+          ? toSharedAssets('illustration_integrations_darkmode.svg')
+          : toSharedAssets('illustration_integrations_lightmode.svg')
       }
     />
   );
@@ -61,8 +61,8 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
           <EuiText>
             <h1>
               <FormattedMessage
-                id="xpack.fleet.integrationsAppTitle"
-                defaultMessage="Integrations"
+                id="xpack.fleet.integrationsHeaderTitle"
+                defaultMessage="Elastic Agent Integrations"
               />
             </h1>
           </EuiText>
@@ -74,7 +74,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
               <p>
                 <FormattedMessage
                   id="xpack.fleet.epm.pageSubtitle"
-                  defaultMessage="Collect data from popular apps and services."
+                  defaultMessage="Collect data from popular apps and services using Elastic Agent"
                 />
               </p>
             </EuiText>

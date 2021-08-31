@@ -17,8 +17,11 @@ import {
 import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock, rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { UntypedNormalizedAlertType } from '../alert_type_registry';
-import { alertTypeRegistryMock } from '../alert_type_registry.mock';
+import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
+
+const executionContext = executionContextServiceMock.createSetupContract();
 
 const alertType: UntypedNormalizedAlertType = {
   id: 'test',
@@ -77,10 +80,11 @@ describe('Task Runner Factory', () => {
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
-    alertTypeRegistry: alertTypeRegistryMock.create(),
+    ruleTypeRegistry: ruleTypeRegistryMock.create(),
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: true,
     maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
+    executionContext,
   };
 
   beforeEach(() => {

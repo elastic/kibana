@@ -98,10 +98,9 @@ export { formatMsg, formatStack, subscribeWithScope } from '../../kibana_legacy/
 // EXPORT types
 export {
   IndexPatternsContract,
-  IIndexPattern,
   IndexPattern,
   indexPatterns,
-  IFieldType,
+  IndexPatternField,
   ISearchSource,
   EsQuerySortValue,
   SortDirection,

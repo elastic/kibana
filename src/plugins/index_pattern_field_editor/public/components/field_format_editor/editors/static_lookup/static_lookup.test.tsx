@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test/jest';
 import { StaticLookupFormatEditorFormatParams } from './static_lookup';
-import { FieldFormat } from 'src/plugins/data/public';
+import { FieldFormat } from 'src/plugins/field_formats/common';
 
 import { StaticLookupFormatEditor } from './static_lookup';
 

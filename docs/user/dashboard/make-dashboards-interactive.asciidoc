@@ -88,44 +88,20 @@ The panels you create using the following editors support dashboard drilldowns:
 [float]
 ==== Create and set up the dashboards you want to connect
 
-Use the <<gs-get-data-into-kibana,*Sample web logs*>> data to create a dashboard and add panels, then set a search and filter on the *[Logs] Web traffic* dashboard.
+Use the <<gs-get-data-into-kibana,*Sample web logs*>> data to create a dashboard and add panels, then set a search and filter on the *[Logs] Web Traffic* dashboard.
 
 . Add the *Sample web logs* data.
 
 . Create a new dashboard, click *Add from Library*, then add the following panels:
 
-* *[Logs] Heatmap*
-* *[Logs] Host, Visits, and Bytes Table*
-* *[Logs] Total Requests and Bytes*
-* *[Logs] Visitors by OS*
+* *[Logs] Response Codes Over Time + Annotations*
+* *[Logs] Visits*
 
 . Set the <<set-time-filter,time filter>> to *Last 30 days*.
 
-. Save the dashboard. In the *Title* field, enter `Host Overview`.
+. Save the dashboard. In the *Title* field, enter `Detailed logs`.
 
-. Open the *[Logs] Web traffic* dashboard.
-
-. Create a data table. 
-
-.. In the toolbar, click *Edit*.
-
-.. Click *Create visualization*.
-
-.. From the *Chart type* dropdown, select *Table*.
-
-.. From the *Available fields* list, drag and drop the following fields onto the visualization builder:
-
-* *agent.keyword*
-
-* *bytes*
-
-* *geo.src*
-
-* *ip*
-
-.. In the editor, remove *Count of records*, then click *Save and return*.
-
-. On the *[Logs] Web traffic* dashboard, set a search and filter.
+. Open the *[Logs] Web Traffic* dashboard, then set a search and filter.
 +
 [%hardbreaks]
 Search: `extension.keyword: ("gz" or "css" or "deb")`
@@ -134,15 +110,15 @@ Filter: `geo.src: CN`
 [float]
 ==== Create the drilldown
 
-Create a drilldown that opens the *Host Overview* dashboard from the *[Logs] Web traffic* dashboard.
+Create a drilldown that opens the *Detailed logs* dashboard from the *[Logs] Web Traffic* dashboard.
 
-. Open the panel menu for the data table you created, then select *Create drilldown*.
+. Open the panel menu for the *[Logs] Errors by host* data table, then select *Create drilldown*.
 
 . Click *Go to dashboard*.
 
-.. Give the drilldown a name. For example, `My Drilldown`.
+.. Give the drilldown a name. For example, `View details`.
 
-.. From the *Choose a destination dashboard* dropdown, select *Host Overview*.
+.. From the *Choose a destination dashboard* dropdown, select *Detailed logs*.
 
 .. To use the geo.src filter, KQL query, and time filter, select *Use filters and query from origin dashboard* and *Use date range from origin dashboard*.
 
@@ -150,7 +126,7 @@ Create a drilldown that opens the *Host Overview* dashboard from the *[Logs] Web
 
 . Save the dashboard.
 
-. In the data table panel, hover over a value, click *+*, then select `My Drilldown`.
+. In the data table panel, hover over a value, click *+*, then select `View details`.
 +
 [role="screenshot"]
 image::images/drilldown_on_panel.png[Drilldown on data table that navigates to another dashboard]
@@ -187,11 +163,23 @@ For example, if you have a dashboard that shows data from a Github repository, y
 
 . Add the *Sample web logs* data.
 
-. Open the *[Logs] Web traffic* dashboard.
+. Open the *[Logs] Web Traffic* dashboard.
 
 . In the toolbar, click *Edit*.
 
-. Open the *[Logs] Visitors by OS* panel menu, then select *Create drilldown*.
+. Create a donut chart
+
+.. In the toolbar, click *Edit*.
+
+.. Click *Create visualization*.
+
+.. From the *Chart type* dropdown, select *Donut*.
+
+.. From the *Available fields* list, drag and drop the *machine.os.keyword* field onto the visualization builder.
+
+.. Click *Save and return*.
+
+. Open the donut chart panel menu, then select *Create drilldown*.
 
 . Click *Go to URL*.
 
@@ -212,7 +200,7 @@ https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}
 
 . Save the dashboard.
 
-. On the *[Logs] Visitors by OS* panel, click any chart slice, then select *Show on Github*.
+. On the donut chart panel, click any chart slice, then select *Show on Github*.
 +
 [role="screenshot"]
 image:images/url_drilldown_popup.png[URL drilldown popup]

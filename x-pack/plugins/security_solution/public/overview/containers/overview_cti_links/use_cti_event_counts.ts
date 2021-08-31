@@ -11,7 +11,6 @@ import { emptyEventCountsByDataset } from './helpers';
 import { CtiEnabledModuleProps } from '../../components/overview_cti_links/cti_enabled_module';
 
 export const ID = 'ctiEventCountQuery';
-const PREFIX = 'threatintel.';
 
 export const useCtiEventCounts = ({ deleteQuery, from, setQuery, to }: CtiEnabledModuleProps) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -23,7 +22,7 @@ export const useCtiEventCounts = ({ deleteQuery, from, setQuery, to }: CtiEnable
       data.reduce(
         (acc, item) => {
           if (item.y && item.g) {
-            const id = item.g.replace(PREFIX, '');
+            const id = item.g;
             acc[id] += item.y;
           }
           return acc;

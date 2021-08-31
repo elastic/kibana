@@ -26,13 +26,13 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject | Sa
   const search = isSavedSearchSavedObject(savedSearch)
     ? savedSearch?.attributes?.kibanaSavedObjectMeta
     : // @ts-expect-error kibanaSavedObjectMeta does exist
-      savedSearch?.kibanaSavedObjectMeta;
+    savedSearch?.kibanaSavedObjectMeta;
 
   return typeof search?.searchSourceJSON === 'string'
     ? (JSON.parse(search.searchSourceJSON) as {
-        query: Query;
-        filter: any[];
-      })
+      query: Query;
+      filter: any[];
+    })
     : undefined;
 }
 
@@ -79,12 +79,12 @@ export function createCombinedQuery(
  * and merge with query data and filters
  */
 export function extractSearchData({
-  indexPattern,
-  uiSettings,
-  savedSearch,
-  query,
-  filters,
-}: {
+                                    indexPattern,
+                                    uiSettings,
+                                    savedSearch,
+                                    query,
+                                    filters,
+                                  }: {
   indexPattern: IndexPattern;
   uiSettings: IUiSettingsClient;
   savedSearch: SavedSearchSavedObject | SavedSearch | null | undefined;
@@ -106,6 +106,45 @@ export function extractSearchData({
       uiSettings
     );
 
+    return {
+      searchQuery: combinedQuery,
+      searchString: userQuery.query,
+      queryLanguage: userQuery.language as SearchQueryLanguage,
+    };
+  }
+
+  // If saved search available, merge saved search with latest user query or filters differ from extracted saved search data
+  if (savedSearchData) {
+    const currentQuery = userQuery ?? savedSearchData?.query;
+    const currentFilters = userFilters ?? savedSearchData?.filter;
+
+    const combinedQuery = createCombinedQuery(
+      currentQuery,
+      Array.isArray(currentFilters) ? currentFilters : [],
+      indexPattern,
+      uiSettings
+    );
+
+    return {
+      searchQuery: combinedQuery,
+      searchString: currentQuery.query,
+      queryLanguage: currentQuery.language as SearchQueryLanguage,
+    };
+  }
+}
+
+const DEFAULT_QUERY = {
+  bool: {
+    must: [
+      {
+        match_all: {},
+      },
+    ],
+  },
+};
+
+export function getDefaultDatafeedQuery() {
+  return cloneDeep(DEFAULT_QUERY);
     return {
       searchQuery: combinedQuery,
       searchString: userQuery.query,

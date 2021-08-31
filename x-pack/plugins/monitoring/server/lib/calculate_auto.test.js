@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { calculateAuto } from './calculate_auto.js';
+import { calculateAuto } from './calculate_auto';
 import _ from 'lodash';
 import moment from 'moment';
 

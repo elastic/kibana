@@ -33,10 +33,8 @@ import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
 import { mapCenter } from './map_center';
-import { metric } from './metric';
 import { neq } from './neq';
 import { ply } from './ply';
-import { progress } from './progress';
 import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
@@ -82,10 +80,8 @@ export const functions = [
   lte,
   joinRows,
   mapCenter,
-  metric,
   neq,
   ply,
-  progress,
   render,
   replace,
   rounddate,

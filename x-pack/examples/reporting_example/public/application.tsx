@@ -8,15 +8,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
-import { SetupDeps, StartDeps } from './types';
 import { ReportingExampleApp } from './components/app';
+import { SetupDeps, StartDeps, MyForwardableState } from './types';
 
 export const renderApp = (
   coreStart: CoreStart,
   deps: Omit<StartDeps & SetupDeps, 'developerExamples'>,
-  { appBasePath, element }: AppMountParameters
+  { appBasePath, element }: AppMountParameters, // FIXME: appBasePath is deprecated
+  forwardedParams: MyForwardableState
 ) => {
-  ReactDOM.render(<ReportingExampleApp basename={appBasePath} {...coreStart} {...deps} />, element);
+  ReactDOM.render(
+    <ReportingExampleApp
+      basename={appBasePath}
+      {...coreStart}
+      {...deps}
+      forwardedParams={forwardedParams}
+    />,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

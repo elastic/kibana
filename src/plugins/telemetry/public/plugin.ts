@@ -90,16 +90,14 @@ interface TelemetryPluginSetupDependencies {
 export interface TelemetryPluginConfig {
   /** Is the plugin enabled? **/
   enabled: boolean;
-  /** Remote telemetry service's URL **/
-  url: string;
   /** The banner is expected to be shown when needed **/
   banner: boolean;
   /** Does the cluster allow changing the opt-in/out status via the UI? **/
   allowChangingOptInStatus: boolean;
   /** Is the cluster opted-in? **/
   optIn: boolean | null;
-  /** Opt-in/out notification URL **/
-  optInStatusUrl: string;
+  /** Specify if telemetry should send usage to the prod or staging remote telemetry service **/
+  sendUsageTo: 'prod' | 'staging';
   /** Should the telemetry payloads be sent from the server or the browser? **/
   sendUsageFrom: 'browser' | 'server';
   /** Should notify the user about the opt-in status? **/

@@ -17,7 +17,7 @@ import { registry } from './registry';
 interface Config {
   name: APMFtrConfigName;
   license: 'basic' | 'trial';
-  kibanaConfig?: Record<string, string>;
+  kibanaConfig?: Record<string, string | string[]>;
 }
 
 const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async (
@@ -81,7 +81,9 @@ export function createTestConfig(config: Config) {
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
           ...(kibanaConfig
-            ? Object.entries(kibanaConfig).map(([key, value]) => `--${key}=${value}`)
+            ? Object.entries(kibanaConfig).map(([key, value]) =>
+                Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
+              )
             : []),
         ],
       },

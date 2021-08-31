@@ -22,7 +22,6 @@ import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
 import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
@@ -33,7 +32,6 @@ import { getDateRangeFromChartElement } from './utils';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
 import { createExploratoryViewUrl } from '../../../../../observability/public';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
-import { monitorStatusSelector } from '../../../state/selectors';
 
 export interface PingHistogramComponentProps {
   /**
@@ -74,8 +72,6 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   } = useContext(UptimeThemeContext);
 
   const monitorId = useMonitorId();
-
-  const selectedMonitor = useSelector(monitorStatusSelector);
 
   const { basePath } = useUptimeSettingsContext();
 
@@ -193,21 +189,12 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
 
   const pingHistogramExploratoryViewLink = createExploratoryViewUrl(
     {
-      reportType: 'kpi-over-time',
-      allSeries: [
-        {
-          name: `${monitorId}-pings`,
-          dataType: 'synthetics',
-          selectedMetricField: 'summary.up',
-          time: { from: dateRangeStart, to: dateRangeEnd },
-          reportDefinitions: {
-            'monitor.name':
-              monitorId && selectedMonitor?.monitor?.name
-                ? [selectedMonitor.monitor.name]
-                : ['ALL_VALUES'],
-          },
-        },
-      ],
+      'pings-over-time': {
+        dataType: 'synthetics',
+        reportType: 'kpi-over-time',
+        time: { from: dateRangeStart, to: dateRangeEnd },
+        ...(monitorId ? { filters: [{ field: 'monitor.id', values: [monitorId] }] } : {}),
+      },
     },
     basePath
   );

@@ -6,7 +6,8 @@
  */
 
 import { metricVisualization } from './visualization';
-import type { MetricState } from '../../common/expressions';
+import { MetricState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
@@ -17,6 +18,7 @@ function exampleState(): MetricState {
   return {
     accessor: 'a',
     layerId: 'l1',
+    layerType: layerTypes.DATA,
   };
 }
 
@@ -41,6 +43,7 @@ describe('metric_visualization', () => {
         Object {
           "accessor": undefined,
           "layerId": "test-id1",
+          "layerType": "data",
         }
       `);
     });
@@ -62,6 +65,7 @@ describe('metric_visualization', () => {
       expect(metricVisualization.clearLayer(exampleState(), 'l1')).toEqual({
         accessor: undefined,
         layerId: 'l1',
+        layerType: layerTypes.DATA,
       });
     });
   });
@@ -73,6 +77,7 @@ describe('metric_visualization', () => {
           state: {
             accessor: undefined,
             layerId: 'l1',
+            layerType: layerTypes.DATA,
           },
           layerId: 'l1',
           frame: mockFrame(),
@@ -92,6 +97,7 @@ describe('metric_visualization', () => {
           state: {
             accessor: 'a',
             layerId: 'l1',
+            layerType: layerTypes.DATA,
           },
           layerId: 'l1',
           frame: mockFrame(),
@@ -113,14 +119,17 @@ describe('metric_visualization', () => {
           prevState: {
             accessor: undefined,
             layerId: 'l1',
+            layerType: layerTypes.DATA,
           },
           layerId: 'l1',
           groupId: '',
           columnId: 'newDimension',
+          frame: mockFrame(),
         })
       ).toEqual({
         accessor: 'newDimension',
         layerId: 'l1',
+        layerType: layerTypes.DATA,
       });
     });
   });
@@ -132,14 +141,30 @@ describe('metric_visualization', () => {
           prevState: {
             accessor: 'a',
             layerId: 'l1',
+            layerType: layerTypes.DATA,
           },
           layerId: 'l1',
           columnId: 'a',
+          frame: mockFrame(),
         })
       ).toEqual({
         accessor: undefined,
         layerId: 'l1',
+        layerType: layerTypes.DATA,
       });
+    });
+  });
+
+  describe('#getSupportedLayers', () => {
+    it('should return a single layer type', () => {
+      expect(metricVisualization.getSupportedLayers()).toHaveLength(1);
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      expect(metricVisualization.getLayerType('l1', exampleState())).toEqual(layerTypes.DATA);
+      expect(metricVisualization.getLayerType('foo', exampleState())).toBeUndefined();
     });
   });
 
