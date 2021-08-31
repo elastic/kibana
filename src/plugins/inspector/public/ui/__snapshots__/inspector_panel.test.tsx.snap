@@ -12,6 +12,76 @@ exports[`InspectorPanel should render as expected 1`] = `
   }
   dependencies={
     Object {
+      "application": Object {
+        "applications$": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "_isScalar": false,
+          "source": Subject {
+            "_isScalar": false,
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [
+              Subscriber {
+                "_parentOrParents": null,
+                "_subscriptions": Array [
+                  SubjectSubscription {
+                    "_parentOrParents": [Circular],
+                    "_subscriptions": null,
+                    "closed": false,
+                    "subject": [Circular],
+                    "subscriber": [Circular],
+                  },
+                ],
+                "closed": false,
+                "destination": SafeSubscriber {
+                  "_complete": undefined,
+                  "_context": [Circular],
+                  "_error": undefined,
+                  "_next": [Function],
+                  "_parentOrParents": null,
+                  "_parentSubscriber": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "destination": Object {
+                    "closed": true,
+                    "complete": [Function],
+                    "error": [Function],
+                    "next": [Function],
+                  },
+                  "isStopped": false,
+                  "syncErrorThrowable": false,
+                  "syncErrorThrown": false,
+                  "syncErrorValue": null,
+                },
+                "isStopped": false,
+                "syncErrorThrowable": true,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+            ],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      },
+      "http": Object {},
+      "share": Object {},
       "uiSettings": Object {},
     }
   }
@@ -143,6 +213,76 @@ exports[`InspectorPanel should render as expected 1`] = `
   <Provider
     services={
       Object {
+        "application": Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [
+                Subscriber {
+                  "_parentOrParents": null,
+                  "_subscriptions": Array [
+                    SubjectSubscription {
+                      "_parentOrParents": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "subject": [Circular],
+                      "subscriber": [Circular],
+                    },
+                  ],
+                  "closed": false,
+                  "destination": SafeSubscriber {
+                    "_complete": undefined,
+                    "_context": [Circular],
+                    "_error": undefined,
+                    "_next": [Function],
+                    "_parentOrParents": null,
+                    "_parentSubscriber": [Circular],
+                    "_subscriptions": null,
+                    "closed": false,
+                    "destination": Object {
+                      "closed": true,
+                      "complete": [Function],
+                      "error": [Function],
+                      "next": [Function],
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": false,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
+                  "isStopped": false,
+                  "syncErrorThrowable": true,
+                  "syncErrorThrown": false,
+                  "syncErrorValue": null,
+                },
+              ],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+        },
+        "http": Object {},
+        "share": Object {},
         "uiSettings": Object {},
       }
     }
@@ -334,25 +474,102 @@ exports[`InspectorPanel should render as expected 1`] = `
           <div
             className="euiFlyoutBody__overflowContent"
           >
-            <Suspense
-              fallback={<EuiLoadingSpinner />}
-            >
-              <component
-                adapters={
-                  Object {
-                    "bardapter": Object {},
-                    "foodapter": Object {
-                      "foo": [Function],
+            <RedirectAppLinks
+              application={
+                Object {
+                  "applications$": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Map {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "capabilities": Object {
+                    "catalogue": Object {},
+                    "management": Object {},
+                    "navLinks": Object {},
+                  },
+                  "currentAppId$": Observable {
+                    "_isScalar": false,
+                    "source": Subject {
+                      "_isScalar": false,
+                      "closed": false,
+                      "hasError": false,
+                      "isStopped": false,
+                      "observers": Array [
+                        Subscriber {
+                          "_parentOrParents": null,
+                          "_subscriptions": Array [
+                            SubjectSubscription {
+                              "_parentOrParents": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "subject": [Circular],
+                              "subscriber": [Circular],
+                            },
+                          ],
+                          "closed": false,
+                          "destination": SafeSubscriber {
+                            "_complete": undefined,
+                            "_context": [Circular],
+                            "_error": undefined,
+                            "_next": [Function],
+                            "_parentOrParents": null,
+                            "_parentSubscriber": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "destination": Object {
+                              "closed": true,
+                              "complete": [Function],
+                              "error": [Function],
+                              "next": [Function],
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": false,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": true,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                      ],
+                      "thrownError": null,
                     },
-                  }
+                  },
+                  "getUrlForApp": [MockFunction],
+                  "navigateToApp": [MockFunction],
+                  "navigateToUrl": [MockFunction],
                 }
-                title="Inspector"
+              }
+            >
+              <div
+                className="kbnRedirectCrossAppLinks"
               >
-                <h1>
-                  View 1
-                </h1>
-              </component>
-            </Suspense>
+                <Suspense
+                  fallback={<EuiLoadingSpinner />}
+                >
+                  <component
+                    adapters={
+                      Object {
+                        "bardapter": Object {},
+                        "foodapter": Object {
+                          "foo": [Function],
+                        },
+                      }
+                    }
+                    title="Inspector"
+                  >
+                    <h1>
+                      View 1
+                    </h1>
+                  </component>
+                </Suspense>
+              </div>
+            </RedirectAppLinks>
           </div>
         </div>
       </div>

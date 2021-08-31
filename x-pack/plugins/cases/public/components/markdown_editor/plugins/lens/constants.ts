@@ -6,6 +6,6 @@
  */
 
 export const ID = 'lens';
-export const PREFIX = `[`;
+export const PREFIX = `!{${ID}`;
 export const LENS_VISUALIZATION_HEIGHT = 200;
 export const DRAFT_COMMENT_STORAGE_ID = 'xpack.cases.commentDraft';
