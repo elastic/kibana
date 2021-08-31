@@ -13,6 +13,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { CustomHostSettings } from '../../config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
+import { postSendEmailMSExchange } from './send_mail_graph_api';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -23,6 +24,7 @@ export interface SendEmailOptions {
   content: Content;
   hasAuth: boolean;
   configurationUtilities: ActionsConfigurationUtilities;
+  provider?: string;
 }
 
 // config validation ensures either service is set or host/port are set
@@ -33,6 +35,10 @@ export interface Transport {
   host?: string;
   port?: number;
   secure?: boolean; // see: https://nodemailer.com/smtp/#tls-options
+  accessToken?: string;
+  clientId?: string;
+  clientSecret?: string;
+  refreshToken?: string;
 }
 
 export interface Routing {
@@ -49,7 +55,7 @@ export interface Content {
 
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
-  const { transport, routing, content, configurationUtilities, hasAuth } = options;
+  const { transport, routing, content, configurationUtilities, hasAuth, provider } = options;
   const { service, host, port, secure, user, password } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
@@ -137,6 +143,22 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     }
   }
 
+  if (provider === 'exchange') {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    let response;
+    try {
+      response = await postSendEmailMSExchange(
+        { emailOptions: options, headers },
+        logger,
+        configurationUtilities
+      );
+    } catch (err) {
+      logger.warn(`error thrown posting pagerduty event: ${err.message}`);
+      throw err;
+    }
+  }
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
   const messageHTML = htmlFromMarkdown(logger, message);
 
