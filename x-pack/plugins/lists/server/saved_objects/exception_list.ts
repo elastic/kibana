@@ -188,7 +188,7 @@ const combinedMappings: SavedObjectsType['mappings'] = {
 export const getExceptionListType = (
   startServices: Promise<[CoreStart, object, unknown]>
 ): SavedObjectsType => ({
-  hidden: true,
+  hidden: false,
   management: {
     getTitle(savedObject: SavedObject<ExceptionListSoSchema>): string {
       const type = savedObject.attributes.list_type;
@@ -221,7 +221,7 @@ export const getExceptionListType = (
 export const exceptionListAgnosticType = (
   startServices: Promise<[CoreStart, object, unknown]>
 ): SavedObjectsType => ({
-  hidden: true,
+  hidden: false,
   management: {
     getTitle(savedObject: SavedObject<ExceptionListSoSchema>): string {
       const type = savedObject.attributes.list_type;
