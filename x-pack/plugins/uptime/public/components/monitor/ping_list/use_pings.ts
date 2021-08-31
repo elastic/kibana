@@ -35,7 +35,7 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
 
   const { statusFilter } = useGetUrlParams();
 
-  const { excludedLocations: excludedLocationsObj, selectedLocations } = useSelectedFilters();
+  const selectedFilters = useSelectedFilters();
 
   const dispatch = useDispatch();
 
@@ -45,8 +45,9 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
     dispatch,
   ]);
 
-  const locations = JSON.stringify(selectedLocations);
-  const excludedLocations = JSON.stringify(excludedLocationsObj);
+  const locations = JSON.stringify(selectedFilters.selectedLocations);
+  const excludedLocations = JSON.stringify(selectedFilters.excludedLocations);
+
   useEffect(() => {
     getPings({
       monitorId,
