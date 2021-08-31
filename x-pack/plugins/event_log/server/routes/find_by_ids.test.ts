@@ -50,7 +50,7 @@ describe('find_by_ids', () => {
 
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
 
-    const [type, ids,, legacyIds] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
+    const [type, ids, , legacyIds] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
     expect(type).toEqual(`action`);
     expect(ids).toEqual(['1']);
     expect(legacyIds).toEqual(['2']);
