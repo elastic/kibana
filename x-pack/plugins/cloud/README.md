@@ -16,6 +16,8 @@ This is the ID of the Cloud deployment to which the Kibana instance belongs.
 
 **Example:** `eastus2.azure.elastic-cloud.com:9243$59ef636c6917463db140321484d63cfa$a8b109c08adc43279ef48f29af1a3911`
 
+**NOTE:** The `cloudId` is a concatenation of the deployment name and a hash. Users can update the deployment name, changing the `cloudId`. However, the changed `cloudId` will not be re-injected into `kibana.yml`. If you need the current `cloudId` the best approach is to split the injected `cloudId` on the semi-colon, and replace the first element with the `persistent.cluster.metadata.display_name` value as provided by a call to `GET _cluster/settings`.
+
 ### `baseUrl`
 
 This is the URL of the Cloud interface.

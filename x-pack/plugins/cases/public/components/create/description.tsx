@@ -17,16 +17,26 @@ interface Props {
 export const fieldName = 'description';
 
 const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
-  const { draftComment, openLensModal } = useLensDraftComment();
+  const {
+    draftComment,
+    hasIncomingLensState,
+    openLensModal,
+    clearDraftComment,
+  } = useLensDraftComment();
   const { setFieldValue } = useFormContext();
   const editorRef = useRef<Record<string, any>>();
 
   useEffect(() => {
     if (draftComment?.commentId === fieldName && editorRef.current) {
       setFieldValue(fieldName, draftComment.comment);
-      openLensModal({ editorRef: editorRef.current });
+
+      if (hasIncomingLensState) {
+        openLensModal({ editorRef: editorRef.current });
+      } else {
+        clearDraftComment();
+      }
     }
-  }, [draftComment, openLensModal, setFieldValue]);
+  }, [clearDraftComment, draftComment, hasIncomingLensState, openLensModal, setFieldValue]);
 
   return (
     <UseField

@@ -659,24 +659,13 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.memory_protection.shellcode_enhanced_pe_parsing',
-    first_supported_version: '7.15',
-    documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_enhanced_pe_parsing',
-      {
-        defaultMessage:
-          "A value of 'false' disables enhanced parsing of PEs found within shellcode payloads. Default: true.",
-      }
-    ),
-  },
-  {
     key: 'windows.advanced.memory_protection.shellcode',
     first_supported_version: '7.15',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode',
       {
         defaultMessage:
-          "A value of 'false' disables Shellcode Injection Protection, a feature of Memory Protection. Default: true.",
+          'Enable shellcode injection detection as a part of memory protection. Default: true.',
       }
     ),
   },
@@ -684,10 +673,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     key: 'windows.advanced.memory_protection.memory_scan',
     first_supported_version: '7.15',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.signature',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.memory_scan',
       {
         defaultMessage:
-          "A value of 'false' disables Memory Signature Scanning, a feature of Memory Protection. Default: true.",
+          'Enable scanning for malicious memory regions as a part of memory protection. Default: true.',
       }
     ),
   },
@@ -699,6 +688,39 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.shellcode_collect_sample',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected shellcode regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.memory_scan_collect_sample',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.memory_scan_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.shellcode_enhanced_pe_parsing',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.memory_protection.shellcode_enhanced_pe_parsing',
+      {
+        defaultMessage:
+          'Attempt to identify and extract PE metadata from injected shellcode, including Authenticode signatures and version resource information. Default: true.',
       }
     ),
   },
