@@ -33,7 +33,7 @@ export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
-// supported values for `service` addition to nodemailer's list of well-known services
+// supported values for `service` in addition to nodemailer's list of well-known services
 export enum AdditionalEmailServices {
   ELASTIC_CLOUD = 'elastic_cloud',
   EXCHANGE = 'exchange_server',

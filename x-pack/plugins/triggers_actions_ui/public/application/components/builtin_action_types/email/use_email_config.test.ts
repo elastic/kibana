@@ -21,7 +21,7 @@ const renderUseEmailConfigHook = () =>
 describe('useEmailConfig', () => {
   beforeEach(() => jest.resetAllMocks);
 
-  it('should call get email config API when server type changes and handle result', async () => {
+  it('should call get email config API when service changes and handle result', async () => {
     http.get.mockResolvedValueOnce({
       host: 'smtp.gmail.com',
       port: 465,
@@ -41,7 +41,7 @@ describe('useEmailConfig', () => {
     expect(editActionConfig).toHaveBeenCalledWith('secure', true);
   });
 
-  it('should call get email config API when server type changes and handle partial result', async () => {
+  it('should call get email config API when service changes and handle partial result', async () => {
     http.get.mockResolvedValueOnce({
       host: 'smtp.gmail.com',
       port: 465,
@@ -60,7 +60,7 @@ describe('useEmailConfig', () => {
     expect(editActionConfig).toHaveBeenCalledWith('secure', false);
   });
 
-  it('should call get email config API when server type changes and handle empty result', async () => {
+  it('should call get email config API when service changes and handle empty result', async () => {
     http.get.mockResolvedValueOnce({});
     const { result, waitForNextUpdate } = renderUseEmailConfigHook();
     await act(async () => {
@@ -76,7 +76,7 @@ describe('useEmailConfig', () => {
     expect(editActionConfig).toHaveBeenCalledWith('secure', false);
   });
 
-  it('should call get email config API when server type changes and handle errors', async () => {
+  it('should call get email config API when service changes and handle errors', async () => {
     http.get.mockImplementationOnce(() => {
       throw new Error('no!');
     });

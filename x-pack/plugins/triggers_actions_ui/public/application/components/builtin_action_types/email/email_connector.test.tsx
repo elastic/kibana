@@ -29,7 +29,7 @@ describe('EmailActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <EmailActionConnectorFields
         action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [], serverType: [] }}
+        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
@@ -60,7 +60,7 @@ describe('EmailActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <EmailActionConnectorFields
         action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [], serverType: [] }}
+        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
@@ -76,7 +76,7 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeFalsy();
   });
 
-  test('server type field defaults to empty when not defined', () => {
+  test('service field defaults to empty when not defined', () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -93,7 +93,7 @@ describe('EmailActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <EmailActionConnectorFields
         action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [], serverType: [] }}
+        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
@@ -126,7 +126,7 @@ describe('EmailActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <EmailActionConnectorFields
         action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [], serverType: [] }}
+        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
