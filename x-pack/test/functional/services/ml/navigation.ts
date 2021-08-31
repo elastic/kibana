@@ -13,8 +13,9 @@ export function MachineLearningNavigationProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const retry = getService('retry');
+  const appsMenu = getService('appsMenu');
   const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
@@ -22,6 +23,13 @@ export function MachineLearningNavigationProvider({
     async navigateToMl() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('ml');
+        await testSubjects.existOrFail('mlApp', { timeout: 2000 });
+      });
+    },
+
+    async navigateToMlViaAppsMenu() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await appsMenu.clickLink('Machine Learning');
         await testSubjects.existOrFail('mlApp', { timeout: 2000 });
       });
     },
@@ -34,6 +42,13 @@ export function MachineLearningNavigationProvider({
         } else {
           await testSubjects.missingOrFail('jobsListLink', { timeout: 2000 });
         }
+      });
+    },
+
+    async navigateToStackManagementViaAppsMenu() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await appsMenu.clickLink('Stack Management');
+        await testSubjects.existOrFail('jobsListLink', { timeout: 2000 });
       });
     },
 
@@ -151,6 +166,15 @@ export function MachineLearningNavigationProvider({
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the overall page is present
         await testSubjects.existOrFail('mlPageInsufficientLicense');
+      });
+    },
+
+    async navigateToStackManagementJobsListPageAnomalyDetectionTab() {
+      // clicks the `Analytics` tab and loads the analytics list page
+      await testSubjects.click('mlStackManagementJobsListAnomalyDetectionTab');
+      await retry.tryForTime(60 * 1000, async () => {
+        // verify that the empty prompt for analytics jobs list got loaded
+        await testSubjects.existOrFail('ml-jobs-list');
       });
     },
 

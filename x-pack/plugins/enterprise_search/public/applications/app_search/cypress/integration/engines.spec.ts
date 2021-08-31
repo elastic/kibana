@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login } from '../support/commands';
+import { login, checkA11y } from '../support/commands';
 
 context('Engines', () => {
   beforeEach(() => {
@@ -14,5 +14,6 @@ context('Engines', () => {
 
   it('renders', () => {
     cy.contains('Engines');
+    checkA11y();
   });
 });

@@ -6,7 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ALERT_DURATION, ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import { loggerMock } from '@kbn/logging/mocks';
 import { castArray, omit, mapValues } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
@@ -177,7 +183,9 @@ describe('createLifecycleRuleTypeFactory', () => {
         expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
-        expect(alertDocuments.every((doc) => doc[ALERT_STATUS] === 'open')).toBeTruthy();
+        expect(
+          alertDocuments.every((doc) => doc[ALERT_STATUS] === ALERT_STATUS_ACTIVE)
+        ).toBeTruthy();
 
         expect(alertDocuments.every((doc) => doc[ALERT_DURATION] === 0)).toBeTruthy();
 
@@ -198,11 +206,12 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.alert.status": "open",
+              "kibana.alert.status": "active",
               "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
+              "kibana.version": "7.16.0",
               "service.name": "opbeans-java",
               "tags": Array [
                 "tags",
@@ -221,11 +230,12 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.alert.status": "open",
+              "kibana.alert.status": "active",
               "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
+              "kibana.version": "7.16.0",
               "service.name": "opbeans-node",
               "tags": Array [
                 "tags",
@@ -253,6 +263,36 @@ describe('createLifecycleRuleTypeFactory', () => {
           },
         ]);
 
+        // TODO mock the resolved value before calling alertWithLifecycle again
+        const lastOpbeansNodeDoc = helpers.ruleDataClientMock
+          .getWriter()
+          .bulk.mock.calls[0][0].body?.concat()
+          .reverse()
+          .find(
+            (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
+          ) as Record<string, any>;
+
+        const stored = mapValues(lastOpbeansNodeDoc, (val) => {
+          return castArray(val);
+        });
+
+        helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
+          hits: {
+            hits: [{ fields: stored } as any],
+            total: {
+              value: 1,
+              relation: 'eq',
+            },
+          },
+          took: 0,
+          timed_out: false,
+          _shards: {
+            failed: 0,
+            successful: 1,
+            total: 1,
+          },
+        });
+
         await helpers.alertWithLifecycle([
           {
             id: 'opbeans-java',
@@ -264,6 +304,7 @@ describe('createLifecycleRuleTypeFactory', () => {
             id: 'opbeans-node',
             fields: {
               'service.name': 'opbeans-node',
+              'kibana.alert.workflow_status': 'closed',
             },
           },
         ]);
@@ -271,7 +312,6 @@ describe('createLifecycleRuleTypeFactory', () => {
 
       it('writes the correct alerts', () => {
         expect(helpers.ruleDataClientMock.getWriter().bulk).toHaveBeenCalledTimes(2);
-
         const body = helpers.ruleDataClientMock.getWriter().bulk.mock.calls[1][0].body!;
 
         const documents = body.filter((op: any) => !('index' in op)) as any[];
@@ -282,7 +322,9 @@ describe('createLifecycleRuleTypeFactory', () => {
         expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
-        expect(alertDocuments.every((doc) => doc[ALERT_STATUS] === 'open')).toBeTruthy();
+        expect(
+          alertDocuments.every((doc) => doc[ALERT_STATUS] === ALERT_STATUS_ACTIVE)
+        ).toBeTruthy();
         expect(alertDocuments.every((doc) => doc['event.action'] === 'active')).toBeTruthy();
 
         expect(alertDocuments.every((doc) => doc[ALERT_DURATION] > 0)).toBeTruthy();
@@ -360,10 +402,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         );
 
         expect(opbeansJavaAlertDoc['event.action']).toBe('active');
-        expect(opbeansJavaAlertDoc[ALERT_STATUS]).toBe('open');
+        expect(opbeansJavaAlertDoc[ALERT_STATUS]).toBe(ALERT_STATUS_ACTIVE);
 
         expect(opbeansNodeAlertDoc['event.action']).toBe('close');
-        expect(opbeansNodeAlertDoc[ALERT_STATUS]).toBe('closed');
+        expect(opbeansNodeAlertDoc[ALERT_STATUS]).toBe(ALERT_STATUS_RECOVERED);
       });
     });
   });
