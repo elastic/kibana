@@ -911,6 +911,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         mbTooManyFeaturesLayer['source-layer'] = MVT_META_SOURCE_LAYER_NAME;
       }
       mbMap.addLayer(mbTooManyFeaturesLayer);
+
+      //todo this filter should not be used for agg-layers
       mbMap.setFilter(tooManyFeaturesLayerId, [
         'all',
         ['==', ['get', MVT_HITS_TOTAL_RELATION], 'gte'],

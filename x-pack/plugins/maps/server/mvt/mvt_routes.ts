@@ -128,7 +128,7 @@ export function initMVTRoutes({
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
-      const tile = await getGridTile({
+      const tile = await getEsGridTile({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -142,6 +142,15 @@ export function initMVTRoutes({
         searchSessionId: query.searchSessionId,
         abortSignal: abortController.signal,
       });
+
+      try {
+        console.log('sdfsdl', tile.length, typeof tile);
+        const jsonTile = new VectorTile(new Protobuf(tile));
+        console.log('jst', jsonTile);
+      } catch (e) {
+        console.error('Cant parse vector tile');
+        console.error(e);
+      }
 
       return sendResponse(response, tile);
     }

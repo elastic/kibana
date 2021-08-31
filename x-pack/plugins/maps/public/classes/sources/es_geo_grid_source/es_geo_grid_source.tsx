@@ -26,7 +26,7 @@ import {
   GIS_API_PATH,
   GRID_RESOLUTION,
   MVT_GETGRIDTILE_API_PATH,
-  MVT_HITS_SOURCE_LAYER_NAME,
+  MVT_AGGS_SOURCE_LAYER_NAME,
   MVT_TOKEN_PARAM_NAME,
   RENDER_AS,
   SOURCE_TYPES,
@@ -420,7 +420,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   getLayerName(): string {
-    return MVT_HITS_SOURCE_LAYER_NAME;
+    return MVT_AGGS_SOURCE_LAYER_NAME;
   }
 
   async getUrlTemplateWithMeta(

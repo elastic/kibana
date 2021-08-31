@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-// @ts-expect-error
-import geojsonvt from 'geojson-vt';
-// @ts-expect-error
-import vtpbf from 'vt-pbf';
-import { Logger } from 'src/core/server';
-import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-import { Feature, FeatureCollection } from 'geojson';
+import {Logger} from 'src/core/server';
+import {Feature, FeatureCollection} from 'geojson';
 import {
   COUNT_PROP_NAME,
   ES_GEO_FIELD_TYPE,
+  GEOCENTROID_AGG_NAME,
   GEOTILE_GRID_AGG_NAME,
   KBN_FEATURE_COUNT,
   KBN_IS_TILE_COMPLETE,
@@ -27,15 +23,13 @@ import {
   VECTOR_SHAPE_TYPE,
 } from '../../common/constants';
 
-import {
-  convertRegularRespToGeoJson,
-  formatEnvelopeAsPolygon,
-} from '../../common/elasticsearch_util';
-import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
-import { pluckRangeFieldMeta } from '../../common/pluck_range_field_meta';
-import { FieldMeta, TileMetaFeature } from '../../common/descriptor_types';
-import { pluckCategoryFieldMeta } from '../../common/pluck_category_field_meta';
-import { createMvtTile, getTileSpatialFilter } from './util';
+import {convertRegularRespToGeoJson, formatEnvelopeAsPolygon,} from '../../common/elasticsearch_util';
+import {ESBounds, tileToESBbox} from '../../common/geo_tile_utils';
+import {pluckRangeFieldMeta} from '../../common/pluck_range_field_meta';
+import {FieldMeta, TileMetaFeature} from '../../common/descriptor_types';
+import {pluckCategoryFieldMeta} from '../../common/pluck_category_field_meta';
+import {createMvtTile, getTileSpatialFilter} from './util';
+import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 
 // heuristic. largest color-palette has 30 colors. 1 color is used for 'other'.
 const TERM_COUNT = 30 - 1;
@@ -72,15 +66,40 @@ export async function getEsGridTile({
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
-    console.log('getTileP', path);
+
+    const aggs = {};
+
+    for (const key in requestBody.aggs) {
+      if (requestBody.aggs.hasOwnProperty(key)) {
+        if (key !== GEOTILE_GRID_AGG_NAME && key !== GEOCENTROID_AGG_NAME) {
+          aggs[key] = requestBody.aggs[key];
+        }
+      }
+    }
+
+    const fields = requestBody.fields;
+    const body = {
+      size: 0, // no hits
+      grid_precision: 7,
+      exact_bounds: false,
+      extent: 4096, // full resolution,
+      query: requestBody.query,
+      grid_type: requestType === RENDER_AS.GRID ? 'grid' : 'point',
+      aggs,
+      fields,
+      runtime_mappings: requestBody.runtime_mappings,
+      // script_fields: requestBody.script_fields,
+    };
+
+    console.log('bo---');
+    console.log(body);
     const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'GET',
       path,
+      body,
     });
-    // let buffer = Buffer.from(tile.body, 'base64');
     const buffer = tile.body;
     console.log('buf length', buffer.length);
-    // console.log('s', buffer.toString('base64'));
     return buffer;
   } catch (e) {
     if (!isAbortError(e)) {
