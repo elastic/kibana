@@ -46,7 +46,7 @@ describe('settings', () => {
     isDefault: false,
   };
 
-  const angularProps: jest.Mocked<SettingsWorkspaceProps> = {
+  const workspaceProps: jest.Mocked<SettingsWorkspaceProps> = {
     blocklistedNodes: [
       {
         x: 0,
@@ -138,7 +138,7 @@ describe('settings', () => {
     );
     dispatchSpy = jest.fn(store.dispatch);
     store.dispatch = dispatchSpy;
-    subject = new Rx.BehaviorSubject(angularProps);
+    subject = new Rx.BehaviorSubject(workspaceProps);
     instance = mountWithIntl(
       <Provider store={store}>
         <Settings observable={subject.asObservable()} />
@@ -218,7 +218,7 @@ describe('settings', () => {
     it('should update on new data', () => {
       act(() => {
         subject.next({
-          ...angularProps,
+          ...workspaceProps,
           blocklistedNodes: [
             {
               x: 0,
@@ -251,13 +251,13 @@ describe('settings', () => {
     it('should delete node', () => {
       instance.find(EuiListGroupItem).at(0).prop('extraAction')!.onClick!({} as any);
 
-      expect(angularProps.unblockNode).toHaveBeenCalledWith(angularProps.blocklistedNodes![0]);
+      expect(workspaceProps.unblockNode).toHaveBeenCalledWith(workspaceProps.blocklistedNodes![0]);
     });
 
     it('should delete all nodes', () => {
       instance.find('[data-test-subj="graphUnblocklistAll"]').find(EuiButton).simulate('click');
 
-      expect(angularProps.unblockAll).toHaveBeenCalled();
+      expect(workspaceProps.unblockAll).toHaveBeenCalled();
     });
   });
 

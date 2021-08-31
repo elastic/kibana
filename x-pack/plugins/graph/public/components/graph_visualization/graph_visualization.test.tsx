@@ -13,6 +13,7 @@ import { Workspace, WorkspaceEdge, WorkspaceNode } from '../../types';
 describe('graph_visualization', () => {
   const nodes: WorkspaceNode[] = [
     {
+      id: '1',
       color: 'black',
       data: {
         field: 'A',
@@ -34,6 +35,7 @@ describe('graph_visualization', () => {
       y: 5,
     },
     {
+      id: '2',
       color: 'red',
       data: {
         field: 'B',
@@ -55,6 +57,7 @@ describe('graph_visualization', () => {
       y: 9,
     },
     {
+      id: '3',
       color: 'yellow',
       data: {
         field: 'C',

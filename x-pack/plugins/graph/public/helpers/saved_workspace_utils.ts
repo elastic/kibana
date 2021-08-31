@@ -123,11 +123,11 @@ export async function getSavedWorkspace(
   return savedObject as GraphWorkspaceSavedObject;
 }
 
-export async function deleteSavedWorkspace(
+export function deleteSavedWorkspace(
   savedObjectsClient: SavedObjectsClientContract,
   ids: string[]
 ) {
-  await Promise.all(ids.map((id: string) => savedObjectsClient.delete(savedWorkspaceType, id)));
+  return Promise.all(ids.map((id: string) => savedObjectsClient.delete(savedWorkspaceType, id)));
 }
 
 export async function saveSavedWorkspace(

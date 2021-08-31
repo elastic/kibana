@@ -12,6 +12,7 @@ import { FontawesomeIcon } from '../helpers/style_choices';
 import { WorkspaceField, AdvancedSettings } from './app_state';
 
 export interface WorkspaceNode {
+  id: string;
   x: number;
   y: number;
   label: string;
@@ -29,7 +30,7 @@ export interface WorkspaceNode {
   ky: number;
 }
 
-export type BlockListedNode = Omit<WorkspaceNode, 'numChildren' | 'kx' | 'ky'>;
+export type BlockListedNode = Omit<WorkspaceNode, 'numChildren' | 'kx' | 'ky' | 'id'>;
 
 export interface WorkspaceEdge {
   weight: number;

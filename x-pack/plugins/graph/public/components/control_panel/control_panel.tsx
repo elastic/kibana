@@ -103,7 +103,7 @@ const ControlPanelComponent = ({
 
           {workspace.selectedNodes.map((node) => (
             <SelectedNodeItem
-              key={`${node.label}-${node.x}-${node.y}`}
+              key={node.id}
               node={node}
               isHighlighted={selectedNode === node}
               onSelectedFieldClick={onSelectedFieldClick}

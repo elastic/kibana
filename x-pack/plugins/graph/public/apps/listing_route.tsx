@@ -62,8 +62,8 @@ export function ListingRoute({
   );
 
   const deleteItems = useCallback(
-    (savedWorkspaces: GraphWorkspaceSavedObject[]) => {
-      return deleteSavedWorkspace(
+    async (savedWorkspaces: GraphWorkspaceSavedObject[]) => {
+      await deleteSavedWorkspace(
         savedObjectsClient,
         savedWorkspaces.map((cur) => cur.id!)
       );

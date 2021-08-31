@@ -84,7 +84,6 @@ export class GraphPlugin
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        await pluginsStart.kibanaLegacy.loadAngularBootstrap();
         coreStart.chrome.docTitle.change(
           i18n.translate('xpack.graph.pageTitle', { defaultMessage: 'Graph' })
         );
