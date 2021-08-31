@@ -114,6 +114,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   },
   renderCellValue: () => null,
   rowRenderers: [],
+  setQuery: () => null,
   sort: [
     {
       columnId: '@timestamp',
