@@ -9,9 +9,9 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 // @ts-ignore
-import { NoData as NoDataComponent } from '../../components/no_data';
+import { NoData } from '../../components/no_data';
 
-export const NoData: React.FC = () => {
+export const NoDataPage: React.FC = () => {
   return (
     <div className="app-container">
       <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween" responsive>
@@ -22,7 +22,7 @@ export const NoData: React.FC = () => {
       </EuiFlexGroup>
 
       <div>
-        <NoDataComponent />
+        <NoData />
       </div>
     </div>
   );

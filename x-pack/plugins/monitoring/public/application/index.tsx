@@ -15,7 +15,7 @@ import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalStateProvider } from './global_state_context';
 import { createPreserveQueryHistory } from './preserve_query_history';
 import { RouteInit } from './route_init';
-import { NoData } from './pages/no_data';
+import { NoDataPage } from './pages/no_data_page';
 
 export const renderApp = (
   core: CoreStart,
@@ -40,7 +40,7 @@ const MonitoringApp: React.FC<{
       <GlobalStateProvider query={plugins.data.query} toasts={core.notifications.toasts}>
         <Router history={history}>
           <Switch>
-            <Route path="/no-data" component={NoData} />
+            <Route path="/no-data" component={NoDataPage} />
             <Route path="/loading" component={LoadingPage} />
             <RouteInit
               path="/license"
