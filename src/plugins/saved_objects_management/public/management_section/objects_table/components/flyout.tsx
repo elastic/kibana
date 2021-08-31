@@ -7,7 +7,7 @@
  */
 
 import React, { Component, Fragment, ReactNode } from 'react';
-import { take, get as getField } from 'lodash';
+import { take } from 'lodash';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -39,18 +39,10 @@ import {
 } from '../../../../../data/public';
 import {
   importFile,
-  // importLegacyFile,
   resolveImportErrors,
-  // logLegacyImport,
   processImportResponse,
   ProcessedImportResponse,
 } from '../../../lib';
-import {
-  resolveSavedObjects,
-  resolveSavedSearches,
-  resolveIndexPatternConflicts,
-  saveObjects,
-} from '../../../lib/resolve_saved_objects';
 import { ISavedObjectsManagementServiceRegistry } from '../../../services';
 import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
 import { OverwriteModal } from './overwrite_modal';
@@ -428,7 +420,6 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     const {
       status,
       loadingMessage,
-      importCount,
       failedImports = [],
       successfulImports = [],
       importMode,
@@ -449,7 +440,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
-    // Import summary for completed non-legacy import
+    // Import summary for completed import
     if (status === 'success') {
       return (
         <ImportSummary
@@ -461,108 +452,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
-    // Import summary for failed legacy import. Not in use since we removed support for legacy imports
-    if (failedImports.length && !this.hasUnmatchedReferences) {
-      return (
-        <EuiCallOut
-          data-test-subj="importSavedObjectsFailedWarning"
-          title={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.flyout.importFailedTitle"
-              defaultMessage="Import failed"
-            />
-          }
-          color="warning"
-          iconType="help"
-        >
-          <p>
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.flyout.importFailedDescription"
-              defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
-              values={{
-                failedImportCount: failedImports.length,
-                totalImportCount: importCount + failedImports.length,
-              }}
-            />
-          </p>
-          <p>
-            {failedImports
-              .map(({ error, obj }) => {
-                if (error.type === 'missing_references') {
-                  return error.references.map((reference) => {
-                    return i18n.translate(
-                      'savedObjectsManagement.objectsTable.flyout.importFailedMissingReference',
-                      {
-                        defaultMessage: '{type} [id={id}] could not locate {refType} [id={refId}]',
-                        values: {
-                          id: obj.id,
-                          type: obj.type,
-                          refId: reference.id,
-                          refType: reference.type,
-                        },
-                      }
-                    );
-                  });
-                } else if (error.type === 'unsupported_type') {
-                  return i18n.translate(
-                    'savedObjectsManagement.objectsTable.flyout.importFailedUnsupportedType',
-                    {
-                      defaultMessage: '{type} [id={id}] unsupported type',
-                      values: {
-                        id: obj.id,
-                        type: obj.type,
-                      },
-                    }
-                  );
-                }
-                return getField(error, 'body.message', (error as any).message ?? '');
-              })
-              .join(' ')}
-          </p>
-        </EuiCallOut>
-      );
-    }
-
-    // Import summary for completed legacy import. Not in use since we removed support for legacy imports
-    if (status === 'success') {
-      if (importCount === 0) {
-        return (
-          <EuiCallOut
-            data-test-subj="importSavedObjectsSuccessNoneImported"
-            title={
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.flyout.importSuccessfulCallout.noObjectsImportedTitle"
-                defaultMessage="No objects imported"
-              />
-            }
-            color="primary"
-          />
-        );
-      }
-
-      return (
-        <EuiCallOut
-          data-test-subj="importSavedObjectsSuccess"
-          title={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.flyout.importSuccessfulTitle"
-              defaultMessage="Import successful"
-            />
-          }
-          color="success"
-          iconType="check"
-        >
-          <p>
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.flyout.importSuccessfulDescription"
-              defaultMessage="Successfully imported {importCount} objects."
-              values={{ importCount }}
-            />
-          </p>
-        </EuiCallOut>
-      );
-    }
-
+    // Failed imports
     if (this.hasUnmatchedReferences) {
       return this.renderUnmatchedReferences();
     }
