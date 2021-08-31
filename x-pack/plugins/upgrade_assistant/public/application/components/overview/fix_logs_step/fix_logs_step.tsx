@@ -69,7 +69,11 @@ const i18nTexts = {
 };
 
 const FixLogsStep: FunctionComponent = () => {
-  const { docLinks } = useAppContext();
+  const {
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
   const state = useDeprecationLogging();
 
   return (
