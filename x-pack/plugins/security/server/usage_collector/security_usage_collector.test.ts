@@ -47,8 +47,8 @@ describe('Security UsageCollector', () => {
     enabledAuthProviders: ['basic'],
     loginSelectorEnabled: false,
     httpAuthSchemes: ['apikey'],
-    sessionIdleTimeoutMinutes: 60,
-    sessionLifespanMinutes: 43200,
+    sessionIdleTimeoutInMinutes: 60,
+    sessionLifespanInMinutes: 43200,
   };
 
   describe('initialization', () => {
@@ -106,8 +106,8 @@ describe('Security UsageCollector', () => {
       enabledAuthProviders: [],
       loginSelectorEnabled: false,
       httpAuthSchemes: [],
-      sessionIdleTimeoutMinutes: 0,
-      sessionLifespanMinutes: 0,
+      sessionIdleTimeoutInMinutes: 0,
+      sessionLifespanInMinutes: 0,
     });
   });
 
@@ -489,8 +489,8 @@ describe('Security UsageCollector', () => {
 
       expect(usage).toEqual({
         ...DEFAULT_USAGE,
-        sessionIdleTimeoutMinutes: 123,
-        sessionLifespanMinutes: 456,
+        sessionIdleTimeoutInMinutes: 123,
+        sessionLifespanInMinutes: 456,
       });
     });
   });

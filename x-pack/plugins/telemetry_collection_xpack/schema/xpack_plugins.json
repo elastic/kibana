@@ -5497,13 +5497,13 @@
             }
           }
         },
-        "sessionIdleTimeoutMinutes": {
+        "sessionIdleTimeoutInMinutes": {
           "type": "long",
           "_meta": {
             "description": "The global session idle timeout expiration that is configured, in minutes (0 if disabled)."
           }
         },
-        "sessionLifespanMinutes": {
+        "sessionLifespanInMinutes": {
           "type": "long",
           "_meta": {
             "description": "The global session lifespan expiration that is configured, in minutes (0 if disabled)."

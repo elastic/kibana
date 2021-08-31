@@ -18,8 +18,8 @@ interface Usage {
   authProviderCount: number;
   enabledAuthProviders: string[];
   httpAuthSchemes: string[];
-  sessionIdleTimeoutMinutes: number;
-  sessionLifespanMinutes: number;
+  sessionIdleTimeoutInMinutes: number;
+  sessionLifespanInMinutes: number;
 }
 
 interface Deps {
@@ -108,14 +108,14 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           },
         },
       },
-      sessionIdleTimeoutMinutes: {
+      sessionIdleTimeoutInMinutes: {
         type: 'long',
         _meta: {
           description:
             'The global session idle timeout expiration that is configured, in minutes (0 if disabled).',
         },
       },
-      sessionLifespanMinutes: {
+      sessionLifespanInMinutes: {
         type: 'long',
         _meta: {
           description:
@@ -138,8 +138,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           authProviderCount: 0,
           enabledAuthProviders: [],
           httpAuthSchemes: [],
-          sessionIdleTimeoutMinutes: 0,
-          sessionLifespanMinutes: 0,
+          sessionIdleTimeoutInMinutes: 0,
+          sessionLifespanInMinutes: 0,
         };
       }
 
@@ -173,8 +173,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       );
 
       const sessionExpirations = config.session.getExpirationTimeouts(); // get global expiration values
-      const sessionIdleTimeoutMinutes = sessionExpirations.idleTimeout?.asMinutes() ?? 0;
-      const sessionLifespanMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
+      const sessionIdleTimeoutInMinutes = sessionExpirations.idleTimeout?.asMinutes() ?? 0;
+      const sessionLifespanInMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
 
       return {
         auditLoggingEnabled: legacyAuditLoggingEnabled || ecsAuditLoggingEnabled,
@@ -184,8 +184,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         authProviderCount,
         enabledAuthProviders,
         httpAuthSchemes,
-        sessionIdleTimeoutMinutes,
-        sessionLifespanMinutes,
+        sessionIdleTimeoutInMinutes,
+        sessionLifespanInMinutes,
       };
     },
   });
