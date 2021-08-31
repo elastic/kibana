@@ -212,6 +212,10 @@ export class DynamicStyleProperty<T>
     return this._field ? this._field.getName() : '';
   }
 
+  getMbFieldName() {
+    return this._field ? this._field.getMbFieldName() : '';
+  }
+
   isDynamic() {
     return true;
   }

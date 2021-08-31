@@ -8,9 +8,11 @@
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
+import { number, string } from '../../../../security_solution/public/resolver/models/schema';
 
 export interface IField {
   getName(): string;
+  getMbFieldName(): string;
   getRootName(): string;
   canValueBeFormatted(): boolean;
   getLabel(): Promise<string>;
@@ -49,6 +51,10 @@ export class AbstractField implements IField {
 
   getName(): string {
     return this._fieldName;
+  }
+
+  getMbFieldName(): string {
+    return this.getName();
   }
 
   getRootName(): string {

@@ -511,6 +511,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName(source);
 
+      console.log('going to load style meta');
       const styleMeta = await (source as IESSource).loadStylePropsMeta({
         layerName,
         style,
@@ -520,8 +521,11 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         timeFilters: nextMeta.timeFilters,
         searchSessionId: dataFilters.searchSessionId,
       });
+      console.log('done lading to load style meta', styleMeta);
+
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
+      console.log(error);
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(dataRequestId, requestToken, error.message);
       }

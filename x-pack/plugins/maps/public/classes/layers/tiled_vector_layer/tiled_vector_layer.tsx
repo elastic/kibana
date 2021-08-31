@@ -271,11 +271,9 @@ export class TiledVectorLayer extends VectorLayer {
     });
 
     const metaFeatures: TileMetaFeature[] = mbFeatures.map((mbFeature: Feature | null) => {
-      console.log('m', mbFeature);
       const parsedProperties: Record<string, unknown> = {};
       for (const key in mbFeature.properties) {
         if (mbFeature.properties.hasOwnProperty(key)) {
-          console.log('parse', mbFeature.properties[key]);
           parsedProperties[key] =
             typeof mbFeature.properties[key] === 'string' ||
             typeof mbFeature.properties[key] === 'number' ||

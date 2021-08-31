@@ -550,6 +550,8 @@ export class VectorStyle implements IVectorStyle {
       return styleMeta;
     }
 
+    console.log('dun props', dynamicProperties);
+    
     dynamicProperties.forEach((dynamicProperty) => {
       const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(
         metaFeatures

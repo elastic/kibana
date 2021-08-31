@@ -147,7 +147,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getOrdinalColorMbExpression() {
-    const targetName = this.getFieldName();
+    const targetName = this.getMbFieldName();
+    console.log('tn', targetName);
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
         // custom color ramp config is not complete
@@ -206,6 +207,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     if (!rangeFieldMeta) {
       return null;
     }
+
+    console.log('rf', rangeFieldMeta);
 
     const colorStops = getOrdinalMbColorRampStops(
       this._options.color ? this._options.color : null,
