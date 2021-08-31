@@ -20,7 +20,7 @@ export const SecurityLayerWizardConfig: LayerWizard = {
   },
   disabledReason: i18n.translate('xpack.maps.security.disabledDesc', {
     defaultMessage:
-      'Cannot find security index pattern. To get started with Security, go to Security > Overview.',
+      'Cannot find security data view. To get started with Security, go to Security > Overview.',
   }),
   description: i18n.translate('xpack.maps.security.desc', {
     defaultMessage: 'Security layers',

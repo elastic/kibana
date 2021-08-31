@@ -128,7 +128,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       return (
         <EuiCallOut
           title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexErrorTitle', {
-            defaultMessage: 'Sorry, could not create index pattern',
+            defaultMessage: 'Unable to create data view',
           })}
           color="danger"
           iconType="alert"
