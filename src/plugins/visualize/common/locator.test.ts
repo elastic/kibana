@@ -93,13 +93,16 @@ describe('visualize locator', () => {
       ],
       query: { query: 'bye', language: 'kuery' },
       linked: true,
-      uiState: { fakeUIState: 'fakeUIState' },
+      uiState: {
+        fakeUIState: 'fakeUIState',
+        this: 'value contains a spaces that should be encoded',
+      },
       vis: ({ fakeVis: 'fakeVis' } as unknown) as PureVisState,
     });
 
     expect(location.app).toMatchInlineSnapshot(`"visualize"`);
     expect(location.path).toMatchInlineSnapshot(
-      `"#/edit/123?_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),linked:!t,query:(language:kuery,query:bye),uiState:(fakeUIState:fakeUIState),vis:(fakeVis:fakeVis))&type=test"`
+      `"#/edit/123?_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),linked:!t,query:(language:kuery,query:bye),uiState:(fakeUIState:fakeUIState,this:'value%20contains%20a%20spaces%20that%20should%20be%20encoded'),vis:(fakeVis:fakeVis))&type=test"`
     );
     expect(location.state).toMatchInlineSnapshot(`Object {}`);
   });

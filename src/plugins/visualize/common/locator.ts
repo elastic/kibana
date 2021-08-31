@@ -8,11 +8,14 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { omitBy } from 'lodash';
+import type { ParsedQuery } from 'query-string';
+import { stringify } from 'query-string';
 import rison from 'rison-node';
-import type { Filter, Query, RefreshInterval, TimeRange } from 'src/plugins/data/public';
+import type { Filter, Query, RefreshInterval, TimeRange } from 'src/plugins/data/common';
 import type { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common';
 import { isFilterPinned } from '../../data/common';
-import { VisualizeConstants } from './constants';
+import { url } from '../../kibana_utils/common';
+import { GLOBAL_STATE_STORAGE_KEY, STATE_STORAGE_KEY, VisualizeConstants } from './constants';
 import { PureVisState } from './types';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -77,26 +80,32 @@ export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLo
       ? `#${VisualizeConstants.EDIT_PATH}/${params.visId}`
       : `#${VisualizeConstants.CREATE_PATH}`;
 
-    const globalUrlState = omitBy(
-      {
-        time: params.timeRange,
-        filters: params.filters?.filter((f) => isFilterPinned(f)),
-        refreshInterval: params.refreshInterval,
-      },
-      (v) => v == null
-    );
-    const appUrlState = omitBy(
-      {
-        linked: params.linked,
-        filters: params.filters?.filter((f) => !isFilterPinned(f)),
-        uiState: params.uiState,
-        query: params.query,
-        vis: params.vis,
-      },
-      (v) => v == null
-    );
+    const query: ParsedQuery = {
+      [GLOBAL_STATE_STORAGE_KEY]: rison.encode(
+        omitBy(
+          {
+            time: params.timeRange,
+            filters: params.filters?.filter((f) => isFilterPinned(f)),
+            refreshInterval: params.refreshInterval,
+          },
+          (v) => v == null
+        )
+      ),
+      [STATE_STORAGE_KEY]: rison.encode(
+        omitBy(
+          {
+            linked: params.linked,
+            filters: params.filters?.filter((f) => !isFilterPinned(f)),
+            uiState: params.uiState,
+            query: params.query,
+            vis: params.vis,
+          },
+          (v) => v == null
+        )
+      ),
+    };
 
-    path = `${path}?_g=${rison.encode(globalUrlState)}&_a=${rison.encode(appUrlState)}`;
+    path += `?${stringify(url.encodeQuery(query), { encode: false, sort: false })}`;
 
     path = params.type ? `${path}&type=${params.type}` : path;
 

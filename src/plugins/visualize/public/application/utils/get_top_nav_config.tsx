@@ -292,6 +292,7 @@ export const getTopNavConfig = (
             uiState: currentState.uiState,
             query: currentState.query,
             vis: currentState.vis,
+            linked: currentState.linked,
           };
           // TODO: support sharing in by-value mode
           share.toggleShareContextMenu({
