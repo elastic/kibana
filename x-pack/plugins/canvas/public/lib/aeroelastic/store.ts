@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ActionId, Payload, State, Store, TypeName, UpdaterFunction } from '.';
+import { ActionId, CommitFn, State, Store, UpdaterFunction } from '.';
 
 let counter = 0 as ActionId;
 
 export const createStore = (initialState: State, updater: UpdaterFunction): Store => {
   let currentState = initialState;
 
-  const commit = (type: TypeName, payload: Payload) => {
+  const commit: CommitFn = (type, payload) => {
     return (currentState = updater({
       ...currentState,
       primaryUpdate: {

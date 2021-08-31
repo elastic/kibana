@@ -30,6 +30,7 @@ import {
   getActivityLogRequestLoaded,
   getLastLoadedActivityLogData,
   getActivityLogRequestLoading,
+  getActivityLogUninitialized,
 } from '../../store/selectors';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)<{ isShorter: boolean }>`
@@ -42,6 +43,7 @@ const LoadMoreTrigger = styled.div`
 
 export const EndpointActivityLog = memo(
   ({ activityLog }: { activityLog: AsyncResourceState<Immutable<ActivityLog>> }) => {
+    const activityLogUninitialized = useEndpointSelector(getActivityLogUninitialized);
     const activityLogLoading = useEndpointSelector(getActivityLogRequestLoading);
     const activityLogLoaded = useEndpointSelector(getActivityLogRequestLoaded);
     const activityLastLogData = useEndpointSelector(getLastLoadedActivityLogData);
@@ -96,7 +98,9 @@ export const EndpointActivityLog = memo(
     return (
       <>
         <StyledEuiFlexGroup direction="column" responsive={false} isShorter={isShorter}>
-          {showEmptyState ? (
+          {(activityLogLoading && !activityLastLogData?.data.length) || activityLogUninitialized ? (
+            <EuiLoadingContent lines={3} />
+          ) : showEmptyState ? (
             <EuiFlexItem>
               <EuiEmptyPrompt
                 iconType="editorUnorderedList"
