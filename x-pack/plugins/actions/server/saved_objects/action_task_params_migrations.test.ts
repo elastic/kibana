@@ -410,8 +410,7 @@ describe('isPreconfiguredAction()', () => {
 
 function getMockData(
   overwrites: Record<string, unknown> = {},
-  referencesOverwrites: SavedObjectReference[] = [],
-  namespaces: string[] = ['default']
+  referencesOverwrites: SavedObjectReference[] = []
 ): SavedObjectUnsanitizedDoc<ActionTaskParams> {
   return {
     attributes: {
@@ -421,7 +420,6 @@ function getMockData(
     },
     references: [...referencesOverwrites],
     id: uuid.v4(),
-    namespaces,
     type: 'action_task_param',
   };
 }

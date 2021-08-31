@@ -9,10 +9,13 @@ import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { TaskInstanceWithDeprecatedFields } from '../../../../plugins/task_manager/server/task';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects';
 
 export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const ALERT_ID = '0359d7fcc04da9878ee9aadbda38ba55';
+  const ACTION_TASK_PARAMS_ID = '6e96ac5e648f57523879661ea72525b7';
 
   describe('migrations', () => {
     before(async () => {
@@ -31,7 +34,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
       expect(response.statusCode).to.eql(200);
       expect(response.body._source?.task.params).to.eql(
-        '{"spaceId":"user1","alertId":"4c0ff612-006a-590e-8bb5-ac42cf0a2878"}'
+        `{"spaceId":"user1","alertId":"${SavedObjectsUtils.getConvertedObjectId(
+          'user1',
+          'alert',
+          ALERT_ID
+        )}"}`
       );
     });
 
@@ -52,7 +59,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
       expect(hit!._source!.task.params!).to.equal(
-        '{"spaceId":"user1","actionTaskParamsId":"c2d08bdf-ff59-51c1-a11a-d29a2140650a"}'
+        `{"spaceId":"user1","actionTaskParamsId":"${SavedObjectsUtils.getConvertedObjectId(
+          'user1',
+          'actionTaskParamsId',
+          ACTION_TASK_PARAMS_ID
+        )}"}`
       );
     });
   });

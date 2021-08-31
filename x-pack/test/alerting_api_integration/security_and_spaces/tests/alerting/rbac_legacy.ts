@@ -21,14 +21,38 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  const MIGRATED_ACTION_ID = SavedObjectsUtils.getConvertedObjectId('space1', 'action', '17f38826-5a8d-4a76-975a-b496e7fffe0b');
+  const MIGRATED_ACTION_ID = SavedObjectsUtils.getConvertedObjectId(
+    'space1',
+    'action',
+    '17f38826-5a8d-4a76-975a-b496e7fffe0b'
+  );
 
   const MIGRATED_ALERT_ID: Record<string, string> = {
-    space_1_all_alerts_none_actions: SavedObjectsUtils.getConvertedObjectId('space1', 'alert', '6ee9630a-a20e-44af-9465-217a3717d2ab'),
-    space_1_all_with_restricted_fixture: SavedObjectsUtils.getConvertedObjectId('space1', 'alert', '5cc59319-74ee-4edc-8646-a79ea91067cd'),
-    space_1_all: SavedObjectsUtils.getConvertedObjectId('space1', 'alert', 'd41a6abb-b93b-46df-a80a-926221ea847c'),
-    global_read: SavedObjectsUtils.getConvertedObjectId('space1', 'alert', '362e362b-a137-4aa2-9434-43e3d0d84a34'),
-    superuser: SavedObjectsUtils.getConvertedObjectId('space1', 'alert', 'b384be60-ec53-4b26-857e-0253ee55b277'),
+    space_1_all_alerts_none_actions: SavedObjectsUtils.getConvertedObjectId(
+      'space1',
+      'alert',
+      '6ee9630a-a20e-44af-9465-217a3717d2ab'
+    ),
+    space_1_all_with_restricted_fixture: SavedObjectsUtils.getConvertedObjectId(
+      'space1',
+      'alert',
+      '5cc59319-74ee-4edc-8646-a79ea91067cd'
+    ),
+    space_1_all: SavedObjectsUtils.getConvertedObjectId(
+      'space1',
+      'alert',
+      'd41a6abb-b93b-46df-a80a-926221ea847c'
+    ),
+    global_read: SavedObjectsUtils.getConvertedObjectId(
+      'space1',
+      'alert',
+      '362e362b-a137-4aa2-9434-43e3d0d84a34'
+    ),
+    superuser: SavedObjectsUtils.getConvertedObjectId(
+      'space1',
+      'alert',
+      'b384be60-ec53-4b26-857e-0253ee55b277'
+    ),
   };
 
   describe('alerts', () => {
