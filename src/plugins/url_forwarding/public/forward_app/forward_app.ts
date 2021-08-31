@@ -32,7 +32,7 @@ export const createLegacyUrlForwardApp = (
 
     const { navigated } = navigateToLegacyKibanaUrl(hash, forwards, basePath, application);
     if (!navigated) {
-      application.navigateToUrl('/');
+      application.navigateToUrl(basePath.get());
     }
 
     return () => {};
