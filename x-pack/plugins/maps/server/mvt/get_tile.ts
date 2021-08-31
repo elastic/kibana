@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import { Feature, FeatureCollection, Polygon } from 'geojson';
 import { countVectorShapeTypes } from '../../common/get_geometry_counts';
 import {
+  DEFAULT_MAX_RESULT_WINDOW,
   ES_GEO_FIELD_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   KBN_FEATURE_COUNT,
@@ -63,10 +63,15 @@ export async function getEsTile({
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
-    console.log('getEsTileP', path);
+    // console.log('getEsTileP', path);
     const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'GET',
       path,
+      body: {
+        size: DEFAULT_MAX_RESULT_WINDOW,
+        grid_precision: 0,
+        exact_bounds: true,
+      },
     });
     // let buffer = Buffer.from(tile.body, 'base64');
     const buffer = tile.body;

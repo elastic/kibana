@@ -30,6 +30,7 @@ import {
   FieldFormatter,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
   KBN_IS_TILE_COMPLETE,
+  MVT_META_SOURCE_LAYER_NAME,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -868,6 +869,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     mvtSourceLayer?: string,
     timesliceMaskConfig?: TimesliceMaskConfig
   ) {
+    console.log('set mvlin', mvtSourceLayer);
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
@@ -899,27 +901,25 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer);
     }
     if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
-      const mbLayer: MbLayer = {
+      const mbTooManyFeaturesLayer: MbLayer = {
         id: tooManyFeaturesLayerId,
-        type: 'fill',
+        type: 'line',
         source: sourceId,
         paint: {},
       };
       if (mvtSourceLayer) {
-        mbLayer['source-layer'] = mvtSourceLayer;
+        mbTooManyFeaturesLayer['source-layer'] = MVT_META_SOURCE_LAYER_NAME;
       }
-      mbMap.addLayer(mbLayer);
-      mbMap.setFilter(tooManyFeaturesLayerId, [
-        'all',
-        ['==', ['get', KBN_METADATA_FEATURE], true],
-        ['==', ['get', KBN_IS_TILE_COMPLETE], false],
-      ]);
-      mbMap.setPaintProperty(
-        tooManyFeaturesLayerId,
-        'fill-pattern',
-        KBN_TOO_MANY_FEATURES_IMAGE_ID
-      );
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'fill-opacity', this.getAlpha());
+      mbMap.addLayer(mbTooManyFeaturesLayer);
+      // mbMap.setFilter(tooManyFeaturesLayerId, [
+      //   'all',
+      //   ['==', ['get', KBN_METADATA_FEATURE], true],
+      //   ['==', ['get', KBN_IS_TILE_COMPLETE], false],
+      // ]);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', '#FFA500');
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 2);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-dasharray', [2, 1]);
+      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-opacity', this.getAlpha());
     }
 
     this.getCurrentStyle().setMBPaintProperties({

@@ -55,6 +55,7 @@ export const MVT_GETESGRIDTILE_API_PATH = 'mvt/getEsGridTile';
 
 export const MVT_HITS_SOURCE_LAYER_NAME = 'hits';
 export const MVT_AGGS_SOURCE_LAYER_NAME = 'aggs';
+export const MVT_META_SOURCE_LAYER_NAME = 'meta';
 
 // Identifies vector tile "too many features" feature.
 // "too many features" feature is a box showing area that contains too many features for single ES search response

@@ -10,36 +10,32 @@ import type {
   GeoJSONSource as MbGeoJSONSource,
   VectorSource as MbVectorSource,
 } from '@kbn/mapbox-gl';
-import { Feature } from 'geojson';
+import {Feature} from 'geojson';
 import uuid from 'uuid/v4';
-import { parse as parseUrl } from 'url';
-import { i18n } from '@kbn/i18n';
-import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
+import {parse as parseUrl} from 'url';
+import {i18n} from '@kbn/i18n';
+import {IVectorStyle, VectorStyle} from '../../styles/vector/vector_style';
 import {
   KBN_FEATURE_COUNT,
   KBN_IS_TILE_COMPLETE,
-  KBN_METADATA_FEATURE,
   LAYER_TYPE,
+  MVT_META_SOURCE_LAYER_NAME,
   SOURCE_DATA_REQUEST_ID,
 } from '../../../../common/constants';
+import {NO_RESULTS_ICON_AND_TOOLTIPCONTENT, VectorLayer, VectorLayerArguments,} from '../vector_layer';
+import {ITiledSingleLayerVectorSource} from '../../sources/tiled_single_layer_vector_source';
+import {DataRequestContext} from '../../../actions';
 import {
-  VectorLayer,
-  VectorLayerArguments,
-  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
-} from '../vector_layer';
-import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
-import { DataRequestContext } from '../../../actions';
-import {
-  Timeslice,
   StyleMetaDescriptor,
+  TileMetaFeature,
+  Timeslice,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
-  TileMetaFeature,
 } from '../../../../common/descriptor_types';
-import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
-import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { isRefreshOnlyQuery } from '../../util/is_refresh_only_query';
-import { CustomIconAndTooltipContent } from '../layer';
+import {MVTSingleLayerVectorSourceConfig} from '../../sources/mvt_single_layer_vector_source/types';
+import {canSkipSourceUpdate} from '../../util/can_skip_fetch';
+import {isRefreshOnlyQuery} from '../../util/is_refresh_only_query';
+import {CustomIconAndTooltipContent} from '../layer';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -114,6 +110,7 @@ export class TiledVectorLayer extends VectorLayer {
     onLoadError,
     dataFilters,
   }: DataRequestContext) {
+    console.log('syncmvt template');
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_REQUEST_ID}`);
     const searchFilters: VectorSourceRequestMeta = await this._getSearchFilters(
       dataFilters,
@@ -139,8 +136,12 @@ export class TiledVectorLayer extends VectorLayer {
           },
         });
         const canSkip = noChangesInSourceState && noChangesInSearchState;
+
         if (canSkip) {
+          console.log('can skip!');
           return null;
+        } else {
+          console.log('cannot skip');
         }
       }
     }
@@ -231,12 +232,18 @@ export class TiledVectorLayer extends VectorLayer {
       return;
     }
 
+    console.log('sync stlye proprs');
     this._setMbPointsProperties(mbMap, sourceMeta.layerName);
     this._setMbLinePolygonProperties(mbMap, sourceMeta.layerName);
     this._setMbCentroidProperties(mbMap, sourceMeta.layerName);
   }
 
   queryTileMetaFeatures(mbMap: MbMap): TileMetaFeature[] | null {
+    if (!this.getSource().isESSource()) {
+      console.log('not an es srouce, cant show merta');
+      return null;
+    }
+
     // @ts-ignore
     const mbSource = mbMap.getSource(this._getMbSourceId());
     if (!mbSource) {
@@ -255,15 +262,22 @@ export class TiledVectorLayer extends VectorLayer {
     // querySourceFeatures can return duplicated features when features cross tile boundaries.
     // Tile meta will never have duplicated features since by there nature, tile meta is a feature contained within a single tile
     const mbFeatures = mbMap.querySourceFeatures(this._getMbSourceId(), {
-      sourceLayer: sourceMeta.layerName,
-      filter: ['==', ['get', KBN_METADATA_FEATURE], true],
+      sourceLayer: MVT_META_SOURCE_LAYER_NAME,
+      // filter: ['==', ['get', KBN_METADATA_FEATURE], true],
     });
 
     const metaFeatures: TileMetaFeature[] = mbFeatures.map((mbFeature: Feature) => {
+      console.log('m', mbFeature);
       const parsedProperties: Record<string, unknown> = {};
       for (const key in mbFeature.properties) {
         if (mbFeature.properties.hasOwnProperty(key)) {
-          parsedProperties[key] = JSON.parse(mbFeature.properties[key]); // mvt properties cannot be nested geojson
+          console.log('parse', mbFeature.properties[key]);
+          parsedProperties[key] =
+            typeof mbFeature.properties[key] === 'string' ||
+            typeof mbFeature.properties[key] === 'number' ||
+            typeof mbFeature.properties[key] === 'boolean'
+              ? mbFeature.properties[key]
+              : JSON.parse(mbFeature.properties[key]); // mvt properties cannot be nested geojson
         }
       }
       return {
@@ -273,6 +287,8 @@ export class TiledVectorLayer extends VectorLayer {
         properties: parsedProperties,
       } as TileMetaFeature;
     });
+
+    console.log('meta featyres', metaFeatures);
 
     return metaFeatures as TileMetaFeature[];
   }
@@ -313,7 +329,7 @@ export class TiledVectorLayer extends VectorLayer {
       // The mapbox type in the spec is specified with `source-layer`
       // but the programmable JS-object uses camelcase `sourceLayer`
       // @ts-expect-error
-      if (mbLayer && mbLayer.sourceLayer !== tiledSourceMeta.layerName) {
+      if (mbLayer && mbLayer.sourceLayer !== tiledSourceMeta.layerName && mbLayer.sourceLayer !== MVT_META_SOURCE_LAYER_NAME) {
         // If the source-pointer of one of the layers is stale, they will all be stale.
         // In this case, all the mb-layers need to be removed and re-added.
         return true;
