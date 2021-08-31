@@ -87,8 +87,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       if (!userHasIndexWritePermissions) {
         this._setCreateIndexError(
           i18n.translate('xpack.maps.layers.newVectorLayerWizard.indexPermissionsError', {
-            defaultMessage:
-              'You do not have permission to create or import data into index "{indexName}".',
+            defaultMessage: `You must have 'create' and 'create_index' index privileges to create and write data to "{indexName}".`,
             values: {
               indexName: this.state.indexName,
             },
@@ -154,29 +153,19 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
         return (
           <EuiCallOut
             title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.indexPrivsErrorTitle', {
-              defaultMessage: 'Unable to create index',
+              defaultMessage: 'Missing index privileges',
             })}
             color="danger"
             iconType="alert"
           >
             <p>{this.state.createIndexError}</p>
-            <EuiLink
-              href={getDocLinks().links.maps.importGeospatialPrivileges}
-              target="_blank"
-              external
-            >
-              {i18n.translate('xpack.maps.layers.newVectorLayerWizard.permission.docLink', {
-                defaultMessage:
-                  'Review file import permissions, they are identical to those required to create & modify a new index',
-              })}
-            </EuiLink>
           </EuiCallOut>
         );
       }
       return (
         <EuiCallOut
           title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexErrorTitle', {
-            defaultMessage: 'Error creating index',
+            defaultMessage: 'Unable to create index',
           })}
           color="danger"
           iconType="alert"
