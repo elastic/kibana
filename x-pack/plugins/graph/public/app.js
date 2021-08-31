@@ -65,9 +65,9 @@ export function initGraphApp(angularModule, deps) {
     return reactDirective(VennDiagram);
   });
 
-  app.directive('graphVisualization', function (reactDirective) {
-    return reactDirective(GraphVisualization);
-  });
+  // app.directive('graphVisualization', function (reactDirective) {
+  //   return reactDirective(GraphVisualization);
+  // });
 
   app.directive('graphListing', function (reactDirective) {
     return reactDirective(Listing, [
@@ -348,29 +348,29 @@ export function initGraphApp(angularModule, deps) {
     $scope.spymode = 'request';
     $scope.colors = colorChoices;
     $scope.isColorDark = (color) => isColorDark(...hexToRgb(color));
-    $scope.nodeClick = function (n, $event) {
-      //Selection logic - shift key+click helps selects multiple nodes
-      // Without the shift key we deselect all prior selections (perhaps not
-      // a great idea for touch devices with no concept of shift key)
-      if (!$event.shiftKey) {
-        const prevSelection = n.isSelected;
-        $scope.workspace.selectNone();
-        n.isSelected = prevSelection;
-      }
+    // $scope.nodeClick = function (n, $event) {
+    //   //Selection logic - shift key+click helps selects multiple nodes
+    //   // Without the shift key we deselect all prior selections (perhaps not
+    //   // a great idea for touch devices with no concept of shift key)
+    //   if (!$event.shiftKey) {
+    //     const prevSelection = n.isSelected;
+    //     $scope.workspace.selectNone();
+    //     n.isSelected = prevSelection;
+    //   }
 
-      if ($scope.workspace.toggleNodeSelection(n)) {
-        $scope.selectSelected(n);
-      } else {
-        $scope.detail = null;
-      }
-    };
+    //   if ($scope.workspace.toggleNodeSelection(n)) {
+    //     $scope.selectSelected(n);
+    //   } else {
+    //     $scope.detail = null;
+    //   }
+    // };
 
-    $scope.clickEdge = function (edge) {
-      $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [
-        edge.topSrc,
-        edge.topTarget,
-      ]);
-    };
+    // $scope.clickEdge = function (edge) {
+    //   $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [
+    //     edge.topSrc,
+    //     edge.topTarget,
+    //   ]);
+    // };
 
     $scope.submit = function (searchTerm) {
       $scope.workspaceInitialized = true;
