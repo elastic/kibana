@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import { isInSetupMode } from '../../lib/setup_mode';
+import { isInSetupMode as isInSetupModeOld } from '../../lib/setup_mode';
+import { isInSetupMode as isInSetupModeNew } from '../../application/setup_mode/setup_mode';
 import { CommonAlertStatus } from '../../../common/types/alerts';
 import { ISetupModeContext } from '../../components/setup_mode/setup_mode_context';
 
 export function shouldShowAlertBadge(
   alerts: { [alertTypeId: string]: CommonAlertStatus[] },
   alertTypeIds: string[],
-  context?: ISetupModeContext
+  context?: ISetupModeContext,
+  reactMigrationEnabled?: boolean
 ) {
   if (!alerts) {
     return false;
   }
-  const inSetupMode = isInSetupMode(context);
+
+  const inSetupMode = reactMigrationEnabled ? isInSetupModeNew(context) : isInSetupModeOld(context);
+
   const alertExists = alertTypeIds.find(
     (name) => alerts[name] && alerts[name].find((rule) => rule.states.length > 0)
   );
