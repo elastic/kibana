@@ -13,7 +13,9 @@ import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { useAppContext } from '../../../app_context';
 
 const SnapshotRestoreAppLink: React.FunctionComponent = () => {
-  const { share } = useAppContext();
+  const {
+    plugins: { share },
+  } = useAppContext();
 
   const snapshotRestoreUrl = share.url.locators
     .get('SNAPSHOT_RESTORE_LOCATOR')

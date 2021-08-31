@@ -30,8 +30,12 @@ jest.mock('../../../../../app_context', () => {
   return {
     useAppContext: () => {
       return {
-        docLinks: docLinksServiceMock.createStartContract(),
         kibanaVersionInfo: mockKibanaVersionInfo,
+        services: {
+          core: {
+            docLinks: docLinksServiceMock.createStartContract(),
+          },
+        },
       };
     },
   };

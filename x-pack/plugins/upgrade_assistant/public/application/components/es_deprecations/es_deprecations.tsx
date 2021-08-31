@@ -71,7 +71,9 @@ const i18nTexts = {
 };
 
 export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
-  const { api, breadcrumbs } = useAppContext();
+  const {
+    services: { api, breadcrumbs },
+  } = useAppContext();
 
   const {
     data: esDeprecations,

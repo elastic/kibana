@@ -76,7 +76,9 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
 };
 
 export const MlSnapshotsTableRow: React.FunctionComponent<TableRowProps> = (props) => {
-  const { api } = useAppContext();
+  const {
+    services: { api },
+  } = useAppContext();
 
   return (
     <MlSnapshotsStatusProvider

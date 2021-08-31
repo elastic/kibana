@@ -82,7 +82,11 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
 }) => {
   const { status, reindexWarnings } = reindexState;
   const { index, correctiveAction } = deprecation;
-  const { docLinks } = useAppContext();
+  const {
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
   // If there are any warnings and we haven't started reindexing, show the warnings step first.
   const [currentFlyoutStep, setCurrentFlyoutStep] = useState<ReindexFlyoutStep>(
     reindexWarnings && reindexWarnings.length > 0 && status === undefined

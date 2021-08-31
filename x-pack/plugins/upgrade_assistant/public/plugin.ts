@@ -9,12 +9,9 @@ import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import {
-  SetupDependencies,
-  StartDependencies,
-  AppServicesContext,
-  ClientConfigType,
-} from './types';
+import { apiService } from './application/lib/api';
+import { breadcrumbService } from './application/lib/breadcrumbs';
+import { SetupDependencies, StartDependencies, AppDependencies, ClientConfigType } from './types';
 
 export class UpgradeAssistantUIPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
@@ -47,8 +44,7 @@ export class UpgradeAssistantUIPlugin
       title: pluginName,
       order: 1,
       async mount(params) {
-        const [coreStart, { data }] = await coreSetup.getStartServices();
-        const services: AppServicesContext = { data, cloud };
+        const [coreStart, { discover, data }] = await coreSetup.getStartServices();
 
         const {
           chrome: { docTitle },
@@ -56,15 +52,25 @@ export class UpgradeAssistantUIPlugin
 
         docTitle.change(pluginName);
 
-        const { mountManagementSection } = await import('./application/mount_management_section');
-        const unmountAppCallback = await mountManagementSection(
-          coreSetup,
-          params,
+        const appDependencies: AppDependencies = {
           kibanaVersionInfo,
-          readonly,
-          share,
-          services
-        );
+          isReadOnlyMode: readonly,
+          plugins: {
+            cloud,
+            share,
+          },
+          services: {
+            core: coreStart,
+            data,
+            history: params.history,
+            discover,
+            api: apiService,
+            breadcrumbs: breadcrumbService,
+          },
+        };
+
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        const unmountAppCallback = mountManagementSection(params, appDependencies);
 
           return () => {
             docTitle.reset();

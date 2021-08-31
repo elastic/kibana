@@ -70,7 +70,11 @@ const i18nTexts = {
 
 export const KibanaDeprecationStats: FunctionComponent = () => {
   const history = useHistory();
-  const { deprecations } = useAppContext();
+  const {
+    services: {
+      core: { deprecations },
+    },
+  } = useAppContext();
 
   const [kibanaDeprecations, setKibanaDeprecations] = useState<
     DomainDeprecationDetails[] | undefined

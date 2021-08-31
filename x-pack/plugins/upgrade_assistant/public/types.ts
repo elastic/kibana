@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { ScopedHistory } from 'kibana/public';
 import { DiscoverStart } from 'src/plugins/discover/public';
 import { ManagementSetup } from 'src/plugins/management/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SharePluginSetup } from 'src/plugins/share/public';
+import { CoreStart } from 'src/core/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
+import { BreadcrumbService } from './application/lib/breadcrumbs';
+import { ApiService } from './application/lib/api';
 
-export interface AppServicesContext {
-  data: DataPublicPluginStart;
-  cloud?: CloudSetup;
+export interface KibanaVersionContext {
+  currentMajor: number;
+  prevMajor: number;
+  nextMajor: number;
 }
 
 export interface SetupDependencies {
@@ -33,5 +38,22 @@ export interface ClientConfigType {
   readonly: boolean;
   ui: {
     enabled: boolean;
+  };
+}
+
+export interface AppDependencies {
+  isReadOnlyMode: boolean;
+  kibanaVersionInfo: KibanaVersionContext;
+  plugins: {
+    cloud?: CloudSetup;
+    share: SharePluginSetup;
+  };
+  services: {
+    core: CoreStart;
+    discover: DiscoverStart;
+    data: DataPublicPluginStart;
+    breadcrumbs: BreadcrumbService;
+    history: ScopedHistory;
+    api: ApiService;
   };
 }

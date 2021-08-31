@@ -29,7 +29,12 @@ const i18nTexts = {
 };
 
 export const useDeprecationLogging = (): DeprecationLoggingPreviewProps => {
-  const { api, notifications } = useAppContext();
+  const {
+    services: {
+      api,
+      core: { notifications },
+    },
+  } = useAppContext();
   const { data, error: fetchError, isLoading, resendRequest } = api.useLoadDeprecationLogging();
 
   const [isDeprecationLogIndexingEnabled, setIsDeprecationLogIndexingEnabled] = useState(false);

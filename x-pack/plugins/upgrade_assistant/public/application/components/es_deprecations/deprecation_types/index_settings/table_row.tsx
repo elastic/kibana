@@ -33,7 +33,9 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
     details?: ResponseError;
   }>({ statusType: 'idle' });
 
-  const { api } = useAppContext();
+  const {
+    services: { api },
+  } = useAppContext();
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
