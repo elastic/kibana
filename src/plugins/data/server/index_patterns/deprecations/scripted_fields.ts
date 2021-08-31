@@ -43,7 +43,7 @@ export const createScriptedFieldsDeprecationsConfig: (
       return [
         {
           title: i18n.translate('data.deprecations.scriptedFieldsTitle', {
-            defaultMessage: 'Found scripted fields',
+            defaultMessage: 'Found index patterns using scripted fields',
           }),
           message: i18n.translate('data.deprecations.scriptedFieldsMessage', {
             defaultMessage: `You have {numberOfIndexPatternsWithScriptedFields} index patterns ({titlesPreview}...) that use scripted fields. Scripted fields are deprecated and will be removed in future. Use runtime fields instead.`,
