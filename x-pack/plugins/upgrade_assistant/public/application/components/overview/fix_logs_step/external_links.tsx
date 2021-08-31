@@ -40,12 +40,8 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
 
 const DiscoverAppLink: FunctionComponent = () => {
   const {
-    services: {
-      data: dataService,
-    },
-    plugins: {
-      share,
-    },
+    services: { data: dataService },
+    plugins: { share },
   } = useAppContext();
 
   const [discoveryUrl, setDiscoveryUrl] = useState<string | undefined>();
