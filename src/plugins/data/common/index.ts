@@ -22,4 +22,4 @@ export * from './exports';
  * @removeBy 8.1
  */
 
-export { IndexPatternAttributes } from './types';
+export { IndexPatternAttributes, DataViewAttributes } from './types';

@@ -10,6 +10,7 @@ import { v4 } from 'uuid';
 
 import { Logger, SavedObject } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { mlPluginServerMock } from '../../../../../../ml/server/mocks';
 
 import type { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
@@ -84,6 +85,7 @@ export const createRuleTypeMocks = (
       config$: mockedConfig$,
       lists: listMock.createSetup(),
       logger: loggerMock,
+      ml: mlPluginServerMock.createSetupContract(),
       ruleDataClient: ruleRegistryMocks.createRuleDataClient(
         '.alerts-security.alerts'
       ) as IRuleDataClient,
