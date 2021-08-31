@@ -37,6 +37,7 @@ import {
   SpacesInfo,
   getObjectRowIdentifier,
   getObjectIdentifier,
+  isInNamespace,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
@@ -508,6 +509,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   onDelete = () => {
+    const { selectedSavedObjects } = this.state;
+    const { spacesInfo } = this.props;
+    if (spacesInfo) {
+      const nonSpaceObjects = selectedSavedObjects.filter(
+        (obj) => !isInNamespace(obj, spacesInfo.active.id)
+      );
+      if (nonSpaceObjects.length) {
+        return this.props.notifications.toasts.addDanger(
+          i18n.translate('savedObjectsManagement.objectsTable.cannotDeleteAcrossSpace', {
+            defaultMessage: 'Cannot delete objects that are not in the current space',
+          })
+        );
+      }
+    }
+
     this.setState({ isShowingDeleteConfirmModal: true });
   };
 

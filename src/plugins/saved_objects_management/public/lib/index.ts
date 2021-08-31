@@ -39,3 +39,4 @@ export { getTagFindReferences } from './get_tag_references';
 export { getSpaceInfo, SpacesInfo } from './get_space_info';
 export { getObjectRowIdentifier } from './get_object_row_id';
 export { ObjectIdentifier, getObjectIdentifier } from './get_object_id';
+export { isInNamespace } from './is_in_namespace';

@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
-import { getDefaultTitle, getSavedObjectLabel, SpacesInfo } from '../../../lib';
+import { getDefaultTitle, getSavedObjectLabel, isInNamespace, SpacesInfo } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
   SavedObjectsManagementActionServiceStart,
@@ -167,6 +167,14 @@ export class Table extends PureComponent<TableProps, TableState> {
       pageSizeOptions: [5, 10, 20, 50],
     };
 
+    // only allow to execute actions for objects present in current namespace
+    const canExecuteAction = (obj: SavedObjectWithMetadata): boolean => {
+      if (!spacesInfo) {
+        return true;
+      }
+      return isInNamespace(obj, spacesInfo.active.id);
+    };
+
     const filters = [
       {
         type: 'field_value_selection',
@@ -273,7 +281,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             type: 'icon',
             icon: 'inspect',
             onClick: (object) => goInspectObject(object),
-            available: (object) => !!object.meta.editUrl,
+            available: (object) => !!object.meta.editUrl && canExecuteAction(object),
             'data-test-subj': 'savedObjectsTableAction-inspect',
           },
           {
@@ -291,6 +299,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             type: 'icon',
             icon: 'kqlSelector',
             onClick: (object) => onShowRelationships(object),
+            available: (object) => canExecuteAction(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
           ...actionRegistry.getAll().map((action) => {
@@ -298,6 +307,12 @@ export class Table extends PureComponent<TableProps, TableState> {
             return {
               ...action.euiAction,
               'data-test-subj': `savedObjectsTableAction-${action.id}`,
+              available: (object: SavedObjectWithMetadata) => {
+                return (
+                  canExecuteAction(object) &&
+                  (action.euiAction.available ? action.euiAction.available(object as any) : true)
+                );
+              },
               onClick: (object: SavedObjectWithMetadata) => {
                 this.setState({
                   activeAction: action,

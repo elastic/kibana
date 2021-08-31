@@ -15,7 +15,7 @@ import { SavedObjectWithMetadata } from '../types';
  */
 export const getObjectRowIdentifier = (obj: SavedObjectWithMetadata): string => {
   if (obj.meta.namespaceType === 'single') {
-    return `${obj.namespaces ? obj.namespaces[0] : 'default'}:${obj.id}`;
+    return `${obj.namespaces ? obj.namespaces[0] : 'default'}:${obj.type}:${obj.id}`;
   }
-  return obj.id;
+  return `${obj.type}:${obj.id}`;
 };
