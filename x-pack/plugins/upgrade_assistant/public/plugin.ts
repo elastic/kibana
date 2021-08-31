@@ -41,8 +41,8 @@ export class UpgradeAssistantUIPlugin
       title: pluginName,
       order: 1,
       async mount(params) {
-        const [coreStart, { discover, data }] = await coreSetup.getStartServices();
-        const services: AppServicesContext = { discover, data, cloud };
+        const [coreStart, { data }] = await coreSetup.getStartServices();
+        const services: AppServicesContext = { data, cloud };
 
         const {
           chrome: { docTitle },

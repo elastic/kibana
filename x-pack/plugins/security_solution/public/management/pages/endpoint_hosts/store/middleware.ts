@@ -33,11 +33,13 @@ import {
   getActivityLogData,
   getActivityLogDataPaging,
   getLastLoadedActivityLogData,
+  getActivityLogError,
   detailsData,
   getIsEndpointPackageInfoUninitialized,
   getIsOnEndpointDetailsActivityLog,
   getMetadataTransformStats,
   isMetadataTransformStatsLoading,
+  getActivityLogIsUninitializedOrHasSubsequentAPIError,
 } from './selectors';
 import {
   AgentIdsPendingActions,
@@ -124,7 +126,8 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     if (
       action.type === 'userChangedUrl' &&
       hasSelectedEndpoint(getState()) === true &&
-      getIsOnEndpointDetailsActivityLog(getState())
+      getIsOnEndpointDetailsActivityLog(getState()) &&
+      getActivityLogIsUninitializedOrHasSubsequentAPIError(getState())
     ) {
       await endpointDetailsActivityLogChangedMiddleware({ store, coreStart });
     }
@@ -132,6 +135,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     // page activity log API
     if (
       action.type === 'endpointDetailsActivityLogUpdatePaging' &&
+      !getActivityLogError(getState()) &&
       hasSelectedEndpoint(getState())
     ) {
       await endpointDetailsActivityLogPagingMiddleware({ store, coreStart });

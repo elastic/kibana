@@ -6,8 +6,9 @@
  */
 
 import { IRouter, Logger, SavedObjectsServiceStart } from 'src/core/server';
-import { CredentialStore } from './lib/reindexing/credential_store';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { CredentialStore } from './lib/reindexing/credential_store';
+import { handleEsError } from './shared_imports';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -15,4 +16,7 @@ export interface RouteDependencies {
   log: Logger;
   getSavedObjectsService: () => SavedObjectsServiceStart;
   licensing: LicensingPluginSetup;
+  lib: {
+    handleEsError: typeof handleEsError;
+  };
 }

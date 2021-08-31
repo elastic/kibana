@@ -39,24 +39,26 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
 };
 
 const DiscoverAppLink: FunctionComponent = () => {
-  const { getUrlForApp } = useAppContext();
-  const { data: dataService, discover: discoverService } = useKibana().services;
+  const { share } = useAppContext();
+  const { data: dataService } = useKibana().services;
 
   const [discoveryUrl, setDiscoveryUrl] = useState<string | undefined>();
 
   useEffect(() => {
     const getDiscoveryUrl = async () => {
       const indexPatternId = await getDeprecationIndexPatternId(dataService);
-      const appLocation = await discoverService?.locator?.getLocation({ indexPatternId });
+      const locator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
-      const result = getUrlForApp(appLocation?.app as string, {
-        path: appLocation?.path,
-      });
-      setDiscoveryUrl(result);
+      if (!locator) {
+        return;
+      }
+
+      const url = await locator.getUrl({ indexPatternId });
+      setDiscoveryUrl(url);
     };
 
     getDiscoveryUrl();
-  }, [dataService, discoverService, getUrlForApp]);
+  }, [dataService, share.url.locators]);
 
   return (
     <EuiLink href={discoveryUrl} target="_blank" data-test-subj="viewDiscoverLogs">
