@@ -292,4 +292,4 @@ The `xpack.reporting.roles` settings are for a deprecated system of access contr
 deprecated:[7.14.0,The default for this setting will be `false` in an upcoming version of {kib}.] Sets access control to a set of assigned reporting roles, specified by `xpack.reporting.roles.allow`. Defaults to `true`.
 
 `xpack.reporting.roles.allow`::
-deprecated:[7.14.0] Specifies the roles, in addition to superusers, that can generate reports, using the {ref}/security-api.html#security-role-apis[{es} role management APIs]. Requires `xpack.reporting.roles.enabled` to be `true`. Defaults to `[ "reporting_user" ]`.
+deprecated:[7.14.0] In addition to superusers, specifies the roles that can generate reports using the {ref}/security-api.html#security-role-apis[{es} role management APIs]. Requires `xpack.reporting.roles.enabled` to be `true`. Defaults to `[ "reporting_user" ]`.
