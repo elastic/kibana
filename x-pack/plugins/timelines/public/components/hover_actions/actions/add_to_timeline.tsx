@@ -109,7 +109,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
             icon="timeline"
             iconType="timeline"
             onClick={handleStartDragToTimeline}
-            title={showTooltip ? '' : i18n.ADD_TO_TIMELINE}
+            title={i18n.ADD_TO_TIMELINE}
           >
             {i18n.ADD_TO_TIMELINE}
           </Component>
@@ -124,7 +124,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
             onClick={handleStartDragToTimeline}
           />
         ),
-      [Component, defaultFocusedButtonRef, handleStartDragToTimeline, showTooltip]
+      [Component, defaultFocusedButtonRef, handleStartDragToTimeline]
     );
 
     return showTooltip ? (

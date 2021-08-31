@@ -74,7 +74,7 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
             data-test-subj="filter-out-value"
             iconType="minusInCircle"
             onClick={filterOutValueFn}
-            title={showTooltip ? '' : FILTER_OUT_VALUE}
+            title={FILTER_OUT_VALUE}
           >
             {FILTER_OUT_VALUE}
           </Component>
@@ -89,7 +89,7 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
             onClick={filterOutValueFn}
           />
         ),
-      [Component, defaultFocusedButtonRef, filterOutValueFn, showTooltip]
+      [Component, defaultFocusedButtonRef, filterOutValueFn]
     );
 
     return showTooltip ? (

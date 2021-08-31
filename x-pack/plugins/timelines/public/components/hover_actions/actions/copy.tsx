@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -17,8 +17,6 @@ import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../clipboard';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { COPY_TO_CLIPBOARD } from '../../t_grid/body/translations';
 import { SUCCESS_TOAST_TITLE } from '../../clipboard/translations';
-import { getAdditionalScreenReaderOnlyContext } from '../utils';
-import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 
 export const FIELD = i18n.translate('xpack.timelines.hoverActions.fieldLabel', {
   defaultMessage: 'Field',
@@ -33,7 +31,7 @@ export interface CopyProps extends HoverActionComponentProps {
 }
 
 const CopyButton: React.FC<CopyProps> = React.memo(
-  ({ Component, field, isHoverAction, onClick, keyboardEvent, showTooltip, ownFocus, value }) => {
+  ({ Component, field, isHoverAction, onClick, keyboardEvent, ownFocus, value }) => {
     const { addSuccess } = useAppToasts();
     const panelRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
@@ -67,51 +65,27 @@ const CopyButton: React.FC<CopyProps> = React.memo(
       }
     }, [addSuccess, field, onClick, text]);
 
-    const button = useMemo(
-      () =>
-        Component ? (
-          <Component
-            aria-label={COPY_TO_CLIPBOARD}
-            data-test-subj="copy-to-clipboard"
-            icon="copyClipboard"
-            iconType="copyClipboard"
-            onClick={handleOnClick}
-            title={showTooltip ? '' : COPY_TO_CLIPBOARD}
-          >
-            {COPY_TO_CLIPBOARD}
-          </Component>
-        ) : (
-          <div ref={panelRef}>
-            <WithCopyToClipboard
-              data-test-subj="copy-to-clipboard"
-              isHoverAction={isHoverAction}
-              keyboardShortcut={ownFocus ? COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT : ''}
-              text={text}
-              titleSummary={FIELD}
-            />
-          </div>
-        ),
-      [Component, handleOnClick, showTooltip, ownFocus]
-    );
-
-    return showTooltip ? (
-      <EuiToolTip
-        content={
-          <TooltipWithKeyboardShortcut
-            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-              field,
-              value,
-            })}
-            content={COPY_TO_CLIPBOARD}
-            shortcut={COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT}
-            showShortcut={ownFocus}
-          />
-        }
+    return Component ? (
+      <Component
+        aria-label={COPY_TO_CLIPBOARD}
+        data-test-subj="copy-to-clipboard"
+        icon="copy"
+        iconType="copy"
+        onClick={handleOnClick}
+        title={COPY_TO_CLIPBOARD}
       >
-        {button}
-      </EuiToolTip>
+        {COPY_TO_CLIPBOARD}
+      </Component>
     ) : (
-      button
+      <div ref={panelRef}>
+        <WithCopyToClipboard
+          data-test-subj="copy-to-clipboard"
+          isHoverAction={isHoverAction}
+          keyboardShortcut={ownFocus ? COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT : ''}
+          text={text}
+          titleSummary={FIELD}
+        />
+      </div>
     );
   }
 );
