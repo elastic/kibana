@@ -38,22 +38,7 @@ export const PageTemplate = ({ title, pageTitle, tabs, children }: PageTemplateP
             responsive
           >
             <EuiFlexItem>
-              <div id="setupModeNav">
-                <div
-                  className="monSetupModeEnterButton__buttonWrapper"
-                  data-test-subj="monitoringSetupModeBtn"
-                >
-                  <button
-                    className="euiButton euiButton--primary euiButton--small"
-                    type="button"
-                    style={{ border: '2px solid red' }}
-                  >
-                    <span className="euiButtonContent euiButtonContent--iconRight euiButton__content">
-                      <span className="euiButton__text">Enter setup mode</span>
-                    </span>
-                  </button>
-                </div>
-              </div>
+              <div id="setupModeNav">{/* HERE GOES THE SETUP BUTTON */}</div>
             </EuiFlexItem>
             <EuiFlexItem className="monTopNavSecondItem">
               {pageTitle && (
@@ -67,9 +52,7 @@ export const PageTemplate = ({ title, pageTitle, tabs, children }: PageTemplateP
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <div>HERE GOES THE TIMEPICKER</div>
-        </EuiFlexItem>
+        <EuiFlexItem>{/* HERE GOES THE TIMEPICKER */}</EuiFlexItem>
       </EuiFlexGroup>
 
       {tabs && (
