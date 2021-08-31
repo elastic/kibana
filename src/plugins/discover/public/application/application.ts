@@ -12,28 +12,9 @@ import { renderApp as renderReactApp } from './index';
  * Here's where Discover is mounted and rendered
  */
 export async function renderApp(moduleName: string, element: HTMLElement) {
-  const app = mountDiscoverApp(moduleName, element);
+  // @ts-expect-error
+  const app = renderReactApp({ element });
   return () => {
     app();
   };
-}
-
-function buildDiscoverElement(mountpoint: HTMLElement) {
-  // due to legacy angular tags, we need some manual DOM intervention here
-  const appWrapper = document.createElement('div');
-  const discoverApp = document.createElement('discover-app');
-  const discover = document.createElement('discover');
-  appWrapper.appendChild(discoverApp);
-  discoverApp.append(discover);
-  mountpoint.appendChild(appWrapper);
-  return discover;
-}
-
-function mountDiscoverApp(moduleName: string, element: HTMLElement) {
-  const mountpoint = document.createElement('div');
-  const discoverElement = buildDiscoverElement(mountpoint);
-  // @ts-expect-error
-  const app = renderReactApp({ element: discoverElement });
-  element.appendChild(mountpoint);
-  return app;
 }
