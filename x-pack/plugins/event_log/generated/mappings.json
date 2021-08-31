@@ -291,6 +291,9 @@
                             "ignore_above": 1024
                         }
                     }
+                },
+                "version": {
+                    "type": "version"
                 }
             }
         }

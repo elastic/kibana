@@ -7,7 +7,6 @@
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import React, { ComponentType } from 'react';
-import type { TopAlertResponse } from '../';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { PluginContext, PluginContextValue } from '../../../context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
@@ -15,7 +14,7 @@ import { apmAlertResponseExample } from '../example_data';
 import { AlertsFlyout } from './';
 
 interface Args {
-  alerts: TopAlertResponse[];
+  alerts: Array<Record<string, unknown>>;
 }
 
 export default {

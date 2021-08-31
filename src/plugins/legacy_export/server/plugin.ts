@@ -9,6 +9,7 @@
 import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
 import { registerRoutes } from './routes';
 
+/** @deprecated */
 export class LegacyExportPlugin implements Plugin<{}, {}> {
   constructor(private readonly initContext: PluginInitializerContext) {}
 

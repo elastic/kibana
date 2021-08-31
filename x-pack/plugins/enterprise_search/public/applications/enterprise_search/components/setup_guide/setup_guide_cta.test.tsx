@@ -16,6 +16,6 @@ describe('SetupGuideCta', () => {
     const wrapper = shallow(<SetupGuideCta />);
 
     expect(wrapper.find('.enterpriseSearchSetupCta')).toHaveLength(1);
-    expect(wrapper.find('img')).toHaveLength(1);
+    expect(wrapper.find('EuiImage')).toHaveLength(1);
   });
 });

@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -18,7 +19,7 @@ import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 export async function hasRumData({
   setup,
 }: {
-  setup: Setup & Partial<SetupTimeRange>;
+  setup: SetupUX & Partial<SetupTimeRange>;
 }) {
   try {
     const {

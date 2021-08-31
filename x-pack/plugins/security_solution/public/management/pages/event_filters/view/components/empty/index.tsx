@@ -48,7 +48,7 @@ export const EventFiltersListEmptyState = memo<{
         >
           <FormattedMessage
             id="xpack.securitySolution.eventFilters.listEmpty.addButton"
-            defaultMessage="Add Event Filter"
+            defaultMessage="Add event filter"
           />
         </EuiButton>
       }

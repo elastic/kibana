@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Logger } from '@kbn/logging';
-import { RuleDataClient } from '..';
+import { IRuleDataClient } from '../rule_data_client';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -20,7 +20,7 @@ export const createLifecycleRuleTypeFactory = ({
   ruleDataClient,
 }: {
   logger: Logger;
-  ruleDataClient: RuleDataClient;
+  ruleDataClient: IRuleDataClient;
 }) => <
   TParams extends AlertTypeParams,
   TAlertInstanceContext extends AlertInstanceContext,

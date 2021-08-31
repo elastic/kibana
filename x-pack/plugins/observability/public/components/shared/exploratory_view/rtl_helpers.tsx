@@ -30,8 +30,7 @@ import * as fetcherHook from '../../../hooks/use_fetcher';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
+
 import indexPatternData from './configurations/test_data/test_index_pattern.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
@@ -40,6 +39,7 @@ import {
   IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
+import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
@@ -332,10 +332,11 @@ export const mockHistory = {
   },
 };
 
-export const mockIndexPattern = getStubIndexPattern(
-  'apm-*',
-  () => {},
-  '@timestamp',
-  JSON.parse(indexPatternData.attributes.fields),
-  mockCore() as any
-);
+export const mockIndexPattern = createStubIndexPattern({
+  spec: {
+    id: 'apm-*',
+    title: 'apm-*',
+    timeFieldName: '@timestamp',
+    fields: JSON.parse(indexPatternData.attributes.fields),
+  },
+});

@@ -38,6 +38,7 @@ export class IndexPatternEditorPlugin
       openEditor: getEditorOpener({
         core,
         indexPatternService: data.indexPatterns,
+        searchClient: data.search.search,
       }),
       /**
        * Index pattern editor flyout via react component
@@ -53,6 +54,7 @@ export class IndexPatternEditorPlugin
             notifications,
             application,
             indexPatternService: data.indexPatterns,
+            searchClient: data.search.search,
           }}
           {...props}
         />

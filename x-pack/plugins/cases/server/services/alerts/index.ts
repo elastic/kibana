@@ -9,33 +9,24 @@ import { isEmpty } from 'lodash';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
-import { MAX_ALERTS_PER_SUB_CASE } from '../../../common';
+import { Logger } from 'kibana/server';
+import { CaseStatuses, MAX_ALERTS_PER_SUB_CASE } from '../../../common';
 import { AlertInfo, createCaseError } from '../../common';
 import { UpdateAlertRequest } from '../../client/alerts/types';
+import { AlertsClient } from '../../../../rule_registry/server';
+import { Alert } from './types';
+import { STATUS_VALUES } from '../../../../rule_registry/common/technical_rule_data_field_names';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
 
 interface UpdateAlertsStatusArgs {
   alerts: UpdateAlertRequest[];
-  scopedClusterClient: ElasticsearchClient;
   logger: Logger;
 }
 
 interface GetAlertsArgs {
   alertsInfo: AlertInfo[];
-  scopedClusterClient: ElasticsearchClient;
   logger: Logger;
-}
-
-interface Alert {
-  _id: string;
-  _index: string;
-  _source: Record<string, unknown>;
-}
-
-interface AlertsResponse {
-  docs: Alert[];
 }
 
 function isEmptyAlert(alert: AlertInfo): boolean {
@@ -43,22 +34,42 @@ function isEmptyAlert(alert: AlertInfo): boolean {
 }
 
 export class AlertService {
-  constructor() {}
+  constructor(private readonly alertsClient?: PublicMethodsOf<AlertsClient>) {}
 
-  public async updateAlertsStatus({ alerts, scopedClusterClient, logger }: UpdateAlertsStatusArgs) {
+  public async updateAlertsStatus({ alerts, logger }: UpdateAlertsStatusArgs) {
     try {
-      const body = alerts
-        .filter((alert) => !isEmptyAlert(alert))
-        .flatMap((alert) => [
-          { update: { _id: alert.id, _index: alert.index } },
-          { doc: { signal: { status: alert.status } } },
-        ]);
+      if (!this.alertsClient) {
+        throw new Error(
+          'Alert client is undefined, the rule registry plugin must be enabled to updated the status of alerts'
+        );
+      }
 
-      if (body.length <= 0) {
+      const alertsToUpdate = alerts.filter((alert) => !isEmptyAlert(alert));
+
+      if (alertsToUpdate.length <= 0) {
         return;
       }
 
-      return scopedClusterClient.bulk({ body });
+      const updatedAlerts = await Promise.allSettled(
+        alertsToUpdate.map((alert) =>
+          this.alertsClient?.update({
+            id: alert.id,
+            index: alert.index,
+            status: translateStatus({ alert, logger }),
+            _version: undefined,
+          })
+        )
+      );
+
+      updatedAlerts.forEach((updatedAlert, index) => {
+        if (updatedAlert.status === 'rejected') {
+          logger.error(
+            `Failed to update status for alert: ${JSON.stringify(alertsToUpdate[index])}: ${
+              updatedAlert.reason
+            }`
+          );
+        }
+      });
     } catch (error) {
       throw createCaseError({
         message: `Failed to update alert status ids: ${JSON.stringify(alerts)}: ${error}`,
@@ -68,25 +79,51 @@ export class AlertService {
     }
   }
 
-  public async getAlerts({
-    scopedClusterClient,
-    alertsInfo,
-    logger,
-  }: GetAlertsArgs): Promise<AlertsResponse | undefined> {
+  public async getAlerts({ alertsInfo, logger }: GetAlertsArgs): Promise<Alert[] | undefined> {
     try {
-      const docs = alertsInfo
-        .filter((alert) => !isEmptyAlert(alert))
-        .slice(0, MAX_ALERTS_PER_SUB_CASE)
-        .map((alert) => ({ _id: alert.id, _index: alert.index }));
+      if (!this.alertsClient) {
+        throw new Error(
+          'Alert client is undefined, the rule registry plugin must be enabled to retrieve alerts'
+        );
+      }
 
-      if (docs.length <= 0) {
+      const alertsToGet = alertsInfo
+        .filter((alert) => !isEmpty(alert))
+        .slice(0, MAX_ALERTS_PER_SUB_CASE);
+
+      if (alertsToGet.length <= 0) {
         return;
       }
 
-      const results = await scopedClusterClient.mget<Alert>({ body: { docs } });
+      const retrievedAlerts = await Promise.allSettled(
+        alertsToGet.map(({ id, index }) => this.alertsClient?.get({ id, index }))
+      );
 
-      // @ts-expect-error @elastic/elasticsearch _source is optional
-      return results.body;
+      retrievedAlerts.forEach((alert, index) => {
+        if (alert.status === 'rejected') {
+          logger.error(
+            `Failed to retrieve alert: ${JSON.stringify(alertsToGet[index])}: ${alert.reason}`
+          );
+        }
+      });
+
+      return retrievedAlerts.map((alert, index) => {
+        let source: unknown | undefined;
+        let error: Error | undefined;
+
+        if (alert.status === 'fulfilled') {
+          source = alert.value;
+        } else {
+          error = alert.reason;
+        }
+
+        return {
+          id: alertsToGet[index].id,
+          index: alertsToGet[index].index,
+          source,
+          error,
+        };
+      });
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve alerts ids: ${JSON.stringify(alertsInfo)}: ${error}`,
@@ -95,4 +132,28 @@ export class AlertService {
       });
     }
   }
+}
+
+function translateStatus({
+  alert,
+  logger,
+}: {
+  alert: UpdateAlertRequest;
+  logger: Logger;
+}): STATUS_VALUES {
+  const translatedStatuses: Record<string, STATUS_VALUES> = {
+    [CaseStatuses.open]: 'open',
+    [CaseStatuses['in-progress']]: 'acknowledged',
+    [CaseStatuses.closed]: 'closed',
+  };
+
+  const translatedStatus = translatedStatuses[alert.status];
+  if (!translatedStatus) {
+    logger.error(
+      `Unable to translate case status ${alert.status} during alert update: ${JSON.stringify(
+        alert
+      )}`
+    );
+  }
+  return translatedStatus ?? 'open';
 }

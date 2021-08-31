@@ -23,9 +23,8 @@ export interface DeprecatedMatchPhraseFilter extends Filter {
   };
 }
 
-function isDeprecatedMatchPhraseFilter(filter: any): filter is DeprecatedMatchPhraseFilter {
-  const fieldName = filter.query && filter.query.match && Object.keys(filter.query.match)[0];
-
+function isDeprecatedMatchPhraseFilter(filter: Filter): filter is DeprecatedMatchPhraseFilter {
+  const fieldName = Object.keys(filter.query?.match ?? {})[0];
   return Boolean(fieldName && get(filter, ['query', 'match', fieldName, 'type']) === 'phrase');
 }
 

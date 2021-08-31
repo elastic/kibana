@@ -72,3 +72,17 @@ Sometimes Saved Objects end up persisted inside another Saved Object. We call th
  issues with edits propagating - since an entity can only exist in a single place.
   Note that from the end user stand point, we don’t use these terms “by reference” and “by value”.
 
+## Sharing Saved Objects
+
+Starting in Kibana 7.12, saved objects can be shared to multiple spaces. The "space behavior" is determined for each object type depending
+on how it is registered.
+
+If you are adding a **new** object type, when you register it:
+
+1. Use `namespaceType: 'multiple-isolated'` to make these objects exist in exactly one space
+2. Use `namespaceType: 'multiple'` to make these objects exist in one *or more* spaces
+3. Use `namespaceType: 'agnostic'` if you want these objects to always exist in all spaces
+
+If you have an **existing** "legacy" object type that is not shareable (using `namespaceType: 'single'`), see the [legacy developer guide
+for Sharing Saved Objects](https://www.elastic.co/guide/en/kibana/master/sharing-saved-objects.html) for details on steps you need to take
+to make sure this is converted to `namespaceType: 'multiple-isolated'` or `namespaceType: 'multiple'` in the 8.0 release.

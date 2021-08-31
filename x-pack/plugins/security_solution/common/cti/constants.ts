@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { INDICATOR_DESTINATION_PATH } from '../constants';
+import { ENRICHMENT_DESTINATION_PATH } from '../constants';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';
@@ -13,28 +13,26 @@ export const MATCHED_ID = 'matched.id';
 export const MATCHED_TYPE = 'matched.type';
 export const INDICATOR_MATCH_SUBFIELDS = [MATCHED_ATOMIC, MATCHED_FIELD, MATCHED_TYPE];
 
-export const INDICATOR_MATCHED_ATOMIC = `${INDICATOR_DESTINATION_PATH}.${MATCHED_ATOMIC}`;
-export const INDICATOR_MATCHED_FIELD = `${INDICATOR_DESTINATION_PATH}.${MATCHED_FIELD}`;
-export const INDICATOR_MATCHED_TYPE = `${INDICATOR_DESTINATION_PATH}.${MATCHED_TYPE}`;
+export const INDICATOR_MATCHED_ATOMIC = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_ATOMIC}`;
+export const INDICATOR_MATCHED_FIELD = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_FIELD}`;
+export const INDICATOR_MATCHED_TYPE = `${ENRICHMENT_DESTINATION_PATH}.${MATCHED_TYPE}`;
 
 export const EVENT_DATASET = 'event.dataset';
-export const EVENT_REFERENCE = 'event.reference';
-export const EVENT_URL = 'event.url';
-export const PROVIDER = 'provider';
-export const FIRSTSEEN = 'first_seen';
 
-export const INDICATOR_DATASET = `${INDICATOR_DESTINATION_PATH}.${EVENT_DATASET}`;
-export const INDICATOR_EVENT_URL = `${INDICATOR_DESTINATION_PATH}.${EVENT_URL}`;
-export const INDICATOR_FIRSTSEEN = `${INDICATOR_DESTINATION_PATH}.${FIRSTSEEN}`;
-export const INDICATOR_LASTSEEN = `${INDICATOR_DESTINATION_PATH}.last_seen`;
-export const INDICATOR_PROVIDER = `${INDICATOR_DESTINATION_PATH}.${PROVIDER}`;
-export const INDICATOR_REFERENCE = `${INDICATOR_DESTINATION_PATH}.${EVENT_REFERENCE}`;
+export const FIRST_SEEN = 'indicator.first_seen';
+export const LAST_SEEN = 'indicator.last_seen';
+export const PROVIDER = 'indicator.provider';
+export const REFERENCE = 'indicator.reference';
+
+export const INDICATOR_FIRSTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${FIRST_SEEN}`;
+export const INDICATOR_LASTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${LAST_SEEN}`;
+export const INDICATOR_PROVIDER = `${ENRICHMENT_DESTINATION_PATH}.${PROVIDER}`;
+export const INDICATOR_REFERENCE = `${ENRICHMENT_DESTINATION_PATH}.${REFERENCE}`;
 
 export const CTI_ROW_RENDERER_FIELDS = [
   INDICATOR_MATCHED_ATOMIC,
   INDICATOR_MATCHED_FIELD,
   INDICATOR_MATCHED_TYPE,
-  INDICATOR_DATASET,
   INDICATOR_REFERENCE,
   INDICATOR_PROVIDER,
 ];
@@ -60,14 +58,12 @@ export const EVENT_ENRICHMENT_INDICATOR_FIELD_MAP = {
 export const DEFAULT_EVENT_ENRICHMENT_FROM = 'now-30d';
 export const DEFAULT_EVENT_ENRICHMENT_TO = 'now';
 
-export const CTI_DEFAULT_SOURCES = [
-  'Abuse URL',
-  'Abuse Malware',
-  'AlienVault OTX',
-  'Anomali',
-  'Malware Bazaar',
-  'MISP',
-  'Recorded Future',
-];
-
-export const DEFAULT_CTI_SOURCE_INDEX = ['filebeat-*'];
+export const CTI_DATASET_KEY_MAP: { [key: string]: string } = {
+  'Abuse URL': 'threatintel.abuseurl',
+  'Abuse Malware': 'threatintel.abusemalware',
+  'AlienVault OTX': 'threatintel.otx',
+  Anomali: 'threatintel.anomali',
+  'Malware Bazaar': 'threatintel.malwarebazaar',
+  MISP: 'threatintel.misp',
+  'Recorded Future': 'threatintel.recordedfuture',
+};

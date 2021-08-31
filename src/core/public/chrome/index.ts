@@ -29,7 +29,6 @@ export type {
   ChromeHelpExtension,
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumb,
-  ChromeBrand,
   ChromeBadge,
   ChromeUserBanner,
 } from './types';

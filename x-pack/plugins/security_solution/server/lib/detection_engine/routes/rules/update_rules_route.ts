@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { updateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -19,13 +19,12 @@ import { buildSiemResponse } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRules } from '../../rules/update_rules';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
 export const updateRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: RuleDataClient | null
+  ruleDataClient?: IRuleDataClient | null
 ) => {
   router.put(
     {
@@ -70,21 +69,12 @@ export const updateRulesRoute = (
         });
 
         if (rule != null) {
-          const ruleActions = await updateRulesNotifications({
-            ruleAlertId: rule.id,
-            rulesClient,
-            savedObjectsClient,
-            enabled: request.body.enabled ?? true,
-            actions: request.body.actions ?? [],
-            throttle: request.body.throttle ?? 'no_actions',
-            name: request.body.name,
-          });
           const ruleStatuses = await ruleStatusClient.find({
             logsCount: 1,
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
-          const [validated, errors] = transformValidate(rule, ruleActions, ruleStatuses[0]);
+          const [validated, errors] = transformValidate(rule, ruleStatuses[0]);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

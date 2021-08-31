@@ -174,6 +174,17 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     minMaxByColumnId[args.valueAccessor!]
   );
 
+  const bands = ranges.map((start, index, array) => {
+    return {
+      // with the default continuity:above the every range is left-closed
+      start,
+      // with the default continuity:above the last range is right-open
+      end: index === array.length - 1 ? Infinity : array[index + 1],
+      // the current colors array contains a duplicated color at the beginning that we need to skip
+      color: colors[index + 1],
+    };
+  });
+
   const onElementClick = ((e: HeatmapElementEvent[]) => {
     const cell = e[0][0];
     const { x, y } = cell.datum;
@@ -285,7 +296,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     yAxisLabel: {
       visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
       // eui color subdued
-      fill: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
+      textColor: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
       padding: yAxisColumn?.name ? 8 : 0,
       name: yAxisColumn?.name ?? '',
       ...(yAxisColumn
@@ -297,7 +308,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     xAxisLabel: {
       visible: args.gridConfig.isXAxisLabelVisible,
       // eui color subdued
-      fill: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
+      textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
       formatter: (v: number | string) => xValuesFormatter.convert(v),
       name: xAxisColumn.name,
     },
@@ -321,13 +332,20 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         showLegend={args.legend.isVisible}
         legendPosition={args.legend.position}
         debugState={window._echDebugStateFlag ?? false}
+        theme={{
+          ...chartTheme,
+          legend: {
+            labelOptions: { maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0 },
+          },
+        }}
       />
       <Heatmap
         id={tableId}
         name={valueColumn.name}
-        colorScale={ScaleType.Threshold}
-        colors={colors}
-        ranges={ranges}
+        colorScale={{
+          type: 'bands',
+          bands,
+        }}
         data={chartData}
         xAccessor={args.xAccessor}
         yAccessor={args.yAccessor || 'unifiedY'}

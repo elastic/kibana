@@ -32,6 +32,7 @@ export function ServiceLink({
 
   return (
     <StyledLink
+      data-test-subj={`serviceLink_${agentName}`}
       href={link('/services/:serviceName/overview', {
         path: { serviceName },
         query,

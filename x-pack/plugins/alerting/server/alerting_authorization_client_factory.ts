@@ -45,7 +45,7 @@ export class AlertingAuthorizationClientFactory {
     this.getSpaceId = options.getSpaceId;
   }
 
-  public create(request: KibanaRequest, exemptConsumerIds: string[] = []): AlertingAuthorization {
+  public create(request: KibanaRequest): AlertingAuthorization {
     const { securityPluginSetup, securityPluginStart, features } = this;
     return new AlertingAuthorization({
       authorization: securityPluginStart?.authz,
@@ -57,7 +57,6 @@ export class AlertingAuthorizationClientFactory {
       auditLogger: new AlertingAuthorizationAuditLogger(
         securityPluginSetup?.audit.getLogger(ALERTS_FEATURE_ID)
       ),
-      exemptConsumerIds,
     });
   }
 }

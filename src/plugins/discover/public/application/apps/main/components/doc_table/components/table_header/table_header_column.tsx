@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { SortOrder } from './helpers';
+import { DocViewTableScoreSortWarning } from './score_sort_warning';
 
 interface Props {
   colLeftIdx: number; // idx of the column to the left, -1 if moving is not possible
@@ -63,6 +64,10 @@ export function TableHeaderColumn({
   const curSortWithoutCol = sortOrder.filter((pair) => pair[0] !== name);
   const curColSort = sortOrder.find((pair) => pair[0] === name);
   const curColSortDir = (curColSort && curColSort[1]) || '';
+
+  // If this is the _score column, and _score is not one of the columns inside the sort, show a
+  // warning that the _score will not be retrieved from Elasticsearch
+  const showScoreSortWarning = name === '_score' && !curColSort;
 
   const handleChangeSortOrder = () => {
     if (!onChangeSortOrder) return;
@@ -177,6 +182,7 @@ export function TableHeaderColumn({
   return (
     <th data-test-subj="docTableHeaderField">
       <span data-test-subj={`docTableHeader-${name}`} className="kbnDocTableHeader__actions">
+        {showScoreSortWarning && <DocViewTableScoreSortWarning />}
         {displayName}
         {buttons
           .filter((button) => button.active)

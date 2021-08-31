@@ -26,7 +26,7 @@ import {
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
+import { calculateFailedTransactionRate } from '../helpers/transaction_error_rate';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -44,8 +44,8 @@ export async function getServiceTransactionGroups({
   transactionType,
   latencyAggregationType,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
@@ -115,9 +115,7 @@ export async function getServiceTransactionGroups({
 
   const transactionGroups =
     response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      const errorRate = calculateTransactionErrorPercentage(
-        bucket[EVENT_OUTCOME]
-      );
+      const errorRate = calculateFailedTransactionRate(bucket[EVENT_OUTCOME]);
 
       const transactionGroupTotalDuration =
         bucket.transaction_group_total_duration.value || 0;

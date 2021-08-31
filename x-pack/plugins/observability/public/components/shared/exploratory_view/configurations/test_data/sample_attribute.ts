@@ -175,6 +175,7 @@ export const sampleAttribute = {
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
+          layerType: 'data',
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
           yConfig: [

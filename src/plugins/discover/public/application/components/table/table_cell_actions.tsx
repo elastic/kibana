@@ -15,26 +15,22 @@ import { IndexPatternField } from '../../../../../data/public';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 
 interface TableActionsProps {
+  field: string;
   isActive: boolean;
-  fieldName: string;
   flattenedField: unknown;
-  fieldMapping: IndexPatternField | undefined;
+  fieldMapping?: IndexPatternField;
   onFilter: DocViewFilterFn;
   onToggleColumn: (field: string) => void;
 }
 
 export const TableActions = ({
   isActive,
-  fieldName,
+  field,
   fieldMapping,
   flattenedField,
   onToggleColumn,
   onFilter,
 }: TableActionsProps) => {
-  const toggleColumn = () => {
-    onToggleColumn(fieldName);
-  };
-
   return (
     <div className="kbnDocViewer__buttons">
       <DocViewTableRowBtnFilterAdd
@@ -47,12 +43,12 @@ export const TableActions = ({
       />
       <DocViewTableRowBtnToggleColumn
         active={isActive}
-        fieldname={fieldName}
-        onClick={toggleColumn}
+        fieldname={field}
+        onClick={() => onToggleColumn(field)}
       />
       <DocViewTableRowBtnFilterExists
         disabled={!fieldMapping || !fieldMapping.filterable}
-        onClick={() => onFilter('_exists_', fieldName, '+')}
+        onClick={() => onFilter('_exists_', field, '+')}
         scripted={fieldMapping && fieldMapping.scripted}
       />
     </div>

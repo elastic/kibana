@@ -275,12 +275,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSorting.buttonActive': i18n.translate('core.euiColumnSorting.buttonActive', {
       defaultMessage: 'fields sorted',
     }),
-    'euiColumnSortingDraggable.activeSortLabel': i18n.translate(
-      'core.euiColumnSortingDraggable.activeSortLabel',
-      {
-        defaultMessage: 'is sorting this data grid',
-      }
-    ),
+    'euiColumnSortingDraggable.activeSortLabel': ({ display }: EuiValues) =>
+      i18n.translate('core.euiColumnSortingDraggable.activeSortLabel', {
+        defaultMessage: '{display} is sorting this data grid',
+        values: { display },
+      }),
     'euiColumnSortingDraggable.defaultSortAsc': i18n.translate(
       'core.euiColumnSortingDraggable.defaultSortAsc',
       {
@@ -295,18 +294,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Descending sort label',
       }
     ),
-    'euiColumnSortingDraggable.removeSortLabel': i18n.translate(
-      'core.euiColumnSortingDraggable.removeSortLabel',
-      {
-        defaultMessage: 'Remove from data grid sort:',
-      }
-    ),
-    'euiColumnSortingDraggable.toggleLegend': i18n.translate(
-      'core.euiColumnSortingDraggable.toggleLegend',
-      {
-        defaultMessage: 'Select sorting method for field:',
-      }
-    ),
+    'euiColumnSortingDraggable.removeSortLabel': ({ display }: EuiValues) =>
+      i18n.translate('core.euiColumnSortingDraggable.removeSortLabel', {
+        defaultMessage: 'Remove {display} from data grid sort',
+        values: { display },
+      }),
+    'euiColumnSortingDraggable.toggleLegend': ({ display }: EuiValues) =>
+      i18n.translate('core.euiColumnSortingDraggable.toggleLegend', {
+        defaultMessage: 'Select sorting method for {display}',
+        values: { display },
+      }),
     'euiComboBoxOptionsList.allOptionsSelected': i18n.translate(
       'core.euiComboBoxOptionsList.allOptionsSelected',
       {
@@ -381,19 +378,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiDataGrid.screenReaderNotice': i18n.translate('core.euiDataGrid.screenReaderNotice', {
       defaultMessage: 'Cell contains interactive content.',
     }),
-    'euiDataGrid.ariaLabelGridPagination': ({ label }: EuiValues) =>
-      i18n.translate('core.euiDataGrid.ariaLabelGridPagination', {
-        defaultMessage: 'Pagination for preceding grid: {label}',
-        values: { label },
-        description: 'Screen reader text to describe the pagination controls',
-      }),
-    'euiDataGrid.ariaLabelledByGridPagination': i18n.translate(
-      'core.euiDataGrid.ariaLabelledByGridPagination',
-      {
-        defaultMessage: 'Pagination for preceding grid',
-        description: 'Screen reader text to describe the pagination controls',
-      }
-    ),
     'euiDataGrid.ariaLabel': ({ label, page, pageCount }: EuiValues) =>
       i18n.translate('core.euiDataGrid.ariaLabel', {
         defaultMessage: '{label}; Page {page} of {pageCount}.',
@@ -406,21 +390,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { page, pageCount },
         description: 'Screen reader text to describe the size of the data grid',
       }),
-    'euiDataGrid.fullScreenButton': i18n.translate('core.euiDataGrid.fullScreenButton', {
-      defaultMessage: 'Full screen',
-    }),
-    'euiDataGrid.fullScreenButtonActive': i18n.translate(
-      'core.euiDataGrid.fullScreenButtonActive',
-      {
-        defaultMessage: 'Exit full screen',
-      }
-    ),
-    'euiDataGridCell.row': i18n.translate('core.euiDataGridCell.row', {
-      defaultMessage: 'Row',
-    }),
-    'euiDataGridCell.column': i18n.translate('core.euiDataGridCell.column', {
-      defaultMessage: 'Column',
-    }),
+    'euiDataGridCell.position': ({ row, col }: EuiValues) =>
+      i18n.translate('core.euiDataGridCell.position', {
+        defaultMessage: 'Row: {row}; Column: {col}',
+        values: { row, col },
+      }),
     'euiDataGridCellButtons.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellButtons.expandButtonTitle',
       {
@@ -431,6 +405,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiDataGridHeaderCell.headerActions',
       {
         defaultMessage: 'Header actions',
+      }
+    ),
+    'euiDataGridPagination.detailedPaginationLabel': ({ label }: EuiValues) =>
+      i18n.translate('core.euiDataGridPagination.detailedPaginationLabel', {
+        defaultMessage: 'Pagination for preceding grid: {label}',
+        values: { label },
+      }),
+    'euiDataGridPagination.paginationLabel': i18n.translate(
+      'core.euiDataGridPagination.paginationLabel',
+      {
+        defaultMessage: 'Pagination for preceding grid',
       }
     ),
     'euiDataGridSchema.booleanSortTextAsc': i18n.translate(
@@ -497,6 +482,28 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Descending size label',
       }
     ),
+    'euiDataGridToolbar.fullScreenButton': i18n.translate(
+      'core.euiDataGridToolbar.fullScreenButton',
+      {
+        defaultMessage: 'Full screen',
+      }
+    ),
+    'euiDataGridToolbar.fullScreenButtonActive': i18n.translate(
+      'core.euiDataGridToolbar.fullScreenButtonActive',
+      {
+        defaultMessage: 'Exit full screen',
+      }
+    ),
+    'euiDatePopoverButton.invalidTitle': ({ title }: EuiValues) =>
+      i18n.translate('core.euiDatePopoverButton.invalidTitle', {
+        defaultMessage: 'Invalid date: {title}',
+        values: { title },
+      }),
+    'euiDatePopoverButton.outdatedTitle': ({ title }: EuiValues) =>
+      i18n.translate('core.euiDatePopoverButton.outdatedTitle', {
+        defaultMessage: 'Update needed: {title}',
+        values: { title },
+      }),
     'euiFieldPassword.showPassword': i18n.translate('core.euiFieldPassword.showPassword', {
       defaultMessage:
         'Show password as plain text. Note: this will visually expose your password on the screen.',

@@ -7,7 +7,7 @@
 import rison, { RisonValue } from 'rison-node';
 import type { ReportViewType, SeriesUrl, UrlFilter } from '../types';
 import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { esFilters, ExistsFilter } from '../../../../../../../../src/plugins/data/public';
 import { URL_KEYS } from './constants/url_constants';
 import { PersistableFilter } from '../../../../../../lens/common';
@@ -56,7 +56,7 @@ export function createExploratoryViewUrl(
   );
 }
 
-export function buildPhraseFilter(field: string, value: string, indexPattern: IIndexPattern) {
+export function buildPhraseFilter(field: string, value: string, indexPattern: IndexPattern) {
   const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
     return [esFilters.buildPhraseFilter(fieldMeta, value, indexPattern)];
@@ -64,7 +64,7 @@ export function buildPhraseFilter(field: string, value: string, indexPattern: II
   return [];
 }
 
-export function buildPhrasesFilter(field: string, value: string[], indexPattern: IIndexPattern) {
+export function buildPhrasesFilter(field: string, value: string[], indexPattern: IndexPattern) {
   const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
     return [esFilters.buildPhrasesFilter(fieldMeta, value, indexPattern)];
@@ -72,7 +72,7 @@ export function buildPhrasesFilter(field: string, value: string[], indexPattern:
   return [];
 }
 
-export function buildExistsFilter(field: string, indexPattern: IIndexPattern) {
+export function buildExistsFilter(field: string, indexPattern: IndexPattern) {
   const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
     return [esFilters.buildExistsFilter(fieldMeta, indexPattern)];
@@ -89,7 +89,7 @@ export function urlFilterToPersistedFilter({
 }: {
   urlFilters: UrlFilter[];
   initFilters: FiltersType;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
 }) {
   const parsedFilters: FiltersType = initFilters ? [...initFilters] : [];
 

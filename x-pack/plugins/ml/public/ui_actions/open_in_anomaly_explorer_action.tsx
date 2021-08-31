@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SerializableRecord } from '@kbn/utility-types';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { MlCoreSetup } from '../plugin';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
@@ -82,7 +83,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
                 should: [
                   {
                     match_phrase: {
-                      [fieldName]: fieldValue,
+                      [fieldName]: String(fieldValue),
                     },
                   },
                 ],
@@ -103,7 +104,8 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
           pageState: {
             jobIds,
             timeRange,
-            ...(mlExplorerFilter ? { mlExplorerFilter } : {}),
+            // @ts-ignore QueryDslQueryContainer is not compatible with SerializableRecord
+            ...(mlExplorerFilter ? ({ mlExplorerFilter } as SerializableRecord) : {}),
             query: {},
           },
         });

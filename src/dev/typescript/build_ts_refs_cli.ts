@@ -12,8 +12,10 @@ import { run, REPO_ROOT } from '@kbn/dev-utils';
 import del from 'del';
 
 import { RefOutputCache } from './ref_output_cache';
-import { buildAllTsRefs, REF_CONFIG_PATHS } from './build_ts_refs';
-import { getOutputsDeep } from './ts_configfile';
+import { buildAllTsRefs } from './build_ts_refs';
+import { updateRootRefsConfig, ROOT_REFS_CONFIG_PATH } from './root_refs_config';
+import { Project } from './project';
+import { PROJECT_CACHE } from './projects';
 import { concurrentMap } from './concurrent_map';
 
 const CACHE_WORKING_DIR = Path.resolve(REPO_ROOT, 'data/ts_refs_output_cache');
@@ -28,7 +30,7 @@ const isTypeFailure = (error: any) =>
 
 export async function runBuildRefsCli() {
   run(
-    async ({ log, flags }) => {
+    async ({ log, flags, procRunner }) => {
       if (process.env.BUILD_TS_REFS_DISABLE === 'true' && !flags.force) {
         log.info(
           'Building ts refs is disabled because the BUILD_TS_REFS_DISABLE environment variable is set to "true". Pass `--force` to run the build anyway.'
@@ -36,7 +38,19 @@ export async function runBuildRefsCli() {
         return;
       }
 
-      const outDirs = getOutputsDeep(REF_CONFIG_PATHS);
+      // if the tsconfig.refs.json file is not self-managed then make sure it has
+      // a reference to every composite project in the repo
+      await updateRootRefsConfig(log);
+
+      // load all the projects referenced from the root refs config deeply, so we know all
+      // the ts projects we are going to be cleaning or populating with caches
+      const projects = Project.load(
+        ROOT_REFS_CONFIG_PATH,
+        {},
+        {
+          skipConfigValidation: true,
+        }
+      ).getProjectsDeep(PROJECT_CACHE);
 
       const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false' && !!flags.cache;
       const doCapture = process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true';
@@ -44,15 +58,15 @@ export async function runBuildRefsCli() {
       const doInitCache = cacheEnabled && !doCapture;
 
       if (doClean) {
-        log.info('deleting', outDirs.length, 'ts output directories');
-        await concurrentMap(100, outDirs, (outDir) => del(outDir));
+        log.info('deleting', projects.outDirs.length, 'ts output directories');
+        await concurrentMap(100, projects.outDirs, (outDir) => del(outDir));
       }
 
       let outputCache;
       if (cacheEnabled) {
         outputCache = await RefOutputCache.create({
           log,
-          outDirs,
+          projects,
           repoRoot: REPO_ROOT,
           workingDir: CACHE_WORKING_DIR,
           upstreamUrl: 'https://github.com/elastic/kibana.git',
@@ -64,7 +78,7 @@ export async function runBuildRefsCli() {
       }
 
       try {
-        await buildAllTsRefs(log);
+        await buildAllTsRefs({ log, procRunner, verbose: !!flags.verbose });
         log.success('ts refs build successfully');
       } catch (error) {
         const typeFailure = isTypeFailure(error);
@@ -97,7 +111,7 @@ export async function runBuildRefsCli() {
           --force            Run the build even if the BUILD_TS_REFS_DISABLE is set to "true"
           --clean            Delete outDirs for each ts project before building
           --no-cache         Disable fetching/extracting outDir caches based on the mergeBase with upstream
-          --ignore-type-failures  If tsc reports type errors, ignore them and just log a small warning.
+          --ignore-type-failures  If tsc reports type errors, ignore them and just log a small warning
         `,
       },
       log: {

@@ -14,6 +14,7 @@ import {
   dateBasedOperationToExpression,
   hasDateField,
   buildLabelFunction,
+  checkForDataLayerType,
 } from './utils';
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter } from '../helpers';
@@ -108,13 +109,17 @@ export const cumulativeSumOperation: OperationDefinition<
       })
     );
   },
-  getDisabledStatus(indexPattern, layer) {
-    return checkForDateHistogram(
-      layer,
-      i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
-        defaultMessage: 'Cumulative sum',
-      })
-    )?.join(', ');
+  getDisabledStatus(indexPattern, layer, layerType) {
+    const opName = i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
+      defaultMessage: 'Cumulative sum',
+    });
+    if (layerType) {
+      const dataLayerErrors = checkForDataLayerType(layerType, opName);
+      if (dataLayerErrors) {
+        return dataLayerErrors.join(', ');
+      }
+    }
+    return checkForDateHistogram(layer, opName)?.join(', ');
   },
   filterable: true,
   documentation: {

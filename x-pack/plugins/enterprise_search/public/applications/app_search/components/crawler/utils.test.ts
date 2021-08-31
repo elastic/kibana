@@ -16,6 +16,7 @@ import {
   CrawlerStatus,
   CrawlerData,
   CrawlRequest,
+  CrawlerDomain,
 } from './types';
 
 import {
@@ -39,7 +40,7 @@ describe('crawlerDomainServerToClient', () => {
     const id = '507f1f77bcf86cd799439011';
     const name = 'moviedatabase.com';
 
-    const defaultServerPayload = {
+    const defaultServerPayload: CrawlerDomainFromServer = {
       id,
       name,
       created_on: 'Mon, 31 Aug 2020 17:00:00 +0000',
@@ -47,9 +48,12 @@ describe('crawlerDomainServerToClient', () => {
       sitemaps: [],
       entry_points: [],
       crawl_rules: [],
+      deduplication_enabled: false,
+      deduplication_fields: ['title'],
+      available_deduplication_fields: ['title', 'description'],
     };
 
-    const defaultClientPayload = {
+    const defaultClientPayload: CrawlerDomain = {
       id,
       createdOn: 'Mon, 31 Aug 2020 17:00:00 +0000',
       url: name,
@@ -57,6 +61,9 @@ describe('crawlerDomainServerToClient', () => {
       sitemaps: [],
       entryPoints: [],
       crawlRules: [],
+      deduplicationEnabled: false,
+      deduplicationFields: ['title'],
+      availableDeduplicationFields: ['title', 'description'],
     };
 
     expect(crawlerDomainServerToClient(defaultServerPayload)).toStrictEqual(defaultClientPayload);
@@ -124,6 +131,9 @@ describe('crawlerDataServerToClient', () => {
       entry_points: [],
       crawl_rules: [],
       default_crawl_rule: DEFAULT_CRAWL_RULE,
+      deduplication_enabled: false,
+      deduplication_fields: ['title'],
+      available_deduplication_fields: ['title', 'description'],
     },
     {
       id: 'y',
@@ -134,6 +144,9 @@ describe('crawlerDataServerToClient', () => {
       sitemaps: [],
       entry_points: [],
       crawl_rules: [],
+      deduplication_enabled: false,
+      deduplication_fields: ['title'],
+      available_deduplication_fields: ['title', 'description'],
     },
   ];
 
@@ -154,6 +167,9 @@ describe('crawlerDataServerToClient', () => {
         entryPoints: [],
         crawlRules: [],
         defaultCrawlRule: DEFAULT_CRAWL_RULE,
+        deduplicationEnabled: false,
+        deduplicationFields: ['title'],
+        availableDeduplicationFields: ['title', 'description'],
       },
       {
         id: 'y',
@@ -164,6 +180,9 @@ describe('crawlerDataServerToClient', () => {
         sitemaps: [],
         entryPoints: [],
         crawlRules: [],
+        deduplicationEnabled: false,
+        deduplicationFields: ['title'],
+        availableDeduplicationFields: ['title', 'description'],
       },
     ]);
   });

@@ -10,6 +10,7 @@ import * as constants from './constants';
 import noDataResponse from './mock_responses/no_data.json';
 import dataResponse from './mock_responses/data.json';
 import { APMConfig } from '../../..';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const mockIndices = {
   /* eslint-disable @typescript-eslint/naming-convention */
@@ -49,6 +50,8 @@ describe('getTransactionBreakdown', () => {
       serviceName: 'myServiceName',
       transactionType: 'request',
       setup: getMockSetup(noDataResponse),
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
     });
 
     expect(Object.keys(response.timeseries).length).toBe(0);
@@ -59,6 +62,8 @@ describe('getTransactionBreakdown', () => {
       serviceName: 'myServiceName',
       transactionType: 'request',
       setup: getMockSetup(dataResponse),
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
     });
 
     const { timeseries } = response;
@@ -87,6 +92,8 @@ describe('getTransactionBreakdown', () => {
       serviceName: 'myServiceName',
       transactionType: 'request',
       setup: getMockSetup(dataResponse),
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
     });
 
     const { timeseries } = response;
@@ -99,6 +106,8 @@ describe('getTransactionBreakdown', () => {
       serviceName: 'myServiceName',
       transactionType: 'request',
       setup: getMockSetup(dataResponse),
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
     });
 
     const { timeseries } = response;

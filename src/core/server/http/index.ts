@@ -30,7 +30,6 @@ export type {
   KibanaRequestRouteOptions,
   IKibanaResponse,
   KnownHeaders,
-  LegacyRequest,
   LifecycleResponseFactory,
   RedirectResponseOptions,
   RequestHandler,

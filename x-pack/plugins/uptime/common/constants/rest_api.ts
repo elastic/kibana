@@ -26,9 +26,9 @@ export enum API_URLS {
   ML_CAPABILITIES = '/api/ml/ml_capabilities',
   ML_ANOMALIES_RESULT = `/api/ml/results/anomalies_table_data`,
 
-  ALERT_ACTIONS = '/api/actions',
-  CREATE_ALERT = '/api/alerts/alert',
-  ALERT = '/api/alerts/alert/',
-  ALERTS_FIND = '/api/alerts/_find',
-  ACTION_TYPES = '/api/actions/list_action_types',
+  RULE_CONNECTORS = '/api/actions/connectors',
+  CREATE_RULE = '/api/alerting/rule',
+  DELETE_RULE = '/api/alerting/rule/',
+  RULES_FIND = '/api/alerting/rules/_find',
+  CONNECTOR_TYPES = '/api/actions/connector_types',
 }

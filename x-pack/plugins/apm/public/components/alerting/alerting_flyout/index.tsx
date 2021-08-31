@@ -16,8 +16,8 @@ import { ApmPluginStartDeps } from '../../../plugin';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { AlertMetadata } from '../helper';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 interface Props {
   addFlyoutVisible: boolean;
@@ -30,9 +30,12 @@ export function AlertingFlyout(props: Props) {
 
   const serviceName = useServiceName();
   const { query } = useApmParams('/*');
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
+
+  const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
+  const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
+
   const environment =
     'environment' in query ? query.environment : ENVIRONMENT_ALL.value;
   const transactionType =

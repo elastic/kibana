@@ -13,6 +13,7 @@ import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { Visualization, OperationMetadata, AccessorConfig } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { suggestions } from './suggestions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 import { DimensionEditor, PieToolbar } from './toolbar';
@@ -26,6 +27,7 @@ function newLayerState(layerId: string): PieLayerState {
     categoryDisplay: 'default',
     legendDisplay: 'default',
     nestedLegend: false,
+    layerType: layerTypes.DATA,
   };
 }
 
@@ -229,6 +231,21 @@ export const getPieVisualization = ({
       </I18nProvider>,
       domElement
     );
+  },
+
+  getSupportedLayers() {
+    return [
+      {
+        type: layerTypes.DATA,
+        label: i18n.translate('xpack.lens.pie.addLayer', {
+          defaultMessage: 'Add visualization layer',
+        }),
+      },
+    ];
+  },
+
+  getLayerType(layerId, state) {
+    return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
   },
 
   toExpression: (state, layers, attributes) =>

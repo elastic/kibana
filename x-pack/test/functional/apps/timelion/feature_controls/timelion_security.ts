@@ -38,7 +38,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
-    describe('global timelion all privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/110396
+    describe.skip('global timelion all privileges', () => {
       before(async () => {
         await security.role.create('global_timelion_all_role', {
           elasticsearch: {

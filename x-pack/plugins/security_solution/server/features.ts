@@ -76,7 +76,7 @@ export const getAlertsSubFeature = (ruleTypes: string[]): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['crud_alerts', 'read_alerts'],
         },
         {
           id: 'alerts_read',
@@ -93,17 +93,14 @@ export const getAlertsSubFeature = (ruleTypes: string[]): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['read_alerts'],
         },
       ],
     },
   ],
 });
 
-export const getKibanaPrivilegesFeaturePrivileges = (
-  ruleTypes: string[],
-  isRuleRegistryEnabled: boolean
-): KibanaFeatureConfig => ({
+export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): KibanaFeatureConfig => ({
   id: SERVER_APP_ID,
   name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionTitle', {
     defaultMessage: 'Security',
@@ -117,9 +114,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
   },
   alerting: ruleTypes,
   cases: [APP_ID],
-  subFeatures: isRuleRegistryEnabled
-    ? [{ ...CASES_SUB_FEATURE }, { ...getAlertsSubFeature(ruleTypes) }]
-    : [{ ...CASES_SUB_FEATURE }],
+  subFeatures: [{ ...CASES_SUB_FEATURE }, { ...getAlertsSubFeature(ruleTypes) }],
   privileges: {
     all: {
       app: [APP_ID, 'kibana'],

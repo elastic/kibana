@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
@@ -69,6 +70,12 @@ export const RoleMappingsTable: React.FC<Props> = ({
     _rm.accessItems = rm[accessItemKey];
     return _rm;
   }) as SharedRoleMapping[];
+
+  const [items, setItems] = useState([] as SharedRoleMapping[]);
+
+  useEffect(() => {
+    setItems(standardizedRoleMappings);
+  }, [roleMappings]);
 
   const attributeNameCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'attribute',
@@ -161,7 +168,22 @@ export const RoleMappingsTable: React.FC<Props> = ({
     pageSize: 10,
   };
 
+  const onQueryChange = ({ queryText }: EuiSearchBarOnChangeArgs) => {
+    const filteredItems = standardizedRoleMappings.filter((rm) => {
+      // JSON.stringify allows us to search all the object fields
+      // without converting all the nested arrays and objects to strings manually
+      // Some false-positives are possible, because the search is also performed on
+      // object keys, but the simplicity of JSON.stringify seems to worth the tradeoff.
+      const normalizedTableItemString = JSON.stringify(rm).toLowerCase();
+      const normalizedQuery = queryText.toLowerCase();
+      return normalizedTableItemString.indexOf(normalizedQuery) !== -1;
+    });
+
+    setItems(filteredItems);
+  };
+
   const search = {
+    onChange: onQueryChange,
     box: {
       incremental: true,
       fullWidth: false,
@@ -173,7 +195,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
     <EuiInMemoryTable
       data-test-subj="RoleMappingsTable"
       columns={columns}
-      items={standardizedRoleMappings}
+      items={items}
       search={search}
       pagination={pagination}
       message={ROLE_MAPPINGS_NO_RESULTS_MESSAGE}

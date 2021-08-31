@@ -14,6 +14,8 @@ import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../../common/search_strategy';
 import { defaultHeaders, mockTimelineData, mockTimelineModel } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
@@ -23,7 +25,47 @@ import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana/hooks');
+jest.mock('../../../../common/hooks/use_app_toasts');
+
+jest.mock('../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        uiSettings: {
+          get: jest.fn(),
+        },
+        savedObjects: {
+          client: {},
+        },
+        timelines: {
+          getLastUpdated: jest.fn(),
+          getLoadingPanel: jest.fn(),
+          getFieldBrowser: jest.fn(),
+          getUseDraggableKeyboardWrapper: () =>
+            jest.fn().mockReturnValue({
+              onBlur: jest.fn(),
+              onKeyDown: jest.fn(),
+            }),
+          getAddToCasePopover: jest
+            .fn()
+            .mockReturnValue(<div data-test-subj="add-to-case-action">{'Add to case'}</div>),
+          getAddToCaseAction: jest.fn(),
+        },
+      },
+    }),
+    useGetUserSavedObjectPermissions: jest.fn(),
+  };
+});
 
 const mockSort: Sort[] = [
   {
@@ -69,6 +111,13 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 describe('Body', () => {
   const mount = useMountAppended();
   const mockRefetch = jest.fn();
+  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+
+  beforeEach(() => {
+    appToastsMock = useAppToastsMock.create();
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+  });
+
   const props: StatefulBodyProps = {
     activePage: 0,
     browserFields: mockBrowserFields,

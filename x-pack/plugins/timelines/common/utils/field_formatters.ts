@@ -43,7 +43,7 @@ export const getDataFromSourceHits = (
   category?: string,
   path?: string
 ): TimelineEventsDetailsItem[] =>
-  Object.keys(sources).reduce<TimelineEventsDetailsItem[]>((accumulator, source) => {
+  Object.keys(sources ?? {}).reduce<TimelineEventsDetailsItem[]>((accumulator, source) => {
     const item: EventSource = get(source, sources);
     if (Array.isArray(item) || isString(item) || isNumber(item)) {
       const field = path ? `${path}.${source}` : source;

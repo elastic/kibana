@@ -18,11 +18,13 @@ import type {
   UseDraggableKeyboardWrapper,
   UseDraggableKeyboardWrapperProps,
 } from './components';
+export type { SortDirection } from '../common';
 import type { TGridIntegratedProps } from './components/t_grid/integrated';
 import type { TGridStandaloneProps } from './components/t_grid/standalone';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
 import { HoverActionsConfig } from './components/hover_actions/index';
 import type { AddToCaseActionProps } from './components/actions/timeline/cases/add_to_case_action';
+import { TimelineTabs } from '../common';
 export * from './store/t_grid';
 export interface TimelinesUIStart {
   getHoverActions: () => HoverActionsConfig;
@@ -41,6 +43,9 @@ export interface TimelinesUIStart {
   ) => UseDraggableKeyboardWrapper;
   setTGridEmbeddedStore: (store: Store) => void;
   getAddToCaseAction: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToCasePopover: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToExistingCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
+  getAddToNewCaseButton: (props: AddToCaseActionProps) => ReactElement<AddToCaseActionProps>;
 }
 
 export interface TimelinesStartPlugins {
@@ -62,3 +67,10 @@ export type GetTGridProps<T extends TGridType> = T extends 'standalone'
   ? TGridIntegratedCompProps
   : TGridIntegratedCompProps;
 export type TGridProps = TGridStandaloneCompProps | TGridIntegratedCompProps;
+
+export interface StatefulEventContextType {
+  tabType: TimelineTabs | undefined;
+  timelineID: string;
+  enableHostDetailsFlyout: boolean;
+  enableIpDetailsFlyout: boolean;
+}

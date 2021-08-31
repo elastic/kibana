@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { JsonObject } from '@kbn/utility-types';
-
-import { DslQuery, Filter } from '@kbn/es-query';
+import { BoolQuery } from '@kbn/es-query';
 
 export type ESQuery =
   | ESRangeQuery
@@ -48,10 +47,5 @@ export interface ESTermQuery {
 }
 
 export interface ESBoolQuery {
-  bool: {
-    must: DslQuery[];
-    filter: Filter[];
-    should: never[];
-    must_not: Filter[];
-  };
+  bool: BoolQuery;
 }

@@ -22,6 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { useStartServices } from '../../../../../hooks';
 import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../../../hooks';
@@ -191,6 +192,9 @@ function MissingIntegrationContent({
   resetQuery,
   setSelectedCategory,
 }: MissingIntegrationContentProps) {
+  const {
+    application: { getUrlForApp },
+  } = useStartServices();
   const handleCustomInputsLinkClick = useCallback(() => {
     resetQuery();
     setSelectedCategory('custom');
@@ -201,7 +205,7 @@ function MissingIntegrationContent({
       <p>
         <FormattedMessage
           id="xpack.fleet.integrations.missing"
-          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations using our {discussForumLink}."
+          defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}, or add data using {beatsTutorialLink}. Request new integrations using our {discussForumLink}."
           values={{
             customInputsLink: (
               <EuiLink onClick={handleCustomInputsLinkClick}>
@@ -216,6 +220,14 @@ function MissingIntegrationContent({
                 <FormattedMessage
                   id="xpack.fleet.integrations.discussForumLink"
                   defaultMessage="discuss forum"
+                />
+              </EuiLink>
+            ),
+            beatsTutorialLink: (
+              <EuiLink href={getUrlForApp('home', { path: '#/tutorial_directory' })}>
+                <FormattedMessage
+                  id="xpack.fleet.integrations.beatsModulesLink"
+                  defaultMessage="Beats modules"
                 />
               </EuiLink>
             ),

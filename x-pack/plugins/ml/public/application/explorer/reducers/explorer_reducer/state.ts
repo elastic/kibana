@@ -36,7 +36,7 @@ export interface ExplorerState {
   filteredFields: any[];
   filterPlaceHolder: any;
   indexPattern: { title: string; fields: any[] };
-  influencersFilterQuery: InfluencersFilterQuery;
+  influencersFilterQuery?: InfluencersFilterQuery;
   influencers: Dictionary<any>;
   isAndOperator: boolean;
   loading: boolean;

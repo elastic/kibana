@@ -482,7 +482,7 @@ export class LoginForm extends Component<Props, State> {
               { defaultMessage: 'Username or password is incorrect. Please try again.' }
             )
           : i18n.translate('xpack.security.login.basicLoginForm.unknownErrorMessage', {
-              defaultMessage: 'Oops! Error. Try again.',
+              defaultMessage: `We couldn't log you in. Please try again.`,
             });
 
       this.setState({

@@ -20,31 +20,17 @@ const DatePickerWrapper = styled.div`
   background: white;
 `;
 const StickyFlexItem = styled(EuiFlexItem)`
+  max-width: 350px;
   position: sticky;
   top: ${(props) => props.theme.eui.euiSizeM};
   z-index: 1;
+  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.m}`};
 `;
 
 export const DateRangePicker = memo(() => {
   const dispatch = useDispatch();
   const { page, pageSize, startDate, endDate, isInvalidDateRange } = useEndpointSelector(
     getActivityLogDataPaging
-  );
-
-  const onClear = useCallback(
-    ({ clearStart = false, clearEnd = false }: { clearStart?: boolean; clearEnd?: boolean }) => {
-      dispatch({
-        type: 'endpointDetailsActivityLogUpdatePaging',
-        payload: {
-          disabled: false,
-          page,
-          pageSize,
-          startDate: clearStart ? undefined : startDate,
-          endDate: clearEnd ? undefined : endDate,
-        },
-      });
-    },
-    [dispatch, endDate, startDate, page, pageSize]
   );
 
   const onChangeStartDate = useCallback(
@@ -92,9 +78,7 @@ export const DateRangePicker = memo(() => {
                   aria-label="Start date"
                   endDate={endDate ? moment(endDate) : undefined}
                   isInvalid={isInvalidDateRange}
-                  maxDate={moment(endDate) || moment()}
                   onChange={onChangeStartDate}
-                  onClear={() => onClear({ clearStart: true })}
                   placeholderText={i18.ACTIVITY_LOG.datePicker.startDate}
                   selected={startDate ? moment(startDate) : undefined}
                   showTimeSelect
@@ -106,10 +90,7 @@ export const DateRangePicker = memo(() => {
                   aria-label="End date"
                   endDate={endDate ? moment(endDate) : undefined}
                   isInvalid={isInvalidDateRange}
-                  maxDate={moment()}
-                  minDate={startDate ? moment(startDate) : undefined}
                   onChange={onChangeEndDate}
-                  onClear={() => onClear({ clearEnd: true })}
                   placeholderText={i18.ACTIVITY_LOG.datePicker.endDate}
                   selected={endDate ? moment(endDate) : undefined}
                   showTimeSelect

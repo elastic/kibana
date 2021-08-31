@@ -53,16 +53,6 @@ describe('AnalyzeDataButton', () => {
     });
   });
 
-  describe('with no environment', () => {
-    it('does not include the environment', () => {
-      render(<Example environment={undefined} />);
-
-      expect((screen.getByRole('link') as HTMLAnchorElement).href).toEqual(
-        'http://localhost/app/observability/exploratory-view/configure#?reportType=kpi-over-time&sr=!((dt:mobile,mt:transaction.duration.us,n:testServiceName-response-latency,op:average,rdf:(service.name:!(testServiceName)),time:(from:now-15m,to:now)))'
-      );
-    });
-  });
-
   describe('with environment not defined', () => {
     it('does not include the environment', () => {
       render(<Example environment={ENVIRONMENT_NOT_DEFINED.value} />);

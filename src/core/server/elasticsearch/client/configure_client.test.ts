@@ -58,6 +58,7 @@ const createApiResponse = <T>({
     headers,
     warnings,
     meta: {
+      body,
       request: {
         params: params!,
         options: requestOptions,
@@ -367,7 +368,7 @@ describe('configureClient', () => {
       it('logs default error info when the error response body is empty', () => {
         const client = configureClient(createFakeConfig(), { logger, type: 'test', scoped: false });
 
-        let response = createApiResponse({
+        let response: RequestEvent<any, any> = createApiResponse({
           statusCode: 400,
           headers: {},
           params: {
@@ -384,7 +385,7 @@ describe('configureClient', () => {
           Array [
             Array [
               "400
-          GET /_path [undefined]: Response Error",
+          GET /_path [undefined]: {\\"error\\":{}}",
               undefined,
             ],
           ]
@@ -399,7 +400,7 @@ describe('configureClient', () => {
             method: 'GET',
             path: '/_path',
           },
-          body: {} as any,
+          body: undefined,
         });
         client.emit('response', new errors.ResponseError(response), response);
 
