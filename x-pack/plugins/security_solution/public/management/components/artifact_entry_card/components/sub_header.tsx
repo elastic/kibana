@@ -12,14 +12,14 @@ import { EffectScope, EffectScopeProps } from './effect_scope';
 
 export type SubHeaderProps = TouchedByUsersProps & EffectScopeProps;
 
-export const SubHeader = memo<SubHeaderProps>(({ createdBy, updatedBy }) => {
+export const SubHeader = memo<SubHeaderProps>(({ createdBy, updatedBy, policies }) => {
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <TouchedByUsers createdBy={createdBy} updatedBy={updatedBy} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EffectScope policies={[]} />
+        <EffectScope policies={policies} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

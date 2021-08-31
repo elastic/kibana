@@ -27,7 +27,7 @@ export const CardHeader = memo<{
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false}>
+            <EuiFlexGroup responsive={false} gutterSize="xl">
               <EuiFlexItem grow={false}>
                 <DateFieldValue date={updatedDate} type="update" />
               </EuiFlexItem>
@@ -40,7 +40,7 @@ export const CardHeader = memo<{
       </EuiFlexItem>
       {actions && actions.length > 0 && (
         <EuiFlexItem grow={false}>
-          <ActionsContextMenu items={actions} icon="boxesVertical" />
+          <ActionsContextMenu items={actions} icon="boxesHorizontal" />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

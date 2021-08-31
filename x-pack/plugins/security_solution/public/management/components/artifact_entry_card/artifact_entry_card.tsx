@@ -6,10 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import { CommonProps, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { CommonProps, EuiHorizontalRule, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CardHeader } from './components/card_header';
 import { APP_ID } from '../../../../common/constants';
+import { SubHeader } from './components/sub_header';
+import { getEmptyValue } from '../../../common/components/empty_value';
 
 // FIXME:PT fix types for the artifact type
 
@@ -21,13 +23,17 @@ export interface ArtifactEntryCardProps<T extends {} = {}> extends CommonProps {
  * Display Artifact Items (ex. Trusted App, Event Filter, etc) as a card
  */
 export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(({ item, ...commonProps }) => {
+  // FIXME: make compnent generic for the data type
+
+  // FIXME: revisit all dev code below
+
   return (
     <EuiPanel hasBorder={true} {...commonProps} paddingSize="none">
       <EuiPanel hasBorder={false} borderRadius="none" hasShadow={false}>
         <CardHeader
           name={item.name}
-          createdDate={item.createdDate}
-          updatedDate={item.updatedDate}
+          createdDate={item.created_at}
+          updatedDate={item.updated_at}
           actions={[
             {
               'data-test-subj': 'unIsolateLink',
@@ -47,10 +53,21 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(({ item, ...common
             },
           ]}
         />
-        <div>{'Sub header section'}</div>
-        <div>{'Description'}</div>
+        <SubHeader
+          createdBy={item.created_by}
+          updatedBy={item.updated_by}
+          policies={item.effectScope.type === 'policy' ? item.effectScope.policies : undefined}
+        />
+
+        <EuiSpacer size="m" />
+
+        <EuiText>
+          <p>{item.description || getEmptyValue()}</p>
+        </EuiText>
       </EuiPanel>
+
       <EuiHorizontalRule margin="xs" />
+
       <EuiPanel hasBorder={false} borderRadius="none" hasShadow={false}>
         <div>{'conditions here'}</div>
       </EuiPanel>
