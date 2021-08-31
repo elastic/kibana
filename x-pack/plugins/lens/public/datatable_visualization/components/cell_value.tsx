@@ -53,6 +53,18 @@ export const createGridCell = (
           }
         }
       }
+      // make sure to clean it up when something change
+      // this avoids cell's styling to stick forever
+      return () => {
+        if (minMaxByColumnId?.[originalId]) {
+          setCellProps({
+            style: {
+              backgroundColor: undefined,
+              color: undefined,
+            },
+          });
+        }
+      };
     }, [rowValue, columnId, setCellProps, colorMode, palette, minMaxByColumnId, getColorForValue]);
 
     return (
