@@ -43,8 +43,9 @@ export const deleteFeatureFromIndex = async (indexName: string, featureId: strin
 
 export const getMatchingIndexes = async (indexPattern: string) => {
   return await getHttp().fetch({
-    path: `${GET_MATCHING_INDEXES_PATH}/${indexPattern}`,
+    path: GET_MATCHING_INDEXES_PATH,
     method: 'GET',
+    query: { indexPattern },
   });
 };
 

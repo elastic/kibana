@@ -69,9 +69,9 @@
       {
         groupName: 'vega related modules',
         packageNames: ['vega', 'vega-lite', 'vega-schema-url-parser', 'vega-tooltip'],
-        reviewers: ['team:kibana-app'],
+        reviewers: ['team:kibana-vis-editors'],
         matchBaseBranches: ['master'],
-        labels: ['Feature:Vega', 'Team:KibanaApp'],
+        labels: ['Feature:Vega', 'Team:VisEditors'],
         enabled: true,
       },
     ],
