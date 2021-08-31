@@ -29,28 +29,27 @@ export const onExport = async ({
     await Promise.all(
       exceptionListsAndItems
         .filter((exceptionListAndItem) => exceptionListAndItem.attributes.list_type === 'list')
-        .map((exceptionListAndItem) => {
+        .map(async (exceptionListAndItem) => {
           const savedObjectType = getSavedObjectTypes({ namespaceType: ['single'] });
-          const client = getScopedClient(context.request);
-          // TODO: Replace this function below with the "client.createPointInTimeFinder" PIT one seems like a better version.
-          const foundItems = client.find<ExceptionListSoSchema>({
+          const savedObjectsClient = getScopedClient(context.request);
+          const finder = savedObjectsClient.createPointInTimeFinder<ExceptionListSoSchema>({
             filter: getExceptionListsItemFilter({
               filter: [],
               listId: [exceptionListAndItem.attributes.list_id],
               savedObjectType,
             }),
-            page: 1,
-            perPage: 10000, // NOTE: Exception list items do not support > 10k and during testing we do not exceed this number. The limitation is creating queries around 10k cause payload issues.
-            sortField: undefined,
-            sortOrder: undefined,
+            perPage: 100,
             type: savedObjectType,
           });
+          let foundItems: Array<SavedObject<ExceptionListSoSchema>> = [];
+          for await (const response of finder.find()) {
+            foundItems = [...response.saved_objects, ...foundItems];
+          }
+          await finder.close();
           return foundItems;
         })
     )
-  )
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    .flatMap(({ saved_objects }) => saved_objects);
+  ).flatMap((exceptionItem) => exceptionItem);
 
   // remove any duplicates we found from the list items against the passed in exceptionLists
   const removedDuplicates = exceptionListsAndItems.filter(
