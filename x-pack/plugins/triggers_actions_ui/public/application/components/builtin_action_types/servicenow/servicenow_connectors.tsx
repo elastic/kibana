@@ -101,7 +101,7 @@ const ServiceNowConnectorFields: React.FC<
 
   const beforeActionConnectorSave = useCallback(async () => {
     if (!isLegacy) {
-      await getApplicationInfo;
+      await getApplicationInfo();
     }
   }, [getApplicationInfo, isLegacy]);
 
