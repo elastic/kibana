@@ -18,12 +18,10 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesRoute } from './create_rules_route';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-jest.mock('../../rules/update_rules_notifications');
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
 describe('create_rules', () => {
@@ -48,12 +46,6 @@ describe('create_rules', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
-      (updateRulesNotifications as jest.Mock).mockResolvedValue({
-        id: 'id',
-        actions: [],
-        alertThrottle: null,
-        ruleThrottle: 'no_actions',
-      });
       const response = await server.inject(getCreateRequest(), context);
       expect(response.status).toEqual(200);
     });
