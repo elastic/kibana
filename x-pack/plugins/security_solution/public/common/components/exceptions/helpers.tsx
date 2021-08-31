@@ -577,7 +577,7 @@ export const getPrepopulatedMemoryShellcodeException = ({
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
-  const { process, Target } = alertEcsData;
+  const { process } = alertEcsData;
   const entries = filterEmptyExceptionEntries([
     {
       field: 'Memory_protection.feature',
