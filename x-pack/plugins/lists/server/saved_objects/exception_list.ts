@@ -15,7 +15,6 @@ import {
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
 } from '@kbn/securitysolution-list-utils';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ExceptionListSoSchema } from '../schemas/saved_objects/exceptions_list_so_schema';
 
@@ -190,15 +189,27 @@ export const getExceptionListType = (
 ): SavedObjectsType => ({
   hidden: false,
   management: {
-    getTitle(savedObject: SavedObject<ExceptionListItemSchema>): string {
-      return `Exception List: [${savedObject.attributes.name}]`;
+    getTitle(savedObject: SavedObject<ExceptionListSoSchema>): string {
+      // TODO: i18n all of this
+      const type = savedObject.attributes.list_type;
+      switch (type) {
+        case 'list': {
+          return `Exception List: [${savedObject.attributes.name}]`;
+        }
+        case 'item': {
+          return `Exception List Item: [${savedObject.attributes.name}]`;
+        }
+        default: {
+          throw new Error(`Unhandled type for type: ${type}`);
+        }
+      }
     },
     importableAndExportable: true,
     onExport(
       context: SavedObjectsExportTransformContext,
-      exceptionLists: Array<SavedObject<ExceptionListSoSchema>>
+      exceptionListsAndItems: Array<SavedObject<ExceptionListSoSchema>>
     ): Promise<Array<SavedObject<ExceptionListSoSchema>>> {
-      return onExport({ context, exceptionLists, startServices });
+      return onExport({ context, exceptionListsAndItems, startServices });
     },
   },
   mappings: combinedMappings,
@@ -212,15 +223,27 @@ export const exceptionListAgnosticType = (
 ): SavedObjectsType => ({
   hidden: false,
   management: {
-    getTitle(savedObject: SavedObject<ExceptionListItemSchema>): string {
-      return `Exception List: [${savedObject.attributes.name}]`;
+    getTitle(savedObject: SavedObject<ExceptionListSoSchema>): string {
+      // TODO: i18n all of this
+      const type = savedObject.attributes.list_type;
+      switch (type) {
+        case 'list': {
+          return `Agnostic Exception List: [${savedObject.attributes.name}]`;
+        }
+        case 'item': {
+          return `Agnostic Exception List Item (Agnostic): [${savedObject.attributes.name}]`;
+        }
+        default: {
+          throw new Error(`Unhandled type for type: ${type}`);
+        }
+      }
     },
     importableAndExportable: true,
     onExport(
       context: SavedObjectsExportTransformContext,
-      exceptionLists: Array<SavedObject<ExceptionListSoSchema>>
+      exceptionListsAndItems: Array<SavedObject<ExceptionListSoSchema>>
     ): Promise<Array<SavedObject<ExceptionListSoSchema>>> {
-      return onExport({ context, exceptionLists, startServices });
+      return onExport({ context, exceptionListsAndItems, startServices });
     },
   },
   mappings: combinedMappings,
