@@ -105,7 +105,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/xpack_saved_object_field_metrics.sh
-    label: 'Default Firefox Tests'
+    label: 'Saved Object Field Metrics'
     agents:
       queue: ci-group-6
     artifact_paths: target/junit/**/*.xml

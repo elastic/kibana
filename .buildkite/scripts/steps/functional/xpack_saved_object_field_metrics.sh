@@ -4,6 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
+cd "$XPACK_DIR"
+
 echo --- Capture Kibana Saved Objects field count metrics
 checks-reporter-with-killswitch "Capture Kibana Saved Objects field count metrics" \
   node scripts/functional_tests \

@@ -4,6 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
+cd "$XPACK_DIR"
+
 echo --- Default Accessibility Tests
 
 checks-reporter-with-killswitch "X-Pack accessibility tests" \

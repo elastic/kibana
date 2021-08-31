@@ -4,6 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
+cd "$XPACK_DIR"
+
 echo --- Default Firefox Smoke Tests
 
 checks-reporter-with-killswitch "X-Pack firefox smoke test" \
