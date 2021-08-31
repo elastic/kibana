@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { KibanaRegionmapSource } from './kibana_regionmap_source';
+export const getDefaultIndex = () => {
+  return Promise.resolve('Demonstration index');
+};
