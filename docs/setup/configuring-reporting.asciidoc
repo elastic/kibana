@@ -50,7 +50,7 @@ When security is enabled, granting users privilege to generate reports can be co
 xpack.reporting.roles.enabled: false
 ------------------------------------
 +
-NOTE: If you keep the default settings, you can still create a custom role that grants reporting privilege: the default role is `reporting_user`. This behavior is being deprecated as it does not allow application-level access control for {report-features}, and it does not allow API keys or authentication tokens to authorize report generation. See <<reporting-advanced-settings, reporting security settings>> for information and caveats about the deprecated access control features.
+NOTE: If you use the default settings, you can still create a custom role that grants reporting privileges. The default role is `reporting_user`. This behavior is being deprecated and does not allow application-level access controls for {report-features}, and does not allow API keys or authentication tokens to authorize report generation. Refer to <<reporting-advanced-settings, reporting security settings>> for information and caveats about the deprecated access control features.
 
 . Create the reporting role. 
 
