@@ -127,7 +127,7 @@ export class MonitoringPlugin
         const config = Object.fromEntries(externalConfig);
         if (config.renderReactApp) {
           const { renderApp } = await import('./application');
-          return renderApp(coreStart, pluginsStart, params);
+          return renderApp(coreStart, pluginsStart, params, config);
         } else {
           const monitoringApp = new AngularApp(deps);
           const removeHistoryListener = params.history.listen((location) => {

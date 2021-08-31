@@ -763,13 +763,15 @@ describe('Execution', () => {
       });
 
       test('saves duration it took to execute each function', async () => {
+        const startTime = Date.now();
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
         await execution.result.toPromise();
+        const duration = Date.now() - startTime;
 
         for (const node of execution.state.get().ast.chain) {
           expect(typeof node.debug?.duration).toBe('number');
-          expect(node.debug?.duration).toBeLessThan(100);
+          expect(node.debug?.duration).toBeLessThanOrEqual(duration);
           expect(node.debug?.duration).toBeGreaterThanOrEqual(0);
         }
       });
