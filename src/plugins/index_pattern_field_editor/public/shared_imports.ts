@@ -19,7 +19,7 @@ export {
   RuntimeCompositeWithSubFields,
 } from '../../data/common';
 
-export { SerializedFieldFormat } from '../../expressions/public';
+export type { SerializedFieldFormat } from '../../expressions/public';
 
 export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';
 
