@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useLayoutEffect } from 'react';
 
 // That could be different from security and observability. Get it as parameter?
 const INITIAL_DATA_GRID_HEIGHT = 967;
+
+// It will recalculate DataGrid height after this time interval.
+const TIME_INTERVAL = 50;
 
 /**
  * You are probably asking yourself "Why 3?". But that is the wrong mindset. You should be asking yourself "why not 3?".
@@ -26,26 +29,28 @@ const MAGIC_GAP = 3;
  *
  * Please delete me and allow DataGrid to calculate its height when the bug is fixed.
  */
-export const useDataGridHeightHack = () => {
-  const [dataGridHeight, setDataGridHeight] = useState(INITIAL_DATA_GRID_HEIGHT);
+export const useDataGridHeightHack = (pageSize: number, rowCount: number) => {
+  const [height, setHeight] = useState(INITIAL_DATA_GRID_HEIGHT);
 
-  const onMutation = useCallback(() => {
-    const gridVirtualized = document.querySelector('#body-data-grid .euiDataGrid__virtualized');
+  useLayoutEffect(() => {
+    setTimeout(() => {
+      const gridVirtualized = document.querySelector('#body-data-grid .euiDataGrid__virtualized');
 
-    if (
-      gridVirtualized &&
-      gridVirtualized.children[0].clientHeight !== gridVirtualized.clientHeight // check if it has vertical scroll
-    ) {
-      setDataGridHeight(
-        dataGridHeight +
-          gridVirtualized.children[0].clientHeight -
-          gridVirtualized.clientHeight +
-          MAGIC_GAP
-      );
-    }
-  }, [dataGridHeight]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => onMutation, []);
+      if (
+        gridVirtualized &&
+        gridVirtualized.children[0].clientHeight !== gridVirtualized.clientHeight // check if it has vertical scroll
+      ) {
+        setHeight((currentHeight) => {
+          return (
+            currentHeight +
+            gridVirtualized.children[0].clientHeight -
+            gridVirtualized.clientHeight +
+            MAGIC_GAP
+          );
+        });
+      }
+    }, TIME_INTERVAL);
+  }, [pageSize, rowCount]);
 
-  return { height: dataGridHeight, onMutation };
+  return height;
 };

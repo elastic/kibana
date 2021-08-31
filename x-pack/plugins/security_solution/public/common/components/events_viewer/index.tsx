@@ -20,7 +20,7 @@ import type { SubsetTimelineModel, TimelineModel } from '../../../timelines/stor
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { InspectButtonContainer } from '../inspect';
-import { useGlobalFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen, useIsDataGridExpanded } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
@@ -144,11 +144,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
-  const [isDataGridExpanded, setDataGridExpanded] = useState(false);
-  const onMutation = useCallback(() => {
-    const isExpanded = document.querySelector('.euiDataGrid--fullScreen') !== null;
-    setDataGridExpanded(isExpanded);
-  }, [setDataGridExpanded]);
+  const { isDataGridExpanded, onMutation } = useIsDataGridExpanded();
   const graphOverlay = useMemo(
     () =>
       graphEventId != null && graphEventId.length > 0 ? (

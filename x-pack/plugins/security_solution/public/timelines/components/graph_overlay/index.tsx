@@ -24,7 +24,7 @@ import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
-  closeDataGrid,
+  setDataGridFullScreen,
 } from '../../../common/containers/use_full_screen';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -57,7 +57,7 @@ const FullScreenOverlayContainer = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 10;
+  z-index: ${(props) => props.theme.eui.euiZLevel3};
 `;
 
 const StyledResolver = styled(Resolver)`
@@ -172,7 +172,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({
 
   const onCloseOverlay = useCallback(() => {
     if (isResolverExpanded === false) {
-      closeDataGrid();
+      setDataGridFullScreen(false);
     }
     if (timelineId === TimelineId.active) {
       setTimelineFullScreen(false);

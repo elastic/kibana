@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';
@@ -29,7 +29,7 @@ export const resetScroll = () => {
   }, 0);
 };
 
-const setDataGridFullScreen = (isExpanded: boolean) => {
+export const setDataGridFullScreen = (isExpanded: boolean) => {
   const clickEvent = new KeyboardEvent('click', {
     view: window,
     bubbles: true,
@@ -44,44 +44,6 @@ const setDataGridFullScreen = (isExpanded: boolean) => {
   );
   const dataGridFullScreenButton = dataGridFullScreenButtonNew || dataGridFullScreenButtonOld;
   if (dataGridIsFullScreen !== isExpanded && dataGridFullScreenButton) {
-    dataGridFullScreenButton.dispatchEvent(clickEvent);
-  }
-};
-
-export const closeDataGrid = () => {
-  const clickEvent = new KeyboardEvent('click', {
-    view: window,
-    bubbles: true,
-    cancelable: true,
-  });
-  const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
-  const dataGridFullScreenButtonOld = document.querySelector(
-    '[data-test-subj="dataGridFullScrenButton"]'
-  );
-  const dataGridFullScreenButtonNew = document.querySelector(
-    '[data-test-subj="dataGridFullScreenButton"]'
-  );
-  const dataGridFullScreenButton = dataGridFullScreenButtonNew || dataGridFullScreenButtonOld;
-  if (dataGridIsFullScreen && dataGridFullScreenButton) {
-    dataGridFullScreenButton.dispatchEvent(clickEvent);
-  }
-};
-
-export const expandDataGrid = () => {
-  const clickEvent = new MouseEvent('click', {
-    view: window,
-    bubbles: true,
-    cancelable: true,
-  });
-  const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
-  const dataGridFullScreenButtonOld = document.querySelector(
-    '[data-test-subj="dataGridFullScrenButton"]'
-  );
-  const dataGridFullScreenButtonNew = document.querySelector(
-    '[data-test-subj="dataGridFullScreenButton"]'
-  );
-  const dataGridFullScreenButton = dataGridFullScreenButtonNew || dataGridFullScreenButtonOld;
-  if (dataGridFullScreenButton && !dataGridIsFullScreen) {
     dataGridFullScreenButton.dispatchEvent(clickEvent);
   }
 };
@@ -149,4 +111,15 @@ export const useTimelineFullScreen = (): TimelineFullScreen => {
     [timelineFullScreen, setTimelineFullScreen]
   );
   return memoizedReturn;
+};
+
+export const useIsDataGridExpanded = () => {
+  const [isDataGridExpanded, setDataGridExpanded] = useState(false);
+  const onMutation = useCallback(() => {
+    const isExpanded = document.querySelector('.euiDataGrid--fullScreen') !== null;
+    setDataGridExpanded(isExpanded);
+  }, [setDataGridExpanded]);
+  return useMemo(() => {
+    return { onMutation, isDataGridExpanded };
+  }, [onMutation, isDataGridExpanded]);
 };
