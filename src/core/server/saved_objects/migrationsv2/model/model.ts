@@ -33,6 +33,18 @@ import {
 } from './helpers';
 import { createBatches } from './create_batches';
 
+const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
+const fatalReasonDocumentExceedsMaxBatchSizeBytes = ({
+  _id,
+  docSizeBytes,
+  maxBatchSizeBytes,
+}: {
+  _id: string;
+  docSizeBytes: number;
+  maxBatchSizeBytes: number;
+}) =>
+  `The document with _id "${_id}" is ${docSizeBytes} bytes which exceeds the configured maximum batch size of ${maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`;
+
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
   // responses. Each control state only triggers one action so each control
@@ -507,7 +519,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which exceeds the configured maximum batch size of ${batches.left.maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`,
+            reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
+              _id: batches.left.document._id,
+              docSizeBytes: batches.left.docSizeBytes,
+              maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
+            }),
           };
         }
       } else {
@@ -571,7 +587,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`,
+          reason: FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
         };
       }
       throwBadResponse(stateP, res.left);
@@ -718,7 +734,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which exceeds the configured maximum batch size of ${batches.left.maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`,
+            reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
+              _id: batches.left.document._id,
+              docSizeBytes: batches.left.docSizeBytes,
+              maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
+            }),
           };
         }
       } else {
@@ -767,7 +787,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`,
+          reason: FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
         };
       } else if (
         isLeftTypeof(res.left, 'target_index_had_write_block') ||
