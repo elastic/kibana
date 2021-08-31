@@ -14,3 +14,11 @@ export const LAST_UPDATED = i18n.translate('xpack.securitySolution.artifactCard.
 export const CREATED = i18n.translate('xpack.securitySolution.artifactCard.created', {
   defaultMessage: 'Created',
 });
+
+export const LAST_UPDATED_BY = i18n.translate('xpack.securitySolution.artifactCard.lastUpdatedBy', {
+  defaultMessage: 'Updated by',
+});
+
+export const CREATED_BY = i18n.translate('xpack.securitySolution.artifactCard.createdBy', {
+  defaultMessage: 'Created by',
+});
