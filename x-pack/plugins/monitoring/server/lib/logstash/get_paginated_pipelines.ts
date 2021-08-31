@@ -99,9 +99,7 @@ export async function getPaginatedPipelines({
     totalPipelineCount: filteredPipelines.length,
   };
 
-  const ret = processPipelinesAPIResponse(response, throughputMetric, nodesCountMetric);
-  // console.log('processPipelinesAPIResponse', JSON.stringify(ret));
-  return ret;
+  return processPipelinesAPIResponse(response, throughputMetric, nodesCountMetric);
 }
 
 function processPipelinesAPIResponse(
