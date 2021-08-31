@@ -62,9 +62,47 @@ Review important information about the {kib} 7.14.x releases.
 [[release-notes-7.14.1]]
 == {kib} 7.14.1
 
-coming::[7.14.1]
-
 For information about the 7.14.1 release, review the following information.
+
+[float]
+[[security-updates-v7.14.1]]
+=== Security updates
+
+Review the security updates that were found in previous versions of {kib}.
+
+[float]
+[[code-execution-issue]]
+==== Code execution issue
+
+*Details* +
+In {kib} 7.10.2 to 7.14.0, users with Fleet admin privileges could insecurely upload malicious packages due to an older version of the js-yaml library, allowing attackers to execute commands on the {kib} server. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-XXXXX[CVE-2021-XXXXX]
+
+*Solution* +
+TBD.
+
+[float]
+[[path-traversal-issue]]
+==== Path traversal issue
+
+*Details* +
+In {kib} 7.14.0 and earlier, {kib} was not validating the user supplied paths that upload .pbf files, allowing malicious users to arbitrarily traverse the {kib} host to load internal files that end in the .pbf extension. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-XXXXX[CVE-2021-XXXXX]
+
+Thanks to Luat Nguyen of CyberJutsu for reporting this issue.
+
+*Solution* +
+TBD.
+
+[float]
+[[path-traversal-issue]]
+==== Path traversal issue
+
+*Details* +
+In {kib} 7.14.0 and earlier, {kib} was not validating the user supplied paths that upload .pbf files, allowing malicious users to arbitrarily traverse the {kib} host to load internal files that end in the .pbf extension. https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-XXXXX[CVE-2021-XXXXX]
+
+Thanks to Luat Nguyen of CyberJutsu for reporting this issue.
+
+*Solution* +
+TBD.
 
 [float]
 [[breaking-changes-v7.14.1]]
