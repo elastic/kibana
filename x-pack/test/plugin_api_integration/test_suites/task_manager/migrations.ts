@@ -61,7 +61,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(hit!._source!.task.params!).to.equal(
         `{"spaceId":"user1","actionTaskParamsId":"${SavedObjectsUtils.getConvertedObjectId(
           'user1',
-          'actionTaskParamsId',
+          'action_task_params',
           ACTION_TASK_PARAMS_ID
         )}"}`
       );
