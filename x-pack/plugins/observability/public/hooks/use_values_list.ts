@@ -125,12 +125,11 @@ export const useValuesList = ({
               count: aggsCount.value,
               label: String(value),
             };
-          } else {
-            return {
-              count,
-              label: String(value),
-            };
           }
+          return {
+            count,
+            label: String(value),
+          };
         }
       ) ?? [];
 
