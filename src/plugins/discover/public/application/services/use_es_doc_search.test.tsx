@@ -8,15 +8,15 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { buildSearchBody, useEsDocSearch } from './use_es_doc_search';
-import { DocProps } from '../components/doc';
 import { Observable } from 'rxjs';
-import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../../common';
 import { IndexPattern } from 'src/plugins/data/common';
-import { ElasticRequestState } from '../types';
+import { DocProps } from '../apps/doc/components/doc';
+import { ElasticRequestState } from '../apps/doc/types';
+import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../common';
 
 const mockSearchResult = new Observable();
 
-jest.mock('../../../../kibana_services', () => ({
+jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     data: {
       search: {
