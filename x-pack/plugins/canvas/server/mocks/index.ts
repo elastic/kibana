@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { KibanaRegionmapSource } from './kibana_regionmap_source';
+export { workpadRouteContextMock, MockWorkpadRouteContext } from './workpad_route_context';
