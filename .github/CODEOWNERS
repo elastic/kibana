@@ -15,6 +15,7 @@
 # Data Discovery
 /src/plugins/discover/ @elastic/kibana-data-discovery
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-data-discovery
+/test/functional/apps/discover/ @elastic/kibana-data-discovery
 
 # Vis Editors
 /x-pack/plugins/lens/ @elastic/kibana-vis-editors
