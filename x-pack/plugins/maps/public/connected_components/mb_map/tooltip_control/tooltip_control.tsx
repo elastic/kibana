@@ -253,6 +253,7 @@ export class TooltipControl extends Component<Props, {}> {
     this._updateHoverTooltipState.cancel(); // ignore any possible moves
 
     const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
+    console.log('lock', mbFeatures);
     if (!mbFeatures.length) {
       // No features at click location so there is no tooltip to open
       return;
@@ -282,6 +283,7 @@ export class TooltipControl extends Component<Props, {}> {
     }
 
     const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
+    console.log('mbFeatures', mbFeatures);
     if (!mbFeatures.length) {
       this.props.closeOnHoverTooltip();
       return;

@@ -30,3 +30,15 @@ export function getSourceAggKey({
 }): string {
   return aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${aggFieldName}` : COUNT_PROP_NAME;
 }
+
+export function getEsMvSourceAggKey({
+                                  aggType,
+                                  aggFieldName,
+                                }: {
+  aggType: AGG_TYPE;
+  aggFieldName?: string;
+}): string {
+  console.log('getmvt', aggType, aggFieldName);
+  return aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${aggFieldName}` : `_count`;
+}
+

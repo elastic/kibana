@@ -81,7 +81,7 @@ export async function getEsGridTile({
     const fields = requestBody.fields;
     const body = {
       size: 0, // no hits
-      grid_precision: 7,
+      grid_precision: requestType === RENDER_AS.GRID ? 7 : 8, //would prefer to have centroid placement, for points
       exact_bounds: false,
       extent: 4096, // full resolution,
       query: requestBody.query,

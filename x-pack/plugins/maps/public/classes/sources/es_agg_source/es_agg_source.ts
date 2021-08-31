@@ -12,7 +12,7 @@ import { IESSource } from '../es_source';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
-import { getSourceAggKey } from '../../../../common/get_agg_key';
+import { getEsMvSourceAggKey, getSourceAggKey } from '../../../../common/get_agg_key';
 import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { IField } from '../../fields/field';
@@ -99,10 +99,17 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
   }
 
   getAggKey(aggType: AGG_TYPE, fieldName: string): string {
-    return getSourceAggKey({
-      aggType,
-      aggFieldName: fieldName,
-    });
+    if (this.isMvt()) {
+      return getEsMvSourceAggKey({
+        aggType,
+        aggFieldName: fieldName,
+      });
+    } else {
+      return getSourceAggKey({
+        aggType,
+        aggFieldName: fieldName,
+      });
+    }
   }
 
   getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {

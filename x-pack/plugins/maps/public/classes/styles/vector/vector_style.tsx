@@ -492,50 +492,54 @@ export class VectorStyle implements IVectorStyle {
   }
 
   async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
-    const shapeTypeCountMeta: VectorShapeTypeCounts = metaFeatures.reduce(
-      (accumulator: VectorShapeTypeCounts, tileMeta: TileMetaFeature) => {
-        if (
-          !tileMeta ||
-          !tileMeta.properties ||
-          !tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS]
-        ) {
-          return accumulator;
-        }
 
-        accumulator[VECTOR_SHAPE_TYPE.POINT] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POINT];
-        accumulator[VECTOR_SHAPE_TYPE.LINE] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.LINE];
-        accumulator[VECTOR_SHAPE_TYPE.POLYGON] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POLYGON];
+    console.log('pluck style meta!', metaFeatures);
 
-        return accumulator;
-      },
-      {
-        [VECTOR_SHAPE_TYPE.POLYGON]: 0,
-        [VECTOR_SHAPE_TYPE.LINE]: 0,
-        [VECTOR_SHAPE_TYPE.POINT]: 0,
-      }
-    );
 
-    const isLinesOnly =
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] > 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
-    const isPointsOnly =
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] > 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
-    const isPolygonsOnly =
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] > 0;
+    // const shapeTypeCountMeta: VectorShapeTypeCounts = metaFeatures.reduce(
+    //   (accumulator: VectorShapeTypeCounts, tileMeta: TileMetaFeature) => {
+    //     if (
+    //       !tileMeta ||
+    //       !tileMeta.properties ||
+    //       !tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS]
+    //     ) {
+    //       return accumulator;
+    //     }
+    //
+    //     accumulator[VECTOR_SHAPE_TYPE.POINT] +=
+    //       tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POINT];
+    //     accumulator[VECTOR_SHAPE_TYPE.LINE] +=
+    //       tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.LINE];
+    //     accumulator[VECTOR_SHAPE_TYPE.POLYGON] +=
+    //       tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POLYGON];
+    //
+    //     return accumulator;
+    //   },
+    //   {
+    //     [VECTOR_SHAPE_TYPE.POLYGON]: 0,
+    //     [VECTOR_SHAPE_TYPE.LINE]: 0,
+    //     [VECTOR_SHAPE_TYPE.POINT]: 0,
+    //   }
+    // );
+    //
+    // const isLinesOnly =
+    //   shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] > 0 &&
+    //   shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
+    //   shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
+    // const isPointsOnly =
+    //   shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
+    //   shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] > 0 &&
+    //   shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
+    // const isPolygonsOnly =
+    //   shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
+    //   shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
+    //   shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] > 0;
 
     const styleMeta: StyleMetaDescriptor = {
       geometryTypes: {
-        isPointsOnly,
-        isLinesOnly,
-        isPolygonsOnly,
+        // isPointsOnly,
+        // isLinesOnly,
+        // isPolygonsOnly,
       },
       fieldMeta: {},
     };
@@ -555,6 +559,7 @@ export class VectorStyle implements IVectorStyle {
       );
 
       const name = dynamicProperty.getFieldName();
+      console.log('name', name, ordinalStyleMeta, categoricalStyleMeta);
       if (!styleMeta.fieldMeta[name]) {
         styleMeta.fieldMeta[name] = {};
       }

@@ -63,7 +63,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaRequest(): Promise<unknown | null>;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
-  pluckOrdinalStyleMetaFromTileMetaFeatures(features: TileMetaFeature[]): RangeFieldMeta | null;
+  pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures: TileMetaFeature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromTileMetaFeatures(
     features: TileMetaFeature[]
   ): CategoryFieldMeta | null;
@@ -309,20 +309,26 @@ export class DynamicStyleProperty<T>
   pluckOrdinalStyleMetaFromTileMetaFeatures(
     metaFeatures: TileMetaFeature[]
   ): RangeFieldMeta | null {
-
     console.log('pluck ordinal stylemeta', metaFeatures);
     if (!this.isOrdinal()) {
       return null;
     }
 
     const name = this.getFieldName();
-    let min = Infinity;
-    let max = -Infinity;
+    console.log('na', name);
+    let min = this._field?.isCountable() ? 0 : Infinity;
+    let max = this._field?.isCountable() ? 0 : -Infinity;
     for (let i = 0; i < metaFeatures.length; i++) {
-      const fieldMeta = metaFeatures[i].properties.fieldMeta;
-      if (fieldMeta && fieldMeta[name] && fieldMeta[name].range) {
-        min = Math.min(fieldMeta[name].range?.min as number, min);
-        max = Math.max(fieldMeta[name].range?.max as number, max);
+      const fieldMeta = metaFeatures[i].properties;
+      const minField = `aggregations.${name}.min`;
+      const maxField = `aggregations.${name}.max`;
+      if (
+        fieldMeta &&
+        typeof fieldMeta[minField] === 'number' &&
+        typeof fieldMeta[maxField] === 'number'
+      ) {
+        min = Math.min(fieldMeta[minField] as number, min);
+        max = Math.max(fieldMeta[maxField] as number, max);
       }
     }
     return {

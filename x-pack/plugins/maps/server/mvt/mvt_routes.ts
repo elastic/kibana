@@ -20,11 +20,9 @@ import {
   MVT_GETGRIDTILE_API_PATH,
   ES_GEO_FIELD_TYPE,
   RENDER_AS,
-  MVT_GETESGRIDTILE_API_PATH,
-  MVT_GETESTILE_API_PATH,
 } from '../../common/constants';
-import { getTile, getEsTile } from './get_tile';
-import { getGridTile, getEsGridTile } from './get_grid_tile';
+import {  getEsTile } from './get_tile';
+import {  getEsGridTile } from './get_grid_tile';
 
 const CACHE_TIMEOUT_SECONDS = 60 * 60;
 

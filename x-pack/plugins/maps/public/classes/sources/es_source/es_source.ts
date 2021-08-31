@@ -42,6 +42,7 @@ export function isSearchSourceAbortError(error: Error) {
 }
 
 export interface IESSource extends IVectorSource {
+  isMvt(): boolean;
   isESSource(): true;
   getId(): string;
   getIndexPattern(): Promise<IndexPattern>;
@@ -94,6 +95,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   constructor(descriptor: AbstractESSourceDescriptor, inspectorAdapters?: Adapters) {
     super(AbstractESSource.createDescriptor(descriptor), inspectorAdapters);
     this._descriptor = descriptor;
+  }
+
+  isMvt(): boolean {
+    return false;
   }
 
   getId(): string {

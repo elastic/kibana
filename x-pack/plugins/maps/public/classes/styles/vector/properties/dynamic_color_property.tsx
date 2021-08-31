@@ -79,6 +79,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
 
   syncFillColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
     const color = this._getMbColor();
+    console.log('color', color);
+    window._c = color;
     mbMap.setPaintProperty(mbLayerId, 'fill-color', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
   }
