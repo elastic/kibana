@@ -9,7 +9,6 @@
 
 import Url from 'url';
 import cypress from 'cypress';
-import path from 'path';
 import { FtrProviderContext } from './ftr_provider_context';
 import archives_metadata from './cypress/fixtures/es_archiver/archives_metadata';
 import { createApmUsersAndRoles } from '../scripts/create-apm-users-and-roles/create_apm_users_and_roles';
