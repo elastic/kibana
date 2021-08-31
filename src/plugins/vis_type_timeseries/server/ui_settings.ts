@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 
 import { UiSettingsParams } from 'kibana/server';
 
-import { MAX_BUCKETS_SETTING } from '../common/constants';
+import { MAX_BUCKETS_SETTING, USE_STRING_INDICES } from '../common/constants';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   [MAX_BUCKETS_SETTING]: {
@@ -24,5 +24,15 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
         'Affects the TSVB histogram density. Must be set higher than "histogram:maxBars".',
     }),
     schema: schema.number(),
+  },
+  [USE_STRING_INDICES]: {
+    name: i18n.translate('visTypeTimeseries.advancedSettings.useStringIndicesTitle', {
+      defaultMessage: 'TSVB allow using string indices',
+    }),
+    value: false,
+    description: i18n.translate('visTypeTimeseries.advancedSettings.useStringIndicesText', {
+      defaultMessage: 'Enable switching between Kibana index patterns and Elasticsearch indices.',
+    }),
+    schema: schema.boolean(),
   },
 });

@@ -17,9 +17,12 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import type { PopoverProps } from './types';
+import { getUISettings } from '../../../../services';
+import { USE_STRING_INDICES } from '../../../../../common/constants';
 
 export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -29,6 +32,9 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
   const switchMode = useCallback(() => {
     onModeChange(!useKibanaIndices);
   }, [onModeChange, useKibanaIndices]);
+
+  const stringIndicesAllowed = getUISettings().get(USE_STRING_INDICES);
+  const isSwitchDisabled = useKibanaIndices && !stringIndicesAllowed;
 
   return (
     <EuiPopover
@@ -63,17 +69,30 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
           />
         </EuiText>
         <EuiSpacer />
-        <EuiSwitch
-          checked={useKibanaIndices}
-          label={i18n.translate(
-            'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
-            {
-              defaultMessage: 'Use only Kibana index patterns',
-            }
-          )}
-          onChange={switchMode}
-          data-test-subj="switchIndexPatternSelectionMode"
-        />
+        <EuiToolTip
+          content={
+            isSwitchDisabled && (
+              <FormattedMessage
+                id="visTypeTimeseries."
+                defaultMessage='Using Elasticsearch indices is not recommended.
+      Enable "TSVB allow using string indices" setting in Advanced Settings to switch back.'
+              />
+            )
+          }
+        >
+          <EuiSwitch
+            checked={useKibanaIndices}
+            label={i18n.translate(
+              'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
+              {
+                defaultMessage: 'Use only Kibana index patterns',
+              }
+            )}
+            onChange={switchMode}
+            disabled={isSwitchDisabled}
+            data-test-subj="switchIndexPatternSelectionMode"
+          />
+        </EuiToolTip>
       </div>
     </EuiPopover>
   );

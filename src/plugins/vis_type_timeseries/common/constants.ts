@@ -7,6 +7,7 @@
  */
 
 export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
+export const USE_STRING_INDICES = 'metrics:useStringIndices';
 export const INDEXES_SEPARATOR = ',';
 export const AUTO_INTERVAL = 'auto';
 export const ROUTES = {
