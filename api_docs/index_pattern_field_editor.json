@@ -26,7 +26,13 @@
             "text": "FormatEditorProps"
           },
           "<P>, ",
-          "FormatEditorState",
+          {
+            "pluginId": "indexPatternFieldEditor",
+            "scope": "public",
+            "docId": "kibIndexPatternFieldEditorPluginApi",
+            "section": "def-public.FormatEditorState",
+            "text": "FormatEditorState"
+          },
           " & S, any>"
         ],
         "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
@@ -50,7 +56,13 @@
             "label": "state",
             "description": [],
             "signature": [
-              "FormatEditorState",
+              {
+                "pluginId": "indexPatternFieldEditor",
+                "scope": "public",
+                "docId": "kibIndexPatternFieldEditorPluginApi",
+                "section": "def-public.FormatEditorState",
+                "text": "FormatEditorState"
+              },
               " & S"
             ],
             "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
@@ -73,9 +85,21 @@
                 "text": "FormatEditorProps"
               },
               "<{}>, state: ",
-              "FormatEditorState",
+              {
+                "pluginId": "indexPatternFieldEditor",
+                "scope": "public",
+                "docId": "kibIndexPatternFieldEditorPluginApi",
+                "section": "def-public.FormatEditorState",
+                "text": "FormatEditorState"
+              },
               ") => { error: string | undefined; samples: ",
-              "Sample",
+              {
+                "pluginId": "indexPatternFieldEditor",
+                "scope": "public",
+                "docId": "kibIndexPatternFieldEditorPluginApi",
+                "section": "def-public.Sample",
+                "text": "Sample"
+              },
               "[]; }"
             ],
             "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
@@ -110,7 +134,13 @@
                 "label": "state",
                 "description": [],
                 "signature": [
-                  "FormatEditorState"
+                  {
+                    "pluginId": "indexPatternFieldEditor",
+                    "scope": "public",
+                    "docId": "kibIndexPatternFieldEditorPluginApi",
+                    "section": "def-public.FormatEditorState",
+                    "text": "FormatEditorState"
+                  }
                 ],
                 "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
@@ -309,6 +339,53 @@
       },
       {
         "parentPluginId": "indexPatternFieldEditor",
+        "id": "def-public.FormatEditorState",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormatEditorState",
+        "description": [],
+        "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/format_editor.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexPatternFieldEditor",
+            "id": "def-public.FormatEditorState.EditorComponent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "EditorComponent",
+            "description": [],
+            "signature": [
+              "React.LazyExoticComponent<",
+              {
+                "pluginId": "indexPatternFieldEditor",
+                "scope": "public",
+                "docId": "kibIndexPatternFieldEditorPluginApi",
+                "section": "def-public.FieldFormatEditor",
+                "text": "FieldFormatEditor"
+              },
+              "<{}>> | null"
+            ],
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/format_editor.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexPatternFieldEditor",
+            "id": "def-public.FormatEditorState.fieldFormatId",
+            "type": "string",
+            "tags": [],
+            "label": "fieldFormatId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/format_editor.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexPatternFieldEditor",
         "id": "def-public.OpenFieldDeleteModalOptions",
         "type": "Interface",
         "tags": [],
@@ -431,7 +508,7 @@
                 "section": "def-common.IndexPatternField",
                 "text": "IndexPatternField"
               },
-              ") => void) | undefined"
+              "[]) => void) | undefined"
             ],
             "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
             "deprecated": false,
@@ -439,7 +516,7 @@
               {
                 "parentPluginId": "indexPatternFieldEditor",
                 "id": "def-public.OpenFieldEditorOptions.onSave.$1",
-                "type": "Object",
+                "type": "Array",
                 "tags": [],
                 "label": "field",
                 "description": [],
@@ -450,7 +527,8 @@
                     "docId": "kibDataIndexPatternsPluginApi",
                     "section": "def-common.IndexPatternField",
                     "text": "IndexPatternField"
-                  }
+                  },
+                  "[]"
                 ],
                 "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
                 "deprecated": false,
@@ -470,6 +548,134 @@
               "string | undefined"
             ],
             "path": "src/plugins/index_pattern_field_editor/public/open_editor.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexPatternFieldEditor",
+        "id": "def-public.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [],
+        "path": "src/plugins/index_pattern_field_editor/public/components/delete_field_provider.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexPatternFieldEditor",
+            "id": "def-public.Props.children",
+            "type": "Function",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "(deleteFieldHandler: DeleteFieldFunc) => React.ReactNode"
+            ],
+            "path": "src/plugins/index_pattern_field_editor/public/components/delete_field_provider.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "indexPatternFieldEditor",
+                "id": "def-public.Props.children.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "deleteFieldHandler",
+                "description": [],
+                "signature": [
+                  "DeleteFieldFunc"
+                ],
+                "path": "src/plugins/index_pattern_field_editor/public/components/delete_field_provider.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "indexPatternFieldEditor",
+            "id": "def-public.Props.indexPattern",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
+              }
+            ],
+            "path": "src/plugins/index_pattern_field_editor/public/components/delete_field_provider.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexPatternFieldEditor",
+            "id": "def-public.Props.onDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "onDelete",
+            "description": [],
+            "signature": [
+              "((fieldNames: string[]) => void) | undefined"
+            ],
+            "path": "src/plugins/index_pattern_field_editor/public/components/delete_field_provider.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "indexPatternFieldEditor",
+                "id": "def-public.Props.onDelete.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "fieldNames",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/index_pattern_field_editor/public/components/delete_field_provider.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexPatternFieldEditor",
+        "id": "def-public.Sample",
+        "type": "Interface",
+        "tags": [],
+        "label": "Sample",
+        "description": [],
+        "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "indexPatternFieldEditor",
+            "id": "def-public.Sample.input",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string | number | React.ReactText[] | Record<string, React.ReactText[]>"
+            ],
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "indexPatternFieldEditor",
+            "id": "def-public.Sample.output",
+            "type": "string",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "path": "src/plugins/index_pattern_field_editor/public/components/field_format_editor/types.ts",
             "deprecated": false
           }
         ],
@@ -722,7 +928,13 @@
           "description": [],
           "signature": [
             "React.FunctionComponent<",
-            "Props",
+            {
+              "pluginId": "indexPatternFieldEditor",
+              "scope": "public",
+              "docId": "kibIndexPatternFieldEditorPluginApi",
+              "section": "def-public.Props",
+              "text": "Props"
+            },
             ">"
           ],
           "path": "src/plugins/index_pattern_field_editor/public/types.ts",
