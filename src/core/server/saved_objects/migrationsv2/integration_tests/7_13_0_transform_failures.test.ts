@@ -12,7 +12,7 @@ import Util from 'util';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 
-const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures_test.log');
+const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
 

@@ -39,7 +39,7 @@ describe('createInitialState', () => {
       })
     ).toEqual({
       batchSize: 1000,
-      batchSizeBytes: 1e8,
+      batchSizeBytes: new ByteSizeValue(ByteSizeValue.parse('100mb')),
       controlState: 'INIT',
       currentAlias: '.kibana_task_manager',
       excludeFromUpgradeFilterHooks: {},

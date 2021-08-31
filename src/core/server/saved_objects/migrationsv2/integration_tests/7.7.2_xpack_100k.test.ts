@@ -17,7 +17,7 @@ import { InternalCoreStart } from '../../../internal_types';
 import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
-const logFilePath = path.join(__dirname, 'migration_test_kibana.log');
+const logFilePath = path.join(__dirname, '7.7.2_xpack_100k.log');
 
 async function removeLogFile() {
   // ignore errors if it doesn't exist

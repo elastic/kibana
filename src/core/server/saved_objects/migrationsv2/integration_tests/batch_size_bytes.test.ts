@@ -93,7 +93,7 @@ describe('migration v2', () => {
     const records = logFileContent
       .split('\n')
       .filter(Boolean)
-      .map((str) => JSON5.parse(str)) as any[];
+      .map((str) => JSON5.parse(str)) as LogRecord[];
 
     expect(
       records.find((rec) =>
