@@ -37,11 +37,10 @@ export function InspectorContextProvider({
       _inspect?: InspectResponse;
     }>
   ) {
-    (
-      result.data?._inspect ??
-      result.data?.mainStatisticsData?._inspect ??
-      []
-    ).forEach((operation) => {
+    const operations =
+      result.data?._inspect ?? result.data?.mainStatisticsData?._inspect ?? [];
+
+    operations.forEach((operation) => {
       if (operation.response) {
         const { id, name } = operation;
         const requestParams = { id, name };
@@ -64,11 +63,15 @@ export function InspectorContextProvider({
   }
 
   useEffect(() => {
-    history.listen((newLocation) => {
+    const unregisterCallback = history.listen((newLocation) => {
       if (history.location.pathname !== newLocation.pathname) {
         inspectorAdapters.requests.reset();
       }
     });
+
+    return () => {
+      unregisterCallback();
+    };
   }, [history, inspectorAdapters]);
 
   return (
