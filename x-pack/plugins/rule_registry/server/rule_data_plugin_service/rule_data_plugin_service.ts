@@ -6,31 +6,38 @@
  */
 
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 
+import { INDEX_PREFIX } from '../config';
 import { IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';
-import { IndexOptions } from './index_options';
+import { Dataset, IndexOptions } from './index_options';
 import { ResourceInstaller } from './resource_installer';
 import { joinWithDash } from './utils';
 
 interface ConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
+  kibanaVersion: string;
   isWriteEnabled: boolean;
-  index: string;
 }
 
 /**
  * A service for creating and using Elasticsearch indices for alerts-as-data.
  */
 export class RuleDataPluginService {
+  private readonly indicesByBaseName: Map<string, IndexInfo>;
+  private readonly indicesByFeatureId: Map<string, IndexInfo[]>;
   private readonly resourceInstaller: ResourceInstaller;
   private installCommonResources: Promise<Either<Error, 'ok'>>;
   private isInitialized: boolean;
 
   constructor(private readonly options: ConstructorOptions) {
+    this.indicesByBaseName = new Map();
+    this.indicesByFeatureId = new Map();
+
     this.resourceInstaller = new ResourceInstaller({
       getResourceName: (name) => this.getResourceName(name),
       getClusterClient: options.getClusterClient,
@@ -43,18 +50,16 @@ export class RuleDataPluginService {
   }
 
   /**
-   * Returns a full resource prefix.
-   *   - it's '.alerts' by default
-   *   - it can be adjusted by the user via Kibana config
+   * Returns a prefix used in the naming scheme of index aliases, templates
+   * and other Elasticsearch resources that this service creates
+   * for alerts-as-data indices.
    */
   public getResourcePrefix(): string {
-    // TODO: https://github.com/elastic/kibana/issues/106432
-    return this.options.index;
+    return INDEX_PREFIX;
   }
 
   /**
-   * Prepends a relative resource name with a full resource prefix, which
-   * starts with '.alerts' and can optionally include a user-defined part in it.
+   * Prepends a relative resource name with the resource prefix.
    * @returns Full name of the resource.
    * @example 'security.alerts' => '.alerts-security.alerts'
    */
@@ -100,10 +105,11 @@ export class RuleDataPluginService {
       );
     }
 
-    const indexInfo = new IndexInfo({
-      getResourceName: (name) => this.getResourceName(name),
-      indexOptions,
-    });
+    const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: this.options.kibanaVersion });
+
+    const indicesAssociatedWithFeature = this.indicesByFeatureId.get(indexOptions.feature) ?? [];
+    this.indicesByFeatureId.set(indexOptions.feature, [...indicesAssociatedWithFeature, indexInfo]);
+    this.indicesByBaseName.set(indexInfo.baseName, indexInfo);
 
     const waitUntilClusterClientAvailable = async (): Promise<WaitResult> => {
       try {
@@ -147,5 +153,22 @@ export class RuleDataPluginService {
       waitUntilReadyForReading,
       waitUntilReadyForWriting,
     });
+  }
+
+  /**
+   * Looks up the index information associated with the given registration context and dataset.
+   */
+  public findIndexByName(registrationContext: string, dataset: Dataset): IndexInfo | null {
+    const baseName = this.getResourceName(`${registrationContext}.${dataset}`);
+    return this.indicesByBaseName.get(baseName) ?? null;
+  }
+
+  /**
+   * Looks up the index information associated with the given Kibana "feature".
+   * Note: features are used in RBAC.
+   */
+  public findIndicesByFeature(featureId: ValidFeatureId, dataset?: Dataset): IndexInfo[] {
+    const foundIndices = this.indicesByFeatureId.get(featureId) ?? [];
+    return dataset ? foundIndices.filter((i) => i.indexOptions.dataset === dataset) : foundIndices;
   }
 }

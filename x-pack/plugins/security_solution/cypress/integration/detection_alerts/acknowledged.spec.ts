@@ -12,11 +12,9 @@ import {
   selectNumberOfAlerts,
   waitForAlertsPanelToBeLoaded,
   waitForAlerts,
-  waitForAlertsToBeLoaded,
   markAcknowledgedFirstAlert,
   goToAcknowledgedAlerts,
   waitForAlertsIndexToBeCreated,
-  goToOpenedAlerts,
 } from '../../tasks/alerts';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
@@ -50,10 +48,6 @@ describe('Marking alerts as acknowledged', () => {
         cy.get(TAKE_ACTION_POPOVER_BTN).should('exist');
 
         markAcknowledgedFirstAlert();
-        refreshPage();
-        waitForAlertsToBeLoaded();
-        goToOpenedAlerts();
-
         const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
         cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 

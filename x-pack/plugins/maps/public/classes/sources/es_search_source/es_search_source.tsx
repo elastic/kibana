@@ -9,7 +9,7 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
-import type { Filter, IFieldType, IndexPattern } from 'src/plugins/data/public';
+import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
@@ -183,7 +183,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async getFields(): Promise<IField[]> {
     try {
       const indexPattern = await this.getIndexPattern();
-      const fields: IFieldType[] = indexPattern.fields.filter((field) => {
+      const fields: IndexPatternField[] = indexPattern.fields.filter((field) => {
         // Ensure fielddata is enabled for field.
         // Search does not request _source
         return field.aggregatable;
@@ -300,7 +300,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       };
     }
 
-    const topHitsSplitField: IFieldType = getField(indexPattern, topHitsSplitFieldName);
+    const topHitsSplitField: IndexPatternField = getField(indexPattern, topHitsSplitFieldName);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = {
       size: DEFAULT_MAX_BUCKETS_LIMIT,

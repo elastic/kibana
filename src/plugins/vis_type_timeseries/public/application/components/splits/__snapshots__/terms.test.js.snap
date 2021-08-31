@@ -54,6 +54,15 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
           />
         }
         onChange={[Function]}
+        restrict={
+          Array [
+            "number",
+            "boolean",
+            "date",
+            "ip",
+            "string",
+          ]
+        }
         type="terms"
         value="OriginCityName"
       />

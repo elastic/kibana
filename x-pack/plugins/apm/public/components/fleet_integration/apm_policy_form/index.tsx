@@ -5,30 +5,124 @@
  * 2.0.
  */
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
-import { OnFormChangeFn, PackagePolicyVars } from './typings';
-import { APMSettingsForm } from './settings/apm_settings';
-import { RUMSettingsForm } from './settings/rum_settings';
-import { TLSSettingsForm } from './settings/tls_settings';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
+import { getAgentAuthorizationSettings } from './settings_definition/agent_authorization_settings';
+import { getApmSettings } from './settings_definition/apm_settings';
+import {
+  getRUMSettings,
+  isRUMFormValid,
+} from './settings_definition/rum_settings';
+import {
+  getTLSSettings,
+  isTLSFormValid,
+} from './settings_definition/tls_settings';
+import { SettingsForm, SettingsSection } from './settings_form';
+import { isSettingsFormValid, mergeNewVars } from './settings_form/utils';
+import { PackagePolicyVars } from './typings';
 
 interface Props {
-  onChange: OnFormChangeFn;
+  updateAPMPolicy: (newVars: PackagePolicyVars, isValid: boolean) => void;
   vars?: PackagePolicyVars;
   isCloudPolicy: boolean;
 }
 
-export function APMPolicyForm({ vars = {}, isCloudPolicy, onChange }: Props) {
+export function APMPolicyForm({
+  vars = {},
+  isCloudPolicy,
+  updateAPMPolicy,
+}: Props) {
+  const {
+    apmSettings,
+    rumSettings,
+    tlsSettings,
+    agentAuthorizationSettings,
+  } = useMemo(() => {
+    return {
+      apmSettings: getApmSettings({ isCloudPolicy }),
+      rumSettings: getRUMSettings(),
+      tlsSettings: getTLSSettings(),
+      agentAuthorizationSettings: getAgentAuthorizationSettings({
+        isCloudPolicy,
+      }),
+    };
+  }, [isCloudPolicy]);
+
+  function handleFormChange(key: string, value: any) {
+    // Merge new key/value with the rest of fields
+    const newVars = mergeNewVars(vars, key, value);
+
+    // Validate the entire form before sending it to fleet
+    const isFormValid =
+      isSettingsFormValid(apmSettings, newVars) &&
+      isRUMFormValid(newVars, rumSettings) &&
+      isTLSFormValid(newVars, tlsSettings) &&
+      isSettingsFormValid(agentAuthorizationSettings, newVars);
+
+    updateAPMPolicy(newVars, isFormValid);
+  }
+
+  const settingsSections: SettingsSection[] = [
+    {
+      id: 'apm',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.apm.settings.title',
+        { defaultMessage: 'General' }
+      ),
+      subtitle: i18n.translate(
+        'xpack.apm.fleet_integration.settings.apm.settings.subtitle',
+        { defaultMessage: 'Settings for the APM integration.' }
+      ),
+      settings: apmSettings,
+    },
+    {
+      id: 'rum',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.rum.settings.title',
+        { defaultMessage: 'Real User Monitoring' }
+      ),
+      subtitle: i18n.translate(
+        'xpack.apm.fleet_integration.settings.rum.settings.subtitle',
+        { defaultMessage: 'Manage the configuration of the RUM JS agent.' }
+      ),
+      settings: rumSettings,
+    },
+    {
+      id: 'tls',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.tls.settings.title',
+        { defaultMessage: 'TLS Settings' }
+      ),
+      subtitle: i18n.translate(
+        'xpack.apm.fleet_integration.settings.tls.settings.subtitle',
+        { defaultMessage: 'Settings for TLS certification.' }
+      ),
+      settings: tlsSettings,
+    },
+    {
+      id: 'agentAuthorization',
+      title: i18n.translate(
+        'xpack.apm.fleet_integration.settings.agentAuthorization.settings.title',
+        { defaultMessage: 'Agent authorization' }
+      ),
+      settings: agentAuthorizationSettings,
+    },
+  ];
+
   return (
     <>
-      <APMSettingsForm
-        vars={vars}
-        onChange={onChange}
-        isCloudPolicy={isCloudPolicy}
-      />
-      <EuiSpacer />
-      <RUMSettingsForm vars={vars} onChange={onChange} />
-      <EuiSpacer />
-      <TLSSettingsForm vars={vars} onChange={onChange} />
+      {settingsSections.map((settingsSection) => {
+        return (
+          <React.Fragment key={settingsSection.id}>
+            <SettingsForm
+              settingsSection={settingsSection}
+              vars={vars}
+              onChange={handleFormChange}
+            />
+            <EuiSpacer />
+          </React.Fragment>
+        );
+      })}
     </>
   );
 }

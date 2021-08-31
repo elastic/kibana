@@ -11,7 +11,7 @@ import { isEmpty } from 'lodash';
 import React from 'react';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { MLSingleMetricLink } from '../../Links/MachineLearningLinks/MLSingleMetricLink';
 
 interface Props {
@@ -32,14 +32,15 @@ const ShiftedEuiText = euiStyled(EuiText)`
 `;
 
 export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
-  const { urlParams } = useUrlParams();
   const { transactionType, serviceName } = useApmServiceContext();
+
+  const {
+    query: { kuery },
+  } = useApmParams('/services/:serviceName');
 
   if (!hasValidMlLicense || !mlJobId) {
     return null;
   }
-
-  const { kuery } = urlParams;
 
   const hasKuery = !isEmpty(kuery);
   const icon = hasKuery ? (

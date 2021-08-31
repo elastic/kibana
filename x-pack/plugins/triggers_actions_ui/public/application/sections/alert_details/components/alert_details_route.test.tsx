@@ -15,7 +15,7 @@ import { ToastsApi } from 'kibana/public';
 import { AlertDetailsRoute, getRuleData } from './alert_details_route';
 import { Alert } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { spacesOssPluginMock } from 'src/plugins/spaces_oss/public/mocks';
+import { spacesPluginMock } from '../../../../../../spaces/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
@@ -38,11 +38,11 @@ describe('alert_details_route', () => {
     jest.clearAllMocks();
   });
 
-  const spacesOssMock = spacesOssPluginMock.createStartContract();
+  const spacesMock = spacesPluginMock.createStartContract();
   async function setup() {
     const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useKibanaMock().services.spacesOss = spacesOssMock;
+    useKibanaMock().services.spaces = spacesMock;
   }
 
   it('render a loader while fetching data', () => {
@@ -82,7 +82,7 @@ describe('alert_details_route', () => {
 
     expect(loadAlert).toHaveBeenCalledWith(rule.id);
     expect(resolveRule).toHaveBeenCalledWith(rule.id);
-    expect((spacesOssMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith(
+    expect((spacesMock as any).ui.redirectLegacyUrl).toHaveBeenCalledWith(
       `insightsAndAlerting/triggersActions/rule/new_id`,
       `rule`
     );
@@ -122,7 +122,7 @@ describe('alert_details_route', () => {
 
     expect(loadAlert).toHaveBeenCalledWith(rule.id);
     expect(resolveRule).toHaveBeenCalledWith(rule.id);
-    expect((spacesOssMock as any).ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
+    expect((spacesMock as any).ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
       currentObjectId: 'new_id',
       objectNoun: 'rule',
       otherObjectId: rule.id,
