@@ -140,7 +140,7 @@ export const FieldEditorFlyoutContentContainer = ({
 
   const saveRuntimeField = useCallback(
     (updatedField: Field): [IndexPatternField] => {
-      if (field?.type !== undefined && field?.type === 'object') {
+      if (field?.type !== undefined && field?.type === 'composite') {
         // A previous runtime composite is now a runtime field
         indexPattern.removeRuntimeComposite(field.name);
       } else if (field?.name && field.name !== updatedField.name) {
