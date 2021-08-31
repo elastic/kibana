@@ -40,6 +40,16 @@ describe('Security UsageCollector', () => {
   };
 
   const collectorFetchContext = createCollectorFetchContextMock();
+  const DEFAULT_USAGE = {
+    auditLoggingEnabled: false,
+    accessAgreementEnabled: false,
+    authProviderCount: 1,
+    enabledAuthProviders: ['basic'],
+    loginSelectorEnabled: false,
+    httpAuthSchemes: ['apikey'],
+    sessionIdleTimeoutMinutes: 60,
+    sessionLifespanMinutes: 43200,
+  };
 
   describe('initialization', () => {
     it('handles an undefined usage collector', () => {
@@ -75,14 +85,7 @@ describe('Security UsageCollector', () => {
       .getCollectorByType('security')
       ?.fetch(collectorFetchContext);
 
-    expect(usage).toEqual({
-      auditLoggingEnabled: false,
-      accessAgreementEnabled: false,
-      authProviderCount: 1,
-      enabledAuthProviders: ['basic'],
-      loginSelectorEnabled: false,
-      httpAuthSchemes: ['apikey'],
-    });
+    expect(usage).toEqual(DEFAULT_USAGE);
   });
 
   it('reports correctly when security is disabled in Elasticsearch', async () => {
@@ -103,6 +106,8 @@ describe('Security UsageCollector', () => {
       enabledAuthProviders: [],
       loginSelectorEnabled: false,
       httpAuthSchemes: [],
+      sessionIdleTimeoutMinutes: 0,
+      sessionLifespanMinutes: 0,
     });
   });
 
@@ -140,14 +145,7 @@ describe('Security UsageCollector', () => {
         .getCollectorByType('security')
         ?.fetch(collectorFetchContext);
 
-      expect(usage).toEqual({
-        auditLoggingEnabled: false,
-        accessAgreementEnabled: false,
-        authProviderCount: 1,
-        enabledAuthProviders: ['basic'],
-        loginSelectorEnabled: false,
-        httpAuthSchemes: ['apikey'],
-      });
+      expect(usage).toEqual(DEFAULT_USAGE);
     });
 
     it('reports the types and count of enabled auth providers', async () => {
@@ -190,12 +188,10 @@ describe('Security UsageCollector', () => {
         ?.fetch(collectorFetchContext);
 
       expect(usage).toEqual({
-        auditLoggingEnabled: false,
-        accessAgreementEnabled: false,
+        ...DEFAULT_USAGE,
         authProviderCount: 3,
         enabledAuthProviders: ['saml', 'pki'],
         loginSelectorEnabled: true,
-        httpAuthSchemes: ['apikey'],
       });
     });
   });
@@ -228,12 +224,9 @@ describe('Security UsageCollector', () => {
         ?.fetch(collectorFetchContext);
 
       expect(usage).toEqual({
-        auditLoggingEnabled: false,
+        ...DEFAULT_USAGE,
         accessAgreementEnabled: true,
-        authProviderCount: 1,
         enabledAuthProviders: ['saml'],
-        loginSelectorEnabled: false,
-        httpAuthSchemes: ['apikey'],
       });
     });
     it('does not report the access agreement if the license does not permit it', async () => {
@@ -266,12 +259,9 @@ describe('Security UsageCollector', () => {
         ?.fetch(collectorFetchContext);
 
       expect(usage).toEqual({
-        auditLoggingEnabled: false,
+        ...DEFAULT_USAGE,
         accessAgreementEnabled: false,
-        authProviderCount: 1,
         enabledAuthProviders: ['saml'],
-        loginSelectorEnabled: false,
-        httpAuthSchemes: ['apikey'],
       });
     });
 
@@ -307,12 +297,9 @@ describe('Security UsageCollector', () => {
         ?.fetch(collectorFetchContext);
 
       expect(usage).toEqual({
-        auditLoggingEnabled: false,
+        ...DEFAULT_USAGE,
         accessAgreementEnabled: false,
-        authProviderCount: 1,
         enabledAuthProviders: ['saml'],
-        loginSelectorEnabled: false,
-        httpAuthSchemes: ['apikey'],
       });
     });
   });
@@ -346,12 +333,9 @@ describe('Security UsageCollector', () => {
         ?.fetch(collectorFetchContext);
 
       expect(usage).toEqual({
-        auditLoggingEnabled: false,
-        accessAgreementEnabled: false,
-        authProviderCount: 1,
+        ...DEFAULT_USAGE,
         enabledAuthProviders: ['saml'],
         loginSelectorEnabled: true,
-        httpAuthSchemes: ['apikey'],
       });
     });
   });
@@ -379,13 +363,9 @@ describe('Security UsageCollector', () => {
         ?.fetch(collectorFetchContext);
 
       expect(usage).toEqual({
+        ...DEFAULT_USAGE,
         auditLoggingEnabled: true,
         auditLoggingType: 'legacy',
-        accessAgreementEnabled: false,
-        authProviderCount: 1,
-        enabledAuthProviders: ['basic'],
-        loginSelectorEnabled: false,
-        httpAuthSchemes: ['apikey'],
       });
     });
 
@@ -411,13 +391,9 @@ describe('Security UsageCollector', () => {
         ?.fetch(collectorFetchContext);
 
       expect(usage).toEqual({
+        ...DEFAULT_USAGE,
         auditLoggingEnabled: true,
         auditLoggingType: 'ecs',
-        accessAgreementEnabled: false,
-        authProviderCount: 1,
-        enabledAuthProviders: ['basic'],
-        loginSelectorEnabled: false,
-        httpAuthSchemes: ['apikey'],
       });
     });
 
@@ -438,12 +414,9 @@ describe('Security UsageCollector', () => {
         ?.fetch(collectorFetchContext);
 
       expect(usage).toEqual({
+        ...DEFAULT_USAGE,
         auditLoggingEnabled: false,
-        accessAgreementEnabled: false,
-        authProviderCount: 1,
-        enabledAuthProviders: ['basic'],
-        loginSelectorEnabled: false,
-        httpAuthSchemes: ['apikey'],
+        auditLoggingType: undefined,
       });
     });
   });
@@ -468,11 +441,7 @@ describe('Security UsageCollector', () => {
         ?.fetch(collectorFetchContext);
 
       expect(usage).toEqual({
-        auditLoggingEnabled: false,
-        accessAgreementEnabled: false,
-        authProviderCount: 1,
-        enabledAuthProviders: ['basic'],
-        loginSelectorEnabled: false,
+        ...DEFAULT_USAGE,
         httpAuthSchemes: ['basic', 'Negotiate'],
       });
     });
@@ -496,12 +465,32 @@ describe('Security UsageCollector', () => {
         ?.fetch(collectorFetchContext);
 
       expect(usage).toEqual({
-        auditLoggingEnabled: false,
-        accessAgreementEnabled: false,
-        authProviderCount: 1,
-        enabledAuthProviders: ['basic'],
-        loginSelectorEnabled: false,
+        ...DEFAULT_USAGE,
         httpAuthSchemes: ['basic', 'Negotiate'],
+      });
+    });
+  });
+
+  describe('session expirations', () => {
+    // Note: can't easily test deprecated 'sessionTimeout' value here because of the way that config deprecation renaming works
+    it('reports customized session idleTimeout and lifespan', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          session: { idleTimeout: '123m', lifespan: '456m' },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true, allowAuditLogging: false });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        sessionIdleTimeoutMinutes: 123,
+        sessionLifespanMinutes: 456,
       });
     });
   });

@@ -5496,6 +5496,18 @@
               "description": "The set of enabled http auth schemes. Used for api-based usage, and when credentials are provided via reverse-proxy."
             }
           }
+        },
+        "sessionIdleTimeoutMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session idle timeout expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionLifespanMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session lifespan expiration that is configured, in minutes (0 if disabled)."
+          }
         }
       }
     },

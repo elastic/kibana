@@ -18,6 +18,8 @@ interface Usage {
   authProviderCount: number;
   enabledAuthProviders: string[];
   httpAuthSchemes: string[];
+  sessionIdleTimeoutMinutes: number;
+  sessionLifespanMinutes: number;
 }
 
 interface Deps {
@@ -106,6 +108,20 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           },
         },
       },
+      sessionIdleTimeoutMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The global session idle timeout expiration that is configured, in minutes (0 if disabled).',
+        },
+      },
+      sessionLifespanMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The global session lifespan expiration that is configured, in minutes (0 if disabled).',
+        },
+      },
     },
     fetch: () => {
       const {
@@ -122,6 +138,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           authProviderCount: 0,
           enabledAuthProviders: [],
           httpAuthSchemes: [],
+          sessionIdleTimeoutMinutes: 0,
+          sessionLifespanMinutes: 0,
         };
       }
 
@@ -154,6 +172,10 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         WELL_KNOWN_AUTH_SCHEMES.includes(scheme.toLowerCase())
       );
 
+      const sessionExpirations = config.session.getExpirationTimeouts(); // get global expiration values
+      const sessionIdleTimeoutMinutes = sessionExpirations.idleTimeout?.asMinutes() ?? 0;
+      const sessionLifespanMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
+
       return {
         auditLoggingEnabled: legacyAuditLoggingEnabled || ecsAuditLoggingEnabled,
         auditLoggingType,
@@ -162,6 +184,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         authProviderCount,
         enabledAuthProviders,
         httpAuthSchemes,
+        sessionIdleTimeoutMinutes,
+        sessionLifespanMinutes,
       };
     },
   });
