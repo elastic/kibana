@@ -9,7 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, OnRefreshChangeProps } f
 import React, { useContext, useCallback } from 'react';
 import { MonitoringTimeContainer } from '../../application/pages/use_monitoring_time';
 
-export const MonitoringToolbar = () => {
+interface MonitoringToolbarProps {
+  getData?: () => void;
+}
+
+export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ getData }) => {
   const {
     currentTimerange,
     handleTimeChange,
@@ -45,7 +49,7 @@ export const MonitoringToolbar = () => {
           start={currentTimerange.from}
           end={currentTimerange.to}
           onTimeChange={onTimeChange}
-          onRefresh={() => {}}
+          onRefresh={getData}
           isPaused={isPaused}
           refreshInterval={refreshInterval}
           onRefreshChange={onRefreshChange}

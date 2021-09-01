@@ -22,9 +22,16 @@ interface PageTemplateProps {
   title: string;
   pageTitle?: string;
   tabs?: TabMenuItem[];
+  getData?: () => void;
 }
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({ title, pageTitle, tabs, children }) => {
+export const PageTemplate: React.FC<PageTemplateProps> = ({
+  title,
+  pageTitle,
+  tabs,
+  getData,
+  children,
+}) => {
   useTitle('', title);
 
   return (
@@ -53,7 +60,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({ title, pageTitle, ta
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <MonitoringToolbar />
+          <MonitoringToolbar getData={getData} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
