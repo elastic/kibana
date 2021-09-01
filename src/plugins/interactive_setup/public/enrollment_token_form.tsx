@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -31,6 +32,8 @@ import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
 import { useHttp } from './use_http';
+import { useVerification } from './use_verification';
+import { useVisibility } from './use_visibility';
 
 export interface EnrollmentTokenFormValues {
   token: string;
@@ -50,6 +53,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
   onSuccess,
 }) => {
   const http = useHttp();
+  const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
     defaultValues,
     validate: (values) => {
@@ -77,17 +81,25 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
           hosts: decoded.adr,
           apiKey: decoded.key,
           caFingerprint: decoded.fgr,
+          code: getCode(),
         }),
       });
       onSuccess?.();
     },
   });
+  const [isVisible, buttonRef] = useVisibility<HTMLButtonElement>();
+
+  useUpdateEffect(() => {
+    if (status === 'verified' && isVisible) {
+      form.submit();
+    }
+  }, [status]);
 
   const enrollmentToken = decodeEnrollmentToken(form.values.token);
 
   return (
     <EuiForm component="form" noValidate {...eventHandlers}>
-      {form.submitError && (
+      {status !== 'unverified' && !form.isSubmitting && !form.isValidating && form.submitError && (
         <>
           <EuiCallOut
             color="danger"
@@ -133,6 +145,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            buttonRef={buttonRef}
             type="submit"
             isLoading={form.isSubmitting}
             isDisabled={form.isSubmitted && form.isInvalid}
