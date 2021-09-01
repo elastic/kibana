@@ -118,6 +118,7 @@ describe('get_time', () => {
     });
 
     test('do not coerce relative time to absolute time when given flag - with mixed from and to times', () => {
+      const clock = sinon.useFakeTimers(moment.utc().valueOf());
       const filter = getTime(
         ({
           id: 'test',
@@ -143,8 +144,7 @@ describe('get_time', () => {
           ],
         } as unknown) as IIndexPattern,
         {
-          from:
-            'Sep 1, 2020 @ 10:30:00.000' /* Kibana specific time format, deprecated from URLs but may exist in older ones */,
+          from: '2020-09-01T08:30:00.000Z',
           to: 'now',
         },
         { fieldName: 'myCustomDate', coerceRelativeTimeToAbsoluteTime: false }
@@ -155,6 +155,7 @@ describe('get_time', () => {
         lte: 'now',
         format: 'strict_date_optional_time',
       });
+      clock.restore();
     });
   });
   describe('getAbsoluteTimeRange', () => {
