@@ -30,11 +30,11 @@ a preview of the data on the map.
 . Use the default *Index type* of {ref}/geo-point.html[geo_point] for point data,
 or override it and select {ref}/geo-shape.html[geo_shape].
 All other shapes will default to a type of `geo_shape`.
-. Leave the default *Index name* and *Index pattern* names (the name of the uploaded
+. Leave the default *Index name* and *Data view* names (the name of the uploaded
 file minus its extension). You might need to change the index name if it is invalid.
 . Click *Import file*.
 +
-Upon completing the indexing process and creating the associated index pattern,
+Upon completing the indexing process and creating the associated data view,
 the Elasticsearch responses are shown on the *Layer add panel* and the indexed data
 appears on the map. The geospatial data on the map
 should be identical to the locally-previewed data, but now it's indexed data from Elasticsearch.
