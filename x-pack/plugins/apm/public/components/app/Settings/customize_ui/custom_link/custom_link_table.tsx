@@ -79,6 +79,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
                 icon: 'pencil',
                 color: 'primary',
                 type: 'icon',
+                'data-test-subj': 'editCustomLink',
                 onClick: (customLink: CustomLink) => {
                   onCustomLinkSelected(customLink);
                 },
