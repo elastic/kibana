@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { RequestHandlerContext, RequestHandlerContextProvider, SavedObject } from 'kibana/server';
+import {
+  RequestHandlerContext,
+  RequestHandlerContextProvider,
+  SavedObject,
+  SavedObjectsResolveResponse,
+} from 'kibana/server';
 import { ExpressionsService } from 'src/plugins/expressions';
 import { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
@@ -17,7 +22,7 @@ export interface CanvasRouteHandlerContext extends RequestHandlerContext {
   canvas: {
     workpad: {
       create: (attributes: CanvasWorkpad) => Promise<SavedObject<WorkpadAttributes>>;
-      get: (id: string) => Promise<SavedObject<WorkpadAttributes>>;
+      get: (id: string) => Promise<SavedObjectsResolveResponse<WorkpadAttributes>>;
       update: (
         id: string,
         attributes: Partial<CanvasWorkpad>
@@ -57,14 +62,18 @@ export const createWorkpadRouteContext: (
         );
       },
       get: async (id: string) => {
-        const workpad = await context.core.savedObjects.client.get<WorkpadAttributes>(
+        const resolved = await context.core.savedObjects.client.resolve<WorkpadAttributes>(
           CANVAS_TYPE,
           id
         );
 
-        workpad.attributes = injectReferences(workpad.attributes, workpad.references, expressions);
+        resolved.saved_object.attributes = injectReferences(
+          resolved.saved_object.attributes,
+          resolved.saved_object.references,
+          expressions
+        );
 
-        return workpad;
+        return resolved;
       },
       update: async (id: string, { id: omittedId, ...workpad }: Partial<CanvasWorkpad>) => {
         const now = new Date().toISOString();

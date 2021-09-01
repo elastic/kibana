@@ -125,9 +125,9 @@ describe('workpad route context', () => {
         undefined as any
       );
 
-      (mockContext.core.savedObjects.client.get as jest.Mock).mockResolvedValue({
-        attributes: extractedWorkpad,
-        references,
+      (mockContext.core.savedObjects.client.resolve as jest.Mock).mockResolvedValue({
+        saved_object: { attributes: extractedWorkpad, references },
+        outcome: 'exactMatch',
       });
 
       mockedExpressionService.inject.mockReturnValue(fromExpression(injectedExpression));
@@ -135,9 +135,9 @@ describe('workpad route context', () => {
       const result = await canvasContext.workpad.get(id);
       const { id: ingnoredId, ...expectedAttributes } = injectedWorkpad;
 
-      expect(mockContext.core.savedObjects.client.get).toBeCalledWith(CANVAS_TYPE, id);
+      expect(mockContext.core.savedObjects.client.resolve).toBeCalledWith(CANVAS_TYPE, id);
 
-      expect(result.attributes).toEqual(expectedAttributes);
+      expect(result.saved_object.attributes).toEqual(expectedAttributes);
     });
   });
 

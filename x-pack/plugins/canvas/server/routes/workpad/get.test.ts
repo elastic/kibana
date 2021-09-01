@@ -41,11 +41,18 @@ describe('GET workpad', () => {
       },
     });
 
+    const outcome = 'aliasMatch';
+    const aliasId = 'alias-id';
+
     mockRouteContext.canvas.workpad.get.mockResolvedValue({
-      id: '123',
-      type: CANVAS_TYPE,
-      attributes: { foo: true },
-      references: [],
+      saved_object: {
+        id: '123',
+        type: CANVAS_TYPE,
+        attributes: { foo: true },
+        references: [],
+      },
+      outcome,
+      alias_target_id: aliasId,
     });
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
@@ -53,8 +60,12 @@ describe('GET workpad', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toMatchInlineSnapshot(`
       Object {
-        "foo": true,
-        "id": "123",
+        "aliasId": "alias-id",
+        "outcome": "aliasMatch",
+        "workpad": Object {
+          "foo": true,
+          "id": "123",
+        },
       }
     `);
 
@@ -77,14 +88,17 @@ describe('GET workpad', () => {
     });
 
     mockRouteContext.canvas.workpad.get.mockResolvedValue({
-      id: '123',
-      type: CANVAS_TYPE,
-      attributes: workpadWithGroupAsElement as any,
-      references: [],
+      saved_object: {
+        id: '123',
+        type: CANVAS_TYPE,
+        attributes: workpadWithGroupAsElement as any,
+        references: [],
+      },
+      outcome: 'exactMatch',
     });
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-    const workpad = response.payload as CanvasWorkpad;
+    const workpad = response.payload.workpad as CanvasWorkpad;
 
     expect(response.status).toBe(200);
     expect(workpad).not.toBeUndefined();

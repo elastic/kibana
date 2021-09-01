@@ -12,6 +12,7 @@ import { useWorkpad } from './use_workpad';
 const mockDispatch = jest.fn();
 const mockSelector = jest.fn();
 const mockGetWorkpad = jest.fn();
+const mockRedirectLegacyUrl = jest.fn();
 
 const workpad = {
   id: 'someworkpad',
@@ -35,6 +36,9 @@ jest.mock('../../../services', () => ({
   useWorkpadService: () => ({
     get: mockGetWorkpad,
   }),
+  usePlatformService: () => ({
+    redirectLegacyUrl: mockRedirectLegacyUrl,
+  }),
 }));
 
 jest.mock('../../../state/actions/workpad', () => ({
@@ -51,9 +55,13 @@ describe('useWorkpad', () => {
 
   test('fires request to load workpad and dispatches results', async () => {
     const workpadId = 'someworkpad';
-    mockGetWorkpad.mockResolvedValue(workpadResponse);
+    const getRedirectPath = (id: string) => id;
+    mockGetWorkpad.mockResolvedValue({
+      outcome: 'exactMatch',
+      workpad: workpadResponse,
+    });
 
-    renderHook(() => useWorkpad(workpadId));
+    renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
     await waitFor(() => expect(mockGetWorkpad).toHaveBeenCalledWith(workpadId));
 
@@ -61,5 +69,45 @@ describe('useWorkpad', () => {
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'setAssets', payload: assets });
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'setWorkpad', payload: workpad });
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'setZoomScale', payload: 1 });
+  });
+
+  test('sets alias id of workpad on a conflict', async () => {
+    const workpadId = 'someworkpad';
+    const getRedirectPath = (id: string) => id;
+    const aliasId = 'someworkpad-alias';
+    mockGetWorkpad.mockResolvedValue({
+      outcome: 'conflict',
+      workpad: workpadResponse,
+      aliasId,
+    });
+
+    renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+
+    await waitFor(() => expect(mockGetWorkpad).toHaveBeenCalledWith(workpadId));
+
+    expect(mockGetWorkpad).toHaveBeenCalledWith(workpadId);
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'setAssets', payload: assets });
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'setWorkpad',
+      payload: { ...workpad, aliasId },
+    });
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'setZoomScale', payload: 1 });
+  });
+
+  test('redirects on alias match', async () => {
+    const workpadId = 'someworkpad';
+    const getRedirectPath = (id: string) => id;
+    const aliasId = 'someworkpad-alias';
+    mockGetWorkpad.mockResolvedValue({
+      outcome: 'aliasMatch',
+      workpad: workpadResponse,
+      aliasId,
+    });
+
+    renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+
+    await waitFor(() => expect(mockGetWorkpad).toHaveBeenCalledWith(workpadId));
+
+    expect(mockRedirectLegacyUrl).toBeCalledWith(`#${aliasId}`, 'Workpad');
   });
 });

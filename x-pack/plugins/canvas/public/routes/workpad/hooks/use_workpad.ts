@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useWorkpadService } from '../../../services';
+import { useWorkpadService, usePlatformService } from '../../../services';
 import { getWorkpad } from '../../../state/selectors/workpad';
 import { setWorkpad } from '../../../state/actions/workpad';
 // @ts-expect-error
@@ -18,9 +18,11 @@ import { CanvasWorkpad } from '../../../../types';
 
 export const useWorkpad = (
   workpadId: string,
-  loadPages: boolean = true
+  loadPages: boolean = true,
+  getRedirectPath: (workpadId: string) => string
 ): [CanvasWorkpad | undefined, string | Error | undefined] => {
   const workpadService = useWorkpadService();
+  const platformService = usePlatformService();
   const dispatch = useDispatch();
   const storedWorkpad = useSelector(getWorkpad);
   const [error, setError] = useState<string | Error | undefined>(undefined);
@@ -28,15 +30,28 @@ export const useWorkpad = (
   useEffect(() => {
     (async () => {
       try {
-        const { assets, ...workpad } = await workpadService.get(workpadId);
+        const {
+          outcome,
+          aliasId,
+          workpad: { assets, ...workpad },
+        } = await workpadService.get(workpadId);
+
+        if (outcome === 'conflict') {
+          workpad.aliasId = aliasId;
+        }
+
         dispatch(setAssets(assets));
         dispatch(setWorkpad(workpad, { loadPages }));
         dispatch(setZoomScale(1));
+
+        if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
+          platformService.redirectLegacyUrl(`#${getRedirectPath(aliasId)}`, 'Workpad');
+        }
       } catch (e) {
         setError(e);
       }
     })();
-  }, [workpadId, dispatch, setError, loadPages, workpadService]);
+  }, [workpadId, dispatch, setError, loadPages, workpadService, getRedirectPath, platformService]);
 
   return [storedWorkpad.id === workpadId ? storedWorkpad : undefined, error];
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsResolveResponse } from 'src/core/public';
 import { CanvasWorkpad, CanvasTemplate } from '../../types';
 import { CanvasRenderedWorkpad } from '../../shareable_runtime/types';
 
@@ -18,8 +19,14 @@ export interface WorkpadFindResponse {
 export interface TemplateFindResponse {
   templates: CanvasTemplate[];
 }
+
+export interface GetWorkpadResponse {
+  workpad: CanvasWorkpad;
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasId: SavedObjectsResolveResponse['alias_target_id'];
+}
 export interface CanvasWorkpadService {
-  get: (id: string) => Promise<CanvasWorkpad>;
+  get: (id: string) => Promise<GetWorkpadResponse>;
   create: (workpad: CanvasWorkpad) => Promise<CanvasWorkpad>;
   createFromTemplate: (templateId: string) => Promise<CanvasWorkpad>;
   find: (term: string) => Promise<WorkpadFindResponse>;

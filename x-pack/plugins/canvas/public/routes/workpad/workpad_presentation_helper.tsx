@@ -34,5 +34,19 @@ export const WorkpadPresentationHelper: FC = ({ children }) => {
     setDocTitle(workpad.name);
   }, [workpad.name]);
 
-  return <>{children}</>;
+  const conflictElement = workpad.aliasId
+    ? platformService.getLegacyUrlConflict?.({
+        objectNoun: 'Workpad',
+        currentObjectId: workpad.id,
+        otherObjectId: workpad.aliasId,
+        otherObjectPath: `#/workpad/${workpad.aliasId}`,
+      })
+    : null;
+
+  return (
+    <>
+      {conflictElement}
+      {children}
+    </>
+  );
 };

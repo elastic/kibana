@@ -20,7 +20,7 @@ export const useCloneWorkpad = () => {
   return useCallback(
     async (workpadId: string) => {
       try {
-        let workpad = await workpadService.get(workpadId);
+        let workpad = (await workpadService.get(workpadId)).workpad;
 
         workpad = {
           ...workpad,

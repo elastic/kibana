@@ -22,7 +22,8 @@ export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const workpad = await context.canvas.workpad.get(request.params.id);
+      const resolved = await context.canvas.workpad.get(request.params.id);
+      const { saved_object: workpad } = resolved;
 
       if (
         // not sure if we need to be this defensive
@@ -45,8 +46,12 @@ export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
 
       return response.ok({
         body: {
-          id: workpad.id,
-          ...workpad.attributes,
+          workpad: {
+            id: workpad.id,
+            ...workpad.attributes,
+          },
+          outcome: resolved.outcome,
+          aliasId: resolved.alias_target_id,
         },
       });
     })

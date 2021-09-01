@@ -34,7 +34,7 @@ export const useDownloadWorkpad = () => {
   return useCallback(
     async (workpadId: string) => {
       try {
-        const workpad = await workpadService.get(workpadId);
+        const workpad = (await workpadService.get(workpadId)).workpad;
 
         download(workpad, `canvas-workpad-${workpad.name}-${workpad.id}`);
       } catch (err) {
