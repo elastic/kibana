@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiComboBoxOptionOption,
   EuiButton,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -59,7 +60,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
   const [tenantId, setTenantId] = useState<string | undefined>(undefined);
-  const [redirectUrl, setRedirectTokenUrl] = useState<string | undefined>(undefined);
+  const redirectUrl = 'https://localhost:5601/pqn/api/actions/connector/oauth_callback';
 
   const { docLinks } = useKibana().services;
   const { from, host, port, secure, hasAuth } = action.config;
@@ -406,46 +407,6 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                   </EuiFormRow>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiFormRow
-                    fullWidth
-                    label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
-                      {
-                        defaultMessage: 'Redirect URL',
-                      }
-                    )}
-                  >
-                    <EuiFieldText
-                      fullWidth
-                      value={redirectUrl || ''}
-                      onChange={(e) => {
-                        setRedirectTokenUrl(e.target.value);
-                      }}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiButton
-                    onClick={() => {
-                      getOAuth(
-                        redirectUrl ?? '',
-                        clientId ?? '',
-                        clientSecret ?? '',
-                        editActionSecrets,
-                        editActionConfig,
-                        tenantId ?? ''
-                      );
-                    }}
-                    data-test-subj="oauth"
-                  >
-                    Get OAuth
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
             </>
           ) : null}
         </>
@@ -458,52 +419,6 @@ export const EmailActionConnectorFields: React.FunctionComponent<
 function nullableString(str: string | null | undefined) {
   if (str == null || str.trim() === '') return null;
   return str;
-}
-
-async function getOAuth(
-  redirectUrl: string,
-  clientId: string,
-  clientSecret: string,
-  editActionSecrets: (property: string, value: unknown) => void,
-  editActionConfig: (property: string, value: unknown) => void,
-  tenantId: string
-) {
-  const state: string = btoa(
-    JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      tenantId,
-    })
-  );
-  const r = `https://login.microsoftonline.com/${tenantId}/adminconsent
-?client_id=${clientId}
-&state=${state}
-&redirect_uri=${redirectUrl}`;
-  openSignInWindow(r, 'test');
-  let loopCount = 600;
-  const intervalId = window.setInterval(async () => {
-    if (loopCount-- < 0) {
-      window.clearInterval(intervalId);
-      windowObjectReference.close();
-    } else {
-      let href: string | null = null; // For referencing window url
-      try {
-        href = windowObjectReference.location.href; // set window location to href string
-      } catch (e) {
-        // console.log('Error:', e); // Handle any errors here
-      }
-      if (href !== null) {
-        /* As i was getting code and oauth-token i added for same, you can replace with your expected variables */
-        if (href.match('admin_consent')) {
-          const res = windowObjectReference.json;
-          editActionSecrets('accessToken', `${res.token_type} ${res.access_token}`);
-          console.log(windowObjectReference.json);
-          window.clearInterval(intervalId);
-          windowObjectReference.close();
-        }
-      }
-    }
-  }, 100);
 }
 
 // eslint-disable-next-line import/no-default-export

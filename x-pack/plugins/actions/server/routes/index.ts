@@ -16,7 +16,6 @@ import { getAllActionRoute } from './get_all';
 import { connectorTypesRoute } from './connector_types';
 import { updateActionRoute } from './update';
 import { defineLegacyRoutes } from './legacy';
-import { oauthActionRoute } from './oauth_callback';
 
 export function defineRoutes(
   router: IRouter<ActionsRequestHandlerContext>,
@@ -31,5 +30,4 @@ export function defineRoutes(
   updateActionRoute(router, licenseState);
   connectorTypesRoute(router, licenseState);
   executeActionRoute(router, licenseState);
-  oauthActionRoute(router, licenseState);
 }

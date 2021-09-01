@@ -35,10 +35,9 @@ export interface Transport {
   host?: string;
   port?: number;
   secure?: boolean; // see: https://nodemailer.com/smtp/#tls-options
-  accessToken?: string;
   clientId?: string;
   clientSecret?: string;
-  refreshToken?: string;
+  tenantId?: string;
 }
 
 export interface Routing {
@@ -56,7 +55,7 @@ export interface Content {
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth, provider } = options;
-  const { service, host, port, secure, user, password, accessToken } = transport;
+  const { service, host, port, secure, user, password } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
@@ -146,11 +145,11 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
   if (provider === 'exchange') {
     const headers = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
     };
     let response;
     try {
       response = await postSendEmailMSExchange(
+        transport,
         { emailOptions: options, headers },
         logger,
         configurationUtilities
