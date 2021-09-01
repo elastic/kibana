@@ -179,13 +179,29 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     value: false,
     description: i18n.translate('discover.advancedSettings.defaultViewDescription', {
       defaultMessage:
-        'Turn on this option to use the aggregated view by default. Turn off to use the document view. ',
+        'Turn on this option to use the aggregated view by default. Turn off to use the document view.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
     metric: {
       type: METRIC_TYPE.CLICK,
       name: 'discover:useAggregatedView',
+    },
+  },
+  // @todo update terminology
+  ['discover:showAggregatedPreview']: {
+    name: i18n.translate('discover.advancedSettings.defaultViewName', {
+      defaultMessage: 'Show aggregated preview',
+    }),
+    value: false,
+    description: i18n.translate('discover.advancedSettings.defaultViewDescription', {
+      defaultMessage: 'Turn on this option to show the preview in the aggregated view by default.',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:showAggregatedPreview',
     },
   },
 

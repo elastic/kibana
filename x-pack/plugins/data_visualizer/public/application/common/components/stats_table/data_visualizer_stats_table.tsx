@@ -49,14 +49,15 @@ interface DataVisualizerTableProps<T> {
   updatePageState: (update: DataVisualizerTableState) => void;
   getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
   extendedColumns?: Array<EuiBasicTableColumn<T>>;
+  showPreviewByDefault?: boolean;
 }
-
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   items,
   pageState,
   updatePageState,
   getItemIdToExpandedRowMap,
   extendedColumns,
+  showPreviewByDefault,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, toggleExpandAll] = useState<boolean>(false);
@@ -66,13 +67,10 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     pageState,
     updatePageState
   );
-  const showDistributions: boolean =
-    ('showDistributions' in pageState && pageState.showDistributions) ?? true;
+  const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
+
   const toggleShowDistribution = () => {
-    updatePageState({
-      ...pageState,
-      showDistributions: !showDistributions,
-    });
+    setShowDistributions(!showDistributions);
   };
 
   function toggleDetails(item: DataVisualizerTableItem) {

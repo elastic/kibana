@@ -66,6 +66,7 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   query?: Query;
   visibleFieldNames?: string[];
   filters?: Filter[];
+  showPreviewByDefault?: boolean;
 }
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
@@ -635,9 +636,12 @@ export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddable
     Required<DataVisualizerIndexBasedAppState>
   >(restorableDefaults);
 
-  const onTableChange = (update: DataVisualizerTableState) => {
-    setDataVisualizerListState({ ...dataVisualizerListState, ...update });
-  };
+  const onTableChange = useCallback(
+    (update: DataVisualizerTableState) => {
+      setDataVisualizerListState({ ...dataVisualizerListState, ...update });
+    },
+    [dataVisualizerListState]
+  );
   const { configs, searchQueryLanguage, searchString, extendedColumns } = useDataVisualizerGridData(
     input,
     dataVisualizerListState
@@ -668,6 +672,7 @@ export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddable
       updatePageState={onTableChange}
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
+      showPreviewByDefault={input?.showPreviewByDefault}
     />
   );
 

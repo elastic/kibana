@@ -26,6 +26,7 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   query?: Query;
   visibleFieldNames?: string[];
   filters?: Filter[];
+  showPreviewByDefault?: boolean;
 }
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
@@ -65,6 +66,8 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
 
 export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProps) => {
   const { services, indexPattern, savedSearch, query, columns, filters } = props;
+  const { uiSettings } = services;
+
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
     | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
@@ -87,6 +90,17 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   }, [embeddable, indexPattern, savedSearch, query, columns, filters]);
 
   useEffect(() => {
+    const showPreviewByDefault = uiSettings?.get('discover:showAggregatedPreview');
+    if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {
+      // Update embeddable whenever one of the important input changes
+      embeddable.updateInput({
+        showPreviewByDefault,
+      });
+      embeddable.reload();
+    }
+  }, [uiSettings, embeddable]);
+
+  useEffect(() => {
     return () => {
       // Clean up embeddable upon unmounting
       if (embeddable) {
@@ -96,7 +110,10 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   }, [embeddable]);
 
   useEffect(() => {
+    // @todo: handle unmounted
     const loadEmbeddable = async () => {
+      const showPreviewByDefault = uiSettings?.get('discover:showAggregatedPreview');
+
       if (services?.embeddable) {
         const factory = services.embeddable.getEmbeddableFactory<
           DataVisualizerGridEmbeddableInput,
@@ -109,6 +126,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
             indexPattern,
             savedSearch,
             query,
+            showPreviewByDefault,
           });
           setEmbeddable(initializedEmbeddable);
         }
@@ -123,14 +141,14 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
     if (embeddableRoot.current && embeddable) {
       embeddable.render(embeddableRoot.current);
     }
-  }, [embeddable, embeddableRoot]);
+  }, [embeddable, embeddableRoot, uiSettings]);
 
   return (
     <div
       data-test-subj="dataVisualizerEmbeddedContent"
       ref={embeddableRoot}
       style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
-      className="euiDataGrid__virtualized"
+      className="kbnDocTableWrapper"
     />
   );
 };
