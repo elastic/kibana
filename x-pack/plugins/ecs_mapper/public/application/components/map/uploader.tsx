@@ -9,6 +9,7 @@ import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { NavigateToAppOptions } from 'kibana/public';
+import fileSaver from 'file-saver';
 import { UploadPanel } from './upload_panel';
 import { PreviewPanel } from './pipeline_preview_panel';
 import { CreatePipelinePanel } from './create_pipeline_panel';
@@ -18,7 +19,6 @@ import { readFile } from '../util/utils';
 import { FieldCopyAction } from '../../../../common';
 import { MapperProxy } from '../../mapper_api';
 import { FileUploadPluginStart } from '../../../../../file_upload/public';
-import fileSaver from 'file-saver';
 
 export interface Props {
   fileUpload: FileUploadPluginStart;
@@ -37,7 +37,7 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
 
   const onUpdateProcessors = (updatedProcessors: object[]) => {
     setPipelineProcessors(updatedProcessors);
-  }
+  };
 
   const onManageIngestPipeline = () => {
     navigateToApp('management', {
@@ -47,7 +47,7 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
 
   const onFileUpload = async (action: FieldCopyAction, files: FileList) => {
     setError('');
-    //setPipelineName(name);
+    // setPipelineName(name);
 
     if (files.length > 0) {
       setIsLoading(true);
@@ -99,7 +99,7 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
 
   const onClickToCreatePipeline = () => {
     setIsCreatingPipeline(true);
-  }
+  };
 
   const onDownload = () => {
     const jsonBlob = new Blob([JSON.stringify(pipelineProcessors)], { type: 'application/json' });

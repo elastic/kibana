@@ -20,7 +20,7 @@ export const EcsMapperMainUi: FC = () => {
     fileUpload,
     mapper,
     navigateToApp,
-    uiSettings
+    uiSettings,
   };
 
   return (

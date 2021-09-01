@@ -17,7 +17,7 @@ import {
   EuiButton,
   EuiSelect,
   EuiFormRow,
-  EuiDescribedFormGroup
+  EuiDescribedFormGroup,
 } from '@elastic/eui';
 import { FieldCopyAction } from '../../../../common';
 import { Instructions } from './instructions';

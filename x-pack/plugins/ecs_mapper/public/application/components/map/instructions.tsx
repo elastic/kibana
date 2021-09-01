@@ -86,7 +86,6 @@ export const Instructions: FC = () => {
           </p>
         </EuiText>
         <EuiSpacer size="s" />
-        
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -27,9 +27,8 @@ interface Props {
 export const CreatePipelinePanel: FC<Props> = ({
   onCreatePipeline,
   onCancel,
-  isPipelineCreated
+  isPipelineCreated,
 }) => {
-
   const [pipelineName, setPipelineName] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
   const hasPipelineName = !!pipelineName || !!pipelineName.trim();
@@ -45,7 +44,6 @@ export const CreatePipelinePanel: FC<Props> = ({
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-
         <EuiDescribedFormGroup
           title={
             <h3>
@@ -76,11 +74,11 @@ export const CreatePipelinePanel: FC<Props> = ({
             }
             hasEmptyLabelSpace
           >
-          <EuiFieldText
-            onChange={(e) => {
-              setPipelineName(e.target.value);
-            }}
-            isInvalid={hasSubmitted && !hasPipelineName}
+            <EuiFieldText
+              onChange={(e) => {
+                setPipelineName(e.target.value);
+              }}
+              isInvalid={hasSubmitted && !hasPipelineName}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>

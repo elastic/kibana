@@ -17,9 +17,9 @@ import {
   EuiFormRow,
   EuiCopy,
 } from '@elastic/eui';
-import { CodeEditorField } from '../../../../../../../src/plugins/kibana_react/public';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
+import { CodeEditorField } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   processors: object[];
@@ -34,29 +34,27 @@ export const PreviewPanel: FC<Props> = ({
   onDownload,
   onClickToCreatePipeline,
   onUpdateProcessors,
-  isCreatingPipeline
+  isCreatingPipeline,
 }) => {
-
   const [isValidJson, setIsValidJson] = useState<boolean>(true);
-  const [processorsJson, setProcessorsJson] = useState<string>("");
+  const [processorsJson, setProcessorsJson] = useState<string>('');
 
   useEffect(() => {
     const jsonString = JSON.stringify(processors, null, 2);
-    setProcessorsJson(jsonString)
+    setProcessorsJson(jsonString);
   }, [processors]);
 
   const onUpdate = (updated: string) => {
     setProcessorsJson(updated);
-    
+
     try {
       setIsValidJson(true);
       const parsedJson = JSON.parse(updated);
       onUpdateProcessors(parsedJson);
-    }
-    catch (e) {
+    } catch (e) {
       setIsValidJson(false);
     }
-  }
+  };
 
   return (
     <EuiFlexGroup>
@@ -84,7 +82,7 @@ export const PreviewPanel: FC<Props> = ({
               aria-label={''}
               languageId={XJsonLang.ID}
               value={processorsJson}
-              onChange={(processors) => onUpdate(processors)}
+              onChange={(pipelineProcessors) => onUpdate(pipelineProcessors)}
               fullWidth={true}
               height="400px"
               options={{
@@ -103,16 +101,14 @@ export const PreviewPanel: FC<Props> = ({
             />
           </Fragment>
         </EuiFormRow>
-        
+
         <EuiSpacer size="xl" />
 
         {!isCreatingPipeline && (
-         <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiCopy
-              textToCopy={processorsJson}
-            >
-              {(copy: () => void) => (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCopy textToCopy={processorsJson}>
+                {(copy: () => void) => (
                   <EuiCard
                     icon={<EuiIcon size="xxl" type={`copy`} />}
                     data-test-subj="copyPipelineProcessors"
@@ -126,39 +122,39 @@ export const PreviewPanel: FC<Props> = ({
                     description=""
                   />
                 )}
-            </EuiCopy>
-          </EuiFlexItem>
+              </EuiCopy>
+            </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiCard
-              icon={<EuiIcon size="xxl" type={`download`} />}
-              data-test-subj="downloadPipelineProcessors"
-              title={
-                <FormattedMessage
-                  id="xpack.ecsMapper.preview.download"
-                  defaultMessage="Download"
-                />
-              }
-              description=""
-              onClick={onDownload}
-            />
-          </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type={`download`} />}
+                data-test-subj="downloadPipelineProcessors"
+                title={
+                  <FormattedMessage
+                    id="xpack.ecsMapper.preview.download"
+                    defaultMessage="Download"
+                  />
+                }
+                description=""
+                onClick={onDownload}
+              />
+            </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiCard
-              icon={<EuiIcon size="xxl" type={`gear`} />}
-              data-test-subj="createIngestNodePipeline"
-              title={
-                <FormattedMessage
-                  id="xpack.ecsMapper.preview.createPipeline"
-                  defaultMessage="Create Ingest Node pipeline"
-                />
-              }
-              description=""
-              onClick={onClickToCreatePipeline}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type={`gear`} />}
+                data-test-subj="createIngestNodePipeline"
+                title={
+                  <FormattedMessage
+                    id="xpack.ecsMapper.preview.createPipeline"
+                    defaultMessage="Create Ingest Node pipeline"
+                  />
+                }
+                description=""
+                onClick={onClickToCreatePipeline}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
