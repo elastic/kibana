@@ -1,85 +1,3 @@
-{
-  "type": "doc",
-  "value": {
-    "id": "config:8.0.0",
-    "index": ".kibana_1",
-    "source": {
-      "config": {
-        "buildNum": 9007199254740991
-      },
-      "migrationVersion": {
-        "config": "7.9.0"
-      },
-      "references": [
-      ],
-      "type": "config",
-      "updated_at": "2020-10-28T15:19:15.795Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "space:default",
-    "index": ".kibana_1",
-    "source": {
-      "migrationVersion": {
-        "space": "6.6.0"
-      },
-      "references": [
-      ],
-      "space": {
-        "_reserved": true,
-        "color": "#00bfb3",
-        "description": "This is your default space!",
-        "disabledFeatures": [
-        ],
-        "name": "Default"
-      },
-      "type": "space",
-      "updated_at": "2020-10-28T15:19:15.857Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "space:namespace-a",
-    "index": ".kibana_1",
-    "source": {
-      "migrationVersion": {
-        "space": "6.6.0"
-      },
-      "references": [
-      ],
-      "space": {
-        "disabledFeatures": [
-        ],
-        "name": "Space A"
-      },
-      "type": "space",
-      "updated_at": "2020-10-28T15:19:52.887Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "event_log_test:421f2511-5cd1-44fd-95df-e0df83e354d5",
-    "index": ".kibana_1",
-    "source": {
-      "event_log_test": {
-      },
-      "references": [
-      ],
-      "type": "event_log_test",
-      "updated_at": "2020-10-28T15:19:53.861Z"
-    }
-  }
-}
 
 {
   "type": "doc",
@@ -216,6 +134,39 @@
 {
   "type": "doc",
   "value": {
+    "id": "X6bLb3UBt6Z_MVvSTfYk0000",
+    "index": ".kibana-event-log-8.0.0-000001",
+    "source": {
+      "@timestamp": "2020-10-28T15:19:55.933Z",
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "action": "test legacy",
+        "duration": 0,
+        "end": "2020-10-28T15:19:55.933Z",
+        "provider": "event_log_fixture",
+        "start": "2020-10-28T15:19:55.933Z"
+      },
+      "kibana": {
+        "saved_objects": [
+          {
+            "id": "521f2511-5cd1-44fd-95df-e0df83e354d5",
+            "rel": "primary",
+            "type": "event_log_test"
+          }
+        ],
+        "server_uuid": "5b2de169-2785-441b-ae8c-186a1936b17d",
+        "version": "7.12.0"
+      },
+      "message": "test legacy 2020-10-28T15:19:55.913Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "YKbLb3UBt6Z_MVvSTfY8",
     "index": ".kibana-event-log-8.0.0-000001",
     "source": {
@@ -242,6 +193,39 @@
         "version": "8.0.0"
       },
       "message": "test 2020-10-28T15:19:55.938Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "YabLb3UBt6Z_MVvSTfZc0000",
+    "index": ".kibana-event-log-8.0.0-000001",
+    "source": {
+      "@timestamp": "2020-10-28T15:19:55.991Z",
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "action": "test",
+        "duration": 0,
+        "end": "2020-10-28T15:19:55.991Z",
+        "provider": "event_log_fixture",
+        "start": "2020-10-28T15:19:55.991Z"
+      },
+      "kibana": {
+        "saved_objects": [
+          {
+            "id": "521f2511-5cd1-44fd-95df-e0df83e354d5",
+            "rel": "primary",
+            "type": "event_log_test"
+          }
+        ],
+        "server_uuid": "5b2de169-2785-441b-ae8c-186a1936b17d",
+        "version": "NULL"
+      },
+      "message": "test legacy 2020-10-28T15:19:55.962Z"
     }
   }
 }

@@ -187,10 +187,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe(`Legacy Ids`, () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/event_log_multiple_indicies');
+        await esArchiver.load('x-pack/test/functional/es_archives/event_log_legacy_ids');
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_multiple_indicies');
+        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_legacy_ids');
       });
       it('should support search event by ids and legacyIds', async () => {
         const legacyId = `521f2511-5cd1-44fd-95df-e0df83e354d5`;
