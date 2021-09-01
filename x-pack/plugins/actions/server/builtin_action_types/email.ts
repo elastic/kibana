@@ -96,7 +96,6 @@ const SecretsSchema = schema.object({
   tenantId: schema.nullable(schema.string()),
   clientId: schema.nullable(schema.string()),
   clientSecret: schema.nullable(schema.string()),
-  accessToken: schema.nullable(schema.string()),
 });
 
 // params definition
@@ -205,8 +204,8 @@ async function executor(
   if (secrets.password != null) {
     transport.password = secrets.password;
   }
-  if (secrets.accessToken != null) {
-    transport.accessToken = secrets.accessToken;
+  if (secrets.tenantId != null) {
+    transport.tenantId = secrets.tenantId;
   }
   if (secrets.clientId != null) {
     transport.clientId = secrets.clientId;
