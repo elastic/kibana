@@ -56,7 +56,11 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
   closeFlyout,
   advanceNextStep,
 }) => {
-  const { docLinks } = useAppContext();
+  const {
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
   const { links } = docLinks;
 
   const [checkedIds, setCheckedIds] = useState<CheckedIds>(

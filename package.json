@@ -86,7 +86,7 @@
     "**/underscore": "^1.13.1"
   },
   "engines": {
-    "node": "14.17.5",
+    "node": "14.17.6",
     "yarn": "^1.21.1"
   },
   "dependencies": {
@@ -97,7 +97,7 @@
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^7.16.0-canary.2",
     "@elastic/ems-client": "7.15.0",
-    "@elastic/eui": "37.3.0",
+    "@elastic/eui": "37.3.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "^9.0.1-kibana3",
     "@elastic/maki": "6.3.0",
@@ -333,7 +333,7 @@
     "raw-loader": "^3.1.0",
     "rbush": "^3.0.1",
     "re-resizable": "^6.1.1",
-    "re2": "^1.15.4",
+    "re2": "^1.16.0",
     "react": "^16.12.0",
     "react-ace": "^7.0.5",
     "react-beautiful-dnd": "^13.0.0",
@@ -431,6 +431,7 @@
   "devDependencies": {
     "@babel/cli": "^7.12.10",
     "@babel/core": "^7.12.10",
+    "@babel/generator": "^7.12.11",
     "@babel/parser": "^7.12.11",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/plugin-proposal-export-namespace-from": "^7.12.1",
@@ -790,7 +791,7 @@
     "multimatch": "^4.0.0",
     "mutation-observer": "^1.0.3",
     "ncp": "^2.0.0",
-    "node-sass": "^4.14.1",
+    "node-sass": "^6.0.1",
     "null-loader": "^3.0.0",
     "nyc": "^15.0.1",
     "oboe": "^2.1.4",
@@ -810,7 +811,7 @@
     "regenerate": "^1.4.0",
     "resolve": "^1.7.1",
     "rxjs-marbles": "^5.0.6",
-    "sass-loader": "^8.0.2",
+    "sass-loader": "^10.2.0",
     "sass-resources-loader": "^2.0.1",
     "selenium-webdriver": "^4.0.0-alpha.7",
     "serve-static": "1.14.1",

@@ -10,13 +10,23 @@ import {
   docLinksServiceMock,
   notificationServiceMock,
   applicationServiceMock,
+  httpServiceMock,
+  coreMock,
+  scopedHistoryMock,
 } from 'src/core/public/mocks';
 import { sharePluginMock } from 'src/plugins/share/public/mocks';
-import { HttpSetup } from 'src/core/public';
 
 import { mockKibanaSemverVersion } from '../../../common/constants';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { cloudMock } from '../../../../../../x-pack/plugins/cloud/public/mocks';
+
+const servicesMock = {
+  api: apiService,
+  breadcrumbs: breadcrumbService,
+  data: dataPluginMock.createStartContract(),
+};
 
 // We'll mock these values to avoid testing the locators themselves.
 const idToUrlMap = {
@@ -32,19 +42,30 @@ shareMock.url.locators.get = (id) => ({
   getUrl: (): string | undefined => idToUrlMap[id],
 });
 
-export const getAppContextMock = (mockHttpClient: HttpSetup) => ({
-  http: mockHttpClient,
-  docLinks: docLinksServiceMock.createStartContract(),
+export const getAppContextMock = () => ({
+  isReadOnlyMode: false,
   kibanaVersionInfo: {
     currentMajor: mockKibanaSemverVersion.major,
     prevMajor: mockKibanaSemverVersion.major - 1,
     nextMajor: mockKibanaSemverVersion.major + 1,
   },
-  notifications: notificationServiceMock.createStartContract(),
-  isReadOnlyMode: false,
-  api: apiService,
-  breadcrumbs: breadcrumbService,
-  getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
-  deprecations: deprecationsServiceMock.createStartContract(),
-  share: shareMock,
+  services: {
+    ...servicesMock,
+    core: {
+      ...coreMock.createStart(),
+      http: httpServiceMock.createSetupContract(),
+      deprecations: deprecationsServiceMock.createStartContract(),
+      notifications: notificationServiceMock.createStartContract(),
+      docLinks: docLinksServiceMock.createStartContract(),
+      history: scopedHistoryMock.create(),
+      application: applicationServiceMock.createStartContract(),
+    },
+  },
+  plugins: {
+    share: shareMock,
+    cloud: {
+      ...cloudMock.createSetup(),
+      isCloudEnabled: false,
+    },
+  },
 });

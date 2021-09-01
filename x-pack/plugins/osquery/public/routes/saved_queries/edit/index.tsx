@@ -125,16 +125,33 @@ const EditSavedQueryPageComponent = () => {
       )}
       {isDeleteModalVisible ? (
         <EuiConfirmModal
-          title={`Are you sure you want to delete this query?`}
+          title={
+            <FormattedMessage
+              id="xpack.osquery.deleteSavedQuery.confirmationModal.title"
+              defaultMessage="Are you sure you want to delete this query?"
+            />
+          }
           onCancel={handleCloseDeleteConfirmationModal}
           onConfirm={handleDeleteConfirmClick}
-          cancelButtonText="No, don't do it"
-          confirmButtonText="Yes, do it"
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.osquery.deleteSavedQuery.confirmationModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.osquery.deleteSavedQuery.confirmationModal.confirmButtonLabel"
+              defaultMessage="Confirm"
+            />
+          }
           buttonColor="danger"
           defaultFocusedButton="confirm"
         >
-          <p>You&rsquo;re about to delete this query.</p>
-          <p>Are you sure you want to do this?</p>
+          <FormattedMessage
+            id="xpack.osquery.deleteSavedQuery.confirmationModal.body"
+            defaultMessage="You're about to delete this query. Are you sure you want to do this?"
+          />
         </EuiConfirmModal>
       ) : null}
     </WithHeaderLayout>
