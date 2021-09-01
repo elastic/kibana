@@ -65,6 +65,7 @@ export const buildQueryBarDescription = ({
   filters,
   filterManager,
   query,
+  savedId,
   indexPatterns,
   queryLabel,
 }: BuildQueryBarDescription): ListItems[] => {
@@ -105,7 +106,15 @@ export const buildQueryBarDescription = ({
       },
     ];
   }
-
+  if (!isEmpty(savedId)) {
+    items = [
+      ...items,
+      {
+        title: <>{i18n.SAVED_ID_LABEL} </>,
+        description: <>{savedId} </>,
+      },
+    ];
+  }
   return items;
 };
 

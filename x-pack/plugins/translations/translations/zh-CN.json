@@ -20589,6 +20589,7 @@
     "xpack.securitySolution.detectionEngine.createRule.QueryLabel": "定制查询",
     "xpack.securitySolution.detectionEngine.createRule.queryRuleTypeDescription": "查询",
     "xpack.securitySolution.detectionEngine.createRule.ruleActionsField.ruleActionsFormErrorsTitle": "请修复下面所列的问题",
+    "xpack.securitySolution.detectionEngine.createRule.savedIdLabel": "已保存查询名称",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.descriptionFieldRequiredError": "描述必填。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel": "索引模式",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel": "将现有的终端例外添加到规则",
