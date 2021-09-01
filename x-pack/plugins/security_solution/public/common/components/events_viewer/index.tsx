@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import React, { useCallback, useMemo, useEffect } from 'react';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
@@ -108,6 +108,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   hasAlertsCrud = false,
   unit,
 }) => {
+  const dispatch = useDispatch();
   const { timelines: timelinesUi } = useKibana().services;
   const {
     browserFields,
@@ -149,6 +150,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       ) : null,
     [graphEventId, id]
   );
+  const setQuery = useCallback(
+    (inspect, loading, refetch) => {
+      dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
+    },
+    [dispatch, id]
+  );
+
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -180,6 +188,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               onRuleChange,
               renderCellValue,
               rowRenderers,
+              setQuery,
               start,
               sort,
               additionalFilters,
