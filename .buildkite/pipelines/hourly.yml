@@ -145,7 +145,7 @@ steps:
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
-      queue: n2-2
+      queue: c2-4
     key: checks
 
   - wait: ~
