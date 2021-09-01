@@ -18,10 +18,12 @@ describe('ExpressionsService', () => {
 
     expect(expressions.setup()).toMatchObject({
       getFunctions: expect.any(Function),
+      getTypes: expect.any(Function),
+      getRenderers: expect.any(Function),
       registerFunction: expect.any(Function),
       registerType: expect.any(Function),
       registerRenderer: expect.any(Function),
-      run: expect.any(Function),
+      fork: expect.any(Function),
     });
   });
 
@@ -31,6 +33,12 @@ describe('ExpressionsService', () => {
 
     expect(expressions.start()).toMatchObject({
       getFunctions: expect.any(Function),
+      getTypes: expect.any(Function),
+      getRenderers: expect.any(Function),
+      registerFunction: expect.any(Function),
+      registerType: expect.any(Function),
+      registerRenderer: expect.any(Function),
+      execute: expect.any(Function),
       run: expect.any(Function),
     });
   });
@@ -54,21 +62,21 @@ describe('ExpressionsService', () => {
       const service = new ExpressionsService();
       const fork = service.fork();
 
-      expect(fork.executor.state.get().types).toEqual(service.executor.state.get().types);
+      expect(fork.getTypes()).toEqual(service.getTypes());
     });
 
     test('fork keeps all functions of the origin service', () => {
       const service = new ExpressionsService();
       const fork = service.fork();
 
-      expect(fork.executor.state.get().functions).toEqual(service.executor.state.get().functions);
+      expect(fork.getFunctions()).toEqual(service.getFunctions());
     });
 
     test('fork keeps context of the origin service', () => {
       const service = new ExpressionsService();
       const fork = service.fork();
 
-      expect(fork.executor.state.get().context).toEqual(service.executor.state.get().context);
+      expect(fork.executor.state.context).toEqual(service.executor.state.context);
     });
 
     test('newly registered functions in origin are also available in fork', () => {
@@ -82,7 +90,7 @@ describe('ExpressionsService', () => {
         fn: () => {},
       });
 
-      expect(fork.executor.state.get().functions).toEqual(service.executor.state.get().functions);
+      expect(fork.getFunctions()).toEqual(service.getFunctions());
     });
 
     test('newly registered functions in fork are NOT available in origin', () => {
@@ -96,8 +104,8 @@ describe('ExpressionsService', () => {
         fn: () => {},
       });
 
-      expect(Object.values(fork.executor.state.get().functions)).toHaveLength(
-        Object.values(service.executor.state.get().functions).length + 1
+      expect(Object.values(fork.getFunctions())).toHaveLength(
+        Object.values(service.getFunctions()).length + 1
       );
     });
 
