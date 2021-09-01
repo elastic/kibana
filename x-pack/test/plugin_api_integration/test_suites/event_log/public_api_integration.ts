@@ -250,7 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
             .map(([key, val]) => `${key}=${val}`)
             .join('&')}`
     }`;
-    await delay(1000); // wait for buffer to be written
+    await delay(3000); // wait for buffer to be written
     log.debug(`Finding Events for Saved Object with ${url}`);
     return await supertest.get(url).set('kbn-xsrf', 'foo').expect(200);
   }
