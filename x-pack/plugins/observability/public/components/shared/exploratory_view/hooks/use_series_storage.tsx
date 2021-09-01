@@ -6,7 +6,6 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
@@ -23,19 +22,13 @@ import { OperationType, SeriesType } from '../../../../../../lens/public';
 import { URL_KEYS } from '../configurations/constants/url_constants';
 
 export interface SeriesContextValue {
-  firstSeries?: SeriesUrl;
-  autoApply: boolean;
-  lastRefresh: number;
-  setLastRefresh: (val: number) => void;
-  setAutoApply: (val: boolean) => void;
-  applyChanges: () => void;
+  firstSeries: SeriesUrl;
+  firstSeriesId: string;
+  allSeriesIds: string[];
   allSeries: AllSeries;
-  setSeries: (seriesIndex: number, newValue: SeriesUrl) => void;
-  getSeries: (seriesIndex: number) => SeriesUrl | undefined;
-  removeSeries: (seriesIndex: number) => void;
-  setReportType: (reportType: string) => void;
-  storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
-  reportType: ReportViewType;
+  setSeries: (seriesIdN: string, newValue: SeriesUrl) => void;
+  getSeries: (seriesId: string) => SeriesUrl;
+  removeSeries: (seriesId: string) => void;
 }
 export const UrlStorageContext = createContext<SeriesContextValue>({} as SeriesContextValue);
 
@@ -43,112 +36,72 @@ interface ProviderProps {
   storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
 }
 
-export function convertAllShortSeries(allShortSeries: AllShortSeries) {
-  return (allShortSeries ?? []).map((shortSeries) => convertFromShortUrl(shortSeries));
-}
+function convertAllShortSeries(allShortSeries: AllShortSeries) {
+  const allSeriesIds = Object.keys(allShortSeries);
+  const allSeriesN: AllSeries = {};
+  allSeriesIds.forEach((seriesKey) => {
+    allSeriesN[seriesKey] = convertFromShortUrl(allShortSeries[seriesKey]);
+  });
 
-export const allSeriesKey = 'sr';
-const autoApplyKey = 'autoApply';
-const reportTypeKey = 'reportType';
+  return allSeriesN;
+}
 
 export function UrlStorageContextProvider({
   children,
   storage,
 }: ProviderProps & { children: JSX.Element }) {
+  const allSeriesKey = 'sr';
+
+  const [allShortSeries, setAllShortSeries] = useState<AllShortSeries>(
+    () => storage.get(allSeriesKey) ?? {}
+  );
   const [allSeries, setAllSeries] = useState<AllSeries>(() =>
-    convertAllShortSeries(storage.get(allSeriesKey) ?? [])
+    convertAllShortSeries(storage.get(allSeriesKey) ?? {})
   );
-
-  const [autoApply, setAutoApply] = useState<boolean>(() => storage.get(autoApplyKey) ?? true);
-  const [lastRefresh, setLastRefresh] = useState<number>(() => Date.now());
-
-  const [reportType, setReportType] = useState<string>(
-    () => (storage as IKbnUrlStateStorage).get(reportTypeKey) ?? ''
-  );
-
+  const [firstSeriesId, setFirstSeriesId] = useState('');
   const [firstSeries, setFirstSeries] = useState<SeriesUrl>();
-  const isPreview = !!useRouteMatch('/exploratory-view/preview');
 
   useEffect(() => {
-    const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
+    const allSeriesIds = Object.keys(allShortSeries);
+    const allSeriesN: AllSeries = convertAllShortSeries(allShortSeries ?? {});
 
-    const firstSeriesT = allSeries?.[0];
-
-    setFirstSeries(firstSeriesT);
-
-    if (autoApply) {
-      (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
-    }
-  }, [allSeries, autoApply, storage]);
-
-  useEffect(() => {
-    // needed for tab change
-    const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
-
+    setAllSeries(allSeriesN);
+    setFirstSeriesId(allSeriesIds?.[0]);
+    setFirstSeries(allSeriesN?.[allSeriesIds?.[0]]);
     (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
-    (storage as IKbnUrlStateStorage).set(reportTypeKey, reportType);
-    // this is only needed for tab change, so we will not add allSeries into dependencies
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPreview, storage]);
+  }, [allShortSeries, storage]);
 
-  const setSeries = useCallback((seriesIndex: number, newValue: SeriesUrl) => {
-    setAllSeries((prevAllSeries) => {
-      const newStateRest = prevAllSeries.map((series, index) => {
-        if (index === seriesIndex) {
-          return newValue;
-        }
-        return series;
-      });
-
-      if (prevAllSeries.length === seriesIndex) {
-        return [...newStateRest, newValue];
-      }
-
-      return [...newStateRest];
+  const setSeries = (seriesIdN: string, newValue: SeriesUrl) => {
+    setAllShortSeries((prevState) => {
+      prevState[seriesIdN] = convertToShortUrl(newValue);
+      return { ...prevState };
     });
-  }, []);
+  };
 
-  useEffect(() => {
-    (storage as IKbnUrlStateStorage).set(reportTypeKey, reportType);
-  }, [reportType, storage]);
+  const removeSeries = (seriesIdN: string) => {
+    setAllShortSeries((prevState) => {
+      delete prevState[seriesIdN];
+      return { ...prevState };
+    });
+  };
 
-  const removeSeries = useCallback((seriesIndex: number) => {
-    setAllSeries((prevAllSeries) =>
-      prevAllSeries.filter((seriesT, index) => index !== seriesIndex)
-    );
-  }, []);
+  const allSeriesIds = Object.keys(allShortSeries);
 
   const getSeries = useCallback(
-    (seriesIndex: number) => {
-      return allSeries[seriesIndex];
+    (seriesId?: string) => {
+      return seriesId ? allSeries?.[seriesId] ?? {} : ({} as SeriesUrl);
     },
     [allSeries]
   );
 
-  const applyChanges = useCallback(() => {
-    const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
-
-    (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
-    setLastRefresh(Date.now());
-  }, [allSeries, storage]);
-
-  useEffect(() => {
-    (storage as IKbnUrlStateStorage).set(autoApplyKey, autoApply);
-  }, [autoApply, storage]);
-
   const value = {
-    autoApply,
-    setAutoApply,
-    applyChanges,
     storage,
     getSeries,
     setSeries,
     removeSeries,
+    firstSeriesId,
     allSeries,
-    lastRefresh,
-    setLastRefresh,
-    setReportType,
-    reportType: storage.get(reportTypeKey) as ReportViewType,
+    allSeriesIds,
     firstSeries: firstSeries!,
   };
   return <UrlStorageContext.Provider value={value}>{children}</UrlStorageContext.Provider>;
@@ -159,9 +112,10 @@ export function useSeriesStorage() {
 }
 
 function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
-  const { dt, op, st, bd, ft, time, rdf, mt, h, n, c, ...restSeries } = newValue;
+  const { dt, op, st, rt, bd, ft, time, rdf, mt, ...restSeries } = newValue;
   return {
     operationType: op,
+    reportType: rt!,
     seriesType: st,
     breakdown: bd,
     filters: ft!,
@@ -169,31 +123,26 @@ function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
     reportDefinitions: rdf,
     dataType: dt!,
     selectedMetricField: mt,
-    hidden: h,
-    name: n,
-    color: c,
     ...restSeries,
   };
 }
 
 interface ShortUrlSeries {
   [URL_KEYS.OPERATION_TYPE]?: OperationType;
+  [URL_KEYS.REPORT_TYPE]?: ReportViewType;
   [URL_KEYS.DATA_TYPE]?: AppDataType;
   [URL_KEYS.SERIES_TYPE]?: SeriesType;
   [URL_KEYS.BREAK_DOWN]?: string;
   [URL_KEYS.FILTERS]?: UrlFilter[];
   [URL_KEYS.REPORT_DEFINITIONS]?: URLReportDefinition;
   [URL_KEYS.SELECTED_METRIC]?: string;
-  [URL_KEYS.HIDDEN]?: boolean;
-  [URL_KEYS.NAME]: string;
-  [URL_KEYS.COLOR]?: string;
   time?: {
     to: string;
     from: string;
   };
 }
 
-export type AllShortSeries = ShortUrlSeries[];
-export type AllSeries = SeriesUrl[];
+export type AllShortSeries = Record<string, ShortUrlSeries>;
+export type AllSeries = Record<string, SeriesUrl>;
 
-export const NEW_SERIES_KEY = 'new-series';
+export const NEW_SERIES_KEY = 'new-series-key';

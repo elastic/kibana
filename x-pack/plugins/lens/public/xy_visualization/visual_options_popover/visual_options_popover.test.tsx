@@ -15,6 +15,7 @@ import { VisualOptionsPopover } from './visual_options_popover';
 import { ToolbarPopover } from '../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { FillOpacityOption } from './fill_opacity_option';
+import { layerTypes } from '../../../common';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;
@@ -27,6 +28,7 @@ describe('Visual options popover', () => {
       layers: [
         {
           seriesType: 'bar',
+          layerType: layerTypes.DATA,
           layerId: 'first',
           splitAccessor: 'baz',
           xAccessor: 'foo',
@@ -231,6 +233,7 @@ describe('Visual options popover', () => {
             { ...state.layers[0], seriesType: 'bar' },
             {
               seriesType: 'bar',
+              layerType: layerTypes.DATA,
               layerId: 'second',
               splitAccessor: 'baz',
               xAccessor: 'foo',

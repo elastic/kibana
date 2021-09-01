@@ -46,7 +46,6 @@ export function buildVariableDec(
   captureReferences: boolean
 ): ApiDeclaration {
   const initializer = node.getInitializer();
-
   if (initializer && Node.isObjectLiteralExpression(initializer)) {
     // Recursively list object properties as children.
     return {
@@ -90,6 +89,7 @@ export function buildVariableDec(
     );
   }
 
+  // Without this the test "Property on interface pointing to generic function type exported with link" will fail.
   if (node.getType().getCallSignatures().length > 0) {
     if (node.getType().getCallSignatures().length > 1) {
       log.warning(`Not handling more than one call signature for node ${node.getName()}`);

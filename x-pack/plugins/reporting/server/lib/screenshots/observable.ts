@@ -10,12 +10,7 @@ import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
 import { HeadlessChromiumDriverFactory } from '../../browsers';
 import { CaptureConfig } from '../../types';
-import {
-  ElementsPositionAndAttribute,
-  ScreenshotObservableOpts,
-  ScreenshotResults,
-  ScreenshotsObservableFn,
-} from './';
+import { ElementsPositionAndAttribute, ScreenshotObservableOpts, ScreenshotResults } from './';
 import { checkPageIsOpen } from './check_browser_open';
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
 import { getElementPositionAndAttributes } from './get_element_position_data';
@@ -36,117 +31,116 @@ interface ScreenSetupData {
   error?: Error;
 }
 
-export function screenshotsObservableFactory(
+export function getScreenshots$(
   captureConfig: CaptureConfig,
-  browserDriverFactory: HeadlessChromiumDriverFactory
-): ScreenshotsObservableFn {
-  return function screenshotsObservable({
+  browserDriverFactory: HeadlessChromiumDriverFactory,
+  {
     logger,
-    urls,
+    urlsOrUrlLocatorTuples,
     conditionalHeaders,
     layout,
     browserTimezone,
-  }: ScreenshotObservableOpts): Rx.Observable<ScreenshotResults[]> {
-    const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
+  }: ScreenshotObservableOpts
+): Rx.Observable<ScreenshotResults[]> {
+  const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
 
-    const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
-    const create$ = browserDriverFactory.createPage(
-      { viewport: layout.getBrowserViewport(), browserTimezone },
-      logger
-    );
+  const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
+  const create$ = browserDriverFactory.createPage(
+    { viewport: layout.getBrowserViewport(), browserTimezone },
+    logger
+  );
 
-    return create$.pipe(
-      mergeMap(({ driver, exit$ }) => {
-        apmCreatePage?.end();
-        exit$.subscribe({ error: () => apmTrans?.end() });
+  return create$.pipe(
+    mergeMap(({ driver, exit$ }) => {
+      apmCreatePage?.end();
+      exit$.subscribe({ error: () => apmTrans?.end() });
 
-        return Rx.from(urls).pipe(
-          concatMap((url, index) => {
-            const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
-              mergeMap(() => {
-                // If we're moving to another page in the app, we'll want to wait for the app to tell us
-                // it's loaded the next page.
-                const page = index + 1;
-                const pageLoadSelector =
-                  page > 1 ? `[data-shared-page="${page}"]` : DEFAULT_PAGELOAD_SELECTOR;
+      return Rx.from(urlsOrUrlLocatorTuples).pipe(
+        concatMap((urlOrUrlLocatorTuple, index) => {
+          const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
+            mergeMap(() => {
+              // If we're moving to another page in the app, we'll want to wait for the app to tell us
+              // it's loaded the next page.
+              const page = index + 1;
+              const pageLoadSelector =
+                page > 1 ? `[data-shared-page="${page}"]` : DEFAULT_PAGELOAD_SELECTOR;
 
-                return openUrl(
-                  captureConfig,
-                  driver,
-                  url,
-                  pageLoadSelector,
-                  conditionalHeaders,
-                  logger
-                );
-              }),
-              mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
-              mergeMap(async (itemsCount) => {
-                // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
-                const viewport = layout.getViewport(itemsCount) || getDefaultViewPort();
-                await Promise.all([
-                  driver.setViewport(viewport, logger),
-                  waitForVisualizations(captureConfig, driver, itemsCount, layout, logger),
-                ]);
-              }),
-              mergeMap(async () => {
-                // Waiting till _after_ elements have rendered before injecting our CSS
-                // allows for them to be displayed properly in many cases
-                await injectCustomCss(driver, layout, logger);
+              return openUrl(
+                captureConfig,
+                driver,
+                urlOrUrlLocatorTuple,
+                pageLoadSelector,
+                conditionalHeaders,
+                logger
+              );
+            }),
+            mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
+            mergeMap(async (itemsCount) => {
+              // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
+              const viewport = layout.getViewport(itemsCount) || getDefaultViewPort();
+              await Promise.all([
+                driver.setViewport(viewport, logger),
+                waitForVisualizations(captureConfig, driver, itemsCount, layout, logger),
+              ]);
+            }),
+            mergeMap(async () => {
+              // Waiting till _after_ elements have rendered before injecting our CSS
+              // allows for them to be displayed properly in many cases
+              await injectCustomCss(driver, layout, logger);
 
-                const apmPositionElements = apmTrans?.startSpan('position_elements', 'correction');
-                if (layout.positionElements) {
-                  // position panel elements for print layout
-                  await layout.positionElements(driver, logger);
-                }
-                if (apmPositionElements) apmPositionElements.end();
+              const apmPositionElements = apmTrans?.startSpan('position_elements', 'correction');
+              if (layout.positionElements) {
+                // position panel elements for print layout
+                await layout.positionElements(driver, logger);
+              }
+              if (apmPositionElements) apmPositionElements.end();
 
-                await waitForRenderComplete(captureConfig, driver, layout, logger);
-              }),
-              mergeMap(async () => {
-                return await Promise.all([
-                  getTimeRange(driver, layout, logger),
-                  getElementPositionAndAttributes(driver, layout, logger),
-                ]).then(([timeRange, elementsPositionAndAttributes]) => ({
-                  elementsPositionAndAttributes,
+              await waitForRenderComplete(captureConfig, driver, layout, logger);
+            }),
+            mergeMap(async () => {
+              return await Promise.all([
+                getTimeRange(driver, layout, logger),
+                getElementPositionAndAttributes(driver, layout, logger),
+              ]).then(([timeRange, elementsPositionAndAttributes]) => ({
+                elementsPositionAndAttributes,
+                timeRange,
+              }));
+            }),
+            catchError((err) => {
+              checkPageIsOpen(driver); // if browser has closed, throw a relevant error about it
+
+              logger.error(err);
+              return Rx.of({ elementsPositionAndAttributes: null, timeRange: null, error: err });
+            })
+          );
+
+          return setup$.pipe(
+            takeUntil(exit$),
+            mergeMap(
+              async (data: ScreenSetupData): Promise<ScreenshotResults> => {
+                checkPageIsOpen(driver); // re-check that the browser has not closed
+
+                const elements = data.elementsPositionAndAttributes
+                  ? data.elementsPositionAndAttributes
+                  : getDefaultElementPosition(layout.getViewport(1));
+                const screenshots = await getScreenshots(driver, layout, elements, logger);
+                const { timeRange, error: setupError } = data;
+                return {
                   timeRange,
-                }));
-              }),
-              catchError((err) => {
-                checkPageIsOpen(driver); // if browser has closed, throw a relevant error about it
-
-                logger.error(err);
-                return Rx.of({ elementsPositionAndAttributes: null, timeRange: null, error: err });
-              })
-            );
-
-            return setup$.pipe(
-              takeUntil(exit$),
-              mergeMap(
-                async (data: ScreenSetupData): Promise<ScreenshotResults> => {
-                  checkPageIsOpen(driver); // re-check that the browser has not closed
-
-                  const elements = data.elementsPositionAndAttributes
-                    ? data.elementsPositionAndAttributes
-                    : getDefaultElementPosition(layout.getViewport(1));
-                  const screenshots = await getScreenshots(driver, layout, elements, logger);
-                  const { timeRange, error: setupError } = data;
-                  return {
-                    timeRange,
-                    screenshots,
-                    error: setupError,
-                    elementsPositionAndAttributes: elements,
-                  };
-                }
-              )
-            );
-          }),
-          take(urls.length),
-          toArray()
-        );
-      }),
-      first()
-    );
-  };
+                  screenshots,
+                  error: setupError,
+                  elementsPositionAndAttributes: elements,
+                };
+              }
+            )
+          );
+        }),
+        take(urlsOrUrlLocatorTuples.length),
+        toArray()
+      );
+    }),
+    first()
+  );
 }
 
 /*

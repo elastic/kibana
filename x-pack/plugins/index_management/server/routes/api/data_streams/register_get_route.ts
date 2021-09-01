@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { ElasticsearchClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { deserializeDataStream, deserializeDataStreamList } from '../../../../common/lib';
 import { DataStreamFromEs } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
@@ -68,30 +68,23 @@ const enhanceDataStreams = ({
   });
 };
 
-const getDataStreams = (client: ElasticsearchClient, name = '*') => {
-  // TODO update when elasticsearch client has update requestParams for 'indices.getDataStream'
-  return client.transport.request({
-    path: `/_data_stream/${encodeURIComponent(name)}`,
-    method: 'GET',
-    querystring: {
-      expand_wildcards: 'all',
-    },
+const getDataStreams = (client: IScopedClusterClient, name = '*') => {
+  return client.asCurrentUser.indices.getDataStream({
+    name,
+    expand_wildcards: 'all',
   });
 };
 
-const getDataStreamsStats = (client: ElasticsearchClient, name = '*') => {
-  return client.transport.request({
-    path: `/_data_stream/${encodeURIComponent(name)}/_stats`,
-    method: 'GET',
-    querystring: {
-      human: true,
-      expand_wildcards: 'all',
-    },
+const getDataStreamsStats = (client: IScopedClusterClient, name = '*') => {
+  return client.asCurrentUser.indices.dataStreamsStats({
+    name,
+    expand_wildcards: 'all',
+    human: true,
   });
 };
 
-const getDataStreamsPrivileges = (client: ElasticsearchClient, names: string[]) => {
-  return client.security.hasPrivileges({
+const getDataStreamsPrivileges = (client: IScopedClusterClient, names: string[]) => {
+  return client.asCurrentUser.security.hasPrivileges({
     body: {
       index: [
         {
@@ -109,15 +102,15 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
   });
   router.get(
     { path: addBasePath('/data_streams'), validate: { query: querySchema } },
-    async (ctx, req, response) => {
-      const { asCurrentUser } = ctx.core.elasticsearch.client;
+    async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
 
-      const includeStats = (req.query as TypeOf<typeof querySchema>).includeStats === 'true';
+      const includeStats = (request.query as TypeOf<typeof querySchema>).includeStats === 'true';
 
       try {
-        let {
+        const {
           body: { data_streams: dataStreams },
-        } = await getDataStreams(asCurrentUser);
+        } = await getDataStreams(client);
 
         let dataStreamsStats;
         let dataStreamsPrivileges;
@@ -125,24 +118,26 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         if (includeStats) {
           ({
             body: { data_streams: dataStreamsStats },
-          } = await getDataStreamsStats(asCurrentUser));
+          } = await getDataStreamsStats(client));
         }
 
         if (config.isSecurityEnabled() && dataStreams.length > 0) {
           ({ body: dataStreamsPrivileges } = await getDataStreamsPrivileges(
-            asCurrentUser,
-            dataStreams.map((dataStream: DataStreamFromEs) => dataStream.name)
+            client,
+            dataStreams.map((dataStream) => dataStream.name)
           ));
         }
 
-        dataStreams = enhanceDataStreams({
+        const enhancedDataStreams = enhanceDataStreams({
+          // @ts-expect-error DataStreamFromEs conflicts with @elastic/elasticsearch IndicesGetDataStreamIndicesGetDataStreamItem
           dataStreams,
+          // @ts-expect-error StatsFromEs conflicts with @elastic/elasticsearch IndicesDataStreamsStatsDataStreamsStatsItem
           dataStreamsStats,
-          // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
+          // @ts-expect-error PrivilegesFromEs conflicts with @elastic/elasticsearch ApplicationsPrivileges
           dataStreamsPrivileges,
         });
 
-        return response.ok({ body: deserializeDataStreamList(dataStreams) });
+        return response.ok({ body: deserializeDataStreamList(enhancedDataStreams) });
       } catch (error) {
         return handleEsError({ error, response });
       }
@@ -159,9 +154,9 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
       path: addBasePath('/data_streams/{name}'),
       validate: { params: paramsSchema },
     },
-    async (ctx, req, response) => {
-      const { name } = req.params as TypeOf<typeof paramsSchema>;
-      const { asCurrentUser } = ctx.core.elasticsearch.client;
+    async (context, request, response) => {
+      const { name } = request.params as TypeOf<typeof paramsSchema>;
+      const { client } = context.core.elasticsearch;
       try {
         const [
           {
@@ -170,23 +165,22 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
           {
             body: { data_streams: dataStreamsStats },
           },
-        ] = await Promise.all([
-          getDataStreams(asCurrentUser, name),
-          getDataStreamsStats(asCurrentUser, name),
-        ]);
+        ] = await Promise.all([getDataStreams(client, name), getDataStreamsStats(client, name)]);
 
         if (dataStreams[0]) {
           let dataStreamsPrivileges;
           if (config.isSecurityEnabled()) {
-            ({ body: dataStreamsPrivileges } = await getDataStreamsPrivileges(asCurrentUser, [
+            ({ body: dataStreamsPrivileges } = await getDataStreamsPrivileges(client, [
               dataStreams[0].name,
             ]));
           }
 
           const enhancedDataStreams = enhanceDataStreams({
+            // @ts-expect-error DataStreamFromEs conflicts with @elastic/elasticsearch IndicesGetDataStreamIndicesGetDataStreamItem
             dataStreams,
+            // @ts-expect-error StatsFromEs conflicts with @elastic/elasticsearch IndicesDataStreamsStatsDataStreamsStatsItem
             dataStreamsStats,
-            // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
+            // @ts-expect-error PrivilegesFromEs conflicts with @elastic/elasticsearch ApplicationsPrivileges
             dataStreamsPrivileges,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);

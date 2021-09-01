@@ -11,7 +11,7 @@ import { fireEvent, screen } from '@testing-library/dom';
 import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import { EuiButtonIcon } from '@elastic/eui';
-import { useExpandedRow } from './use_expanded_row';
+import { getExpandedStepCallback, useExpandedRow } from './use_expanded_row';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { JourneyStep } from '../../../../common/runtime_types';
 import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../common/constants';
@@ -197,5 +197,13 @@ describe('useExpandedROw', () => {
 
     // expect only one accordion to be expanded
     expect(Object.keys(result.current.expandedRows)).toEqual(['0']);
+  });
+
+  describe('getExpandedStepCallback', () => {
+    it('matches step index to key', () => {
+      const callback = getExpandedStepCallback(2);
+      expect(callback(defaultSteps[0])).toBe(false);
+      expect(callback(defaultSteps[1])).toBe(true);
+    });
   });
 });

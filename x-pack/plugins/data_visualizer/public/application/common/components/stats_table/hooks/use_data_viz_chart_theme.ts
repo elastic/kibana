@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { useCurrentEuiTheme } from './use_color_range';
 export const useDataVizChartTheme = (): PartialTheme => {
   const { euiTheme } = useCurrentEuiTheme();
-  const chartTheme = useMemo(() => {
+  const chartTheme = useMemo<PartialTheme>(() => {
     const AREA_SERIES_COLOR = euiTheme.euiColorVis0;
     return {
       axes: {

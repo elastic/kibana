@@ -129,6 +129,7 @@ describe('vega_map_view/view', () => {
         JSON.stringify(vegaMap),
         new SearchAPI({
           search: dataPluginStart.search,
+          indexPatterns: dataPluginStart.indexPatterns,
           uiSettings: coreStart.uiSettings,
           injectedMetadata: coreStart.injectedMetadata,
         }),

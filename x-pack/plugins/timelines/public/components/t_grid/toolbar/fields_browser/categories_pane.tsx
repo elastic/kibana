@@ -14,7 +14,6 @@ import {
   DATA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
 } from '../../../../../common';
-// eslint-disable-next-line no-duplicate-imports
 import type { BrowserFields } from '../../../../../common';
 import { getCategoryColumns } from './category_columns';
 import { CATEGORIES_PANE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
@@ -22,10 +21,10 @@ import { CATEGORIES_PANE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 import * as i18n from './translations';
 
 const CategoryNames = styled.div<{ height: number; width: number }>`
-  ${({ height }) => `height: ${height}px`};
-  overflow: auto;
-  padding: 5px;
   ${({ width }) => `width: ${width}px`};
+  ${({ height }) => `height: ${height}px`};
+  overflow-y: hidden;
+  padding: 5px;
   thead {
     display: none;
   }
@@ -89,12 +88,13 @@ export const CategoriesPane = React.memo<Props>(
         <CategoryNames
           className={`${CATEGORIES_PANE_CLASS_NAME} euiTable--compressed`}
           data-test-subj="categories-container"
-          height={TABLE_HEIGHT}
           onKeyDown={onKeyDown}
           ref={containerElement}
           width={width}
+          height={TABLE_HEIGHT}
         >
           <EuiInMemoryTable
+            className="eui-yScroll"
             columns={getCategoryColumns({
               filteredBrowserFields,
               onCategorySelected,

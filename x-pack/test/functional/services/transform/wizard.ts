@@ -110,7 +110,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         .toArray()
         .map((cell) => {
           const cellText = $(cell).text();
-          const pattern = /^(.*)Row: (\d+), Column: (\d+):$/;
+          const pattern = /^(.*)Row: (\d+); Column: (\d+)$/;
           const matches = cellText.match(pattern);
           expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
           return { text: matches![1], row: Number(matches![2]), column: Number(matches![3]) };
@@ -385,9 +385,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async assertRuntimeMappingsEditorContent(expectedContent: string[]) {
       await this.assertRuntimeMappingsEditorExists();
 
-      const runtimeMappingsEditorString = await aceEditor.getValue(
-        'transformAdvancedRuntimeMappingsEditor'
-      );
+      const wrapper = await testSubjects.find('transformAdvancedRuntimeMappingsEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const runtimeMappingsEditorString = await editor.getVisibleText();
       // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
       // This means we might not get back valid JSON so we only test against the first few lines
       // and see if the string matches.
@@ -624,7 +624,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertAdvancedPivotEditorContent(expectedValue: string[]) {
-      const advancedEditorString = await aceEditor.getValue('transformAdvancedPivotEditor');
+      const wrapper = await testSubjects.find('transformAdvancedPivotEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const advancedEditorString = await editor.getVisibleText();
       // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
       // This means we might not get back valid JSON so we only test against the first few lines
       // and see if the string matches.

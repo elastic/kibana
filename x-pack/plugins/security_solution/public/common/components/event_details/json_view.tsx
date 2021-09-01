@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCodeEditor } from '@elastic/eui';
+import { EuiCodeBlock } from '@elastic/eui';
 import { set } from '@elastic/safer-lodash-set/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -23,8 +23,6 @@ const EuiCodeEditorContainer = styled.div`
   }
 `;
 
-const EDITOR_SET_OPTIONS = { fontSize: '12px' };
-
 export const JsonView = React.memo<Props>(({ data }) => {
   const value = useMemo(
     () =>
@@ -38,15 +36,15 @@ export const JsonView = React.memo<Props>(({ data }) => {
 
   return (
     <EuiCodeEditorContainer>
-      <EuiCodeEditor
+      <EuiCodeBlock
+        language="json"
+        fontSize="m"
+        paddingSize="m"
+        isCopyable
         data-test-subj="jsonView"
-        isReadOnly
-        mode="javascript"
-        setOptions={EDITOR_SET_OPTIONS}
-        value={value}
-        width="100%"
-        height="100%"
-      />
+      >
+        {value}
+      </EuiCodeBlock>
     </EuiCodeEditorContainer>
   );
 });

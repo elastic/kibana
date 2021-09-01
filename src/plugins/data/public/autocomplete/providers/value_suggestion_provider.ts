@@ -7,15 +7,10 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
-import {
-  IIndexPattern,
-  IFieldType,
-  UI_SETTINGS,
-  buildQueryFromFilters,
-  ValueSuggestionsMethod,
-} from '../../../common';
+import { IIndexPattern, IFieldType, UI_SETTINGS, ValueSuggestionsMethod } from '../../../common';
 import { TimefilterSetup } from '../../query';
 import { AutocompleteUsageCollector } from '../collectors';
 
@@ -67,7 +62,9 @@ export const setupValueSuggestionProvider = (
       query: string,
       filters: any = [],
       signal?: AbortSignal,
-      method?: ValueSuggestionsMethod
+      method: ValueSuggestionsMethod = core.uiSettings.get<ValueSuggestionsMethod>(
+        UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD
+      )
     ) => {
       usageCollector?.trackRequest();
       return core.http

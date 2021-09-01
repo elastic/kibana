@@ -28,7 +28,7 @@ import {
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
 import { PalettePicker } from '../../palette_picker';
-import { getChartsSetup } from '../../../../services';
+import { getCharts } from '../../../../services';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
@@ -120,7 +120,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
   const selectedChartTypeOption = chartTypeOptions.find((option) => {
     return model.chart_type === option.value;
   });
-  const { palettes } = getChartsSetup();
+  const { palettes } = getCharts();
   const [palettesRegistry, setPalettesRegistry] = useState(null);
 
   useEffect(() => {

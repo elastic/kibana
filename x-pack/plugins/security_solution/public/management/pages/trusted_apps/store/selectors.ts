@@ -74,6 +74,18 @@ export const getCurrentLocationFilter = (state: Immutable<TrustedAppsListPageSta
   return state.location.filter;
 };
 
+export const getCurrentLocationIncludedPolicies = (
+  state: Immutable<TrustedAppsListPageState>
+): string => {
+  return state.location.included_policies;
+};
+
+export const getCurrentLocationExcludedPolicies = (
+  state: Immutable<TrustedAppsListPageState>
+): string => {
+  return state.location.excluded_policies;
+};
+
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
   return getLastLoadedResourceState(state.listView.listResourceState)?.data.totalItemsCount || 0;
 };
@@ -187,6 +199,14 @@ export const entriesExist: (state: Immutable<TrustedAppsListPageState>) => boole
     return isLoadedResourceState(doEntriesExists) && doEntriesExists.data;
   }
 );
+
+export const prevEntriesExist: (
+  state: Immutable<TrustedAppsListPageState>
+) => boolean = createSelector(entriesExistState, (doEntriesExists) => {
+  return (
+    isLoadingResourceState(doEntriesExists) && !!getLastLoadedResourceState(doEntriesExists)?.data
+  );
+});
 
 export const trustedAppsListPageActive: (state: Immutable<TrustedAppsListPageState>) => boolean = (
   state

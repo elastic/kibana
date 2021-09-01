@@ -20,8 +20,8 @@ export function getErrorGroupsProjection({
   setup,
   serviceName,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
 }) {

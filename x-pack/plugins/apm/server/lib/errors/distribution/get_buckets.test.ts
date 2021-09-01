@@ -28,6 +28,7 @@ describe('get buckets', () => {
       environment: 'prod',
       serviceName: 'myServiceName',
       bucketSize: 10,
+      kuery: '',
       setup: {
         start: 1528113600000,
         end: 1528977600000,
@@ -43,7 +44,6 @@ describe('get buckets', () => {
             get: () => 'myIndex',
           }
         ) as APMConfig,
-        uiFilters: {},
         indices: {
           /* eslint-disable @typescript-eslint/naming-convention */
           'apm_oss.sourcemapIndices': 'apm-*',

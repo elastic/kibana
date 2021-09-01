@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { isEsError, handleEsError, parseEsError } from './errors';
+export { handleEsError, parseEsError } from './errors';
 
 /** dummy plugin*/
 export function plugin() {

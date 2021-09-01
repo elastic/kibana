@@ -54,7 +54,7 @@ describe('AutocompleteFieldMatchComponent', () => {
         placeholder="Placeholder text"
         rowLabel={'Row Label'}
         selectedField={getField('ip')}
-        selectedValue="126.45.211.34"
+        selectedValue="127.0.0.1"
       />
     );
 
@@ -79,7 +79,7 @@ describe('AutocompleteFieldMatchComponent', () => {
         onError={jest.fn()}
         placeholder="Placeholder text"
         selectedField={getField('ip')}
-        selectedValue="126.45.211.34"
+        selectedValue="127.0.0.1"
       />
     );
 
@@ -104,7 +104,7 @@ describe('AutocompleteFieldMatchComponent', () => {
         onError={jest.fn()}
         placeholder="Placeholder text"
         selectedField={getField('ip')}
-        selectedValue="126.45.211.34"
+        selectedValue="127.0.0.1"
       />
     );
     wrapper.find('[data-test-subj="valuesAutocompleteMatch"] button').at(0).simulate('click');
@@ -131,7 +131,7 @@ describe('AutocompleteFieldMatchComponent', () => {
         onError={jest.fn()}
         placeholder="Placeholder text"
         selectedField={getField('ip')}
-        selectedValue="126.45.211.34"
+        selectedValue="127.0.0.1"
       />
     );
 
@@ -158,13 +158,13 @@ describe('AutocompleteFieldMatchComponent', () => {
         onError={jest.fn()}
         placeholder="Placeholder text"
         selectedField={getField('ip')}
-        selectedValue="126.45.211.34"
+        selectedValue="127.0.0.1"
       />
     );
 
     expect(
       wrapper.find('[data-test-subj="valuesAutocompleteMatch"] EuiComboBoxPill').at(0).text()
-    ).toEqual('126.45.211.34');
+    ).toEqual('127.0.0.1');
   });
 
   test('it invokes "onChange" when new value created', async () => {
@@ -190,9 +190,9 @@ describe('AutocompleteFieldMatchComponent', () => {
 
     ((wrapper.find(EuiComboBox).props() as unknown) as {
       onCreateOption: (a: string) => void;
-    }).onCreateOption('126.45.211.34');
+    }).onCreateOption('127.0.0.1');
 
-    expect(mockOnChange).toHaveBeenCalledWith('126.45.211.34');
+    expect(mockOnChange).toHaveBeenCalledWith('127.0.0.1');
   });
 
   test('it invokes "onChange" when new value selected', async () => {

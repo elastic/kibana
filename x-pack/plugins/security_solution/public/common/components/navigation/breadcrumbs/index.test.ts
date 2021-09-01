@@ -330,7 +330,7 @@ describe('Navigation Breadcrumbs', () => {
 
     test('should return Rules breadcrumbs when supplied rules Details pathname', () => {
       const mockDetailName = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
-      const mockRuleName = 'RULE_NAME';
+      const mockRuleName = 'ALERT_RULE_NAME';
       const breadcrumbs = getBreadcrumbsForRoute(
         {
           ...getMockObject('rules', `/rules/id/${mockDetailName}`, undefined),
@@ -357,7 +357,7 @@ describe('Navigation Breadcrumbs', () => {
 
     test('should return Rules breadcrumbs when supplied rules Edit pathname', () => {
       const mockDetailName = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
-      const mockRuleName = 'RULE_NAME';
+      const mockRuleName = 'ALERT_RULE_NAME';
       const breadcrumbs = getBreadcrumbsForRoute(
         {
           ...getMockObject('rules', `/rules/id/${mockDetailName}/edit`, undefined),
@@ -376,7 +376,7 @@ describe('Navigation Breadcrumbs', () => {
             "securitySolution/rules?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         },
         {
-          text: 'RULE_NAME',
+          text: 'ALERT_RULE_NAME',
           href: `securitySolution/rules/id/${mockDetailName}?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
         },
         {

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
 
+import { fromKueryExpression } from '@kbn/es-query';
 import {
   singleEntryThreat,
   containsInvalidItems,
@@ -17,7 +18,6 @@ import {
 } from '../../../../common/components/threat_match/helpers';
 import { isThreatMatchRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { esKuery } from '../../../../../../../../src/plugins/data/public';
 import { FieldValueQueryBar } from '../query_bar';
 import {
   ERROR_CODE,
@@ -107,7 +107,7 @@ export const schema: FormSchema<DefineStepRule> = {
 
           if (!isEmpty(query.query as string) && query.language === 'kuery') {
             try {
-              esKuery.fromKueryExpression(query.query);
+              fromKueryExpression(query.query);
             } catch (err) {
               return {
                 code: 'ERR_FIELD_FORMAT',
@@ -465,7 +465,7 @@ export const schema: FormSchema<DefineStepRule> = {
 
           if (!isEmpty(query.query as string) && query.language === 'kuery') {
             try {
-              esKuery.fromKueryExpression(query.query);
+              fromKueryExpression(query.query);
             } catch (err) {
               return {
                 code: 'ERR_FIELD_FORMAT',

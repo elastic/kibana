@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/target/mocks';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../../src/core/server/mocks';
-import {
-  AlertExecutorOptions,
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../../../alerting/server';
-import { alertsMock } from '../../../alerting/server/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 import {
   ALERT_ID,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_WORKFLOW_STATUS,
+  ALERT_UUID,
   EVENT_ACTION,
   EVENT_KIND,
+  SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
-import { createRuleDataClientMock } from '../rule_data_client/create_rule_data_client_mock';
+import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleExecutor } from './create_lifecycle_executor';
+import { createDefaultAlertExecutorOptions } from './rule_executor_test_utils';
 
 describe('createLifecycleExecutor', () => {
   it('wraps and unwraps the original executor state', async () => {
@@ -92,14 +92,14 @@ describe('createLifecycleExecutor', () => {
           { index: { _id: expect.any(String) } },
           expect.objectContaining({
             [ALERT_ID]: 'TEST_ALERT_0',
-            [ALERT_STATUS]: 'open',
+            [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             [EVENT_ACTION]: 'open',
             [EVENT_KIND]: 'signal',
           }),
           { index: { _id: expect.any(String) } },
           expect.objectContaining({
             [ALERT_ID]: 'TEST_ALERT_1',
-            [ALERT_STATUS]: 'open',
+            [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             [EVENT_ACTION]: 'open',
             [EVENT_KIND]: 'signal',
           }),
@@ -119,7 +119,7 @@ describe('createLifecycleExecutor', () => {
     );
   });
 
-  it('overwrites existing documents for repeatedly firing alerts', async () => {
+  it('updates existing documents for repeatedly firing alerts', async () => {
     const logger = loggerMock.create();
     const ruleDataClientMock = createRuleDataClientMock();
     ruleDataClientMock.getReader().search.mockResolvedValue({
@@ -127,13 +127,35 @@ describe('createLifecycleExecutor', () => {
         hits: [
           {
             fields: {
+              '@timestamp': '',
               [ALERT_ID]: 'TEST_ALERT_0',
-              labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
+              [ALERT_UUID]: 'ALERT_0_UUID',
+              [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+              [ALERT_RULE_CONSUMER]: 'CONSUMER',
+              [ALERT_RULE_NAME]: 'NAME',
+              [ALERT_RULE_PRODUCER]: 'PRODUCER',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_UUID]: 'RULE_UUID',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [ALERT_WORKFLOW_STATUS]: 'closed',
+              [SPACE_IDS]: ['fake-space-id'],
+              labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
             },
           },
           {
             fields: {
+              '@timestamp': '',
               [ALERT_ID]: 'TEST_ALERT_1',
+              [ALERT_UUID]: 'ALERT_1_UUID',
+              [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+              [ALERT_RULE_CONSUMER]: 'CONSUMER',
+              [ALERT_RULE_NAME]: 'NAME',
+              [ALERT_RULE_PRODUCER]: 'PRODUCER',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_UUID]: 'RULE_UUID',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
             },
           },
@@ -185,14 +207,19 @@ describe('createLifecycleExecutor', () => {
           { index: { _id: 'TEST_ALERT_0_UUID' } },
           expect.objectContaining({
             [ALERT_ID]: 'TEST_ALERT_0',
-            [ALERT_STATUS]: 'open',
+            [ALERT_WORKFLOW_STATUS]: 'closed',
+            [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+            labels: { LABEL_0_KEY: 'LABEL_0_VALUE' },
+
             [EVENT_ACTION]: 'active',
             [EVENT_KIND]: 'signal',
           }),
           { index: { _id: 'TEST_ALERT_1_UUID' } },
           expect.objectContaining({
             [ALERT_ID]: 'TEST_ALERT_1',
-            [ALERT_STATUS]: 'open',
+            [ALERT_WORKFLOW_STATUS]: 'open',
+            [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+
             [EVENT_ACTION]: 'active',
             [EVENT_KIND]: 'signal',
           }),
@@ -222,6 +249,15 @@ describe('createLifecycleExecutor', () => {
             fields: {
               '@timestamp': '',
               [ALERT_ID]: 'TEST_ALERT_0',
+              [ALERT_UUID]: 'ALERT_0_UUID',
+              [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+              [ALERT_RULE_CONSUMER]: 'CONSUMER',
+              [ALERT_RULE_NAME]: 'NAME',
+              [ALERT_RULE_PRODUCER]: 'PRODUCER',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_UUID]: 'RULE_UUID',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
             },
           },
@@ -229,6 +265,15 @@ describe('createLifecycleExecutor', () => {
             fields: {
               '@timestamp': '',
               [ALERT_ID]: 'TEST_ALERT_1',
+              [ALERT_UUID]: 'ALERT_1_UUID',
+              [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
+              [ALERT_RULE_CONSUMER]: 'CONSUMER',
+              [ALERT_RULE_NAME]: 'NAME',
+              [ALERT_RULE_PRODUCER]: 'PRODUCER',
+              [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_UUID]: 'RULE_UUID',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
             },
           },
@@ -277,7 +322,7 @@ describe('createLifecycleExecutor', () => {
           { index: { _id: 'TEST_ALERT_0_UUID' } },
           expect.objectContaining({
             [ALERT_ID]: 'TEST_ALERT_0',
-            [ALERT_STATUS]: 'closed',
+            [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
             labels: { LABEL_0_KEY: 'LABEL_0_VALUE' },
             [EVENT_ACTION]: 'close',
             [EVENT_KIND]: 'signal',
@@ -285,7 +330,7 @@ describe('createLifecycleExecutor', () => {
           { index: { _id: 'TEST_ALERT_1_UUID' } },
           expect.objectContaining({
             [ALERT_ID]: 'TEST_ALERT_1',
-            [ALERT_STATUS]: 'open',
+            [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             [EVENT_ACTION]: 'active',
             [EVENT_KIND]: 'signal',
           }),
@@ -313,62 +358,3 @@ type TestRuleState = Record<string, unknown> & {
 const initialRuleState: TestRuleState = {
   aRuleStateKey: 'INITIAL_RULE_STATE_VALUE',
 };
-
-const createDefaultAlertExecutorOptions = <
-  Params extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
-  InstanceState extends AlertInstanceState = {},
-  InstanceContext extends AlertInstanceContext = {},
-  ActionGroupIds extends string = ''
->({
-  alertId = 'ALERT_ID',
-  ruleName = 'RULE_NAME',
-  params,
-  state,
-  createdAt = new Date(),
-  startedAt = new Date(),
-  updatedAt = new Date(),
-}: {
-  alertId?: string;
-  ruleName?: string;
-  params: Params;
-  state: State;
-  createdAt?: Date;
-  startedAt?: Date;
-  updatedAt?: Date;
-}): AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
-  alertId,
-  createdBy: 'CREATED_BY',
-  startedAt,
-  name: ruleName,
-  rule: {
-    updatedBy: null,
-    tags: [],
-    name: ruleName,
-    createdBy: null,
-    actions: [],
-    enabled: true,
-    consumer: 'CONSUMER',
-    producer: 'PRODUCER',
-    schedule: { interval: '1m' },
-    throttle: null,
-    createdAt,
-    updatedAt,
-    notifyWhen: null,
-    ruleTypeId: 'RULE_TYPE_ID',
-    ruleTypeName: 'RULE_TYPE_NAME',
-  },
-  tags: [],
-  params,
-  spaceId: 'SPACE_ID',
-  services: {
-    alertInstanceFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>()
-      .alertInstanceFactory,
-    savedObjectsClient: savedObjectsClientMock.create(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-  },
-  state,
-  updatedBy: null,
-  previousStartedAt: null,
-  namespace: undefined,
-});

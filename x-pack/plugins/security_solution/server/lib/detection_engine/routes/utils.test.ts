@@ -29,6 +29,7 @@ import { exampleRuleStatus } from '../signals/__mocks__/es_results';
 import { getAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 
 let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
@@ -297,9 +298,9 @@ describe('utils', () => {
   describe('mergeStatuses', () => {
     it('merges statuses and converts from camelCase saved object to snake_case HTTP response', () => {
       const statusOne = exampleRuleStatus();
-      statusOne.attributes.status = 'failed';
+      statusOne.attributes.status = RuleExecutionStatus.failed;
       const statusTwo = exampleRuleStatus();
-      statusTwo.attributes.status = 'failed';
+      statusTwo.attributes.status = RuleExecutionStatus.failed;
       const currentStatus = exampleRuleStatus();
       const foundRules = [currentStatus.attributes, statusOne.attributes, statusTwo.attributes];
       const res = mergeStatuses(currentStatus.attributes.alertId, foundRules, {
@@ -307,7 +308,7 @@ describe('utils', () => {
           current_status: {
             alert_id: 'myfakealertid-8cfac',
             status_date: '2020-03-27T22:55:59.517Z',
-            status: 'succeeded',
+            status: RuleExecutionStatus.succeeded,
             last_failure_at: null,
             last_success_at: '2020-03-27T22:55:59.517Z',
             last_failure_message: null,

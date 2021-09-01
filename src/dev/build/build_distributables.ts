@@ -25,6 +25,7 @@ export interface BuildOptions {
   createDockerContexts: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
+  createExamplePlugins: boolean;
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions) {
@@ -47,6 +48,13 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
       options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds
     );
     await run(Tasks.ExtractNodeBuilds);
+  }
+
+  /**
+   * build example plugins
+   */
+  if (options.createExamplePlugins) {
+    await run(Tasks.BuildKibanaExamplePlugins);
   }
 
   /**
@@ -96,6 +104,10 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createArchives) {
     // control w/ --skip-archives
     await run(Tasks.CreateArchives);
+  }
+
+  if (options.createDebPackage || options.createRpmPackage) {
+    await run(Tasks.CreatePackageConfig);
   }
   if (options.createDebPackage) {
     // control w/ --deb or --skip-os-packages

@@ -35,7 +35,6 @@ import { lte } from './lte';
 import { mapCenter } from './map_center';
 import { neq } from './neq';
 import { ply } from './ply';
-import { progress } from './progress';
 import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
@@ -83,7 +82,6 @@ export const functions = [
   mapCenter,
   neq,
   ply,
-  progress,
   render,
   replace,
   rounddate,

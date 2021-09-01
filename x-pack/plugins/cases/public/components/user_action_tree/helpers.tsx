@@ -157,10 +157,11 @@ export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: b
 
 export const getPushInfo = (
   caseServices: CaseServices,
-  parsedValue: { connector_id: string; connector_name: string },
+  // a JSON parse failure will result in null for parsedValue
+  parsedValue: { connector_id: string | null; connector_name: string } | null,
   index: number
 ) =>
-  parsedValue != null
+  parsedValue != null && parsedValue.connector_id != null
     ? {
         firstPush: caseServices[parsedValue.connector_id]?.firstPushIndex === index,
         parsedConnectorId: parsedValue.connector_id,

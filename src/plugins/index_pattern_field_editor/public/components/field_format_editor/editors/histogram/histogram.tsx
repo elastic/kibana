@@ -10,8 +10,9 @@ import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSelect, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
-import { DefaultFormatEditor, defaultState } from '../default';
+import { DefaultFormatEditor, defaultState } from '../default/default';
 import { FormatEditorSamples } from '../../samples';
+import { formatId } from './constants';
 
 export interface HistogramFormatEditorParams {
   id: 'bytes' | 'percent' | 'number';
@@ -19,7 +20,7 @@ export interface HistogramFormatEditorParams {
 }
 
 export class HistogramFormatEditor extends DefaultFormatEditor<HistogramFormatEditorParams> {
-  static formatId = 'histogram';
+  static formatId = formatId;
   state = {
     ...defaultState,
     sampleInputs: [

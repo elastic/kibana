@@ -95,6 +95,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
           >
             <div
               className="euiTextColor euiTextColor--subdued"
+              style={Object {}}
             >
               <p>
                 Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.
@@ -278,6 +279,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
           >
             <div
               className="euiTextColor euiTextColor--subdued"
+              style={Object {}}
             >
               <p>
                 Below are the image assets in this workpad. Any assets that are currently in use cannot be determined at this time. To reclaim space, delete assets.
@@ -325,6 +327,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                     <br />
                     <span
                       className="euiTextColor euiTextColor--subdued"
+                      style={Object {}}
                     >
                       <small>
                         (
@@ -500,6 +503,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                     <br />
                     <span
                       className="euiTextColor euiTextColor--subdued"
+                      style={Object {}}
                     >
                       <small>
                         (

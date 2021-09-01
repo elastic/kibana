@@ -80,9 +80,9 @@ export interface DataFrameAnalyticsConfig {
     runtime_mappings?: RuntimeMappings;
   };
   analysis: AnalysisConfig;
-  analyzed_fields: {
-    includes: string[];
-    excludes: string[];
+  analyzed_fields?: {
+    includes?: string[];
+    excludes?: string[];
   };
   model_memory_limit: string;
   max_num_threads?: number;
@@ -142,4 +142,32 @@ export interface AnalyticsMapReturnType {
   elements: MapElements[];
   details: Record<string, any>; // transform, job, or index details
   error: null | any;
+}
+
+export interface FeatureProcessor {
+  frequency_encoding: {
+    feature_name: string;
+    field: string;
+    frequency_map: Record<string, any>;
+  };
+  multi_encoding: {
+    processors: any[];
+  };
+  n_gram_encoding: {
+    feature_prefix?: string;
+    field: string;
+    length?: number;
+    n_grams: number[];
+    start?: number;
+  };
+  one_hot_encoding: {
+    field: string;
+    hot_map: string;
+  };
+  target_mean_encoding: {
+    default_value: number;
+    feature_name: string;
+    field: string;
+    target_map: Record<string, any>;
+  };
 }

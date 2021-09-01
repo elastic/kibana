@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { esKuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { IndexPattern } from '../../../../../src/plugins/data/public';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 
 const getKueryString = (urlFilters: string): string => {
@@ -25,7 +26,7 @@ const getKueryString = (urlFilters: string): string => {
 };
 
 export const useUpdateKueryString = (
-  indexPattern: IIndexPattern | null,
+  indexPattern: IndexPattern | null,
   filterQueryString = '',
   urlFilters: string
 ): [string?, Error?] => {
@@ -38,9 +39,9 @@ export const useUpdateKueryString = (
   // this error will be actually shown in UI for user to see
   try {
     if ((filterQueryString || urlFilters) && indexPattern) {
-      const ast = esKuery.fromKueryExpression(combinedFilterString);
+      const ast = fromKueryExpression(combinedFilterString);
 
-      const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
+      const elasticsearchQuery = toElasticsearchQuery(ast, indexPattern);
 
       esFilters = JSON.stringify(elasticsearchQuery);
     }

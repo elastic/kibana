@@ -20,6 +20,7 @@ export { JsonEditor, OnJsonEditorUpdateHandler, JsonEditorState } from './compon
 export { PageLoading } from './components/page_loading';
 export { SectionLoading } from './components/section_loading';
 
+export { EuiCodeEditor, EuiCodeEditorProps } from './components/code_editor';
 export { Frequency, CronEditor } from './components/cron_editor';
 
 export {

@@ -7,18 +7,23 @@
  */
 
 import { groupBy, has, isEqual } from 'lodash';
+import { SerializableRecord } from '@kbn/utility-types';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
 import { Filter, Query } from '../filters';
-import { IndexPatternBase } from './types';
+import { BoolQuery, IndexPatternBase } from './types';
+import { KueryQueryOptions } from '../kuery';
 
-export interface EsQueryConfig {
+/**
+ * Configurations to be used while constructing an ES query.
+ * @public
+ */
+export type EsQueryConfig = KueryQueryOptions & {
   allowLeadingWildcards: boolean;
-  queryStringOptions: Record<string, any>;
+  queryStringOptions: SerializableRecord;
   ignoreFilterIfFieldNotInIndex: boolean;
-  dateFormatTZ?: string;
-}
+};
 
 function removeMatchAll<T>(filters: T[]) {
   return filters.filter(
@@ -33,6 +38,8 @@ function removeMatchAll<T>(filters: T[]) {
  * @param config - an objects with query:allowLeadingWildcards and query:queryString:options UI
  * settings in form of { allowLeadingWildcards, queryStringOptions }
  * config contains dateformat:tz
+ *
+ * @public
  */
 export function buildEsQuery(
   indexPattern: IndexPatternBase | undefined,
@@ -43,7 +50,7 @@ export function buildEsQuery(
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: false,
   }
-) {
+): { bool: BoolQuery } {
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
@@ -53,7 +60,8 @@ export function buildEsQuery(
     indexPattern,
     queriesByLanguage.kuery,
     config.allowLeadingWildcards,
-    config.dateFormatTZ
+    config.dateFormatTZ,
+    config.filtersInMustClause
   );
   const luceneQuery = buildQueryFromLucene(
     queriesByLanguage.lucene,

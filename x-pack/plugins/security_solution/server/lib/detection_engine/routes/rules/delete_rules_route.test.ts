@@ -12,7 +12,8 @@ import {
   getDeleteRequest,
   getFindResultWithSingleHit,
   getDeleteRequestById,
-  getFindResultStatus,
+  getRuleExecutionStatuses,
+  getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesRoute } from './delete_rules_route';
@@ -27,7 +28,8 @@ describe('delete_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
+    clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses());
 
     deleteRulesRoute(server.router);
   });

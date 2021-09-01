@@ -12,7 +12,6 @@ import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
   const client = getService('es');
 
   describe('telemetry collectors fleet', () => {
@@ -36,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       await makeChecksWithStatus(
-        es,
+        client,
         'upMonitorId',
         1,
         1,
@@ -55,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await makeChecksWithStatus(
-        es,
+        client,
         'downMonitorId',
         1,
         1,
@@ -74,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await makeChecksWithStatus(
-        es,
+        client,
         'noGeoNameMonitor',
         1,
         1,
@@ -91,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         true
       );
       await makeChecksWithStatus(
-        es,
+        client,
         'downMonitorId',
         1,
         1,
@@ -110,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await makeChecksWithStatus(
-        es,
+        client,
         'mixMonitorId',
         1,
         1,
@@ -121,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
         undefined,
         true
       );
-      await es.indices.refresh();
+      await client.indices.refresh();
     });
 
     after('unload heartbeat index', () => {
@@ -140,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await es.indices.refresh();
+      await client.indices.refresh();
     });
 
     it('should receive expected results for fleet managed monitors after calling monitor logging', async () => {

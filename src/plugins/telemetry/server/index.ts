@@ -6,24 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
+import type { PluginInitializerContext } from 'kibana/server';
+import type { TelemetryConfigType } from './config';
 import { TelemetryPlugin } from './plugin';
-import { configSchema, TelemetryConfigType } from './config';
 
+export { config } from './config';
 export type { TelemetryPluginSetup, TelemetryPluginStart } from './plugin';
-
-export const config: PluginConfigDescriptor<TelemetryConfigType> = {
-  schema: configSchema,
-  exposeToBrowser: {
-    enabled: true,
-    url: true,
-    banner: true,
-    allowChangingOptInStatus: true,
-    optIn: true,
-    optInStatusUrl: true,
-    sendUsageFrom: true,
-  },
-};
 
 export const plugin = (initializerContext: PluginInitializerContext<TelemetryConfigType>) =>
   new TelemetryPlugin(initializerContext);

@@ -4,26 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+
+import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+import { EuiEmptyPrompt, EuiLoadingContent, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Direction } from '../../../../common/search_strategy';
-// eslint-disable-next-line no-duplicate-imports
+import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-// eslint-disable-next-line no-duplicate-imports
+import { TGridCellAction, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   DataProvider,
   RowRenderer,
+  AlertStatus,
 } from '../../../../common/types/timeline';
 import {
   esQuery,
@@ -33,28 +38,17 @@ import {
   DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { Refetch } from '../../../store/t_grid/inputs';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { calculateTotalPages, combineQueries, resolverIsShowing } from '../helpers';
+import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
-import { useTimelineEvents } from '../../../container';
-import { HeaderSection } from '../header_section';
+import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
 import { StatefulBody } from '../body';
-import { Footer, footerHeight } from '../footer';
-import { LastUpdatedAt } from '../..';
-import { AlertCount, SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem } from '../styles';
-import * as i18n from './translations';
-import { ExitFullScreen } from '../../exit_full_screen';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
-import { InspectButtonContainer } from '../../inspect';
+import { InspectButton, InspectButtonContainer } from '../../inspect';
+import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
 
-export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const UTILITY_BAR_HEIGHT = 19; // px
-const COMPACT_HEADER_HEIGHT = 36; // px
-
-const UtilityBar = styled.div`
-  height: ${UTILITY_BAR_HEIGHT}px;
-`;
+const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -63,6 +57,7 @@ const TitleText = styled.span`
 const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
   display: flex;
   flex-direction: column;
+  position: relative;
 
   ${({ $isFullScreen }) =>
     $isFullScreen &&
@@ -74,13 +69,10 @@ const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
   `}
 `;
 
-const TitleFlexGroup = styled(EuiFlexGroup)`
-  margin-top: 8px;
-`;
-
 const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
 }))`
+  position: relative;
   width: 100%;
   overflow: hidden;
   flex: 1;
@@ -88,34 +80,26 @@ const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   flex-direction: column;
 `;
 
-const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
-  overflow: hidden;
-  margin: 0;
-  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
-`;
-
-const ScrollableFlexItem = styled(EuiFlexItem)`
-  overflow: auto;
-`;
-
-/**
- * Hides stateful headerFilterGroup implementations, but prevents the component
- * from being unmounted, to preserve the state of the component
- */
-const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
-  ${({ show }) => (show ? '' : 'visibility: hidden;')}
-`;
+const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface TGridIntegratedProps {
+  additionalFilters: React.ReactNode;
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
+  data?: DataPublicPluginStart;
   dataProviders: DataProvider[];
+  defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
+  entityType: EntityType;
   filters: Filter[];
+  filterStatus?: AlertStatus;
   globalFullScreen: boolean;
-  headerFilterGroup?: React.ReactNode;
+  // If truthy, the graph viewer (Resolver) is showing
+  graphEventId: string | undefined;
+  graphOverlay?: React.ReactNode;
+  hasAlertsCrud: boolean;
   height?: number;
   id: TimelineId;
   indexNames: string[];
@@ -125,59 +109,62 @@ export interface TGridIntegratedProps {
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: 'filter' | 'search';
-  query: Query;
+  leadingControlColumns?: ControlColumnProps[];
   onRuleChange?: () => void;
+  query: Query;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  setGlobalFullScreen: (fullscreen: boolean) => void;
-  start: string;
+  setQuery: (inspect: InspectResponse, loading: boolean, refetch: Refetch) => void;
   sort: Sort[];
-  utilityBar?: (refetch: Refetch, totalCount: number) => React.ReactNode;
-  // If truthy, the graph viewer (Resolver) is showing
-  graphEventId: string | undefined;
-  leadingControlColumns: ControlColumnProps[];
-  trailingControlColumns: ControlColumnProps[];
-  data?: DataPublicPluginStart;
+  start: string;
+  tGridEventRenderedViewEnabled: boolean;
+  trailingControlColumns?: ControlColumnProps[];
+  unit?: (n: number) => string;
 }
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
+  additionalFilters,
   browserFields,
   columns,
+  data,
   dataProviders,
+  defaultCellActions,
   deletedEventIds,
   docValueFields,
   end,
+  entityType,
   filters,
+  filterStatus,
   globalFullScreen,
-  headerFilterGroup,
+  graphEventId,
+  graphOverlay = null,
+  hasAlertsCrud,
   id,
   indexNames,
   indexPattern,
-  isLive,
   isLoadingIndexPattern,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
+  leadingControlColumns,
   onRuleChange,
   query,
   renderCellValue,
   rowRenderers,
-  setGlobalFullScreen,
-  start,
+  setQuery,
   sort,
-  utilityBar,
-  graphEventId,
-  leadingControlColumns,
+  start,
+  tGridEventRenderedViewEnabled,
   trailingControlColumns,
-  data,
+  unit,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
-  const [isQueryLoading, setIsQueryLoading] = useState(false);
+  const [isQueryLoading, setIsQueryLoading] = useState(true);
 
+  const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const unit = useMemo(() => (n: number) => i18n.ALERTS_UNIT(n), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
   );
@@ -187,19 +174,8 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   }, [dispatch, id, isQueryLoading]);
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
-  const titleWithExitFullScreen = useMemo(
-    () => (
-      <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
-        <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ExitFullScreen fullScreen={globalFullScreen} setFullScreen={setGlobalFullScreen} />
-        </EuiFlexItem>
-      </TitleFlexGroup>
-    ),
-    [globalFullScreen, justTitle, setGlobalFullScreen]
-  );
 
-  const combinedQueries = combineQueries({
+  const combinedQueries = buildCombinedQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
     dataProviders,
     indexPattern,
@@ -237,124 +213,155 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const [
     loading,
-    { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
+    { events, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    // We rely on entityType to determine Events vs Alerts
+    alertConsumers: SECURITY_ALERTS_CONSUMERS,
+    data,
     docValueFields,
+    endDate: end,
+    entityType,
     fields,
     filterQuery: combinedQueries!.filterQuery,
     id,
     indexNames,
     limit: itemsPerPage,
+    skip: !canQueryTimeline,
     sort: sortField,
     startDate: start,
-    endDate: end,
-    skip: !canQueryTimeline,
-    data,
   });
+
+  const filterQuery = useMemo(
+    () =>
+      getCombinedFilterQuery({
+        config: esQuery.getEsQueryConfig(uiSettings),
+        browserFields,
+        dataProviders,
+        filters,
+        from: start,
+        indexPattern,
+        isEventViewer: true,
+        kqlMode,
+        kqlQuery: query,
+        to: end,
+      }),
+    [uiSettings, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]
+  );
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
     [deletedEventIds.length, totalCount]
   );
 
-  const subtitle = useMemo(
-    () => `${totalCountMinusDeleted.toLocaleString()} ${unit && unit(totalCountMinusDeleted)}`,
-    [totalCountMinusDeleted, unit]
-  );
-
-  const additionalControls = useMemo(() => <AlertCount>{subtitle}</AlertCount>, [subtitle]);
-
   const nonDeletedEvents = useMemo(() => events.filter((e) => !deletedEventIds.includes(e._id)), [
     deletedEventIds,
     events,
   ]);
 
-  const HeaderSectionContent = useMemo(
-    () =>
-      headerFilterGroup && (
-        <HeaderFilterGroupWrapper
-          data-test-subj="header-filter-group-wrapper"
-          show={!resolverIsShowing(graphEventId)}
-        >
-          {headerFilterGroup}
-        </HeaderFilterGroupWrapper>
-      ),
-    [headerFilterGroup, graphEventId]
-  );
-
   useEffect(() => {
     setIsQueryLoading(loading);
   }, [loading]);
 
+  const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
+
+  const isFirstUpdate = useRef(true);
+  useEffect(() => {
+    if (isFirstUpdate.current && !loading) {
+      isFirstUpdate.current = false;
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    setQuery(inspect, loading, refetch);
+  }, [inspect, loading, refetch, setQuery]);
+
   return (
     <InspectButtonContainer>
-      <StyledEuiPanel data-test-subj="events-viewer-panel" $isFullScreen={globalFullScreen}>
-        {canQueryTimeline ? (
-          <>
-            <HeaderSection
-              id={!resolverIsShowing(graphEventId) ? id : undefined}
-              inspect={inspect}
-              loading={loading}
-              height={
-                headerFilterGroup == null ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT
-              }
-              subtitle={utilityBar}
-              title={globalFullScreen ? titleWithExitFullScreen : justTitle}
-            >
-              {HeaderSectionContent}
-            </HeaderSection>
-            {utilityBar && !resolverIsShowing(graphEventId) && (
-              <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
-            )}
-            <EventsContainerLoading
-              data-timeline-id={id}
-              data-test-subj={`events-container-loading-${loading}`}
-            >
-              <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-                <UpdatedFlexItem grow={false} show={!loading}>
-                  <LastUpdatedAt updatedAt={updatedAt} />
-                </UpdatedFlexItem>
-              </EuiFlexGroup>
+      <StyledEuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="none"
+        data-test-subj="events-viewer-panel"
+        $isFullScreen={globalFullScreen}
+      >
+        {isFirstUpdate.current && <EuiLoadingContent data-test-subj="loading-alerts-panel" />}
 
-              <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
-                <ScrollableFlexItem grow={1}>
+        {graphOverlay}
+
+        {canQueryTimeline && (
+          <EventsContainerLoading
+            data-timeline-id={id}
+            data-test-subj={`events-container-loading-${loading}`}
+          >
+            <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
+              <UpdatedFlexItem grow={false} $show={!loading}>
+                <InspectButton title={justTitle} inspect={inspect} loading={loading} />
+              </UpdatedFlexItem>
+              <UpdatedFlexItem grow={false} $show={!loading}>
+                {!resolverIsShowing(graphEventId) && additionalFilters}
+              </UpdatedFlexItem>
+              {tGridEventRenderedViewEnabled &&
+                ['detections-page', 'detections-rules-details-page'].includes(id) && (
+                  <UpdatedFlexItem grow={false} $show={!loading}>
+                    <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                  </UpdatedFlexItem>
+                )}
+            </UpdatedFlexGroup>
+
+            {!graphEventId && graphOverlay == null && (
+              <>
+                {totalCountMinusDeleted === 0 && loading === false && (
+                  <EuiEmptyPrompt
+                    title={
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaTitle"
+                          defaultMessage="No results match your search criteria"
+                        />
+                      </h2>
+                    }
+                    titleSize="s"
+                    body={
+                      <p>
+                        <FormattedMessage
+                          id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaDescription"
+                          defaultMessage="Try searching over a longer period of time or modifying your search."
+                        />
+                      </p>
+                    }
+                  />
+                )}
+                {totalCountMinusDeleted > 0 && (
                   <StatefulBody
+                    hasAlertsCrud={hasAlertsCrud}
                     activePage={pageInfo.activePage}
-                    additionalControls={additionalControls}
                     browserFields={browserFields}
+                    filterQuery={filterQuery}
                     data={nonDeletedEvents}
+                    defaultCellActions={defaultCellActions}
                     id={id}
                     isEventViewer={true}
+                    itemsPerPageOptions={itemsPerPageOptions}
+                    loadPage={loadPage}
                     onRuleChange={onRuleChange}
+                    pageSize={itemsPerPage}
                     renderCellValue={renderCellValue}
                     rowRenderers={rowRenderers}
-                    sort={sort}
                     tabType={TimelineTabs.query}
-                    totalPages={calculateTotalPages({
-                      itemsCount: totalCountMinusDeleted,
-                      itemsPerPage,
-                    })}
+                    tableView={tableView}
+                    totalItems={totalCountMinusDeleted}
+                    unit={unit}
+                    filterStatus={filterStatus}
                     leadingControlColumns={leadingControlColumns}
                     trailingControlColumns={trailingControlColumns}
+                    refetch={refetch}
+                    indexNames={indexNames}
                   />
-                  <Footer
-                    activePage={pageInfo.activePage}
-                    data-test-subj="events-viewer-footer"
-                    height={footerHeight}
-                    id={id}
-                    isLive={isLive}
-                    isLoading={loading}
-                    itemsCount={nonDeletedEvents.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    onChangePage={loadPage}
-                    totalCount={totalCountMinusDeleted}
-                  />
-                </ScrollableFlexItem>
-              </FullWidthFlexGroup>
-            </EventsContainerLoading>
-          </>
-        ) : null}
+                )}
+              </>
+            )}
+          </EventsContainerLoading>
+        )}
       </StyledEuiPanel>
     </InspectButtonContainer>
   );

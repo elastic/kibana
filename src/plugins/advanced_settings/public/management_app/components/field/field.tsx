@@ -8,7 +8,6 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import classNames from 'classnames';
-
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
 import 'brace/mode/json';
@@ -19,7 +18,6 @@ import {
   EuiCodeBlock,
   EuiColorPicker,
   EuiScreenReaderOnly,
-  EuiCodeEditor,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
@@ -40,6 +38,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
 import { UiSettingsType, DocLinksStart, ToastsStart } from '../../../../../../core/public';
+import { EuiCodeEditor } from '../../../../../es_ui_shared/public';
 
 interface FieldProps {
   setting: FieldSetting;

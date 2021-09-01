@@ -212,7 +212,7 @@ export const getSavedObjects = (): SavedObject[] => [
       fieldFormatMap:
         '{"hour_of_day":{"id":"number","params":{"pattern":"00"}},"AvgTicketPrice":{"id":"number","params":{"pattern":"$0,0.[00]"}}}',
       runtimeFieldMap:
-        '{"hour_of_day":{"type":"long","script":{"source":"emit(doc[\'timestamp\'].value.hourOfDay);"}}}',
+        '{"hour_of_day":{"type":"long","script":{"source":"emit(doc[\'timestamp\'].value.getHour());"}}}',
     },
     references: [],
   },

@@ -53,6 +53,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
                 catalogueId !== 'ml' &&
                 catalogueId !== 'monitoring' &&
                 catalogueId !== 'ml_file_data_visualizer' &&
+                catalogueId !== 'osquery' &&
                 !esFeatureExceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
@@ -70,6 +71,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'enterpriseSearch',
               'appSearch',
               'workplaceSearch',
+              'osquery',
               ...esFeatureExceptions,
             ];
             const expected = mapValues(

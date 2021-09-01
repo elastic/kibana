@@ -29,6 +29,13 @@ var IGNORE_WARNINGS = [
     file: '/node_modules/supertest/node_modules/superagent/lib/node/index.js',
     line: 418,
   },
+  {
+    // TODO: @elastic/es-clients - The new client will attempt a Product check and it will `process.emitWarning`
+    //  that the security features are blocking such check.
+    //  Such emit is causing Node.js to crash unless we explicitly catch it.
+    //  We need to discard that warning
+    name: 'ProductNotSupportedSecurityError',
+  },
 ];
 
 if (process.noProcessWarnings !== true) {

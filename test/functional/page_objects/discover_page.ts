@@ -353,17 +353,39 @@ export class DiscoverPageObject extends FtrService {
   public async clickFieldListItemAdd(field: string) {
     // a filter check may make sense here, but it should be properly handled to make
     // it work with the _score and _source fields as well
+    if (await this.isFieldSelected(field)) {
+      return;
+    }
     await this.clickFieldListItemToggle(field);
+    const isLegacyDefault = await this.useLegacyTable();
+    if (isLegacyDefault) {
+      await this.retry.waitFor(`field ${field} to be added to classic table`, async () => {
+        return await this.testSubjects.exists(`docTableHeader-${field}`);
+      });
+    } else {
+      await this.retry.waitFor(`field ${field} to be added to new table`, async () => {
+        return await this.testSubjects.exists(`dataGridHeaderCell-${field}`);
+      });
+    }
+  }
+
+  public async isFieldSelected(field: string) {
+    if (!(await this.testSubjects.exists('fieldList-selected'))) {
+      return false;
+    }
+    const selectedList = await this.testSubjects.find('fieldList-selected');
+    return await this.testSubjects.descendantExists(`field-${field}`, selectedList);
   }
 
   public async clickFieldListItemRemove(field: string) {
-    if (!(await this.testSubjects.exists('fieldList-selected'))) {
+    if (
+      !(await this.testSubjects.exists('fieldList-selected')) ||
+      !(await this.isFieldSelected(field))
+    ) {
       return;
     }
-    const selectedList = await this.testSubjects.find('fieldList-selected');
-    if (await this.testSubjects.descendantExists(`field-${field}`, selectedList)) {
-      await this.clickFieldListItemToggle(field);
-    }
+
+    await this.clickFieldListItemToggle(field);
   }
 
   public async clickFieldListItemVisualize(fieldName: string) {

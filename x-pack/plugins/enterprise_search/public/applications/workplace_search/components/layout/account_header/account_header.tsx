@@ -70,7 +70,7 @@ export const AccountHeader: React.FC = () => {
       <EuiHeaderSection grow={false}>
         <EuiHeaderSectionItem border="none">
           <EuiHeaderLogo iconType="logoWorkplaceSearch" />
-          <EuiText>{WORKPLACE_SEARCH_TITLE}</EuiText>
+          <EuiText role="banner">{WORKPLACE_SEARCH_TITLE}</EuiText>
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem border="none">
           <EuiHeaderLinks>

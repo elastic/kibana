@@ -12,7 +12,7 @@ import {
   getReadRequest,
   getFindResultWithSingleHit,
   nonRuleFindResult,
-  getFindResultStatusEmpty,
+  getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
 
@@ -25,7 +25,8 @@ describe('read_signals', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // successful transform
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
+    clients.ruleExecutionLogClient.find.mockResolvedValue([]);
 
     readRulesRoute(server.router);
   });
