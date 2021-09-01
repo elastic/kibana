@@ -210,7 +210,7 @@ export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServicePr
 
       addLogMessage(
         `Identified ${
-          state.getState().values.length
+          state.getState().latencyCorrelations.length
         } significant correlations out of ${
           fieldValuePairs.length
         } field/value pairs.`
@@ -256,7 +256,7 @@ export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServicePr
         ccsWarning,
         log: getLogMessages(),
         took: Date.now() - progress.started,
-        values: state.getValuesSortedByCorrelation(),
+        latencyCorrelations: state.getLatencyCorrelationsSortedByCorrelation(),
         percentileThresholdValue,
         overallHistogram,
       },

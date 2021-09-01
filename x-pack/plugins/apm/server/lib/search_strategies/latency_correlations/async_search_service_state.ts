@@ -7,7 +7,7 @@
 
 import type {
   AsyncSearchProviderProgress,
-  SearchServiceValue,
+  LatencyCorrelation,
 } from '../../../../common/search_strategies/latency_correlations/types';
 
 import type { HistogramItem } from '../queries';
@@ -72,13 +72,13 @@ export const asyncSearchServiceStateProvider = () => {
     };
   }
 
-  const values: SearchServiceValue[] = [];
-  function addValue(d: SearchServiceValue) {
-    values.push(d);
+  const latencyCorrelations: LatencyCorrelation[] = [];
+  function addValue(d: LatencyCorrelation) {
+    latencyCorrelations.push(d);
   }
 
-  function getValuesSortedByCorrelation() {
-    return values.sort((a, b) => b.correlation - a.correlation);
+  function getLatencyCorrelationsSortedByCorrelation() {
+    return latencyCorrelations.sort((a, b) => b.correlation - a.correlation);
   }
 
   function getState() {
@@ -90,7 +90,7 @@ export const asyncSearchServiceStateProvider = () => {
       overallHistogram,
       percentileThresholdValue,
       progress,
-      values,
+      latencyCorrelations,
     };
   }
 
@@ -99,7 +99,7 @@ export const asyncSearchServiceStateProvider = () => {
     getIsCancelled,
     getOverallProgress,
     getState,
-    getValuesSortedByCorrelation,
+    getLatencyCorrelationsSortedByCorrelation,
     setCcsWarning,
     setError,
     setIsCancelled,

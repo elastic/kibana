@@ -71,7 +71,12 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     }
   );
   const { error, isRunning, loaded, total } = state;
-  const { ccsWarning, log, values, percentileThresholdValue } = data;
+  const {
+    ccsWarning,
+    log,
+    latencyCorrelations,
+    percentileThresholdValue,
+  } = data;
   const overallHistogram =
     data.overallHistogram === undefined && !isRunning
       ? []
@@ -99,21 +104,23 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const selectedHistogram = useMemo(() => {
     let selected =
-      Array.isArray(values) && values.length > 0 ? values[0] : undefined;
+      Array.isArray(latencyCorrelations) && latencyCorrelations.length > 0
+        ? latencyCorrelations[0]
+        : undefined;
 
     if (
-      Array.isArray(values) &&
-      values.length > 0 &&
+      Array.isArray(latencyCorrelations) &&
+      latencyCorrelations.length > 0 &&
       selectedSignificantTerm !== null
     ) {
-      selected = values.find(
+      selected = latencyCorrelations.find(
         (h) =>
           h.field === selectedSignificantTerm.fieldName &&
           h.value === selectedSignificantTerm.fieldValue
       );
     }
     return selected;
-  }, [values, selectedSignificantTerm]);
+  }, [latencyCorrelations, selectedSignificantTerm]);
 
   const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
@@ -241,11 +248,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   }, []);
 
   const { histogramTerms, sorting } = useMemo(() => {
-    if (!Array.isArray(values)) {
+    if (!Array.isArray(latencyCorrelations)) {
       return { histogramTerms: [], sorting: undefined };
     }
     const orderedTerms = orderBy(
-      values.map((d) => {
+      latencyCorrelations.map((d) => {
         return {
           fieldName: d.field,
           fieldValue: d.value,
@@ -267,7 +274,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         },
       } as EuiTableSortingType<MlCorrelationsTerms>,
     };
-  }, [values, sortField, sortDirection]);
+  }, [latencyCorrelations, sortField, sortDirection]);
 
   return (
     <div data-test-subj="apmLatencyCorrelationsTabContent">

@@ -106,7 +106,12 @@ describe('transaction_details/distribution', () => {
         <Wrapper
           dataSearchResponse={{
             isRunning: true,
-            rawResponse: { ccsWarning: false, took: 1234, values: [], log: [] },
+            rawResponse: {
+              ccsWarning: false,
+              took: 1234,
+              latencyCorrelations: [],
+              log: [],
+            },
           }}
         >
           <TransactionDistribution
@@ -130,7 +135,12 @@ describe('transaction_details/distribution', () => {
         <Wrapper
           dataSearchResponse={{
             isRunning: false,
-            rawResponse: { ccsWarning: false, took: 1234, values: [], log: [] },
+            rawResponse: {
+              ccsWarning: false,
+              took: 1234,
+              latencyCorrelations: [],
+              log: [],
+            },
           }}
         >
           <TransactionDistribution

@@ -97,7 +97,12 @@ describe('correlations', () => {
         <Wrapper
           dataSearchResponse={{
             isRunning: true,
-            rawResponse: { ccsWarning: false, took: 1234, values: [], log: [] },
+            rawResponse: {
+              ccsWarning: false,
+              took: 1234,
+              latencyCorrelations: [],
+              log: [],
+            },
           }}
         >
           <LatencyCorrelations onFilter={jest.fn()} />
@@ -115,7 +120,12 @@ describe('correlations', () => {
         <Wrapper
           dataSearchResponse={{
             isRunning: false,
-            rawResponse: { ccsWarning: false, took: 1234, values: [], log: [] },
+            rawResponse: {
+              ccsWarning: false,
+              took: 1234,
+              latencyCorrelations: [],
+              log: [],
+            },
           }}
         >
           <LatencyCorrelations onFilter={jest.fn()} />

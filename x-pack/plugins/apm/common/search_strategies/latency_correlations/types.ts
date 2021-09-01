@@ -20,7 +20,7 @@ export interface ResponseHit {
   _source: ResponseHitSource;
 }
 
-export interface SearchServiceValue {
+export interface LatencyCorrelation {
   histogram: HistogramItem[];
   value: string;
   field: string;
@@ -47,5 +47,5 @@ export interface LatencyCorrelationsRawResponse extends RawResponseBase {
   log: string[];
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number;
-  values?: SearchServiceValue[];
+  latencyCorrelations?: LatencyCorrelation[];
 }
