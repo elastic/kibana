@@ -58,6 +58,8 @@ export const createThreatSignal = async ({
       filters: [...filters, threatFilter],
       language,
       query,
+      savedId,
+      services,
       index: inputIndex,
       lists: exceptionItems,
     });
