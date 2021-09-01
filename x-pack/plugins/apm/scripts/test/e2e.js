@@ -41,9 +41,9 @@ if (server) {
   ftrScript = 'functional_test_runner';
 }
 
+const config = open ? './cypress_open.ts' : './cypress_run.ts';
+
 childProcess.execSync(
-  `node ../../../../scripts/${ftrScript} --config ${
-    open ? './cypress_open.ts' : './cypress_run.ts'
-  }`,
+  `node ../../../../scripts/${ftrScript} --config ${config}`,
   { cwd: e2eDir, stdio: 'inherit' }
 );
