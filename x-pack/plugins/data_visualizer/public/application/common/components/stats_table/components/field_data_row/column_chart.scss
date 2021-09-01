@@ -5,16 +5,15 @@
 
 .dataGridChart__legend {
   @include euiTextTruncate;
-  @include euiFontSizeXS;
 
   color: $euiColorMediumShade;
   display: block;
   overflow-x: hidden;
-  margin: $euiSizeXS 0 0 0;
   font-style: italic;
   font-weight: normal;
   text-align: left;
   line-height: 1;
+  font-size: 10px;
 }
 
 .dataGridChart__legend--numeric {
