@@ -41,13 +41,10 @@ import {
 import * as i18n from './translations';
 
 const OverlayContainer = styled.div`
-  ${({ $restrictWidth }: { $restrictWidth: boolean }) =>
-    `
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    width: ${$restrictWidth ? 'calc(100% - 36px)' : '100%'};
-    `}
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
 `;
 
 const FullScreenOverlayContainer = styled.div`
@@ -68,7 +65,6 @@ const FullScreenButtonIcon = styled(EuiButtonIcon)`
 `;
 
 interface OwnProps {
-  isEventViewer: boolean;
   timelineId: TimelineId;
 }
 
@@ -120,7 +116,7 @@ NavigationComponent.displayName = 'NavigationComponent';
 
 const Navigation = React.memo(NavigationComponent);
 
-const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }) => {
+const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
@@ -223,7 +219,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
     );
   } else {
     return (
-      <OverlayContainer data-test-subj="overlayContainer" $restrictWidth={isEventViewer}>
+      <OverlayContainer data-test-subj="overlayContainer">
         <EuiHorizontalRule margin="none" />
         <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
