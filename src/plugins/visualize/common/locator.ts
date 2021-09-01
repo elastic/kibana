@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord, Serializable } from '@kbn/utility-types';
 import { omitBy } from 'lodash';
 import type { ParsedQuery } from 'query-string';
 import { stringify } from 'query-string';
@@ -17,6 +17,9 @@ import { isFilterPinned } from '../../data/common';
 import { url } from '../../kibana_utils/common';
 import { GLOBAL_STATE_STORAGE_KEY, STATE_STORAGE_KEY, VisualizeConstants } from './constants';
 import { PureVisState } from './types';
+
+const removeEmptyKeys = (o: Record<string, Serializable>): Record<string, Serializable> =>
+  omitBy(o, (v) => v == null);
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type VisualizeLocatorParams = {
@@ -66,6 +69,16 @@ export type VisualizeLocatorParams = {
    * Whether this visualization is linked a saved search.
    */
   linked?: boolean;
+
+  /**
+   * The saved search used as the source of the visualization.
+   */
+  savedSearchId?: string;
+
+  /**
+   * The saved search used as the source of the visualization.
+   */
+  indexPattern?: string;
 };
 
 export type VisualizeAppLocator = LocatorPublic<VisualizeLocatorParams>;
@@ -75,39 +88,47 @@ export const VISUALIZE_APP_LOCATOR = 'VISUALIZE_APP_LOCATOR';
 export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLocatorParams> {
   id = VISUALIZE_APP_LOCATOR;
 
-  public async getLocation(params: VisualizeLocatorParams) {
-    let path = params.visId
-      ? `#${VisualizeConstants.EDIT_PATH}/${params.visId}`
+  public async getLocation({
+    visId,
+    timeRange,
+    filters,
+    refreshInterval,
+    linked,
+    uiState,
+    query,
+    vis,
+    type,
+    savedSearchId,
+    indexPattern,
+  }: VisualizeLocatorParams) {
+    let path = visId
+      ? `#${VisualizeConstants.EDIT_PATH}/${visId}`
       : `#${VisualizeConstants.CREATE_PATH}`;
 
-    const query: ParsedQuery = {
+    const urlState: ParsedQuery = {
       [GLOBAL_STATE_STORAGE_KEY]: rison.encode(
-        omitBy(
-          {
-            time: params.timeRange,
-            filters: params.filters?.filter((f) => isFilterPinned(f)),
-            refreshInterval: params.refreshInterval,
-          },
-          (v) => v == null
-        )
+        removeEmptyKeys({
+          time: timeRange,
+          filters: filters?.filter((f) => isFilterPinned(f)),
+          refreshInterval,
+        })
       ),
       [STATE_STORAGE_KEY]: rison.encode(
-        omitBy(
-          {
-            linked: params.linked,
-            filters: params.filters?.filter((f) => !isFilterPinned(f)),
-            uiState: params.uiState,
-            query: params.query,
-            vis: params.vis,
-          },
-          (v) => v == null
-        )
+        removeEmptyKeys({
+          linked,
+          filters: filters?.filter((f) => !isFilterPinned(f)),
+          uiState,
+          query,
+          vis,
+        })
       ),
     };
 
-    path += `?${stringify(url.encodeQuery(query), { encode: false, sort: false })}`;
+    path += `?${stringify(url.encodeQuery(urlState), { encode: false, sort: false })}`;
 
-    path = params.type ? `${path}&type=${params.type}` : path;
+    const otherParams = stringify({ type, savedSearchId, indexPattern });
+
+    if (otherParams) path += `&${otherParams}`;
 
     return {
       app: VisualizeConstants.APP_ID,

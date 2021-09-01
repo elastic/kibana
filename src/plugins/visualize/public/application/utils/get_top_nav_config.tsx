@@ -10,6 +10,7 @@ import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { parse } from 'query-string';
 
 import { Capabilities } from 'src/core/public';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
@@ -283,6 +284,7 @@ export const getTopNavConfig = (
       run: (anchorElement) => {
         if (share && !embeddableId) {
           const currentState = stateContainer.getState();
+          const searchParams = parse(history.location.search);
           const params: VisualizeLocatorParams = {
             visId: savedVis?.id,
             filters: currentState.filters,
@@ -293,6 +295,8 @@ export const getTopNavConfig = (
             query: currentState.query,
             vis: currentState.vis,
             linked: currentState.linked,
+            indexPattern: searchParams.indexPattern as string,
+            savedSearchId: searchParams.savedSearchId as string,
           };
           // TODO: support sharing in by-value mode
           share.toggleShareContextMenu({
