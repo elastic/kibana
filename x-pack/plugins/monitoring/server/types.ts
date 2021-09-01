@@ -228,11 +228,6 @@ export interface PipelinesResponse {
   pipelines: PipelineResponse[];
   totalPipelineCount: number;
 }
-export type PipelineWithSort = Pipeline &
-  {
-    [key in PipelineMetricKey]?: PipelineMetricsProcessed;
-  };
-
 export interface PipelineMetrics {
   bucket_size: string;
   timeRange: {
