@@ -46,7 +46,6 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
     }
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
-    pairs.push([displayKey ? displayKey : key, val]);
     const val = indexPattern.formatField(hit, key);
 
     if (typeof val === 'string') {
@@ -55,9 +54,7 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
     }
 
     if (displayKey) {
-      if (fieldsToShow.includes(displayKey)) {
-        pairs.push([displayKey, val]);
-      }
+      pairs.push([displayKey, val]);
     } else {
       pairs.push([key, val]);
     }
