@@ -34,7 +34,10 @@ jest.mock('@kbn/alerts', () => {
 });
 
 jest.mock('../../../common/utils/endpoint_alert_check', () => {
-  return { endpointAlertCheck: jest.fn().mockReturnValue(true) };
+  return {
+    isAlertFromEndpointAlert: jest.fn().mockReturnValue(true),
+    isAlertFromEndpointEvent: jest.fn().mockReturnValue(true),
+  };
 });
 
 jest.mock('../../../../common/endpoint/service/host_isolation/utils', () => {
