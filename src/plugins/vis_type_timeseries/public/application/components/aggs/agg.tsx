@@ -13,14 +13,13 @@ import { aggToComponent } from '../lib/agg_to_component';
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 import { UnsupportedAgg } from './unsupported_agg';
 import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
-import type { Metric, Panel, Series } from '../../../../common/types';
+import type { Metric, Panel, Series, SanitizedFieldType } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
-import { IFieldType } from '../../../../../data/common/index_patterns/fields';
 
 interface AggProps extends HTMLAttributes<HTMLElement> {
   disableDelete: boolean;
-  fields: IFieldType[];
+  fields: Record<string, SanitizedFieldType[]>;
   model: Metric;
   panel: Panel;
   series: Series;

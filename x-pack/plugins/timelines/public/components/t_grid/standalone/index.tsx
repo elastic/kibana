@@ -94,7 +94,13 @@ export interface TGridStandaloneProps {
   filters: Filter[];
   footerText: React.ReactNode;
   filterStatus: AlertStatus;
-  hasAlertsCrudPermissions: (featureId: string) => boolean;
+  hasAlertsCrudPermissions: ({
+    ruleConsumer,
+    ruleProducer,
+  }: {
+    ruleConsumer: string;
+    ruleProducer?: string;
+  }) => boolean;
   height?: number;
   indexNames: string[];
   itemsPerPageOptions: number[];
@@ -229,8 +235,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       hasAlertsCrud: boolean;
       totalSelectAllAlerts: number;
     }>(
-      (acc, [featureId, nbrAlerts]) => {
-        const featureHasPermission = hasAlertsCrudPermissions(featureId);
+      (acc, [ruleConsumer, nbrAlerts]) => {
+        const featureHasPermission = hasAlertsCrudPermissions({ ruleConsumer });
         return {
           hasAlertsCrud: featureHasPermission || acc.hasAlertsCrud,
           totalSelectAllAlerts: featureHasPermission
@@ -405,7 +411,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             </EventsContainerLoading>
           </>
         ) : null}
-        <AddToCaseAction {...addToCaseActionProps} />
+        <AddToCaseAction {...addToCaseActionProps} disableAlerts />
       </AlertsTableWrapper>
     </InspectButtonContainer>
   );
