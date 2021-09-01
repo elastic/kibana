@@ -99,7 +99,7 @@ export type CreateSecurityRuleTypeFactory = (options: {
   ruleDataClient: IRuleDataClient;
   ruleDataService: IRuleDataPluginService;
 }) => <
-  TParams extends RuleParams & { index: string[] | undefined },
+  TParams extends RuleParams & { index?: string[] | undefined },
   TAlertInstanceContext extends AlertInstanceContext,
   TServices extends PersistenceServices<TAlertInstanceContext>,
   TState extends AlertTypeState
@@ -124,6 +124,7 @@ export interface CreateRuleOptions {
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  ml?: SetupPlugins['ml'];
   ruleDataClient: IRuleDataClient;
   version: string;
   ruleDataService: IRuleDataPluginService;

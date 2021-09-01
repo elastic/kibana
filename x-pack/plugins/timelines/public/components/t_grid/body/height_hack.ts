@@ -40,9 +40,9 @@ export const useDataGridHeightHack = (pageSize: number, rowCount: number) => {
         gridVirtualized &&
         gridVirtualized.children[0].clientHeight !== gridVirtualized.clientHeight // check if it has vertical scroll
       ) {
-        setHeight((currentHeight) => {
+        setHeight((currHeight) => {
           return (
-            currentHeight +
+            currHeight +
             gridVirtualized.children[0].clientHeight -
             gridVirtualized.clientHeight +
             MAGIC_GAP
