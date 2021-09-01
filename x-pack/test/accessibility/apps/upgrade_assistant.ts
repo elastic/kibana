@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.upgradeAssistant.navigateToPage();
 
       try {
-        // Create an index that will trigger deprecation warnings to test the ES deprecations page
+        // Create two indices that will trigger deprecation warnings to test the ES deprecations page
         await es.indices.create(multiFieldsIndexDeprecation);
         await es.indices.create(translogSettingsIndexDeprecation);
       } catch (e) {

@@ -41,7 +41,7 @@ export class UpgradeAssistantPageObject extends FtrService {
     });
   }
 
-  async clickEsDeprecation(deprecationType: 'indexSettings' | 'default') {
+  async clickEsDeprecation(deprecationType: 'indexSettings' | 'default' | 'reindex' | 'ml') {
     const table = await this.testSubjects.find('esDeprecationsTable');
     const deprecationIssueLink = await (
       await table.findByTestSubject(`${deprecationType}TableCell-message`)
