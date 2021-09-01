@@ -11,7 +11,7 @@ import type { KibanaRequest } from '../../http';
 import type { Logger } from '../../logging';
 import { SavedObjectsClientContract, SavedObjectsExportablePredicate } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { getObjKey, ObjectKey } from '../service/lib';
+import { getObjKey, ObjectKeyProvider } from '../import/lib';
 import type { SavedObjectsExportTransform } from './types';
 import { applyExportTransforms } from './apply_export_transforms';
 
@@ -51,8 +51,6 @@ interface ObjectMetaFields {
 
 export type ExclusionReason = 'predicate_error' | 'excluded';
 
-type KeyBuilder = (obj: ObjectMetaFields) => string;
-
 export const collectExportedObjects = async ({
   objects,
   includeReferences = true,
@@ -70,7 +68,7 @@ export const collectExportedObjects = async ({
   const collectedNonExportableObjects: ExcludedObject[] = [];
   const alreadyProcessed: Set<string> = new Set();
 
-  const objKey: KeyBuilder = (obj: ObjectMetaFields) => getObjKey(obj, typeRegistry);
+  const objKey: ObjectKeyProvider = (obj: ObjectMetaFields) => getObjKey(obj, typeRegistry);
 
   let currentObjects = objects;
   do {
@@ -143,8 +141,8 @@ interface CollectedReference {
 
 const collectReferences = (
   objects: SavedObject[],
-  alreadyProcessed: Set<ObjectKey>,
-  objKey: KeyBuilder
+  alreadyProcessed: Set<string>,
+  objKey: ObjectKeyProvider
 ): CollectedReference[] => {
   const references: Map<string, CollectedReference> = new Map();
   objects.forEach((obj) => {
@@ -276,7 +274,7 @@ const splitByExportability = (
   };
 };
 
-const splitByKeys = (objects: SavedObject[], keys: ObjectKey[], objKey: KeyBuilder) => {
+const splitByKeys = (objects: SavedObject[], keys: string[], objKey: ObjectKeyProvider) => {
   const included: SavedObject[] = [];
   const excluded: SavedObject[] = [];
   objects.forEach((obj) => {
