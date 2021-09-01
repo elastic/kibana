@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback, useState } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { EuiMutationObserver } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';

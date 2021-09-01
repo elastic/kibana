@@ -147,9 +147,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const { renderApp } = await this.lazyApplicationDependencies();
-        if (startPlugins.timelines && this._store) {
-          startPlugins.timelines.setTGridEmbeddedStore(this._store);
-        }
         return renderApp({
           ...params,
           services: await startServices,

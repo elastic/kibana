@@ -78,7 +78,7 @@ describe('GraphOverlay', () => {
           <GraphOverlay
             timelineId={TimelineId.test}
             isEventViewer={isEventViewer}
-            isDataGridExpanded={false}
+            isDataGridExpanded={true}
           />
         </TestProviders>
       );
