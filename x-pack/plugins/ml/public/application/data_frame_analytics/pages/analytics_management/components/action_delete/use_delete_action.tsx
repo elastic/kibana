@@ -89,10 +89,10 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       );
     }
   };
-  const checkUserIndexPermission = () => {
+  const checkUserIndexPermission = async () => {
     try {
       const userCanDelete = canDeleteIndex(indexName, toastNotificationService);
-      if (userCanDelete) {
+      if (await userCanDelete) {
         setUserCanDeleteIndex(true);
       }
     } catch (e) {
