@@ -346,6 +346,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
     arg: BaseBuildColumnArgs & {
       previousColumn?: IndexPatternColumn;
     },
+    // @ts-ignore, TS not able to dig into this depth, https://github.com/elastic/kibana/issues/110761
     columnParams?: (IndexPatternColumn & C)['params']
   ) => C;
   /**
@@ -387,6 +388,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
       field: IndexPatternField;
       previousColumn?: IndexPatternColumn;
     },
+    // @ts-ignore, TS not able to dig into this depth, https://github.com/elastic/kibana/issues/110761
     columnParams?: (IndexPatternColumn & C)['params'] & {
       kql?: string;
       lucene?: string;
