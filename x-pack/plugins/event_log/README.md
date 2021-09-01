@@ -271,6 +271,7 @@ Request Body:
 |Property|Description|Type|
 |---|---|---|
 |ids|The array ids of the saved object.|string array|
+|legacyIds|The array legacy ids of the saved object. This filter applies to the rules creted in Kibana versions before 8.0.0.|string array|
 
 Response body:
 

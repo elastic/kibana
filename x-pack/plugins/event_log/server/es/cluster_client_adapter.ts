@@ -53,7 +53,7 @@ interface QueryOptionsEventsBySavedObjectFilter {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AliasAny = any;
 
-const KIBANA_VERSION_8_0_0 = '8.0.0';
+const LEGACY_ID_CUTOFF_VERSION = '8.0.0';
 
 export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string } = Doc> {
   private readonly logger: Logger;
@@ -305,7 +305,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
           {
             range: {
               'kibana.version': {
-                gte: KIBANA_VERSION_8_0_0,
+                gte: LEGACY_ID_CUTOFF_VERSION,
               },
             },
           },
@@ -340,7 +340,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
                   {
                     range: {
                       'kibana.version': {
-                        lt: KIBANA_VERSION_8_0_0,
+                        lt: LEGACY_ID_CUTOFF_VERSION,
                       },
                     },
                   },

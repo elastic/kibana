@@ -186,9 +186,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe(`Legacy Ids`, () => {
-      it('should support search event by ids and legacyIds', async () => {
+      before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/event_log_multiple_indicies');
-
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_multiple_indicies');
+      });
+      it('should support search event by ids and legacyIds', async () => {
         const legacyId = `521f2511-5cd1-44fd-95df-e0df83e354d5`;
         const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
 
@@ -209,13 +213,9 @@ export default function ({ getService }: FtrProviderContext) {
           'test legacy 2020-10-28T15:19:55.962Z',
           'test 2020-10-28T15:19:55.962Z',
         ]);
-
-        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_multiple_indicies');
       });
 
-      it('should search event only by ids if no legacyIds was setting', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/event_log_multiple_indicies');
-
+      it('should search event only by ids if no legacyIds are provided', async () => {
         const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
 
         const {
@@ -233,8 +233,6 @@ export default function ({ getService }: FtrProviderContext) {
           'test 2020-10-28T15:19:55.938Z',
           'test 2020-10-28T15:19:55.962Z',
         ]);
-
-        await esArchiver.unload('x-pack/test/functional/es_archives/event_log_multiple_indicies');
       });
     });
   });
