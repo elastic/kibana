@@ -36,14 +36,6 @@ export interface DeprecationDetailsFlyoutProps {
 }
 
 const i18nTexts = {
-  getDeprecationTitle: (domainId: string) => {
-    return i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.flyout.flyoutTitle', {
-      defaultMessage: "'{domainId}' is using a deprecated feature",
-      values: {
-        domainId,
-      },
-    });
-  },
   learnMoreLinkLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.flyout.learnMoreLinkLabel',
     {
@@ -137,16 +129,13 @@ export const DeprecationDetailsFlyout = ({
   resolveDeprecation,
   deprecationResolutionState,
 }: DeprecationDetailsFlyoutProps) => {
-  const { documentationUrl, message, correctiveActions, domainId } = deprecation;
+  const { documentationUrl, message, correctiveActions, title } = deprecation;
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          {/* This will be replaced with a custom title once https://github.com/elastic/kibana/pull/109840 is merged  */}
-          <h2 id="kibanaDeprecationDetailsFlyoutTitle">
-            {i18nTexts.getDeprecationTitle(domainId)}
-          </h2>
+          <h2 id="kibanaDeprecationDetailsFlyoutTitle">{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

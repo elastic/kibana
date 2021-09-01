@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Deprecation details flyout', async () => {
         await PageObjects.upgradeAssistant.clickKibanaDeprecation(
-          'xpack.securitySolution is using a deprecated feature' // This deprecation was added to the test runner config so should be guaranteed
+          'xpack.securitySolution has a deprecated setting' // This deprecation was added to the test runner config so should be guaranteed
         );
 
         await retry.waitFor('Kibana deprecation details flyout to be visible', async () => {

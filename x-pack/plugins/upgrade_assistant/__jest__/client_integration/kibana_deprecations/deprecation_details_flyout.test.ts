@@ -47,9 +47,7 @@ describe('Kibana deprecation details flyout', () => {
       await actions.table.clickDeprecationAt(1);
 
       expect(exists('kibanaDeprecationDetails')).toBe(true);
-      expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
-        `'${manualDeprecation.domainId}' is using a deprecated feature`
-      );
+      expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(manualDeprecation.title);
       expect(find('manualStepsList').find('li').length).toEqual(
         manualDeprecation.correctiveActions.manualSteps.length
       );
@@ -69,7 +67,7 @@ describe('Kibana deprecation details flyout', () => {
 
       expect(exists('kibanaDeprecationDetails')).toBe(true);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
-        `'${quickResolveDeprecation.domainId}' is using a deprecated feature`
+        quickResolveDeprecation.title
       );
       expect(find('manualStepsList').find('li').length).toEqual(
         quickResolveDeprecation.correctiveActions.manualSteps.length
@@ -108,7 +106,7 @@ describe('Kibana deprecation details flyout', () => {
 
       expect(exists('kibanaDeprecationDetails')).toBe(true);
       expect(find('kibanaDeprecationDetails.flyoutTitle').text()).toBe(
-        `'${quickResolveDeprecation.domainId}' is using a deprecated feature`
+        quickResolveDeprecation.title
       );
 
       // Quick resolve callout and button should display

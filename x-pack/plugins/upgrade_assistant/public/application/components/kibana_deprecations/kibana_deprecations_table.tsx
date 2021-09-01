@@ -80,14 +80,6 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
-  getDeprecationIssue: (domainId: string) => {
-    return i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.table.issueCellDescription', {
-      defaultMessage: '{domainId} is using a deprecated feature',
-      values: {
-        domainId,
-      },
-    });
-  },
   criticalBadgeLabel: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.table.criticalBadgeLabel',
     {
@@ -131,22 +123,18 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       },
     },
     {
-      field: 'domainId',
+      field: 'title',
       width: '40%',
       name: i18nTexts.issueColumnTitle,
       truncateText: true,
       sortable: true,
-      render: (
-        domainId: KibanaDeprecationDetails['domainId'],
-        deprecation: KibanaDeprecationDetails
-      ) => {
+      render: (title: KibanaDeprecationDetails['title'], deprecation: KibanaDeprecationDetails) => {
         return (
           <EuiLink
             onClick={() => toggleFlyout(deprecation)}
             data-test-subj="deprecationDetailsLink"
           >
-            {/* This will be replaced with a custom title once https://github.com/elastic/kibana/pull/109840 is merged  */}
-            {i18nTexts.getDeprecationIssue(domainId)}
+            {title}
           </EuiLink>
         );
       },
