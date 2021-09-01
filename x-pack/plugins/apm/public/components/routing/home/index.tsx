@@ -45,10 +45,10 @@ export const ServiceInventoryTitle = i18n.translate(
   }
 );
 
-export const BackendInventoryTitle = i18n.translate(
-  'xpack.apm.views.backendInventory.title',
+export const DependenciesInventoryTitle = i18n.translate(
+  'xpack.apm.views.dependenciesInventory.title',
   {
-    defaultMessage: 'Backends',
+    defaultMessage: 'Dependencies',
   }
 );
 
@@ -114,7 +114,7 @@ export const home = {
         },
         page({
           path: '/',
-          title: BackendInventoryTitle,
+          title: DependenciesInventoryTitle,
           element: <BackendInventory />,
         }),
       ],

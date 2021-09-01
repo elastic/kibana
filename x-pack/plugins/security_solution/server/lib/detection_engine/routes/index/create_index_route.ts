@@ -25,7 +25,6 @@ import { buildSiemResponse } from '../utils';
 import {
   createSignalsFieldAliases,
   getSignalsTemplate,
-  getRbacRequiredFields,
   SIGNALS_TEMPLATE_VERSION,
   SIGNALS_FIELD_ALIASES_VERSION,
   ALIAS_VERSION_FIELD,
@@ -89,7 +88,7 @@ export const createDetectionIndex = async (
   ruleDataService: RuleDataPluginService,
   ruleRegistryEnabled: boolean
 ): Promise<void> => {
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const spaceId = siemClient.getSpaceId();
 
   if (!siemClient) {
@@ -132,11 +131,11 @@ export const createDetectionIndex = async (
     // for BOTH the index AND alias name. However, through 7.14 admins only needed permissions for .siem-signals (the index)
     // and not .alerts-security.alerts (the alias). From the security solution perspective, all .siem-signals-<space id>-*
     // indices should have an alias to .alerts-security.alerts-<space id> so it's safe to add those aliases as the internal user.
-    await addIndexAliases({
-      esClient: context.core.elasticsearch.client.asInternalUser,
-      index,
-      aadIndexAliasName,
-    });
+    // await addIndexAliases({
+    //   esClient: context.core.elasticsearch.client.asInternalUser,
+    //   index,
+    //   aadIndexAliasName,
+    // });
     const indexVersion = await getIndexVersion(esClient, index);
     if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
       await esClient.indices.rollover({ alias: index });
@@ -166,7 +165,7 @@ const addFieldAliasesToIndices = async ({
       properties: {
         ...signalExtraFields,
         ...fieldAliases,
-        ...getRbacRequiredFields(spaceId),
+        // ...getRbacRequiredFields(spaceId),
       },
       _meta: {
         version: currentVersion,
@@ -181,26 +180,26 @@ const addFieldAliasesToIndices = async ({
   }
 };
 
-const addIndexAliases = async ({
-  esClient,
-  index,
-  aadIndexAliasName,
-}: {
-  esClient: ElasticsearchClient;
-  index: string;
-  aadIndexAliasName: string;
-}) => {
-  const { body: indices } = await esClient.indices.getAlias({ name: index });
-  const aliasActions = {
-    actions: Object.keys(indices).map((concreteIndexName) => {
-      return {
-        add: {
-          index: concreteIndexName,
-          alias: aadIndexAliasName,
-          is_write_index: false,
-        },
-      };
-    }),
-  };
-  await esClient.indices.updateAliases({ body: aliasActions });
-};
+// const addIndexAliases = async ({
+//   esClient,
+//   index,
+//   aadIndexAliasName,
+// }: {
+//   esClient: ElasticsearchClient;
+//   index: string;
+//   aadIndexAliasName: string;
+// }) => {
+//   const { body: indices } = await esClient.indices.getAlias({ name: index });
+//   const aliasActions = {
+//     actions: Object.keys(indices).map((concreteIndexName) => {
+//       return {
+//         add: {
+//           index: concreteIndexName,
+//           alias: aadIndexAliasName,
+//           is_write_index: false,
+//         },
+//       };
+//     }),
+//   };
+//   await esClient.indices.updateAliases({ body: aliasActions });
+// };

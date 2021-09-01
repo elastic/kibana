@@ -15,7 +15,7 @@ export function useClusters(clusterUuid?: string | null, ccs?: any, codePaths?: 
   const [min] = useState(bounds.min.toISOString());
   const [max] = useState(bounds.max.toISOString());
 
-  const [clusters, setClusters] = useState([]);
+  const [clusters, setClusters] = useState([] as any);
   const [loaded, setLoaded] = useState<boolean | null>(false);
 
   let url = '../api/monitoring/v1/clusters';
