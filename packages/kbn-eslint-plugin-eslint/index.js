@@ -12,5 +12,6 @@ module.exports = {
     'disallow-license-headers': require('./rules/disallow_license_headers'),
     'no-restricted-paths': require('./rules/no_restricted_paths'),
     module_migration: require('./rules/module_migration'),
+    no_async_promise_body: require('./rules/no_async_promise_body'),
   },
 };

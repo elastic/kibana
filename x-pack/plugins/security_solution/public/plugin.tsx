@@ -33,7 +33,6 @@ import {
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
-import { BASE_RAC_ALERTS_API_PATH } from '../../rule_registry/common/constants';
 
 import {
   APP_ID,
@@ -42,7 +41,7 @@ import {
   APP_PATH,
   DEFAULT_INDEX_KEY,
   APP_ICON_SOLUTION,
-  SERVER_APP_ID,
+  DETECTION_ENGINE_INDEX_URL,
   SOURCERER_API_URL,
 } from '../common/constants';
 
@@ -330,17 +329,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     subPlugins: StartedSubPlugins
   ): Promise<SecurityAppStore> {
     if (!this._store) {
+
       let signal: { name: string | null } = { name: null };
       try {
-        const { index_name: indexName } = await coreStart.http.fetch(
-          `${BASE_RAC_ALERTS_API_PATH}/index`,
-          {
-            method: 'GET',
-            query: { features: SERVER_APP_ID },
-          }
-        );
-        console.log({ indexName });
-        signal = { name: indexName[0] };
+        // const { index_name: indexName } = await coreStart.http.fetch(
+        //   `${BASE_RAC_ALERTS_API_PATH}/index`,
+        //   {
+        //     method: 'GET',
+        //     query: { features: SERVER_APP_ID },
+        //   }
+        // );
+        // signal = { name: indexName[0] };
+        signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+          method: 'GET',
+        });
       } catch {
         signal = { name: null };
       }
@@ -395,6 +397,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         };
       });
       console.log('PLUGIN.tsx: kips', kips);
+
       const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
 
@@ -454,9 +457,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.storage,
         [...(subPlugins.management.store.middleware ?? [])]
       );
-      if (startPlugins.timelines) {
-        startPlugins.timelines.setTGridEmbeddedStore(this._store);
-      }
+    }
+    if (startPlugins.timelines) {
+      startPlugins.timelines.setTGridEmbeddedStore(this._store);
     }
     return this._store;
   }
