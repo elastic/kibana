@@ -161,7 +161,6 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
   );
 
   const isInTimeline = timelineId === TimelineId.active;
-  console.log(isInTimeline);
   const onCloseOverlay = useCallback(() => {
     if (timelineId === TimelineId.active) {
       setTimelineFullScreen(false);
@@ -224,10 +223,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
     );
   } else {
     return (
-      <OverlayContainer
-        data-test-subj="overlayContainer"
-        $restrictWidth={isEventViewer && isInTimeline}
-      >
+      <OverlayContainer data-test-subj="overlayContainer" $restrictWidth={isEventViewer}>
         <EuiHorizontalRule margin="none" />
         <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
