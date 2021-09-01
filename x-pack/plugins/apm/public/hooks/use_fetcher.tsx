@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useInspectorContext } from '../context/inspector/use_inspector_context';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import {
   AutoAbortedAPMClient,
@@ -77,6 +78,7 @@ export function useFetcher<TReturn>(
   });
   const [counter, setCounter] = useState(0);
   const { timeRangeId } = useTimeRangeId();
+  const { addInspectorRequest } = useInspectorContext();
 
   useEffect(() => {
     let controller: AbortController = new AbortController();
@@ -164,6 +166,14 @@ export function useFetcher<TReturn>(
     ...fnDeps,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
+
+  useEffect(() => {
+    if (result.error) {
+      addInspectorRequest({ ...result, data: result.error.body?.attributes });
+    } else {
+      addInspectorRequest(result);
+    }
+  }, [addInspectorRequest, result]);
 
   return useMemo(() => {
     return {

@@ -62,10 +62,18 @@ export function getActionsMigrations(
     pipeMigrations(addisMissingSecretsField)
   );
 
+  const migrationActions800 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawAction>): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      true,
+    (doc) => doc // no-op
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
     '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
+    '8.0.0': executeMigrationWithErrorHandling(migrationActions800, '8.0.0'),
   };
 }
 
