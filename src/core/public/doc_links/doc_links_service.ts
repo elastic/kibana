@@ -30,6 +30,10 @@ export class DocLinksService {
       ELASTIC_WEBSITE_URL,
       links: {
         settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
+        apm: {
+          kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
+          supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
+        },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
         },
@@ -453,6 +457,10 @@ export interface DocLinksStart {
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
     readonly settings: string;
+    readonly apm: {
+      readonly kibanaSettings: string;
+      readonly supportedServiceMaps: string;
+    };
     readonly canvas: {
       readonly guide: string;
     };
