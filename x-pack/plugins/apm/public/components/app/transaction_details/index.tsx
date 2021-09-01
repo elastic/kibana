@@ -11,6 +11,8 @@ import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 
 import { TransactionDetailsTabs } from './transaction_details_tabs';
@@ -31,8 +33,14 @@ export function TransactionDetails() {
     }),
   });
 
+  const { kuery } = query;
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
+
   return (
     <>
+      {fallbackToTransactions && <AggregatedTransactionsBadge />}
       <EuiSpacer size="s" />
 
       <EuiTitle>
