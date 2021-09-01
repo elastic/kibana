@@ -22,7 +22,7 @@ const ApplicationRequiredCalloutComponent: React.FC = () => {
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.applicationRequiredCallout',
           {
             defaultMessage:
-              'In order to create this connector, please go to the ServiceNow Store and install the Elastic application.',
+              'Elastic application is required. Please go to the ServiceNow Store and install the Elastic application.',
           }
         )}
       />
