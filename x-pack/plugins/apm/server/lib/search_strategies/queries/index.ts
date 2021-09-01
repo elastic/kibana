@@ -13,4 +13,4 @@ export { fetchTransactionDurationPercentiles } from './query_percentiles';
 export { fetchTransactionDurationCorrelation } from './query_correlation';
 export { fetchTransactionDurationHistograms } from './query_histograms_generator';
 export { fetchTransactionDurationHistogramRangeSteps } from './query_histogram_range_steps';
-export { fetchTransactionDurationRanges, HistogramItem } from './query_ranges';
+export { fetchTransactionDurationRanges } from './query_ranges';

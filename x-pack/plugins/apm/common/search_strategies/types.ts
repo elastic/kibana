@@ -5,6 +5,19 @@
  * 2.0.
  */
 
+export interface HistogramItem {
+  key: number;
+  doc_count: number;
+}
+
+export interface ResponseHitSource {
+  [s: string]: unknown;
+}
+
+export interface ResponseHit {
+  _source: ResponseHitSource;
+}
+
 export interface RawResponseBase {
   ccsWarning: boolean;
   took: number;

@@ -99,6 +99,9 @@ export function TransactionDistribution({
   );
   const { error, isRunning } = state;
   const { percentileThresholdValue } = data;
+  // If loading stopped but we didn't receive any histogram data
+  // set it to an empty error so that the chart component finishes
+  // its loading state.
   const overallHistogram =
     data.overallHistogram === undefined && !isRunning
       ? []

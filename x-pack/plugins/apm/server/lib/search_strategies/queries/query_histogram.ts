@@ -13,8 +13,8 @@ import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldname
 import type {
   HistogramItem,
   ResponseHit,
-} from '../../../../common/search_strategies/latency_correlations/types';
-import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
+  SearchStrategyParams,
+} from '../../../../common/search_strategies/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';

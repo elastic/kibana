@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import { RawResponseBase, SearchStrategyClientParams } from '../types';
-
-export interface HistogramItem {
-  key: number;
-  doc_count: number;
-}
-
-export interface ResponseHitSource {
-  [s: string]: unknown;
-}
-
-export interface ResponseHit {
-  _source: ResponseHitSource;
-}
+import {
+  HistogramItem,
+  RawResponseBase,
+  SearchStrategyClientParams,
+} from '../types';
 
 export interface LatencyCorrelation {
   histogram: HistogramItem[];

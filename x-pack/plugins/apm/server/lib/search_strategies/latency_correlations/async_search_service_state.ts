@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import type { HistogramItem } from '../../../../common/search_strategies/types';
 import type {
   AsyncSearchProviderProgress,
   LatencyCorrelation,
 } from '../../../../common/search_strategies/latency_correlations/types';
-
-import type { HistogramItem } from '../queries';
 
 export const asyncSearchServiceStateProvider = () => {
   let ccsWarning = false;

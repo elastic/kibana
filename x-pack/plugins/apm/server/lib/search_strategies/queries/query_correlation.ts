@@ -10,22 +10,13 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
-import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
+import type {
+  ResponseHit,
+  SearchStrategyParams,
+} from '../../../../common/search_strategies/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
-
-export interface HistogramItem {
-  key: number;
-  doc_count: number;
-}
-
-interface ResponseHitSource {
-  [s: string]: unknown;
-}
-interface ResponseHit {
-  _source: ResponseHitSource;
-}
 
 export interface BucketCorrelation {
   buckets_path: string;
