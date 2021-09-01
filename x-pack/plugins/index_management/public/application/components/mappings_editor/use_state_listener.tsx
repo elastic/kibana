@@ -94,17 +94,25 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
       validate: async () => {
         const configurationFormValidator =
           state.configuration.submitForm !== undefined
-            ? new Promise(async (resolve) => {
-                const { isValid } = await state.configuration.submitForm!();
-                resolve(isValid);
+            ? new Promise(async (resolve, reject) => {
+                try {
+                  const { isValid } = await state.configuration.submitForm!();
+                  resolve(isValid);
+                } catch (error) {
+                  reject(error);
+                }
               })
             : Promise.resolve(true);
 
         const templatesFormValidator =
           state.templates.submitForm !== undefined
-            ? new Promise(async (resolve) => {
-                const { isValid } = await state.templates.submitForm!();
-                resolve(isValid);
+            ? new Promise(async (resolve, reject) => {
+                try {
+                  const { isValid } = await state.templates.submitForm!();
+                  resolve(isValid);
+                } catch (error) {
+                  reject(error);
+                }
               })
             : Promise.resolve(true);
 

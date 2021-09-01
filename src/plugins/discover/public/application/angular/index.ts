@@ -8,10 +8,6 @@
 
 // required for i18nIdDirective
 import 'angular-sanitize';
-// required for ngRoute
-import 'angular-route';
 
-import './discover';
 import './doc';
 import './context';
-import './redirect';
