@@ -93,6 +93,16 @@ services:
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
 --------------------------------------------
 
+==== Persisting the Kibana keystore
+
+By default, Kibana will auto-generate a keystore file for secure settings at start up. If you want to persist your {kibana-ref}/secure-settings.html[secure settings], you must use the `kibana-keystore` utility to bind-mount the keystore's parent-directory to the container. For example
+
+[source,sh]
+----
+docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data docker.elastic.co/kibana/kibana:7.14.0 bin/kibana-keystore create
+docker run -it --rm -v full_path_to/config:/usr/share/kibana/config -v full_path_to/data:/usr/share/kibana/data docker.elastic.co/kibana/kibana:7.14.0 bin/kibana-keystore add test_keystore_setting
+----
+
 [float]
 [[environment-variable-config]]
 ==== Environment variable configuration
