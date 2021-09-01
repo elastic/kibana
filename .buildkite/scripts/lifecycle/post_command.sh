@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get is_test_execution_step --default '')"
+IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_test_execution_step" --default '')"
 
 if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'target/junit/**/*'

@@ -51,5 +51,5 @@ docker_run() {
 }
 
 is_test_execution_step() {
-  buildkite-agent meta-data set 'is_test_execution_step' 'true'
+  buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'true'
 }
