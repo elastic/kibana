@@ -116,21 +116,29 @@ export const waitFor = async (
   timeoutWait: number = 10
 ) => {
   await new Promise<void>(async (resolve, reject) => {
-    let found = false;
-    let numberOfTries = 0;
-    while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
-      const itPasses = await functionToTest();
-      if (itPasses) {
-        found = true;
-      } else {
-        numberOfTries++;
+    try {
+      let found = false;
+      let numberOfTries = 0;
+
+      while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+        const itPasses = await functionToTest();
+
+        if (itPasses) {
+          found = true;
+        } else {
+          numberOfTries++;
+        }
+
+        await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
       }
-      await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
-    }
-    if (found) {
-      resolve();
-    } else {
-      reject(new Error(`timed out waiting for function ${functionName} condition to be true`));
+
+      if (found) {
+        resolve();
+      } else {
+        reject(new Error(`timed out waiting for function ${functionName} condition to be true`));
+      }
+    } catch (error) {
+      reject(error);
     }
   });
 };
