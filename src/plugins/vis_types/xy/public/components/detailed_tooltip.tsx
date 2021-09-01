@@ -19,7 +19,7 @@ import {
 import { Aspects } from '../types';
 
 import './_detailed_tooltip.scss';
-import { COMPLEX_SPLIT_ACCESSOR, isRangeAggType } from '../utils/accessors';
+import { COMPLEX_SPLIT_ACCESSOR, isSimpleField } from '../utils/accessors';
 
 interface TooltipData {
   label: string;
@@ -34,10 +34,13 @@ export const getTooltipData = (
   const data: TooltipData[] = [];
 
   if (header) {
-    const xFormatter = isRangeAggType(aspects.x.aggType) ? null : aspects.x.formatter;
     data.push({
       label: aspects.x.title,
-      value: xFormatter ? xFormatter(header.value) : `${header.value}`,
+      // already formatted while execiting accessor on such a complex field as `*_range`
+      value:
+        isSimpleField(aspects.x.format) && aspects.x.formatter
+          ? aspects.x.formatter(header.value)
+          : `${header.value}`,
     });
   }
 
@@ -47,14 +50,20 @@ export const getTooltipData = (
   if (yAccessor) {
     data.push({
       label: yAccessor.title,
-      value: yAccessor.formatter ? yAccessor.formatter(value.value) : `${value.value}`,
+      value:
+        isSimpleField(yAccessor.format) && yAccessor.formatter
+          ? yAccessor.formatter(value.value)
+          : `${value.value}`,
     });
   }
 
   if (aspects.z && !isNil(value.markValue)) {
     data.push({
       label: aspects.z.title,
-      value: aspects.z.formatter ? aspects.z.formatter(value.markValue) : `${value.markValue}`,
+      value:
+        isSimpleField(aspects.z.format) && aspects.z.formatter
+          ? aspects.z.formatter(value.markValue)
+          : `${value.markValue}`,
     });
   }
 

@@ -306,10 +306,10 @@ const VisComponent = (props: VisComponentProps) => {
     [config.aspects.series]
   );
   const splitChartColumnAccessor = config.aspects.splitColumn
-    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitColumn)
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(config.aspects.splitColumn)
     : undefined;
   const splitChartRowAccessor = config.aspects.splitRow
-    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitRow)
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(config.aspects.splitRow)
     : undefined;
   // -------------------------------------------------------------------------------------------------------
 
@@ -348,6 +348,7 @@ const VisComponent = (props: VisComponentProps) => {
       ),
     [getSeriesName, legendPosition, props.uiState, setColor, visParams.palette.name]
   );
+
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle

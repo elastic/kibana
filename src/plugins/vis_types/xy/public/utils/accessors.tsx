@@ -7,7 +7,7 @@
  */
 
 import { AccessorFn, Accessor } from '@elastic/charts';
-import { BUCKET_TYPES } from '../../../../data/public';
+import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { FakeParams } from '../../../../visualizations/public';
 import { Aspect } from '../types';
 
@@ -27,35 +27,37 @@ const getFieldName = (fieldName: string, index?: number) => {
   return `${fieldName}${indexStr}`;
 };
 
-export const isRangeAggType = (type: string | null) =>
-  type === BUCKET_TYPES.DATE_RANGE || type === BUCKET_TYPES.RANGE || type === BUCKET_TYPES.IP_RANGE;
+export const isSimpleField = (format: Aspect['format']) => {
+  const simpleFormats: string[] = [
+    KBN_FIELD_TYPES.STRING,
+    KBN_FIELD_TYPES.NUMBER,
+    KBN_FIELD_TYPES.DATE,
+    KBN_FIELD_TYPES.BOOLEAN,
+  ];
+  return simpleFormats.includes(format?.id ?? '');
+};
 
 /**
  * Returns accessor function for complex accessor types
  * @param aspect
  * @param isComplex - forces to be functional/complex accessor
  */
-export const getComplexAccessor = (fieldName: string, isComplex: boolean = false) => (
+export const getComplexAccessor = (fieldName: string) => (
   aspect: Aspect,
   index?: number
 ): Accessor | AccessorFn | undefined => {
   if (!aspect.accessor) {
     return;
   }
-
-  if (!((isComplex || isRangeAggType(aspect.aggType)) && aspect.formatter)) {
-    return aspect.accessor;
-  }
-
   const formatter = aspect.formatter;
   const accessor = aspect.accessor;
+
   const fn: AccessorFn = (d) => {
     const v = d[accessor];
     if (v === undefined) {
       return;
     }
-    const f = formatter(v);
-    return f;
+    return isSimpleField(aspect.format) ? v : formatter?.(v) ?? v;
   };
 
   fn.fieldName = getFieldName(fieldName, index);

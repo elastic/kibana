@@ -82,25 +82,16 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      // @TODO: should move this special logic, related to aggs to the separate `fn`, out of `xy_vis` rendering logic
-      // it is not related to the visualization, those are details of querying/filtering data, not rendering.
-      const yAspects = aspects.y.filter(({ aggId, aggType, accessor }) => {
-        if (
-          aggType === METRIC_TYPES.PERCENTILES ||
-          aggType === METRIC_TYPES.PERCENTILE_RANKS ||
-          aggType === METRIC_TYPES.STD_DEV
-        ) {
-          return aggId?.includes(paramId) && accessor !== null;
-        } else {
-          return aggId === paramId && accessor !== null;
-        }
-      });
-      // ------------------------------------------------------------------------------------------------------------
+      const yAspects = aspects.y.filter(
+        ({ aggId, accessor }) =>
+          ((Array.isArray(aggId) && aggId?.includes(paramId)) || aggId === paramId) &&
+          accessor !== null
+      );
 
       if (!show || !yAspects.length) {
         return null;
       }
-      const yAccessors = yAspects.map((aspect) => aspect.accessor) as string[];
+      const yAccessors: string[] = yAspects.map((aspect) => aspect.accessor ?? '');
 
       const id = `${type}-${yAccessors[0]}`;
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
@@ -148,7 +139,6 @@ export const renderAllSeries = (
         case ChartType.Area:
         case ChartType.Line:
           const markSizeAccessor = showCircles ? aspects.z?.accessor ?? undefined : undefined;
-
           return (
             <AreaSeries
               key={id}

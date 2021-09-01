@@ -11,6 +11,7 @@ import { CoreSetup, DocLinksStart } from '../../../../core/public';
 import { createGetterSetter } from '../../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../charts/public';
+import { FieldFormatsStart } from '../../../field_formats/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<CoreSetup['uiSettings']>(
   'xy core.uiSettings'
@@ -20,9 +21,9 @@ export const [getDataActions, setDataActions] = createGetterSetter<
   DataPublicPluginStart['actions']
 >('xy data.actions');
 
-export const [getFormatService, setFormatService] = createGetterSetter<
-  DataPublicPluginStart['fieldFormats']
->('xy data.fieldFormats');
+export const [getFormatService, setFormatService] = createGetterSetter<FieldFormatsStart>(
+  'xy data.fieldFormats'
+);
 
 export const [getThemeService, setThemeService] = createGetterSetter<ChartsPluginSetup['theme']>(
   'xy charts.theme'

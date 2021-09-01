@@ -59,7 +59,7 @@ describe('XY chart datum accessors', () => {
       aggType: BUCKET_TYPES.TERMS,
       ...aspectBase,
     };
-    const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(aspect);
+    const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
 
     expect(typeof accessor).toBe('function');
     expect((accessor as AccessorFn)({ 'col-0-2': 'some value' })).toBe('some value');
