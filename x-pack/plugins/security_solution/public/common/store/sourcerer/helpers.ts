@@ -40,20 +40,21 @@ export const getScopePatternListSelection = (
 
 export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, state }: Args) => {
   const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
-  const securitySolutionIndexPattern = getPatternList(state.defaultIndexPattern);
+  const securitySolutionIndexPattern = state.defaultIndexPattern.patternList;
   const newSelectedPatterns = selectedPatterns.filter(
     (sp) =>
       kibanaIndexPatterns.includes(sp) ||
       (!isEmpty(state.signalIndexName) && state.signalIndexName === sp)
   );
   if (isEmpty(newSelectedPatterns)) {
-    let defaultIndexPatterns = securitySolutionIndexPattern;
+    let defaultPatternList = securitySolutionIndexPattern;
     if (id === SourcererScopeName.timeline && isEmpty(newSelectedPatterns)) {
-      defaultIndexPatterns = defaultIndexPatternByEventType({ state, eventType });
+      defaultPatternList = defaultIndexPatternByEventType({ state, eventType });
     } else if (id === SourcererScopeName.detections && isEmpty(newSelectedPatterns)) {
-      defaultIndexPatterns = [state.signalIndexName ?? ''];
+      defaultPatternList = [state.signalIndexName ?? ''];
     }
-    return defaultIndexPatterns;
+    console.log('defaultPatternList', JSON.stringify(defaultPatternList, null, 2));
+    return defaultPatternList;
   }
   return newSelectedPatterns;
 };
@@ -65,7 +66,7 @@ export const defaultSelectedPatternListByEventType = ({
   state: SourcererModel;
   eventType?: TimelineEventsType;
 }) => {
-  let defaultIndexPatterns = getPatternList(state.defaultIndexPattern);
+  let defaultIndexPatterns = state.defaultIndexPattern.patternList;
   if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
     defaultIndexPatterns = [...defaultIndexPatterns, state.signalIndexName ?? ''];
   } else if (!isEmpty(state.signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
@@ -81,7 +82,7 @@ export const defaultIndexPatternByEventType = ({
   state: SourcererModel;
   eventType?: TimelineEventsType;
 }) => {
-  let defaultIndexPatterns = getPatternList(state.defaultIndexPattern);
+  let defaultIndexPatterns = state.defaultIndexPattern.patternList;
   if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
     defaultIndexPatterns = [...defaultIndexPatterns, state.signalIndexName ?? ''];
   } else if (!isEmpty(state.signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {

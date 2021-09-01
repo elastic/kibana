@@ -8,12 +8,16 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { StartServicesAccessor } from 'kibana/server';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { DEFAULT_INDEX_PATTERN_ID, SOURCERER_API_URL } from '../../../../common/constants';
+import {
+  DEFAULT_INDEX_PATTERN_ID,
+  DEFAULT_TIME_FIELD,
+  SOURCERER_API_URL,
+} from '../../../../common/constants';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { getPatternListSchema, sourcererSchema } from './schema';
+import { sourcererSchema } from './schema';
 import { StartPlugins } from '../../../plugin';
-import { findExistingIndices, getKibanaIndexPattern } from './helpers';
+import { findExistingIndices } from './helpers';
 
 export const createSourcererIndexPatternRoute = (
   router: SecuritySolutionPluginRouter,
@@ -38,55 +42,52 @@ export const createSourcererIndexPatternRoute = (
             data: { indexPatterns },
           },
         ] = await getStartServices();
-        const indexPatternService = await indexPatterns.indexPatternsServiceFactory(
+        const indexPatternsService = await indexPatterns.indexPatternsServiceFactory(
           context.core.savedObjects.client,
           context.core.elasticsearch.client.asInternalUser
         );
-        const pattern = await getKibanaIndexPattern(
-          indexPatternService,
-          request.body.patternList,
-          DEFAULT_INDEX_PATTERN_ID
+
+        const allKips = await indexPatternsService.getIdsWithTitle();
+        const patternId = DEFAULT_INDEX_PATTERN_ID;
+        const { patternList } = request.body;
+        const ssKip = allKips.find((v) => v.id === patternId);
+        let defaultIndexPattern;
+        const patternListAsTitle = patternList.join();
+        if (ssKip == null) {
+          defaultIndexPattern = await indexPatternsService.createAndSave({
+            id: patternId,
+            title: patternListAsTitle,
+            timeFieldName: DEFAULT_TIME_FIELD,
+          });
+          // type thing here, should never happen
+          allKips.push({ ...defaultIndexPattern, id: defaultIndexPattern.id ?? patternId });
+        } else {
+          defaultIndexPattern = { ...ssKip, id: ssKip.id ?? '' };
+          if (patternListAsTitle !== defaultIndexPattern.title) {
+            const wholeKip = await indexPatternsService.get(defaultIndexPattern.id);
+            wholeKip.title = patternListAsTitle;
+            await indexPatternsService.updateSavedObject(wholeKip);
+          }
+        }
+
+        const patternLists: string[][] = allKips.map(({ title }) => title.split(','));
+        const activePatternBools: boolean[][] = await Promise.all(
+          patternLists.map((pl) =>
+            findExistingIndices(pl, context.core.elasticsearch.client.asCurrentUser)
+          )
         );
-        return response.ok({ body: pattern });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body:
-            error.statusCode === 403
-              ? 'Users with write permissions need to access the Elastic Security app to initialize the app source data.'
-              : error.message,
-          statusCode: error.statusCode,
-        });
-      }
-    }
-  );
-};
-
-export const getKipPatternListsRoute = (router: SecuritySolutionPluginRouter) => {
-  router.get(
-    {
-      path: SOURCERER_API_URL,
-      validate: {
-        query: buildRouteValidation(getPatternListSchema),
-      },
-      options: {
-        tags: ['access:securitySolution'],
-      },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const patternLists: string[][] = request.query.titles.map((title) => title.split(','));
-      const activePatternLists: boolean[][] = await Promise.all(
-        patternLists.map((patternList) =>
-          findExistingIndices(patternList, context.core.elasticsearch.client.asCurrentUser)
-        )
-      );
-      const body = patternLists.map((patternList, i) =>
-        patternList.filter((pattern, j) => activePatternLists[i][j])
-      );
-      console.log('EHHHH', JSON.stringify({ patternLists, activePatternLists, body }));
-
-      try {
+        const activePatternLists = patternLists.map((pl, i) =>
+          pl.filter((pattern, j) => activePatternBools[i][j])
+        );
+        const kibanaIndexPatterns = allKips.map((kip, i) => ({
+          ...kip,
+          patternList: activePatternLists[i],
+        }));
+        const body = {
+          defaultIndexPattern: kibanaIndexPatterns.find((p) => p.id === patternId) ?? {},
+          kibanaIndexPatterns,
+        };
+        console.log('body', body);
         return response.ok({ body });
       } catch (err) {
         const error = transformError(err);

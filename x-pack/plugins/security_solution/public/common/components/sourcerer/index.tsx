@@ -57,7 +57,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const { patternList, selectablePatterns } = useMemo(() => {
     const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
-    console.log('theLKip', { kibanaIndexPatterns, theKip });
     return theKip != null
       ? { patternList: theKip.title.split(','), selectablePatterns: theKip.patternList }
       : { patternList: [], selectablePatterns: [] };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
 import { StartServicesAccessor } from 'kibana/server';
+import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -57,7 +57,7 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 import { SetupPlugins, StartPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
-import { createSourcererIndexPatternRoute, getKipPatternListsRoute } from '../lib/sourcerer/routes';
+import { createSourcererIndexPatternRoute } from '../lib/sourcerer/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -133,5 +133,4 @@ export const initRoutes = (
 
   // Sourcerer API to generate default pattern
   createSourcererIndexPatternRoute(router, getStartServices);
-  getKipPatternListsRoute(router);
 };

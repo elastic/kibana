@@ -12,9 +12,3 @@ export const sourcererSchema = t.exact(
     patternList: t.array(t.string),
   })
 );
-
-export const getPatternListSchema = t.exact(
-  t.type({
-    titles: t.array(t.string),
-  })
-);

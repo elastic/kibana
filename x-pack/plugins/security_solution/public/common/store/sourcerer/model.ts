@@ -45,8 +45,14 @@ export type SourcererScopeById = {
 };
 
 export interface KibanaIndexPattern {
+  /** Uniquely identifies a Kibana Index Pattern */
   id: string;
+  /**  list of active patterns that return data  */
   patternList: string[];
+  /**
+   * title of Kibana Index Pattern
+   * title also serves as "all pattern list", including inactive
+   */
   title: string;
 }
 
@@ -72,8 +78,13 @@ export const initSourcererScope = {
   selectedPatterns: [],
 };
 
+// instantiated in plugin.tsx `getKibanaIndexPattern` so these values don't matter
 export const initialSourcererState: SourcererModel = {
-  defaultIndexPattern: { id: DEFAULT_INDEX_PATTERN_ID, title: DEFAULT_INDEX_PATTERN.join(',') }, // instantiated in plugin.tsx `getKibanaIndexPattern`
+  defaultIndexPattern: {
+    id: DEFAULT_INDEX_PATTERN_ID,
+    title: DEFAULT_INDEX_PATTERN.join(','),
+    patternList: DEFAULT_INDEX_PATTERN,
+  },
   kibanaIndexPatterns: [],
   signalIndexName: null,
   sourcererScopes: {

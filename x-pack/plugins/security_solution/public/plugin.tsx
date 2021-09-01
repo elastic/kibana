@@ -60,6 +60,7 @@ import {
 } from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
+import { KibanaIndexPattern } from './common/store/sourcerer/model';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -329,7 +330,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     subPlugins: StartedSubPlugins
   ): Promise<SecurityAppStore> {
     if (!this._store) {
-
       let signal: { name: string | null } = { name: null };
       try {
         // const { index_name: indexName } = await coreStart.http.fetch(
@@ -347,56 +347,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         signal = { name: null };
       }
       const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      let defaultIndexPattern;
-      console.log('1', { configPatternList, signal });
+      let defaultIndexPattern: KibanaIndexPattern;
+      let kibanaIndexPatterns: KibanaIndexPattern[];
       try {
         // check for/generate default Security Solution Kibana index pattern
-        defaultIndexPattern = await coreStart.http.fetch(SOURCERER_API_URL, {
+        const a = await coreStart.http.fetch(SOURCERER_API_URL, {
           method: 'POST',
           body: JSON.stringify({ patternList: [...configPatternList, signal.name] }),
         });
-        console.log('2');
+        console.log('PLUGIN.tsx: stringify', JSON.stringify(a, null, 2));
+        defaultIndexPattern = a.defaultIndexPattern;
+        kibanaIndexPatterns = a.kibanaIndexPatterns;
       } catch (error) {
-        console.log('3');
         defaultIndexPattern = { id: null, ...error };
+        kibanaIndexPatterns = [];
       }
-      console.log('4');
-      const [{ createStore, createInitialState }, kibanaIndexPatterns] = await Promise.all([
-        this.lazyApplicationDependencies(),
-        // Note: this needs to be after defaultIndexPattern is defined in case the KIP is updated
-        startPlugins.data.indexPatterns.getIdsWithTitle(),
-      ]);
-
-      console.log('5');
-      // check for/generate default Security Solution Kibana index pattern
-      const kibanaIndexPatternLists: string[][] = await coreStart.http.fetch(SOURCERER_API_URL, {
-        method: 'GET',
-        query: { titles: kibanaIndexPatterns.map(({ title }) => title) },
-      });
-      console.log('PLUGIN.tsx: kibanaIndexPatternLists', kibanaIndexPatternLists);
-      const kips = kibanaIndexPatterns.map((kip, i) => {
-        const patternList = kibanaIndexPatternLists[i];
-        const stringifyIt = JSON.stringify(patternList);
-        if (kip.id === 'security-solution') {
-          console.log(`kip patternList ${kip.id}:`, patternList);
-          console.log(`kip obj ${kip.id}:`, {
-            patternList,
-            stringifyIt,
-            parseIt: JSON.parse(stringifyIt),
-          });
-          console.log(`kip spread ${kip.id}:`, {
-            ...kip,
-            patternList,
-            stringifyIt,
-            parseIt: JSON.parse(stringifyIt),
-          });
-        }
-        return {
-          ...kip,
-          patternList,
-        };
-      });
-      console.log('PLUGIN.tsx: kips', kips);
+      const { createStore, createInitialState } = await this.lazyApplicationDependencies();
 
       const appLibs: AppObservableLibs = { kibana: coreStart };
       const libs$ = new BehaviorSubject(appLibs);
@@ -425,6 +391,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         subPlugins.timelines.store.reducer.timeline
       ) as unknown) as Reducer<TimelineState, AnyAction>;
 
+      console.log('PLUGIN.tsx: createStore', JSON.stringify(kibanaIndexPatterns, null, 2));
       this._store = createStore(
         createInitialState(
           {
@@ -438,7 +405,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           },
           {
             defaultIndexPattern,
-            kibanaIndexPatterns: kips,
+            kibanaIndexPatterns,
             signalIndexName: signal.name,
             enableExperimental: this.experimentalFeatures,
           }

@@ -230,7 +230,10 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-        console.log('indexFieldsSearch', { kipId, patternList, selectedPatterns });
+        console.log(
+          'indexFieldsSearch',
+          JSON.stringify({ kipId, patternList, selectedPatterns }, null, 2)
+        );
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { kipId: selectedKipId, indices: patternList, onlyCheckIfIndicesExist: false },

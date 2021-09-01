@@ -81,12 +81,12 @@ export const getSelectedKipSelector = () => {
     const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
     const kipId = scope.selectedKipId === null ? defaultIndexPattern.id : scope.selectedKipId;
     const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
+    console.log('theKip', JSON.stringify(theKip));
     const patternList = theKip != null ? theKip.patternList : [];
     const selectedPatterns =
       scope.selectedPatterns.length === 0 && theKip != null
         ? getScopePatternListSelection(kibanaIndexPatterns, kipId, scopeId)
         : scope.selectedPatterns;
-
     return {
       kipId,
       patternList,

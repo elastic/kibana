@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { transformError } from '@kbn/securitysolution-es-utils';
+
 import { ElasticsearchClient } from 'kibana/server';
 import get from 'lodash/get';
-import { IndexPattern, IndexPatternsService } from '../../../../../../../src/plugins/data/common';
-import { DEFAULT_TIME_FIELD } from '../../../../common/constants';
 
 export const findExistingIndices = async (
   indices: string[],
@@ -25,35 +23,3 @@ export const findExistingIndices = async (
       })
       .map((p) => p.catch((e) => false))
   );
-
-export const getKibanaIndexPattern = async (
-  indexPatternsService: IndexPatternsService,
-  patternList: string[],
-  patternId: string
-): Promise<IndexPattern> => {
-  console.log('start getKibanaIndexPattern');
-  let indexPattern: IndexPattern;
-  const patternListAsTitle = patternList.join();
-  try {
-    indexPattern = await indexPatternsService.get(patternId);
-    console.log('after indexPattern getKibanaIndexPattern');
-    if (patternListAsTitle !== indexPattern.title) {
-      indexPattern.title = patternListAsTitle;
-      await indexPatternsService.updateSavedObject(indexPattern);
-    }
-  } catch (e) {
-    console.log('error getKibanaIndexPattern');
-    const error = transformError(e);
-    console.log('ERRRR', error);
-    if (error.statusCode === 404) {
-      indexPattern = await indexPatternsService.createAndSave({
-        id: patternId,
-        title: patternListAsTitle,
-        timeFieldName: DEFAULT_TIME_FIELD,
-      });
-    } else {
-      throw e;
-    }
-  }
-  return indexPattern;
-};
