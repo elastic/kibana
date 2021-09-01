@@ -368,16 +368,7 @@ export function getDeepLinks(
           deepLinks: [],
         };
       }
-      if (
-        deepLinkId === SecurityPageName.detections &&
-        capabilities != null &&
-        capabilities.siem.read_alerts === false
-      ) {
-        return {
-          ...deepLink,
-          deepLinks: baseDeepLinks.filter(({ id }) => id !== SecurityPageName.alerts),
-        };
-      }
+
       if (isPremiumLicense(licenseType) && subPluginDeepLinks?.premium) {
         return {
           ...deepLink,
