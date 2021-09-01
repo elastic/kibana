@@ -20,6 +20,7 @@ export interface CreateCaseModalProps {
   onSuccess: (theCase: Case) => Promise<void>;
   useInsertTimeline?: Function;
   appId: string;
+  disableAlerts?: boolean;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -53,6 +54,7 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   onCloseFlyout,
   onSuccess,
   appId,
+  disableAlerts,
 }) => {
   const { cases } = useKibana<TimelinesStartServices>().services;
   const createCaseProps = useMemo(() => {
@@ -62,8 +64,9 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
       onSuccess,
       withSteps: false,
       owner: [appId],
+      disableAlerts,
     };
-  }, [afterCaseCreated, onCloseFlyout, onSuccess, appId]);
+  }, [afterCaseCreated, onCloseFlyout, onSuccess, appId, disableAlerts]);
   return (
     <StyledFlyout onClose={onCloseFlyout} data-test-subj="create-case-flyout">
       <EuiFlyoutHeader hasBorder>
