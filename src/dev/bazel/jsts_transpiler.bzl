@@ -45,6 +45,10 @@ def jsts_transpiler(name, srcs, build_pkg_name, web = False, root_input_dir = "s
       "--config-file",
       "./%s/%s" % (build_pkg_name, config_file),
     ]
+  else:
+    args += [
+      "--no-babelrc"
+    ]
 
   args += additional_args
 
