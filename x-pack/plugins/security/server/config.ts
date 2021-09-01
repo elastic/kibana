@@ -411,7 +411,7 @@ function getSessionConfig(session: RawConfigType['session'], providers: Provider
       // for the anonymous sessions in case neither global nor provider specific lifespan is configured explicitly.
       // We can remove this code once https://github.com/elastic/kibana/issues/68885 is resolved.
       const providerLifespan =
-        type === 'anonymous' &&
+        provider?.type === 'anonymous' &&
         providerSessionConfig?.lifespan === undefined &&
         session.lifespan === undefined
           ? defaultAnonymousSessionLifespan
