@@ -33,38 +33,10 @@ import { SavedObjectsClientContract } from '../saved_objects/types';
  * @example
  * ```ts
  * import { DeprecationsDetails, GetDeprecationsContext, CoreSetup } from 'src/core/server';
+ * import { i18n } from '@kbn/i18n';
  *
  * async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
  *   const deprecations: DeprecationsDetails[] = [];
- *
- *   // Example of an api correctiveAction
- *   deprecations.push({
- *     "message": "User 'test_dashboard_user' is using a deprecated role: 'kibana_user'",
- *     "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html",
- *     "level": "critical",
- *     "correctiveActions": {
- *         "api": {
- *             "path": "/internal/security/users/test_dashboard_user",
- *             "method": "POST",
- *             "body": {
- *                 "username": "test_dashboard_user",
- *                 "roles": [
- *                     "machine_learning_user",
- *                     "enrich_user",
- *                     "kibana_admin"
- *                 ],
- *                 "full_name": "Alison Goryachev",
- *                 "email": "alisongoryachev@gmail.com",
- *                 "metadata": {},
- *                 "enabled": true
- *             }
- *         },
- *         "manualSteps": [
- *             "Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.",
- *             "Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role."
- *         ]
- *     },
- *   });
  *
  *   return deprecations;
  * }
@@ -171,16 +143,19 @@ export class DeprecationsService
       const deprecationsRegistry = deprecationsFactory.getRegistry(domainId);
       deprecationsRegistry.registerDeprecations({
         getDeprecations: () => {
-          return deprecationsContexts.map(({ message, correctiveActions, documentationUrl }) => {
-            return {
-              level: 'critical',
-              deprecationType: 'config',
-              message,
-              correctiveActions,
-              documentationUrl,
-              requireRestart: true,
-            };
-          });
+          return deprecationsContexts.map(
+            ({ title, message, correctiveActions, documentationUrl }) => {
+              return {
+                title: title || `${domainId} has a deprecated setting`,
+                level: 'critical',
+                deprecationType: 'config',
+                message,
+                correctiveActions,
+                documentationUrl,
+                requireRestart: true,
+              };
+            }
+          );
         },
       });
     }

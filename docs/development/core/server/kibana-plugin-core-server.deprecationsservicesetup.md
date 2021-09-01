@@ -21,6 +21,7 @@ export interface DeprecationsServiceSetup
 
 ```ts
 import { DeprecationsDetails, GetDeprecationsContext, CoreSetup } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
 
 async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
   const deprecations: DeprecationsDetails[] = [];

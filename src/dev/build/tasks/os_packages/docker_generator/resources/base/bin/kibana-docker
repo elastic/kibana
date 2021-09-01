@@ -108,6 +108,7 @@ kibana_vars=(
     map.tilemap.options.subdomains
     map.tilemap.url
     migrations.batchSize
+    migrations.maxBatchSizeBytes
     migrations.enableV2
     migrations.pollInterval
     migrations.retryAttempts
