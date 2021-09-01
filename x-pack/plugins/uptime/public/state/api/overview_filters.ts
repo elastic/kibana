@@ -29,5 +29,9 @@ export const fetchOverviewFilters = async ({
     search,
   };
 
-  return await apiService.get(API_URLS.FILTERS, queryParams, OverviewFiltersType);
+  try {
+    return await apiService.get(API_URLS.FILTERS, queryParams, OverviewFiltersType);
+  } catch (e) {
+    return new Error(e.body.message);
+  }
 };

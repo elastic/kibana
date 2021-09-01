@@ -42,17 +42,29 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       }
     }
 
-    return await libs.requests.getFilterBar({
-      uptimeEsClient,
-      dateRangeStart,
-      dateRangeEnd,
-      search: parsedSearch,
-      filterOptions: objectValuesToArrays<string>({
-        locations,
-        ports,
-        schemes,
-        tags,
-      }),
-    });
+    try {
+      return await libs.requests.getFilterBar({
+        uptimeEsClient,
+        dateRangeStart,
+        dateRangeEnd,
+        search: parsedSearch,
+        filterOptions: objectValuesToArrays<string>({
+          locations,
+          ports,
+          schemes,
+          tags,
+        }),
+      });
+    } catch (e) {
+      /**
+       * This particular error is usually indicative of a mapping problem within the user's
+       * indices. It's relevant for the UI because we will be able to provide the user with a
+       * tailored message to help them remediate this problem on their own with minimal effort.
+       */
+      if (e.name === 'ResponseError') {
+        return response.badRequest({ body: e });
+      }
+      throw e;
+    }
   },
 });
