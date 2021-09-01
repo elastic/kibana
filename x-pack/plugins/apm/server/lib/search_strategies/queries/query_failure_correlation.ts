@@ -6,14 +6,14 @@
  */
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
-import { SearchServiceFetchParams } from '../../../../common/search_strategies/types';
+import { SearchStrategyParams } from '../../../../common/search_strategies/types';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { getQueryWithParams, getTermsQuery } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 export const getFailureCorrelationRequest = (
-  params: SearchServiceFetchParams,
+  params: SearchStrategyParams,
   fieldName: string
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({
@@ -59,7 +59,7 @@ export const getFailureCorrelationRequest = (
 
 export const fetchFailedTransactionsCorrelationPValues = async (
   esClient: ElasticsearchClient,
-  params: SearchServiceFetchParams,
+  params: SearchStrategyParams,
   fieldName: string
 ) => {
   const resp = await esClient.search(

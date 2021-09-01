@@ -6,9 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+
+import { IKibanaSearchRequest } from '../../../../../src/plugins/data/common';
+
+import type { FailedTransactionsCorrelationsParams } from '../../../../plugins/apm/common/search_strategies/failed_transactions_correlations/types';
+import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import type { PartialSearchRequest } from '../../../../plugins/apm/server/lib/search_strategies/search_strategy_provider';
 import { parseBfetchResponse } from '../../common/utils/parse_b_fetch';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -16,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const getRequestBody = () => {
-    const partialSearchRequest: PartialSearchRequest = {
+    const request: IKibanaSearchRequest<FailedTransactionsCorrelationsParams> = {
       params: {
         environment: 'ENVIRONMENT_ALL',
         start: '2020',
@@ -28,8 +33,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return {
       batch: [
         {
-          request: partialSearchRequest,
-          options: { strategy: 'apmFailedTransactionsCorrelationsSearchStrategy' },
+          request,
+          options: { strategy: APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS },
         },
       ],
     };

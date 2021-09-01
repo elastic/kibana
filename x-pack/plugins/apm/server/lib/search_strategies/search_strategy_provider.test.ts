@@ -8,16 +8,17 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import { SearchStrategyDependencies } from 'src/plugins/data/server';
+
+import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common';
+
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import type { LatencyCorrelationsParams } from '../../../common/search_strategies/latency_correlations/types';
 
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 import { latencyCorrelationsAsyncSearchServiceProvider } from './latency_correlations';
 
-import {
-  searchStrategyProvider,
-  PartialSearchRequest,
-} from './search_strategy_provider';
+import { searchStrategyProvider } from './search_strategy_provider';
 
 // helper to trigger promises in the async search service
 const flushPromises = () => new Promise(setImmediate);
@@ -123,7 +124,9 @@ describe('APM Correlations search strategy', () => {
     let mockClientSearch: jest.Mock;
     let mockGetApmIndicesMock: jest.Mock;
     let mockDeps: SearchStrategyDependencies;
-    let params: Required<PartialSearchRequest>['params'];
+    let params: Required<
+      IKibanaSearchRequest<LatencyCorrelationsParams>
+    >['params'];
 
     beforeEach(() => {
       mockClientFieldCaps = jest.fn(clientFieldCapsMock);
@@ -142,6 +145,8 @@ describe('APM Correlations search strategy', () => {
         end: '2021',
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
+        percentileThreshold: 95,
+        analyzeCorrelations: true,
       };
     });
 

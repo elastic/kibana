@@ -10,7 +10,7 @@ import { getOrElse } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/types';
+import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
 import { rangeRt } from '../../../routes/default_api_types';
 import { getCorrelationsFilters } from '../../correlations/get_filters';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -23,7 +23,7 @@ export const getTermsQuery = (
 };
 
 interface QueryParams {
-  params: SearchServiceFetchParams;
+  params: SearchStrategyParams;
   fieldName?: string;
   fieldValue?: string;
 }

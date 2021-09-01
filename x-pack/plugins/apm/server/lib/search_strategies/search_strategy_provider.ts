@@ -16,13 +16,11 @@ import {
   IKibanaSearchResponse,
 } from '../../../../../../src/plugins/data/common';
 
-import type { SearchServiceParams } from '../../../common/search_strategies/types';
+import type { SearchStrategyClientParams } from '../../../common/search_strategies/types';
 import type { RawResponseBase } from '../../../common/search_strategies/types';
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
-export type PartialSearchRequest = IKibanaSearchRequest<SearchServiceParams>;
-
-interface AsyncSearchServiceState<RawResponse extends RawResponseBase> {
+interface AsyncSearchServiceState<TRawResponse extends RawResponseBase> {
   cancel: () => void;
   error: Error;
   meta: {
@@ -31,31 +29,40 @@ interface AsyncSearchServiceState<RawResponse extends RawResponseBase> {
     isRunning: boolean;
     isPartial: boolean;
   };
-  rawResponse: RawResponse;
+  rawResponse: TRawResponse;
 }
 
 type GetAsyncSearchServiceState<
-  RawResponse extends RawResponseBase
-> = () => AsyncSearchServiceState<RawResponse>;
+  TRawResponse extends RawResponseBase
+> = () => AsyncSearchServiceState<TRawResponse>;
 
-export type AsyncSearchServiceProvider<RawResponse extends RawResponseBase> = (
+export type AsyncSearchServiceProvider<
+  TSearchStrategyClientParams extends SearchStrategyClientParams,
+  TRawResponse extends RawResponseBase
+> = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
-  searchServiceParams: SearchServiceParams,
+  searchServiceParams: TSearchStrategyClientParams,
   includeFrozen: boolean
-) => GetAsyncSearchServiceState<RawResponse>;
+) => GetAsyncSearchServiceState<TRawResponse>;
 
-export const searchStrategyProvider = <RawResponse extends RawResponseBase>(
-  asyncSearchServiceProvider: AsyncSearchServiceProvider<RawResponse>,
+export function searchStrategyProvider<
+  TSearchStrategyClientParams extends SearchStrategyClientParams,
+  TRawResponse extends RawResponseBase
+>(
+  asyncSearchServiceProvider: AsyncSearchServiceProvider<
+    TSearchStrategyClientParams,
+    TRawResponse
+  >,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   includeFrozen: boolean
 ): ISearchStrategy<
-  PartialSearchRequest,
-  IKibanaSearchResponse<RawResponse>
-> => {
+  IKibanaSearchRequest<TSearchStrategyClientParams>,
+  IKibanaSearchResponse<TRawResponse>
+> {
   const asyncSearchServiceMap = new Map<
     string,
-    GetAsyncSearchServiceState<RawResponse>
+    GetAsyncSearchServiceState<TRawResponse>
   >();
 
   return {
@@ -66,7 +73,7 @@ export const searchStrategyProvider = <RawResponse extends RawResponseBase>(
 
       // The function to fetch the current state of the async search service.
       // This will be either an existing service for a follow up fetch or a new one for new requests.
-      let getAsyncSearchServiceState: GetAsyncSearchServiceState<RawResponse>;
+      let getAsyncSearchServiceState: GetAsyncSearchServiceState<TRawResponse>;
 
       // If the request includes an ID, we require that the async search service already exists
       // otherwise we throw an error. The client should never poll a service that's been cancelled or finished.
@@ -87,7 +94,7 @@ export const searchStrategyProvider = <RawResponse extends RawResponseBase>(
         getAsyncSearchServiceState = asyncSearchServiceProvider(
           deps.esClient.asCurrentUser,
           getApmIndices,
-          request.params,
+          request.params as TSearchStrategyClientParams,
           includeFrozen
         );
       }
@@ -120,4 +127,4 @@ export const searchStrategyProvider = <RawResponse extends RawResponseBase>(
       }
     },
   };
-};
+}

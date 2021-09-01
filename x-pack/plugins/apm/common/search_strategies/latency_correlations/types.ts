@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RawResponseBase } from '../types';
+import { RawResponseBase, SearchStrategyClientParams } from '../types';
 
 export interface HistogramItem {
   key: number;
@@ -38,8 +38,12 @@ export interface AsyncSearchProviderProgress {
   loadedHistograms: number;
 }
 
-export interface LatencyCorrelationsAsyncSearchServiceRawResponse
-  extends RawResponseBase {
+export interface LatencyCorrelationsParams extends SearchStrategyClientParams {
+  percentileThreshold: number;
+  analyzeCorrelations: boolean;
+}
+
+export interface LatencyCorrelationsRawResponse extends RawResponseBase {
   log: string[];
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number;

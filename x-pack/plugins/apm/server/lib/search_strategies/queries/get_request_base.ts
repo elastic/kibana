@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/types';
+import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
 
 export const getRequestBase = ({
   index,
   includeFrozen,
-}: SearchServiceFetchParams) => ({
+}: SearchStrategyParams) => ({
   index,
   // matches APM's event client settings
   ignore_throttled: includeFrozen === undefined ? true : !includeFrozen,

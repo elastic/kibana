@@ -7,11 +7,11 @@
 
 import { range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
+import type { SearchStrategyServerParams } from '../../../../common/search_strategies/types';
 import type {
-  SearchServiceParams,
-  SearchServiceFetchParams,
-} from '../../../../common/search_strategies/types';
-import type { LatencyCorrelationsAsyncSearchServiceRawResponse } from '../../../../common/search_strategies/latency_correlations/types';
+  LatencyCorrelationsParams,
+  LatencyCorrelationsRawResponse,
+} from '../../../../common/search_strategies/latency_correlations/types';
 
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 
@@ -30,10 +30,13 @@ import type { AsyncSearchServiceProvider } from '../search_strategy_provider';
 
 import { asyncSearchServiceStateProvider } from './async_search_service_state';
 
-export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServiceProvider<LatencyCorrelationsAsyncSearchServiceRawResponse> = (
+export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServiceProvider<
+  LatencyCorrelationsParams,
+  LatencyCorrelationsRawResponse
+> = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
-  searchServiceParams: SearchServiceParams,
+  searchServiceParams: LatencyCorrelationsParams,
   includeFrozen: boolean
 ) => {
   const { addLogMessage, getLogMessages } = asyncSearchServiceLogProvider();
@@ -41,7 +44,9 @@ export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServicePr
   const state = asyncSearchServiceStateProvider();
 
   async function fetchCorrelations() {
-    let params: SearchServiceFetchParams | undefined;
+    let params:
+      | (LatencyCorrelationsParams & SearchStrategyServerParams)
+      | undefined;
 
     try {
       const indices = await getApmIndices();

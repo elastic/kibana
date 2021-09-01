@@ -14,13 +14,13 @@ import type {
   HistogramItem,
   ResponseHit,
 } from '../../../../common/search_strategies/latency_correlations/types';
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/types';
+import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 export const getTransactionDurationHistogramRequest = (
-  params: SearchServiceFetchParams,
+  params: SearchStrategyParams,
   interval: number,
   fieldName?: string,
   fieldValue?: string
@@ -39,7 +39,7 @@ export const getTransactionDurationHistogramRequest = (
 
 export const fetchTransactionDurationHistogram = async (
   esClient: ElasticsearchClient,
-  params: SearchServiceFetchParams,
+  params: SearchStrategyParams,
   interval: number,
   fieldName?: string,
   fieldValue?: string

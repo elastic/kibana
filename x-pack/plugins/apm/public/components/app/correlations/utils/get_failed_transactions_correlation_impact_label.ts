@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { FailureCorrelationImpactThreshold } from '../../../../../common/search_strategies/failed_transactions_correlations/types';
+import { FailedTransactionsCorrelationsImpactThreshold } from '../../../../../common/search_strategies/failed_transactions_correlations/types';
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/failed_transactions_correlations/constants';
 
 export function getFailedTransactionsCorrelationImpactLabel(
   pValue: number
-): { impact: FailureCorrelationImpactThreshold; color: string } | null {
+): {
+  impact: FailedTransactionsCorrelationsImpactThreshold;
+  color: string;
+} | null {
   // The lower the p value, the higher the impact
   if (pValue >= 0 && pValue < 1e-6)
     return {

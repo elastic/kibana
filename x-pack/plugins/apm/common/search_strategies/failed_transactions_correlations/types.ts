@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RawResponseBase } from '../types';
+import { RawResponseBase, SearchStrategyClientParams } from '../types';
 
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from './constants';
 
@@ -22,14 +22,16 @@ export interface FailedTransactionsCorrelationValue {
   successPercentage: number;
 }
 
-export type FailureCorrelationImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
+export type FailedTransactionsCorrelationsImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
 
 export interface CorrelationsTerm {
   fieldName: string;
   fieldValue: string;
 }
 
-export interface FailedTransactionsCorrelationsAsyncSearchServiceRawResponse
+export type FailedTransactionsCorrelationsParams = SearchStrategyClientParams;
+
+export interface FailedTransactionsCorrelationsRawResponse
   extends RawResponseBase {
   log: string[];
   values: FailedTransactionsCorrelationValue[];

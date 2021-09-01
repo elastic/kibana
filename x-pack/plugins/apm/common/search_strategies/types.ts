@@ -10,7 +10,7 @@ export interface RawResponseBase {
   took: number;
 }
 
-export interface SearchServiceParams {
+export interface SearchStrategyClientParams {
   environment: string;
   kuery: string;
   serviceName?: string;
@@ -18,11 +18,12 @@ export interface SearchServiceParams {
   transactionType?: string;
   start?: string;
   end?: string;
-  percentileThreshold?: number;
-  analyzeCorrelations?: boolean;
 }
 
-export interface SearchServiceFetchParams extends SearchServiceParams {
+export interface SearchStrategyServerParams {
   index: string;
   includeFrozen?: boolean;
 }
+
+export type SearchStrategyParams = SearchStrategyClientParams &
+  SearchStrategyServerParams;

@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/types';
+import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
 
 import type { AsyncSearchServiceLog } from '../async_search_service_log';
 import type { AsyncSearchServiceState } from '../latency_correlations/async_search_service_state';
@@ -24,7 +24,7 @@ import type { FieldValuePairs } from './query_field_value_pairs';
 export async function* fetchTransactionDurationHistograms(
   esClient: ElasticsearchClient,
   addLogMessage: AsyncSearchServiceLog['addLogMessage'],
-  params: SearchServiceFetchParams,
+  params: SearchStrategyParams,
   state: AsyncSearchServiceState,
   expectations: number[],
   ranges: estypes.AggregationsAggregationRange[],

@@ -10,11 +10,11 @@ import type { ElasticsearchClient } from 'src/core/server';
 import { chunk } from 'lodash';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
+import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
 import type {
-  SearchServiceParams,
-  SearchServiceFetchParams,
-} from '../../../../common/search_strategies/types';
-import type { FailedTransactionsCorrelationsAsyncSearchServiceRawResponse } from '../../../../common/search_strategies/failed_transactions_correlations/types';
+  FailedTransactionsCorrelationsParams,
+  FailedTransactionsCorrelationsRawResponse,
+} from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { asyncSearchServiceLogProvider } from '../async_search_service_log';
 import {
@@ -27,10 +27,13 @@ import { asyncFailedTransactionsCorrelationsSearchServiceStateProvider } from '.
 
 import { ERROR_CORRELATION_THRESHOLD } from '../constants';
 
-export const failedTransactionsCorrelationsAsyncSearchServiceProvider: AsyncSearchServiceProvider<FailedTransactionsCorrelationsAsyncSearchServiceRawResponse> = (
+export const failedTransactionsCorrelationsAsyncSearchServiceProvider: AsyncSearchServiceProvider<
+  FailedTransactionsCorrelationsParams,
+  FailedTransactionsCorrelationsRawResponse
+> = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
-  searchServiceParams: SearchServiceParams,
+  searchServiceParams: FailedTransactionsCorrelationsParams,
   includeFrozen: boolean
 ) => {
   const { addLogMessage, getLogMessages } = asyncSearchServiceLogProvider();
@@ -40,7 +43,7 @@ export const failedTransactionsCorrelationsAsyncSearchServiceProvider: AsyncSear
   async function fetchErrorCorrelations() {
     try {
       const indices = await getApmIndices();
-      const params: SearchServiceFetchParams = {
+      const params: SearchStrategyParams = {
         ...searchServiceParams,
         index: indices['apm_oss.transactionIndices'],
         includeFrozen,

@@ -16,10 +16,10 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
-import type { SearchServiceParams } from '../../common/search_strategies/types';
+import type { SearchStrategyClientParams } from '../../common/search_strategies/types';
 import type { RawResponseBase } from '../../common/search_strategies/types';
-import type { LatencyCorrelationsAsyncSearchServiceRawResponse } from '../../common/search_strategies/latency_correlations/types';
-import type { FailedTransactionsCorrelationsAsyncSearchServiceRawResponse } from '../../common/search_strategies/failed_transactions_correlations/types';
+import type { LatencyCorrelationsRawResponse } from '../../common/search_strategies/latency_correlations/types';
+import type { FailedTransactionsCorrelationsRawResponse } from '../../common/search_strategies/failed_transactions_correlations/types';
 import {
   ApmSearchStrategies,
   APM_SEARCH_STRATEGIES,
@@ -71,13 +71,13 @@ export function useSearchStrategy(
     analyzeCorrelations: boolean;
   }
 ): {
-  data: LatencyCorrelationsAsyncSearchServiceRawResponse;
+  data: LatencyCorrelationsRawResponse;
 } & SearchStrategyReturnBase;
 
 export function useSearchStrategy(
   searchStrategyName: typeof APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS
 ): {
-  data: FailedTransactionsCorrelationsAsyncSearchServiceRawResponse;
+  data: FailedTransactionsCorrelationsRawResponse;
 } & SearchStrategyReturnBase;
 
 export function useSearchStrategy<
@@ -138,7 +138,7 @@ export function useSearchStrategy<
     // Submit the search request using the `data.search` service.
     searchSubscription$.current = data.search
       .search<
-        IKibanaSearchRequest<SearchServiceParams & (TOptions | {})>,
+        IKibanaSearchRequest<SearchStrategyClientParams & (TOptions | {})>,
         IKibanaSearchResponse<TRawResponse>
       >(req, {
         strategy: searchStrategyName,

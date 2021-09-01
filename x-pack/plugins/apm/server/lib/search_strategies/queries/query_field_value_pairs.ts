@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from 'src/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/types';
+import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
 
 import type { AsyncSearchServiceLog } from '../async_search_service_log';
 import type { AsyncSearchServiceState } from '../latency_correlations/async_search_service_state';
@@ -27,7 +27,7 @@ interface FieldValuePair {
 export type FieldValuePairs = FieldValuePair[];
 
 export const getTermsAggRequest = (
-  params: SearchServiceFetchParams,
+  params: SearchStrategyParams,
   fieldName: FieldName
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
@@ -47,7 +47,7 @@ export const getTermsAggRequest = (
 
 const fetchTransactionDurationFieldTerms = async (
   esClient: ElasticsearchClient,
-  params: SearchServiceFetchParams,
+  params: SearchStrategyParams,
   fieldName: string,
   addLogMessage: AsyncSearchServiceLog['addLogMessage']
 ): Promise<FieldValuePairs> => {
@@ -96,7 +96,7 @@ async function fetchInSequence(
 
 export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
-  params: SearchServiceFetchParams,
+  params: SearchStrategyParams,
   fieldCandidates: FieldName[],
   state: AsyncSearchServiceState,
   addLogMessage: AsyncSearchServiceLog['addLogMessage']

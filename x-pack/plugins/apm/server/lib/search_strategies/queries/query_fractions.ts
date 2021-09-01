@@ -8,14 +8,14 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 
-import { SearchServiceFetchParams } from '../../../../common/search_strategies/types';
+import { SearchStrategyParams } from '../../../../common/search_strategies/types';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 export const getTransactionDurationRangesRequest = (
-  params: SearchServiceFetchParams,
+  params: SearchStrategyParams,
   ranges: estypes.AggregationsAggregationRange[]
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
@@ -38,7 +38,7 @@ export const getTransactionDurationRangesRequest = (
  */
 export const fetchTransactionDurationFractions = async (
   esClient: ElasticsearchClient,
-  params: SearchServiceFetchParams,
+  params: SearchStrategyParams,
   ranges: estypes.AggregationsAggregationRange[]
 ): Promise<{ fractions: number[]; totalDocCount: number }> => {
   const resp = await esClient.search(
