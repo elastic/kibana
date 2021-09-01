@@ -41,7 +41,7 @@ import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
-import { useTimelineEvents } from '../../../container';
+import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
 import { StatefulBody } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
@@ -114,6 +114,7 @@ export interface TGridIntegratedProps {
   query: Query;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  setQuery: (inspect: InspectResponse, loading: boolean, refetch: Refetch) => void;
   sort: Sort[];
   start: string;
   tGridEventRenderedViewEnabled: boolean;
@@ -150,6 +151,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   query,
   renderCellValue,
   rowRenderers,
+  setQuery,
   sort,
   start,
   tGridEventRenderedViewEnabled,
@@ -269,6 +271,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     }
   }, [loading]);
 
+  useEffect(() => {
+    setQuery(inspect, loading, refetch);
+  }, [inspect, loading, refetch, setQuery]);
+
   return (
     <InspectButtonContainer>
       <StyledEuiPanel
@@ -294,11 +300,12 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
               <UpdatedFlexItem grow={false} $show={!loading}>
                 {!resolverIsShowing(graphEventId) && additionalFilters}
               </UpdatedFlexItem>
-              {tGridEventRenderedViewEnabled && entityType === 'alerts' && (
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
-                </UpdatedFlexItem>
-              )}
+              {tGridEventRenderedViewEnabled &&
+                ['detections-page', 'detections-rules-details-page'].includes(id) && (
+                  <UpdatedFlexItem grow={false} $show={!loading}>
+                    <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                  </UpdatedFlexItem>
+                )}
             </UpdatedFlexGroup>
 
             {!graphEventId && graphOverlay == null && (
