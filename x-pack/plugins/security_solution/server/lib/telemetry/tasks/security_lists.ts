@@ -15,14 +15,15 @@ import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from '../../../../../task_manager/server';
 import {
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
   TELEMETRY_CHANNEL_LISTS,
-} from './constants';
-import { batchTelemetryRecords, templateEndpointExceptions, templateTrustedApps } from './helpers';
-import { TelemetryEventsSender } from './sender';
+} from '../constants';
+import { batchTelemetryRecords, templateEndpointExceptions, templateTrustedApps } from '../helpers';
+import { TelemetryEventsSender } from '../sender';
+import { TelemetryReceiver } from '../receiver';
 
 export const TelemetrySecuityListsTaskConstants = {
   TIMEOUT: '3m',
@@ -36,14 +37,17 @@ const MAX_TELEMETRY_BATCH = 1_000;
 export class TelemetryExceptionListsTask {
   private readonly logger: Logger;
   private readonly sender: TelemetryEventsSender;
+  private readonly receiver: TelemetryReceiver;
 
   constructor(
     logger: Logger,
     taskManager: TaskManagerSetupContract,
-    sender: TelemetryEventsSender
+    sender: TelemetryEventsSender,
+    receiver: TelemetryReceiver
   ) {
     this.logger = logger;
     this.sender = sender;
+    this.receiver = receiver;
 
     taskManager.registerTaskDefinitions({
       [TelemetrySecuityListsTaskConstants.TYPE]: {
@@ -105,7 +109,7 @@ export class TelemetryExceptionListsTask {
 
     // Lists Telemetry: Trusted Applications
 
-    const trustedApps = await this.sender.fetchTrustedApplications();
+    const trustedApps = await this.receiver.fetchTrustedApplications();
     const trustedAppsJson = templateTrustedApps(trustedApps.data);
     this.logger.debug(`Trusted Apps: ${trustedAppsJson}`);
 
@@ -115,7 +119,7 @@ export class TelemetryExceptionListsTask {
 
     // Lists Telemetry: Endpoint Exceptions
 
-    const epExceptions = await this.sender.fetchEndpointList(ENDPOINT_LIST_ID);
+    const epExceptions = await this.receiver.fetchEndpointList(ENDPOINT_LIST_ID);
     const epExceptionsJson = templateEndpointExceptions(epExceptions.data, LIST_ENDPOINT_EXCEPTION);
     this.logger.debug(`EP Exceptions: ${epExceptionsJson}`);
 
@@ -125,7 +129,7 @@ export class TelemetryExceptionListsTask {
 
     // Lists Telemetry: Endpoint Event Filters
 
-    const epFilters = await this.sender.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
+    const epFilters = await this.receiver.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
     const epFiltersJson = templateEndpointExceptions(epFilters.data, LIST_ENDPOINT_EVENT_FILTER);
     this.logger.debug(`EP Event Filters: ${epFiltersJson}`);
 
