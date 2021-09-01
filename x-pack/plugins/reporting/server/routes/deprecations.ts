@@ -41,7 +41,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
                 privileges: ['manage'], // required to do anything with the reporting indices
                 names: [store.getReportingIndexPattern()],
                 allow_restricted_indices: true,
-              } as unknown) as SecurityHasPrivilegesIndexPrivilegesCheck, // Needed, until `allow_restricted_indices` is added to the types.
+              } as unknown) as SecurityHasPrivilegesIndexPrivilegesCheck, // TODO: Needed until `allow_restricted_indices` is added to the types.
             ],
           },
         });
