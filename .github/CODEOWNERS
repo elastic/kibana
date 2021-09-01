@@ -438,6 +438,9 @@
 /x-pack/test/reporting_api_integration/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/test/reporting_functional/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/test/stack_functional_integration/apps/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/docs/user/reporting @elastic/kibana-reporting-services @elastic/kibana-app-services
+/docs/settings/reporting-settings.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
+/docs/setup/configuring-reporting.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
 

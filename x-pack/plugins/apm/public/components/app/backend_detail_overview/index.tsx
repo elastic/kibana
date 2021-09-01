@@ -18,7 +18,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { SearchBar } from '../../shared/search_bar';
 import { BackendLatencyChart } from './backend_latency_chart';
-import { BackendInventoryTitle } from '../../routing/home';
+import { DependenciesInventoryTitle } from '../../routing/home';
 import { BackendDetailDependenciesTable } from './backend_detail_dependencies_table';
 import { BackendThroughputChart } from './backend_throughput_chart';
 import { BackendFailedTransactionRateChart } from './backend_error_rate_chart';
@@ -39,7 +39,7 @@ export function BackendDetailOverview() {
 
   useBreadcrumb([
     {
-      title: BackendInventoryTitle,
+      title: DependenciesInventoryTitle,
       href: apmRouter.link('/backends', {
         query: { rangeFrom, rangeTo, environment, kuery },
       }),

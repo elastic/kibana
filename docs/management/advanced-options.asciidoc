@@ -186,7 +186,7 @@ Set to `true` to enable a dark mode for the {kib} UI. You must refresh the page
 to apply the setting.
 
 [[theme-version]]`theme:version`::
-Specifies the {kib} theme. If you change the setting, refresh the page to apply the setting. 
+Specifies the {kib} theme. If you change the setting, refresh the page to apply the setting.
 
 [[timepicker-quickranges]]`timepicker:quickRanges`::
 The list of ranges to show in the Quick section of the time filter. This should
@@ -214,7 +214,7 @@ truncation.
 When enabled, provides access to the experimental *Labs* features for *Canvas*.
 
 [[labs-dashboard-defer-below-fold]]`labs:dashboard:deferBelowFold`::
-When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard. 
+When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard.
 _Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<defer-loading-panels-below-the-fold,Improve dashboard loading time>>.
 
 [[labs-dashboard-enable-ui]]`labs:dashboard:enable_ui`::
@@ -240,7 +240,7 @@ Banners are a https://www.elastic.co/subscriptions[subscription feature].
 
 [horizontal]
 [[banners-placement]]`banners:placement`::
-Set to `Top` to display a banner above the Elastic header for this space. Defaults to the value of 
+Set to `Top` to display a banner above the Elastic header for this space. Defaults to the value of
 the `xpack.banners.placement` configuration property.
 
 [[banners-textcontent]]`banners:textContent`::
@@ -442,6 +442,9 @@ The threshold above which {ml} job anomalies are displayed in the {security-app}
 [[securitysolution-defaultindex]]`securitySolution:defaultIndex`::
 A comma-delimited list of {es} indices from which the {security-app} collects
 events.
+
+[[securitysolution-threatindices]]`securitySolution:defaultThreatIndex`::
+A comma-delimited list of Threat Intelligence indices from which the {security-app} collects indicators.
 
 [[securitysolution-enablenewsfeed]]`securitySolution:enableNewsFeed`:: Enables
 the security news feed on the Security *Overview* page.
