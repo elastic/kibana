@@ -37,11 +37,11 @@ interface CreateFilterOptions {
   timeRange?: TimeRange;
 
   /**
-   * Whether to coerce the time range values to an absolute ISO time.
+   * Whether to coerce relative time values (like `now-1s`) to an absolute ISO time.
    *
    * @default true
    */
-  coerceToAbsoluteTime?: boolean;
+  coerceRelativeTimeToAbsoluteTime?: boolean;
 }
 
 export class Timefilter {
@@ -196,11 +196,11 @@ export class Timefilter {
 
   public createFilter = (
     indexPattern: IIndexPattern,
-    { timeRange, coerceToAbsoluteTime }: CreateFilterOptions = {}
+    { timeRange, coerceRelativeTimeToAbsoluteTime }: CreateFilterOptions = {}
   ) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, {
       forceNow: this.nowProvider.get(),
-      coerceToAbsoluteTime,
+      coerceRelativeTimeToAbsoluteTime,
     });
   };
 

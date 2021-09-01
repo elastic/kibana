@@ -56,7 +56,9 @@ export function updateSearchSource(
     if (indexPatternsUtils.isDefault(indexPattern)) {
       searchSource.setField(
         'filter',
-        data.query.timefilter.timefilter.createFilter(indexPattern, { coerceToAbsoluteTime: false })
+        data.query.timefilter.timefilter.createFilter(indexPattern, {
+          coerceRelativeTimeToAbsoluteTime: false,
+        })
       );
     }
 

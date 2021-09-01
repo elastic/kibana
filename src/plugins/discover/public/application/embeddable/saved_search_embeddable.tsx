@@ -294,7 +294,7 @@ export class SavedSearchEmbeddable
       if (!this.searchProps || !this.input.timeRange) return;
       return this.services.timefilter.createFilter(indexPattern, {
         timeRange: this.input.timeRange,
-        coerceToAbsoluteTime: false,
+        coerceRelativeTimeToAbsoluteTime: false,
       });
     });
 

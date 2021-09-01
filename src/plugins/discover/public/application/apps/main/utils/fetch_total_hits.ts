@@ -40,7 +40,9 @@ export function fetchTotalHits(
   searchSource.setField('trackTotalHits', true);
   searchSource.setField(
     'filter',
-    data.query.timefilter.timefilter.createFilter(indexPattern!, { coerceToAbsoluteTime: false })
+    data.query.timefilter.timefilter.createFilter(indexPattern!, {
+      coerceRelativeTimeToAbsoluteTime: false,
+    })
   );
   searchSource.setField('size', 0);
   searchSource.removeField('sort');

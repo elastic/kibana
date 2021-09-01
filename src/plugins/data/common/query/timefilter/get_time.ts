@@ -7,20 +7,30 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { omitBy } from 'lodash';
 import { buildRangeFilter } from '@kbn/es-query';
+import type { Moment } from 'moment';
 import type { IIndexPattern, TimeRange, TimeRangeBounds, RangeFilterParams } from '../..';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;
 }
 
+const calculateLowerBound = (from: string, forceNow?: Date): undefined | Moment =>
+  dateMath.parse(from, { forceNow });
+
+const calculateUpperBound = (to: string, forceNow?: Date): undefined | Moment =>
+  dateMath.parse(to, { roundUp: true, forceNow });
+
+const isRelativeTime = (value: string): boolean => value.includes('now');
+
 export function calculateBounds(
   timeRange: TimeRange,
   options: CalculateBoundsOptions = {}
 ): TimeRangeBounds {
   return {
-    min: dateMath.parse(timeRange.from, { forceNow: options.forceNow }),
-    max: dateMath.parse(timeRange.to, { roundUp: true, forceNow: options.forceNow }),
+    min: calculateLowerBound(timeRange.from, options.forceNow),
+    max: calculateUpperBound(timeRange.to, options.forceNow),
   };
 }
 
@@ -38,14 +48,14 @@ export function getAbsoluteTimeRange(
 export function getTime(
   indexPattern: IIndexPattern | undefined,
   timeRange: TimeRange,
-  options?: { forceNow?: Date; fieldName?: string; coerceToAbsoluteTime?: boolean }
+  options?: { forceNow?: Date; fieldName?: string; coerceRelativeTimeToAbsoluteTime?: boolean }
 ) {
   return createTimeRangeFilter(
     indexPattern,
     timeRange,
     options?.fieldName || indexPattern?.timeFieldName,
     options?.forceNow,
-    options?.coerceToAbsoluteTime
+    options?.coerceRelativeTimeToAbsoluteTime
   );
 }
 
@@ -54,7 +64,7 @@ function createTimeRangeFilter(
   timeRange: TimeRange,
   fieldName?: string,
   forceNow?: Date,
-  coerceToAbsoluteTime: boolean = true
+  coerceRelativeTimeToAbsoluteTime: boolean = true
 ) {
   if (!indexPattern) {
     return;
@@ -66,20 +76,28 @@ function createTimeRangeFilter(
     return;
   }
 
-  const rangeFilterParams: RangeFilterParams = {};
+  let rangeFilterParams: RangeFilterParams = {
+    format: 'strict_date_optional_time',
+  };
 
-  if (coerceToAbsoluteTime) {
+  if (coerceRelativeTimeToAbsoluteTime) {
     const bounds = calculateBounds(timeRange, { forceNow });
     if (!bounds) {
       return;
     }
-    if (bounds.min) rangeFilterParams.gte = bounds.min.toISOString();
-    if (bounds.max) rangeFilterParams.lte = bounds.max.toISOString();
-    rangeFilterParams.format = 'strict_date_optional_time';
+    rangeFilterParams.gte = bounds.min?.toISOString();
+    rangeFilterParams.lte = bounds.max?.toISOString();
   } else {
-    rangeFilterParams.gte = timeRange.from;
-    rangeFilterParams.lte = timeRange.to;
+    rangeFilterParams.gte = isRelativeTime(timeRange.from)
+      ? timeRange.from
+      : calculateLowerBound(timeRange.from, forceNow)?.toISOString();
+
+    rangeFilterParams.lte = isRelativeTime(timeRange.to)
+      ? timeRange.to
+      : calculateUpperBound(timeRange.to, forceNow)?.toISOString();
   }
+
+  rangeFilterParams = omitBy(rangeFilterParams, (v) => v == null);
 
   return buildRangeFilter(field, rangeFilterParams, indexPattern);
 }

@@ -121,7 +121,9 @@ export function updateSearchSource(
   const indexPattern = searchSource.getField('index')!;
   searchSource.setField(
     'filter',
-    data.query.timefilter.timefilter.createFilter(indexPattern, { coerceToAbsoluteTime: false })
+    data.query.timefilter.timefilter.createFilter(indexPattern, {
+      coerceRelativeTimeToAbsoluteTime: false,
+    })
   );
   searchSource.setField('size', 0);
   searchSource.setField('trackTotalHits', true);

@@ -81,7 +81,7 @@ describe('get_time', () => {
       clock.restore();
     });
 
-    test('do not coerce to absolute time when given flag', () => {
+    test('do not coerce relative time to absolute time when given flag', () => {
       const filter = getTime(
         ({
           id: 'test',
@@ -107,12 +107,53 @@ describe('get_time', () => {
           ],
         } as unknown) as IIndexPattern,
         { from: 'now-60y', to: 'now' },
-        { fieldName: 'myCustomDate', coerceToAbsoluteTime: false }
+        { fieldName: 'myCustomDate', coerceRelativeTimeToAbsoluteTime: false }
       ) as RangeFilter;
 
       expect(filter.range.myCustomDate).toEqual({
         gte: 'now-60y',
         lte: 'now',
+        format: 'strict_date_optional_time',
+      });
+    });
+
+    test('do not coerce relative time to absolute time when given flag - with mixed from and to times', () => {
+      const filter = getTime(
+        ({
+          id: 'test',
+          title: 'test',
+          timeFieldName: 'date',
+          fields: [
+            {
+              name: 'date',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+              filterable: true,
+            },
+            {
+              name: 'myCustomDate',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+              filterable: true,
+            },
+          ],
+        } as unknown) as IIndexPattern,
+        {
+          from:
+            'Sep 1, 2020 @ 10:30:00.000' /* Kibana specific time format, deprecated from URLs but may exist in older ones */,
+          to: 'now',
+        },
+        { fieldName: 'myCustomDate', coerceRelativeTimeToAbsoluteTime: false }
+      ) as RangeFilter;
+
+      expect(filter.range.myCustomDate).toEqual({
+        gte: '2020-09-01T08:30:00.000Z',
+        lte: 'now',
+        format: 'strict_date_optional_time',
       });
     });
   });
