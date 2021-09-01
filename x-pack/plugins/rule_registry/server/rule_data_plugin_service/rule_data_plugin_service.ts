@@ -22,6 +22,7 @@ interface ConstructorOptions {
   logger: Logger;
   kibanaVersion: string;
   isWriteEnabled: boolean;
+  isIndexUpgradeEnabled: boolean;
 }
 
 /**
@@ -43,6 +44,7 @@ export class RuleDataPluginService {
       getClusterClient: options.getClusterClient,
       logger: options.logger,
       isWriteEnabled: options.isWriteEnabled,
+      isIndexUpgradeEnabled: options.isIndexUpgradeEnabled,
     });
 
     this.installCommonResources = Promise.resolve(right('ok'));

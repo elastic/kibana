@@ -34,6 +34,7 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
 import { useUserPrivileges } from '../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
@@ -72,8 +73,8 @@ const OverviewComponent = () => {
   }, [addMessage]);
   const {
     endpointPrivileges: { canAccessFleet },
-    alertsPrivileges,
   } = useUserPrivileges();
+  const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
   const isThreatIntelModuleEnabled = useIsThreatIntelModuleEnabled();
   return (
     <>
@@ -98,7 +99,7 @@ const OverviewComponent = () => {
 
               <EuiFlexItem grow={true}>
                 <EuiFlexGroup direction="column" gutterSize="none">
-                  {alertsPrivileges?.read && (
+                  {hasIndexRead && hasKibanaREAD && (
                     <>
                       <EuiFlexItem grow={false}>
                         <SignalsByCategory filters={filters} query={query} />

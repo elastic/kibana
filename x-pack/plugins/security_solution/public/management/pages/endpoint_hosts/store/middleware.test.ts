@@ -286,22 +286,15 @@ describe('endpoint list middleware', () => {
 
     it('should set ActivityLog state to loading', async () => {
       dispatchUserChangedUrl();
-      dispatchGetActivityLogLoading();
 
       const loadingDispatched = waitForAction('endpointDetailsActivityLogChanged', {
         validate(action) {
           return isLoadingResourceState(action.payload);
         },
       });
+      dispatchGetActivityLogLoading();
 
       const loadingDispatchedResponse = await loadingDispatched;
-      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
-        path: expect.any(String),
-        query: {
-          page: 1,
-          page_size: 50,
-        },
-      });
       expect(loadingDispatchedResponse.payload.type).toEqual('LoadingResourceState');
     });
 
@@ -341,6 +334,25 @@ describe('endpoint list middleware', () => {
 
       const failedAction = (await failedDispatched).payload as FailedResourceState<ActivityLog>;
       expect(failedAction.error).toBe(apiError);
+    });
+
+    it('should not call API again if it fails', async () => {
+      dispatchUserChangedUrl();
+
+      const apiError = new Error('oh oh');
+      const failedDispatched = waitForAction('endpointDetailsActivityLogChanged', {
+        validate(action) {
+          return isFailedResourceState(action.payload);
+        },
+      });
+
+      mockedApis.responseProvider.activityLogResponse.mockImplementation(() => {
+        throw apiError;
+      });
+
+      await failedDispatched;
+
+      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledTimes(1);
     });
 
     it('should not fetch Activity Log with invalid date ranges', async () => {

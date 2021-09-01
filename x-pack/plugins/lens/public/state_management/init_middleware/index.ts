@@ -23,7 +23,8 @@ export const initMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAP
         store,
         storeDeps,
         action.payload.redirectCallback,
-        action.payload.initialInput
+        action.payload.initialInput,
+        action.payload.emptyState
       );
     } else if (lensSlice.actions.navigateAway.match(action)) {
       return unsubscribeFromExternalContext();

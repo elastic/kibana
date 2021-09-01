@@ -131,6 +131,13 @@ export function getCoreUsageCollector(
                 'The interval in miliseconds between health check requests Kibana sends to the Elasticsearch.',
             },
           },
+          principal: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'Indicates how Kibana authenticates itself to Elasticsearch. If elasticsearch.username is configured, this can be any of: "elastic_user", "kibana_user", "kibana_system_user", or "other_user". Otherwise, if elasticsearch.serviceAccountToken is configured, this will be "kibana_service_account". Otherwise, this value will be "unknown", because some other principal might be used to authenticate Kibana to Elasticsearch (such as an x509 certificate), or authentication may be skipped altogether.',
+            },
+          },
         },
 
         http: {
