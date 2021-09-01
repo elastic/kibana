@@ -24,13 +24,6 @@ import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin'
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-jest.mock('@kbn/alerts', () => ({
-  useGetUserAlertsPermissions: () => ({
-    loading: false,
-    crud: true,
-    read: true,
-  }),
-}));
 jest.mock('../../../../../common/hooks/use_selector');
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
