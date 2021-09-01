@@ -381,7 +381,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       pageFilters={defaultFiltersMemo}
       defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
-      entityType="alerts"
+      entityType="events"
       end={to}
       currentFilter={filterGroup}
       id={timelineId}
@@ -392,7 +392,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       start={from}
       utilityBar={utilityBarCallback}
       additionalFilters={additionalFiltersComponent}
-      hasAlertsCrud={hasIndexWrite}
+      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
     />
   );
 };
