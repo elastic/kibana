@@ -15,7 +15,7 @@ export class Manager {
   // This must be a synchronous method because it is used in the unhandledException and exit event handlers
   public cleanup() {
     // Since this can be called multiple places we proxy it with some protection
-    if (!this.cleaned) {
+    if (this._cleanup && !this.cleaned) {
       this.cleaned = true;
       this._cleanup();
     }

@@ -7,7 +7,33 @@
 import axios from 'axios';
 import { ElasticsearchConfig } from './fleet_server';
 
-export const ROLES = {
+interface Roles {
+  [roleName: string]: {
+    indices: [
+      {
+        names: string[];
+        privileges: string[];
+        allow_restricted_indices: boolean;
+      }
+    ];
+    applications: [
+      {
+        application: string;
+        privileges: string[];
+        resources: string[];
+      }
+    ];
+    transient_metadata: {
+      enabled: boolean;
+    };
+  };
+}
+
+interface Users {
+  [username: string]: { roles: string[] };
+}
+
+export const ROLES: Roles = {
   read: {
     indices: [
       {
@@ -48,7 +74,7 @@ export const ROLES = {
   },
 };
 
-export const USERS = {
+export const USERS: Users = {
   osqueryRead: {
     roles: ['osquery_read'],
   },
