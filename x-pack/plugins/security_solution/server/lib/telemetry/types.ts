@@ -8,10 +8,8 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { TrustedApp } from '../../../common/endpoint/types';
 
-
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
-
 
 // For getting cluster info. Copied from telemetry_collection/get_cluster_info.ts
 export interface ESClusterInfo {
@@ -45,7 +43,6 @@ export interface ESLicense {
   start_date_in_millis?: number;
 }
 
-
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
   '@timestamp'?: string;
@@ -63,7 +60,6 @@ export interface TelemetryEvent {
   };
   license?: ESLicense;
 }
-
 
 // EP Policy Response
 

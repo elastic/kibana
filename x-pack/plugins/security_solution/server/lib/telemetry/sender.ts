@@ -21,6 +21,7 @@ import { AllowlistFields, allowlistEventFields } from './filters';
 import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import { TelemetryEvent } from './types';
+import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
@@ -28,7 +29,7 @@ export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 60 * 1000;
   private readonly logger: Logger;
-  private maxQueueSize = 100;
+  private maxQueueSize = TELEMETRY_MAX_BUFFER_SIZE;
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
   private intervalId?: NodeJS.Timeout;

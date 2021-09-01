@@ -16,6 +16,7 @@ import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 import { exceptionListItemToEndpointEntry } from './helpers';
 import { TelemetryEvent, ESLicense, ESClusterInfo, GetEndpointListResponse } from './types';
 
@@ -27,7 +28,6 @@ export class TelemetryReceiver {
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
   private readonly max_records = 10_000;
-  private maxQueueSize = 100;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -56,14 +56,6 @@ export class TelemetryReceiver {
       sortField: 'enrolled_at',
       sortOrder: 'desc',
     });
-  }
-
-  public async fetchClusterInfo(): Promise<ESClusterInfo> {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
-    }
-
-    return this.getClusterInfo(this.esClient);
   }
 
   public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string) {
@@ -171,7 +163,7 @@ export class TelemetryReceiver {
       expand_wildcards: 'open,hidden',
       index: '.logs-endpoint.diagnostic.collection-*',
       ignore_unavailable: true,
-      size: this.maxQueueSize,
+      size: TELEMETRY_MAX_BUFFER_SIZE,
       body: {
         query: {
           range: {
@@ -192,58 +184,6 @@ export class TelemetryReceiver {
     };
 
     return (await this.esClient.search<TelemetryEvent>(query)).body;
-  }
-
-  /**
-   * Get the cluster info from the connected cluster.
-   * Copied from:
-   * src/plugins/telemetry/server/telemetry_collection/get_cluster_info.ts
-   * This is the equivalent to GET /
-   */
-  private async getClusterInfo(esClient: ElasticsearchClient) {
-    const { body } = await esClient.info();
-    return body;
-  }
-
-  public async fetchLicenseInfo(): Promise<ESLicense | undefined> {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve license information');
-    }
-
-    try {
-      const ret = await this.getLicense(this.esClient, true);
-      return ret.license;
-    } catch (err) {
-      this.logger.debug(`failed retrieving license: ${err}`);
-      return undefined;
-    }
-  }
-
-  private async getLicense(
-    esClient: ElasticsearchClient,
-    local: boolean
-  ): Promise<{ license: ESLicense }> {
-    return (
-      await esClient.transport.request({
-        method: 'GET',
-        path: '/_license',
-        querystring: {
-          local,
-          // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
-          accept_enterprise: 'true',
-        },
-      })
-    ).body as Promise<{ license: ESLicense }>; // Note: We have to as cast since transport.request doesn't have generics
-  }
-
-  public copyLicenseFields(lic: ESLicense) {
-    return {
-      uid: lic.uid,
-      status: lic.status,
-      type: lic.type,
-      ...(lic.issued_to ? { issued_to: lic.issued_to } : {}),
-      ...(lic.issuer ? { issuer: lic.issuer } : {}),
-    };
   }
 
   public async fetchPolicyConfigs(id: string) {
@@ -287,6 +227,50 @@ export class TelemetryReceiver {
       total: results?.total ?? 0,
       page: results?.page ?? 1,
       per_page: results?.per_page ?? this.max_records,
+    };
+  }
+
+  public async fetchClusterInfo(): Promise<ESClusterInfo> {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
+    }
+
+    const { body } = await this.esClient.info();
+    return body;
+  }
+
+  public async fetchLicenseInfo(): Promise<ESLicense | undefined> {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve license information');
+    }
+
+    try {
+      const ret = (
+        await this.esClient.transport.request({
+          method: 'GET',
+          path: '/_license',
+          querystring: {
+            local: true,
+            // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
+            accept_enterprise: 'true',
+          },
+        })
+      ).body as Promise<{ license: ESLicense }>;
+
+      return (await ret).license;
+    } catch (err) {
+      this.logger.debug(`failed retrieving license: ${err}`);
+      return undefined;
+    }
+  }
+
+  public copyLicenseFields(lic: ESLicense) {
+    return {
+      uid: lic.uid,
+      status: lic.status,
+      type: lic.type,
+      ...(lic.issued_to ? { issued_to: lic.issued_to } : {}),
+      ...(lic.issuer ? { issuer: lic.issuer } : {}),
     };
   }
 }
