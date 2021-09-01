@@ -11,6 +11,7 @@ import { execSync } from 'child_process';
 import { writeFileSync, unlinkSync, rmdirSync } from 'fs';
 import { resolve } from 'path';
 import { ToolingLog } from '@kbn/dev-utils';
+import { Manager } from './resource_manager';
 
 const archMap: { [key: string]: string } = {
   x64: 'x86_64',
@@ -66,12 +67,13 @@ export type FetchArtifactsParams = {
 };
 
 type ArtifactPaths = FetchArtifactsParams;
-export class ArtifactManager {
+export class ArtifactManager extends Manager {
   private artifacts: ArtifactPaths;
   private versions: FetchArtifactsParams;
   private log: ToolingLog;
 
   constructor(versions: FetchArtifactsParams, log: ToolingLog) {
+    super();
     this.versions = versions;
     this.log = log;
     this.artifacts = {};
@@ -106,18 +108,18 @@ export class ArtifactManager {
     return file.replace('.tar.gz', '');
   }
 
-  public cleanupArtifacts = () => {
+  protected _cleanup() {
     this.log.info('Cleaning up artifacts');
     if (this.artifacts) {
       for (const artifactName of Object.keys(this.artifacts)) {
         const file = this.artifacts[artifactName as ArtifactName];
         if (!file) {
-          this.log.info(`Unknown artifact ${artifactName} encountered during cleanup, skipping`);
+          this.log.warning(`Unknown artifact ${artifactName} encountered during cleanup, skipping`);
           continue;
         }
         unlinkSync(file);
         rmdirSync(this.getArtifactDirectory(artifactName), { recursive: true });
       }
     }
-  };
+  }
 }

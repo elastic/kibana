@@ -20,7 +20,7 @@ A headless browser is a browser simulation program that does not have a user int
 
 #### FTR (CI)
 
-This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
+This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/osquery_cypress`
 
 ### Test Execution: Examples
 
@@ -36,7 +36,7 @@ yarn kbn bootstrap
 node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner
-cd x-pack/plugins/security_solution
+cd x-pack/plugins/osquery
 yarn cypress:run-as-ci
 ```
 #### FTR + Interactive
@@ -51,7 +51,7 @@ yarn kbn bootstrap
 node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner
-cd x-pack/plugins/security_solution
+cd x-pack/plugins/osquery
 yarn cypress:open-as-ci
 ```
 
@@ -98,16 +98,16 @@ We use es_archiver to manage the data that our Cypress tests need.
 
 1. Set up a clean instance of kibana and elasticsearch (if this is not possible, try to clean/minimize the data that you are going to archive).
 2. With the kibana and elasticsearch instance up and running, create the data that you need for your test.
-3. When you are sure that you have all the data you need run the following command from: `x-pack/plugins/security_solution`
+3. When you are sure that you have all the data you need run the following command from: `x-pack/plugins/osquery`
 
 ```sh
-node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/osquery_cypress/es_archives --config ../../../test/functional/config.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
 ```
 
 Example:
 
 ```sh
-node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9220
+node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/osquery_cypress/es_archives --config ../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9220
 ```
 
 Note that the command will create the folder if it does not exist.

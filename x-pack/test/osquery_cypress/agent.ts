@@ -11,21 +11,23 @@ import { copyFile } from 'fs/promises';
 import { ChildProcess, execFileSync, spawn } from 'child_process';
 import { resolve } from 'path';
 import { unlinkSync } from 'fs';
+import { Manager } from './resource_manager';
 
 interface AgentManagerParams {
   user: string;
   password: string;
   kibanaUrl: string;
-  elasticHost: string;
+  esHost: string;
 }
 
-export class AgentManager {
+export class AgentManager extends Manager {
   private directoryPath: string;
   private params: AgentManagerParams;
   private log: ToolingLog;
   private agentProcess?: ChildProcess;
   private requestOptions: AxiosRequestConfig;
   constructor(directoryPath: string, params: AgentManagerParams, log: ToolingLog) {
+    super();
     // TODO: check if the file exists
     this.directoryPath = directoryPath;
     this.log = log;
@@ -58,7 +60,7 @@ export class AgentManager {
 
     await axios.put(
       `${this.params.kibanaUrl}/api/fleet/outputs/${defaultOutput.id}`,
-      { hosts: [this.params.elasticHost] },
+      { hosts: [this.params.esHost] },
       this.requestOptions
     );
 
@@ -100,21 +102,24 @@ export class AgentManager {
       );
       done = agents.list[0]?.status === 'online';
       if (++retries > 12) {
-        this.log.error('Giving up on enrolling the agent after an hour');
+        this.log.error('Giving up on enrolling the agent after a minute');
         throw new Error('Agent timed out while coming online');
       }
     }
     return { policyId: policy.policy_id as string };
   }
 
-  public cleanup() {
+  protected _cleanup() {
     this.log.info('Cleaning up the agent process');
     if (this.agentProcess) {
-      this.agentProcess.kill(9);
+      if (!this.agentProcess.kill(9)) {
+        this.log.warning('Unable to kill agent process');
+      }
 
       this.agentProcess.on('close', () => {
         this.log.info('Agent process closed');
       });
+      delete this.agentProcess;
     }
     unlinkSync(resolve('.', 'elastic-agent.yml'));
   }

@@ -13,15 +13,15 @@ import { withProcRunner } from '@kbn/dev-utils';
 import { FtrProviderContext } from './ftr_provider_context';
 
 import { ArtifactManager, FetchArtifactsParams } from './artifact_manager';
-import { setupUserPermissions } from './osquery_setup';
-import { AgentManager } from './setup_agent';
-import { FleetManager } from './setup_fleet_server';
+import { setupUsers } from './users';
+import { AgentManager } from './agent';
+import { FleetManager } from './fleet_server';
 
 interface SetupParams {
   artifacts: FetchArtifactsParams;
 }
 
-async function setupRunner(
+async function withFleetAgent(
   { getService }: FtrProviderContext,
   params: SetupParams,
   runner: (runnerEnv: Record<string, string>) => Promise<void>
@@ -33,22 +33,21 @@ async function setupRunner(
   await artifactManager.fetchArtifacts();
 
   const esHost = Url.format(config.get('servers.elasticsearch'));
+  const esConfig = {
+    user: config.get('servers.elasticsearch.username'),
+    password: config.get('servers.elasticsearch.password'),
+    esHost,
+  };
   const fleetManager = new FleetManager(
     artifactManager.getArtifactDirectory('fleet-server'),
-    {
-      host: esHost,
-      user: config.get('servers.elasticsearch.username'),
-      password: config.get('servers.elasticsearch.password'),
-    },
+    esConfig,
     log
   );
 
   const agentManager = new AgentManager(
     artifactManager.getArtifactDirectory('elastic-agent'),
     {
-      user: config.get('servers.elasticsearch.username'),
-      password: config.get('servers.elasticsearch.password'),
-      elasticHost: esHost,
+      ...esConfig,
       kibanaUrl: Url.format({
         protocol: config.get('servers.kibana.protocol'),
         hostname: config.get('servers.kibana.hostname'),
@@ -57,32 +56,32 @@ async function setupRunner(
     },
     log
   );
+
+  // Since the managers will create uncaughtException event handlers we need to exit manually
+  process.on('uncaughtException', (err) => {
+    // eslint-disable-next-line no-console
+    console.error('Encountered error; exiting after cleanup.', err);
+    process.exit(1);
+  });
+
   await fleetManager.setup();
   const { policyId } = await agentManager.setup();
-
-  await setupUserPermissions(config);
-  async function cleanup() {
-    fleetManager.cleanup();
-    agentManager.cleanup();
-    await artifactManager.cleanupArtifacts();
-  }
-
-  process.on('SIGINT', async () => await cleanup());
-
+  await setupUsers(esConfig);
   try {
     await runner({
       CYPRESS_OSQUERY_POLICY: policyId,
     });
   } finally {
-    log.info('Cleaning up agent and fleet debris');
-    await cleanup();
+    fleetManager.cleanup();
+    agentManager.cleanup();
+    artifactManager.cleanup();
   }
 }
 
 export async function OsqueryCypressCliTestRunner(context: FtrProviderContext) {
   const log = context.getService('log');
   const config = context.getService('config');
-  await setupRunner(
+  await withFleetAgent(
     context,
     {
       artifacts: {
@@ -127,7 +126,7 @@ export async function OsqueryCypressVisualTestRunner(context: FtrProviderContext
   const log = context.getService('log');
   const config = context.getService('config');
 
-  await setupRunner(
+  await withFleetAgent(
     context,
     {
       artifacts: {
@@ -136,34 +135,36 @@ export async function OsqueryCypressVisualTestRunner(context: FtrProviderContext
       },
     },
     (runnerEnv) =>
-      withProcRunner(log, async (procs) => {
-        await procs.run('cypress', {
-          cmd: 'yarn',
-          args: ['cypress:open'],
-          cwd: resolve(__dirname, '../../plugins/osquery'),
-          env: {
-            FORCE_COLOR: '1',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            CYPRESS_protocol: config.get('servers.kibana.protocol'),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            CYPRESS_hostname: config.get('servers.kibana.hostname'),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            CYPRESS_configport: config.get('servers.kibana.port'),
-            CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-            CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-            CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
-            CYPRESS_KIBANA_URL: Url.format({
-              protocol: config.get('servers.kibana.protocol'),
-              hostname: config.get('servers.kibana.hostname'),
-              port: config.get('servers.kibana.port'),
-            }),
-            ...runnerEnv,
-            ...process.env,
-          },
-          wait: true,
-        });
-      })
+      withProcRunner(
+        log,
+        async (procs) =>
+          await procs.run('cypress', {
+            cmd: 'yarn',
+            args: ['cypress:open'],
+            cwd: resolve(__dirname, '../../plugins/osquery'),
+            env: {
+              FORCE_COLOR: '1',
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              CYPRESS_protocol: config.get('servers.kibana.protocol'),
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              CYPRESS_hostname: config.get('servers.kibana.hostname'),
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              CYPRESS_configport: config.get('servers.kibana.port'),
+              CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
+              CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
+              CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+              CYPRESS_KIBANA_URL: Url.format({
+                protocol: config.get('servers.kibana.protocol'),
+                hostname: config.get('servers.kibana.hostname'),
+                port: config.get('servers.kibana.port'),
+              }),
+              ...runnerEnv,
+              ...process.env,
+            },
+            wait: true,
+          })
+      )
   );
 }
