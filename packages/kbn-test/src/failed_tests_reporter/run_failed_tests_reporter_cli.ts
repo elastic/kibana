@@ -34,16 +34,25 @@ export function runFailedTestsReporterCli() {
       }
 
       if (updateGithub) {
-        // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
-        const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
-        const branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH;
+        let branch: string | undefined = '';
+        let isPr = false;
+
+        if (process.env.BUILDKITE === 'true') {
+          branch = process.env.BUILDKITE_BRANCH;
+          isPr = process.env.BUILDKITE_PULL_REQUEST === 'true';
+        } else {
+          // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
+          const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
+          branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH;
+          isPr = !!process.env.ghprbPullId;
+        }
+
         if (!branch) {
           throw createFailError(
             'Unable to determine originating branch from job name or other environment variables'
           );
         }
 
-        const isPr = !!process.env.ghprbPullId;
         const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
         if (!isMasterOrVersion || isPr) {
           log.info('Failure issues only created on master/version branch jobs');
