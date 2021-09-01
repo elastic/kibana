@@ -577,7 +577,7 @@ export const getPrepopulatedMemoryShellcodeException = ({
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
-  const { process, Target } = alertEcsData;
+  const { process } = alertEcsData;
   const entries = filterEmptyExceptionEntries([
     {
       field: 'Memory_protection.feature',
@@ -608,44 +608,6 @@ export const getPrepopulatedMemoryShellcodeException = ({
       operator: 'included' as const,
       type: 'match' as const,
       value: process?.Ext?.token?.integrity_level_name ?? '',
-    },
-    {
-      field: 'Target.process.thread.Ext.start_address_details',
-      type: 'nested' as const,
-      entries: [
-        {
-          field: 'allocation_type',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: Target?.process?.thread?.Ext?.start_address_details?.allocation_type ?? '',
-        },
-        {
-          field: 'allocation_size',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: String(Target?.process?.thread?.Ext?.start_address_details?.allocation_size) ?? '',
-        },
-        {
-          field: 'region_size',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: String(Target?.process?.thread?.Ext?.start_address_details?.region_size) ?? '',
-        },
-        {
-          field: 'region_protection',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value:
-            String(Target?.process?.thread?.Ext?.start_address_details?.region_protection) ?? '',
-        },
-        {
-          field: 'memory_pe.imphash',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value:
-            String(Target?.process?.thread?.Ext?.start_address_details?.memory_pe?.imphash) ?? '',
-        },
-      ],
     },
   ]);
 
@@ -845,7 +807,7 @@ export const defaultEndpointExceptionItems = (
           alertEcsData,
         }),
       ];
-    case 'malicious_thread':
+    case 'shellcode_thread':
       return [
         getPrepopulatedMemoryShellcodeException({
           listId,
