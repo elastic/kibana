@@ -48,7 +48,7 @@ export class DashboardToDiscoverDrilldown
     return [APPLY_FILTER_TRIGGER];
   }
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps>;
+  private readonly ReactCollectConfig!: React.FC<CollectConfigProps>;
 
   public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 

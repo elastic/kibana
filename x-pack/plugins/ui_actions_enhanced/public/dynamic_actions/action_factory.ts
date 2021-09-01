@@ -46,7 +46,7 @@ export class ActionFactory<
   public readonly MenuItem?: UiComponent;
   public readonly ReactMenuItem?: FC;
   public readonly CollectConfig: UiComponent;
-  public readonly ReactCollectConfig: FC;
+  public readonly ReactCollectConfig: FC<Record<string, unknown>>;
   public readonly createConfig: (context: FactoryContext) => Config;
   public readonly isConfigValid: (config: Config, context: FactoryContext) => boolean;
   public readonly migrations: MigrateFunctionsObject;
