@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     // Alert - Update - RBAC - spaces Security Solution superuser should bulk update alerts which match query in space1/.alerts-security.alerts
     // Alert - Update - RBAC - spaces superuser should bulk update alert with given id 020202 in space1/.alerts-security.alerts
-    describe('Security Solution', () => {
+    describe.skip('Security Solution', () => {
       const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll];
       const authorizedOnlyInSpace1 = [secOnly, obsSec];
       const authorizedOnlyInSpace2 = [secOnlySpace2, obsSecAllSpace2];
