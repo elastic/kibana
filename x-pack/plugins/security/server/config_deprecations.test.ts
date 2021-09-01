@@ -84,6 +84,7 @@ describe('Config Deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Setting \\"xpack.security.sessionTimeout\\" has been replaced by \\"xpack.security.session.idleTimeout\\"",
+        "Session lifespan (\\"xpack.security.session.lifespan\\") will be set to 30 days by default in the next major version (8.0).",
       ]
     `);
   });
