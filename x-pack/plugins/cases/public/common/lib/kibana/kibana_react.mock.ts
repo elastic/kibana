@@ -15,16 +15,14 @@ import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { securityMock } from '../../../../../security/public/mocks';
 import { triggersActionsUiMock } from '../../../../../triggers_actions_ui/public/mocks';
 
-export const mockCreateStartServicesMock = (): StartServices =>
-  (({
-    ...coreMock.createStart(),
-    security: securityMock.createStart(),
-    triggersActionsUi: triggersActionsUiMock.createStart(),
-  } as unknown) as StartServices);
-
 export const createStartServicesMock = (): StartServices =>
   (({
     ...coreMock.createStart(),
+    storage: { ...coreMock.createStorage(), remove: jest.fn() },
+    lens: {
+      canUseEditor: jest.fn(),
+      navigateToPrefilledEditor: jest.fn(),
+    },
     security: securityMock.createStart(),
     triggersActionsUi: triggersActionsUiMock.createStart(),
   } as unknown) as StartServices);
