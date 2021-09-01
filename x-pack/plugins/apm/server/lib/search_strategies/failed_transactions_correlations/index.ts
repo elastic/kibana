@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { failedTransactionsCorrelationsAsyncSearchServiceProvider } from './async_search_service';
+export {
+  failedTransactionsCorrelationsAsyncSearchServiceProvider,
+  FailedTransactionsCorrelationsAsyncSearchServiceProvider,
+  FailedTransactionsCorrelationsSearchStrategy,
+} from './async_search_service';

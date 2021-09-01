@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { latencyCorrelationsAsyncSearchServiceProvider } from './async_search_service';
+export {
+  latencyCorrelationsAsyncSearchServiceProvider,
+  LatencyCorrelationsAsyncSearchServiceProvider,
+  LatencyCorrelationsSearchStrategy,
+} from './async_search_service';

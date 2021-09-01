@@ -20,6 +20,15 @@ import type { SearchStrategyClientParams } from '../../../common/search_strategi
 import type { RawResponseBase } from '../../../common/search_strategies/types';
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
+import type {
+  LatencyCorrelationsAsyncSearchServiceProvider,
+  LatencyCorrelationsSearchStrategy,
+} from './latency_correlations';
+import type {
+  FailedTransactionsCorrelationsAsyncSearchServiceProvider,
+  FailedTransactionsCorrelationsSearchStrategy,
+} from './failed_transactions_correlations';
+
 interface AsyncSearchServiceState<TRawResponse extends RawResponseBase> {
   cancel: () => void;
   error: Error;
@@ -45,6 +54,20 @@ export type AsyncSearchServiceProvider<
   searchServiceParams: TSearchStrategyClientParams,
   includeFrozen: boolean
 ) => GetAsyncSearchServiceState<TRawResponse>;
+
+// Failed Transactions Correlations function overload
+export function searchStrategyProvider(
+  asyncSearchServiceProvider: FailedTransactionsCorrelationsAsyncSearchServiceProvider,
+  getApmIndices: () => Promise<ApmIndicesConfig>,
+  includeFrozen: boolean
+): FailedTransactionsCorrelationsSearchStrategy;
+
+// Latency Correlations function overload
+export function searchStrategyProvider(
+  asyncSearchServiceProvider: LatencyCorrelationsAsyncSearchServiceProvider,
+  getApmIndices: () => Promise<ApmIndicesConfig>,
+  includeFrozen: boolean
+): LatencyCorrelationsSearchStrategy;
 
 export function searchStrategyProvider<
   TSearchStrategyClientParams extends SearchStrategyClientParams,

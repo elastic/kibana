@@ -7,6 +7,13 @@
 
 import { range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
+
+import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+} from '../../../../../../../src/plugins/data/common';
+
 import type { SearchStrategyServerParams } from '../../../../common/search_strategies/types';
 import type {
   LatencyCorrelationsParams,
@@ -30,10 +37,17 @@ import type { AsyncSearchServiceProvider } from '../search_strategy_provider';
 
 import { asyncSearchServiceStateProvider } from './async_search_service_state';
 
-export const latencyCorrelationsAsyncSearchServiceProvider: AsyncSearchServiceProvider<
+export type LatencyCorrelationsAsyncSearchServiceProvider = AsyncSearchServiceProvider<
   LatencyCorrelationsParams,
   LatencyCorrelationsRawResponse
-> = (
+>;
+
+export type LatencyCorrelationsSearchStrategy = ISearchStrategy<
+  IKibanaSearchRequest<LatencyCorrelationsParams>,
+  IKibanaSearchResponse<LatencyCorrelationsRawResponse>
+>;
+
+export const latencyCorrelationsAsyncSearchServiceProvider: LatencyCorrelationsAsyncSearchServiceProvider = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   searchServiceParams: LatencyCorrelationsParams,

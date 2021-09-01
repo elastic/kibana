@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
+
 import type { ElasticsearchClient } from 'src/core/server';
 
-import { chunk } from 'lodash';
+import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+} from '../../../../../../../src/plugins/data/common';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
@@ -27,10 +33,17 @@ import { asyncFailedTransactionsCorrelationsSearchServiceStateProvider } from '.
 
 import { ERROR_CORRELATION_THRESHOLD } from '../constants';
 
-export const failedTransactionsCorrelationsAsyncSearchServiceProvider: AsyncSearchServiceProvider<
+export type FailedTransactionsCorrelationsAsyncSearchServiceProvider = AsyncSearchServiceProvider<
   FailedTransactionsCorrelationsParams,
   FailedTransactionsCorrelationsRawResponse
-> = (
+>;
+
+export type FailedTransactionsCorrelationsSearchStrategy = ISearchStrategy<
+  IKibanaSearchRequest<FailedTransactionsCorrelationsParams>,
+  IKibanaSearchResponse<FailedTransactionsCorrelationsRawResponse>
+>;
+
+export const failedTransactionsCorrelationsAsyncSearchServiceProvider: FailedTransactionsCorrelationsAsyncSearchServiceProvider = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   searchServiceParams: FailedTransactionsCorrelationsParams,
