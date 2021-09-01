@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(indexNames?.index_name?.length).to.eql(0);
       });
 
-      it(`${secOnlyRead.username} should be able to access the security solution alert in ${SPACE1}`, async () => {
+      it.skip(`${secOnlyRead.username} should be able to access the security solution alert in ${SPACE1}`, async () => {
         const indexNames = await getSecuritySolutionIndexName(secOnlyRead, SPACE1);
         const securitySolution = indexNames?.index_name?.find((indexName) =>
           indexName.startsWith(SECURITY_SOLUTION_ALERT_INDEX)
