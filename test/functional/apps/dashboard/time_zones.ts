@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'savedObjects',
   ]);
 
+  // TODO: remove this test (we no longer support legacy imports)
   describe('dashboard time zones', function () {
     this.tags('includeFirefox');
 
@@ -34,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.savedObjects.importFile(
-        path.join(__dirname, 'exports', 'timezonetest_6_2_4.json')
+        path.join(__dirname, 'exports', 'timezonetest_6_2_4.ndjson')
       );
       await PageObjects.savedObjects.checkImportSucceeded();
       await PageObjects.common.navigateToApp('dashboard');

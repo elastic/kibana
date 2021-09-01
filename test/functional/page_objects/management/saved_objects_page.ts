@@ -61,6 +61,7 @@ export class SavedObjectsPageObject extends FtrService {
 
   async checkImportSucceeded() {
     await this.testSubjects.existOrFail('importSavedObjectsSuccess', { timeout: 20000 });
+    await this.testSubjects.existOrFail('importSavedObjectsSuccess', { timeout: 20000 });
   }
 
   async checkNoneImported() {
