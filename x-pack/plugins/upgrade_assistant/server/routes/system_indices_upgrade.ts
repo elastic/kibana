@@ -9,20 +9,22 @@ import { API_BASE_PATH } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 
-const mockedData = [
-  {
-    id: '1',
-    feature_name: 'security',
-    minimum_index_version: '7.1.1',
-    upgrade_status: 'UPGRADE_NEEDED',
-    indices: [
-      {
-        index: '.security-7',
-        index_version: '7.1.1',
-      },
-    ],
-  },
-];
+const mockedResponse = {
+  features: [
+    {
+      feature_name: 'security',
+      minimum_index_version: '7.1.1',
+      upgrade_status: 'UPGRADE_NEEDED',
+      indices: [
+        {
+          index: '.security-7',
+          index_version: '7.1.1',
+        },
+      ],
+    },
+  ],
+  upgrade_status: 'UPGRADE_NEEDED',
+};
 
 export function registerSystemIndicesUpgradeRoutes({
   router,
@@ -34,9 +36,7 @@ export function registerSystemIndicesUpgradeRoutes({
     versionCheckHandlerWrapper(async (context, request, response) => {
       try {
         return response.ok({
-          body: {
-            ...mockedData,
-          },
+          body: mockedResponse,
         });
       } catch (error) {
         return handleEsError({ error, response });

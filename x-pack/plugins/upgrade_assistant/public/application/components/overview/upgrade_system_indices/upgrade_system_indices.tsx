@@ -133,11 +133,13 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
           {i18nTexts.startButtonLabel}
         </EuiButton>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={() => setShowFlyout(true)}>
-          {i18nTexts.viewSystemIndices}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+      {data?.upgrade_status !== 'UPGRADE_NEEDED' && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={() => setShowFlyout(true)}>
+            {i18nTexts.viewSystemIndices}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

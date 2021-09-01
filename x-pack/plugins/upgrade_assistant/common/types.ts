@@ -255,15 +255,3 @@ export interface DeprecationLoggingStatus {
   isDeprecationLogIndexingEnabled: boolean;
   isDeprecationLoggingEnabled: boolean;
 }
-
-export type UPGRADE_STATUS_STATUS = 'UPGRADE_NEEDED' | 'NO_UPGRADE_NEEDED' | 'IN_PROGRESS';
-export interface SystemIndicesUpgradeStatus {
-  id: string;
-  feature_name: string;
-  minimum_index_version: string;
-  upgrade_status: UPGRADE_STATUS_STATUS;
-  indices: Array<{
-    index: string;
-    index_version: string;
-  }>;
-}

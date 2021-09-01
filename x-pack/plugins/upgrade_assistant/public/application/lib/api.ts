@@ -64,7 +64,7 @@ export class ApiService {
   }
 
   public useLoadSystemIndicesUpgradeStatus() {
-    return this.useRequest<SystemIndicesUpgradeStatus[]>({
+    return this.useRequest<SystemIndicesUpgradeStatus>({
       path: `${API_BASE_PATH}/system_indices_upgrade`,
       method: 'get',
       pollIntervalMs: SYSTEM_INDICES_UPGRADE_POLL_INTERVAL_MS,
