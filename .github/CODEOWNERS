@@ -12,31 +12,34 @@
 # Virtual teams
 /x-pack/plugins/rule_registry/ @elastic/rac
 
-# App
-/x-pack/plugins/discover_enhanced/ @elastic/kibana-app
-/x-pack/plugins/lens/ @elastic/kibana-app
-/x-pack/plugins/graph/ @elastic/kibana-app
-/src/plugins/advanced_settings/ @elastic/kibana-app
-/src/plugins/charts/ @elastic/kibana-app
-/src/plugins/discover/ @elastic/kibana-app
-/src/plugins/management/ @elastic/kibana-app
-/src/plugins/kibana_legacy/ @elastic/kibana-app
-/src/plugins/timelion/ @elastic/kibana-app
-/src/plugins/vis_default_editor/ @elastic/kibana-app
-/src/plugins/vis_type_metric/ @elastic/kibana-app
-/src/plugins/vis_type_table/ @elastic/kibana-app
-/src/plugins/vis_type_tagcloud/ @elastic/kibana-app
-/src/plugins/vis_type_timelion/ @elastic/kibana-app
-/src/plugins/vis_type_timeseries/ @elastic/kibana-app
-/src/plugins/vis_type_vega/ @elastic/kibana-app
-/src/plugins/vis_types/vislib/ @elastic/kibana-app
-/src/plugins/vis_types/xy/ @elastic/kibana-app
-/src/plugins/vis_types/pie/ @elastic/kibana-app
-/src/plugins/visualize/ @elastic/kibana-app
-/src/plugins/visualizations/ @elastic/kibana-app
-/src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-app
-/src/plugins/url_forwarding/ @elastic/kibana-app
-/packages/kbn-tinymath/ @elastic/kibana-app
+# Data Discovery
+/src/plugins/discover/ @elastic/kibana-data-discovery
+/x-pack/plugins/discover_enhanced/ @elastic/kibana-data-discovery
+/test/functional/apps/discover/ @elastic/kibana-data-discovery
+
+# Vis Editors
+/x-pack/plugins/lens/ @elastic/kibana-vis-editors
+/x-pack/plugins/graph/ @elastic/kibana-vis-editors
+/src/plugins/advanced_settings/ @elastic/kibana-vis-editors
+/src/plugins/charts/ @elastic/kibana-vis-editors
+/src/plugins/management/ @elastic/kibana-vis-editors
+/src/plugins/kibana_legacy/ @elastic/kibana-vis-editors
+/src/plugins/timelion/ @elastic/kibana-vis-editors
+/src/plugins/vis_default_editor/ @elastic/kibana-vis-editors
+/src/plugins/vis_type_metric/ @elastic/kibana-vis-editors
+/src/plugins/vis_type_table/ @elastic/kibana-vis-editors
+/src/plugins/vis_type_tagcloud/ @elastic/kibana-vis-editors
+/src/plugins/vis_type_timelion/ @elastic/kibana-vis-editors
+/src/plugins/vis_type_timeseries/ @elastic/kibana-vis-editors
+/src/plugins/vis_type_vega/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/vislib/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/xy/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/pie/ @elastic/kibana-vis-editors
+/src/plugins/visualize/ @elastic/kibana-vis-editors
+/src/plugins/visualizations/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-vis-editors
+/src/plugins/url_forwarding/ @elastic/kibana-vis-editors
+/packages/kbn-tinymath/ @elastic/kibana-vis-editors
 
 # Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-services
@@ -436,6 +439,9 @@
 /x-pack/test/reporting_api_integration/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/test/reporting_functional/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 /x-pack/test/stack_functional_integration/apps/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/docs/user/reporting @elastic/kibana-reporting-services @elastic/kibana-app-services
+/docs/settings/reporting-settings.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
+/docs/setup/configuring-reporting.asciidoc @elastic/kibana-reporting-services @elastic/kibana-app-services
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
 
