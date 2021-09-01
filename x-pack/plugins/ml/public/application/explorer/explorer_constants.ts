@@ -34,6 +34,7 @@ export const EXPLORER_ACTION = {
   SET_VIEW_BY_PER_PAGE: 'setViewByPerPage',
   SET_VIEW_BY_FROM_PAGE: 'setViewByFromPage',
   SET_SWIM_LANE_SEVERITY: 'setSwimLaneSeverity',
+  SET_SHOW_CHARTS: 'setShowCharts',
 };
 
 export const FILTER_ACTION = {
