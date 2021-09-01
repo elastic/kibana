@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
@@ -21,33 +21,55 @@ export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount: number;
 }
 
+const scrollTop = () => {
+  const scrollDiv = document.querySelector('.kbnDocTableWrapper') as HTMLElement;
+  scrollDiv.scrollTo(0, 0);
+};
+
 const DocTableWrapperMemoized = memo(DocTableWrapper);
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
-  const pager = usePager({ totalItems: props.rows.length });
+  const {
+    currentPage,
+    pageSize,
+    totalPages,
+    startIndex,
+    hasNextPage,
+    changePage,
+    changePageSize,
+  } = usePager({
+    totalItems: props.rows.length,
+  });
 
-  const pageOfItems = useMemo(
-    () => props.rows.slice(pager.startIndex, pager.pageSize + pager.startIndex),
-    [pager.pageSize, pager.startIndex, props.rows]
+  const pageOfItems = useMemo(() => props.rows.slice(startIndex, pageSize + startIndex), [
+    pageSize,
+    startIndex,
+    props.rows,
+  ]);
+
+  const onPageChange = useCallback(
+    (page: number) => {
+      scrollTop();
+      changePage(page);
+    },
+    [changePage]
   );
 
+  const onPageSizeChange = useCallback(
+    (size: number) => {
+      scrollTop();
+      changePageSize(size);
+    },
+    [changePageSize]
+  );
+
+  /**
+   * Go to the first page if filter was applied
+   */
+  useEffect(() => onPageChange(0), [onPageChange, props.rows.length]);
+
   const shouldShowLimitedResultsWarning = () =>
-    !pager.hasNextPage && props.rows.length < props.totalHitCount;
-
-  const scrollTop = () => {
-    const scrollDiv = document.querySelector('.kbnDocTableWrapper') as HTMLElement;
-    scrollDiv.scrollTo(0, 0);
-  };
-
-  const onPageChange = (page: number) => {
-    scrollTop();
-    pager.onPageChange(page);
-  };
-
-  const onPageSizeChange = (size: number) => {
-    scrollTop();
-    pager.onPageSizeChange(size);
-  };
+    !hasNextPage && props.rows.length < props.totalHitCount;
 
   const sampleSize = useMemo(() => {
     return getServices().uiSettings.get(SAMPLE_SIZE_SETTING, 500);
@@ -102,9 +124,9 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
 
       <EuiFlexItem grow={false}>
         <ToolBarPagination
-          pageSize={pager.pageSize}
-          pageCount={pager.totalPages}
-          activePage={pager.currentPage}
+          pageSize={pageSize}
+          pageCount={totalPages}
+          activePage={currentPage}
           onPageClick={onPageChange}
           onPageSizeChange={onPageSizeChange}
         />
