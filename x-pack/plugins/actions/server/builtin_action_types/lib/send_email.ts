@@ -149,8 +149,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     let response;
     try {
       response = await postSendEmailMSExchange(
-        transport,
-        { emailOptions: options, headers },
+        { emailOptions: options, headers, transport },
         logger,
         configurationUtilities
       );
