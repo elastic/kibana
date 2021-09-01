@@ -194,7 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       it('should support search event by ids and legacyIds', async () => {
         const legacyId = `521f2511-5cd1-44fd-95df-e0df83e354d5`;
-        const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
+        const id = `621f2511-5cd1-44fd-95df-e0df83e354d5`;
 
         const {
           body: { data, total },
@@ -216,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should search event only by ids if no legacyIds are provided', async () => {
-        const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
+        const id = `621f2511-5cd1-44fd-95df-e0df83e354d5`;
 
         const {
           body: { data, total },

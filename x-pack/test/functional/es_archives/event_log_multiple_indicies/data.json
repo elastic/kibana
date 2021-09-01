@@ -140,7 +140,7 @@
           }
         ],
         "server_uuid": "5b2de169-2785-441b-ae8c-186a1936b17d",
-        "version": "8.6.0"
+        "version": "8.0.0"
       },
       "message": "test 2020-10-28T15:19:54.849Z"
     }
@@ -173,7 +173,7 @@
           }
         ],
         "server_uuid": "5b2de169-2785-441b-ae8c-186a1936b17d",
-        "version": "8.1.0"
+        "version": "8.0.0"
       },
       "message": "test 2020-10-28T15:19:54.881Z"
     }
