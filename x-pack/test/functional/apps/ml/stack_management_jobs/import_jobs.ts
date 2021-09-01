@@ -93,5 +93,16 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
     }
+
+    describe('correctly fails to import bad data', async () => {
+      it('selects and reads file', async () => {
+        await ml.testExecution.logTestStep('selects job import');
+        await ml.stackManagementJobs.openImportFlyout();
+        await ml.stackManagementJobs.selectFileToImport(
+          path.join(__dirname, 'files_to_import', 'bad_data.json'),
+          true
+        );
+      });
+    });
   });
 }

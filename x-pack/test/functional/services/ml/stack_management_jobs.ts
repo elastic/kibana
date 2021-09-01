@@ -288,5 +288,9 @@ export function MachineLearningStackManagementJobsProvider(
         await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout');
       });
     },
+
+    async assertReadErrorCalloutExists() {
+      await testSubjects.existOrFail('~mlJobMgmtImportJobsFileReadErrorCallout');
+    },
   };
 }
