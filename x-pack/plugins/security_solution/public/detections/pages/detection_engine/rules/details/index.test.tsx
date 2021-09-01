@@ -45,13 +45,6 @@ jest.mock('../../../../../common/containers/use_global_time', () => ({
     setQuery: jest.fn(),
   }),
 }));
-jest.mock('@kbn/alerts', () => ({
-  useGetUserAlertsPermissions: () => ({
-    loading: false,
-    crud: true,
-    read: true,
-  }),
-}));
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
 
