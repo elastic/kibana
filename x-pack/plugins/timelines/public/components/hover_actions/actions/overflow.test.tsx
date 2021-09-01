@@ -24,7 +24,7 @@ describe('OverflowButton', () => {
     expect(wrapper.find('EuiPopover').exists()).toBeTruthy();
   });
 
-  test('popover should be hidden if thers an overlay opening on the page', () => {
+  test('the popover always contains a class that hides it when an overlay (e.g. the inspect modal) is displayed', () => {
     const wrapper = shallow(<OverflowButton {...props} />);
     expect(wrapper.find('EuiPopover').prop('panelClassName')).toEqual('withHoverActions__popover');
   });
