@@ -43,6 +43,12 @@ import {
  */
 export interface ExpressionsServiceCommon {
   /**
+   * Get a fork instance by name.
+   * @param name A fork name.
+   */
+  getFork(name: string): ExpressionsService;
+
+  /**
    * Get a registered `ExpressionFunction` by its name, which was registered
    * using the `registerFunction` method. The returned `ExpressionFunction`
    * instance is an internal representation of the function in Expressions
@@ -98,8 +104,9 @@ export interface ExpressionsServiceSetup extends ExpressionsServiceCommon {
    * available in the forked instance. However, all new types and functions
    * registered in the forked instances will NOT be available to the original
    * service.
+   * @param name A fork name that can be used to get fork instance later.
    */
-  fork(): ExpressionsService;
+  fork(name?: string): ExpressionsService;
 
   /**
    * Register an expression function, which will be possible to execute as
@@ -251,6 +258,8 @@ export class ExpressionsService
     PersistableStateService<ExpressionAstExpression>,
     ExpressionsServiceSetup,
     ExpressionsServiceStart {
+  private children = new Map<string, ExpressionsService>();
+
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
@@ -261,6 +270,15 @@ export class ExpressionsService
     this.executor = executor;
     this.renderers = renderers;
   }
+
+  public getFork: ExpressionsServiceCommon['getFork'] = (name) => {
+    const fork = this.children.get(name);
+    if (!fork) {
+      throw new Error(`Expressions fork '${name}' not found.`);
+    }
+
+    return fork;
+  };
 
   public readonly getFunction: ExpressionsServiceCommon['getFunction'] = (name) =>
     this.executor.getFunction(name);
@@ -289,10 +307,14 @@ export class ExpressionsService
   public readonly registerRenderer: ExpressionsServiceSetup['registerRenderer'] = (definition) =>
     this.renderers.register(definition);
 
-  public readonly fork = () => {
+  public readonly fork: ExpressionsServiceSetup['fork'] = (name) => {
     const executor = this.executor.fork();
     const renderers = this.renderers;
     const fork = new (this.constructor as typeof ExpressionsService)({ executor, renderers });
+
+    if (name) {
+      this.children.set(name, fork);
+    }
 
     return fork;
   };

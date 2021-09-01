@@ -17,6 +17,7 @@ describe('ExpressionsService', () => {
     const expressions = new ExpressionsService();
 
     expect(expressions.setup()).toMatchObject({
+      getFork: expect.any(Function),
       getFunctions: expect.any(Function),
       getTypes: expect.any(Function),
       getRenderers: expect.any(Function),
@@ -32,6 +33,7 @@ describe('ExpressionsService', () => {
     expressions.setup();
 
     expect(expressions.start()).toMatchObject({
+      getFork: expect.any(Function),
       getFunctions: expect.any(Function),
       getTypes: expect.any(Function),
       getRenderers: expect.any(Function),
@@ -123,6 +125,22 @@ describe('ExpressionsService', () => {
       });
 
       const { result } = await fork.run('__test__', null).toPromise();
+
+      expect(result).toBe('123');
+    });
+
+    test('fork can be gathered by the name', async () => {
+      const service = new ExpressionsService();
+      service.fork('test').registerFunction({
+        name: '__test__',
+        args: {},
+        help: '',
+        fn: () => {
+          return '123';
+        },
+      });
+
+      const { result } = await service.getFork('test').run('__test__', null).toPromise();
 
       expect(result).toBe('123');
     });
