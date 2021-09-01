@@ -1388,6 +1388,18 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/target/types/public/applications/integrations/index.d.ts"
+              },
+              {
+                "plugin": "kibanaOverview",
+                "path": "src/plugins/kibana_overview/public/application.tsx"
+              },
+              {
+                "plugin": "timelion",
+                "path": "src/plugins/timelion/public/application.ts"
+              },
+              {
+                "plugin": "management",
+                "path": "src/plugins/management/target/types/public/application.d.ts"
               }
             ]
           },
@@ -1495,6 +1507,42 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/components/visualize_top_nav.tsx"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/components/visualize_editor_common.tsx"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/app.tsx"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/public/application/index.tsx"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/target/types/public/types.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/app.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/index.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/components/visualize_editor_common.d.ts"
+              },
+              {
+                "plugin": "visualize",
+                "path": "src/plugins/visualize/target/types/public/application/components/visualize_top_nav.d.ts"
               }
             ],
             "children": [

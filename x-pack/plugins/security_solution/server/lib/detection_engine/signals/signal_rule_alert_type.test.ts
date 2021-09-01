@@ -11,7 +11,6 @@ import { loggingSystemMock } from 'src/core/server/mocks';
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
-import { ruleStatusServiceFactory } from './rule_status_service';
 import {
   getListsClient,
   getExceptions,
@@ -20,7 +19,6 @@ import {
 } from './utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
-import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { RuleAlertType } from '../rules/types';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getListClientMock } from '../../../../../lists/server/services/lists/list_client.mock';
@@ -35,9 +33,10 @@ import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.moc
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
+import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
+import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 
-jest.mock('./rule_status_saved_objects_client');
-jest.mock('./rule_status_service');
 jest.mock('./utils', () => {
   const original = jest.requireActual('./utils');
   return {
@@ -58,6 +57,12 @@ jest.mock('@kbn/securitysolution-io-ts-utils', () => {
     parseScheduleDates: jest.fn(),
   };
 });
+
+const mockRuleExecutionLogClient = ruleExecutionLogClientMock.create();
+
+jest.mock('../rule_execution_log/rule_execution_log_client', () => ({
+  RuleExecutionLogClient: jest.fn().mockImplementation(() => mockRuleExecutionLogClient),
+}));
 
 const getPayload = (
   ruleAlert: RuleAlertType,
@@ -119,21 +124,12 @@ describe('signal_rule_alert_type', () => {
   let alert: ReturnType<typeof signalRulesAlertType>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let alertServices: AlertServicesMock;
-  let ruleStatusService: Record<string, jest.Mock>;
   let ruleDataService: ReturnType<typeof ruleRegistryMocks.createRuleDataPluginService>;
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
     logger = loggingSystemMock.createLogger();
-    ruleStatusService = {
-      success: jest.fn(),
-      find: jest.fn(),
-      goingToRun: jest.fn(),
-      error: jest.fn(),
-      partialFailure: jest.fn(),
-    };
     ruleDataService = ruleRegistryMocks.createRuleDataPluginService();
-    (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getListsClient as jest.Mock).mockReturnValue({
       listClient: getListClientMock(),
       exceptionsClient: getExceptionListClientMock(),
@@ -201,23 +197,33 @@ describe('signal_rule_alert_type', () => {
       mergeStrategy: 'missingFields',
       ruleDataService,
     });
+
+    mockRuleExecutionLogClient.logStatusChange.mockClear();
   });
 
   describe('executor', () => {
-    it('should call ruleStatusService.success if signals were created', async () => {
+    it('should log success status if signals were created', async () => {
       payload.previousStartedAt = null;
       await alert.executor(payload);
-      expect(ruleStatusService.success).toHaveBeenCalled();
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.succeeded,
+        })
+      );
     });
 
     it('should warn about the gap between runs if gap is very large', async () => {
       payload.previousStartedAt = moment().subtract(100, 'm').toDate();
       await alert.executor(payload);
       expect(logger.warn).toHaveBeenCalled();
-      expect(ruleStatusService.error).toHaveBeenCalled();
-      expect(ruleStatusService.error.mock.calls[0][1]).toEqual({
-        gap: 'an hour',
-      });
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.failed,
+          metrics: {
+            gap: 'an hour',
+          },
+        })
+      );
     });
 
     it('should set a warning for when rules cannot read ALL provided indices', async () => {
@@ -243,9 +249,12 @@ describe('signal_rule_alert_type', () => {
       payload = getPayload(newRuleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
 
       await alert.executor(payload);
-      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
-      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
-        'Missing required read privileges on the following indices: ["some*"]'
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus['partial failure'],
+          message: 'Missing required read privileges on the following indices: ["some*"]',
+        })
       );
     });
 
@@ -269,9 +278,13 @@ describe('signal_rule_alert_type', () => {
       payload = getPayload(newRuleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
 
       await alert.executor(payload);
-      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
-      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
-        'This rule may not have the required read privileges to the following indices: ["myfa*","some*"]'
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus['partial failure'],
+          message:
+            'This rule may not have the required read privileges to the following indices: ["myfa*","some*"]',
+        })
       );
     });
 
@@ -279,7 +292,19 @@ describe('signal_rule_alert_type', () => {
       payload.previousStartedAt = moment().subtract(10, 'm').toDate();
       await alert.executor(payload);
       expect(logger.warn).toHaveBeenCalledTimes(0);
-      expect(ruleStatusService.error).toHaveBeenCalledTimes(0);
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenCalledTimes(2);
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus['going to run'],
+        })
+      );
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.succeeded,
+        })
+      );
     });
 
     it('should call scheduleActions if signalsCount was greater than 0 and rule has actions defined', async () => {
@@ -304,12 +329,6 @@ describe('signal_rule_alert_type', () => {
       });
 
       await alert.executor(payload);
-
-      expect(scheduleNotificationActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          signalsCount: 10,
-        })
-      );
     });
 
     it('should resolve results_link when meta is an empty object to use "/app/security"', async () => {
@@ -426,7 +445,11 @@ describe('signal_rule_alert_type', () => {
 
         await alert.executor(payload);
         expect(checkPrivileges).toHaveBeenCalledTimes(0);
-        expect(ruleStatusService.success).toHaveBeenCalled();
+        expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            newStatus: RuleExecutionStatus.succeeded,
+          })
+        );
       });
     });
   });
@@ -450,7 +473,11 @@ describe('signal_rule_alert_type', () => {
       expect(logger.error.mock.calls[0][0]).toContain(
         'Bulk Indexing of signals failed: Error that bubbled up. name: "Detect Root/Admin Users" id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" rule id: "rule-1" signals index: ".siem-signals"'
       );
-      expect(ruleStatusService.error).toHaveBeenCalled();
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.failed,
+        })
+      );
     });
 
     it('when error was thrown', async () => {
@@ -458,10 +485,14 @@ describe('signal_rule_alert_type', () => {
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();
       expect(logger.error.mock.calls[0][0]).toContain('An error occurred during rule execution');
-      expect(ruleStatusService.error).toHaveBeenCalled();
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.failed,
+        })
+      );
     });
 
-    it('and call ruleStatusService with the default message', async () => {
+    it('and log failure with the default message', async () => {
       (queryExecutor as jest.Mock).mockReturnValue(
         elasticsearchClientMock.createErrorTransportRequestPromise(
           new ResponseError(
@@ -475,7 +506,11 @@ describe('signal_rule_alert_type', () => {
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();
       expect(logger.error.mock.calls[0][0]).toContain('An error occurred during rule execution');
-      expect(ruleStatusService.error).toHaveBeenCalled();
+      expect(mockRuleExecutionLogClient.logStatusChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          newStatus: RuleExecutionStatus.failed,
+        })
+      );
     });
   });
 });

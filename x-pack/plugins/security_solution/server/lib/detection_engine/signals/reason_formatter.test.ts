@@ -12,7 +12,6 @@ import { SignalSourceHit } from './types';
 describe('reason_formatter', () => {
   let rule: RulesSchema;
   let mergedDoc: SignalSourceHit;
-  let timestamp: string;
   beforeAll(() => {
     rule = {
       name: 'What is in a name',
@@ -28,18 +27,17 @@ describe('reason_formatter', () => {
         '@timestamp': '2021-08-11T02:28:59.101Z',
       },
     };
-    timestamp = '2021-08-11T02:28:59.401Z';
   });
 
   describe('buildCommonReasonMessage', () => {
-    describe('when rule, mergedDoc, and timestamp are provided', () => {
+    describe('when rule and mergedDoc are provided', () => {
       it('should return the full reason message', () => {
-        expect(buildCommonReasonMessage({ rule, mergedDoc, timestamp })).toEqual(
-          'Alert What is in a name created at 2021-08-11T02:28:59.401Z with a medium severity and risk score of 9000 by ferris bueller on party host.'
+        expect(buildCommonReasonMessage({ rule, mergedDoc })).toEqual(
+          'Alert What is in a name created with a medium severity and risk score of 9000 by ferris bueller on party host.'
         );
       });
     });
-    describe('when rule, mergedDoc, and timestamp are provided and host.name is missing', () => {
+    describe('when rule and mergedDoc are provided, but host.name is missing', () => {
       it('should return the reason message without the host name', () => {
         const updatedMergedDoc = {
           ...mergedDoc,
@@ -48,12 +46,12 @@ describe('reason_formatter', () => {
             'host.name': ['-'],
           },
         };
-        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc, timestamp })).toEqual(
-          'Alert What is in a name created at 2021-08-11T02:28:59.401Z with a medium severity and risk score of 9000 by ferris bueller.'
+        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc })).toEqual(
+          'Alert What is in a name created with a medium severity and risk score of 9000 by ferris bueller.'
         );
       });
     });
-    describe('when rule, mergedDoc, and timestamp are provided and user.name is missing', () => {
+    describe('when rule and mergedDoc are provided, but user.name is missing', () => {
       it('should return the reason message without the user name', () => {
         const updatedMergedDoc = {
           ...mergedDoc,
@@ -62,15 +60,15 @@ describe('reason_formatter', () => {
             'user.name': ['-'],
           },
         };
-        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc, timestamp })).toEqual(
-          'Alert What is in a name created at 2021-08-11T02:28:59.401Z with a medium severity and risk score of 9000 on party host.'
+        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc })).toEqual(
+          'Alert What is in a name created with a medium severity and risk score of 9000 on party host.'
         );
       });
     });
-    describe('when only rule and timestamp are provided', () => {
+    describe('when only rule is provided', () => {
       it('should return the reason message without host name or user name', () => {
-        expect(buildCommonReasonMessage({ rule, timestamp })).toEqual(
-          'Alert What is in a name created at 2021-08-11T02:28:59.401Z with a medium severity and risk score of 9000.'
+        expect(buildCommonReasonMessage({ rule })).toEqual(
+          'Alert What is in a name created with a medium severity and risk score of 9000.'
         );
       });
     });

@@ -11,10 +11,13 @@ export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     write: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+      enabled: schema.boolean({ defaultValue: true }),
     }),
     unsafe: schema.object({
       legacyMultiTenancy: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      indexUpgrade: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
     }),
@@ -24,3 +27,4 @@ export const config = {
 export type RuleRegistryPluginConfig = TypeOf<typeof config.schema>;
 
 export const INDEX_PREFIX = '.alerts' as const;
+export const INDEX_PREFIX_FOR_BACKING_INDICES = '.internal.alerts' as const;
