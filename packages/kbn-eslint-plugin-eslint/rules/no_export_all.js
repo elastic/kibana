@@ -49,17 +49,17 @@ module.exports = {
         };
 
         const exportSet = getExportNamesDeep(parser, context.getFilename(), tsnode);
+        const isTypeExport = esNode.exportKind === 'type';
+        const isNamespaceExportWithTypes =
+          tsnode.exportClause &&
+          ts.isNamespaceExport(tsnode.exportClause) &&
+          (isTypeExport || exportSet.types.size);
 
         /** @param {Fixer} fixer */
         const fix = (fixer) => {
           const source = /** @type EsTreeStringLiteral */ (esNode.source);
-          const isTypeExport = esNode.exportKind === 'type';
 
           if (tsnode.exportClause && ts.isNamespaceExport(tsnode.exportClause)) {
-            if (isTypeExport || exportSet.types.size) {
-              throw new Error('unable to automatically fix namespace exports of types');
-            }
-
             return fixer.replaceText(
               node,
               getExportNamedNamespaceCode(
@@ -76,7 +76,7 @@ module.exports = {
         context.report({
           message: ERROR_MSG,
           loc: node.loc,
-          fix: exportSet?.size ? fix : undefined,
+          fix: exportSet?.size && !isNamespaceExportWithTypes ? fix : undefined,
         });
       },
     };
