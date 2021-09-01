@@ -923,7 +923,7 @@ export function overridePackageInputs(
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policies are added/removed between versions.
-    if (!originalInput) {
+    if (originalInput === undefined) {
       inputs.push(override as NewPackagePolicyInput);
       continue;
     }
@@ -937,7 +937,7 @@ export function overridePackageInputs(
     }
 
     if (override.vars) {
-      originalInput = deepMergeVars(originalInput, override);
+      originalInput = deepMergeVars(originalInput, override) as NewPackagePolicyInput;
     }
 
     if (override.streams) {
@@ -945,6 +945,11 @@ export function overridePackageInputs(
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
+
+        if (originalStream === undefined) {
+          originalInput.streams.push(stream);
+          continue;
+        }
 
         if (typeof stream.enabled !== 'undefined' && originalStream) {
           originalStream.enabled = stream.enabled;
@@ -994,11 +999,11 @@ export function overridePackageInputs(
 }
 
 function deepMergeVars(original: any, override: any): any {
-  const result = { ...original };
-
-  if (!result.vars || !override.vars) {
-    return;
+  if (!original.vars) {
+    original.vars = { ...override.vars };
   }
+
+  const result = { ...original };
 
   const overrideVars = Array.isArray(override.vars)
     ? override.vars
@@ -1009,11 +1014,6 @@ function deepMergeVars(original: any, override: any): any {
 
   for (const { name, ...overrideVal } of overrideVars) {
     const originalVar = original.vars[name];
-
-    if (!result.vars) {
-      result.vars = {};
-    }
-
     result.vars[name] = { ...overrideVal, ...originalVar };
   }
 
