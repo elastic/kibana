@@ -11,8 +11,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
-  rangeFrom: '2021-08-23T13:36:22.109Z',
-  rangeTo: '2021-08-25T13:36:22.109Z',
+  rangeFrom: '2021-08-31T13:36:22.109Z',
+  rangeTo: '2021-09-01T13:36:22.109Z',
 };
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -45,7 +45,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Renders the correct number of cells', async () => {
         // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
         const cells = await testSubjects.findAll('dataGridRowCell');
-        expect(cells.length).to.be(140);
+        expect(cells.length).to.be(54);
       });
     });
   });

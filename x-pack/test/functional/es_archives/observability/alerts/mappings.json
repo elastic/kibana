@@ -6,8 +6,14 @@
         "is_write_index": true
       }
     },
-    "index": ".alerts-observability.apm.alerts-default-000001",
+    "index": ".internal.alerts-observability.apm.alerts-default-000001",
     "mappings": {
+      "_meta": {
+        "kibana": {
+          "version": "8.0.0"
+        },
+        "namespace": "default"
+      },
       "dynamic": "strict",
       "properties": {
         "@timestamp": {
@@ -206,7 +212,7 @@
               "type": "keyword"
             },
             "version": {
-              "type": "keyword"
+              "type": "version"
             }
           }
         },
@@ -260,8 +266,14 @@
         "is_write_index": true
       }
     },
-    "index": ".alerts-observability.logs.alerts-default-000001",
+    "index": ".internal.alerts-observability.logs.alerts-default-000001",
     "mappings": {
+      "_meta": {
+        "kibana": {
+          "version": "8.0.0"
+        },
+        "namespace": "default"
+      },
       "dynamic": "strict",
       "properties": {
         "@timestamp": {
@@ -460,7 +472,7 @@
               "type": "keyword"
             },
             "version": {
-              "type": "keyword"
+              "type": "version"
             }
           }
         },
@@ -490,8 +502,14 @@
         "is_write_index": true
       }
     },
-    "index": ".alerts-observability.metrics.alerts-default-000001",
+    "index": ".internal.alerts-observability.metrics.alerts-default-000001",
     "mappings": {
+      "_meta": {
+        "kibana": {
+          "version": "8.0.0"
+        },
+        "namespace": "default"
+      },
       "dynamic": "strict",
       "properties": {
         "@timestamp": {
@@ -690,7 +708,7 @@
               "type": "keyword"
             },
             "version": {
-              "type": "keyword"
+              "type": "version"
             }
           }
         },
