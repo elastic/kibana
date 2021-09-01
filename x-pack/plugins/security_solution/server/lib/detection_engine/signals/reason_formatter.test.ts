@@ -160,6 +160,20 @@ describe('reason_formatter', () => {
         );
       });
     });
+    describe('when rule and mergedDoc are provided without any fields of interest', () => {
+      it('should return the full reason message', () => {
+        const updatedMergedDoc = {
+          fields: {
+            'event.category': ['test'],
+            'user.name': ['test-user'],
+            '@timestamp': '2021-08-11T02:28:59.101Z',
+          },
+        };
+        expect(buildReasonMessageUtil({ rule, mergedDoc: updatedMergedDoc })).toMatchInlineSnapshot(
+          `"test event by test-user created medium alert my-rule."`
+        );
+      });
+    });
     describe('when only rule is provided', () => {
       it('should return the reason message without host name or user name', () => {
         expect(buildReasonMessageUtil({ rule })).toMatchInlineSnapshot(`""`);
