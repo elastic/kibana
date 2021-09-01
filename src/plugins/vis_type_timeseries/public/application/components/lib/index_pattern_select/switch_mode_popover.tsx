@@ -22,7 +22,7 @@ import {
 
 import type { PopoverProps } from './types';
 import { getUISettings } from '../../../../services';
-import { USE_STRING_INDICES } from '../../../../../common/constants';
+import { UI_SETTINGS } from '../../../../../../data/common';
 
 export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -33,7 +33,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
     onModeChange(!useKibanaIndices);
   }, [onModeChange, useKibanaIndices]);
 
-  const stringIndicesAllowed = getUISettings().get(USE_STRING_INDICES);
+  const stringIndicesAllowed = getUISettings().get(UI_SETTINGS.ALLOW_STRING_INDICES);
   const isSwitchDisabled = useKibanaIndices && !stringIndicesAllowed;
 
   return (

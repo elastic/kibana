@@ -15,7 +15,7 @@ import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequest,
 } from '../../../types';
-import { MAX_BUCKETS_SETTING } from '../../../../common/constants';
+import { UI_SETTINGS } from '../../../../../data/common';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
   async checkForViability(
@@ -28,7 +28,7 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
       isViable: true,
       capabilities: new DefaultSearchCapabilities({
         timezone: req.body.timerange?.timezone,
-        maxBucketsLimit: await uiSettings.get(MAX_BUCKETS_SETTING),
+        maxBucketsLimit: await uiSettings.get(UI_SETTINGS.MAX_BUCKETS_SETTING),
       }),
     };
   }

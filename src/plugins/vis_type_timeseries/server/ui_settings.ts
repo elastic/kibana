@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { UiSettingsParams } from 'kibana/server';
-
-import { MAX_BUCKETS_SETTING, USE_STRING_INDICES } from '../common/constants';
+import { UI_SETTINGS } from '../../data/common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
-  [MAX_BUCKETS_SETTING]: {
+  [UI_SETTINGS.MAX_BUCKETS_SETTING]: {
     name: i18n.translate('visTypeTimeseries.advancedSettings.maxBucketsTitle', {
       defaultMessage: 'TSVB buckets limit',
     }),
@@ -25,12 +24,12 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     }),
     schema: schema.number(),
   },
-  [USE_STRING_INDICES]: {
-    name: i18n.translate('visTypeTimeseries.advancedSettings.useStringIndicesTitle', {
+  [UI_SETTINGS.ALLOW_STRING_INDICES]: {
+    name: i18n.translate('visTypeTimeseries.advancedSettings.allowStringIndicesTitle', {
       defaultMessage: 'TSVB allow using string indices',
     }),
     value: false,
-    description: i18n.translate('visTypeTimeseries.advancedSettings.useStringIndicesText', {
+    description: i18n.translate('visTypeTimeseries.advancedSettings.allowStringIndicesText', {
       defaultMessage: 'Enable switching between Kibana index patterns and Elasticsearch indices.',
     }),
     schema: schema.boolean(),

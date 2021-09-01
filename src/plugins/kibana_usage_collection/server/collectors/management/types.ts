@@ -96,7 +96,7 @@ export interface UsageStats {
   'savedObjects:listingLimit': number;
   'query:queryString:options': string;
   'metrics:max_buckets': number;
-  'metrics:useStringIndices': boolean;
+  'metrics:allowStringIndices': boolean;
   'query:allowLeadingWildcards': boolean;
   metaFields: string[];
   'indexPattern:placeholder': string;

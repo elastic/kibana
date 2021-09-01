@@ -440,12 +440,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(isEnabled).to.be(false);
         });
 
-        describe('metrics:useStringIndices = true', () => {
-          beforeEach(async () => {
-            await kibanaServer.uiSettings.update({ 'metrics:useStringIndices': true });
+        describe('metrics:allowStringIndices = true', () => {
+          before(async () => {
+            await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': true });
             await browser.refresh();
-            await visualBuilder.clickPanelOptions('timeSeries');
           });
+
+          beforeEach(async () => await visualBuilder.clickPanelOptions('timeSeries'));
 
           it('should not disable switch for Kibana index patterns mode', async () => {
             await visualBuilder.switchIndexPatternSelectionMode(true);
@@ -454,9 +455,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expect(isEnabled).to.be(true);
           });
 
-          it('should disable switch after selecting Kibana index patterns mode and metrics:useStringIndices = false', async () => {
+          it('should disable switch after selecting Kibana index patterns mode and metrics:allowStringIndices = false', async () => {
             await visualBuilder.switchIndexPatternSelectionMode(false);
-            await kibanaServer.uiSettings.update({ 'metrics:useStringIndices': false });
+            await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false });
             await browser.refresh();
             await visualBuilder.clickPanelOptions('timeSeries');
 
@@ -468,11 +469,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
             expect(isEnabled).to.be(false);
           });
-        });
 
-        after(
-          async () => await kibanaServer.uiSettings.update({ 'metrics:useStringIndices': false })
-        );
+          after(
+            async () =>
+              await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false })
+          );
+        });
       });
     });
   });

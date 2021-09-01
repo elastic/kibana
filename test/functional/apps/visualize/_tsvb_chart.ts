@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.setFieldForAggregation('machine.ram');
         const kibanaIndexPatternModeValue = await visualBuilder.getMetricValue();
 
-        await kibanaServer.uiSettings.update({ 'metrics:useStringIndices': true });
+        await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': true });
         await browser.refresh();
         await visualBuilder.clickPanelOptions('metric');
         await visualBuilder.switchIndexPatternSelectionMode(false);

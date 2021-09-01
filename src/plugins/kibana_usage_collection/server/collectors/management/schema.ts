@@ -292,7 +292,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'metrics:useStringIndices': {
+  'metrics:allowStringIndices': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
