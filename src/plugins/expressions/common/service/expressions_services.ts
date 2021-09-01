@@ -258,7 +258,12 @@ export class ExpressionsService
     PersistableStateService<ExpressionAstExpression>,
     ExpressionsServiceSetup,
     ExpressionsServiceStart {
+  /**
+   * @note Workaround since the expressions service is frozen.
+   */
+  private static started = new WeakSet<ExpressionsService>();
   private children = new Map<string, ExpressionsService>();
+  private parent?: ExpressionsService;
 
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
@@ -269,6 +274,22 @@ export class ExpressionsService
   }: ExpressionServiceParams = {}) {
     this.executor = executor;
     this.renderers = renderers;
+  }
+
+  private isStarted(): boolean {
+    return !!(ExpressionsService.started.has(this) || this.parent?.isStarted());
+  }
+
+  private assertSetup() {
+    if (this.isStarted()) {
+      throw new Error('The expression service is already started and can no longer be configured.');
+    }
+  }
+
+  private assertStart() {
+    if (!this.isStarted()) {
+      throw new Error('The expressions service has not started yet.');
+    }
   }
 
   public getFork: ExpressionsServiceCommon['getFork'] = (name) => {
@@ -308,9 +329,12 @@ export class ExpressionsService
     this.renderers.register(definition);
 
   public readonly fork: ExpressionsServiceSetup['fork'] = (name) => {
+    this.assertSetup();
+
     const executor = this.executor.fork();
     const renderers = this.renderers;
     const fork = new (this.constructor as typeof ExpressionsService)({ executor, renderers });
+    fork.parent = this;
 
     if (name) {
       this.children.set(name, fork);
@@ -320,13 +344,18 @@ export class ExpressionsService
   };
 
   public readonly execute: ExpressionsServiceStart['execute'] = ((ast, input, params) => {
+    this.assertStart();
     const execution = this.executor.createExecution(ast, params);
     execution.start(input);
+
     return execution.contract;
   }) as ExpressionsServiceStart['execute'];
 
-  public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) =>
-    this.executor.run(ast, input, params);
+  public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) => {
+    this.assertStart();
+
+    return this.executor.run(ast, input, params);
+  };
 
   /**
    * Extracts telemetry from expression AST
@@ -404,8 +433,12 @@ export class ExpressionsService
    * same contract on server-side and browser-side.
    */
   public start(...args: unknown[]): ExpressionsServiceStart {
+    ExpressionsService.started.add(this);
+
     return this;
   }
 
-  public stop() {}
+  public stop() {
+    ExpressionsService.started.delete(this);
+  }
 }

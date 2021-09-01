@@ -114,6 +114,7 @@ describe('ExpressionsService', () => {
     test('fork can execute an expression with newly registered function', async () => {
       const service = new ExpressionsService();
       const fork = service.fork();
+      fork.start();
 
       service.registerFunction({
         name: '__test__',
@@ -139,10 +140,34 @@ describe('ExpressionsService', () => {
           return '123';
         },
       });
+      service.start();
 
       const { result } = await service.getFork('test').run('__test__', null).toPromise();
 
       expect(result).toBe('123');
+    });
+
+    test('throw on fork if the service is already started', async () => {
+      const service = new ExpressionsService();
+      service.start();
+
+      expect(() => service.fork()).toThrow();
+    });
+  });
+
+  describe('.execute()', () => {
+    test('throw if the service is not started', () => {
+      const expressions = new ExpressionsService();
+
+      expect(() => expressions.execute('foo', null)).toThrow();
+    });
+  });
+
+  describe('.run()', () => {
+    test('throw if the service is not started', () => {
+      const expressions = new ExpressionsService();
+
+      expect(() => expressions.run('foo', null)).toThrow();
     });
   });
 });
