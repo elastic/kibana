@@ -9,15 +9,26 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { IndexPattern, Query } from '../../../../../data/common';
+import { DataView, Query } from '../../../../../data/common';
 import { DiscoverServices } from '../../../build_services';
-import { ErrorEmbeddable, IEmbeddable, isErrorEmbeddable } from '../../../../../embeddable/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+  IEmbeddable,
+  isErrorEmbeddable,
+} from '../../../../../embeddable/public';
 import { SavedSearch } from '../../../saved_searches';
-import type {
-  DataVisualizerGridEmbeddableInput,
-  DataVisualizerGridEmbeddableOutput,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable';
+
+export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
+  indexPattern: DataView;
+  savedSearch?: SavedSearch;
+  query?: Query;
+  visibleFieldNames?: string[];
+  filters?: Filter[];
+}
+export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
+
 export interface DiscoverDataVisualizerGridProps {
   /**
    * Determines which columns are displayed
@@ -26,7 +37,7 @@ export interface DiscoverDataVisualizerGridProps {
   /**
    * The used index pattern
    */
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   /**
    * The max size of the documents returned by Elasticsearch
    */
@@ -114,5 +125,12 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
     }
   }, [embeddable, embeddableRoot]);
 
-  return <div data-test-subj="dataVisualizerEmbeddedContent" ref={embeddableRoot} />;
+  return (
+    <div
+      data-test-subj="dataVisualizerEmbeddedContent"
+      ref={embeddableRoot}
+      style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
+      className="euiDataGrid__virtualized"
+    />
+  );
 };

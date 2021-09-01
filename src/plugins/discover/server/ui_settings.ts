@@ -171,6 +171,24 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       name: 'discover:useLegacyDataGrid',
     },
   },
+  // @todo
+  ['discover:aggregatedView']: {
+    name: i18n.translate('discover.advancedSettings.defaultViewName', {
+      defaultMessage: 'Aggregated view',
+    }),
+    value: false,
+    description: i18n.translate('discover.advancedSettings.defaultViewDescription', {
+      defaultMessage:
+        'Turn on this option to use the aggregated view by default. Turn off to use the document view. ',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:useAggregatedView',
+    },
+  },
+
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
       defaultMessage: 'Modify columns when changing index patterns',
