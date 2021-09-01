@@ -97,9 +97,12 @@ export function TransactionDistribution({
       analyzeCorrelations: false,
     }
   );
-
-  const { error } = state;
-  const { percentileThresholdValue, overallHistogram } = data;
+  const { error, isRunning } = state;
+  const { percentileThresholdValue } = data;
+  const overallHistogram =
+    data.overallHistogram === undefined && !isRunning
+      ? []
+      : data.overallHistogram;
 
   useEffect(() => {
     if (isErrorMessage(error)) {

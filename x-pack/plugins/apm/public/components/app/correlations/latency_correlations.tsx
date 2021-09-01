@@ -63,21 +63,19 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const {
-    state: { error, isRunning, loaded, total },
-    data: {
-      ccsWarning,
-      log,
-      values,
-      percentileThresholdValue,
-      overallHistogram,
-    },
-    startFetch,
-    cancelFetch,
-  } = useSearchStrategy(APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS, {
-    percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-    analyzeCorrelations: true,
-  });
+  const { state, data, startFetch, cancelFetch } = useSearchStrategy(
+    APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
+    {
+      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+      analyzeCorrelations: true,
+    }
+  );
+  const { error, isRunning, loaded, total } = state;
+  const { ccsWarning, log, values, percentileThresholdValue } = data;
+  const overallHistogram =
+    data.overallHistogram === undefined && !isRunning
+      ? []
+      : data.overallHistogram;
   const progress = loaded / total;
 
   useEffect(() => {
