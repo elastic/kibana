@@ -24,12 +24,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('context size', function contextSize() {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
       });
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID);
-      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
     });
 
     it('should default to the `context:defaultSize` setting', async function () {
