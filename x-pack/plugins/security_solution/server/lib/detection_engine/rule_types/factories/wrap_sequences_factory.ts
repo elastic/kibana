@@ -5,16 +5,20 @@
  * 2.0.
  */
 
+import { Logger } from 'kibana/server';
+
 import { SearchAfterAndBulkCreateParams, WrapSequences } from '../../signals/types';
 import { buildAlertGroupFromSequence } from './utils/build_alert_group_from_sequence';
 import { ConfigType } from '../../../../config';
 import { WrappedRACAlert } from '../types';
 
 export const wrapSequencesFactory = ({
+  logger,
   ruleSO,
   mergeStrategy,
   spaceId,
 }: {
+  logger: Logger;
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   mergeStrategy: ConfigType['alertMergeStrategy'];
   spaceId: string | null | undefined;
@@ -22,7 +26,14 @@ export const wrapSequencesFactory = ({
   sequences.reduce(
     (acc: WrappedRACAlert[], sequence) => [
       ...acc,
-      ...buildAlertGroupFromSequence(sequence, ruleSO, mergeStrategy, spaceId, buildReasonMessage),
+      ...buildAlertGroupFromSequence(
+        logger,
+        sequence,
+        ruleSO,
+        mergeStrategy,
+        spaceId,
+        buildReasonMessage
+      ),
     ],
     []
   );

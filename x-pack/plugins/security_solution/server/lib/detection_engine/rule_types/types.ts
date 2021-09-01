@@ -33,7 +33,7 @@ import { SetupPlugins } from '../../../plugin';
 import { IRuleDataPluginService } from '../rule_execution_log/types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { BuildRuleMessage } from '../signals/rule_messages';
-import { AlertAttributes, BulkCreate, WrapHits } from '../signals/types';
+import { AlertAttributes, BulkCreate, WrapHits, WrapSequences } from '../signals/types';
 import { AlertsFieldMap, RulesFieldMap } from './field_maps';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 
@@ -69,6 +69,7 @@ export interface RunOpts<TParams extends RuleParams> {
     maxSignals: number;
   };
   wrapHits: WrapHits;
+  wrapSequences: WrapSequences;
 }
 
 export type SecurityAlertTypeExecutor<

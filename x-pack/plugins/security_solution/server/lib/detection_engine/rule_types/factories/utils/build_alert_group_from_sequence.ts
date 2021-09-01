@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Logger } from 'kibana/server';
+
 import { SavedObject } from 'src/core/types';
 import type { ConfigType } from '../../../../../config';
 import { buildRuleWithoutOverrides } from '../../../signals/build_rule';
@@ -16,6 +18,7 @@ import { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
 import { objectArrayIntersection } from '../../../signals/build_bulk_body';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
+import { ALERT_GROUP_ID, ALERT_GROUP_INDEX } from '../../field_maps/field_names';
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -
@@ -25,6 +28,7 @@ import { BuildReasonMessage } from '../../../signals/reason_formatters';
  * @param ruleSO SavedObject representing the rule that found the sequence
  */
 export const buildAlertGroupFromSequence = (
+  logger: Logger,
   sequence: EqlSequence<SignalSource>,
   ruleSO: SavedObject<AlertAttributes>,
   mergeStrategy: ConfigType['alertMergeStrategy'],
@@ -36,15 +40,21 @@ export const buildAlertGroupFromSequence = (
     return [];
   }
 
-  const buildingBlocks: RACAlert[] = sequence.events.map((event) => ({
-    ...buildBulkBody(spaceId, ruleSO, event, mergeStrategy, false, buildReasonMessage),
-    'kibana.alert.building_block_type': 'default',
-  }));
+  let buildingBlocks: RACAlert[] = [];
+  try {
+    buildingBlocks = sequence.events.map((event) => ({
+      ...buildBulkBody(spaceId, ruleSO, event, mergeStrategy, false, buildReasonMessage),
+      'kibana.alert.building_block_type': 'default',
+    }));
+  } catch (error) {
+    logger.error(error);
+    return [];
+  }
 
   const buildingBlockIds = generateBuildingBlockIds(buildingBlocks);
   const wrappedBuildingBlocks: WrappedRACAlert[] = buildingBlocks.map((block, i) => ({
     _id: buildingBlockIds[i],
-    _index: '', // TODO: output index
+    _index: '',
     _source: {
       ...block,
     },
@@ -56,15 +66,13 @@ export const buildAlertGroupFromSequence = (
   const doc = buildAlertFromSequence(wrappedBuildingBlocks, ruleSO, spaceId, buildReasonMessage);
   const sequenceAlert = {
     _id: generateAlertId(doc),
-    _index: '', // TODO: output index
+    _index: '',
     _source: doc,
   };
 
-  wrappedBuildingBlocks.forEach((block) => {
-    block._source['kibana.alert.group'] = {
-      id: sequenceAlert._id,
-      index: '',
-    };
+  wrappedBuildingBlocks.forEach((block, i) => {
+    block._source[ALERT_GROUP_ID] = sequenceAlert._source[ALERT_GROUP_ID];
+    block._source[ALERT_GROUP_INDEX] = i;
   });
 
   return [...wrappedBuildingBlocks, sequenceAlert];
@@ -86,5 +94,6 @@ export const buildAlertFromSequence = (
       kind: 'signal',
     },
     ...doc,
+    [ALERT_GROUP_ID]: generateAlertId(doc),
   };
 };

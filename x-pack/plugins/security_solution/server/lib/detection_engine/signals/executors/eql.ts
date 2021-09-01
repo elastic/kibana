@@ -95,6 +95,7 @@ export const eqlExecutor = async ({
     version,
     index: ruleParams.index,
   });
+
   const request = buildEqlSearchRequest(
     ruleParams.query,
     inputIndex,
@@ -105,12 +106,14 @@ export const eqlExecutor = async ({
     exceptionItems,
     ruleParams.eventCategoryOverride
   );
+
   const eqlSignalSearchStart = performance.now();
   logger.debug(
     `EQL query request path: ${request.path}, method: ${request.method}, body: ${JSON.stringify(
       request.body
     )}`
   );
+
   // TODO: fix this later
   const { body: response } = (await services.scopedClusterClient.asCurrentUser.transport.request(
     request

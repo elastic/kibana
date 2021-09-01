@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Logger } from 'kibana/server';
+
 import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 
 import { sampleDocNoSortId } from '../../../signals/__mocks__/es_results';
@@ -19,13 +21,14 @@ import {
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import { getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
 
-/*
-type SignalDoc = SignalSourceHit & {
-  _source: Required<SignalSourceHit>['_source'] & { [TIMESTAMP]: string };
-};
-*/
-
 const SPACE_ID = 'space';
+
+const loggerMock = ({
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+} as unknown) as Logger;
 
 describe('buildAlert', () => {
   beforeEach(() => {
@@ -61,7 +64,14 @@ describe('buildAlert', () => {
         sampleDocNoSortId('619389b2-b077-400e-b40b-abde20d675d3'),
       ],
     };
-    const alertGroup = buildAlertGroupFromSequence(eqlSequence, ruleSO, 'allFields', SPACE_ID);
+    const alertGroup = buildAlertGroupFromSequence(
+      loggerMock,
+      eqlSequence,
+      ruleSO,
+      'allFields',
+      SPACE_ID,
+      jest.fn()
+    );
     const alertGroup1Id = alertGroup[0]._id;
     const alertGroup2Id = alertGroup[1]._id;
     expect(alertGroup.length).toEqual(3);
@@ -137,9 +147,9 @@ describe('buildAlert', () => {
       })
     );
 
-    const groups = alertGroup.map((alert) => alert._source[ALERT_GROUP_ID]);
-    for (const group of groups) {
-      expect(group).toEqual(groups[0]);
+    const groupIds = alertGroup.map((alert) => alert._source[ALERT_GROUP_ID]);
+    for (const groupId of groupIds) {
+      expect(groupId).toEqual(groupIds[0]);
     }
   });
 });
