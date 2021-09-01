@@ -287,7 +287,7 @@ export const getTopNavConfig = (
             visId: savedVis?.id,
             filters: currentState.filters,
             refreshInterval: undefined,
-            timeRange: undefined, // TODO: Add time range
+            timeRange: data.query.timefilter.timefilter.getTime(),
             type: currentState.vis.type,
             uiState: currentState.uiState,
             query: currentState.query,
