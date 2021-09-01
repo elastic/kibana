@@ -46,7 +46,7 @@ interface SourcererComponentProps {
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { defaultIndexPattern, kibanaIndexPatterns, sourcererScope } = useSelector<
+  const { defaultIndexPattern, kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
     State,
     SourcererScopeSelector
   >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
@@ -54,7 +54,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
   const [kipId, setKipId] = useState<string>(selectedKipId ?? '');
-  // debugger;
+
   const { patternList, selectablePatterns } = useMemo(() => {
     const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
     return theKip != null
@@ -104,28 +104,30 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     (newSelectedOption) => {
       setKipId(newSelectedOption);
       setSelectedOptions(
-        getScopePatternListSelection(kibanaIndexPatterns, newSelectedOption, scopeId).map(
-          (indexSelected: string) => ({
-            label: indexSelected,
-            value: indexSelected,
-          })
-        )
+        getScopePatternListSelection(
+          kibanaIndexPatterns.find((kip) => kip.id === newSelectedOption),
+          scopeId,
+          signalIndexName
+        ).map((indexSelected: string) => ({
+          label: indexSelected,
+          value: indexSelected,
+        }))
       );
     },
-    [kibanaIndexPatterns, scopeId]
+    [kibanaIndexPatterns, scopeId, signalIndexName]
   );
 
   const resetDataSources = useCallback(() => {
     setKipId(defaultIndexPattern.id);
     setSelectedOptions(
-      getScopePatternListSelection(kibanaIndexPatterns, defaultIndexPattern.id, scopeId).map(
+      getScopePatternListSelection(defaultIndexPattern, scopeId, signalIndexName).map(
         (indexSelected: string) => ({
           label: indexSelected,
           value: indexSelected,
         })
       )
     );
-  }, [defaultIndexPattern.id, kibanaIndexPatterns, scopeId]);
+  }, [defaultIndexPattern, scopeId, signalIndexName]);
 
   const handleSaveIndices = useCallback(() => {
     onChangeKip(

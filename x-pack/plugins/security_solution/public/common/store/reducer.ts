@@ -23,6 +23,7 @@ import { State } from './types';
 import { AppAction } from './actions';
 import { KibanaIndexPattern, KibanaIndexPatterns, SourcererScopeName } from './sourcerer/model';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
+import { getScopePatternListSelection } from './sourcerer/helpers';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UebaPluginReducer &
@@ -47,11 +48,15 @@ export const createInitialState = (
   }
 ): PreloadedState<State> => {
   const initialPatterns = {
-    [SourcererScopeName.default]: defaultIndexPattern.patternList.filter(
-      (index) => index !== signalIndexName
+    [SourcererScopeName.default]: getScopePatternListSelection(
+      defaultIndexPattern,
+      SourcererScopeName.default,
+      signalIndexName
     ),
-    [SourcererScopeName.detections]: defaultIndexPattern.patternList.filter(
-      (index) => index === signalIndexName
+    [SourcererScopeName.detections]: getScopePatternListSelection(
+      defaultIndexPattern,
+      SourcererScopeName.detections,
+      signalIndexName
     ),
     [SourcererScopeName.timeline]: defaultIndexPattern.patternList,
   };

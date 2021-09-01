@@ -7,32 +7,28 @@
 
 import { State } from '../../store';
 import { sourcererSelectors } from '../../store/sourcerer';
-import {
-  KibanaIndexPattern,
-  KibanaIndexPatterns,
-  ManageScope,
-  SourcererScopeName,
-} from '../../store/sourcerer/model';
+import { ManageScope, SourcererModel, SourcererScopeName } from '../../store/sourcerer/model';
 
-export interface SourcererScopeSelector {
-  defaultIndexPattern: KibanaIndexPattern;
-  kibanaIndexPatterns: KibanaIndexPatterns;
+export interface SourcererScopeSelector extends Omit<SourcererModel, 'sourcererScopes'> {
   sourcererScope: ManageScope;
 }
 
 export const getSourcererScopeSelector = () => {
   const getKibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
   const getDefaultIndexPatternSelector = sourcererSelectors.defaultIndexPatternSelector();
+  const getSignalIndexNameSelector = sourcererSelectors.signalIndexNameSelector();
   const getScopesSelector = sourcererSelectors.scopesSelector();
 
   return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
     const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
     const defaultIndexPattern = getDefaultIndexPatternSelector(state);
+    const signalIndexName = getSignalIndexNameSelector(state);
     const scope = getScopesSelector(state)[scopeId];
 
     return {
       defaultIndexPattern,
       kibanaIndexPatterns,
+      signalIndexName,
       sourcererScope: scope,
     };
   };

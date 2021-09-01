@@ -20,19 +20,18 @@ export interface Args {
 export const getPatternList = (kip: KibanaIndexPattern): string[] => kip.title.split(',');
 
 export const getScopePatternListSelection = (
-  kibanaIndexPatterns: KibanaIndexPattern[],
-  kipId: string,
-  sourcererScope: SourcererScopeName
+  theKip: KibanaIndexPattern | undefined,
+  sourcererScope: SourcererScopeName,
+  signalIndexName: SourcererModel['signalIndexName']
 ): string[] => {
-  const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
   let patternList: string[] = theKip != null ? theKip.patternList : [];
-  if (kipId === DEFAULT_INDEX_PATTERN_ID) {
-    // last index in DEFAULT_INDEX_PATTERN_ID is always signals index
-    // TODO: Steph.sourcerer is that true tho? ^^
+
+  // when our SIEM KIP is set, here are the defaults
+  if (theKip && theKip.id === DEFAULT_INDEX_PATTERN_ID) {
     if (sourcererScope === SourcererScopeName.default) {
-      patternList.pop();
+      patternList = patternList.filter((index) => index !== signalIndexName);
     } else if (sourcererScope === SourcererScopeName.detections) {
-      patternList = [patternList[patternList.length - 1]];
+      patternList = patternList.filter((index) => index === signalIndexName);
     }
   }
   return patternList;

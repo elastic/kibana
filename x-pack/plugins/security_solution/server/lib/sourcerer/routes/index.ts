@@ -53,6 +53,7 @@ export const createSourcererIndexPatternRoute = (
         const ssKip = allKips.find((v) => v.id === patternId);
         let defaultIndexPattern;
         const patternListAsTitle = patternList.join();
+
         if (ssKip == null) {
           defaultIndexPattern = await indexPatternsService.createAndSave({
             id: patternId,
@@ -87,7 +88,6 @@ export const createSourcererIndexPatternRoute = (
           defaultIndexPattern: kibanaIndexPatterns.find((p) => p.id === patternId) ?? {},
           kibanaIndexPatterns,
         };
-        console.log('body', body);
         return response.ok({ body });
       } catch (err) {
         const error = transformError(err);
