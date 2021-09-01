@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../data/public';
+export { DataPublicPluginStart } from '../../data/public';
+export { DataView, DataViewField } from '../../data/common';
 
 export { UsageCollectionStart } from '../../usage_collection/public';
 

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternField, IndexPattern, RuntimeType } from '../shared_imports';
+import { DataViewField, DataView, RuntimeType } from '../shared_imports';
 import type { Field } from '../types';
 
 export const deserializeField = (
-  indexPattern: IndexPattern,
-  field?: IndexPatternField
+  indexPattern: DataView,
+  field?: DataViewField
 ): Field | undefined => {
   if (field === undefined) {
     return undefined;

@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
-  IndexPatternField,
-  IndexPattern,
+  DataViewField,
+  DataView,
   DataPublicPluginStart,
   UsageCollectionStart,
   RuntimeCompositeWithSubFields,
@@ -30,18 +30,18 @@ import { FieldPreviewProvider } from './preview';
 
 export interface Props {
   /** Handler for the "save" footer button */
-  onSave: (field: IndexPatternField[]) => void;
+  onSave: (field: DataViewField[]) => void;
   /** Handler for the "cancel" footer button */
   onCancel: () => void;
   onMounted?: FieldEditorFlyoutContentProps['onMounted'];
   /** The docLinks start service from core */
   docLinks: DocLinksStart;
-  /** The index pattern where the field will be added  */
-  indexPattern: IndexPattern;
+  /** The data view where the field will be added  */
+  indexPattern: DataView;
   /** The Kibana field type of the field to create or edit (default: "runtime") */
   fieldTypeToProcess: InternalFieldType;
   /** Optional field to edit */
-  field?: IndexPatternField;
+  field?: DataViewField;
   /** Services */
   indexPatternService: DataPublicPluginStart['indexPatterns'];
   notifications: NotificationsStart;
@@ -125,7 +125,7 @@ export const FieldEditorFlyoutContentContainer = ({
   );
 
   const saveCompositeRuntime = useCallback(
-    (updatedField: RuntimeCompositeWithSubFields): IndexPatternField[] => {
+    (updatedField: RuntimeCompositeWithSubFields): DataViewField[] => {
       if (field?.type !== undefined && field?.type !== 'composite') {
         // A previous runtime field is now a runtime composite
         indexPattern.removeRuntimeField(field.name);
@@ -146,7 +146,7 @@ export const FieldEditorFlyoutContentContainer = ({
   );
 
   const saveRuntimeField = useCallback(
-    (updatedField: Field): [IndexPatternField] => {
+    (updatedField: Field): [DataViewField] => {
       if (field?.type !== undefined && field?.type === 'composite') {
         // A previous runtime composite is now a runtime field
         indexPattern.removeRuntimeComposite(field.name);
@@ -162,7 +162,7 @@ export const FieldEditorFlyoutContentContainer = ({
   );
 
   const updateRuntimeField = useCallback(
-    (updatedField: Field | RuntimeCompositeWithSubFields): IndexPatternField[] => {
+    (updatedField: Field | RuntimeCompositeWithSubFields): DataViewField[] => {
       return (updatedField as RuntimeCompositeWithSubFields).subFields !== undefined
         ? saveCompositeRuntime(updatedField as RuntimeCompositeWithSubFields)
         : saveRuntimeField(updatedField as Field);
@@ -171,7 +171,7 @@ export const FieldEditorFlyoutContentContainer = ({
   );
 
   const updateConcreteField = useCallback(
-    (updatedField: Field): IndexPatternField[] => {
+    (updatedField: Field): DataViewField[] => {
       const editedField = indexPattern.getFieldByName(updatedField.name);
 
       if (!editedField) {

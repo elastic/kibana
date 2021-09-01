@@ -27,9 +27,9 @@ Use this method to open the index pattern field editor to either create (runtime
 
 This is the only required option. You need to provide the context in which the editor is being consumed. This object has the following properties:
 
-- `indexPattern: IndexPattern`: the index pattern you want to create/edit the field into.
+- `indexPattern: DataView`: the index pattern you want to create/edit the field into.
 
-`onSave(field: IndexPatternField): void` (optional)
+`onSave(field: DataViewField): void` (optional)
 
 You can provide an optional `onSave` handler to be notified when the field has being created/updated. This handler is called after the field has been persisted to the saved object.
 
@@ -47,7 +47,7 @@ Use this method to open a confirmation modal to delete runtime fields from an in
 
 You need to provide the context in which the deletion modal is being consumed. This object has the following properties:
 
-- `indexPattern: IndexPattern`: the index pattern you want to delete fields from.
+- `indexPattern: DataView`: the index pattern you want to delete fields from.
 
 `onDelete(fieldNames: string[]): void` (optional)
 
@@ -63,7 +63,7 @@ This children func React component provides a handler to delete one or multiple 
 
 #### Props
 
-* `indexPattern: IndexPattern`: the current index pattern. (**required**)
+* `indexPattern: DataView`: the current index pattern. (**required**)
 
 ```js
 

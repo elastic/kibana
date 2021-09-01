@@ -11,7 +11,7 @@ import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
-  IndexPattern,
+  DataView,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   DataPublicPluginStart,
@@ -26,7 +26,7 @@ import { FormatEditor } from './format_editor';
 
 export interface FormatSelectEditorProps {
   esTypes: ES_FIELD_TYPES[];
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   uiSettings: CoreStart['uiSettings'];

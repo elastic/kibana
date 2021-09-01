@@ -8,14 +8,14 @@
 
 import React, { useCallback, useRef, useEffect } from 'react';
 
-import { IndexPattern } from '../shared_imports';
+import { DataView } from '../shared_imports';
 import { OpenFieldDeleteModalOptions } from '../open_delete_modal';
 import { CloseEditor } from '../types';
 
 type DeleteFieldFunc = (fieldName: string | string[]) => void;
 export interface Props {
   children: (deleteFieldHandler: DeleteFieldFunc) => React.ReactNode;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   onDelete?: (fieldNames: string[]) => void;
 }
 
