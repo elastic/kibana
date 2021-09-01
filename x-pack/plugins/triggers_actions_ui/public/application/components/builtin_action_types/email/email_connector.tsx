@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFieldText,
   EuiFlexItem,
@@ -16,6 +16,8 @@ import {
   EuiFormRow,
   EuiTitle,
   EuiSpacer,
+  EuiComboBoxOptionOption,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,12 +27,43 @@ import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
+let windowObjectReference: any = null;
+let previousUrl: string | null = null;
+
+const openSignInWindow = (url: string, name: string) => {
+  // window features
+  const strWindowFeatures = 'toolbar=no, menubar=no, width=600, height=700, top=100, left=100';
+
+  if (windowObjectReference === null || windowObjectReference.closed) {
+    /* if the pointer to the window object in memory does not exist
+     or if such pointer exists but the window was closed */
+    windowObjectReference = window.open(url, name, strWindowFeatures);
+  } else if (previousUrl !== url) {
+    /* if the resource to load is different,
+     then we load it in the already opened secondary window and then
+     we bring such window back on top/in front of its parent window. */
+    windowObjectReference = window.open(url, name, strWindowFeatures);
+    windowObjectReference.focus();
+  } else {
+    /* else the window reference must exist and the window
+     is not closed; therefore, we can bring it back on top of any other
+     window with the focus() method. There would be no need to re-create
+     the window or to reload the referenced resource. */
+    windowObjectReference.focus();
+  }
+  // assign the previous URL
+  previousUrl = url;
+};
+
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
+  const [tenantId, setTenantId] = useState<string | undefined>(undefined);
+  const [redirectUrl, setRedirectTokenUrl] = useState<string | undefined>(undefined);
+
   const { docLinks } = useKibana().services;
   const { from, host, port, secure, hasAuth } = action.config;
-  const { user, password } = action.secrets;
+  const { user, password, clientId, clientSecret } = action.secrets;
   useEffect(() => {
     if (!action.id) {
       editActionConfig('hasAuth', true);
@@ -49,6 +82,10 @@ export const EmailActionConnectorFields: React.FunctionComponent<
     password !== undefined && errors.password !== undefined && errors.password.length > 0;
   const isUserInvalid: boolean =
     user !== undefined && errors.user !== undefined && errors.user.length > 0;
+
+  const [selectedOptions, setSelected] = useState<EuiComboBoxOptionOption[]>([
+    { key: 'oauth2', label: 'test' },
+  ]);
   return (
     <>
       <EuiFlexGroup>
@@ -214,6 +251,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
       </EuiFlexGroup>
       {hasAuth ? (
         <>
+          <EuiSpacer size="s" />
           {getEncryptedFieldNotifyLabel(
             !action.id,
             2,
@@ -226,70 +264,190 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               }
             )
           )}
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiFormRow
-                id="emailUser"
-                fullWidth
-                error={errors.user}
-                isInvalid={isUserInvalid}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
-                  {
-                    defaultMessage: 'Username',
-                  }
-                )}
-              >
-                <EuiFieldText
+          {selectedOptions.length > 0 && selectedOptions[0].key === 'basic' ? (
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiFormRow
+                  id="emailUser"
                   fullWidth
+                  error={errors.user}
                   isInvalid={isUserInvalid}
-                  name="user"
-                  readOnly={readOnly}
-                  value={user || ''}
-                  data-test-subj="emailUserInput"
-                  onChange={(e) => {
-                    editActionSecrets('user', nullableString(e.target.value));
-                  }}
-                  onBlur={() => {
-                    if (!user) {
-                      editActionSecrets('user', '');
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+                    {
+                      defaultMessage: 'Username',
                     }
-                  }}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow
-                id="emailPassword"
-                fullWidth
-                error={errors.password}
-                isInvalid={isPasswordInvalid}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
-                  {
-                    defaultMessage: 'Password',
-                  }
-                )}
-              >
-                <EuiFieldPassword
+                  )}
+                >
+                  <EuiFieldText
+                    fullWidth
+                    isInvalid={isUserInvalid}
+                    name="user"
+                    readOnly={readOnly}
+                    value={user || ''}
+                    data-test-subj="emailUserInput"
+                    onChange={(e) => {
+                      editActionSecrets('user', nullableString(e.target.value));
+                    }}
+                    onBlur={() => {
+                      if (!user) {
+                        editActionSecrets('user', '');
+                      }
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id="emailPassword"
                   fullWidth
-                  readOnly={readOnly}
+                  error={errors.password}
                   isInvalid={isPasswordInvalid}
-                  name="password"
-                  value={password || ''}
-                  data-test-subj="emailPasswordInput"
-                  onChange={(e) => {
-                    editActionSecrets('password', nullableString(e.target.value));
-                  }}
-                  onBlur={() => {
-                    if (!password) {
-                      editActionSecrets('password', '');
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+                    {
+                      defaultMessage: 'Password',
                     }
-                  }}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                  )}
+                >
+                  <EuiFieldPassword
+                    fullWidth
+                    readOnly={readOnly}
+                    isInvalid={isPasswordInvalid}
+                    name="password"
+                    value={password || ''}
+                    data-test-subj="emailPasswordInput"
+                    onChange={(e) => {
+                      editActionSecrets('password', nullableString(e.target.value));
+                    }}
+                    onBlur={() => {
+                      if (!password) {
+                        editActionSecrets('password', '');
+                      }
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null}
+          {selectedOptions.length > 0 && selectedOptions[0].key === 'oauth2' ? (
+            <>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFormRow
+                    id="emailUser"
+                    fullWidth
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+                      {
+                        defaultMessage: 'Client ID',
+                      }
+                    )}
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      readOnly={readOnly}
+                      value={clientId || ''}
+                      onChange={(e) => {
+                        editActionSecrets('clientId', nullableString(e.target.value));
+                      }}
+                      onBlur={() => {
+                        if (!clientId) {
+                          editActionSecrets('clientId', '');
+                        }
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    fullWidth
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+                      {
+                        defaultMessage: 'Client secret',
+                      }
+                    )}
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      readOnly={readOnly}
+                      value={clientSecret || ''}
+                      onChange={(e) => {
+                        editActionSecrets('clientSecret', nullableString(e.target.value));
+                      }}
+                      onBlur={() => {
+                        if (!clientSecret) {
+                          editActionSecrets('clientSecret', '');
+                        }
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFormRow
+                    fullWidth
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+                      {
+                        defaultMessage: 'Tenant ID',
+                      }
+                    )}
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      value={tenantId || ''}
+                      onChange={(e) => {
+                        setTenantId(e.target.value);
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFormRow
+                    fullWidth
+                    label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+                      {
+                        defaultMessage: 'Redirect URL',
+                      }
+                    )}
+                  >
+                    <EuiFieldText
+                      fullWidth
+                      value={redirectUrl || ''}
+                      onChange={(e) => {
+                        setRedirectTokenUrl(e.target.value);
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiButton
+                    onClick={() => {
+                      getOAuth(
+                        redirectUrl ?? '',
+                        clientId ?? '',
+                        clientSecret ?? '',
+                        editActionSecrets,
+                        editActionConfig,
+                        tenantId ?? ''
+                      );
+                    }}
+                    data-test-subj="oauth"
+                  >
+                    Get OAuth
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ) : null}
         </>
       ) : null}
     </>
@@ -300,6 +458,52 @@ export const EmailActionConnectorFields: React.FunctionComponent<
 function nullableString(str: string | null | undefined) {
   if (str == null || str.trim() === '') return null;
   return str;
+}
+
+async function getOAuth(
+  redirectUrl: string,
+  clientId: string,
+  clientSecret: string,
+  editActionSecrets: (property: string, value: unknown) => void,
+  editActionConfig: (property: string, value: unknown) => void,
+  tenantId: string
+) {
+  const state: string = btoa(
+    JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      tenantId,
+    })
+  );
+  const r = `https://login.microsoftonline.com/${tenantId}/adminconsent
+?client_id=${clientId}
+&state=${state}
+&redirect_uri=${redirectUrl}`;
+  openSignInWindow(r, 'test');
+  let loopCount = 600;
+  const intervalId = window.setInterval(async () => {
+    if (loopCount-- < 0) {
+      window.clearInterval(intervalId);
+      windowObjectReference.close();
+    } else {
+      let href: string | null = null; // For referencing window url
+      try {
+        href = windowObjectReference.location.href; // set window location to href string
+      } catch (e) {
+        // console.log('Error:', e); // Handle any errors here
+      }
+      if (href !== null) {
+        /* As i was getting code and oauth-token i added for same, you can replace with your expected variables */
+        if (href.match('admin_consent')) {
+          const res = windowObjectReference.json;
+          editActionSecrets('accessToken', `${res.token_type} ${res.access_token}`);
+          console.log(windowObjectReference.json);
+          window.clearInterval(intervalId);
+          windowObjectReference.close();
+        }
+      }
+    }
+  }, 100);
 }
 
 // eslint-disable-next-line import/no-default-export

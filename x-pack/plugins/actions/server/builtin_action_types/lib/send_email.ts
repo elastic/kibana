@@ -56,7 +56,7 @@ export interface Content {
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth, provider } = options;
-  const { service, host, port, secure, user, password } = transport;
+  const { service, host, port, secure, user, password, accessToken } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
@@ -146,6 +146,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
   if (provider === 'exchange') {
     const headers = {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
     };
     let response;
     try {
@@ -155,7 +156,7 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
         configurationUtilities
       );
     } catch (err) {
-      logger.warn(`error thrown posting pagerduty event: ${err.message}`);
+      logger.warn(`error thrown posting echange email: ${err.message}`);
       throw err;
     }
   }

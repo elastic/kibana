@@ -41,7 +41,6 @@ export async function postSendEmailMSExchange(
 
 function getMessage(emailOptions: SendEmailOptions) {
   const { transport, routing, content, configurationUtilities, hasAuth, provider } = emailOptions;
-  const { accessToken } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
   return {

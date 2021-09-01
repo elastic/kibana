@@ -93,10 +93,10 @@ export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const SecretsSchema = schema.object({
   user: schema.nullable(schema.string()),
   password: schema.nullable(schema.string()),
+  tenantId: schema.nullable(schema.string()),
   clientId: schema.nullable(schema.string()),
   clientSecret: schema.nullable(schema.string()),
   accessToken: schema.nullable(schema.string()),
-  refreshToken: schema.nullable(schema.string()),
 });
 
 // params definition
@@ -208,9 +208,6 @@ async function executor(
   if (secrets.accessToken != null) {
     transport.accessToken = secrets.accessToken;
   }
-  if (secrets.refreshToken != null) {
-    transport.refreshToken = secrets.refreshToken;
-  }
   if (secrets.clientId != null) {
     transport.clientId = secrets.clientId;
   }
@@ -228,7 +225,7 @@ async function executor(
   }
   let provider;
   if (config.provider !== null) {
-     provider = config.provider;
+    provider = config.provider;
   }
 
   const footerMessage = getFooterMessage({
