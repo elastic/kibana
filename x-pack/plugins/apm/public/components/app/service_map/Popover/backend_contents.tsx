@@ -80,8 +80,8 @@ export function BackendContents({ nodeData, environment }: ContentsProps) {
             });
           }}
         >
-          {i18n.translate('xpack.apm.serviceMap.backendDetailsButtonText', {
-            defaultMessage: 'Backend Details',
+          {i18n.translate('xpack.apm.serviceMap.dependencyDetailsButtonText', {
+            defaultMessage: 'Dependency Details',
           })}
         </EuiButton>
       </EuiFlexItem>
