@@ -5,20 +5,8 @@
  * 2.0.
  */
 
-// inner angular imports
-// these are necessary to bootstrap the local angular.
-// They can stay even after NP cutover
-import angular from 'angular';
-import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
+import { i18n } from '@kbn/i18n';
 
-import 'brace';
-import 'brace/mode/json';
-
-// required for i18nIdDirective and `ngSanitize` angular module
-import 'angular-sanitize';
-// required for ngRoute
-import 'angular-route';
-// type imports
 import {
   ChromeStart,
   CoreStart,
@@ -28,23 +16,21 @@ import {
   OverlayStart,
   AppMountParameters,
   IUiSettingsClient,
+  Capabilities,
+  ScopedHistory,
 } from 'kibana/public';
-// @ts-ignore
-import { initGraphApp } from './app';
+import ReactDOM from 'react-dom';
 import { DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
 import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import {
-  configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
-  KibanaLegacyStart,
-} from '../../../../src/plugins/kibana_legacy/public';
+import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 
 import './index.scss';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
+import { GraphSavePolicy } from './types';
+import { graphRouter } from './router';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -58,7 +44,7 @@ export interface GraphDependencies {
   coreStart: CoreStart;
   element: HTMLElement;
   appBasePath: string;
-  capabilities: Record<string, boolean | Record<string, boolean>>;
+  capabilities: Capabilities;
   navigation: NavigationStart;
   licensing: LicensingPluginStart;
   chrome: ChromeStart;
@@ -70,22 +56,32 @@ export interface GraphDependencies {
   getBasePath: () => string;
   storage: Storage;
   canEditDrillDownUrls: boolean;
-  graphSavePolicy: string;
+  graphSavePolicy: GraphSavePolicy;
   overlays: OverlayStart;
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   uiSettings: IUiSettingsClient;
+  history: ScopedHistory<unknown>;
 }
 
-export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: GraphDependencies) => {
+export type GraphServices = Omit<GraphDependencies, 'kibanaLegacy' | 'element' | 'history'>;
+
+export const renderApp = ({ history, kibanaLegacy, element, ...deps }: GraphDependencies) => {
+  const { chrome, capabilities } = deps;
   kibanaLegacy.loadFontAwesome();
-  const graphAngularModule = createLocalAngularModule(deps.navigation);
-  configureAppAngularModule(
-    graphAngularModule,
-    { core: deps.core, env: deps.pluginInitializerContext.env },
-    true
-  );
+
+  if (!capabilities.graph.save) {
+    chrome.setBadge({
+      text: i18n.translate('xpack.graph.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('xpack.graph.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save Graph workspaces',
+      }),
+      iconType: 'glasses',
+    });
+  }
 
   const licenseSubscription = deps.licensing.license$.subscribe((license) => {
     const info = checkLicense(license);
@@ -105,59 +101,19 @@ export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: Graph
     }
   });
 
-  initGraphApp(graphAngularModule, deps);
-  const $injector = mountGraphApp(appBasePath, element);
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlistenParentHistory = history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+
+  const app = graphRouter(deps);
+  ReactDOM.render(app, element);
+  element.setAttribute('class', 'gphAppWrapper');
+
   return () => {
     licenseSubscription.unsubscribe();
-    $injector.get('$rootScope').$destroy();
+    unlistenParentHistory();
+    ReactDOM.unmountComponentAtNode(element);
   };
 };
-
-const mainTemplate = (basePath: string) => `<div ng-view class="gphAppWrapper">
-  <base href="${basePath}" />
-</div>
-`;
-
-const moduleName = 'app/graph';
-
-const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.bootstrap'];
-
-function mountGraphApp(appBasePath: string, element: HTMLElement) {
-  const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('class', 'gphAppWrapper');
-  // eslint-disable-next-line no-unsanitized/property
-  mountpoint.innerHTML = mainTemplate(appBasePath);
-  // bootstrap angular into detached element and attach it later to
-  // make angular-within-angular possible
-  const $injector = angular.bootstrap(mountpoint, [moduleName]);
-  element.appendChild(mountpoint);
-  element.setAttribute('class', 'gphAppWrapper');
-  return $injector;
-}
-
-function createLocalAngularModule(navigation: NavigationStart) {
-  createLocalI18nModule();
-  createLocalTopNavModule(navigation);
-
-  const graphAngularModule = angular.module(moduleName, [
-    ...thirdPartyAngularDependencies,
-    'graphI18n',
-    'graphTopNav',
-  ]);
-  return graphAngularModule;
-}
-
-function createLocalTopNavModule(navigation: NavigationStart) {
-  angular
-    .module('graphTopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
-}
-
-function createLocalI18nModule() {
-  angular
-    .module('graphI18n', [])
-    .provider('i18n', I18nProvider)
-    .filter('i18n', i18nFilter)
-    .directive('i18nId', i18nDirective);
-}
