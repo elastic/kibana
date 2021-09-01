@@ -90,13 +90,13 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   });
 
   const { body: result } = await uptimeEsClient.search(params);
-  const buckets: Array<{
-    key: number;
-    down: { value: number | null };
-    up: { value: number | null };
-  }> = result?.aggregations?.timeseries?.buckets ?? [];
 
-  const histogram = buckets.map((bucket) => {
+  const buckets = result?.aggregations?.timeseries?.buckets ?? [];
+  if (typeof buckets === 'undefined' || buckets.length === 0) {
+    return { histogram: [], minInterval };
+  }
+
+  const histogram = buckets.map((bucket: Pick<typeof buckets[0], 'key' | 'down' | 'up'>) => {
     const x: number = bucket.key;
     const downCount = bucket.down.value || 0;
     const upCount = bucket.up.value || 0;
