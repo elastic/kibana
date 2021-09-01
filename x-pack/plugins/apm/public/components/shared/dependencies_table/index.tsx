@@ -149,7 +149,7 @@ export function DependenciesTable(props: Props) {
 
   const noItemsMessage = (
     <EmptyMessage
-      heading={i18n.translate('xpack.apm.tracesTable.notFoundLabel', {
+      heading={i18n.translate('xpack.apm.dependenciesTable.notFoundLabel', {
         defaultMessage: 'No dependencies found',
       })}
     />

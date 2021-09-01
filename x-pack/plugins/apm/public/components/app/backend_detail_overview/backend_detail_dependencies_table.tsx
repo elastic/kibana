@@ -101,7 +101,6 @@ export function BackendDetailDependenciesTable() {
         }
       )}
       status={status}
-      compact={false}
     />
   );
 }
