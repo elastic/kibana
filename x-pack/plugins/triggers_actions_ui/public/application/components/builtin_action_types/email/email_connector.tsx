@@ -30,12 +30,15 @@ export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
   const { docLinks } = useKibana().services;
-  const { from, host, port, secure, hasAuth } = action.config;
+  const { from, host, port, secure, hasAuth, provider } = action.config;
   const { user, password, clientId, clientSecret, tenantId } = action.secrets;
   useEffect(() => {
     if (!action.id) {
       editActionConfig('hasAuth', true);
       editActionConfig('provider', 'exchange'); // TODO: fix with real provider select functionality
+      editActionConfig('host', 'noneedhost');
+      editActionConfig('port', 123);
+      editActionConfig('secure', false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -96,95 +99,97 @@ export const EmailActionConnectorFields: React.FunctionComponent<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiFormRow
-            id="emailHost"
-            fullWidth
-            error={errors.host}
-            isInvalid={isHostInvalid}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel',
-              {
-                defaultMessage: 'Host',
-              }
-            )}
-          >
-            <EuiFieldText
+      {provider !== 'exchange' ? (
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiFormRow
+              id="emailHost"
               fullWidth
-              readOnly={readOnly}
+              error={errors.host}
               isInvalid={isHostInvalid}
-              name="host"
-              value={host || ''}
-              data-test-subj="emailHostInput"
-              onChange={(e) => {
-                editActionConfig('host', e.target.value);
-              }}
-              onBlur={() => {
-                if (!host) {
-                  editActionConfig('host', '');
+              label={i18n.translate(
+                'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel',
+                {
+                  defaultMessage: 'Host',
                 }
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiFormRow
-                id="emailPort"
+              )}
+            >
+              <EuiFieldText
                 fullWidth
-                placeholder="587"
-                error={errors.port}
-                isInvalid={isPortInvalid}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
-                  {
-                    defaultMessage: 'Port',
+                readOnly={readOnly}
+                isInvalid={isHostInvalid}
+                name="host"
+                value={host || ''}
+                data-test-subj="emailHostInput"
+                onChange={(e) => {
+                  editActionConfig('host', e.target.value);
+                }}
+                onBlur={() => {
+                  if (!host) {
+                    editActionConfig('host', '');
                   }
-                )}
-              >
-                <EuiFieldNumber
-                  prepend=":"
-                  isInvalid={isPortInvalid}
-                  fullWidth
-                  readOnly={readOnly}
-                  name="port"
-                  value={port || ''}
-                  data-test-subj="emailPortInput"
-                  onChange={(e) => {
-                    editActionConfig('port', parseInt(e.target.value, 10));
-                  }}
-                  onBlur={() => {
-                    if (!port) {
-                      editActionConfig('port', 0);
-                    }
-                  }}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiSwitch
-                    label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.secureSwitchLabel',
-                      {
-                        defaultMessage: 'Secure',
-                      }
-                    )}
-                    disabled={readOnly}
-                    checked={secure || false}
+                <EuiFormRow
+                  id="emailPort"
+                  fullWidth
+                  placeholder="587"
+                  error={errors.port}
+                  isInvalid={isPortInvalid}
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
+                    {
+                      defaultMessage: 'Port',
+                    }
+                  )}
+                >
+                  <EuiFieldNumber
+                    prepend=":"
+                    isInvalid={isPortInvalid}
+                    fullWidth
+                    readOnly={readOnly}
+                    name="port"
+                    value={port || ''}
+                    data-test-subj="emailPortInput"
                     onChange={(e) => {
-                      editActionConfig('secure', e.target.checked);
+                      editActionConfig('port', parseInt(e.target.value, 10));
+                    }}
+                    onBlur={() => {
+                      if (!port) {
+                        editActionConfig('port', 0);
+                      }
                     }}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow hasEmptyLabelSpace>
+                    <EuiSwitch
+                      label={i18n.translate(
+                        'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.secureSwitchLabel',
+                        {
+                          defaultMessage: 'Secure',
+                        }
+                      )}
+                      disabled={readOnly}
+                      checked={secure || false}
+                      onChange={(e) => {
+                        editActionConfig('secure', e.target.checked);
+                      }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiSpacer size="m" />
@@ -359,7 +364,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                     label={i18n.translate(
                       'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.tenantFieldLabel',
                       {
-                        defaultMessage: 'Tenant ID (optional)',
+                        defaultMessage: 'Tenant ID',
                       }
                     )}
                   >
