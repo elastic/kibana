@@ -6,57 +6,83 @@
  */
 
 import moment from 'moment';
+import { set, unset } from 'lodash';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { handleResponse, getNodeInfo } from './get_node_info';
 import { LegacyRequest } from '../../types';
+import { ElasticsearchResponseHit } from '../../../common/types/es';
 import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
+
+interface HitParams {
+  path: string;
+  value?: string;
+}
+
+// deletes, adds, or updates the properties based on a default object
+function createResponseObjHit(params?: HitParams[]): ElasticsearchResponseHit {
+  const defaultResponseObj: ElasticsearchResponseHit = {
+    _index: 'index',
+    _source: {
+      cluster_uuid: '123',
+      timestamp: '2021-08-31T15:00:26.330Z',
+      logstash_stats: {
+        timestamp: moment().format(),
+        logstash: {
+          pipeline: {
+            batch_size: 2,
+            workers: 2,
+          },
+          host: 'myhost',
+          uuid: 'd63b22f8-7f77-4a23-9aac-9813c760e0e0',
+          version: '8.0.0',
+          status: 'green',
+          name: 'desktop-192-168-162-170.local',
+          http_address: '127.0.0.1:9600',
+        },
+        events: {
+          in: 300,
+          filtered: 300,
+          out: 300,
+        },
+        reloads: {
+          successes: 5,
+          failures: 2,
+        },
+        queue: {
+          type: 'persisted',
+          events: 100,
+        },
+      },
+    },
+  };
+
+  if (!params) return defaultResponseObj;
+  return params.reduce<ElasticsearchResponseHit>((acc, change) => {
+    if (!change.value) {
+      // delete if no value provided
+      unset(acc, change.path);
+      return acc;
+    }
+    return set(acc, change.path, change.value);
+  }, defaultResponseObj);
+}
+
+const createResponseFromHits = (hits: ElasticsearchResponseHit[]) => {
+  return {
+    hits: {
+      total: {
+        value: hits.length,
+      },
+      hits,
+    },
+  };
+};
 
 describe('get_logstash_info', () => {
   it('return mapped data for result with hits, availability = true', () => {
-    const result = handleResponse({
-      hits: {
-        total: {
-          value: 1,
-        },
-        hits: [
-          {
-            _index: 'index',
-            _source: {
-              cluster_uuid: '123',
-              timestamp: '2021-08-31T15:00:26.330Z',
-              logstash_stats: {
-                timestamp: moment().format(),
-                logstash: {
-                  pipeline: {
-                    batch_size: 2,
-                    workers: 2,
-                  },
-                  host: 'myhost',
-                  uuid: 'd63b22f8-7f77-4a23-9aac-9813c760e0e0',
-                  version: '8.0.0',
-                  status: 'green',
-                  name: 'desktop-192-168-162-170.local',
-                  http_address: '127.0.0.1:9600',
-                },
-                events: {
-                  in: 300,
-                  filtered: 300,
-                  out: 300,
-                },
-                reloads: {
-                  successes: 5,
-                  failures: 2,
-                },
-                queue: {
-                  type: 'persisted',
-                  events: 100,
-                },
-              },
-            },
-          },
-        ],
-      },
-    });
+    const hits = [createResponseObjHit()];
+    const res = createResponseFromHits(hits);
+    const result = handleResponse(res);
     expect(result).toEqual({
       host: 'myhost',
       uuid: 'd63b22f8-7f77-4a23-9aac-9813c760e0e0',
@@ -84,50 +110,17 @@ describe('get_logstash_info', () => {
   });
 
   it('return mapped data for result with hits, availability = false', () => {
-    const result = handleResponse({
-      hits: {
-        total: {
-          value: 1,
+    const hits = [
+      createResponseObjHit([
+        {
+          path: '_source.logstash_stats.timestamp',
+          value: moment().subtract(11, 'minutes').format(),
         },
-        hits: [
-          {
-            _index: 'index',
-            _source: {
-              cluster_uuid: '123',
-              timestamp: '2021-08-31T15:00:26.330Z',
-              logstash_stats: {
-                timestamp: moment().subtract(11, 'minutes').format(),
-                logstash: {
-                  pipeline: {
-                    batch_size: 2,
-                    workers: 2,
-                  },
-                  host: 'myhost',
-                  uuid: 'd63b22f8-7f77-4a23-9aac-9813c760e0e0',
-                  version: '8.0.0',
-                  status: 'green',
-                  name: 'desktop-192-168-162-170.local',
-                  http_address: '127.0.0.1:9600',
-                },
-                events: {
-                  in: 300,
-                  filtered: 300,
-                  out: 300,
-                },
-                reloads: {
-                  successes: 5,
-                  failures: 2,
-                },
-                queue: {
-                  type: 'persisted',
-                  events: 100,
-                },
-              },
-            },
-          },
-        ],
-      },
-    });
+      ]),
+    ];
+    const res = createResponseFromHits(hits);
+
+    const result = handleResponse(res);
     expect(result).toEqual({
       host: 'myhost',
       pipeline: {
@@ -154,46 +147,19 @@ describe('get_logstash_info', () => {
   });
 
   it('default to no queue type if none specified', () => {
-    const result = handleResponse({
-      hits: {
-        total: {
-          value: 1,
+    const hits = [
+      createResponseObjHit([
+        {
+          path: '_source.logstash_stats.queue', // delete queue property
         },
-        hits: [
-          {
-            _index: 'index',
-            _source: {
-              cluster_uuid: '123',
-              timestamp: '2021-08-31T15:00:26.330Z',
-              logstash_stats: {
-                timestamp: moment().subtract(11, 'minutes').format(),
-                logstash: {
-                  pipeline: {
-                    batch_size: 2,
-                    workers: 2,
-                  },
-                  host: 'myhost',
-                  uuid: 'd63b22f8-7f77-4a23-9aac-9813c760e0e0',
-                  version: '8.0.0',
-                  status: 'green',
-                  name: 'desktop-192-168-162-170.local',
-                  http_address: '127.0.0.1:9600',
-                },
-                events: {
-                  in: 300,
-                  filtered: 300,
-                  out: 300,
-                },
-                reloads: {
-                  successes: 5,
-                  failures: 2,
-                },
-              },
-            },
-          },
-        ],
-      },
-    });
+        {
+          path: '_source.logstash_stats.timestamp', // update the timestamp property
+          value: moment().subtract(11, 'minutes').format(),
+        },
+      ]),
+    ];
+    const res = createResponseFromHits(hits);
+    const result = handleResponse(res);
     expect(result).toEqual({
       host: 'myhost',
       pipeline: {
