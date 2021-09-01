@@ -111,7 +111,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
   });
 });
 
-describe('Kibana navigation to all pages in the Security app ', () => {
+describe.skip('Kibana navigation to all pages in the Security app ', () => {
   before(() => {
     loginAndWaitForPage(KIBANA_HOME);
   });
