@@ -1019,4 +1019,77 @@ describe('collectExportedObjects', () => {
       );
     });
   });
+
+  describe('exporting multi-namespaced objects from multiple namespaces', () => {
+    it(`uses the object's namespaces to fetch the references`, async () => {
+      registerType('multi', { namespaceType: 'multiple' });
+      registerType('ref', { namespaceType: 'multiple' });
+
+      const obj1 = createObject({
+        type: 'single',
+        id: '1',
+        namespaces: ['ns1', 'ns2', 'ns3'],
+        references: [
+          {
+            id: '1',
+            type: 'ref',
+            name: 'ref-ns1',
+          },
+        ],
+      });
+      const obj2 = createObject({
+        type: 'single',
+        id: '1',
+        namespaces: ['*'],
+        references: [
+          {
+            id: '2',
+            type: 'ref',
+            name: 'ref-ns2',
+          },
+        ],
+      });
+
+      const ref1 = createObject({
+        type: 'ref',
+        id: '1',
+        namespaces: ['ns1', 'ns2'],
+      });
+      const ref2 = createObject({
+        type: 'ref',
+        id: '2',
+        namespaces: ['*'],
+      });
+
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [ref1, ref2],
+      });
+
+      const { objects } = await collectExportedObjects({
+        objects: [obj1, obj2],
+        savedObjectsClient,
+        request,
+        typeRegistry,
+        includeReferences: true,
+        logger,
+      });
+
+      expect(objects.map(toIdTypeNsTuple)).toEqual([obj1, obj2, ref1, ref2].map(toIdTypeNsTuple));
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+        [
+          {
+            type: 'ref',
+            id: '1',
+            namespaces: ['ns1', 'ns2', 'ns3'],
+          },
+          {
+            type: 'ref',
+            id: '2',
+            namespaces: ['*'],
+          },
+        ],
+        expect.any(Object)
+      );
+    });
+  });
 });
