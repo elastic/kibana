@@ -17,6 +17,9 @@ export const config = {
       legacyMultiTenancy: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
+      indexUpgrade: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
     }),
   }),
 };
@@ -24,3 +27,4 @@ export const config = {
 export type RuleRegistryPluginConfig = TypeOf<typeof config.schema>;
 
 export const INDEX_PREFIX = '.alerts' as const;
+export const INDEX_PREFIX_FOR_BACKING_INDICES = '.internal.alerts' as const;

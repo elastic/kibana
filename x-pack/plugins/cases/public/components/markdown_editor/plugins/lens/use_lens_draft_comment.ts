@@ -10,13 +10,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { first } from 'rxjs/operators';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID } from './constants';
-import { INSERT_LENS } from './translations';
+import { VISUALIZATION } from './translations';
 
 interface DraftComment {
   commentId: string;
   comment: string;
   position: EuiMarkdownAstNodePosition;
-  title: string;
 }
 
 export const useLensDraftComment = () => {
@@ -26,6 +25,7 @@ export const useLensDraftComment = () => {
     storage,
   } = useKibana().services;
   const [draftComment, setDraftComment] = useState<DraftComment | null>(null);
+  const [hasIncomingLensState, setHasIncomingLensState] = useState(false);
 
   useEffect(() => {
     const fetchDraftComment = async () => {
@@ -38,14 +38,12 @@ export const useLensDraftComment = () => {
       const incomingEmbeddablePackage = embeddable
         ?.getStateTransfer()
         .getIncomingEmbeddablePackage(currentAppId);
+      const storageDraftComment = storage.get(DRAFT_COMMENT_STORAGE_ID);
 
-      if (incomingEmbeddablePackage) {
-        if (storage.get(DRAFT_COMMENT_STORAGE_ID)) {
-          try {
-            setDraftComment(storage.get(DRAFT_COMMENT_STORAGE_ID));
-            // eslint-disable-next-line no-empty
-          } catch (e) {}
-        }
+      setHasIncomingLensState(!!incomingEmbeddablePackage);
+
+      if (storageDraftComment) {
+        setDraftComment(storageDraftComment);
       }
     };
     fetchDraftComment();
@@ -53,7 +51,7 @@ export const useLensDraftComment = () => {
 
   const openLensModal = useCallback(({ editorRef }) => {
     if (editorRef && editorRef.textarea && editorRef.toolbar) {
-      const lensPluginButton = editorRef.toolbar?.querySelector(`[aria-label="${INSERT_LENS}"]`);
+      const lensPluginButton = editorRef.toolbar?.querySelector(`[aria-label="${VISUALIZATION}"]`);
       if (lensPluginButton) {
         lensPluginButton.click();
       }
@@ -62,7 +60,8 @@ export const useLensDraftComment = () => {
 
   const clearDraftComment = useCallback(() => {
     storage.remove(DRAFT_COMMENT_STORAGE_ID);
+    setDraftComment(null);
   }, [storage]);
 
-  return { draftComment, openLensModal, clearDraftComment };
+  return { draftComment, hasIncomingLensState, openLensModal, clearDraftComment };
 };

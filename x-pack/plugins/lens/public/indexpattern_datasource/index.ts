@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup } from 'kibana/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { createStartServicesGetter, Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
@@ -14,7 +14,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
-import type { Datasource, EditorFrameSetup } from '../types';
+import type { EditorFrameSetup } from '../types';
 import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import type {
   FieldFormatsStart,
@@ -57,29 +57,37 @@ export class IndexPatternDatasource {
         counterRate,
         getTimeScale,
         getSuffixFormatter,
+        suffixFormatterId,
       } = await import('../async_services');
-      return core
-        .getStartServices()
-        .then(([coreStart, { indexPatternFieldEditor, uiActions, data, fieldFormats }]) => {
-          const suffixFormatter = getSuffixFormatter(fieldFormats.deserialize);
-          if (!fieldFormats.has(suffixFormatter.id)) {
-            // todo: this code should be executed on setup phase.
-            fieldFormatsSetup.register([suffixFormatter]);
-          }
-          expressions.registerFunction(getTimeScale(() => getTimeZone(core.uiSettings)));
-          expressions.registerFunction(counterRate);
-          expressions.registerFunction(renameColumns);
-          expressions.registerFunction(formatColumn);
-          return getIndexPatternDatasource({
-            core: coreStart,
-            fieldFormats,
-            storage: new Storage(localStorage),
-            data,
-            charts,
-            indexPatternFieldEditor,
-            uiActions,
-          });
-        }) as Promise<Datasource>;
+
+      if (!fieldFormatsSetup.has(suffixFormatterId)) {
+        const startServices = createStartServicesGetter(core.getStartServices);
+        const suffixFormatter = getSuffixFormatter(
+          () => startServices().plugins.fieldFormats.deserialize
+        );
+
+        fieldFormatsSetup.register([suffixFormatter]);
+      }
+
+      expressions.registerFunction(getTimeScale(() => getTimeZone(core.uiSettings)));
+      expressions.registerFunction(counterRate);
+      expressions.registerFunction(renameColumns);
+      expressions.registerFunction(formatColumn);
+
+      const [
+        coreStart,
+        { indexPatternFieldEditor, uiActions, data, fieldFormats },
+      ] = await core.getStartServices();
+
+      return getIndexPatternDatasource({
+        core: coreStart,
+        fieldFormats,
+        storage: new Storage(localStorage),
+        data,
+        charts,
+        indexPatternFieldEditor,
+        uiActions,
+      });
     });
   }
 }
