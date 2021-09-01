@@ -284,7 +284,7 @@ export const createLifecycleExecutor = (
   if (allEventsToIndex.length > 0 && ruleDataClient.isWriteEnabled()) {
     logger.debug(`Preparing to index ${allEventsToIndex.length} alerts.`);
 
-    ruleDataClient.getWriter().bulk({
+    await ruleDataClient.getWriter().bulk({
       body: allEventsToIndex.flatMap(({ event, indexName }) => [
         indexName
           ? { update: { _id: event[ALERT_UUID]!, _index: indexName } }
