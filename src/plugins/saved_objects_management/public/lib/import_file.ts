@@ -13,7 +13,7 @@ export async function importFile(
   http: HttpStart,
   file: File,
   { createNewCopies, overwrite }: ImportMode,
-  importNamespaces: boolean = false,
+  importNamespaces: boolean = false
 ) {
   const formData = new FormData();
   formData.append('file', file);
