@@ -532,7 +532,6 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
       refreshPage();
-      cy.get(LOADING_INDICATOR).should('exist');
       cy.get(LOADING_INDICATOR).should('not.exist');
       return cy
         .get(SERVER_SIDE_EVENT_COUNT)
