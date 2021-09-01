@@ -8,7 +8,6 @@
 import path from 'path';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-// import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 import { JobType } from '../../../../../plugins/ml/common/types/saved_objects';
 
 export default function ({ getService }: FtrProviderContext) {
