@@ -499,7 +499,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             signal: {
               reason:
-                'configuration event by root on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
+                'configuration event on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               status: 'open',
@@ -665,7 +665,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             signal: {
               reason:
-                'anomoly event by root on zeek-sensor-amsterdam created high alert Signal Testing Query.',
+                'anomoly event on zeek-sensor-amsterdam created high alert Signal Testing Query.',
               rule: fullSignal.signal.rule,
               group: fullSignal.signal.group,
               original_time: fullSignal.signal.original_time,
@@ -756,8 +756,7 @@ export default ({ getService }: FtrProviderContext) => {
               status: 'open',
               depth: 2,
               group: source.signal.group,
-              reason:
-                'event by root on zeek-sensor-amsterdam created high alert Signal Testing Query.',
+              reason: 'event on zeek-sensor-amsterdam created high alert Signal Testing Query.',
               rule: source.signal.rule,
               ancestors: [
                 {
