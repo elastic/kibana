@@ -26,6 +26,7 @@ import { registerExportAcrossSpaceRoute } from './export_across_space';
 import { registerImportRoute } from './import';
 import { registerImportAcrossSpaceRoute } from './import_across_space';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
+import { registerResolveImportErrorsAcrossSpaceRoute } from './resolve_import_errors_across_space';
 import { registerMigrateRoute } from './migrate';
 
 export function registerRoutes({
@@ -58,6 +59,7 @@ export function registerRoutes({
   registerImportRoute(router, { config, coreUsageData });
   registerImportAcrossSpaceRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });
+  registerResolveImportErrorsAcrossSpaceRoute(router, { config, coreUsageData });
 
   const internalRouter = http.createRouter('/internal/saved_objects/');
 
