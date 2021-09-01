@@ -7,6 +7,8 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { orderBy } from 'lodash';
+
 import {
   EuiIcon,
   EuiBasicTableColumn,
@@ -16,31 +18,34 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
-import { orderBy } from 'lodash';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useTransactionDistributionFetcher } from '../../../hooks/use_transaction_distribution_fetcher';
-import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
-import { CorrelationsTable } from './correlations_table';
-import { push } from '../../shared/Links/url_helpers';
+
+import { i18n } from '@kbn/i18n';
+
 import {
   enableInspectEsQueries,
   useUiTracker,
 } from '../../../../../observability/public';
+
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import type { LatencyCorrelationsAsyncSearchServiceRawResponse } from '../../../../common/search_strategies/latency_correlations/types';
+import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
+
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useSearchStrategy } from '../../../hooks/use_search_strategy';
+
+import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
+import { push } from '../../shared/Links/url_helpers';
+
+import { CorrelationsTable } from './correlations_table';
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
-import { useApmParams } from '../../../hooks/use_apm_params';
 import { isErrorMessage } from './utils/is_error_message';
 import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { useTimeRange } from '../../../hooks/use_time_range';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 
@@ -57,60 +62,27 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
 
-  const { serviceName, transactionType } = useApmServiceContext();
-
-  const {
-    query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/transactions/view');
-
-  const { urlParams } = useUrlParams();
-
-  const { transactionName } = urlParams;
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 
   const {
-    ccsWarning,
-    log,
-    error,
-    values,
-    percentileThresholdValue,
-    isRunning,
-    progress,
+    state: { error, isRunning, loaded, total },
+    data: {
+      ccsWarning,
+      log,
+      values,
+      percentileThresholdValue,
+      overallHistogram,
+    },
     startFetch,
     cancelFetch,
-    overallHistogram,
-  } = useTransactionDistributionFetcher();
-
-  const startFetchHandler = useCallback(() => {
-    startFetch({
-      environment,
-      kuery,
-      serviceName,
-      transactionName,
-      transactionType,
-      start,
-      end,
+  } = useSearchStrategy<LatencyCorrelationsAsyncSearchServiceRawResponse>(
+    APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
+    {
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
       analyzeCorrelations: true,
-    });
-  }, [
-    startFetch,
-    environment,
-    serviceName,
-    transactionName,
-    transactionType,
-    kuery,
-    start,
-    end,
-  ]);
-
-  useEffect(() => {
-    startFetchHandler();
-    return cancelFetch;
-  }, [cancelFetch, startFetchHandler]);
+    }
+  );
+  const progress = loaded / total;
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -350,7 +322,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       <CorrelationsProgressControls
         progress={progress}
         isRunning={isRunning}
-        onRefresh={startFetchHandler}
+        onRefresh={startFetch}
         onCancel={cancelFetch}
       />
 
@@ -386,7 +358,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           <CorrelationsEmptyStatePrompt />
         )}
       </div>
-      {displayLog && <CorrelationsLog logMessages={log} />}
+      {displayLog && <CorrelationsLog logMessages={log ?? []} />}
     </div>
   );
 }

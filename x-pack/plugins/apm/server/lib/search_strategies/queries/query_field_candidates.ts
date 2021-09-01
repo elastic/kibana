@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { SearchServiceFetchParams } from '../../../../common/search_strategies/latency_correlations/types';
+import type { SearchServiceFetchParams } from '../../../../common/search_strategies/types';
 
 import {
   FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,

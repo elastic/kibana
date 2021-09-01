@@ -11,10 +11,9 @@ import { APM_SEARCH_STRATEGIES } from '../../../common/search_strategies/constan
 
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
-import { searchStrategyProvider } from './search_strategy_provider';
-
-import { latencyCorrelationsAsyncSearchServiceProvider } from './latency_correlations';
 import { failedTransactionsCorrelationsAsyncSearchServiceProvider } from './failed_transactions_correlations';
+import { latencyCorrelationsAsyncSearchServiceProvider } from './latency_correlations';
+import { searchStrategyProvider } from './search_strategy_provider';
 
 export const registerSearchStrategies = (
   registerSearchStrategy: DataPluginSetup['search']['registerSearchStrategy'],

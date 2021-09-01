@@ -18,18 +18,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import type { LatencyCorrelationsAsyncSearchServiceRawResponse } from '../../../../../common/search_strategies/latency_correlations/types';
+import { APM_SEARCH_STRATEGIES } from '../../../../../common/search_strategies/constants';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useTransactionDistributionFetcher } from '../../../../hooks/use_transaction_distribution_fetcher';
+import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
 import {
   OnHasData,
   TransactionDistributionChart,
 } from '../../../shared/charts/transaction_distribution_chart';
 import { useUiTracker } from '../../../../../../observability/public';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 // Enforce min height so it's consistent across all tabs on the same level
@@ -69,18 +67,6 @@ export function TransactionDistribution({
     core: { notifications },
   } = useApmPluginContext();
 
-  const { serviceName, transactionType } = useApmServiceContext();
-
-  const {
-    query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/transactions/view');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { urlParams } = useUrlParams();
-
-  const { transactionName } = urlParams;
-
   const [showSelection, setShowSelection] = useState(false);
 
   const onTransactionDistributionHasData: OnHasData = useCallback(
@@ -106,40 +92,18 @@ export function TransactionDistribution({
   );
 
   const {
-    error,
-    percentileThresholdValue,
-    startFetch,
-    cancelFetch,
-    overallHistogram,
-  } = useTransactionDistributionFetcher();
-
-  const startFetchHandler = useCallback(() => {
-    startFetch({
-      environment,
-      kuery,
-      serviceName,
-      transactionName,
-      transactionType,
-      start,
-      end,
+    state,
+    data,
+  } = useSearchStrategy<LatencyCorrelationsAsyncSearchServiceRawResponse>(
+    APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
+    {
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
       analyzeCorrelations: false,
-    });
-  }, [
-    startFetch,
-    environment,
-    serviceName,
-    transactionName,
-    transactionType,
-    kuery,
-    start,
-    end,
-  ]);
+    }
+  );
 
-  useEffect(() => {
-    startFetchHandler();
-    return cancelFetch;
-  }, [cancelFetch, startFetchHandler]);
+  const { error } = state;
+  const { percentileThresholdValue, overallHistogram } = data;
 
   useEffect(() => {
     if (isErrorMessage(error)) {

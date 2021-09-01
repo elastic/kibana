@@ -6,6 +6,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { orderBy } from 'lodash';
+
 import {
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -18,37 +21,38 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
-import { orderBy } from 'lodash';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { CorrelationsTable } from './correlations_table';
-import { enableInspectEsQueries } from '../../../../../observability/public';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
-import { ImpactBar } from '../../shared/ImpactBar';
-import { isErrorMessage } from './utils/is_error_message';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
-import { createHref, push } from '../../shared/Links/url_helpers';
-import { useUiTracker } from '../../../../../observability/public';
-import { useSearchStrategy } from '../../../hooks/use_search_strategy';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { CorrelationsLog } from './correlations_log';
-import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
-import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
-import { CorrelationsProgressControls } from './progress_controls';
+
+import { i18n } from '@kbn/i18n';
+import {
+  enableInspectEsQueries,
+  useUiTracker,
+} from '../../../../../observability/public';
+
+import { asPercent } from '../../../../common/utils/formatters';
 import type {
   FailedTransactionsCorrelationValue,
   FailedTransactionsCorrelationsAsyncSearchServiceRawResponse,
 } from '../../../../common/search_strategies/failed_transactions_correlations/types';
-import { Summary } from '../../shared/Summary';
 import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
-import { asPercent } from '../../../../common/utils/formatters';
-import { useTimeRange } from '../../../hooks/use_time_range';
+
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useSearchStrategy } from '../../../hooks/use_search_strategy';
+
+import { ImpactBar } from '../../shared/ImpactBar';
+import { createHref, push } from '../../shared/Links/url_helpers';
+import { Summary } from '../../shared/Summary';
+
+import { CorrelationsTable } from './correlations_table';
+import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
+import { isErrorMessage } from './utils/is_error_message';
+import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
+import { CorrelationsLog } from './correlations_log';
+import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
+import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
+import { CorrelationsProgressControls } from './progress_controls';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -60,71 +64,17 @@ export function FailedTransactionsCorrelations({
   } = useApmPluginContext();
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
-  const { serviceName, transactionType } = useApmServiceContext();
-
-  const {
-    query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
-
-  const { urlParams } = useUrlParams();
-  const { transactionName } = urlParams;
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
   const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
   const {
-    fetchState,
-    rawResponse,
-    ...searchStrategy
+    state: { error, isRunning, loaded, total },
+    data: { ccsWarning, log, values },
+    startFetch,
+    cancelFetch,
   } = useSearchStrategy<FailedTransactionsCorrelationsAsyncSearchServiceRawResponse>(
     APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS
   );
-
-  const result = useMemo(
-    () => ({
-      ...fetchState,
-      ...searchStrategy,
-      ...rawResponse,
-    }),
-    [fetchState, searchStrategy, rawResponse]
-  );
-
-  const {
-    ccsWarning,
-    log,
-    error,
-    isRunning,
-    progress,
-    startFetch,
-    cancelFetch,
-  } = result;
-
-  const startFetchHandler = useCallback(() => {
-    startFetch({
-      environment,
-      kuery,
-      serviceName,
-      transactionName,
-      transactionType,
-      start,
-      end,
-    });
-  }, [
-    startFetch,
-    environment,
-    serviceName,
-    transactionName,
-    transactionType,
-    kuery,
-    start,
-    end,
-  ]);
-
-  useEffect(() => {
-    startFetchHandler();
-    return cancelFetch;
-  }, [cancelFetch, startFetchHandler]);
+  const progress = loaded / total;
 
   const [
     selectedSignificantTerm,
@@ -133,12 +83,8 @@ export function FailedTransactionsCorrelations({
 
   const selectedTerm = useMemo(() => {
     if (selectedSignificantTerm) return selectedSignificantTerm;
-    return result?.values &&
-      Array.isArray(result.values) &&
-      result.values.length > 0
-      ? result?.values[0]
-      : undefined;
-  }, [selectedSignificantTerm, result]);
+    return Array.isArray(values) && values.length > 0 ? values[0] : undefined;
+  }, [selectedSignificantTerm, values]);
 
   const history = useHistory();
 
@@ -387,11 +333,11 @@ export function FailedTransactionsCorrelations({
   }, []);
 
   const { sorting, correlationTerms } = useMemo(() => {
-    if (!Array.isArray(result.values)) {
+    if (!Array.isArray(values)) {
       return { correlationTerms: [], sorting: undefined };
     }
     const orderedTerms = orderBy(
-      result.values,
+      values,
       // The smaller the p value the higher the impact
       // So we want to sort by the normalized score here
       // which goes from 0 -> 1
@@ -407,7 +353,7 @@ export function FailedTransactionsCorrelations({
         },
       } as EuiTableSortingType<FailedTransactionsCorrelationValue>,
     };
-  }, [result?.values, sortField, sortDirection]);
+  }, [values, sortField, sortDirection]);
 
   return (
     <div data-test-subj="apmFailedTransactionsCorrelationsTabContent">
@@ -477,7 +423,7 @@ export function FailedTransactionsCorrelations({
       <CorrelationsProgressControls
         progress={progress}
         isRunning={isRunning}
-        onRefresh={startFetchHandler}
+        onRefresh={startFetch}
         onCancel={cancelFetch}
       />
 
