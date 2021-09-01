@@ -28,6 +28,7 @@ import {
   ValueAxis,
   Scale,
   TimeMarker,
+  AxisMode,
 } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
 import { XyVisType } from '../common';
@@ -184,9 +185,18 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
       const usedValueAxis = (vis.params.valueAxes || []).find(
         (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
       );
-      if (usedValueAxis?.scale.mode === 'percentage') {
+      if (usedValueAxis?.scale.mode === AxisMode.Percentage) {
         yDimension.format = { id: 'percent' };
       }
+    }
+    // if aggType is 'Count', need to display only integers at y-axis
+    // prevent from displaying floats on small charts with small step
+    if (yDimension.aggType === 'count') {
+      if (!yDimension.params) {
+        yDimension.params = {};
+      }
+
+      yDimension.params.integersOnly = true;
     }
   });
 

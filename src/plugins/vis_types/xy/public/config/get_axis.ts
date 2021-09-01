@@ -28,7 +28,7 @@ import { isSimpleField } from '../utils/accessors';
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
   { categoryLines, valueAxis }: Grid,
-  { params, format, formatter, title: fallbackTitle = '', aggType }: Aspect,
+  { params, format, formatter, title: fallbackTitle = '' }: Aspect,
   seriesParams: SeriesParam[],
   isDateHistogram = false
 ): AxisConfig<S> {
@@ -73,7 +73,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
     scale,
     style: getAxisStyle(ticks, title, fallbackRotation),
     domain: getAxisDomain(scale, isCategoryAxis),
-    integersOnly: aggType === 'count',
+    integersOnly: params?.integersOnly ?? false,
   };
 }
 

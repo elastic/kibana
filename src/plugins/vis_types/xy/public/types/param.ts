@@ -103,7 +103,7 @@ export interface TimeMarker {
 
 export type Dimension = Omit<SchemaConfig, 'params'> & {
   params: DateHistogramParams | HistogramParams | FakeParams | {};
-};
+} & { params: { integersOnly?: boolean } };
 
 export interface Dimensions {
   x: Dimension | null;
