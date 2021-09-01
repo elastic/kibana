@@ -1,5 +1,6 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-securitysolution-io-ts-list-types"
 PKG_REQUIRE_NAME = "@kbn/securitysolution-io-ts-list-types"
@@ -26,28 +27,34 @@ NPM_MODULE_EXTRA_FILES = [
   "README.md",
 ]
 
-SRC_DEPS = [
-  "//packages/elastic-datemath",
+RUNTIME_DEPS = [
   "//packages/kbn-securitysolution-io-ts-types",
   "//packages/kbn-securitysolution-io-ts-utils",
-  "//packages/kbn-securitysolution-list-constants",
   "@npm//fp-ts",
   "@npm//io-ts",
-  "@npm//lodash",
-  "@npm//moment",
-  "@npm//tslib",
-  "@npm//uuid",
 ]
 
 TYPES_DEPS = [
-  "@npm//@types/flot",
+  "//packages/kbn-securitysolution-io-ts-types",
+  "//packages/kbn-securitysolution-io-ts-utils",
+  "@npm//fp-ts",
+  "@npm//io-ts",
   "@npm//@types/jest",
-  "@npm//@types/lodash",
   "@npm//@types/node",
-  "@npm//@types/uuid"
 ]
 
-DEPS = SRC_DEPS + TYPES_DEPS
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  config_file = ".babelrc.browser"
+)
 
 ts_config(
   name = "tsconfig",
@@ -59,22 +66,23 @@ ts_config(
 )
 
 ts_project(
-  name = "tsc",
+  name = "tsc_types",
   args = ['--pretty'],
   srcs = SRCS,
-  deps = DEPS,
+  deps = TYPES_DEPS,
   declaration = True,
   declaration_map = True,
-  out_dir = "target",
-  source_map = True,
+  emit_declaration_only = True,
+  out_dir = "target_types",
   root_dir = "src",
+  source_map = True,
   tsconfig = ":tsconfig",
 )
 
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":tsc"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

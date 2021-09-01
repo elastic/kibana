@@ -6,7 +6,6 @@
  */
 import { get } from 'lodash/fp';
 import { ConnectorServiceNowSIRTypeFields } from '../../../common';
-import { Alert } from '../../services/alerts/types';
 import { ServiceNowSIRFormat, SirFieldKey, AlertFieldMappingAndValues } from './types';
 
 export const format: ServiceNowSIRFormat = (theCase, alerts) => {
@@ -46,17 +45,21 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
 
   if (fieldsToAdd.length > 0) {
     sirFields = alerts.reduce<Record<SirFieldKey, string | null>>((acc, alert) => {
-      if (isInvalid(alert)) {
-        return acc;
-      }
-
-      return accumulateFieldsFromAlert({
-        accumulatedFields: acc,
-        alert,
-        fieldsToAdd,
-        dedupFields: manageDuplicate,
-        alertFieldMapping,
+      fieldsToAdd.forEach((alertField) => {
+        const field = get(alertFieldMapping[alertField].alertPath, alert);
+        if (field && !manageDuplicate[alertFieldMapping[alertField].sirFieldKey].has(field)) {
+          manageDuplicate[alertFieldMapping[alertField].sirFieldKey].add(field);
+          acc = {
+            ...acc,
+            [alertFieldMapping[alertField].sirFieldKey]: `${
+              acc[alertFieldMapping[alertField].sirFieldKey] != null
+                ? `${acc[alertFieldMapping[alertField].sirFieldKey]},${field}`
+                : field
+            }`,
+          };
+        }
       });
+      return acc;
     }, sirFields);
   }
 
@@ -67,38 +70,3 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
     priority,
   };
 };
-
-function isInvalid(alert: Alert) {
-  return alert.error || alert.source == null;
-}
-
-function accumulateFieldsFromAlert({
-  accumulatedFields,
-  alert,
-  fieldsToAdd,
-  dedupFields,
-  alertFieldMapping,
-}: {
-  accumulatedFields: Record<SirFieldKey, string | null>;
-  alert: Alert;
-  fieldsToAdd: SirFieldKey[];
-  dedupFields: Record<SirFieldKey, Set<string>>;
-  alertFieldMapping: AlertFieldMappingAndValues;
-}) {
-  fieldsToAdd.forEach((alertField) => {
-    const field = get(alertFieldMapping[alertField].alertPath, alert.source);
-    if (field && !dedupFields[alertFieldMapping[alertField].sirFieldKey].has(field)) {
-      dedupFields[alertFieldMapping[alertField].sirFieldKey].add(field);
-      accumulatedFields = {
-        ...accumulatedFields,
-        [alertFieldMapping[alertField].sirFieldKey]: `${
-          accumulatedFields[alertFieldMapping[alertField].sirFieldKey] != null
-            ? `${accumulatedFields[alertFieldMapping[alertField].sirFieldKey]},${field}`
-            : field
-        }`,
-      };
-    }
-  });
-
-  return accumulatedFields;
-}

@@ -2,6 +2,7 @@
   "paths": {
     "alerts": "packages/kbn-alerts/src",
     "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
+    "kbnConfig": "packages/kbn-config/src",
     "console": "src/plugins/console",
     "core": "src/core",
     "discover": "src/plugins/discover",
@@ -25,6 +26,7 @@
     "expressionRepeatImage": "src/plugins/expression_repeat_image",
     "expressionRevealImage": "src/plugins/expression_reveal_image",
     "expressionShape": "src/plugins/expression_shape",
+    "expressionTagcloud": "src/plugins/chart_expressions/expression_tagcloud",
     "inputControl": "src/plugins/input_control_vis",
     "inspector": "src/plugins/inspector",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",

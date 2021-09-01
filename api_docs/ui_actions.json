@@ -665,6 +665,30 @@
               {
                 "plugin": "discover",
                 "path": "src/plugins/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/explicit_input.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/target/types/public/application/embeddable/search_embeddable_factory.d.ts"
               }
             ],
             "children": [

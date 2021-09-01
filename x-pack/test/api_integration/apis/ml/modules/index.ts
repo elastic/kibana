@@ -14,8 +14,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   const fleetPackages = ['apache', 'nginx'];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/102282
-  describe.skip('modules', function () {
+  describe('modules', function () {
     before(async () => {
       // use empty_kibana to make sure the fleet setup is removed correctly after the tests
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');

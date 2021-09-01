@@ -10,16 +10,16 @@ import { getFindResultWithSingleHit } from '../routes/__mocks__/request_response
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
-import { RuleExecutionLogClient } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 jest.mock('./patch_rules');
 
 describe('updatePrepackagedRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let ruleStatusClient: ReturnType<typeof RuleExecutionLogClient>;
+  let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    ruleStatusClient = new RuleExecutionLogClient();
+    ruleStatusClient = ruleExecutionLogClientMock.create();
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {

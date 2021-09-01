@@ -18,7 +18,6 @@ import { findRules } from '../../rules/find_rules';
 import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
-import { getBulkRuleActionsSavedObject } from '../../rule_actions/get_bulk_rule_actions_saved_object';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -46,7 +45,6 @@ export const findRulesRoute = (
       try {
         const { query } = request;
         const rulesClient = context.alerting?.getRulesClient();
-        const savedObjectsClient = context.core.savedObjects.client;
 
         if (!rulesClient) {
           return siemResponse.error({ statusCode: 404 });
@@ -64,15 +62,12 @@ export const findRulesRoute = (
         });
         const alertIds = rules.data.map((rule) => rule.id);
 
-        const [ruleStatuses, ruleActions] = await Promise.all([
-          execLogClient.findBulk({
-            ruleIds: alertIds,
-            logsCount: 1,
-            spaceId: context.securitySolution.getSpaceId(),
-          }),
-          getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
-        ]);
-        const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);
+        const ruleStatuses = await execLogClient.findBulk({
+          ruleIds: alertIds,
+          logsCount: 1,
+          spaceId: context.securitySolution.getSpaceId(),
+        });
+        const transformed = transformFindAlerts(rules, ruleStatuses);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {

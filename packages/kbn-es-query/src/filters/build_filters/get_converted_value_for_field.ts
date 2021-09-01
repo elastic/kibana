@@ -17,7 +17,10 @@ import { IndexPatternFieldBase } from '../../es_query';
  * https://github.com/elastic/elasticsearch/issues/20941
  * https://github.com/elastic/elasticsearch/pull/22201
  **/
-export const getConvertedValueForField = (field: IndexPatternFieldBase, value: any) => {
+export const getConvertedValueForField = (
+  field: IndexPatternFieldBase,
+  value: string | boolean | number
+) => {
   if (typeof value !== 'boolean' && field.type === 'boolean') {
     if ([1, 'true'].includes(value)) {
       return true;

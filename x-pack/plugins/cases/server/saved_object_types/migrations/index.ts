@@ -27,7 +27,7 @@ import {
   AssociationType,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common';
-import { parseCommentString, stringifyComment } from '../../common';
+import { parseCommentString, stringifyComment } from '../../../common/utils/markdown_plugins/utils';
 
 export { caseMigrations } from './cases';
 export { configureMigrations } from './configuration';

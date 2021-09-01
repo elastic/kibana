@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import {
   IKibanaSearchRequest,
@@ -38,9 +38,7 @@ interface FailedTransactionsCorrelationsFetcherState {
   total: number;
 }
 
-export const useFailedTransactionsCorrelationsFetcher = (
-  params: Omit<SearchServiceParams, 'analyzeCorrelations'>
-) => {
+export const useFailedTransactionsCorrelationsFetcher = () => {
   const {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
@@ -74,62 +72,65 @@ export const useFailedTransactionsCorrelationsFetcher = (
     }));
   }
 
-  const startFetch = () => {
-    setFetchState((prevState) => ({
-      ...prevState,
-      error: undefined,
-      isComplete: false,
-    }));
-    searchSubscription$.current?.unsubscribe();
-    abortCtrl.current.abort();
-    abortCtrl.current = new AbortController();
+  const startFetch = useCallback(
+    (params: SearchServiceParams) => {
+      setFetchState((prevState) => ({
+        ...prevState,
+        error: undefined,
+        isComplete: false,
+      }));
+      searchSubscription$.current?.unsubscribe();
+      abortCtrl.current.abort();
+      abortCtrl.current = new AbortController();
 
-    const req = { params };
+      const req = { params };
 
-    // Submit the search request using the `data.search` service.
-    searchSubscription$.current = data.search
-      .search<IKibanaSearchRequest, IKibanaSearchResponse<RawResponse>>(req, {
-        strategy: FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
-        abortSignal: abortCtrl.current.signal,
-      })
-      .subscribe({
-        next: (res: IKibanaSearchResponse<RawResponse>) => {
-          setResponse(res);
-          if (isCompleteResponse(res)) {
-            searchSubscription$.current?.unsubscribe();
+      // Submit the search request using the `data.search` service.
+      searchSubscription$.current = data.search
+        .search<IKibanaSearchRequest, IKibanaSearchResponse<RawResponse>>(req, {
+          strategy: FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
+          abortSignal: abortCtrl.current.signal,
+        })
+        .subscribe({
+          next: (res: IKibanaSearchResponse<RawResponse>) => {
+            setResponse(res);
+            if (isCompleteResponse(res)) {
+              searchSubscription$.current?.unsubscribe();
+              setFetchState((prevState) => ({
+                ...prevState,
+                isRunnning: false,
+                isComplete: true,
+              }));
+            } else if (isErrorResponse(res)) {
+              searchSubscription$.current?.unsubscribe();
+              setFetchState((prevState) => ({
+                ...prevState,
+                error: (res as unknown) as Error,
+                isRunning: false,
+              }));
+            }
+          },
+          error: (error: Error) => {
             setFetchState((prevState) => ({
               ...prevState,
-              isRunnning: false,
-              isComplete: true,
+              error,
+              isRunning: false,
             }));
-          } else if (isErrorResponse(res)) {
-            searchSubscription$.current?.unsubscribe();
-            setFetchState((prevState) => ({
-              ...prevState,
-              error: (res as unknown) as Error,
-              setIsRunning: false,
-            }));
-          }
-        },
-        error: (error: Error) => {
-          setFetchState((prevState) => ({
-            ...prevState,
-            error,
-            setIsRunning: false,
-          }));
-        },
-      });
-  };
+          },
+        });
+    },
+    [data.search, setFetchState]
+  );
 
-  const cancelFetch = () => {
+  const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
     searchSubscription$.current = undefined;
     abortCtrl.current.abort();
     setFetchState((prevState) => ({
       ...prevState,
-      setIsRunning: false,
+      isRunning: false,
     }));
-  };
+  }, [setFetchState]);
 
   return {
     ...fetchState,

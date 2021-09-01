@@ -164,7 +164,6 @@ Array [
                 className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected"
                 disabled={false}
                 htmlFor="generated-id"
-                onClick={[Function]}
                 style={
                   Object {
                     "minWidth": undefined,
@@ -195,7 +194,6 @@ Array [
                 className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
                 disabled={false}
                 htmlFor="generated-id"
-                onClick={[Function]}
                 style={
                   Object {
                     "minWidth": undefined,
