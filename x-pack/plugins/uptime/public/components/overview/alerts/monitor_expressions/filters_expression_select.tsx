@@ -24,17 +24,6 @@ export interface FilterExpressionsSelectProps {
 
 const { TYPE, TAGS, LOCATION, PORT } = FILTER_FIELDS;
 
-function hasTimerangeStart(
-  params: any
-): params is { timerangeCount: number; timerangeUnit: string } {
-  return !!params.timerangeCount && !isNaN(params.timerangeCount) && params.timerangeUnit;
-}
-
-export function formatParamsDateRange(alertParams: { [key: string]: unknown }) {
-  if (!hasTimerangeStart(alertParams)) return undefined;
-  return `now-${alertParams.timerangeCount.toString()}${alertParams.timerangeUnit}`;
-}
-
 export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = ({
   alertParams,
   newFilters,
@@ -48,7 +37,7 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
   const selectedSchemes = alertFilters?.[TYPE] ?? [];
   const selectedTags = alertFilters?.[TAGS] ?? [];
 
-  const { dateRangeStart: DEFAULT_FROM, dateRangeEnd: to } = useGetUrlParams();
+  const { dateRangeStart: from, dateRangeEnd: to } = useGetUrlParams();
   const onFilterFieldChange = (fieldName: string, values?: string[]) => {
     // the `filters` field is no longer a string
     if (alertParams.filters && typeof alertParams.filters !== 'string') {
@@ -168,10 +157,7 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
                   }}
                   asCombobox={false}
                   cardinalityField="monitor.id"
-                  time={{
-                    from: formatParamsDateRange(alertParams) ?? DEFAULT_FROM,
-                    to: to ?? 'now',
-                  }}
+                  time={{ from, to }}
                 />
               )}
             </EuiFlexItem>
