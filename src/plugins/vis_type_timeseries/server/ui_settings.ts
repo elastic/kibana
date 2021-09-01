@@ -30,7 +30,8 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     }),
     value: false,
     description: i18n.translate('visTypeTimeseries.advancedSettings.allowStringIndicesText', {
-      defaultMessage: 'Enables you to use index patterns and Elasticsearch indices in **TSVB** visualizations.',
+      defaultMessage:
+        'Enables you to use index patterns and Elasticsearch indices in **TSVB** visualizations.',
     }),
     schema: schema.boolean(),
   },

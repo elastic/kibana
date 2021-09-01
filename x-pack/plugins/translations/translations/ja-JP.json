@@ -4350,7 +4350,6 @@
     "visTypeTimeseries.indexPatternSelect.switchModePopover.areaLabel": "インデックスパターン選択モードを構成",
     "visTypeTimeseries.indexPatternSelect.switchModePopover.text": "インデックスパターンは、データ探索で対象とする1つ以上のElasticsearchインデックスを定義します。ElasticsearchインデックスまたはKibanaインデックスパターン (推奨) を使用できます。",
     "visTypeTimeseries.indexPatternSelect.switchModePopover.title": "インデックスパターン選択モード",
-    "visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices": "Kibanaインデックスパターンのみを使用",
     "visTypeTimeseries.kbnVisTypes.metricsDescription": "時系列データの高度な分析を実行します。",
     "visTypeTimeseries.kbnVisTypes.metricsTitle": "TSVB",
     "visTypeTimeseries.lastValueModeIndicator.lastBucketDate": "バケット：{lastBucketDate}",
