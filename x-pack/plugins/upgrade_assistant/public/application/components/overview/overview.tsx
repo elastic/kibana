@@ -99,10 +99,10 @@ export const Overview: FunctionComponent = () => {
         <EuiSteps
           steps={[
             getBackupStep({ cloud, cloudBackupStatusResponse }),
-            getUpgradeSystemIndicesStep(),
+            getUpgradeSystemIndicesStep({ docLinks }),
             getFixIssuesStep({ nextMajor }),
             getFixLogsStep(),
-            getUpgradeStep({ docLinks, nextMajor }),
+            getUpgradeStep({ nextMajor }),
           ]}
         />
       </EuiPageContent>

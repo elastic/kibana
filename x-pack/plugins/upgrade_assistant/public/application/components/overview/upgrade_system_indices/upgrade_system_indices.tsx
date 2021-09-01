@@ -8,6 +8,7 @@
 import React, { useEffect, useCallback, useState, FunctionComponent } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { DocLinksStart } from 'src/core/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiText,
@@ -28,15 +29,12 @@ const FLYOUT_ID = 'upgradeSystemIndicesFlyout';
 const { useGlobalFlyout } = GlobalFlyout;
 
 const i18nTexts = {
-  upgradeSystemIndicesTitle: i18n.translate(
-    'xpack.upgradeAssistant.overview.upgradeSystemIndicesTitle',
-    {
-      defaultMessage: 'Migrate system indices',
-    }
-  ),
-  upgradeSystemIndicesBody: (docLink: string) => (
+  title: i18n.translate('xpack.upgradeAssistant.overview.system_indices.title', {
+    defaultMessage: 'Migrate system indices',
+  }),
+  bodyDescription: (docLink: string) => (
     <FormattedMessage
-      id="xpack.upgradeAssistant.overview.upgradeSystemIndicesBody"
+      id="xpack.upgradeAssistant.overview.system_indices.body"
       defaultMessage="Migrate your system indices to keep them happy. In addition to regular checkups, it is recommended that you brush and floss your indices twice per day. {learnMoreLink}."
       values={{
         learnMoreLink: (
@@ -47,28 +45,42 @@ const i18nTexts = {
       }}
     />
   ),
-  startUpgradeButton: i18n.translate('xpack.upgradeAssistant.overview.startUpgradeButton', {
-    defaultMessage: 'Begin upgrading system indices',
-  }),
-  upgradeInProgressButton: i18n.translate(
-    'xpack.upgradeAssistant.overview.upgradeInProgressButton',
+  startButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.system_indices.startButtonLabel',
     {
-      defaultMessage: 'Upgrading system indices',
+      defaultMessage: 'Begin upgrading system indices',
     }
   ),
-  viewSystemIndices: i18n.translate('xpack.upgradeAssistant.overview.viewSystemIndices', {
-    defaultMessage: 'View system indices and status',
+  inProgressButtonLabel: i18n.translate('xpack.upgradeAssistant.overview.inProgressButtonLabel', {
+    defaultMessage: 'Upgrading system indices',
   }),
+  viewSystemIndices: i18n.translate(
+    'xpack.upgradeAssistant.system_indices.overview.viewSystemIndices',
+    {
+      defaultMessage: 'View system indices and status',
+    }
+  ),
+  retryButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.system_indices.retryButtonLabel',
+    {
+      defaultMessage: 'Try again',
+    }
+  ),
 };
 
 const UpgradeSystemIndicesStep: FunctionComponent = () => {
-  const [showFlyout, setShowFlyout] = useState(false);
-
   const {
-    services: {
-      core: { docLinks },
-    },
+    services: { api },
   } = useAppContext();
+
+  const [showFlyout, setShowFlyout] = useState(false);
+  const {
+    data,
+    error,
+    resendRequest,
+    isLoading,
+    isInitialRequest,
+  } = api.useLoadSystemIndicesUpgradeStatus();
 
   const {
     addContent: addContentToGlobalFlyout,
@@ -95,32 +107,59 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
     }
   }, [addContentToGlobalFlyout, showFlyout, closeFlyout]);
 
-  return (
-    <>
-      <EuiText>
-        <p>{i18nTexts.upgradeSystemIndicesBody(docLinks.links.elasticsearch.docsBase)}</p>
-      </EuiText>
-
-      <EuiSpacer size="m" />
-
+  if (error) {
+    return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiButton>{i18nTexts.startUpgradeButton}</EuiButton>
+          <EuiButton color="danger" isLoading={isLoading} onClick={resendRequest}>
+            {i18nTexts.retryButtonLabel}
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={() => setShowFlyout(true)}>
-            {i18nTexts.viewSystemIndices}
-          </EuiButtonEmpty>
+          <EuiText color="danger">
+            <p>
+              {error.statusCode} - {error.message}
+            </p>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    );
+  }
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiButton isDisabled={isInitialRequest && isLoading}>
+          {i18nTexts.startButtonLabel}
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty onClick={() => setShowFlyout(true)}>
+          {i18nTexts.viewSystemIndices}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
-export const getUpgradeSystemIndicesStep = (): EuiStepProps => {
+export const getUpgradeSystemIndicesStep = ({
+  docLinks,
+}: {
+  docLinks: DocLinksStart;
+}): EuiStepProps => {
   return {
-    title: i18nTexts.upgradeSystemIndicesTitle,
+    title: i18nTexts.title,
     status: 'incomplete',
-    children: <UpgradeSystemIndicesStep />,
+    children: (
+      <>
+        <EuiText>
+          <p>{i18nTexts.bodyDescription(docLinks.links.elasticsearch.docsBase)}</p>
+        </EuiText>
+
+        <EuiSpacer size="m" />
+
+        <UpgradeSystemIndicesStep />
+      </>
+    ),
   };
 };

@@ -48,7 +48,6 @@ const columns = [
     field: 'upgrade_status',
     name: 'Status',
     sortable: true,
-    truncateText: true,
   },
 ];
 

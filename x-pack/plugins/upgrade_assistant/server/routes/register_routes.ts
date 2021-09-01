@@ -8,6 +8,7 @@
 import { RouteDependencies } from '../types';
 
 import { registerCloudBackupStatusRoutes } from './cloud_backup_status';
+import { registerSystemIndicesUpgradeRoutes } from './system_indices_upgrade';
 import { registerESDeprecationRoutes } from './es_deprecations';
 import { registerDeprecationLoggingRoutes } from './deprecation_logging';
 import { registerReindexIndicesRoutes } from './reindex_indices';
@@ -19,6 +20,7 @@ import { registerUpgradeStatusRoute } from './status';
 
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
   registerCloudBackupStatusRoutes(dependencies);
+  registerSystemIndicesUpgradeRoutes(dependencies);
   registerESDeprecationRoutes(dependencies);
   registerDeprecationLoggingRoutes(dependencies);
   registerReindexIndicesRoutes(dependencies, getWorker);
