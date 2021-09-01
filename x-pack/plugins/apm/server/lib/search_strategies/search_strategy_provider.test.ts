@@ -188,6 +188,7 @@ describe('APM Correlations search strategy', () => {
                   percentiles: {
                     field: 'transaction.duration.us',
                     hdr: { number_of_significant_value_digits: 3 },
+                    percents: [95],
                   },
                 },
               },
