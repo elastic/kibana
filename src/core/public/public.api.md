@@ -474,6 +474,10 @@ export interface DocLinksStart {
     // (undocumented)
     readonly links: {
         readonly settings: string;
+        readonly apm: {
+            readonly kibanaSettings: string;
+            readonly supportedServiceMaps: string;
+        };
         readonly canvas: {
             readonly guide: string;
         };
