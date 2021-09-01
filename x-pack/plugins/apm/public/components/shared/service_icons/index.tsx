@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactChild, useState } from 'react';
 import { useTheme } from '../../../hooks/use_theme';
 import { ContainerType } from '../../../../common/service_metadata';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getAgentIcon } from '../agent_icon/get_agent_icon';
 import { CloudDetails } from './cloud_details';
@@ -20,6 +19,8 @@ import { ServiceDetails } from './service_details';
 
 interface Props {
   serviceName: string;
+  start: string;
+  end: string;
 }
 
 const cloudIcons: Record<string, string> = {
@@ -60,10 +61,7 @@ interface PopoverItem {
   component: ReactChild;
 }
 
-export function ServiceIcons({ serviceName }: Props) {
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
+export function ServiceIcons({ start, end, serviceName }: Props) {
   const [
     selectedIconPopover,
     setSelectedIconPopover,

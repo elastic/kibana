@@ -10,7 +10,7 @@ import {
   Normalizer,
   commonNormalizers,
   getNormalizer,
-  getJsonToArrayOrObjectNormalizer,
+  getJsonToJavascriptNormalizer,
 } from '../common/normalizers';
 
 import { defaultBrowserSimpleFields, defaultBrowserAdvancedFields } from '../contexts';
@@ -26,8 +26,8 @@ export const getBrowserNormalizer = (key: ConfigKeys) => {
   return getNormalizer(key, defaultBrowserFields);
 };
 
-export const getBrowserJsonToArrayOrObjectNormalizer = (key: ConfigKeys) => {
-  return getJsonToArrayOrObjectNormalizer(key, defaultBrowserFields);
+export const getBrowserJsonToJavascriptNormalizer = (key: ConfigKeys) => {
+  return getJsonToJavascriptNormalizer(key, defaultBrowserFields);
 };
 
 export const browserNormalizers: BrowserNormalizerMap = {
@@ -35,9 +35,9 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKeys.SOURCE_ZIP_USERNAME]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_USERNAME),
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_PASSWORD),
   [ConfigKeys.SOURCE_ZIP_FOLDER]: getBrowserNormalizer(ConfigKeys.SOURCE_ZIP_FOLDER),
-  [ConfigKeys.SOURCE_INLINE]: getBrowserNormalizer(ConfigKeys.SOURCE_INLINE),
+  [ConfigKeys.SOURCE_INLINE]: getBrowserJsonToJavascriptNormalizer(ConfigKeys.SOURCE_INLINE),
   [ConfigKeys.PARAMS]: getBrowserNormalizer(ConfigKeys.PARAMS),
   [ConfigKeys.SCREENSHOTS]: getBrowserNormalizer(ConfigKeys.SCREENSHOTS),
-  [ConfigKeys.SYNTHETICS_ARGS]: getBrowserJsonToArrayOrObjectNormalizer(ConfigKeys.SYNTHETICS_ARGS),
+  [ConfigKeys.SYNTHETICS_ARGS]: getBrowserJsonToJavascriptNormalizer(ConfigKeys.SYNTHETICS_ARGS),
   ...commonNormalizers,
 };

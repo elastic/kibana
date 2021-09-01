@@ -14,6 +14,7 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   EVENT_KIND,
+  VERSION,
 } from '@kbn/rule-data-utils';
 import { merge, omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -42,7 +43,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const BULK_INDEX_DELAY = 1000;
   const INDEXING_DELAY = 5000;
 
-  const ALERTS_INDEX_TARGET = '.alerts-observability.apm.alerts*';
+  const getAlertsTargetIndicesUrl =
+    '/api/observability/rules/alerts/dynamic_index_pattern?namespace=default&registrationContexts=observability.apm&registrationContexts=';
+
+  const getAlertsTargetIndices = async () =>
+    supertest.get(getAlertsTargetIndicesUrl).send().set('kbn-xsrf', 'foo');
   const APM_METRIC_INDEX_NAME = 'apm-8.0.0-transaction';
 
   const createTransactionMetric = (override: Record<string, any>) => {
@@ -92,6 +97,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       .get(`/api/alerts/alert/${alert.id}`)
       .set('kbn-xsrf', 'foo');
 
+    const { body: targetIndices, status: targetIndicesStatus } = await getAlertsTargetIndices();
+    if (targetIndices.length === 0) {
+      const error = new Error('Error getting alert');
+      Object.assign(error, { response: { body: targetIndices, status: targetIndicesStatus } });
+      throw error;
+    }
+
     if (status >= 300) {
       const error = new Error('Error getting alert');
       Object.assign(error, { response: { body, status } });
@@ -104,10 +116,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await new Promise((resolve) => {
         setTimeout(resolve, BULK_INDEX_DELAY);
       });
-      await es.indices.refresh({
-        index: ALERTS_INDEX_TARGET,
-      });
 
+      /**
+       * When calling refresh on an index pattern .alerts-observability.apm.alerts* (as was originally the hard-coded string in this test)
+       * The response from Elasticsearch is a 200, even if no indices which match that index pattern have been created.
+       * When calling refresh on a concrete index alias .alerts-observability.apm.alerts-default for instance,
+       * we receive a 404 error index_not_found_exception when no indices have been created which match that alias (obviously).
+       * Since we are receiving a concrete index alias from the observability api instead of a kibana index pattern
+       * and we understand / expect that this index does not exist at certain points of the test, we can try-catch at certain points without caring if the call fails.
+       * There are points in the code where we do want to ensure we get the appropriate error message back
+       */
+      try {
+        await es.indices.refresh({
+          index: targetIndices[0],
+        });
+        // eslint-disable-next-line no-empty
+      } catch (exc) {}
       return nextAlert;
     }
 
@@ -120,20 +144,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Rule registry with write enabled', { config: 'rules', archives: [] }, () => {
     it('does not bootstrap indices on plugin startup', async () => {
-      const { body } = await es.indices.get({
-        index: ALERTS_INDEX_TARGET,
-        expand_wildcards: 'open',
-        allow_no_indices: true,
-      });
-
-      const indices = Object.entries(body).map(([indexName, index]) => {
-        return {
-          indexName,
-          index,
-        };
-      });
-
-      expect(indices.length).to.be(0);
+      const { body: targetIndices } = await getAlertsTargetIndices();
+      try {
+        const res = await es.indices.get({
+          index: targetIndices[0],
+          expand_wildcards: 'open',
+          allow_no_indices: true,
+        });
+        expect(res).to.be.empty();
+      } catch (exc) {
+        expect(exc.statusCode).to.eql(404);
+      }
     });
 
     describe('when creating a rule', () => {
@@ -232,6 +253,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        const { body: targetIndices } = await getAlertsTargetIndices();
         if (createResponse.alert) {
           const { body, status } = await supertest
             .delete(`/api/alerts/alert/${createResponse.alert.id}`)
@@ -245,7 +267,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         }
 
         await es.deleteByQuery({
-          index: ALERTS_INDEX_TARGET,
+          index: targetIndices[0],
           body: {
             query: {
               match_all: {},
@@ -263,25 +285,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(createResponse.status).to.be.below(299);
 
         expect(createResponse.alert).not.to.be(undefined);
-
         let alert = await waitUntilNextExecution(createResponse.alert);
 
-        const beforeDataResponse = await es.search({
-          index: ALERTS_INDEX_TARGET,
-          body: {
-            query: {
-              term: {
-                [EVENT_KIND]: 'signal',
+        const { body: targetIndices } = await getAlertsTargetIndices();
+
+        try {
+          const res = await es.search({
+            index: targetIndices[0],
+            body: {
+              query: {
+                term: {
+                  [EVENT_KIND]: 'signal',
+                },
+              },
+              size: 1,
+              sort: {
+                '@timestamp': 'desc',
               },
             },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        });
-
-        expect(beforeDataResponse.body.hits.hits.length).to.be(0);
+          });
+          expect(res).to.be.empty();
+        } catch (exc) {
+          expect(exc.message).contain('index_not_found_exception');
+        }
 
         await es.index({
           index: APM_METRIC_INDEX_NAME,
@@ -295,22 +321,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         alert = await waitUntilNextExecution(alert);
 
-        const afterInitialDataResponse = await es.search({
-          index: ALERTS_INDEX_TARGET,
-          body: {
-            query: {
-              term: {
-                [EVENT_KIND]: 'signal',
+        try {
+          const res = await es.search({
+            index: targetIndices[0],
+            body: {
+              query: {
+                term: {
+                  [EVENT_KIND]: 'signal',
+                },
+              },
+              size: 1,
+              sort: {
+                '@timestamp': 'desc',
               },
             },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        });
-
-        expect(afterInitialDataResponse.body.hits.hits.length).to.be(0);
+          });
+          expect(res).to.be.empty();
+        } catch (exc) {
+          expect(exc.message).contain('index_not_found_exception');
+        }
 
         await es.index({
           index: APM_METRIC_INDEX_NAME,
@@ -325,7 +354,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         alert = await waitUntilNextExecution(alert);
 
         const afterViolatingDataResponse = await es.search({
-          index: ALERTS_INDEX_TARGET,
+          index: targetIndices[0],
           body: {
             query: {
               term: {
@@ -348,7 +377,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           any
         >;
 
-        const exclude = ['@timestamp', ALERT_START, ALERT_UUID, ALERT_RULE_UUID];
+        const exclude = ['@timestamp', ALERT_START, ALERT_UUID, ALERT_RULE_UUID, VERSION];
 
         const toCompare = omit(alertEvent, exclude);
 
@@ -391,7 +420,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "apm.transaction_error_rate",
             ],
             "kibana.alert.status": Array [
-              "open",
+              "active",
             ],
             "kibana.alert.workflow_status": Array [
               "open",
@@ -437,7 +466,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         alert = await waitUntilNextExecution(alert);
 
         const afterRecoveryResponse = await es.search({
-          index: ALERTS_INDEX_TARGET,
+          index: targetIndices[0],
           body: {
             query: {
               term: {
@@ -460,7 +489,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           any
         >;
 
-        expect(recoveredAlertEvent[ALERT_STATUS]?.[0]).to.eql('closed');
+        expect(recoveredAlertEvent[ALERT_STATUS]?.[0]).to.eql('recovered');
         expect(recoveredAlertEvent[ALERT_DURATION]?.[0]).to.be.greaterThan(0);
         expect(new Date(recoveredAlertEvent[ALERT_END]?.[0]).getTime()).to.be.greaterThan(0);
 
@@ -501,7 +530,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "apm.transaction_error_rate",
             ],
             "kibana.alert.status": Array [
-              "closed",
+              "recovered",
             ],
             "kibana.alert.workflow_status": Array [
               "open",
@@ -530,9 +559,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Rule registry with write not enabled', { config: 'basic', archives: [] }, () => {
     it('does not bootstrap the apm rule indices', async () => {
+      const { body: targetIndices } = await getAlertsTargetIndices();
       const errorOrUndefined = await es.indices
         .get({
-          index: ALERTS_INDEX_TARGET,
+          index: targetIndices[0],
           expand_wildcards: 'open',
           allow_no_indices: false,
         })

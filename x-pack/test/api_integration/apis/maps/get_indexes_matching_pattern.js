@@ -13,7 +13,7 @@ export default function ({ getService }) {
   describe('get matching index patterns', () => {
     it('should return an array containing indexes matching pattern', async () => {
       const resp = await supertest
-        .get(`/api/maps/getMatchingIndexes/geo_shapes`)
+        .get(`/api/maps/getMatchingIndexes?indexPattern=geo_shapes`)
         .set('kbn-xsrf', 'kibana')
         .send()
         .expect(200);
@@ -24,12 +24,13 @@ export default function ({ getService }) {
 
     it('should return an empty array when no indexes match pattern', async () => {
       const resp = await supertest
-        .get(`/api/maps/getMatchingIndexes/notAnIndex`)
+        .get(`/api/maps/getMatchingIndexes?indexPattern=notAnIndex`)
         .set('kbn-xsrf', 'kibana')
         .send()
         .expect(200);
 
-      expect(resp.body.success).to.be(false);
+      expect(resp.body.success).to.be(true);
+      expect(resp.body.matchingIndexes.length).to.be(0);
     });
   });
 }
