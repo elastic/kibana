@@ -29,6 +29,27 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
     failOnStatusCode: false,
   });
 
+export const createEventCorrelationRule = (rule: EventCorrelationRule, ruleId = 'rule_testing') =>
+  cy.request({
+    method: 'POST',
+    url: 'api/detection_engine/rules',
+    body: {
+      rule_id: ruleId,
+      risk_score: parseInt(rule.riskScore, 10),
+      description: rule.description,
+      interval: `${rule.runsEvery.interval}${rule.runsEvery.type}`,
+      from: `now-${rule.lookBack.interval}${rule.lookBack.type}`,
+      name: rule.name,
+      severity: rule.severity.toLocaleLowerCase(),
+      type: 'eql',
+      index: rule.index,
+      query: rule.customQuery,
+      language: 'eql',
+      enabled: true,
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
+
 export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'rule_testing') =>
   cy.request({
     method: 'POST',
