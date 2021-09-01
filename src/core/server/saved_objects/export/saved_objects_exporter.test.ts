@@ -1316,5 +1316,43 @@ describe('getSortedObjectsForExport()', () => {
         }
       `);
     });
+
+    test(`uses the object's spaces when calling 'bulkGet' if present`, async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [],
+      });
+      await exporter.exportByObjects({
+        request,
+        objects: [
+          {
+            type: 'index-pattern',
+            id: '1',
+            namespace: 'ns-1',
+          },
+          {
+            type: 'search',
+            id: '2',
+            namespace: 'ns-2',
+          },
+        ],
+      });
+
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+        [
+          {
+            type: 'index-pattern',
+            id: '1',
+            namespaces: ['ns-1'],
+          },
+          {
+            type: 'search',
+            id: '2',
+            namespaces: ['ns-2'],
+          },
+        ],
+        {}
+      );
+    });
   });
 });
