@@ -12,7 +12,7 @@ You can:
  * View a history of past queries and their results
 
 For example, use *Osquery* to centralize security analytics and
-contextualize OSquery results against other event data, anomalies, and threats,
+contextualize Osquery results against other event data, anomalies, and threats,
 and then use that context to improve host visibility, analytical power, and monitoring.
 
 [role="screenshot"]
