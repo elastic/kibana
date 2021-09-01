@@ -8,8 +8,6 @@
 
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
-// TODO: add tests
-
 interface ObjectIdentifierTuple {
   type: string;
   id: string;
