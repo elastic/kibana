@@ -75,7 +75,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
               <FormattedMessage
                 id="visTypeTimeseries."
                 defaultMessage='Using Elasticsearch indices is not recommended.
-      Enable "TSVB allow using string indices" setting in Advanced Settings to switch back.'
+      To use index patterns, go to **Advanced Settings**, then enable **Allow string indices in TSVB**.'
               />
             )
           }
@@ -85,7 +85,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
             label={i18n.translate(
               'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
               {
-                defaultMessage: 'Use only Kibana index patterns',
+                defaultMessage: 'Use only index patterns',
               }
             )}
             onChange={switchMode}
