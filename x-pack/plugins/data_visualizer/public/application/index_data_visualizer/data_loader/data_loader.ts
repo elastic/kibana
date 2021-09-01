@@ -67,8 +67,7 @@ export class DataLoader {
       latest,
       aggregatableFields,
       nonAggregatableFields,
-      runtimeMappings: this._indexPattern.getComputedFields()
-        .runtimeFields as estypes.MappingRuntimeFields,
+      runtimeMappings: this._indexPattern.getRuntimeMappings() as estypes.MappingRuntimeFields,
     });
 
     return stats;
@@ -92,8 +91,7 @@ export class DataLoader {
       interval,
       fields,
       maxExamples: this._maxExamples,
-      runtimeMappings: this._indexPattern.getComputedFields()
-        .runtimeFields as estypes.MappingRuntimeFields,
+      runtimeMappings: this._indexPattern.getRuntimeMappings() as estypes.MappingRuntimeFields,
     });
 
     return stats;

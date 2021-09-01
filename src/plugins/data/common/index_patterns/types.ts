@@ -22,10 +22,13 @@ export type RuntimeType = estypes.MappingRuntimeFieldType | 'composite';
 /**
  * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
  * We extends the object until @elastic/elasticsearch supports "composite" type
- * and its "fields" object
+ * and its "fields" object.
+ *
+ * To simplify the consuming code we enforce the script to be `InlineScript` type (and not also `string`)
  */
-export interface ESRuntimeField extends Omit<estypes.MappingRuntimeField, 'type'> {
+export interface ESRuntimeField extends Omit<estypes.MappingRuntimeField, 'type' | 'script'> {
   type: RuntimeType;
+  script?: estypes.InlineScript;
   fields?: Record<
     string,
     {
@@ -38,10 +41,8 @@ export interface ESRuntimeField extends Omit<estypes.MappingRuntimeField, 'type'
 /**
  * The RuntimeField which is saved in the Data View saved object. We extend it to
  * keep a reference to a possible parent composite object.
- * To simplify the consuming code we enforce the script to be `InlineScript` type (and not also `string`)
  */
-export interface RuntimeField extends Omit<ESRuntimeField, 'script'> {
-  script?: estypes.InlineScript;
+export interface RuntimeField extends ESRuntimeField {
   parentComposite?: string;
 }
 

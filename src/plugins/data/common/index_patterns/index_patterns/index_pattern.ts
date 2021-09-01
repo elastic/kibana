@@ -202,13 +202,7 @@ export class DataView implements IIndexPattern {
       };
     });
 
-    const runtimeFields: Record<string, ESRuntimeField> = {
-      ...getRuntimeFieldsFromMap(this.runtimeFieldMap),
-      ...getRuntimeCompositeFieldsFromMap(
-        this.runtimeCompositeMap,
-        this.getRuntimeField.bind(this)
-      ),
-    };
+    const runtimeFields = this.getRuntimeMappings();
 
     return {
       storedFields: ['*'],
@@ -596,6 +590,19 @@ export class DataView implements IIndexPattern {
         this.removeRuntimeField(`${name}.${subFieldName}`);
       }
     }
+  }
+
+  /**
+   * Return the "runtime_mappings" section of the ES search query
+   */
+  getRuntimeMappings(): Record<string, ESRuntimeField> {
+    return {
+      ...getRuntimeFieldsFromMap(this.runtimeFieldMap),
+      ...getRuntimeCompositeFieldsFromMap(
+        this.runtimeCompositeMap,
+        this.getRuntimeField.bind(this)
+      ),
+    };
   }
 
   /**
