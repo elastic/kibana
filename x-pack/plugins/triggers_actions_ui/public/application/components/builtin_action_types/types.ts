@@ -78,7 +78,7 @@ export interface EmailConfig {
   port: number;
   secure?: boolean;
   hasAuth: boolean;
-  provider: string;
+  provider: boolean;
 }
 
 export interface EmailSecrets {

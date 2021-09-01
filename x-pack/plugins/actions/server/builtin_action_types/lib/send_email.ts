@@ -141,15 +141,15 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
       }
     }
   }
+  const messageHTML = htmlFromMarkdown(logger, message);
 
   if (provider === 'exchange') {
     const headers = {
       'Content-Type': 'application/json',
     };
-    let response;
     try {
-      response = await postSendEmailMSExchange(
-        { emailOptions: options, headers, transport },
+      return await postSendEmailMSExchange(
+        { emailOptions: options, headers, transport, messageHTML },
         logger,
         configurationUtilities
       );
@@ -159,7 +159,6 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     }
   }
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
-  const messageHTML = htmlFromMarkdown(logger, message);
 
   const email = {
     // email routing

@@ -35,6 +35,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
   useEffect(() => {
     if (!action.id) {
       editActionConfig('hasAuth', true);
+      editActionConfig('provider', 'exchange'); // TODO: fix with real provider select functionality
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -304,7 +305,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                     id="emailUser"
                     fullWidth
                     label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.clientIdFieldLabel',
                       {
                         defaultMessage: 'Client ID',
                       }
@@ -329,7 +330,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                   <EuiFormRow
                     fullWidth
                     label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.clientSecretFieldLabel',
                       {
                         defaultMessage: 'Client secret',
                       }
@@ -356,9 +357,9 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                   <EuiFormRow
                     fullWidth
                     label={i18n.translate(
-                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+                      'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.tenantFieldLabel',
                       {
-                        defaultMessage: 'Tenant ID',
+                        defaultMessage: 'Tenant ID (optional)',
                       }
                     )}
                   >

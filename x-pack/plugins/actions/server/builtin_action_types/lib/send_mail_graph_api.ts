@@ -18,6 +18,7 @@ interface PostMSExchangeSendEmailOptions {
   transport: Transport;
   emailOptions: SendEmailOptions;
   headers: Record<string, string>;
+  messageHTML: string;
 }
 
 // post an event to pagerduty
@@ -26,13 +27,13 @@ export async function postSendEmailMSExchange(
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ): Promise<AxiosResponse> {
-  const { emailOptions, headers, transport } = options;
+  const { emailOptions, headers, transport, messageHTML } = options;
 
-  const res: AxiosResponse<{ token_type: string; access_token: string }> = await postAuthToken(
+  const res = await postAuthToken(
     `https://login.microsoftonline.com/${transport.tenantId}/oauth2/v2.0/token`,
     {
-      scope: 'https://graph.microsoft.com/.default',
-      grant_type: 'client_credentials',
+      scope: 'https://graph.microsoft.com/.default', // const
+      grant_type: 'client_credentials', // const
       client_id: transport.clientId,
       client_secret: transport.clientSecret,
     }
@@ -46,43 +47,42 @@ export async function postSendEmailMSExchange(
 
   return await request({
     axios: axiosInstance,
-    url: 'https://graph.microsoft.com/v1.0/me/sendMail',
+    url: `https://graph.microsoft.com/v1.0/users/${emailOptions.routing.from}/sendMail`,
     method: 'post',
     logger,
-    data: getMessage(emailOptions),
+    data: getMessage(emailOptions, messageHTML),
     headers,
     configurationUtilities,
     validateStatus: () => true,
   });
 }
 
-function getMessage(emailOptions: SendEmailOptions) {
+function getMessage(emailOptions: SendEmailOptions, messageHTML: string) {
   const { routing, content } = emailOptions;
-  const { from, to, cc, bcc } = routing;
-  const { subject, message } = content;
+  const { to, cc, bcc } = routing;
+  const { subject } = content;
   return {
-    data: {
-      message: {
-        subject,
-        body: {
-          contentType: 'HTML',
-          content: message,
-        },
-        toRecipients: [
-          {
-            emailAddress: {
-              address: to,
-            },
-          },
-        ],
-        ccRecipients: [
-          {
-            emailAddress: {
-              address: cc,
-            },
-          },
-        ],
+    message: {
+      subject,
+      body: {
+        contentType: 'HTML',
+        content: messageHTML,
       },
+      toRecipients: to.map((toAddr) => ({
+        emailAddress: {
+          address: toAddr,
+        },
+      })),
+      ccRecipients: cc.map((ccAddr) => ({
+        emailAddress: {
+          address: ccAddr,
+        },
+      })),
+      bccRecipients: bcc.map((bccAddr) => ({
+        emailAddress: {
+          address: bccAddr,
+        },
+      })),
     },
   };
 }
