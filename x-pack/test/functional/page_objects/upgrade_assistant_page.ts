@@ -50,8 +50,11 @@ export class UpgradeAssistantPageObject extends FtrService {
       return issue === selectedIssue;
     });
 
-    const issueLink = await selectedRow.findByTestSubject('deprecationDetailsLink');
-
-    await issueLink.click();
+    if (selectedRow) {
+      const issueLink = await selectedRow.findByTestSubject('deprecationDetailsLink');
+      await issueLink.click();
+    } else {
+      this.log.debug('Unable to find selected deprecation row');
+    }
   }
 }
