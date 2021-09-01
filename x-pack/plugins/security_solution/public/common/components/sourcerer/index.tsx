@@ -54,7 +54,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
   const [kipId, setKipId] = useState<string>(selectedKipId ?? '');
-
+  // debugger;
   const { patternList, selectablePatterns } = useMemo(() => {
     const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
     return theKip != null
@@ -62,7 +62,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       : { patternList: [], selectablePatterns: [] };
   }, [kibanaIndexPatterns, kipId]);
   const selectableOptions = useMemo(() => {
-    console.log('useMemo selectableOptions:', { patternList, selectablePatterns });
     return patternList.map((indexName) => ({
       label: indexName,
       value: indexName,

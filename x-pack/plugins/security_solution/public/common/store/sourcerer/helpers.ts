@@ -53,7 +53,6 @@ export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, st
     } else if (id === SourcererScopeName.detections && isEmpty(newSelectedPatterns)) {
       defaultPatternList = [state.signalIndexName ?? ''];
     }
-    console.log('defaultPatternList', JSON.stringify(defaultPatternList, null, 2));
     return defaultPatternList;
   }
   return newSelectedPatterns;

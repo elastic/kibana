@@ -355,7 +355,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           method: 'POST',
           body: JSON.stringify({ patternList: [...configPatternList, signal.name] }),
         });
-        console.log('PLUGIN.tsx: stringify', JSON.stringify(a, null, 2));
         defaultIndexPattern = a.defaultIndexPattern;
         kibanaIndexPatterns = a.kibanaIndexPatterns;
       } catch (error) {
@@ -391,7 +390,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         subPlugins.timelines.store.reducer.timeline
       ) as unknown) as Reducer<TimelineState, AnyAction>;
 
-      console.log('PLUGIN.tsx: createStore', JSON.stringify(kibanaIndexPatterns, null, 2));
       this._store = createStore(
         createInitialState(
           {
