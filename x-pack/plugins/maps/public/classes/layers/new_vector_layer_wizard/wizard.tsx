@@ -13,13 +13,14 @@ import { RenderWizardArguments } from '../layer_wizard_registry';
 import { VectorLayer } from '../vector_layer';
 import { ESSearchSource } from '../../sources/es_search_source';
 import { ADD_LAYER_STEP_ID } from '../../../connected_components/add_layer_panel/view';
-import { getIndexNameFormComponent } from '../../../kibana_services';
+import { getFileUpload, getIndexNameFormComponent } from '../../../kibana_services';
 
 interface State {
   indexName: string;
   indexNameError: string;
   indexingTriggered: boolean;
   createIndexError: string;
+  userHasIndexWritePermissions: boolean;
 }
 
 const DEFAULT_MAPPINGS = {
@@ -43,6 +44,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     indexNameError: '',
     indexingTriggered: false,
     createIndexError: '',
+    userHasIndexWritePermissions: true,
   };
 
   componentDidMount() {
@@ -60,18 +62,40 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     }
   }
 
-  _setCreateIndexError(errorMessage: string) {
+  _setCreateIndexError(errorMessage: string, userHasIndexWritePermissions: boolean = true) {
     if (!this._isMounted) {
       return;
     }
     this.setState({
       createIndexError: errorMessage,
+      userHasIndexWritePermissions,
+    });
+  }
+
+  async _checkIndexPermissions() {
+    return await getFileUpload().hasImportPermission({
+      checkCreateIndexPattern: true,
+      checkHasManagePipeline: false,
+      indexName: this.state.indexName,
     });
   }
 
   _createNewIndex = async () => {
     let indexPatternId: string | undefined;
     try {
+      const userHasIndexWritePermissions = await this._checkIndexPermissions();
+      if (!userHasIndexWritePermissions) {
+        this._setCreateIndexError(
+          i18n.translate('xpack.maps.layers.newVectorLayerWizard.indexPermissionsError', {
+            defaultMessage: `You must have 'create' and 'create_index' index privileges to create and write data to "{indexName}".`,
+            values: {
+              indexName: this.state.indexName,
+            },
+          }),
+          userHasIndexWritePermissions
+        );
+        return;
+      }
       const response = await createNewIndexAndPattern({
         indexName: this.state.indexName,
         defaultMappings: DEFAULT_MAPPINGS,
@@ -125,10 +149,23 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
 
   render() {
     if (this.state.createIndexError) {
+      if (!this.state.userHasIndexWritePermissions) {
+        return (
+          <EuiCallOut
+            title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.indexPrivsErrorTitle', {
+              defaultMessage: 'Missing index privileges',
+            })}
+            color="danger"
+            iconType="alert"
+          >
+            <p>{this.state.createIndexError}</p>
+          </EuiCallOut>
+        );
+      }
       return (
         <EuiCallOut
           title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexErrorTitle', {
-            defaultMessage: 'Sorry, could not create index pattern',
+            defaultMessage: 'Unable to create index',
           })}
           color="danger"
           iconType="alert"
