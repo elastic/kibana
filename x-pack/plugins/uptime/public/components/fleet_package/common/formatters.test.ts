@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { arrayToJsonFormatter, objectToJsonFormatter, secondsToCronFormatter } from './formatters';
+import {
+  arrayToJsonFormatter,
+  objectToJsonFormatter,
+  stringToJsonFormatter,
+  secondsToCronFormatter,
+} from './formatters';
 
 describe('formatters', () => {
   describe('cronToSecondsNormalizer', () => {
@@ -31,6 +36,18 @@ describe('formatters', () => {
 
     it('returns null if the object has no keys', () => {
       expect(objectToJsonFormatter({})).toEqual(null);
+    });
+  });
+
+  describe('stringToJsonFormatter', () => {
+    it('takes a string and returns an json string', () => {
+      expect(stringToJsonFormatter('step("test step", () => {})')).toEqual(
+        '"step(\\"test step\\", () => {})"'
+      );
+    });
+
+    it('returns null if the string is falsy', () => {
+      expect(stringToJsonFormatter('')).toEqual(null);
     });
   });
 });
