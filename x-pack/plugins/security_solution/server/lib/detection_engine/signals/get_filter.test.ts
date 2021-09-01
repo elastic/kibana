@@ -137,6 +137,52 @@ describe('get_filter', () => {
       });
     });
 
+    test('return query for threat_match rule, despite saved_id is specify', async () => {
+      const filter = await getFilter({
+        type: 'threat_match',
+        filters: undefined,
+        language: 'kuery',
+        query: 'host.name: siem',
+        savedId: 'some-id',
+        services: servicesMock,
+        index: ['auditbeat-*'],
+        lists: [],
+      });
+      expect(filter).toEqual({
+        bool: {
+          filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'siem' } }] } },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
+    });
+
+    test('return query for threshold rule, despite saved_id is specify', async () => {
+      const filter = await getFilter({
+        type: 'threat_match',
+        filters: undefined,
+        language: 'kuery',
+        query: 'host.name: siem',
+        savedId: 'some-id',
+        services: servicesMock,
+        index: ['auditbeat-*'],
+        lists: [],
+      });
+      expect(filter).toEqual({
+        bool: {
+          filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'siem' } }] } },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
+    });
+
     test('throws on saved query if saved_id is undefined', async () => {
       await expect(
         getFilter({
