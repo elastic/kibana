@@ -62,7 +62,9 @@ export const DefaultDeprecationFlyout = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>{message}</h2>
+          <h2 id="defaultDeprecationDetailsFlyoutTitle" className="eui-textBreakWord">
+            {message}
+          </h2>
         </EuiTitle>
         {index && (
           <EuiText data-test-subj="flyoutDescription">
@@ -74,7 +76,7 @@ export const DefaultDeprecationFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText>
-          <p>{details}</p>
+          <p className="eui-textBreakWord">{details}</p>
           <p>
             <EuiLink target="_blank" href={url}>
               {i18nTexts.learnMoreLinkLabel}
