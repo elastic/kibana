@@ -387,6 +387,14 @@ export class DataView implements IIndexPattern {
    * @param enhancedRuntimeField Runtime field definition
    */
   addRuntimeField(name: string, enhancedRuntimeField: EnhancedRuntimeField): DataViewField {
+    const existRuntimeCompositeWithSameName = this.getRuntimeComposite(name) !== null;
+
+    if (existRuntimeCompositeWithSameName) {
+      throw new Error(
+        `Can't add runtime field ["${name}"] as there is already a runtime composite with the same name.`
+      );
+    }
+
     const { type, script, parentComposite, customLabel, format, popularity } = enhancedRuntimeField;
 
     const runtimeField: RuntimeField = { type, script, parentComposite };
@@ -460,9 +468,13 @@ export class DataView implements IIndexPattern {
     const existingField = this.getFieldByName(name);
 
     if (existingField) {
-      if (existingField.runtimeField?.parentComposite !== undefined) {
+      const parentCompositeName = existingField.runtimeField?.parentComposite;
+      const hasParentComposite =
+        parentCompositeName !== undefined &&
+        this.getRuntimeComposite(parentCompositeName!) !== null;
+      if (hasParentComposite) {
         throw new Error(
-          `Can't remove runtime field ["${name}"] as it belongs to the composite runtime ["${existingField.runtimeField.parentComposite}"]`
+          `Can't remove runtime field ["${name}"] as it belongs to the composite runtime ["${parentCompositeName}"]`
         );
       }
 
@@ -563,6 +575,13 @@ export class DataView implements IIndexPattern {
   }
 
   /**
+   * Return all the runtime composite fields
+   */
+  getAllRuntimeComposites(): Record<string, RuntimeComposite> {
+    return _.cloneDeep(this.runtimeCompositeMap);
+  }
+
+  /**
    * Remove a runtime composite with its associated subFields
    * @param name - Runtime composite name to remove
    */
@@ -570,12 +589,12 @@ export class DataView implements IIndexPattern {
     const existingRuntimeComposite = this.getRuntimeComposite(name);
 
     if (!!existingRuntimeComposite) {
+      delete this.runtimeCompositeMap[name];
+
       // Remove all subFields
       for (const subFieldName of existingRuntimeComposite.subFields) {
         this.removeRuntimeField(`${name}.${subFieldName}`);
       }
-
-      delete this.runtimeCompositeMap[name];
     }
   }
 

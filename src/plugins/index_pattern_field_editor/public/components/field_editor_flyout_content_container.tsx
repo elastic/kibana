@@ -83,7 +83,14 @@ export const FieldEditorFlyoutContentContainer = ({
 
   const { fields } = indexPattern;
 
-  const namesNotAllowed = useMemo(() => fields.map((fld) => fld.name), [fields]);
+  const namesNotAllowed = useMemo(() => {
+    const fieldNames = indexPattern.fields.map((fld) => fld.name);
+    const runtimeCompositeNames = Object.keys(indexPattern.getAllRuntimeComposites());
+    return {
+      fields: fieldNames,
+      runtimeComposites: runtimeCompositeNames,
+    };
+  }, [indexPattern]);
 
   const existingConcreteFields = useMemo(() => {
     const existing: Array<{ name: string; type: string }> = [];
@@ -201,12 +208,12 @@ export const FieldEditorFlyoutContentContainer = ({
 
       setIsSaving(true);
 
-      const editedFields: IndexPatternField[] =
-        fieldTypeToProcess === 'runtime'
-          ? updateRuntimeField(updatedField)
-          : updateConcreteField(updatedField as Field);
-
       try {
+        const editedFields: DataViewField[] =
+          fieldTypeToProcess === 'runtime'
+            ? updateRuntimeField(updatedField)
+            : updateConcreteField(updatedField as Field);
+
         await indexPatternService.updateSavedObject(indexPattern);
 
         const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
