@@ -19,8 +19,16 @@ export default function ({ getService }: FtrProviderContext) {
       filePath: path.join(__dirname, 'files_to_import', 'anomaly_detection_jobs.json'),
       expected: {
         jobType: 'anomaly-detector' as JobType,
-        jobIds: ['test1', 'test3'],
-        skippedJobIds: ['test2'],
+        jobIds: ['ad-test1', 'ad-test3'],
+        skippedJobIds: ['ad-test2'],
+      },
+    },
+    {
+      filePath: path.join(__dirname, 'files_to_import', 'data_frame_analytics_jobs.json'),
+      expected: {
+        jobType: 'data-frame-analytics' as JobType,
+        jobIds: ['dfa-test1'],
+        skippedJobIds: ['dfa-test2'],
       },
     },
   ];
@@ -30,7 +38,9 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await ml.api.cleanMlIndices();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -62,12 +72,24 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('ensures jobs have been imported', async () => {
-        await ml.jobTable.refreshJobList();
-        for (const id of testData.expected.jobIds) {
-          await ml.jobTable.filterWithSearchString(id);
-        }
-        for (const id of testData.expected.skippedJobIds) {
-          await ml.jobTable.filterWithSearchString(id, 0);
+        if (testData.expected.jobType === 'anomaly-detector') {
+          await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
+          await ml.jobTable.refreshJobList();
+          for (const id of testData.expected.jobIds) {
+            await ml.jobTable.filterWithSearchString(id);
+          }
+          for (const id of testData.expected.skippedJobIds) {
+            await ml.jobTable.filterWithSearchString(id, 0);
+          }
+        } else {
+          await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
+          await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
+          for (const id of testData.expected.jobIds) {
+            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(id, true);
+          }
+          for (const id of testData.expected.skippedJobIds) {
+            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(id, false);
+          }
         }
       });
     }

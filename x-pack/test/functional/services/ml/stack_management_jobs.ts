@@ -219,8 +219,8 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async assertJobIdsExist(expectedJobIds: string[]) {
-      const subj = await testSubjects.find('mlJobMgmtImportJobsFileRead');
-      const inputs = await subj.findAllByTagName('input');
+      const inputs = await testSubjects.findAll('mlJobMgmtImportJobIdInput');
+      // const inputs = await subj.findAllByTagName('input');
       const actualJobIds = await Promise.all(inputs.map((i) => i.getAttribute('value')));
 
       expect(actualJobIds.sort()).to.eql(
@@ -232,14 +232,18 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async assertCorrectTitle(jobCount: number, jobType: JobType) {
-      const subj = await testSubjects.find('mlJobMgmtImportJobsADTitle');
+      const dataTestSubj =
+        jobType === 'anomaly-detector'
+          ? 'mlJobMgmtImportJobsADTitle'
+          : 'mlJobMgmtImportJobsDFATitle';
+      const subj = await testSubjects.find(dataTestSubj);
       const title = (await subj.parseDomContent()).html();
 
       const jobTypeString =
         jobType === 'anomaly-detector' ? 'anomaly detection' : 'data frame analytics';
 
       const results = title.match(
-        /(\d) (anomaly detection|data frame analytics) jobs read from file$/
+        /(\d) (anomaly detection|data frame analytics) job[s]? read from file$/
       );
       expect(results).to.not.eql(null, `Expected regex results to not be null`);
       const foundCount = results![1];

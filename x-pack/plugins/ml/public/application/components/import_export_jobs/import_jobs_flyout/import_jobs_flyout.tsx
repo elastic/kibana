@@ -435,6 +435,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                                 value={jobId.jobId}
                                 onChange={(e) => renameJob(e.target.value, i)}
                                 isInvalid={jobId.jobIdValid === false}
+                                data-test-subj="mlJobMgmtImportJobIdInput"
                               />
                             </EuiFormRow>
 

@@ -1,7 +1,7 @@
 [
   {
     "job": {
-      "job_id": "test1",
+      "job_id": "ad-test1",
       "description": "",
       "analysis_config": {
         "bucket_span": "15m",
@@ -34,8 +34,8 @@
       "allow_lazy_open": false
     },
     "datafeed": {
-      "datafeed_id": "datafeed-test1",
-      "job_id": "test1",
+      "datafeed_id": "datafeed-ad-test1",
+      "job_id": "ad-test1",
       "query": {
         "bool": {
           "must": [
@@ -76,7 +76,7 @@
   },
   {
     "job": {
-      "job_id": "test2",
+      "job_id": "ad-test2",
       "groups": [
         "newgroup"
       ],
@@ -112,8 +112,8 @@
       "allow_lazy_open": false
     },
     "datafeed": {
-      "datafeed_id": "datafeed-test2",
-      "job_id": "test2",
+      "datafeed_id": "datafeed-ad-test2",
+      "job_id": "ad-test2",
       "query": {
         "bool": {
           "must": [
@@ -154,7 +154,7 @@
   },
   {
     "job": {
-      "job_id": "test3",
+      "job_id": "ad-test3",
       "custom_settings": {},
       "description": "",
       "analysis_config": {
@@ -190,8 +190,8 @@
       "allow_lazy_open": false
     },
     "datafeed": {
-      "datafeed_id": "datafeed-test3",
-      "job_id": "test3",
+      "datafeed_id": "datafeed-ad-test3",
+      "job_id": "ad-test3",
       "query": {
         "bool": {
           "must": [
