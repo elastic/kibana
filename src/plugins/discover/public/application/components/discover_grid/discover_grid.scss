@@ -31,7 +31,14 @@
 
   // TODO the margin creates a ragged left edge when type is inline
   .euiDescriptionList.euiDescriptionList--inline .euiDescriptionList__title {
-    margin-left: 0
+    margin-left: 0;
+    background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
+    border: none;
+    padding: 2px 4px;
+  }
+
+  .euiDescriptionList.euiDescriptionList--inline .euiDescriptionList__description {
+    margin-right: $euiSizeXS;
   }
 
   .euiDataGrid__controls {

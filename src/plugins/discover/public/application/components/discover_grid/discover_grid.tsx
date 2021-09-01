@@ -344,7 +344,7 @@ export const DiscoverGrid = ({
   );
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
   const [rowHeightValue, setRowHeightValue] = useState(1);
-  const [defaultColsOnly, setDefaultColsOnly] = useState(true);
+  const [defaultColsOnly, setDefaultColsOnly] = useState(false);
 
   const additionalControls = useMemo(
     () =>
@@ -392,7 +392,7 @@ export const DiscoverGrid = ({
           />
           <EuiSpacer size="m" />
           <EuiSwitch
-            label="Apply to custom tables"
+            label="Apply to default view only"
             checked={defaultColsOnly}
             onChange={() => setDefaultColsOnly(!defaultColsOnly)}
             compressed
@@ -491,7 +491,7 @@ export const DiscoverGrid = ({
                   }
                 : {
                     defaultHeight: {
-                      lineCount: !defaultColsOnly ? 1 : rowHeightValue,
+                      lineCount: defaultColsOnly ? 1 : rowHeightValue,
                     },
                   }
             }
