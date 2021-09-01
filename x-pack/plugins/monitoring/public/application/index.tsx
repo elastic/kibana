@@ -11,19 +11,24 @@ import ReactDOM from 'react-dom';
 import { Route, Switch, Redirect, Router } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { LoadingPage } from './pages/loading_page';
+import { ClusterOverview } from './pages/cluster/overview_page';
 import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalStateProvider } from './global_state_context';
+import { ExternalConfigContext, ExternalConfig } from './external_config_context';
 import { createPreserveQueryHistory } from './preserve_query_history';
 import { RouteInit } from './route_init';
 import { MonitoringTimeContainer } from './pages/use_monitoring_time';
-import { MonitoringToolbar } from '../components/shared/toolbar';
 
 export const renderApp = (
   core: CoreStart,
   plugins: MonitoringStartPluginDependencies,
-  { element }: AppMountParameters
+  { element }: AppMountParameters,
+  externalConfig: ExternalConfig
 ) => {
-  ReactDOM.render(<MonitoringApp core={core} plugins={plugins} />, element);
+  ReactDOM.render(
+    <MonitoringApp core={core} plugins={plugins} externalConfig={externalConfig} />,
+    element
+  );
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
@@ -33,11 +38,13 @@ export const renderApp = (
 const MonitoringApp: React.FC<{
   core: CoreStart;
   plugins: MonitoringStartPluginDependencies;
-}> = ({ core, plugins }) => {
+  externalConfig: ExternalConfig;
+}> = ({ core, plugins, externalConfig }) => {
   const history = createPreserveQueryHistory();
 
   return (
     <KibanaContextProvider services={{ ...core, ...plugins }}>
+    <ExternalConfigContext.Provider value={externalConfig}>
       <GlobalStateProvider query={plugins.data.query} toasts={core.notifications.toasts}>
         <MonitoringTimeContainer.Provider>
           <Router history={history}>
@@ -72,6 +79,7 @@ const MonitoringApp: React.FC<{
           </Router>
         </MonitoringTimeContainer.Provider>
       </GlobalStateProvider>
+      </ExternalConfigContext.Provider>
     </KibanaContextProvider>
   );
 };
@@ -82,15 +90,6 @@ const NoData: React.FC<{}> = () => {
 
 const Home: React.FC<{}> = () => {
   return <div>Home page (Cluster listing)</div>;
-};
-
-const ClusterOverview: React.FC<{}> = () => {
-  return (
-    <div>
-      <MonitoringToolbar />
-      Cluster overview page
-    </div>
-  );
 };
 
 const License: React.FC<{}> = () => {
