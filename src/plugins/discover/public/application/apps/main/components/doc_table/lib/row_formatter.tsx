@@ -33,17 +33,37 @@ const TemplateComponent = ({ defPairs }: Props) => {
 export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) => {
   const highlights = hit?.highlight ?? {};
   // Keys are sorted in the hits object
-  const formatted = indexPattern.formatHit(hit);
+  const flattened = indexPattern.flattenHit(hit);
   const fields = indexPattern.fields;
   const highlightPairs: Array<[string, unknown]> = [];
   const sourcePairs: Array<[string, unknown]> = [];
-  Object.entries(formatted).forEach(([key, val]) => {
+  let totalLen = 0;
+  let entries = 0;
+  const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
+  Object.keys(flattened).forEach((key) => {
+    if (totalLen > 1000 || entries === maxEntries) {
+      return;
+    }
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     pairs.push([displayKey ? displayKey : key, val]);
+    const val = indexPattern.formatField(hit, key);
+
+    if (typeof val === 'string') {
+      totalLen += Number(displayKey?.length);
+      totalLen += Number(val?.length);
+    }
+
+    if (displayKey) {
+      if (fieldsToShow.includes(displayKey)) {
+        pairs.push([displayKey, val]);
+      }
+    } else {
+      pairs.push([key, val]);
+    }
+    entries++;
   });
-  const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
-  return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
+  return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs]} />;
 };
 
 export const formatTopLevelObject = (
