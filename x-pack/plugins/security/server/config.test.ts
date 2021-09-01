@@ -1826,7 +1826,7 @@ describe('createConfig()', () => {
         ).toMatchInlineSnapshot(`
           Object {
             "idleTimeout": "PT0.123S",
-            "lifespan": "null",
+            "lifespan": null,
           }
         `);
 
@@ -1834,7 +1834,7 @@ describe('createConfig()', () => {
           createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts(provider)
         ).toMatchInlineSnapshot(`
           Object {
-            "idleTimeout": "null",
+            "idleTimeout": null,
             "lifespan": "PT0.456S",
           }
         `);
