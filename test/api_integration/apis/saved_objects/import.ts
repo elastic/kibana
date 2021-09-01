@@ -29,17 +29,17 @@ export default function ({ getService }: FtrProviderContext) {
     const indexPattern = {
       type: 'index-pattern',
       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-      meta: { title: 'logstash-*', icon: 'indexPatternApp' },
+      meta: { title: 'logstash-*', icon: 'indexPatternApp', namespaceType: 'single' as const },
     };
     const visualization = {
       type: 'visualization',
       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-      meta: { title: 'Count of requests', icon: 'visualizeApp' },
+      meta: { title: 'Count of requests', icon: 'visualizeApp', namespaceType: 'single' as const },
     };
     const dashboard = {
       type: 'dashboard',
       id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-      meta: { title: 'Requests', icon: 'dashboardApp' },
+      meta: { title: 'Requests', icon: 'dashboardApp', namespaceType: 'single' as const },
     };
 
     describe('with basic data existing', () => {
@@ -155,6 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
               meta: {
                 icon: 'dashboardApp',
                 title: 'dashboard-b',
+                namespaceType: 'single',
               },
               type: 'dashboard',
             },
@@ -163,6 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
               meta: {
                 icon: 'dashboardApp',
                 title: 'dashboard-a',
+                namespaceType: 'single',
               },
               type: 'dashboard',
             },
@@ -222,7 +224,11 @@ export default function ({ getService }: FtrProviderContext) {
                   type: 'visualization',
                   id: '1',
                   title: 'My visualization',
-                  meta: { title: 'My visualization', icon: 'visualizeApp' },
+                  meta: {
+                    title: 'My visualization',
+                    icon: 'visualizeApp',
+                    namespaceType: 'single',
+                  },
                   error: {
                     type: 'missing_references',
                     references: [

@@ -176,11 +176,12 @@ export async function importSavedObjectsFromStream({
   });
   const errorResults = errorAccumulator.map((error) => {
     const icon = typeRegistry.getType(error.type)?.management?.icon;
+    const namespaceType = typeRegistry.getType(error.type)?.namespaceType;
     const attemptedOverwrite = pendingOverwrites.has(getObjKey(error));
     return {
       ...error,
       namespaces: importNamespaces ? error.namespaces : undefined,
-      meta: { ...error.meta, icon },
+      meta: { ...error.meta, icon, namespaceType },
       ...(attemptedOverwrite && { overwrite: true }),
     };
   });
