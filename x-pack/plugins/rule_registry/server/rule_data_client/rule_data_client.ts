@@ -120,7 +120,6 @@ export class RuleDataClient implements IRuleDataClient {
 
         const requestWithDefaultParameters = {
           ...request,
-          require_alias: true,
           index: alias,
         };
 
