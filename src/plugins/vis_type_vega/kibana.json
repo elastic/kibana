@@ -7,8 +7,8 @@
   "optionalPlugins": ["home","usageCollection"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor", "esUiShared"],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   },
   "description": "Registers the vega visualization. Is the elastic version of vega and vega-lite libraries."
 }

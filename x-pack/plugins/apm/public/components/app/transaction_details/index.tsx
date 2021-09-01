@@ -50,6 +50,7 @@ export function TransactionDetails() {
           environment={query.environment}
           start={start}
           end={end}
+          transactionName={transactionName}
         />
       </ChartPointerEventContextProvider>
 
