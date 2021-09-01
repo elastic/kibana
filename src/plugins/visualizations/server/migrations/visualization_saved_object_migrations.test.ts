@@ -2133,7 +2133,7 @@ describe('migration visualization', () => {
       },
     });
 
-    it('should add "drop last bucket" into model if it not exist', () => {
+    it('should add "drop_last_bucket" into model if it not exist', () => {
       const params = {};
       const migratedTestDoc = migrate(createTestDocWithType(params));
       const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
@@ -2145,7 +2145,7 @@ describe('migration visualization', () => {
       `);
     });
 
-    it('should add "series_drop last bucket" into model if it not exist', () => {
+    it('should add "series_drop_last_bucket" into model if it not exist', () => {
       const params = {
         series: [
           {
