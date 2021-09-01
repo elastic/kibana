@@ -82,6 +82,27 @@ describe('EditConnector ', () => {
     expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
   });
 
+  it('Renders no connector, and then edit', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <EditConnector {...defaultProps} />
+      </TestProviders>
+    );
+    expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeTruthy();
+    wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
+
+    expect(
+      wrapper.find(`span[data-test-subj="dropdown-connector-no-connector"]`).last().exists()
+    ).toBeTruthy();
+
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+    wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
+    await waitFor(() => wrapper.update());
+
+    expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
+  });
+
   it('Edit external service on submit', async () => {
     const wrapper = mount(
       <TestProviders>

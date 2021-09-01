@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import deepEqual from 'fast-deep-equal';
 import {
   EuiText,
@@ -144,17 +144,21 @@ export const EditConnector = React.memo(
       { ...initialState, fields: caseFields }
     );
 
+    useEffect(() => {
+      // Initialize the current connector with the connector information attached to the case if we can find that
+      // connector in the retrieved connectors from the API call
+      if (!isLoading) {
+        dispatch({
+          type: 'SET_CURRENT_CONNECTOR',
+          payload: getConnectorById(caseData.connector.id, connectors),
+        });
+      }
+    }, [caseData.connector.id, connectors, isLoading]);
+
     const onChangeConnector = useCallback(
       (newConnectorId) => {
-        // Init
-        if (currentConnector == null) {
-          dispatch({
-            type: 'SET_CURRENT_CONNECTOR',
-            payload: getConnectorById(newConnectorId, connectors),
-          });
-        }
         // change connect on dropdown action
-        else if (currentConnector.id !== newConnectorId) {
+        if (currentConnector?.id !== newConnectorId) {
           dispatch({
             type: 'SET_CURRENT_CONNECTOR',
             payload: getConnectorById(newConnectorId, connectors),
