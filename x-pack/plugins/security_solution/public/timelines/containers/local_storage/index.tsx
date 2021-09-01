@@ -94,8 +94,17 @@ export const addTimelineInStorage = (
 };
 
 const cleanStorageTimeline = (timeline: TimelineModel) => {
-  // clean filterManager as it contains circular references within observer subscriptions
-  const { filterManager, ...timelineToStore } = timeline;
+  // discard unneeded fields to make sure the object serialization works
+  const {
+    documentType,
+    filterManager,
+    isLoading,
+    loadingText,
+    queryFields,
+    selectAll,
+    unit,
+    ...timelineToStore
+  } = timeline;
   return timelineToStore;
 };
 
