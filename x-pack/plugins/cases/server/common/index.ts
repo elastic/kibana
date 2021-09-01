@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110896
 /* eslint-disable @kbn/eslint/no_export_all */
 
 export * from './models';

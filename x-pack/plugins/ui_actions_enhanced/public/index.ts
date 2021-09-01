@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/109891
 /* eslint-disable @kbn/eslint/no_export_all */
 
 import { PluginInitializerContext } from '../../../../src/core/public';
