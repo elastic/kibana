@@ -33,7 +33,7 @@ experimental[] Create a centrally-managed Logstash pipeline, or update an existi
 *  `pipeline.batch.delay`
 *  `pipeline.ecs_compatibility`
 *  `pipeline.ordered`
-  `queue.type`,
+*  `queue.type`
   `queue.max_bytes`, and
   `queue.checkpoint.writes`.
 
