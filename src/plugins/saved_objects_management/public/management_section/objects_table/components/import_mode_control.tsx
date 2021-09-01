@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 
 export interface ImportModeControlProps {
   initialValues: ImportMode;
-  // isLegacyFile: boolean;
   updateSelection: (result: ImportMode) => void;
 }
 
@@ -87,11 +86,7 @@ const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
   </EuiFlexGroup>
 );
 
-export const ImportModeControl = ({
-  initialValues,
-  // isLegacyFile,
-  updateSelection,
-}: ImportModeControlProps) => {
+export const ImportModeControl = ({ initialValues, updateSelection }: ImportModeControlProps) => {
   const [createNewCopies, setCreateNewCopies] = useState(initialValues.createNewCopies);
   const [overwrite, setOverwrite] = useState(initialValues.overwrite);
 
@@ -109,15 +104,10 @@ export const ImportModeControl = ({
       options={[overwriteEnabled, overwriteDisabled]}
       idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
       onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
-      /* disabled={createNewCopies && !isLegacyFile}*/
       disabled={createNewCopies}
       data-test-subj={'savedObjectsManagement-importModeControl-overwriteRadioGroup'}
     />
   );
-
-  // if (isLegacyFile) {
-  //   return overwriteRadio;
-  // }
 
   return (
     <EuiFormFieldset
