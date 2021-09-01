@@ -59,7 +59,7 @@ describe('GraphOverlay', () => {
       });
     });
 
-    test('it has a calculated width that makes room for the Timeline flyout button when isEventViewer is true in full screen mode', async () => {
+    test('it has a fixed position when isEventViewer is true in full screen mode', async () => {
       (useGlobalFullScreen as jest.Mock).mockReturnValue({
         globalFullScreen: true, // <-- true when an events viewer is in full screen mode
         setGlobalFullScreen: jest.fn(),
@@ -77,7 +77,7 @@ describe('GraphOverlay', () => {
 
       await waitFor(() => {
         const overlayContainer = wrapper.find('[data-test-subj="overlayContainer"]').first();
-        expect(overlayContainer).toHaveStyleRule('width', 'calc(100% - 36px)');
+        expect(overlayContainer).toHaveStyleRule('position', 'fixed');
       });
     });
   });
