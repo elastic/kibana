@@ -113,6 +113,24 @@ const breadcrumbGetters: {
       }),
     },
   ],
+  upgrade_package_policy: ({ policyName, policyId }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.policies()[1],
+      text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
+        defaultMessage: 'Agent policies',
+      }),
+    },
+    {
+      href: pagePathGetters.policy_details({ policyId })[1],
+      text: policyName,
+    },
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.upgradePacagePolicyPageTitle', {
+        defaultMessage: 'Upgrade integration ',
+      }),
+    },
+  ],
   agent_list: () => [
     BASE_BREADCRUMB,
     {
