@@ -53,3 +53,24 @@ docker_run() {
 is_test_execution_step() {
   buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'true'
 }
+
+retry() {
+  local retries=$1; shift
+  local delay=$1; shift
+  local attempts=1
+
+  until "$@"; do
+    retry_exit_status=$?
+    echo "Exited with $retry_exit_status"
+    if (( retries == "0" )); then
+      return $retry_exit_status
+    elif (( attempts == retries )); then
+      echo "Failed $attempts retries"
+      return $retry_exit_status
+    else
+      echo "Retrying $((retries - attempts)) more times..."
+      attempts=$((attempts + 1))
+      sleep "$delay"
+    fi
+  done
+}
