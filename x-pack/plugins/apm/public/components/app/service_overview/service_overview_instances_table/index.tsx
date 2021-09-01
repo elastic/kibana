@@ -27,6 +27,7 @@ import { OverviewTableContainer } from '../../../shared/overview_table_container
 import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useBreakPoints } from '../../../../hooks/use_break_points';
 
 type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
@@ -82,6 +83,8 @@ export function ServiceOverviewInstancesTable({
     Record<string, ReactNode>
   >({});
 
+  const breakPoints = useBreakPoints();
+
   useEffect(() => {
     // Closes any open rows when fetching new items
     setItemIdToExpandedRowMap({});
@@ -118,6 +121,7 @@ export function ServiceOverviewInstancesTable({
 
   const columns = getColumns({
     agentName,
+    breakPoints,
     serviceName,
     kuery,
     latencyAggregationType,

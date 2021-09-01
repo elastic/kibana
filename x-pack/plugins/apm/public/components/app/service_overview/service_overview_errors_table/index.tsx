@@ -26,6 +26,7 @@ import { OverviewTableContainer } from '../../../shared/overview_table_container
 import { getColumns } from './get_column';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useBreakPoints } from '../../../../hooks/use_break_points';
 
 interface Props {
   serviceName: string;
@@ -76,6 +77,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/overview');
+  const breakPoints = useBreakPoints();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -176,9 +178,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   );
 
   const columns = getColumns({
-    serviceName,
-    errorGroupDetailedStatistics,
+    breakPoints,
     comparisonEnabled,
+    errorGroupDetailedStatistics,
+    serviceName,
   });
 
   return (

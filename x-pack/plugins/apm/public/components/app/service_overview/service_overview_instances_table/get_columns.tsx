@@ -26,18 +26,20 @@ import {
 } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../utils/style';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
+import { ListMetric } from '../../../shared/list_metric';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_latency_column_label';
 import { InstanceActionsMenu } from './instance_actions_menu';
+import { BreakPoints } from '../../../../hooks/use_break_points';
 
 type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
 type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 export function getColumns({
+  breakPoints,
   serviceName,
   kuery,
   agentName,
@@ -49,6 +51,7 @@ export function getColumns({
   toggleRowActionMenu,
   itemIdToOpenActionMenuRowMap,
 }: {
+  breakPoints: BreakPoints;
   serviceName: string;
   kuery: string;
   agentName?: string;
@@ -60,6 +63,10 @@ export function getColumns({
   toggleRowActionMenu: (selectedServiceNodeName: string) => void;
   itemIdToOpenActionMenuRowMap: Record<string, boolean>;
 }): Array<EuiBasicTableColumn<MainStatsServiceInstanceItem>> {
+  const { isSmall, isMedium, isLarge } = breakPoints;
+  const showWhenSmallOrGreaterThanMedium = isSmall || !isMedium;
+  const isMediumOrLarge = isMedium || isLarge;
+  console.log({ breakPoints });
   return [
     {
       field: 'serviceNodeName',
@@ -101,15 +108,16 @@ export function getColumns({
     {
       field: 'latency',
       name: getLatencyColumnLabel(latencyAggregationType),
-      width: `${unit * 11}px`,
+      width: isMediumOrLarge ? 'auto' : `${unit * 11}px`,
       render: (_, { serviceNodeName, latency }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.latency;
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.latency;
         return (
-          <SparkPlot
+          <ListMetric
             color="euiColorVis1"
+            hideSeries={isMediumOrLarge}
             valueLabel={asMillisecondDuration(latency)}
             series={currentPeriodTimestamp}
             comparisonSeries={
@@ -126,16 +134,17 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: `${unit * 11}px`,
+      width: showWhenSmallOrGreaterThanMedium ? `${unit * 11}px` : 'auto',
       render: (_, { serviceNodeName, throughput }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.throughput;
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.throughput;
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis0"
+            hideSeries={isMedium}
             valueLabel={asTransactionRate(throughput)}
             series={currentPeriodTimestamp}
             comparisonSeries={
@@ -152,16 +161,17 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnErrorRate',
         { defaultMessage: 'Failed transaction rate' }
       ),
-      width: `${unit * 8}px`,
+      width: showWhenSmallOrGreaterThanMedium ? `${unit * 8}px` : 'auto',
       render: (_, { serviceNodeName, errorRate }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.errorRate;
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.errorRate;
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis7"
+            hideSeries={isMedium}
             valueLabel={asPercent(errorRate, 1)}
             series={currentPeriodTimestamp}
             comparisonSeries={
@@ -178,16 +188,17 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnCpuUsage',
         { defaultMessage: 'CPU usage (avg.)' }
       ),
-      width: `${unit * 8}px`,
+      width: showWhenSmallOrGreaterThanMedium ? `${unit * 8}px` : 'auto',
       render: (_, { serviceNodeName, cpuUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.cpuUsage;
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.cpuUsage;
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis2"
+            hideSeries={isMedium}
             valueLabel={asPercent(cpuUsage, 1)}
             series={currentPeriodTimestamp}
             comparisonSeries={
@@ -204,16 +215,17 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnMemoryUsage',
         { defaultMessage: 'Memory usage (avg.)' }
       ),
-      width: `${unit * 9}px`,
+      width: showWhenSmallOrGreaterThanMedium ? `${unit * 9}px` : 'auto',
       render: (_, { serviceNodeName, memoryUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.memoryUsage;
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.memoryUsage;
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis3"
+            hideSeries={isMedium}
             valueLabel={asPercent(memoryUsage, 1)}
             series={currentPeriodTimestamp}
             comparisonSeries={

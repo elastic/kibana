@@ -7,17 +7,24 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
-import { Coordinate } from '../../../../../typings/timeseries';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
+import { Coordinate } from '../../../typings/timeseries';
+import { SparkPlot } from './charts/spark_plot';
 
-export function ServiceListMetric({
+export function ListMetric({
   color,
+  compact,
   series,
   valueLabel,
   comparisonSeries,
   hideSeries = false,
 }: {
-  color: 'euiColorVis1' | 'euiColorVis0' | 'euiColorVis7';
+  color:
+    | 'euiColorVis0'
+    | 'euiColorVis1'
+    | 'euiColorVis2'
+    | 'euiColorVis3'
+    | 'euiColorVis7';
+  compact?: boolean;
   series?: Coordinate[];
   comparisonSeries?: Coordinate[];
   valueLabel: React.ReactNode;
@@ -26,6 +33,7 @@ export function ServiceListMetric({
   if (!hideSeries) {
     return (
       <SparkPlot
+        compact={compact}
         valueLabel={valueLabel}
         series={series}
         color={color}

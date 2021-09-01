@@ -38,9 +38,9 @@ import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import { ListMetric } from '../../../shared/list_metric';
 import { ServiceLink } from '../../../shared/service_link';
 import { HealthBadge } from './HealthBadge';
-import { ServiceListMetric } from './ServiceListMetric';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
@@ -152,7 +152,7 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, latency }) => (
-        <ServiceListMetric
+        <ListMetric
           series={comparisonData?.currentPeriod[serviceName]?.latency}
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.latency
@@ -173,7 +173,7 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, throughput }) => (
-        <ServiceListMetric
+        <ListMetric
           series={comparisonData?.currentPeriod[serviceName]?.throughput}
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.throughput
@@ -196,7 +196,7 @@ export function getServiceColumns({
       render: (_, { serviceName, transactionErrorRate }) => {
         const valueLabel = asPercent(transactionErrorRate, 1);
         return (
-          <ServiceListMetric
+          <ListMetric
             series={
               comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
             }

@@ -22,11 +22,11 @@ import {
 } from '../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { unit } from '../../../utils/style';
-import { SparkPlot } from '../charts/spark_plot';
 import { ImpactBar } from '../ImpactBar';
 import { TableFetchWrapper } from '../table_fetch_wrapper';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { OverviewTableContainer } from '../overview_table_container';
+import { ListMetric } from '../list_metric';
 
 export type DependenciesItem = Omit<
   ConnectionStatsItemWithComparisonData,
@@ -83,7 +83,7 @@ export function DependenciesTable(props: Props) {
       width: `${unit * 11}px`,
       render: (_, { currentStats, previousStats }) => {
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis1"
             series={currentStats.latency.timeseries}
@@ -102,7 +102,7 @@ export function DependenciesTable(props: Props) {
       width: `${unit * 11}px`,
       render: (_, { currentStats, previousStats }) => {
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis0"
             series={currentStats.throughput.timeseries}
@@ -121,7 +121,7 @@ export function DependenciesTable(props: Props) {
       width: `${unit * 10}px`,
       render: (_, { currentStats, previousStats }) => {
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis7"
             series={currentStats.errorRate.timeseries}

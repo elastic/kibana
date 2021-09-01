@@ -18,7 +18,7 @@ import {
   TooltipProps,
   TooltipType,
 } from '@elastic/charts';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -106,79 +106,88 @@ export function InstancesLatencyDistributionChart({
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.apm.instancesLatencyDistributionChartTitle', {
-            defaultMessage: 'Instances latency distribution',
-          })}
-        </h2>
-      </EuiTitle>
-      <ChartContainer hasData={hasData} height={height} status={status}>
-        <Chart id="instances-latency-distribution">
-          <Settings
-            legendPosition={Position.Bottom}
-            onElementClick={handleElementClick}
-            tooltip={tooltip}
-            showLegend
-            theme={chartTheme}
-            xDomain={xDomain}
-          />
-          <BubbleSeries
-            color={theme.eui.euiColorVis0}
-            data={items}
-            id={i18n.translate(
-              'xpack.apm.instancesLatencyDistributionChartLegend',
-              { defaultMessage: 'Instances' }
-            )}
-            xAccessor={(item) => item.throughput}
-            xScaleType={ScaleType.Linear}
-            yAccessors={[(item) => item.latency]}
-            yScaleType={ScaleType.Linear}
-            bubbleSeriesStyle={{
-              point: {
-                strokeWidth: 0,
-                radius: 4,
-                fill: theme.eui.euiColorVis0,
-              },
-            }}
-          />
-
-          {!!comparisonItems.length && (
-            <BubbleSeries
-              data={comparisonItems}
-              id={i18n.translate(
-                'xpack.apm.instancesLatencyDistributionChartLegend.previousPeriod',
-                { defaultMessage: 'Previous period' }
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate(
+                'xpack.apm.instancesLatencyDistributionChartTitle',
+                {
+                  defaultMessage: 'Instances latency distribution',
+                }
               )}
-              xAccessor={(item) => item.throughput}
-              xScaleType={ScaleType.Linear}
-              yAccessors={[(item) => item.latency]}
-              yScaleType={ScaleType.Linear}
-              color={theme.eui.euiColorMediumShade}
-              bubbleSeriesStyle={{
-                point: {
-                  shape: 'square',
-                  radius: 4,
-                  fill: theme.eui.euiColorLightestShade,
-                  stroke: theme.eui.euiColorMediumShade,
-                  strokeWidth: 2,
-                },
-              }}
-            />
-          )}
-          <Axis
-            id="x-axis"
-            labelFormat={asTransactionRate}
-            position={Position.Bottom}
-          />
-          <Axis
-            id="y-axis"
-            labelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-            position={Position.Left}
-            ticks={3}
-          />
-        </Chart>
-      </ChartContainer>
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ChartContainer hasData={hasData} height={height} status={status}>
+            <Chart id="instances-latency-distribution">
+              <Settings
+                legendPosition={Position.Bottom}
+                onElementClick={handleElementClick}
+                tooltip={tooltip}
+                showLegend
+                theme={chartTheme}
+                xDomain={xDomain}
+              />
+              <BubbleSeries
+                color={theme.eui.euiColorVis0}
+                data={items}
+                id={i18n.translate(
+                  'xpack.apm.instancesLatencyDistributionChartLegend',
+                  { defaultMessage: 'Instances' }
+                )}
+                xAccessor={(item) => item.throughput}
+                xScaleType={ScaleType.Linear}
+                yAccessors={[(item) => item.latency]}
+                yScaleType={ScaleType.Linear}
+                bubbleSeriesStyle={{
+                  point: {
+                    strokeWidth: 0,
+                    radius: 4,
+                    fill: theme.eui.euiColorVis0,
+                  },
+                }}
+              />
+
+              {!!comparisonItems.length && (
+                <BubbleSeries
+                  data={comparisonItems}
+                  id={i18n.translate(
+                    'xpack.apm.instancesLatencyDistributionChartLegend.previousPeriod',
+                    { defaultMessage: 'Previous period' }
+                  )}
+                  xAccessor={(item) => item.throughput}
+                  xScaleType={ScaleType.Linear}
+                  yAccessors={[(item) => item.latency]}
+                  yScaleType={ScaleType.Linear}
+                  color={theme.eui.euiColorMediumShade}
+                  bubbleSeriesStyle={{
+                    point: {
+                      shape: 'square',
+                      radius: 4,
+                      fill: theme.eui.euiColorLightestShade,
+                      stroke: theme.eui.euiColorMediumShade,
+                      strokeWidth: 2,
+                    },
+                  }}
+                />
+              )}
+              <Axis
+                id="x-axis"
+                labelFormat={asTransactionRate}
+                position={Position.Bottom}
+              />
+              <Axis
+                id="y-axis"
+                labelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+                position={Position.Left}
+                ticks={3}
+              />
+            </Chart>
+          </ChartContainer>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 }

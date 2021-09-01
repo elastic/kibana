@@ -110,7 +110,7 @@ describe('ServiceList', () => {
         `);
         expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
         expect(renderedColumns[4]).toMatchInlineSnapshot(`
-          <ServiceListMetric
+          <ListMetric
             color="euiColorVis1"
             hideSeries={false}
             valueLabel="0 ms"
@@ -134,7 +134,7 @@ describe('ServiceList', () => {
         );
         expect(renderedColumns.length).toEqual(5);
         expect(renderedColumns[2]).toMatchInlineSnapshot(`
-          <ServiceListMetric
+          <ListMetric
             color="euiColorVis1"
             hideSeries={true}
             valueLabel="0 ms"
@@ -166,7 +166,7 @@ describe('ServiceList', () => {
             />
           `);
           expect(renderedColumns[3]).toMatchInlineSnapshot(`
-            <ServiceListMetric
+            <ListMetric
               color="euiColorVis1"
               hideSeries={false}
               valueLabel="0 ms"
@@ -190,22 +190,22 @@ describe('ServiceList', () => {
           );
           expect(renderedColumns.length).toEqual(7);
           expect(renderedColumns[2]).toMatchInlineSnapshot(`
-          <EnvironmentBadge
-            environments={
-              Array [
-                "test",
-              ]
-            }
-          />
-        `);
+                      <EnvironmentBadge
+                        environments={
+                          Array [
+                            "test",
+                          ]
+                        }
+                      />
+                  `);
           expect(renderedColumns[3]).toMatchInlineSnapshot(`"request"`);
           expect(renderedColumns[4]).toMatchInlineSnapshot(`
-          <ServiceListMetric
-            color="euiColorVis1"
-            hideSeries={false}
-            valueLabel="0 ms"
-          />
-        `);
+            <ListMetric
+              color="euiColorVis1"
+              hideSeries={false}
+              valueLabel="0 ms"
+            />
+          `);
         });
       });
     });

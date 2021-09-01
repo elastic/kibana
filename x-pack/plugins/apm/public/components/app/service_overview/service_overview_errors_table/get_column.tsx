@@ -9,25 +9,30 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
+import { BreakPoints } from '../../../../hooks/use_break_points';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../utils/style';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
+import { ListMetric } from '../../../shared/list_metric';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-
 type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
 type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 export function getColumns({
+  breakPoints,
   serviceName,
   errorGroupDetailedStatistics,
   comparisonEnabled,
 }: {
+  breakPoints: BreakPoints;
   serviceName: string;
   errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
 }): Array<EuiBasicTableColumn<ErrorGroupMainStatistics['error_groups'][0]>> {
+  const { isSmall, isLarge } = breakPoints;
+  const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
+
   return [
     {
       field: 'name',
@@ -72,7 +77,7 @@ export function getColumns({
           defaultMessage: 'Occurrences',
         }
       ),
-      width: `${unit * 12}px`,
+      width: showWhenSmallOrGreaterThanLarge ? `${unit * 11}px` : 'auto',
       render: (_, { occurrences, group_id: errorGroupId }) => {
         const currentPeriodTimeseries =
           errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]
@@ -82,8 +87,9 @@ export function getColumns({
             ?.timeseries;
 
         return (
-          <SparkPlot
+          <ListMetric
             color="euiColorVis7"
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
             series={currentPeriodTimeseries}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',
