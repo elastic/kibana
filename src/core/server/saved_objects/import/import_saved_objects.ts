@@ -156,10 +156,12 @@ export async function importSavedObjectsFromStream({
 
   const successResults = createSavedObjectsResult.createdObjects.map((createdObject) => {
     const { type, id, destinationId, originId, namespaces } = createdObject;
-    const getTitle = typeRegistry.getType(type)?.management?.getTitle;
+    const objectType = typeRegistry.getType(type)!;
+    const getTitle = objectType.management?.getTitle;
     const meta = {
       title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
-      icon: typeRegistry.getType(type)?.management?.icon,
+      icon: objectType.management?.icon,
+      namespaceType: objectType.namespaceType,
     };
     const attemptedOverwrite = pendingOverwrites.has(getObjKey(createdObject));
     return {

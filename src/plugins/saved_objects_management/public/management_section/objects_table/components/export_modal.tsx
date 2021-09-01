@@ -33,6 +33,7 @@ export interface ExportModalProps {
   selectedOptions: Record<string, boolean>;
   includeReferences: boolean;
   onIncludeReferenceChange: (newIncludeReference: boolean) => void;
+  showIncludeNamespacesToggle: boolean;
   includeNamespaces: boolean;
   onIncludeNamespacesChange: (newValue: boolean) => void;
 }
@@ -46,6 +47,7 @@ export const ExportModal: FC<ExportModalProps> = ({
   selectedOptions,
   includeReferences,
   onIncludeReferenceChange,
+  showIncludeNamespacesToggle,
   includeNamespaces,
   onIncludeNamespacesChange,
 }) => {
@@ -97,18 +99,22 @@ export const ExportModal: FC<ExportModalProps> = ({
           checked={includeReferences}
           onChange={() => onIncludeReferenceChange(!includeReferences)}
         />
-        <EuiSpacer size="s" />
-        <EuiSwitch
-          name="includeNamespaces"
-          label={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeNamespaces"
-              defaultMessage="Include namespace information"
+        {showIncludeNamespacesToggle && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiSwitch
+              name="includeNamespaces"
+              label={
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeNamespaces"
+                  defaultMessage="Include namespace information"
+                />
+              }
+              checked={includeNamespaces}
+              onChange={() => onIncludeNamespacesChange(!includeNamespaces)}
             />
-          }
-          checked={includeNamespaces}
-          onChange={() => onIncludeNamespacesChange(!includeNamespaces)}
-        />
+          </>
+        )}
       </EuiModalBody>
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="flexEnd">

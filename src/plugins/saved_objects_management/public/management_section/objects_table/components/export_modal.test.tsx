@@ -45,6 +45,7 @@ describe('ExportModal', () => {
         selectedOptions={selectedOptions}
         includeReferences={false}
         onIncludeReferenceChange={onIncludeReferenceChange}
+        showIncludeNamespacesToggle={false}
         includeNamespaces={false}
         onIncludeNamespacesChange={onIncludeNamespacesChange}
       />
@@ -64,6 +65,7 @@ describe('ExportModal', () => {
         selectedOptions={selectedOptions}
         includeReferences={false}
         onIncludeReferenceChange={onIncludeReferenceChange}
+        showIncludeNamespacesToggle={false}
         includeNamespaces={false}
         onIncludeNamespacesChange={onIncludeNamespacesChange}
       />
@@ -85,6 +87,7 @@ describe('ExportModal', () => {
         selectedOptions={selectedOptions}
         includeReferences={false}
         onIncludeReferenceChange={onIncludeReferenceChange}
+        showIncludeNamespacesToggle={false}
         includeNamespaces={false}
         onIncludeNamespacesChange={onIncludeNamespacesChange}
       />

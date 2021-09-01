@@ -197,10 +197,12 @@ export async function resolveSavedObjectsImportErrors({
       ...successResults,
       ...createdObjects.map((createdObject) => {
         const { type, id, namespaces, destinationId, originId } = createdObject;
-        const getTitle = typeRegistry.getType(type)?.management?.getTitle;
+        const objectType = typeRegistry.getType(type)!;
+        const getTitle = objectType.management?.getTitle;
         const meta = {
           title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
           icon: typeRegistry.getType(type)?.management?.icon,
+          namespaceType: objectType.namespaceType,
         };
         return {
           type,
@@ -224,13 +226,14 @@ export async function resolveSavedObjectsImportErrors({
 
   const errorResults = errorAccumulator.map((error) => {
     const icon = typeRegistry.getType(error.type)?.management?.icon;
+    const namespaceType = typeRegistry.getType(error.type)?.namespaceType;
     const attemptedOverwrite = retries.some(
       ({ overwrite, ...retry }) => getObjKey(retry) === getObjKey(error) && overwrite
     );
     return {
       ...error,
       namespaces: importNamespaces ? error.namespaces : undefined,
-      meta: { ...error.meta, icon },
+      meta: { ...error.meta, icon, namespaceType },
       ...(attemptedOverwrite && { overwrite: true }),
     };
   });

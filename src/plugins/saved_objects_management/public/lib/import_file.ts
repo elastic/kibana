@@ -12,7 +12,8 @@ import { ImportMode } from '../management_section/objects_table/components/impor
 export async function importFile(
   http: HttpStart,
   file: File,
-  { createNewCopies, overwrite, importNamespaces }: ImportMode
+  { createNewCopies, overwrite }: ImportMode,
+  importNamespaces: boolean = false,
 ) {
   const formData = new FormData();
   formData.append('file', file);

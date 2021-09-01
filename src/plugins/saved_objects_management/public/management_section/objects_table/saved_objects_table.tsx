@@ -35,7 +35,7 @@ import {
   SavedObjectsExportResultDetails,
   getTagFindReferences,
   SpacesInfo,
-  getObjectRowIdentifier,
+  getObjectKey,
   getObjectIdentifier,
   isInNamespace,
 } from '../../lib';
@@ -139,7 +139,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
-      isIncludeNamespacesChecked: true,
+      isIncludeNamespacesChecked: false,
     };
   }
 
@@ -328,7 +328,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       (acc, obj) => acc.add(getObjectKey(obj)),
       new Set<string>()
     );
-    const objectsToFetch = objects.filter((obj) => currentObjectsSet.has(getObjectKey(obj)));
+    // TODO: The action API returns only the type/id tuple, so we can't forge the proper key as we're doing everywhere else.
+    //       However the only targets of the copy/share actions are shareable types, so this work-around is acceptable for now.
+    const objectsToFetch = objects.filter((obj) =>
+      currentObjectsSet.has(
+        getObjectKey({
+          ...obj,
+          meta: { namespaceType: 'multiple' },
+        })
+      )
+    );
     if (objectsToFetch.length) {
       this.fetchSavedObjects(objectsToFetch);
     }
@@ -391,7 +400,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { selectedSavedObjects } = this.state;
     const { notifications, http, spacesInfo } = this.props;
     const objectsToExport = selectedSavedObjects.map((obj) =>
-      getObjectIdentifier(obj, spacesInfo?.active?.id)
+      includeNamespaces
+        ? getObjectIdentifier(obj, spacesInfo?.active?.id)
+        : { type: obj.type, id: obj.id }
     );
 
     let blob;
@@ -437,9 +448,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         search: queryText ? `${queryText}*` : undefined,
         types: exportTypes,
         references,
-        namespaces: selectedSpaces,
         includeReferencesDeep: isIncludeReferencesDeepChecked,
         includeNamespaces: isIncludeNamespacesChecked,
+        ...(isIncludeNamespacesChecked && { namespaces: selectedSpaces }),
       });
     } catch (e) {
       notifications.toasts.addDanger({
@@ -572,10 +583,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     if (!this.state.isShowingImportFlyout) {
       return null;
     }
-    const { applications } = this.props;
+    const { applications, spacesInfo } = this.props;
     const newIndexPatternUrl = applications.getUrlForApp('management', {
       path: 'kibana/indexPatterns',
     });
+
+    const canImportAcrossSpace =
+      Boolean(applications.capabilities.savedObjectsManagement.importAcrossSpaces) &&
+      Boolean(spacesInfo);
 
     return (
       <Flyout
@@ -589,6 +604,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         overlays={this.props.overlays}
         basePath={this.props.http.basePath}
         search={this.props.search}
+        canImportNamespaces={canImportAcrossSpace}
       />
     );
   }
@@ -631,6 +647,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   renderExportAllOptionsModal() {
+    const { capabilities } = this.props.applications;
     const {
       isShowingExportAllOptionsModal,
       filteredItemCount,
@@ -643,6 +660,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     if (!isShowingExportAllOptionsModal) {
       return null;
     }
+
+    const canExportAcrossSpace = Boolean(capabilities.savedObjectsManagement.exportAcrossSpaces);
 
     return (
       <ExportModal
@@ -664,6 +683,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             isIncludeReferencesDeepChecked: newIncludeReferences,
           });
         }}
+        showIncludeNamespacesToggle={canExportAcrossSpace}
         includeNamespaces={isIncludeNamespacesChecked}
         onIncludeNamespacesChange={(newIncludeNamespaces) => {
           this.setState({
@@ -715,7 +735,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             taggingApi={taggingApi}
             spacesInfo={spacesInfo}
             initialQuery={this.props.initialQuery}
-            itemId={getObjectRowIdentifier}
+            itemId={getObjectKey}
             actionRegistry={this.props.actionRegistry}
             columnRegistry={this.props.columnRegistry}
             selectionConfig={selectionConfig}
@@ -740,8 +760,4 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       </div>
     );
   }
-}
-
-function getObjectKey(obj: { type: string; id: string }) {
-  return `${obj.type}:${obj.id}`;
 }

@@ -80,7 +80,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     parseErrorMessage: null,
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
-    isIncludeNamespacesChecked: true,
+    isIncludeNamespacesChecked: false,
     activeAction: undefined,
   };
 
@@ -160,6 +160,8 @@ export class Table extends PureComponent<TableProps, TableState> {
       spacesInfo,
     } = this.props;
 
+    const canExportAcrossSpace = capabilities.savedObjectsManagement.exportAcrossSpaces;
+
     const pagination = {
       pageIndex,
       pageSize,
@@ -186,7 +188,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         options: filterOptions,
       },
       ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
-      ...(spacesInfo
+      ...(spacesInfo && canExportAcrossSpace
         ? [
             {
               type: 'field_value_selection',
@@ -195,11 +197,22 @@ export class Table extends PureComponent<TableProps, TableState> {
                 defaultMessage: 'Space',
               }),
               multiSelect: 'or',
-              options: spacesInfo.all.map((space) => ({
-                value: space.id,
-                name: space.name,
-                view: `${space.name}`,
-              })),
+              options: [
+                {
+                  value: '*',
+                  name: i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.spaceFilter.allSpaces',
+                    {
+                      defaultMessage: `All (*)`,
+                    }
+                  ),
+                },
+                ...spacesInfo.all.map((space) => ({
+                  value: space.id,
+                  name: space.name,
+                  view: `${space.name}`,
+                })),
+              ],
             },
           ]
         : []),
@@ -421,19 +434,21 @@ export class Table extends PureComponent<TableProps, TableState> {
                   onChange={this.toggleIsIncludeReferencesDeepChecked}
                 />
               </EuiFormRow>
-              <EuiFormRow>
-                <EuiSwitch
-                  name="includeNamespaces"
-                  label={
-                    <FormattedMessage
-                      id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeNamespaces"
-                      defaultMessage="Include namespace information"
-                    />
-                  }
-                  checked={this.state.isIncludeNamespacesChecked}
-                  onChange={this.toggleIsIncludeNamespacesChecked}
-                />
-              </EuiFormRow>
+              {canExportAcrossSpace && (
+                <EuiFormRow>
+                  <EuiSwitch
+                    name="includeNamespaces"
+                    label={
+                      <FormattedMessage
+                        id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeNamespaces"
+                        defaultMessage="Include namespace information"
+                      />
+                    }
+                    checked={this.state.isIncludeNamespacesChecked}
+                    onChange={this.toggleIsIncludeNamespacesChecked}
+                  />
+                </EuiFormRow>
+              )}
               <EuiFormRow>
                 <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
                   <FormattedMessage
