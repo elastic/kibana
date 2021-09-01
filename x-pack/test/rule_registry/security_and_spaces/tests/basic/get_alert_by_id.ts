@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {
-        it.skip(`${username} should be able to access alert ${alertId} in ${space}/${index}`, async () => {
+        it(`${username} should be able to access alert ${alertId} in ${space}/${index}`, async () => {
           await supertestWithoutAuth
             .get(`${getSpaceUrlPrefix(space)}${TEST_URL}?id=${alertId}&index=${index}`)
             .auth(username, password)
@@ -161,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     }
 
-    describe('Security Solution', () => {
+    describe.skip('Security Solution', () => {
       const authorizedInAllSpaces = [superUser, globalRead, secOnlySpacesAll, obsSecSpacesAll];
       const authorizedOnlyInSpace1 = [secOnly, secOnlyRead, obsSec, obsSecRead];
       const authorizedOnlyInSpace2 = [
