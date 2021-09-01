@@ -158,14 +158,6 @@ describe('healthRoute', () => {
         summarizeMonitoringStats(logger, warnWorkloadStat, getTaskManagerConfig({}))
       ),
     });
-    expect(logHealthMetrics.mock.calls[3][0]).toMatchObject({
-      id,
-      timestamp: expect.any(String),
-      status: expect.any(String),
-      ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(logger, warnEphemeralStat, getTaskManagerConfig({}))
-      ),
-    });
   });
 
   it(`logs at an error level if the status is error`, async () => {
@@ -225,14 +217,6 @@ describe('healthRoute', () => {
       status: expect.any(String),
       ...ignoreCapacityEstimation(
         summarizeMonitoringStats(logger, errorWorkloadStat, getTaskManagerConfig({}))
-      ),
-    });
-    expect(logHealthMetrics.mock.calls[3][0]).toMatchObject({
-      id,
-      timestamp: expect.any(String),
-      status: expect.any(String),
-      ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(logger, errorEphemeralStat, getTaskManagerConfig({}))
       ),
     });
   });
