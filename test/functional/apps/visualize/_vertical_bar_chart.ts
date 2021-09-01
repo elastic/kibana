@@ -18,11 +18,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
+  const xyChartSelector = 'visTypeXyChart';
+
   describe('vertical bar chart', function () {
-    let isNewChartsLibraryEnabled = false;
     before(async () => {
-      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
-      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+      await PageObjects.visualize.initTests();
     });
 
     const vizName1 = 'Visualization VerticalBarChart';
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('bar charts x axis tick labels', () => {
       it('should show tick labels also after rotation of the chart', async function () {
         await initBarChart();
-        const bottomLabels = await PageObjects.visChart.getXAxisLabels();
+        const bottomLabels = await PageObjects.visChart.getXAxisLabels(xyChartSelector);
         log.debug(`${bottomLabels.length} tick labels on bottom x axis`);
 
         await PageObjects.visEditor.clickMetricsAndAxes();
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         // the getYAxisLabels helper always returns the labels on the left axis
-        const leftLabels = await PageObjects.visChart.getYAxisLabels();
+        const leftLabels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         log.debug(`${leftLabels.length} tick labels on left x axis`);
         expect(leftLabels.length).to.be.greaterThan(bottomLabels.length * (2 / 3));
       });
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectField('@timestamp');
 
         await PageObjects.visEditor.clickGo();
-        const bottomLabels = await PageObjects.visChart.getXAxisLabels();
+        const bottomLabels = await PageObjects.visChart.getXAxisLabels(xyChartSelector);
         expect(bottomLabels.length).to.be(1);
 
         await PageObjects.visEditor.clickMetricsAndAxes();
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         // the getYAxisLabels helper always returns the labels on the left axis
-        const leftLabels = await PageObjects.visChart.getYAxisLabels();
+        const leftLabels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         expect(leftLabels.length).to.be(1);
       });
     });
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickAddDateRange();
         await PageObjects.visEditor.setDateRangeByIndex('1', 'now-2w/w', 'now-1w/w');
         await PageObjects.visEditor.clickGo();
-        const bottomLabels = await PageObjects.visChart.getXAxisLabels();
+        const bottomLabels = await PageObjects.visChart.getXAxisLabels(xyChartSelector);
         expect(bottomLabels.length).to.be(2);
       });
     });
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
       // try sleeping a bit before getting that data
       await retry.try(async () => {
-        const data = await PageObjects.visChart.getBarChartData();
+        const data = await PageObjects.visChart.getBarChartData(xyChartSelector);
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
         expect(data).to.eql(expectedChartValues);
@@ -257,7 +257,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
       // try sleeping a bit before getting that data
       await retry.try(async () => {
-        const data = await PageObjects.visChart.getBarChartData();
+        const data = await PageObjects.visChart.getBarChartData(xyChartSelector);
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
         expect(data).to.eql(expectedChartValues);
@@ -333,7 +333,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
       // try sleeping a bit before getting that data
       await retry.try(async () => {
-        const data = await PageObjects.visChart.getBarChartData();
+        const data = await PageObjects.visChart.getBarChartData(xyChartSelector);
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
         expect(data).to.eql(expectedChartValues);
@@ -350,10 +350,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers(xyChartSelector);
 
-        const minLabel = await PageObjects.visChart.getExpectedValue(2, 1);
-        const maxLabel = await PageObjects.visChart.getExpectedValue(5000, 900);
+        const minLabel = 1;
+        const maxLabel = 900;
         const numberOfLabels = 10;
         expect(labels.length).to.be.greaterThan(numberOfLabels);
         expect(labels[0]).to.eql(minLabel);
@@ -363,10 +363,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show filtered ticks on selecting log scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers(xyChartSelector);
 
-        const minLabel = await PageObjects.visChart.getExpectedValue(2, 1);
-        const maxLabel = await PageObjects.visChart.getExpectedValue(5000, 900);
+        const minLabel = 1;
+        const maxLabel = 900;
         const numberOfLabels = 10;
         expect(labels.length).to.be.greaterThan(numberOfLabels);
         expect(labels[0]).to.eql(minLabel);
@@ -377,22 +377,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'square root');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600'],
-          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
-        );
+        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
+        const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
 
       it('should show filtered ticks on selecting square root scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['200', '400', '600', '800', '1,000', '1,200', '1,400'],
-          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
-        );
+        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
+        const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -400,23 +394,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'linear');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
+        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         log.debug(labels);
-        const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600'],
-          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
-        );
+        const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
 
       it('should show filtered ticks on selecting linear scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['200', '400', '600', '800', '1,000', '1,200', '1,400'],
-          ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400']
-        );
+        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
+        const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
     });
@@ -430,7 +418,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.changeYAxisShowCheckbox(axisId, true);
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
+        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         expect(labels[0]).to.eql('0%');
         expect(labels[labels.length - 1]).to.eql('100%');
       });
@@ -447,11 +435,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         await PageObjects.visEditor.clickGo();
 
-        const expectedEntries = await PageObjects.visChart.getExpectedValue(
-          ['200', '404', '503'],
-          ['503', '404', '200'] // sorting aligned with rendered geometries
-        );
-        const legendEntries = await PageObjects.visChart.getLegendEntries();
+        const expectedEntries = ['503', '404', '200']; // sorting aligned with rendered geometries
+        const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });
 
@@ -460,18 +445,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectCustomSortMetric(3, 'Min', 'bytes');
         await PageObjects.visEditor.clickGo();
 
-        const expectedEntries = await PageObjects.visChart.getExpectedValue(
-          ['404', '200', '503'],
-          ['503', '200', '404'] // sorting aligned with rendered geometries
-        );
-        const legendEntries = await PageObjects.visChart.getLegendEntries();
+        const expectedEntries = ['503', '200', '404'];
+        const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });
 
       it('should correctly filter by legend', async () => {
-        await PageObjects.visChart.filterLegend('200');
+        await PageObjects.visChart.filterLegend('200', true);
         await PageObjects.visChart.waitForVisualization();
-        const legendEntries = await PageObjects.visChart.getLegendEntries();
+        const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         const expectedEntries = ['200'];
         expect(legendEntries).to.eql(expectedEntries);
         await filterBar.removeFilter('response.raw');
@@ -496,43 +478,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         await PageObjects.visEditor.clickGo();
 
-        const expectedEntries = await PageObjects.visChart.getExpectedValue(
-          [
-            '200 - win 8',
-            '200 - win xp',
-            '200 - ios',
-            '200 - osx',
-            '200 - win 7',
-            '404 - ios',
-            '503 - ios',
-            '503 - osx',
-            '503 - win 7',
-            '503 - win 8',
-            '503 - win xp',
-            '404 - osx',
-            '404 - win 7',
-            '404 - win 8',
-            '404 - win xp',
-          ],
-          [
-            '404 - win xp',
-            '404 - win 8',
-            '404 - win 7',
-            '404 - osx',
-            '503 - win xp',
-            '503 - win 8',
-            '503 - win 7',
-            '503 - osx',
-            '503 - ios',
-            '404 - ios',
-            '200 - win 7',
-            '200 - osx',
-            '200 - ios',
-            '200 - win xp',
-            '200 - win 8',
-          ]
-        );
-        const legendEntries = await PageObjects.visChart.getLegendEntries();
+        const expectedEntries = [
+          '404 - win xp',
+          '404 - win 8',
+          '404 - win 7',
+          '404 - osx',
+          '503 - win xp',
+          '503 - win 8',
+          '503 - win 7',
+          '503 - osx',
+          '503 - ios',
+          '404 - ios',
+          '200 - win 7',
+          '200 - osx',
+          '200 - ios',
+          '200 - win xp',
+          '200 - win 8',
+        ];
+        const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });
 
@@ -542,11 +505,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.toggleDisabledAgg(3);
         await PageObjects.visEditor.clickGo();
 
-        const expectedEntries = await PageObjects.visChart.getExpectedValue(
-          ['win 8', 'win xp', 'ios', 'osx', 'win 7'],
-          ['win 7', 'osx', 'ios', 'win xp', 'win 8']
-        );
-        const legendEntries = await PageObjects.visChart.getLegendEntries();
+        const expectedEntries = ['win 7', 'osx', 'ios', 'win xp', 'win 8'];
+        const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });
     });
@@ -562,7 +522,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         const expectedEntries = ['Derivative of Count'];
-        const legendEntries = await PageObjects.visChart.getLegendEntries();
+        const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });
 

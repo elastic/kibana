@@ -28,9 +28,7 @@ import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { getOptionTabs } from '../editor/common_config';
 
-export const getLineVisTypeDefinition = (
-  showElasticChartsOptions = false
-): XyVisTypeDefinition => ({
+export const getLineVisTypeDefinition = (): XyVisTypeDefinition => ({
   name: 'line',
   title: i18n.translate('visTypeXy.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',
@@ -128,7 +126,7 @@ export const getLineVisTypeDefinition = (
     },
   },
   editorConfig: {
-    optionTabs: getOptionTabs(showElasticChartsOptions),
+    optionTabs: getOptionTabs(),
     schemas: [
       {
         group: AggGroupNames.Metrics,

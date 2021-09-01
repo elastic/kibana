@@ -28,9 +28,7 @@ import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { getOptionTabs } from '../editor/common_config';
 
-export const getAreaVisTypeDefinition = (
-  showElasticChartsOptions = false
-): XyVisTypeDefinition => ({
+export const getAreaVisTypeDefinition = (): XyVisTypeDefinition => ({
   name: 'area',
   title: i18n.translate('visTypeXy.area.areaTitle', { defaultMessage: 'Area' }),
   icon: 'visArea',
@@ -128,7 +126,7 @@ export const getAreaVisTypeDefinition = (
     },
   },
   editorConfig: {
-    optionTabs: getOptionTabs(showElasticChartsOptions),
+    optionTabs: getOptionTabs(),
     schemas: [
       {
         group: AggGroupNames.Metrics,

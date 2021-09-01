@@ -15,7 +15,7 @@ import type { VisParams } from '../types';
 import { MetricsAxisOptions, PointSeriesOptions } from './components/options';
 import { ValidationWrapper } from './components/common/validation_wrapper';
 
-export function getOptionTabs(showElasticChartsOptions = false) {
+export function getOptionTabs() {
   return [
     {
       name: 'advanced',
@@ -23,13 +23,7 @@ export function getOptionTabs(showElasticChartsOptions = false) {
         defaultMessage: 'Metrics & axes',
       }),
       editor: (props: VisEditorOptionsProps<VisParams>) => (
-        <ValidationWrapper
-          {...props}
-          extraProps={{
-            showElasticChartsOptions,
-          }}
-          component={MetricsAxisOptions}
-        />
+        <ValidationWrapper {...props} component={MetricsAxisOptions} />
       ),
     },
     {
@@ -38,13 +32,7 @@ export function getOptionTabs(showElasticChartsOptions = false) {
         defaultMessage: 'Panel settings',
       }),
       editor: (props: VisEditorOptionsProps<VisParams>) => (
-        <ValidationWrapper
-          {...props}
-          extraProps={{
-            showElasticChartsOptions,
-          }}
-          component={PointSeriesOptions}
-        />
+        <ValidationWrapper {...props} component={PointSeriesOptions} />
       ),
     },
   ];

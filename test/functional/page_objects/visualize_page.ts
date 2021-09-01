@@ -56,7 +56,6 @@ export class VisualizePageObject extends FtrService {
     await this.kibanaServer.uiSettings.replace({
       defaultIndex: 'logstash-*',
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
-      'visualization:visualize:legacyChartsLibrary': !isNewLibrary,
       'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
     });
   }

@@ -23,9 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
     'timePicker',
   ]);
+  const xyChartSelector = 'visTypeXyChart';
 
   describe('line charts - split series', function () {
-    let isNewChartsLibraryEnabled = false;
     const initLineChart = async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -43,8 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
-      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
-      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+      await PageObjects.visualize.initTests();
       await initLineChart();
     });
 
@@ -59,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // sleep a bit before trying to get the chart data
       await PageObjects.common.sleep(3000);
-      const data = await PageObjects.visChart.getLineChartData();
+      const data = await PageObjects.visChart.getLineChartData(xyChartSelector);
       log.debug('data=' + data);
       const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
       for (let x = 0; x < data.length; x++) {
@@ -92,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectOrderByMetric(2, '_key');
       await PageObjects.visEditor.clickGo();
       await retry.try(async function () {
-        const data = await PageObjects.visChart.getLineChartData();
+        const data = await PageObjects.visChart.getLineChartData(xyChartSelector);
         log.debug('data=' + data);
         const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
         for (let x = 0; x < data.length; x++) {
@@ -159,10 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to save and load', async function () {
-      const vizName = await PageObjects.visChart.getExpectedValue(
-        'Visualization Line split series',
-        'Visualization Line split series - chart library'
-      );
+      const vizName = 'Visualization Line split series - chart library';
 
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName);
 
@@ -180,9 +176,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
-        const minLabel = await PageObjects.visChart.getExpectedValue(2, 1);
-        const maxLabel = await PageObjects.visChart.getExpectedValue(5000, 900);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers(xyChartSelector);
+        const minLabel = 1;
+        const maxLabel = 900;
         const numberOfLabels = 10;
         expect(labels.length).to.be.greaterThan(numberOfLabels);
         expect(labels[0]).to.eql(minLabel);
@@ -192,9 +188,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show filtered ticks on selecting log scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
-        const minLabel = await PageObjects.visChart.getExpectedValue(2, 1);
-        const maxLabel = await PageObjects.visChart.getExpectedValue(5000, 900);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers(xyChartSelector);
+        const minLabel = 1;
+        const maxLabel = 900;
         const numberOfLabels = 10;
         expect(labels.length).to.be.greaterThan(numberOfLabels);
         expect(labels[0]).to.eql(minLabel);
@@ -205,22 +201,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'square root');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['0', '2,000', '4,000', '6,000', '8,000', '10,000'],
-          ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
-        );
+        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
+        const expectedLabels = [
+          '0',
+          '1,000',
+          '2,000',
+          '3,000',
+          '4,000',
+          '5,000',
+          '6,000',
+          '7,000',
+          '8,000',
+          '9,000',
+        ];
         expect(labels).to.eql(expectedLabels);
       });
 
       it('should show filtered ticks on selecting square root scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['2,000', '4,000', '6,000', '8,000'],
-          ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
-        );
+        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
+        const expectedLabels = [
+          '0',
+          '1,000',
+          '2,000',
+          '3,000',
+          '4,000',
+          '5,000',
+          '6,000',
+          '7,000',
+          '8,000',
+          '9,000',
+        ];
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -228,23 +240,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'linear');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
+        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         log.debug(labels);
-        const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['0', '2,000', '4,000', '6,000', '8,000', '10,000'],
-          ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
-        );
+        const expectedLabels = [
+          '0',
+          '1,000',
+          '2,000',
+          '3,000',
+          '4,000',
+          '5,000',
+          '6,000',
+          '7,000',
+          '8,000',
+          '9,000',
+        ];
         expect(labels).to.eql(expectedLabels);
       });
 
       it('should show filtered ticks on selecting linear scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = await PageObjects.visChart.getExpectedValue(
-          ['2,000', '4,000', '6,000', '8,000'],
-          ['0', '1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000', '9,000']
-        );
+        const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
+        const expectedLabels = [
+          '0',
+          '1,000',
+          '2,000',
+          '3,000',
+          '4,000',
+          '5,000',
+          '6,000',
+          '7,000',
+          '8,000',
+          '9,000',
+        ];
         expect(labels).to.eql(expectedLabels);
       });
     });
@@ -273,7 +301,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug('Aggregation = Date Histogram');
           await PageObjects.visEditor.selectAggregation('Date Histogram');
           await PageObjects.visEditor.clickGo();
-          const title = await PageObjects.visChart.getYAxisTitle();
+          const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
           expect(title).to.be('Serial Diff of Count');
         });
 
@@ -281,7 +309,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug('set custom label of y-axis to "Custom"');
           await PageObjects.visEditor.setCustomLabel('Custom', 1);
           await PageObjects.visEditor.clickGo();
-          const title = await PageObjects.visChart.getYAxisTitle();
+          const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
           expect(title).to.be('Custom');
         });
 
@@ -296,7 +324,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug('Metrics agg = Average Bucket');
           await PageObjects.visEditor.selectAggregation('Average Bucket', 'metrics');
           await PageObjects.visEditor.clickGo();
-          const title = await PageObjects.visChart.getYAxisTitle();
+          const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
           expect(title).to.be('Overall Average of Count');
         });
 
@@ -304,7 +332,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug('set custom label of sub metric to "Cats"');
           await PageObjects.visEditor.setCustomLabel('Cats', '1-metric');
           await PageObjects.visEditor.clickGo();
-          const title = await PageObjects.visChart.getYAxisTitle();
+          const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
           expect(title).to.be('Overall Average of Cats');
         });
 
@@ -312,7 +340,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug('set custom label to "Custom"');
           await PageObjects.visEditor.setCustomLabel('Custom', 1);
           await PageObjects.visEditor.clickGo();
-          const title = await PageObjects.visChart.getYAxisTitle();
+          const title = await PageObjects.visChart.getYAxisTitle(xyChartSelector);
           expect(title).to.be('Custom');
         });
 

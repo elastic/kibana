@@ -92,7 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Check that session is restored
       await searchSessions.expectState('restored');
       await testSubjects.missingOrFail('embeddableErrorLabel');
-      const data = await PageObjects.visChart.getBarChartData('Sum of bytes');
+      const xyChartSelector = 'visTypeXyChart';
+      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
 
       // switching dashboard to edit mode (or any other non-fetch required) state change
