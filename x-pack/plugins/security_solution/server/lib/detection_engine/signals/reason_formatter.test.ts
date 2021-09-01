@@ -163,6 +163,7 @@ describe('reason_formatter', () => {
     describe('when rule and mergedDoc are provided without any fields of interest', () => {
       it('should return the full reason message', () => {
         const updatedMergedDoc = {
+          ...mergedDoc,
           fields: {
             'event.category': ['test'],
             'user.name': ['test-user'],

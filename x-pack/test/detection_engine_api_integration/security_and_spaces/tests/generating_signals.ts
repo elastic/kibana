@@ -363,7 +363,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             signal: {
               reason:
-                'configuration event by root on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
+                'configuration event on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               status: 'open',
