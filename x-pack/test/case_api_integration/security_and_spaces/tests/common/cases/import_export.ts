@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('export cases', () => {
+  describe('import and export cases', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -155,34 +155,31 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const findResponse = await findCases({ supertest, query: {} });
       expect(findResponse.total).to.eql(1);
-      expect(findResponse.cases[0].title).to.eql('A case to export');
-      expect(findResponse.cases[0].description).to.eql('a description');
-
-      const { body: commentsResponse }: { body: CommentsResponse } = await supertest
-        .get(`${CASES_URL}/${findResponse.cases[0].id}/comments/_find`)
-        .send()
-        .expect(200);
-
-      const comment = (commentsResponse.comments[0] as unknown) as AttributesTypeUser;
-      expect(comment.comment).to.eql('A comment for my case');
+      expect(findResponse.cases[0].title).to.eql('A case with a connector');
+      expect(findResponse.cases[0].description).to.eql('super description');
 
       const userActions = await getCaseUserActions({
         supertest,
         caseID: findResponse.cases[0].id,
       });
 
-      expect(userActions).to.have.length(2);
+      expect(userActions).to.have.length(3);
       expect(userActions[0].action).to.eql('create');
       expect(includesAllRequiredFields(userActions[0].action_field)).to.eql(true);
 
-      expect(userActions[1].action).to.eql('create');
-      expect(userActions[1].action_field).to.eql(['comment']);
+      expect(userActions[1].action).to.eql('push-to-service');
+      expect(userActions[1].action_field).to.eql(['pushed']);
       expect(userActions[1].old_value).to.eql(null);
-      expect(JSON.parse(userActions[1].new_value!)).to.eql({
-        comment: 'A comment for my case',
-        type: 'user',
-        owner: 'securitySolution',
-      });
+
+      const parsedPushNewValue = JSON.parse(userActions[1].new_value!);
+      expect(parsedPushNewValue.connector_name).to.eql('A jira connector');
+      expect(parsedPushNewValue.connector_id).to.eql('1cd34740-06ad-11ec-babc-0b08808e8e01');
+
+      expect(userActions[2].action).to.eql('update');
+      expect(userActions[2].action_field).to.eql(['connector']);
+
+      const parsedUpdateNewValue = JSON.parse(userActions[2].new_value!);
+      expect(parsedUpdateNewValue.id).to.eql('none');
     });
   });
 };
