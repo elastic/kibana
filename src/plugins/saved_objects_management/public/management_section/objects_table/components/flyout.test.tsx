@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  importFileMock,
-  importLegacyFileMock,
-  resolveImportErrorsMock,
-  resolveIndexPatternConflictsMock,
-  resolveSavedObjectsMock,
-  resolveSavedSearchesMock,
-  saveObjectsMock,
-} from './flyout.test.mocks';
+import { importFileMock, resolveImportErrorsMock } from './flyout.test.mocks';
 
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test/jest';
