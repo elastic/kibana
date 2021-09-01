@@ -18,7 +18,8 @@ const DATE_WITH_DATA = {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('Observability alerts', function () {
+  // FLAKY, no issue yet
+  describe.skip('Observability alerts', function () {
     this.tags('includeFirefox');
 
     const pageObjects = getPageObjects(['common']);
