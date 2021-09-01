@@ -6,20 +6,13 @@
  */
 
 import React, { memo, PropsWithChildren, useMemo } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuPanelProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { GLOBAL_EFFECT_SCOPE, POLICY_EFFECT_SCOPE } from './translations';
 import { TextValueDisplay } from './text_value_display';
 import {
   ContextMenuWithRouterSupport,
   ContextMenuWithRouterSupportProps,
 } from '../../context_menu_with_router_support';
-import { ContextMenuItemNavByRouter } from '../../context_menu_with_router_support/context_menu_item_nav_by_rotuer';
 
 interface PolicyAttributes {
   id: string;
@@ -77,7 +70,11 @@ export const WithContextMenu = memo<WithContextMenuProps>(({ policies, children 
     <ContextMenuWithRouterSupport
       items={menuItems}
       anchorPosition="rightCenter"
-      button={<EuiButtonEmpty>{children}</EuiButtonEmpty>}
+      button={
+        <EuiButtonEmpty flush="both" size="s">
+          {children}
+        </EuiButtonEmpty>
+      }
     />
   );
 });

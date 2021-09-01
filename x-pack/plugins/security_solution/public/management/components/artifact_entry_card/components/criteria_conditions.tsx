@@ -64,7 +64,7 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(({ os, entries }
         <div>
           <strong>
             <EuiExpression description={''} value={CONDITION_OS} />
-            <EuiExpression description={CONDITION_OPERATOR_TYPE_WILDCARD} value={OS_LABELS[os]} />
+            <EuiExpression description={CONDITION_OPERATOR_TYPE_MATCH} value={OS_LABELS[os]} />
           </strong>
         </div>
       )}
