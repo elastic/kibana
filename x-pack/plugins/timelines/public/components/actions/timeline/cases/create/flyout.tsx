@@ -87,7 +87,6 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
       <StyledFlyout
         onClose={onCloseFlyout}
         data-test-subj="create-case-flyout"
-        // ownFocus={false}
         maskProps={{ className: maskOverlayClassName }}
       >
         <EuiFlyoutHeader hasBorder>
