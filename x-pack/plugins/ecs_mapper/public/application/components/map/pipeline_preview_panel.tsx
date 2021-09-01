@@ -69,7 +69,7 @@ export const PreviewPanel: FC<Props> = ({
           isInvalid={!isValidJson}
           error={
             !isValidJson
-              ? i18n.translate('xpack.ecsMapper.file.upload.pipelineName.nameErrorMessage', {
+              ? i18n.translate('xpack.ecsMapper.preview.invalidJson', {
                   defaultMessage: 'Invalid JSON.',
                 })
               : null
