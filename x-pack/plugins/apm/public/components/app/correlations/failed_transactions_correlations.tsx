@@ -31,10 +31,7 @@ import {
 } from '../../../../../observability/public';
 
 import { asPercent } from '../../../../common/utils/formatters';
-import type {
-  FailedTransactionsCorrelationValue,
-  FailedTransactionsCorrelationsAsyncSearchServiceRawResponse,
-} from '../../../../common/search_strategies/failed_transactions_correlations/types';
+import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -71,7 +68,7 @@ export function FailedTransactionsCorrelations({
     data: { ccsWarning, log, values },
     startFetch,
     cancelFetch,
-  } = useSearchStrategy<FailedTransactionsCorrelationsAsyncSearchServiceRawResponse>(
+  } = useSearchStrategy(
     APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS
   );
   const progress = loaded / total;

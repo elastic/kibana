@@ -29,7 +29,6 @@ import {
 } from '../../../../../observability/public';
 
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
-import type { LatencyCorrelationsAsyncSearchServiceRawResponse } from '../../../../common/search_strategies/latency_correlations/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -75,13 +74,10 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     },
     startFetch,
     cancelFetch,
-  } = useSearchStrategy<LatencyCorrelationsAsyncSearchServiceRawResponse>(
-    APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
-    {
-      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-      analyzeCorrelations: true,
-    }
-  );
+  } = useSearchStrategy(APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS, {
+    percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+    analyzeCorrelations: true,
+  });
   const progress = loaded / total;
 
   useEffect(() => {

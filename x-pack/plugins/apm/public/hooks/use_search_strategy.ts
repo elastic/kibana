@@ -18,7 +18,12 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 import type { SearchServiceParams } from '../../common/search_strategies/types';
 import type { RawResponseBase } from '../../common/search_strategies/types';
-import { ApmSearchStrategies } from '../../common/search_strategies/constants';
+import type { LatencyCorrelationsAsyncSearchServiceRawResponse } from '../../common/search_strategies/latency_correlations/types';
+import type { FailedTransactionsCorrelationsAsyncSearchServiceRawResponse } from '../../common/search_strategies/failed_transactions_correlations/types';
+import {
+  ApmSearchStrategies,
+  APM_SEARCH_STRATEGIES,
+} from '../../common/search_strategies/constants';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 
@@ -29,7 +34,6 @@ import { useTimeRange } from './use_time_range';
 
 interface SearchStrategyFetcherState {
   error?: Error;
-  isComplete: boolean;
   isRunning: boolean;
   loaded: number;
   total: number;
@@ -44,7 +48,6 @@ const getInitialRawResponse = <
   } as TRawResponse);
 
 const getInitialFetchState = (): SearchStrategyFetcherState => ({
-  isComplete: false,
   isRunning: false,
   loaded: 0,
   total: 100,
@@ -55,10 +58,32 @@ const getReducer = <T>() => (prev: T, update: Partial<T>): T => ({
   ...update,
 });
 
+interface SearchStrategyReturnBase {
+  state: SearchStrategyFetcherState;
+  startFetch: () => void;
+  cancelFetch: () => void;
+}
+
+export function useSearchStrategy(
+  searchStrategyName: typeof APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
+  options: {
+    percentileThreshold: number;
+    analyzeCorrelations: boolean;
+  }
+): {
+  data: LatencyCorrelationsAsyncSearchServiceRawResponse;
+} & SearchStrategyReturnBase;
+
+export function useSearchStrategy(
+  searchStrategyName: typeof APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS
+): {
+  data: FailedTransactionsCorrelationsAsyncSearchServiceRawResponse;
+} & SearchStrategyReturnBase;
+
 export function useSearchStrategy<
   TRawResponse extends RawResponseBase,
-  TOptions extends {} = {}
->(searchStrategyName: ApmSearchStrategies, options: TOptions = {} as TOptions) {
+  TOptions = unknown
+>(searchStrategyName: ApmSearchStrategies, options?: TOptions): unknown {
   const {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
@@ -90,8 +115,8 @@ export function useSearchStrategy<
 
   const startFetch = useCallback(() => {
     setFetchState({
+      ...getInitialFetchState(),
       error: undefined,
-      isComplete: false,
     });
     searchSubscription$.current?.unsubscribe();
     abortCtrl.current.abort();
@@ -106,14 +131,14 @@ export function useSearchStrategy<
         kuery,
         start,
         end,
-        ...optionsRef.current,
+        ...(optionsRef.current ? { ...optionsRef.current } : {}),
       },
     };
 
     // Submit the search request using the `data.search` service.
     searchSubscription$.current = data.search
       .search<
-        IKibanaSearchRequest<SearchServiceParams & TOptions>,
+        IKibanaSearchRequest<SearchServiceParams & (TOptions | {})>,
         IKibanaSearchResponse<TRawResponse>
       >(req, {
         strategy: searchStrategyName,
@@ -124,15 +149,14 @@ export function useSearchStrategy<
           setRawResponse(res.rawResponse);
           setFetchState({
             isRunning: res.isRunning || false,
-            loaded: res.loaded!,
-            total: res.total!,
+            loaded: res.loaded,
+            total: res.total,
           });
 
           if (isCompleteResponse(res)) {
             searchSubscription$.current?.unsubscribe();
             setFetchState({
               isRunning: false,
-              isComplete: true,
             });
           } else if (isErrorResponse(res)) {
             searchSubscription$.current?.unsubscribe();

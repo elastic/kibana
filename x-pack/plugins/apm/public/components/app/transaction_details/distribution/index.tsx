@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import type { LatencyCorrelationsAsyncSearchServiceRawResponse } from '../../../../../common/search_strategies/latency_correlations/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../../common/search_strategies/constants';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
@@ -91,10 +90,7 @@ export function TransactionDistribution({
     }
   );
 
-  const {
-    state,
-    data,
-  } = useSearchStrategy<LatencyCorrelationsAsyncSearchServiceRawResponse>(
+  const { state, data } = useSearchStrategy(
     APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
     {
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
