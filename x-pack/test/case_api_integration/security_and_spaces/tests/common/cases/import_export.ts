@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { join } from 'path';
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   deleteAllCaseItems,
   createCase,
@@ -29,8 +30,11 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('import and export cases', () => {
+    const actionsRemover = new ActionsRemover(supertest);
+
     afterEach(async () => {
       await deleteAllCaseItems(es);
+      await actionsRemover.removeAll();
     });
 
     it('exports a case with its associated user actions and comments', async () => {
@@ -152,6 +156,8 @@ export default ({ getService }: FtrProviderContext): void => {
         )
         .set('kbn-xsrf', 'true')
         .expect(200);
+
+      actionsRemover.add('default', '1cd34740-06ad-11ec-babc-0b08808e8e01', 'action', 'actions');
 
       const findResponse = await findCases({ supertest, query: {} });
       expect(findResponse.total).to.eql(1);
