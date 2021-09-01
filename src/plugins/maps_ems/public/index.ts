@@ -26,7 +26,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
 }
 
-export type { MapsEmsConfig, LayerConfig } from '../config';
+export type { MapsEmsConfig } from '../config';
 
 export * from '../common';
 

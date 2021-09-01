@@ -22,7 +22,7 @@ import { CancellationToken } from '../../../common';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import { ReportOutput } from '../../../common/types';
 import { ReportingConfigType } from '../../config';
-import { BasePayload, RunTaskFn } from '../../types';
+import { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
 import { Report, ReportDocument, ReportingStore, SavedReport } from '../store';
 import { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import {
@@ -43,6 +43,10 @@ interface ReportingExecuteTaskInstance {
   runAt?: Date;
 }
 
+interface TaskExecutor extends Pick<ExportTypeDefinition, 'jobContentEncoding'> {
+  jobExecutor: RunTaskFn<BasePayload>;
+}
+
 function isOutput(output: any): output is CompletedReportOutput {
   return output?.size != null;
 }
@@ -56,7 +60,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   private logger: LevelLogger;
   private taskManagerStart?: TaskManagerStartContract;
-  private taskExecutors?: Map<string, RunTaskFn<BasePayload>>;
+  private taskExecutors?: Map<string, TaskExecutor>;
   private kibanaId?: string;
   private kibanaName?: string;
   private store?: ReportingStore;
@@ -78,13 +82,16 @@ export class ExecuteReportTask implements ReportingTask {
     const { reporting } = this;
 
     const exportTypesRegistry = reporting.getExportTypesRegistry();
-    const executors = new Map<string, RunTaskFn<BasePayload>>();
+    const executors = new Map<string, TaskExecutor>();
     for (const exportType of exportTypesRegistry.getAll()) {
       const exportTypeLogger = this.logger.clone([exportType.id]);
       const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
       // The task will run the function with the job type as a param.
       // This allows us to retrieve the specific export type runFn when called to run an export
-      executors.set(exportType.jobType, jobExecutor);
+      executors.set(exportType.jobType, {
+        jobExecutor,
+        jobContentEncoding: exportType.jobContentEncoding,
+      });
     }
 
     this.taskExecutors = executors;
@@ -111,6 +118,10 @@ export class ExecuteReportTask implements ReportingTask {
       throw new Error('Reporting task runner has not been initialized!');
     }
     return this.taskManagerStart;
+  }
+
+  private getJobContentEncoding(jobType: string) {
+    return this.taskExecutors?.get(jobType)?.jobContentEncoding;
   }
 
   public async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
@@ -241,7 +252,7 @@ export class ExecuteReportTask implements ReportingTask {
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
-    return Rx.from(runner(task.id, task.payload, cancellationToken, stream))
+    return Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream))
       .pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
       .toPromise();
   }
@@ -323,12 +334,19 @@ export class ExecuteReportTask implements ReportingTask {
           this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
           try {
-            const stream = await getContentStream(this.reporting, {
-              id: report._id,
-              index: report._index,
-              if_primary_term: report._primary_term,
-              if_seq_no: report._seq_no,
-            });
+            const jobContentEncoding = this.getJobContentEncoding(jobType);
+            const stream = await getContentStream(
+              this.reporting,
+              {
+                id: report._id,
+                index: report._index,
+                if_primary_term: report._primary_term,
+                if_seq_no: report._seq_no,
+              },
+              {
+                encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
+              }
+            );
             const output = await this._performJob(task, cancellationToken, stream);
 
             stream.end();
