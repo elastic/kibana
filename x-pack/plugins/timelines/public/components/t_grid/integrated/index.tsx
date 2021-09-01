@@ -297,15 +297,15 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
             data-test-subj={`events-container-loading-${loading}`}
           >
             <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
-              <UpdatedFlexItem grow={false} $show={!loading && hasAlerts}>
+              <UpdatedFlexItem grow={false} $show={!loading}>
                 <InspectButton title={justTitle} inspect={inspect} loading={loading} />
               </UpdatedFlexItem>
-              <UpdatedFlexItem grow={false} $show={!loading && hasAlerts}>
+              <UpdatedFlexItem grow={false} $show={!loading}>
                 {!resolverIsShowing(graphEventId) && additionalFilters}
               </UpdatedFlexItem>
               {tGridEventRenderedViewEnabled &&
                 ['detections-page', 'detections-rules-details-page'].includes(id) && (
-                  <UpdatedFlexItem grow={false} $show={!loading && hasAlerts}>
+                  <UpdatedFlexItem grow={false} $show={!loading}>
                     <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
                   </UpdatedFlexItem>
                 )}

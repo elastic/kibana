@@ -347,11 +347,11 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
               data-timeline-id={STANDALONE_ID}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="baseline">
-                <UpdatedFlexItem grow={false} $show={!loading && hasAlerts}>
+              <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} $show={!loading && hasAlerts}>
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   <LastUpdatedAt updatedAt={updatedAt} />
                 </UpdatedFlexItem>
               </UpdatedFlexGroup>
