@@ -44,41 +44,41 @@ const MonitoringApp: React.FC<{
 
   return (
     <KibanaContextProvider services={{ ...core, ...plugins }}>
-    <ExternalConfigContext.Provider value={externalConfig}>
-      <GlobalStateProvider query={plugins.data.query} toasts={core.notifications.toasts}>
-        <MonitoringTimeContainer.Provider>
-          <Router history={history}>
-            <Switch>
-              <Route path="/no-data" component={NoData} />
-              <Route path="/loading" component={LoadingPage} />
-              <RouteInit
-                path="/license"
-                component={License}
-                codePaths={['all']}
-                fetchAllClusters={false}
-              />
-              <RouteInit
-                path="/home"
-                component={Home}
-                codePaths={['all']}
-                fetchAllClusters={false}
-              />
-              <RouteInit
-                path="/overview"
-                component={ClusterOverview}
-                codePaths={['all']}
-                fetchAllClusters={false}
-              />
-              <Redirect
-                to={{
-                  pathname: '/loading',
-                  search: history.location.search,
-                }}
-              />
-            </Switch>
-          </Router>
-        </MonitoringTimeContainer.Provider>
-      </GlobalStateProvider>
+      <ExternalConfigContext.Provider value={externalConfig}>
+        <GlobalStateProvider query={plugins.data.query} toasts={core.notifications.toasts}>
+          <MonitoringTimeContainer.Provider>
+            <Router history={history}>
+              <Switch>
+                <Route path="/no-data" component={NoData} />
+                <Route path="/loading" component={LoadingPage} />
+                <RouteInit
+                  path="/license"
+                  component={License}
+                  codePaths={['all']}
+                  fetchAllClusters={false}
+                />
+                <RouteInit
+                  path="/home"
+                  component={Home}
+                  codePaths={['all']}
+                  fetchAllClusters={false}
+                />
+                <RouteInit
+                  path="/overview"
+                  component={ClusterOverview}
+                  codePaths={['all']}
+                  fetchAllClusters={false}
+                />
+                <Redirect
+                  to={{
+                    pathname: '/loading',
+                    search: history.location.search,
+                  }}
+                />
+              </Switch>
+            </Router>
+          </MonitoringTimeContainer.Provider>
+        </GlobalStateProvider>
       </ExternalConfigContext.Provider>
     </KibanaContextProvider>
   );
