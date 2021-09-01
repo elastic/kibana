@@ -144,6 +144,36 @@ describe('#importSavedObjectsFromStream', () => {
    * intermediate steps in the interest of brevity.
    */
   describe('module calls', () => {
+    test('generates object key provider', async () => {
+      const options = setupOptions();
+
+      await importSavedObjectsFromStream(options);
+
+      expect(getObjectKeyProvider).toHaveBeenCalledTimes(1);
+      expect(getObjectKeyProvider).toHaveBeenCalledWith({
+        typeRegistry,
+        namespace,
+        useObjectNamespaces: false,
+        useProvidedNamespace: true,
+      });
+    });
+
+    test('uses correct arguments for the object key provider when `importNamespaces` is true', async () => {
+      const options = setupOptions({
+        importNamespaces: true,
+      });
+
+      await importSavedObjectsFromStream({ ...options, namespace: undefined });
+
+      expect(getObjectKeyProvider).toHaveBeenCalledTimes(1);
+      expect(getObjectKeyProvider).toHaveBeenCalledWith({
+        typeRegistry,
+        namespace: undefined,
+        useObjectNamespaces: true,
+        useProvidedNamespace: false,
+      });
+    });
+
     test('collects saved objects from stream', async () => {
       const options = setupOptions();
       const supportedTypes = ['foo-type'];
