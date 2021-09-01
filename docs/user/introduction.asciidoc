@@ -31,7 +31,7 @@ in the data, visualize your data on dashboards, and share your findings.  As a b
 you want to view existing dashboards and drill down into details.
 
 *{kib} works with all types of data.* Your data can be structured or unstructured text,
-numerical data, time-series data, geospatial data, logs, metrics, security events,
+numerical data, time series data, geospatial data, logs, metrics, security events,
 and more.
 No matter your data, {kib} can help you uncover patterns and relationships and visualize the results.
 
