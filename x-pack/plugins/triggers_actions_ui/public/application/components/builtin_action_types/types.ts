@@ -84,10 +84,9 @@ export interface EmailConfig {
 export interface EmailSecrets {
   user: string | null;
   password: string | null;
-  accessToken: string | null;
   clientId: string | null;
   clientSecret: string | null;
-  refreshToken: string | null;
+  tenantId: string | null;
 }
 
 export type EmailActionConnector = UserConfiguredActionConnector<EmailConfig, EmailSecrets>;

@@ -29,10 +29,9 @@ import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_l
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
-  const [tenantId, setTenantId] = useState<string | undefined>(undefined);
   const { docLinks } = useKibana().services;
   const { from, host, port, secure, hasAuth } = action.config;
-  const { user, password, clientId, clientSecret } = action.secrets;
+  const { user, password, clientId, clientSecret, tenantId } = action.secrets;
   useEffect(() => {
     if (!action.id) {
       editActionConfig('hasAuth', true);
@@ -52,9 +51,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
   const isUserInvalid: boolean =
     user !== undefined && errors.user !== undefined && errors.user.length > 0;
 
-  const [selectedOptions, setSelected] = useState<EuiComboBoxOptionOption[]>([
-    { key: 'oauth2', label: 'test' },
-  ]);
+  const [selectedOptions] = useState<EuiComboBoxOptionOption[]>([{ key: 'oauth2', label: 'test' }]);
   return (
     <>
       <EuiFlexGroup>
@@ -369,7 +366,12 @@ export const EmailActionConnectorFields: React.FunctionComponent<
                       fullWidth
                       value={tenantId || ''}
                       onChange={(e) => {
-                        setTenantId(e.target.value);
+                        editActionSecrets('tenantId', nullableString(e.target.value));
+                      }}
+                      onBlur={() => {
+                        if (!tenantId) {
+                          editActionSecrets('tenantId', '');
+                        }
                       }}
                     />
                   </EuiFormRow>
