@@ -21,6 +21,14 @@ class ExportSet {
   get size() {
     return this.values.size + this.types.size;
   }
+
+  /**
+   * @param {'value'|'type'} type
+   * @param {string} value
+   */
+  add(type, value) {
+    this[type + 's'].add(value);
+  }
 }
 
 module.exports = { ExportSet };
