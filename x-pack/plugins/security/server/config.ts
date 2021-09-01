@@ -393,11 +393,18 @@ function getSessionConfig(session: RawConfigType['session'], providers: Provider
   const defaultAnonymousSessionLifespan = schema.duration().validate('30d');
   return {
     cleanupInterval: session.cleanupInterval,
-    getExpirationTimeouts({ type, name }: AuthenticationProvider) {
+    getExpirationTimeouts(provider: AuthenticationProvider | undefined) {
       // Both idle timeout and lifespan from the provider specific session config can have three
       // possible types of values: `Duration`, `null` and `undefined`. The `undefined` type means that
       // provider doesn't override session config and we should fall back to the global one instead.
-      const providerSessionConfig = providers[type as keyof ProvidersConfigType]?.[name]?.session;
+      // Note: using an `undefined` provider argument returns the global timeouts.
+      let providerSessionConfig:
+        | { idleTimeout?: Duration | null; lifespan?: Duration | null }
+        | undefined;
+      if (provider) {
+        const { type, name } = provider;
+        providerSessionConfig = providers[type as keyof ProvidersConfigType]?.[name]?.session;
+      }
 
       // We treat anonymous sessions differently since users can create them without realizing it. This may lead to a
       // non controllable amount of sessions stored in the session index. To reduce the impact we set a 30 days lifespan
