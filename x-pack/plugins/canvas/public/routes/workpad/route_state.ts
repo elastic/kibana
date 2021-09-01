@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-expect-error
 import lzString from 'lz-string';
 
 export const encode = (state: any) => {
@@ -19,7 +18,7 @@ export const encode = (state: any) => {
 
 export const decode = (payload: string) => {
   try {
-    const stateJSON = lzString.decompress(payload);
+    const stateJSON = lzString.decompress(payload) ?? 'null';
     return JSON.parse(stateJSON);
   } catch (e) {
     return null;

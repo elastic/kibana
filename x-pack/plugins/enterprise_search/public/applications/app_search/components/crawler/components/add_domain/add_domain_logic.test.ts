@@ -479,7 +479,7 @@ describe('AddDomainLogic', () => {
             },
             contentVerification: {
               state: 'invalid',
-              message: 'Unable to verify content because the "Network Connectivity" check failed.',
+              message: 'Unable to verify content because the "Indexing Restrictions" check failed.',
             },
           });
         });
@@ -574,7 +574,7 @@ describe('AddDomainLogic', () => {
             },
             contentVerification: {
               state: 'invalid',
-              message: 'Unable to verify content because the "Network Connectivity" check failed.',
+              message: 'Unable to verify content because the "Indexing Restrictions" check failed.',
             },
           });
         });

@@ -86,8 +86,30 @@ describe('AlertSummaryView', () => {
           return {
             category: 'event',
             field: 'event.code',
-            values: ['malicious_thread'],
-            originalValue: ['malicious_thread'],
+            values: ['shellcode_thread'],
+            originalValue: ['shellcode_thread'],
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+    const wrapper = mount(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+    expect(wrapper.find('div[data-test-subj="summary-view"]').render()).toMatchSnapshot();
+  });
+  test('Behavior event code renders additional summary rows', () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'event' && item.field === 'event.code') {
+          return {
+            category: 'event',
+            field: 'event.code',
+            values: ['behavior'],
+            originalValue: ['behavior'],
           };
         }
         return item;

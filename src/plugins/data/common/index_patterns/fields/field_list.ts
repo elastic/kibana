@@ -8,24 +8,22 @@
 
 import { findIndex } from 'lodash';
 import { IFieldType } from './types';
-import { IndexPatternField } from './index_pattern_field';
-import { FieldSpec, IndexPatternFieldMap } from '../types';
-import { IndexPattern } from '../index_patterns';
+import { DataViewField } from './index_pattern_field';
+import { FieldSpec, DataViewFieldMap } from '../types';
+import { DataView } from '../index_patterns';
 
-type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;
+type FieldMap = Map<DataViewField['name'], DataViewField>;
 
-export interface IIndexPatternFieldList extends Array<IndexPatternField> {
+export interface IIndexPatternFieldList extends Array<DataViewField> {
   add(field: FieldSpec): void;
-  getAll(): IndexPatternField[];
-  getByName(name: IndexPatternField['name']): IndexPatternField | undefined;
-  getByType(type: IndexPatternField['type']): IndexPatternField[];
+  getAll(): DataViewField[];
+  getByName(name: DataViewField['name']): DataViewField | undefined;
+  getByType(type: DataViewField['type']): DataViewField[];
   remove(field: IFieldType): void;
   removeAll(): void;
   replaceAll(specs: FieldSpec[]): void;
   update(field: FieldSpec): void;
-  toSpec(options?: {
-    getFormatterForField?: IndexPattern['getFormatterForField'];
-  }): IndexPatternFieldMap;
+  toSpec(options?: { getFormatterForField?: DataView['getFormatterForField'] }): DataViewFieldMap;
 }
 
 // extending the array class and using a constructor doesn't work well
@@ -35,11 +33,11 @@ export const fieldList = (
   specs: FieldSpec[] = [],
   shortDotsEnable = false
 ): IIndexPatternFieldList => {
-  class FldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
+  class FldList extends Array<DataViewField> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
-    private groups: Map<IndexPatternField['type'], FieldMap> = new Map();
-    private setByName = (field: IndexPatternField) => this.byName.set(field.name, field);
-    private setByGroup = (field: IndexPatternField) => {
+    private groups: Map<DataViewField['type'], FieldMap> = new Map();
+    private setByName = (field: DataViewField) => this.byName.set(field.name, field);
+    private setByGroup = (field: DataViewField) => {
       if (typeof this.groups.get(field.type) === 'undefined') {
         this.groups.set(field.type, new Map());
       }
@@ -53,12 +51,12 @@ export const fieldList = (
     }
 
     public readonly getAll = () => [...this.byName.values()];
-    public readonly getByName = (name: IndexPatternField['name']) => this.byName.get(name);
-    public readonly getByType = (type: IndexPatternField['type']) => [
+    public readonly getByName = (name: DataViewField['name']) => this.byName.get(name);
+    public readonly getByType = (type: DataViewField['type']) => [
       ...(this.groups.get(type) || new Map()).values(),
     ];
     public readonly add = (field: FieldSpec) => {
-      const newField = new IndexPatternField({ ...field, shortDotsEnable });
+      const newField = new DataViewField({ ...field, shortDotsEnable });
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);
@@ -73,7 +71,7 @@ export const fieldList = (
     };
 
     public readonly update = (field: FieldSpec) => {
-      const newField = new IndexPatternField(field);
+      const newField = new DataViewField(field);
       const index = this.findIndex((f) => f.name === newField.name);
       this.splice(index, 1, newField);
       this.setByName(newField);
@@ -95,10 +93,10 @@ export const fieldList = (
     public toSpec({
       getFormatterForField,
     }: {
-      getFormatterForField?: IndexPattern['getFormatterForField'];
+      getFormatterForField?: DataView['getFormatterForField'];
     } = {}) {
       return {
-        ...this.reduce<IndexPatternFieldMap>((collector, field) => {
+        ...this.reduce<DataViewFieldMap>((collector, field) => {
           collector[field.name] = field.toSpec({ getFormatterForField });
           return collector;
         }, {}),

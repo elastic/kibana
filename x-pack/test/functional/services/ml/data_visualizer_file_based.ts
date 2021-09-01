@@ -132,6 +132,17 @@ export function MachineLearningDataVisualizerFileBasedProvider(
       });
     },
 
+    async assertIngestedDocCount(count: number) {
+      const docCount = await mlCommonUI.getEuiDescriptionListDescriptionFromTitle(
+        'dataVisualizerFileImportSuccessCallout',
+        'Documents ingested'
+      );
+      expect(docCount).to.eql(
+        count,
+        `Expected Documents ingested count to be '${count}' (got '${docCount}')`
+      );
+    },
+
     async selectCreateFilebeatConfig() {
       await testSubjects.scrollIntoView('fileDataVisFilebeatConfigLink', {
         bottomOffset: fixedFooterHeight,

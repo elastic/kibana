@@ -93,7 +93,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
               <EuiButton
                 iconType="analyzeEvent"
                 color="secondary"
-                href={`${basePath}/app/integrations#/detail/apm-0.3.0/overview`}
+                href={`${basePath}/app/integrations#/detail/apm-0.4.0/overview`}
               >
                 {i18n.translate(
                   'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',
