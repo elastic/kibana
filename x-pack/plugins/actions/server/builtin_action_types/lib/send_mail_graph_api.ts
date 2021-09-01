@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import qs from 'qs';
 import axios, { AxiosResponse } from 'axios';
 import { Logger } from '../../../../../../src/core/server';
 import { request } from './axios_utils';
@@ -56,7 +57,7 @@ export async function postSendEmailMSExchange(
 }
 
 function getMessage(emailOptions: SendEmailOptions) {
-  const { transport, routing, content, configurationUtilities, hasAuth, provider } = emailOptions;
+  const { routing, content } = emailOptions;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
   return {
