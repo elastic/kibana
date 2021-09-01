@@ -17,6 +17,7 @@ export function EmptyPrompt({
 }) {
   return (
     <EuiEmptyPrompt
+      data-test-subj="customLinksEmptyPrompt"
       iconType="link"
       iconColor=""
       title={
