@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_ID, VERSION } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeFactory } from './persistence_types';
 
@@ -31,7 +31,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                 body: alerts.flatMap((event) => [
                   { index: {} },
                   {
-                    [ALERT_ID]: event.id,
+                    [ALERT_INSTANCE_ID]: event.id,
                     [VERSION]: ruleDataClient.kibanaVersion,
                     ...commonRuleFields,
                     ...event.fields,
