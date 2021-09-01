@@ -12,11 +12,17 @@ import { CardHeader } from './components/card_header';
 import { APP_ID } from '../../../../common/constants';
 import { SubHeader } from './components/sub_header';
 import { getEmptyValue } from '../../../common/components/empty_value';
+import { CriteriaConditions } from './components/criteria_conditions';
 
 // FIXME:PT fix types for the artifact type
 
 export interface ArtifactEntryCardProps<T extends {} = {}> extends CommonProps {
   item: T;
+  /**
+   * An object with policy names keyed by their `id`s. Used when the Artifact's `effectScope` is
+   * per policy to display them in a popup menu
+   */
+  policyNames?: Record<string, string>;
 }
 
 /**
@@ -29,7 +35,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(({ item, ...common
 
   return (
     <EuiPanel hasBorder={true} {...commonProps} paddingSize="none">
-      <EuiPanel hasBorder={false} borderRadius="none" hasShadow={false}>
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
         <CardHeader
           name={item.name}
           createdDate={item.created_at}
@@ -68,8 +74,8 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(({ item, ...common
 
       <EuiHorizontalRule margin="xs" />
 
-      <EuiPanel hasBorder={false} borderRadius="none" hasShadow={false}>
-        <div>{'conditions here'}</div>
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+        <CriteriaConditions os={item.os} entries={item.entries} />
       </EuiPanel>
     </EuiPanel>
   );

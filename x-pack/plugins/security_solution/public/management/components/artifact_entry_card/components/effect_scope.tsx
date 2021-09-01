@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { GLOBAL_EFFECT_SCOPE, POLICY_EFFECT_SCOPE } from './translations';
 import { TextValueDisplay } from './text_value_display';
@@ -16,17 +16,19 @@ export interface EffectScopeProps {
 }
 
 export const EffectScope = memo<EffectScopeProps>(({ policies }) => {
-  // FIXME:PT Implement popover if policies are >0
+  const [icon, label] = useMemo(() => {
+    return policies
+      ? ['partial', POLICY_EFFECT_SCOPE(policies.length)]
+      : ['global', GLOBAL_EFFECT_SCOPE];
+  }, [policies]);
 
   return (
     <EuiFlexGroup responsive={false} wrap={false} alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="globe" size="m" />
+        <EuiIcon type={icon} size="m" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <TextValueDisplay>
-          {policies ? POLICY_EFFECT_SCOPE(policies.length) : GLOBAL_EFFECT_SCOPE}
-        </TextValueDisplay>
+        <TextValueDisplay>{label}</TextValueDisplay>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
