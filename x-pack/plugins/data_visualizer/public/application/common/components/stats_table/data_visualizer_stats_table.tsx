@@ -105,7 +105,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
                   defaultMessage: 'Collapse details for all fields',
                 })
           }
-          iconType={expandAll ? 'arrowUp' : 'arrowDown'}
+          iconType={expandAll ? 'arrowDown' : 'arrowRight'}
         />
       ),
       align: RIGHT_ALIGNMENT,
@@ -114,7 +114,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       render: (item: DataVisualizerTableItem) => {
         const displayName = item.displayName ?? item.fieldName;
         if (item.fieldName === undefined) return null;
-        const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown';
+        const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowDown' : 'arrowRight';
         return (
           <EuiButtonIcon
             data-test-subj={`dataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
