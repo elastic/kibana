@@ -31,7 +31,7 @@ _Docker Compose is required_
 
 ## Testing
 
-Go to [tests documentation](./scripts/test)
+Go to [tests documentation](./scripts/test/README.md)
 
 ## Linting
 
