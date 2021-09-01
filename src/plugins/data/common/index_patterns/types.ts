@@ -47,9 +47,10 @@ export interface RuntimeField extends ESRuntimeField {
 }
 
 /**
- * Runtime fields are like other fields when it comes to formatting or giving
- * them a custom label. When adding a new runtime field in the Data view we allow the
- * consumer to pass along a "format", "customLabel" or "popularity".
+ * This is the RuntimeField interface enhanced with Data view field
+ * configuration: field format definition, customLabel or popularity.
+ *
+ * @see {@link RuntimeField}
  */
 export interface EnhancedRuntimeField extends Omit<RuntimeField, 'format'> {
   format?: SerializedFieldFormat;
