@@ -45,10 +45,7 @@ export interface ImportSavedObjectsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
-  /**
-   * // TODO: doc
-   * If true
-   */
+  /** If true, the namespaces of the objects from the import file will be imported. Defaults to false. */
   importNamespaces: boolean;
 }
 

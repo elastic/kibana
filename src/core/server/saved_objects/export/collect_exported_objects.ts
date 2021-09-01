@@ -114,7 +114,6 @@ export const collectExportedObjects = async ({
           references,
           namespace,
           client: savedObjectsClient,
-          typeRegistry,
         });
         collectedMissingRefs.push(...missingRefs);
         currentObjects = fetchedObjects;
@@ -168,15 +167,12 @@ interface FetchReferencesResult {
 const fetchReferences = async ({
   references,
   client,
-  typeRegistry,
   namespace,
 }: {
   references: CollectedReference[];
   client: SavedObjectsClientContract;
-  typeRegistry: ISavedObjectTypeRegistry;
   namespace?: string;
 }): Promise<FetchReferencesResult> => {
-  // TODO when `bulkGet` supports specifying namespaces:
   const { saved_objects: savedObjects } = await client.bulkGet(references, { namespace });
   return {
     objects: savedObjects.filter((obj) => !obj.error),
@@ -185,29 +181,6 @@ const fetchReferences = async ({
       .map((obj) => ({ type: obj.type, id: obj.id })),
   };
 };
-
-/*
-const getTargetSpace = (
-  reference: CollectedReference,
-  typeRegistry: ISavedObjectTypeRegistry,
-  defaultNamespace?: string
-) => {
-  // TODO
-
-  if (objNsType === 'single') {
-    targetSpace = obj.namespaces![0];
-  } else if (objNsType !== 'agnostic') {
-    if (
-      obj.namespaces!.includes('*') ||
-      (currentNamespace && obj.namespaces!.includes(currentNamespace))
-    ) {
-      targetSpace = currentNamespace;
-    } else {
-      targetSpace = obj.namespaces![0];
-    }
-  }
-};
-*/
 
 const buildTransforms = (typeRegistry: ISavedObjectTypeRegistry) =>
   typeRegistry.getAllTypes().reduce((transformMap, type) => {

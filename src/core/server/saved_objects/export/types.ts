@@ -18,7 +18,7 @@ export interface SavedObjectExportBaseOptions {
   /**
    * Flag to also include namespace information in the export stream.
    * By default, namespace information is not included in exported objects.
-   * Note: this also impacts the presence of namespaces in the errors and excluded objects.
+   * @remarks this also impacts the presence of namespaces in the errors and excluded objects.
    */
   includeNamespaces?: boolean;
   /** flag to not append {@link SavedObjectsExportResultDetails | export details} to the end of the export stream. */
