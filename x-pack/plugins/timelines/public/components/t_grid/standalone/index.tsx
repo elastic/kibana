@@ -394,7 +394,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             </EventsContainerLoading>
           </>
         ) : null}
-        <AddToCaseAction {...addToCaseActionProps} />
+        <AddToCaseAction {...addToCaseActionProps} disableAlerts />
       </AlertsTableWrapper>
     </InspectButtonContainer>
   );
