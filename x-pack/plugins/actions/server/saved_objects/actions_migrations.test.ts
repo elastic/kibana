@@ -166,6 +166,14 @@ describe('successful migrations', () => {
       expect(migratedAction).toEqual(action);
     });
   });
+
+  describe('8.0.0', () => {
+    test('no op migration for rules SO', () => {
+      const migration800 = getActionsMigrations(encryptedSavedObjectsSetup)['8.0.0'];
+      const action = getMockData({});
+      expect(migration800(action, context)).toEqual(action);
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {
