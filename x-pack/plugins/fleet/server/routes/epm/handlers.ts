@@ -162,7 +162,7 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
     } else {
       const registryResponse = await getFile(pkgName, pkgVersion, filePath);
 
-      const headersToProxy: string[] = ['content-type', 'cache-control'];
+      const headersToProxy = ['content-type', 'cache-control'] as const;
       const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
         const value = registryResponse.headers.get(knownHeader);
         if (value !== null) {
