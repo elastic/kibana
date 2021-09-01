@@ -128,7 +128,10 @@ describe('<FieldEditor />', () => {
           onChange,
         },
         {
-          namesNotAllowed: existingFields,
+          namesNotAllowed: {
+            fields: existingFields,
+            runtimeComposites: [],
+          },
           existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
         }
@@ -165,7 +168,10 @@ describe('<FieldEditor />', () => {
           onChange,
         },
         {
-          namesNotAllowed: existingRuntimeFieldNames,
+          namesNotAllowed: {
+            fields: existingRuntimeFieldNames,
+            runtimeComposites: [],
+          },
           existingConcreteFields: [],
           fieldTypeToProcess: 'runtime',
         }

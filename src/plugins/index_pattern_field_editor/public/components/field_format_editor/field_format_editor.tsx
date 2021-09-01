@@ -10,18 +10,13 @@ import React, { PureComponent } from 'react';
 import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  DataView,
-  KBN_FIELD_TYPES,
-  ES_FIELD_TYPES,
-  DataPublicPluginStart,
-} from 'src/plugins/data/public';
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES, DataPublicPluginStart } from 'src/plugins/data/public';
 import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
 import { CoreStart } from 'src/core/public';
 
 import { castEsToKbnFieldTypeName } from '../../../../data/public';
 import { FormatEditorServiceStart } from '../../service';
-import { SerializedFieldFormat } from '../../shared_imports';
+import { SerializedFieldFormat, DataView } from '../../shared_imports';
 import { FormatEditor } from './format_editor';
 
 export interface FormatSelectEditorProps {
