@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
@@ -24,9 +18,9 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { unit } from '../../../utils/style';
 import { SparkPlot } from '../charts/spark_plot';
 import { ImpactBar } from '../ImpactBar';
-import { TableFetchWrapper } from '../table_fetch_wrapper';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
-import { OverviewTableContainer } from '../overview_table_container';
+import { ITableColumn, ManagedTable } from '../managed_table';
+import { EmptyMessage } from '../EmptyMessage';
 
 export type DependenciesItem = Omit<
   ConnectionStatsItemWithComparisonData,
@@ -43,29 +37,12 @@ interface Props {
   title: React.ReactNode;
   nameColumnTitle: React.ReactNode;
   status: FETCH_STATUS;
-  compact?: boolean;
 }
 
 export function DependenciesTable(props: Props) {
-  const {
-    dependencies,
-    fixedHeight,
-    link,
-    title,
-    nameColumnTitle,
-    status,
-    compact = true,
-  } = props;
+  const { dependencies, link, title, nameColumnTitle, status } = props;
 
-  const pagination = compact
-    ? {
-        initialPageSize: 5,
-        pageSizeOptions: [5],
-        hidePerPageOptions: true,
-      }
-    : {};
-
-  const columns: Array<EuiBasicTableColumn<DependenciesItem>> = [
+  const columns: Array<ITableColumn<DependenciesItem>> = [
     {
       field: 'name',
       name: nameColumnTitle,
@@ -170,6 +147,14 @@ export function DependenciesTable(props: Props) {
       impactValue: item.currentStats.impact,
     })) ?? [];
 
+  const noItemsMessage = (
+    <EmptyMessage
+      heading={i18n.translate('xpack.apm.tracesTable.notFoundLabel', {
+        defaultMessage: 'No dependencies found',
+      })}
+    />
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -183,28 +168,15 @@ export function DependenciesTable(props: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <TableFetchWrapper status={status}>
-          <OverviewTableContainer
-            fixedHeight={fixedHeight}
-            isEmptyAndLoading={
-              items.length === 0 && status === FETCH_STATUS.LOADING
-            }
-          >
-            <EuiInMemoryTable
-              columns={columns}
-              items={items}
-              allowNeutralSort={false}
-              loading={status === FETCH_STATUS.LOADING}
-              pagination={pagination}
-              sorting={{
-                sort: {
-                  direction: 'desc',
-                  field: 'impactValue',
-                },
-              }}
-            />
-          </OverviewTableContainer>
-        </TableFetchWrapper>
+        <ManagedTable
+          isLoading={status === FETCH_STATUS.LOADING}
+          columns={columns}
+          items={items}
+          noItemsMessage={noItemsMessage}
+          initialSortField="impactValue"
+          initialSortDirection="desc"
+          initialPageSize={5}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
