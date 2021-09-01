@@ -12,7 +12,7 @@ import { API_BASE_URL } from '../../../common/constants';
 import { LevelLogger } from '../../lib';
 import { BaseParams } from '../../types';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { handleError, handleGenerateRequest } from '../lib/handle_request';
+import { RequestHandler } from '../lib/request_handler';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
@@ -76,19 +76,12 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Le
         });
       }
 
+      const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
+
       try {
-        return await handleGenerateRequest(
-          reporting,
-          user,
-          req.params.exportType,
-          jobParams,
-          context,
-          req,
-          res,
-          logger
-        );
+        return await requestHandler.handleGenerateRequest(req.params.exportType, jobParams);
       } catch (err) {
-        return handleError(res, err);
+        return requestHandler.handleError(err);
       }
     })
   );

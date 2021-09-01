@@ -14,7 +14,7 @@ import {
   createMockReportingCore,
 } from '../../test_helpers';
 import { BaseParams, ReportingRequestHandlerContext, ReportingSetup } from '../../types';
-import { handleGenerateRequest } from './handle_request';
+import { RequestHandler } from './request_handler';
 
 jest.mock('../../lib/enqueue_job', () => ({
   enqueueJob: () => ({
@@ -48,6 +48,7 @@ describe('Handle request to generate', () => {
   let mockContext: ReturnType<typeof getMockContext>;
   let mockRequest: ReturnType<typeof getMockRequest>;
   let mockResponseFactory: ReturnType<typeof getMockResponseFactory>;
+  let requestHandler: RequestHandler;
 
   const mockJobParams = {} as BaseParams;
 
@@ -62,21 +63,19 @@ describe('Handle request to generate', () => {
 
     mockContext = getMockContext();
     mockContext.reporting = {} as ReportingSetup;
+    requestHandler = new RequestHandler(
+      reportingCore,
+      { username: 'testymcgee' },
+      mockContext,
+      mockRequest,
+      mockResponseFactory,
+      mockLogger
+    );
   });
 
   test('disallows invalid export type', async () => {
-    expect(
-      await handleGenerateRequest(
-        reportingCore,
-        { username: 'testymcgee' },
-        'neanderthals',
-        mockJobParams,
-        mockContext,
-        mockRequest,
-        mockResponseFactory,
-        mockLogger
-      )
-    ).toMatchInlineSnapshot(`
+    expect(await requestHandler.handleGenerateRequest('neanderthals', mockJobParams))
+      .toMatchInlineSnapshot(`
       Object {
         "body": "Invalid export-type of neanderthals",
       }
@@ -88,18 +87,7 @@ describe('Handle request to generate', () => {
       csv: { enableLinks: false, message: `seeing this means the license isn't supported` },
     }));
 
-    expect(
-      await handleGenerateRequest(
-        reportingCore,
-        { username: 'testymcgee' },
-        'csv',
-        mockJobParams,
-        mockContext,
-        mockRequest,
-        mockResponseFactory,
-        mockLogger
-      )
-    ).toMatchInlineSnapshot(`
+    expect(await requestHandler.handleGenerateRequest('csv', mockJobParams)).toMatchInlineSnapshot(`
       Object {
         "body": "seeing this means the license isn't supported",
       }
@@ -107,18 +95,7 @@ describe('Handle request to generate', () => {
   });
 
   test('generates the download path', async () => {
-    expect(
-      await handleGenerateRequest(
-        reportingCore,
-        { username: 'testymcgee' },
-        'csv',
-        mockJobParams,
-        mockContext,
-        mockRequest,
-        mockResponseFactory,
-        mockLogger
-      )
-    ).toMatchInlineSnapshot(`
+    expect(await requestHandler.handleGenerateRequest('csv', mockJobParams)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
           "job": "{\\"id\\":\\"id-of-this-test-report\\"}",

@@ -11,9 +11,9 @@ import { ReportingCore } from '../../';
 import { ROUTE_TAG_CAN_REDIRECT } from '../../../../security/server';
 import { API_BASE_URL } from '../../../common/constants';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { handleUnavailable } from '../lib/handle_request';
 import { jobsQueryFactory } from '../lib/jobs_query';
 import { deleteJobResponseHandler, downloadJobResponseHandler } from '../lib/job_response_handler';
+import { handleUnavailable } from '../lib/request_handler';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 

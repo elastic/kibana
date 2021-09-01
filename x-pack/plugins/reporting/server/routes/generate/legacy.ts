@@ -11,7 +11,7 @@ import { API_BASE_URL } from '../../../common/constants';
 import { ReportingCore } from '../../core';
 import { LevelLogger } from '../../lib';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { handleError, handleGenerateRequest } from '../lib/handle_request';
+import { RequestHandler } from '../lib/request_handler';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
@@ -35,6 +35,7 @@ export function registerLegacy(reporting: ReportingCore, logger: LevelLogger) {
       },
 
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+        const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
         const message = `The following URL is deprecated and will stop working in the next major version: ${req.url.pathname}${req.url.search}`;
         logger.warn(message, ['deprecation']);
 
@@ -46,25 +47,16 @@ export function registerLegacy(reporting: ReportingCore, logger: LevelLogger) {
           }: { title: string; savedObjectId: string; browserTimezone: string } = req.params;
           const queryString = querystring.stringify(req.query as ParsedUrlQueryInput | undefined);
 
-          return await handleGenerateRequest(
-            reporting,
-            user,
-            exportTypeId,
-            {
-              title,
-              objectType,
-              savedObjectId,
-              browserTimezone,
-              queryString,
-              version: reporting.getKibanaVersion(),
-            },
-            context,
-            req,
-            res,
-            logger
-          );
+          return await requestHandler.handleGenerateRequest(exportTypeId, {
+            title,
+            objectType,
+            savedObjectId,
+            browserTimezone,
+            queryString,
+            version: reporting.getKibanaVersion(),
+          });
         } catch (err) {
-          throw handleError(res, err);
+          throw requestHandler.handleError(err);
         }
       })
     );

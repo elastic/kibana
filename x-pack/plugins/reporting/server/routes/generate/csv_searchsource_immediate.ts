@@ -14,7 +14,7 @@ import { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immedi
 import { LevelLogger as Logger } from '../../lib';
 import { TaskRunResult } from '../../lib/tasks';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { handleError } from '../lib/handle_request';
+import { RequestHandler } from '../lib/request_handler';
 
 const API_BASE_URL_V1 = '/api/reporting/v1';
 const API_BASE_GENERATE_V1 = `${API_BASE_URL_V1}/generate`;
@@ -63,9 +63,10 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     },
     authorizedUserPreRouting(
       reporting,
-      async (_user, context, req: CsvFromSavedObjectRequest, res) => {
+      async (user, context, req: CsvFromSavedObjectRequest, res) => {
         const logger = parentLogger.clone(['csv_searchsource_immediate']);
         const runTaskFn = runTaskFnFactory(reporting, logger);
+        const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
 
         try {
           let buffer = Buffer.from('');
@@ -106,7 +107,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           });
         } catch (err) {
           logger.error(err);
-          return handleError(res, err);
+          return requestHandler.handleError(err);
         }
       }
     )
