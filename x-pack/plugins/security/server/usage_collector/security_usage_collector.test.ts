@@ -47,8 +47,8 @@ describe('Security UsageCollector', () => {
     enabledAuthProviders: ['basic'],
     loginSelectorEnabled: false,
     httpAuthSchemes: ['apikey'],
-    sessionIdleTimeoutInMinutes: 60,
-    sessionLifespanInMinutes: 43200,
+    sessionIdleTimeoutInMinutes: 0,
+    sessionLifespanInMinutes: 0,
     sessionCleanupInMinutes: 60,
   };
 
