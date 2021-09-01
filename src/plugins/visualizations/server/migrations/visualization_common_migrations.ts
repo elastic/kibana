@@ -26,16 +26,14 @@ export const commonAddDropLastBucketIntoTSVBModel = (visState: any) => {
       ...visState,
       params: {
         ...visState.params,
-        series: visState.params.series
-          ? visState.params.series.map((s: any) =>
-              s.override_index_pattern
-                ? {
-                    ...s,
-                    series_drop_last_bucket: s.series_drop_last_bucket ?? 1,
-                  }
-                : s
-            )
-          : undefined,
+        series: visState.params?.series?.map((s: any) =>
+          s.override_index_pattern
+            ? {
+                ...s,
+                series_drop_last_bucket: s.series_drop_last_bucket ?? 1,
+              }
+            : s
+        ),
         drop_last_bucket: visState.params.drop_last_bucket ?? 1,
       },
     };
