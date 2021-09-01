@@ -30,7 +30,7 @@ experimental[] Create a centrally-managed Logstash pipeline, or update an existi
 (Optional, object) The pipeline settings, represented as object keys, include the following:
  * `pipeline.workers`
   `pipeline.batch.size`,
-  `pipeline.batch.delay`,
+*  `pipeline.batch.delay`
   `pipeline.ecs_compatibility`,
   `pipeline.ordered`,
   `queue.type`,
