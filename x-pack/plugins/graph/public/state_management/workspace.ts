@@ -5,16 +5,41 @@
  * 2.0.
  */
 
-import actionCreatorFactory from 'typescript-fsa';
+import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
-import { takeLatest, select, call } from 'redux-saga/effects';
-import { GraphStoreDependencies, GraphState } from '.';
+import { takeLatest, select, call, put } from 'redux-saga/effects';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
+import { createSelector } from 'reselect';
+import { GraphStoreDependencies, GraphState, fillWorkspace } from '.';
+import { reset } from './global';
 import { datasourceSelector } from './datasource';
-import { selectedFieldsSelector } from './fields';
+import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
-const actionCreator = actionCreatorFactory('x-pack/graph');
+import { Workspace } from '../types';
 
-export const fillWorkspace = actionCreator<void>('FILL_WORKSPACE');
+const actionCreator = actionCreatorFactory('x-pack/graph/workspace');
+
+export interface WorkspaceState {
+  isInitialized: boolean;
+}
+
+const initialWorkspaceState: WorkspaceState = {
+  isInitialized: false,
+};
+
+export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
+export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
+
+export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
+  .case(reset, () => ({ isInitialized: false }))
+  .case(initializeWorkspace, () => ({ isInitialized: true }))
+  .build();
+
+export const workspaceSelector = (state: GraphState) => state.workspace;
+export const workspaceInitializedSelector = createSelector(
+  workspaceSelector,
+  (workspace: WorkspaceState) => workspace.isInitialized
+);
 
 /**
  * Saga handling filling in top terms into workspace.
@@ -23,8 +48,7 @@ export const fillWorkspace = actionCreator<void>('FILL_WORKSPACE');
  */
 export const fillWorkspaceSaga = ({
   getWorkspace,
-  setWorkspaceInitialized,
-  notifyAngular,
+  notifyReact,
   http,
   notifications,
 }: GraphStoreDependencies) => {
@@ -47,8 +71,8 @@ export const fillWorkspaceSaga = ({
         nodes: topTermNodes,
         edges: [],
       });
-      setWorkspaceInitialized();
-      notifyAngular();
+      yield put(initializeWorkspace());
+      notifyReact();
       workspace.fillInGraph(fields.length * 10);
     } catch (e) {
       const message = 'body' in e ? e.body.message : e.message;
@@ -63,5 +87,41 @@ export const fillWorkspaceSaga = ({
 
   return function* () {
     yield takeLatest(fillWorkspace.match, fetchNodes);
+  };
+};
+
+export const submitSearchSaga = ({
+  getWorkspace,
+  handleSearchQueryError,
+}: GraphStoreDependencies) => {
+  function* submit(action: Action<string>) {
+    const searchTerm = action.payload;
+    yield put(initializeWorkspace());
+
+    // type casting is safe, at this point workspace should be loaded
+    const workspace = getWorkspace() as Workspace;
+    const numHops = 2;
+    const liveResponseFields = liveResponseFieldsSelector(yield select());
+
+    if (searchTerm.startsWith('{')) {
+      try {
+        const query = JSON.parse(searchTerm);
+        if (query.vertices) {
+          // Is a graph explore request
+          workspace.callElasticsearch(query);
+        } else {
+          // Is a regular query DSL query
+          workspace.search(query, liveResponseFields, numHops);
+        }
+      } catch (err) {
+        handleSearchQueryError(err);
+      }
+      return;
+    }
+    workspace.simpleSearch(searchTerm, liveResponseFields, numHops);
+  }
+
+  return function* () {
+    yield takeLatest(submitSearch.match, submit);
   };
 };

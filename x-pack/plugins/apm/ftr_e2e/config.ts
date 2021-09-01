@@ -35,6 +35,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--home.disableWelcomeScreen=true',
         '--csp.strict=false',
+        '--csp.warnLegacyBrowsers=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
       ],
