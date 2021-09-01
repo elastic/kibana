@@ -197,6 +197,7 @@ export class DataPublicPlugin
       autocomplete: this.autocomplete.start(),
       fieldFormats,
       indexPatterns,
+      dataViews: indexPatterns,
       query,
       search,
       nowProvider: this.nowProvider,
