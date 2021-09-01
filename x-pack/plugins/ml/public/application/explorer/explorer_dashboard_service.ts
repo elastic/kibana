@@ -83,6 +83,10 @@ const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
         appState.mlExplorerSwimlane.severity = state.swimLaneSeverity;
       }
 
+      if (state.showCharts !== undefined) {
+        appState.mlShowCharts = state.showCharts;
+      }
+
       if (state.filterActive) {
         appState.mlExplorerFilter.influencersFilterQuery = state.influencersFilterQuery;
         appState.mlExplorerFilter.filterActive = state.filterActive;
@@ -167,6 +171,9 @@ export const explorerService = {
   },
   setSwimLaneSeverity: (payload: number) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_SWIM_LANE_SEVERITY, payload });
+  },
+  setShowCharts: (payload: boolean) => {
+    explorerAction$.next({ type: EXPLORER_ACTION.SET_SHOW_CHARTS, payload });
   },
 };
 

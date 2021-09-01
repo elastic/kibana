@@ -53,7 +53,6 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
     withSteps = true,
   }) => {
     const { isSubmitting } = useFormContext();
-
     const firstStep = useMemo(
       () => ({
         title: i18n.STEP_ONE_TITLE,
