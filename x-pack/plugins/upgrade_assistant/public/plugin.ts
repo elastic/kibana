@@ -34,8 +34,7 @@ export class UpgradeAssistantUIPlugin
     };
 
     const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {
-      defaultMessage: '{version} Upgrade Assistant',
-      values: { version: `${kibanaVersionInfo.nextMajor}.0` },
+      defaultMessage: 'Upgrade Assistant',
     });
 
     appRegistrar.registerApp({
