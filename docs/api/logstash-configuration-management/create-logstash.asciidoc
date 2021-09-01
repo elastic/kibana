@@ -35,7 +35,7 @@ experimental[] Create a centrally-managed Logstash pipeline, or update an existi
 *  `pipeline.ordered`
 *  `queue.type`
 *  `queue.max_bytes`
-  `queue.checkpoint.writes`.
+*  `queue.checkpoint.writes`
 
 [[logstash-configuration-management-api-create-codes]]
 ==== Response code
