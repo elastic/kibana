@@ -69,9 +69,9 @@ export const hasFieldsSelector = createSelector(
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const updateSaveButtonSaga = ({ notifyAngular }: GraphStoreDependencies) => {
+export const updateSaveButtonSaga = ({ notifyReact }: GraphStoreDependencies) => {
   function* notify(): IterableIterator<void> {
-    notifyAngular();
+    notifyReact();
   }
   return function* () {
     yield takeLatest(matchesOne(selectField, deselectField), notify);
@@ -84,10 +84,7 @@ export const updateSaveButtonSaga = ({ notifyAngular }: GraphStoreDependencies) 
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncFieldsSaga = ({
-  getWorkspace,
-  setLiveResponseFields,
-}: GraphStoreDependencies): (() => Generator) => {
+export const syncFieldsSaga = ({ getWorkspace }: GraphStoreDependencies): (() => Generator) => {
   function* syncFields(): Generator<any, any, any> {
     const workspace = getWorkspace();
     if (!workspace) {
@@ -96,7 +93,6 @@ export const syncFieldsSaga = ({
 
     const currentState = yield select();
     workspace.options.vertex_fields = selectedFieldsSelector(currentState);
-    setLiveResponseFields(liveResponseFieldsSelector(currentState));
   }
   return function* () {
     yield takeEvery(
@@ -112,7 +108,7 @@ export const syncFieldsSaga = ({
  *
  * Won't be necessary once the workspace is moved to redux
  */
-export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDependencies) => {
+export const syncNodeStyleSaga = ({ getWorkspace, notifyReact }: GraphStoreDependencies) => {
   function* syncNodeStyle(action: Action<InferActionType<typeof updateFieldProperties>>) {
     const workspace = getWorkspace();
     if (!workspace) {
@@ -135,7 +131,7 @@ export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDep
         }
       });
     }
-    notifyAngular();
+    notifyReact();
 
     const selectedFields = selectedFieldsSelector(yield select());
     workspace.options.vertex_fields = selectedFields;

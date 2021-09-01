@@ -7,19 +7,12 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
-  EuiCallOut,
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
   EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { enableInspectEsQueries } from '../../../../observability/public';
-import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
-import { useKibanaUrl } from '../../hooks/useKibanaUrl';
 import { useBreakPoints } from '../../hooks/use_break_points';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './kuery_bar';
@@ -33,52 +26,6 @@ interface Props {
   showTransactionTypeSelector?: boolean;
   kueryBarPlaceholder?: string;
   kueryBarBoolFilter?: QueryDslQueryContainer[];
-}
-
-function DebugQueryCallout() {
-  const { uiSettings } = useApmPluginContext().core;
-  const advancedSettingsUrl = useKibanaUrl('/app/management/kibana/settings', {
-    query: {
-      query: 'category:(observability)',
-    },
-  });
-
-  if (!uiSettings.get(enableInspectEsQueries)) {
-    return null;
-  }
-
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.apm.searchBar.inspectEsQueriesEnabled.callout.title',
-            {
-              defaultMessage:
-                'Inspectable ES queries (`apm:enableInspectEsQueries`)',
-            }
-          )}
-          iconType="beaker"
-          color="warning"
-        >
-          <FormattedMessage
-            id="xpack.apm.searchBar.inspectEsQueriesEnabled.callout.description"
-            defaultMessage="You can now inspect every Elasticsearch query by opening your browser's Dev Tool and looking at the API responses. The setting can be disabled in Kibana's {advancedSettingsLink}"
-            values={{
-              advancedSettingsLink: (
-                <EuiLink href={advancedSettingsUrl}>
-                  {i18n.translate(
-                    'xpack.apm.searchBar.inspectEsQueriesEnabled.callout.description.advancedSettings',
-                    { defaultMessage: 'Advanced Settings' }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
 }
 
 export function SearchBar({
@@ -100,7 +47,6 @@ export function SearchBar({
 
   return (
     <>
-      <DebugQueryCallout />
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}

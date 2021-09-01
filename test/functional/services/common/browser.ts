@@ -14,7 +14,6 @@ import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 import { modifyUrl } from '@kbn/std';
 
 import Jimp from 'jimp';
-import { AllowedSchemaBooleanTypes } from 'src/plugins/usage_collection/server/collector';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
