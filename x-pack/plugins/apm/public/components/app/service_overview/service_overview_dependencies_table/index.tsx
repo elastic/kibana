@@ -125,13 +125,13 @@ export function ServiceOverviewDependenciesTable({
       title={i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableTitle',
         {
-          defaultMessage: 'Downstream services and backends',
+          defaultMessage: 'Dependencies',
         }
       )}
       nameColumnTitle={i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableColumnBackend',
+        'xpack.apm.serviceOverview.dependenciesTableColumn',
         {
-          defaultMessage: 'Backend',
+          defaultMessage: 'Dependency',
         }
       )}
       status={status}
