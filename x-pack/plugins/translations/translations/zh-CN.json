@@ -25592,7 +25592,6 @@
     "xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesHelpLinkText": "帮助",
     "xpack.uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatErrorMessage": "格式无效：{message}",
     "xpack.uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage": "格式无效。例如：{exampleUrl}",
-    "xpack.upgradeAssistant.appTitle": "{version} 升级助手",
     "xpack.upgradeAssistant.breadcrumb.esDeprecationsLabel": "Elasticsearch 弃用",
     "xpack.upgradeAssistant.breadcrumb.kibanaDeprecationsLabel": "Kibana 弃用",
     "xpack.upgradeAssistant.breadcrumb.overviewLabel": "升级助手",

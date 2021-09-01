@@ -25163,7 +25163,6 @@
     "xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesHelpLinkText": "ヘルプ",
     "xpack.uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatErrorMessage": "無効な形式：{message}",
     "xpack.uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage": "無効なフォーマット。例：{exampleUrl}",
-    "xpack.upgradeAssistant.appTitle": "{version} アップグレードアシスタント",
     "xpack.upgradeAssistant.breadcrumb.esDeprecationsLabel": "Elasticsearchの廃止予定",
     "xpack.upgradeAssistant.breadcrumb.kibanaDeprecationsLabel": "Kibanaの廃止予定",
     "xpack.upgradeAssistant.breadcrumb.overviewLabel": "アップグレードアシスタント",
