@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { getFallbackToTransactions } from '../lib/helpers/aggregated_transactions/get_fallback_to_transactions';
+import { getIsUsingTransactionEvents } from '../lib/helpers/aggregated_transactions/get_is_using_transaction_events';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
@@ -26,7 +26,10 @@ const fallbackToTransactionsRoute = createApmServerRoute({
       },
     } = resources;
     return {
-      fallbackToTransactions: await getFallbackToTransactions({ setup, kuery }),
+      fallbackToTransactions: await getIsUsingTransactionEvents({
+        setup,
+        kuery,
+      }),
     };
   },
 });

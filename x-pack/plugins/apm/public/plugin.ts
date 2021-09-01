@@ -92,9 +92,12 @@ const serviceMapTitle = i18n.translate('xpack.apm.navigation.serviceMapTitle', {
   defaultMessage: 'Service Map',
 });
 
-const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
-  defaultMessage: 'Backends',
-});
+const dependenciesTitle = i18n.translate(
+  'xpack.apm.navigation.dependenciesTitle',
+  {
+    defaultMessage: 'Dependencies',
+  }
+);
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
@@ -125,7 +128,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                   { label: servicesTitle, app: 'apm', path: '/services' },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
                   {
-                    label: backendsTitle,
+                    label: dependenciesTitle,
                     app: 'apm',
                     path: '/backends',
                     isNewFeature: true,
@@ -269,7 +272,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         { id: 'services', title: servicesTitle, path: '/services' },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
-        { id: 'backends', title: backendsTitle, path: '/backends' },
+        { id: 'backends', title: dependenciesTitle, path: '/backends' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
