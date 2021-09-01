@@ -27,6 +27,7 @@ describe('Error handling', () => {
         ...kibanaDeprecationsMockResponse,
         {
           domainId: 'failed_plugin_id',
+          title: 'Failed to fetch deprecations for "failed_plugin_id"',
           message: `Failed to get deprecations info for plugin "failed_plugin_id".`,
           level: 'fetch_error',
           correctiveActions: {

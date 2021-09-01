@@ -114,7 +114,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (ruleTypes: string[]): Kiban
   },
   alerting: ruleTypes,
   cases: [APP_ID],
-  subFeatures: [{ ...CASES_SUB_FEATURE }, { ...getAlertsSubFeature(ruleTypes) }],
+  subFeatures: [{ ...CASES_SUB_FEATURE } /* , { ...getAlertsSubFeature(ruleTypes) } */],
   privileges: {
     all: {
       app: [APP_ID, 'kibana'],

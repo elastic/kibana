@@ -83,11 +83,7 @@ plugins/
 
 `optionalPlugins` - [Optional] If your plugin has an optional dependency on other plugins, you must list them here by id. If any of the optional plugins are disabled or not installed, your plugin will still load, however that plugin's API contract will be undefined in the second parameter of the setup and start functions.
 
-# <<<<<<< HEAD:dev_docs/tutorials/building_a_plugin.mdx
-
 `requiredBundles` - [Required in certain situations] Don't worry about getting this right. The build optimizer will complain if any of these values are incorrect.
-
-> > > > > > > b9f398875a0 (Add more information on kibana.json properties, update example plugins (#107600)):dev_docs/key_concepts/anatomy_of_a_plugin.mdx
 
 <DocCallOut>
   You don't need to declare a dependency on a plugin if you only wish to access its types.

@@ -98,7 +98,11 @@ export default async function ({ readConfigFile }) {
         '--timelion.ui.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
         '--xpack.observability.unsafe.cases.enabled=true',
+<<<<<<< HEAD
         '--xpack.siem.enabled=true', // Used to trigger Kibana deprecation warning in UA (renamed config)
+=======
+        '--xpack.observability.unsafe.alertingExperience.enabled=true', // NOTE: Can be removed once enabled by default
+>>>>>>> 94770b0092ef4027870587aea8566b5318cbb280
       ],
     },
     uiSettings: {
@@ -211,6 +215,9 @@ export default async function ({ readConfigFile }) {
       },
       securitySolution: {
         pathname: '/app/security',
+      },
+      observability: {
+        pathname: '/app/observability',
       },
     },
 
