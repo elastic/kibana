@@ -30,7 +30,7 @@ export const CreatePipelinePanel: FC<Props> = ({
   isPipelineCreated,
 }) => {
   const [pipelineName, setPipelineName] = useState('');
-  const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
+  const [hasSubmitted] = useState<boolean>(false);
   const hasPipelineName = !!pipelineName || !!pipelineName.trim();
 
   return (
