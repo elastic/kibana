@@ -23,7 +23,7 @@ import fileSaver from 'file-saver';
 export interface Props {
   fileUpload: FileUploadPluginStart;
   mapper: MapperProxy;
-  navigateToApp(app: string, options: NavigateToAppOptions): void; // todo object type
+  navigateToApp(app: string, options: NavigateToAppOptions): void;
 }
 
 export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToApp }) => {
@@ -34,6 +34,10 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
   const [pipelineProcessors, setPipelineProcessors] = useState<object[]>([]);
   const [pipelineName, setPipelineName] = useState<string>('');
   const [error, setError] = useState<string>('');
+
+  const onUpdateProcessors = (updatedProcessors: object[]) => {
+    setPipelineProcessors(updatedProcessors);
+  }
 
   const onManageIngestPipeline = () => {
     navigateToApp('management', {
@@ -153,6 +157,7 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
             <PreviewPanel
               processors={pipelineProcessors}
               onDownload={onDownload}
+              onUpdateProcessors={onUpdateProcessors}
               onClickToCreatePipeline={onClickToCreatePipeline}
               isCreatingPipeline={isCreatingPipeline}
             />
@@ -162,6 +167,7 @@ export const EcsMapperUploadView: FC<Props> = ({ fileUpload, mapper, navigateToA
             <CreatePipelinePanel
               onCreatePipeline={onCreatePipeline}
               onCancel={onCancelCreate}
+              isPipelineCreated={isPipelineCreated}
             />
           )}
 

@@ -5,22 +5,27 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiCodeBlock,
   EuiSpacer,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCard,
   EuiIcon,
+  EuiFormRow,
+  EuiCopy,
 } from '@elastic/eui';
+import { CodeEditorField } from '../../../../../../../src/plugins/kibana_react/public';
+import { XJsonLang } from '@kbn/monaco';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   processors: object[];
   onDownload(): void;
   onClickToCreatePipeline(): void;
+  onUpdateProcessors(processors: object[]): void;
   isCreatingPipeline: boolean;
 }
 
@@ -28,8 +33,31 @@ export const PreviewPanel: FC<Props> = ({
   processors,
   onDownload,
   onClickToCreatePipeline,
+  onUpdateProcessors,
   isCreatingPipeline
 }) => {
+
+  const [isValidJson, setIsValidJson] = useState<boolean>(true);
+  const [processorsJson, setProcessorsJson] = useState<string>("");
+
+  useEffect(() => {
+    const jsonString = JSON.stringify(processors, null, 2);
+    setProcessorsJson(jsonString)
+  }, [processors]);
+
+  const onUpdate = (updated: string) => {
+    setProcessorsJson(updated);
+    
+    try {
+      setIsValidJson(true);
+      const parsedJson = JSON.parse(updated);
+      onUpdateProcessors(parsedJson);
+    }
+    catch (e) {
+      setIsValidJson(false);
+    }
+  }
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -39,14 +67,68 @@ export const PreviewPanel: FC<Props> = ({
 
         <EuiSpacer size="m" />
 
-        <EuiCodeBlock language="json" overflowHeight={500} isCopyable>
-          {JSON.stringify(processors, null, 2)}
-        </EuiCodeBlock>
-
+        <EuiFormRow
+          isInvalid={!isValidJson}
+          error={
+            !isValidJson
+              ? i18n.translate('xpack.ecsMapper.file.upload.pipelineName.nameErrorMessage', {
+                  defaultMessage: 'Invalid JSON.',
+                })
+              : null
+          }
+          fullWidth
+          data-test-subj="roleMappingsJSONEditor"
+        >
+          <Fragment>
+            <CodeEditorField
+              aria-label={''}
+              languageId={XJsonLang.ID}
+              value={processorsJson}
+              onChange={(processors) => onUpdate(processors)}
+              fullWidth={true}
+              height="400px"
+              options={{
+                accessibilitySupport: 'off',
+                lineNumbers: 'on',
+                fontSize: 12,
+                tabSize: 2,
+                automaticLayout: true,
+                minimap: { enabled: false },
+                overviewRulerBorder: false,
+                scrollbar: { alwaysConsumeMouseWheel: false },
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                wrappingIndent: 'indent',
+              }}
+            />
+          </Fragment>
+        </EuiFormRow>
+        
         <EuiSpacer size="xl" />
 
         {!isCreatingPipeline && (
          <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiCopy
+              textToCopy={processorsJson}
+            >
+              {(copy: () => void) => (
+                  <EuiCard
+                    icon={<EuiIcon size="xxl" type={`copy`} />}
+                    data-test-subj="copyPipelineProcessors"
+                    title={
+                      <FormattedMessage
+                        id="xpack.ecsMapper.preview.copy"
+                        defaultMessage="Copy to clipboard"
+                      />
+                    }
+                    onClick={copy}
+                    description=""
+                  />
+                )}
+            </EuiCopy>
+          </EuiFlexItem>
+
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={`download`} />}

@@ -13,13 +13,14 @@ import { EcsMapperUploadView } from '../components/map/uploader';
 
 export const EcsMapperMainUi: FC = () => {
   const { fileUpload, mapper } = getPluginsStart();
-  const { application } = getCoreStart();
+  const { application, uiSettings } = getCoreStart();
   const { navigateToApp } = application;
 
   const services = {
     fileUpload,
     mapper,
     navigateToApp,
+    uiSettings
   };
 
   return (

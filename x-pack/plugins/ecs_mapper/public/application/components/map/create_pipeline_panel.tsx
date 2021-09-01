@@ -21,11 +21,13 @@ import {
 interface Props {
   onCreatePipeline(pipelineName: string): void;
   onCancel(): void;
+  isPipelineCreated: boolean;
 }
 
 export const CreatePipelinePanel: FC<Props> = ({
   onCreatePipeline,
-  onCancel
+  onCancel,
+  isPipelineCreated
 }) => {
 
   const [pipelineName, setPipelineName] = useState('');
@@ -83,34 +85,36 @@ export const CreatePipelinePanel: FC<Props> = ({
           </EuiFormRow>
         </EuiDescribedFormGroup>
 
-        <EuiFlexGroup wrap>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              target="_self"
-              onClick={() => onSubmit()}
-              data-test-subj="ecsMapperCreateIngestPipelineButton"
-              color="primary"
-              fill
-            >
-              <FormattedMessage
-                id="xpack.ecsMapper.createIngestPipeline"
-                defaultMessage="Create pipeline"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={() => onCancel()}
-              data-test-subj="ecsMapperCancelIngestPipelineButton"
-            >
-              <FormattedMessage
-                id="xpack.ecsMapper.cancelCreateIngestPipeline"
-                defaultMessage="Cancel"
+        {!isPipelineCreated && (
+          <EuiFlexGroup wrap>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                target="_self"
+                onClick={() => onCreatePipeline(pipelineName)}
+                data-test-subj="ecsMapperCreateIngestPipelineButton"
+                color="primary"
+                fill
+              >
+                <FormattedMessage
+                  id="xpack.ecsMapper.createIngestPipeline"
+                  defaultMessage="Create pipeline"
                 />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              </EuiButton>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={() => onCancel()}
+                data-test-subj="ecsMapperCancelIngestPipelineButton"
+              >
+                <FormattedMessage
+                  id="xpack.ecsMapper.cancelCreateIngestPipeline"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
