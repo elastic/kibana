@@ -33,14 +33,6 @@ export const CreatePipelinePanel: FC<Props> = ({
   const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
   const hasPipelineName = !!pipelineName || !!pipelineName.trim();
 
-  const onSubmit = async () => {
-    setHasSubmitted(true);
-
-    if (hasPipelineName) {
-      onCreatePipeline(pipelineName);
-    }
-  };
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
