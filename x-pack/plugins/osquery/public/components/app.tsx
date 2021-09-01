@@ -26,12 +26,6 @@ const OsqueryAppComponent = () => {
           <EuiFlexGroup gutterSize="l" alignItems="center">
             <EuiFlexItem>
               <EuiTabs display="condensed">
-                {/* <EuiTab isSelected={section === 'overview'} {...useRouterNavigate('overview')}>
-                  <FormattedMessage
-                    id="xpack.osquery.appNavigation.overviewLinkText"
-                    defaultMessage="Overview"
-                  />
-                </EuiTab> */}
                 <EuiTab
                   isSelected={section === 'live_queries'}
                   {...useRouterNavigate('live_queries')}

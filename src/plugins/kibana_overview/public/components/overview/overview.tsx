@@ -54,11 +54,18 @@ interface Props {
 export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const {
-    services: { http, docLinks, data, uiSettings, application },
+    services: { http, docLinks, data, share, uiSettings, application },
   } = useKibana<CoreStart & AppPluginStartDependencies>();
   const addBasePath = http.basePath.prepend;
   const indexPatternService = data.indexPatterns;
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+
+  // Home does not have a locator implemented, so hard-code it here.
+  const addDataHref = addBasePath('/app/home#/tutorial_directory');
+  const devToolsHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
+  const managementHref = share.url.locators
+    .get('MANAGEMENT_APP_LOCATOR')
+    ?.useUrl({ sectionId: '' });
 
   const getFeaturesByCategory = (category: string) =>
     features
@@ -93,9 +100,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   useEffect(() => {
     const fetchIsNewKibanaInstance = async () => {
-      const resp = await indexPatternService.getTitles();
+      const hasUserIndexPattern = await indexPatternService.hasUserIndexPattern().catch(() => true);
 
-      setNewKibanaInstance(resp.length === 0);
+      setNewKibanaInstance(!hasUserIndexPattern);
     };
 
     fetchIsNewKibanaInstance();
@@ -135,9 +142,13 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         iconType: 'logoKibana',
         pageTitle: <FormattedMessage defaultMessage="Analytics" id="kibanaOverview.header.title" />,
         rightSideItems: overviewPageActions({
-          addBasePath,
+          addDataHref,
           application,
+          devToolsHref,
           hidden: isNewKibanaInstance,
+          managementHref,
+          showDevToolsLink: !!devTools,
+          showManagementLink: !!manageDataFeatures,
         }),
       }}
       noDataConfig={isNewKibanaInstance ? noDataConfig : undefined}

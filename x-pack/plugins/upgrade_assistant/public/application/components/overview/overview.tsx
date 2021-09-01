@@ -27,11 +27,11 @@ import { getUpgradeStep } from './upgrade_step';
 
 export const Overview: FunctionComponent = () => {
   const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
-  const { currentMajor } = kibanaVersionInfo;
+  const { nextMajor } = kibanaVersionInfo;
 
   useEffect(() => {
     async function sendTelemetryData() {
-      await api.sendTelemetryData({
+      await api.sendPageTelemetryData({
         overview: true,
       });
     }
@@ -68,12 +68,12 @@ export const Overview: FunctionComponent = () => {
             </EuiButtonEmpty>,
           ]}
         >
-          <EuiText>
+          <EuiText data-test-subj="whatsNewLink">
             <EuiLink href={docLinks.links.elasticsearch.releaseHighlights} target="_blank">
               <FormattedMessage
                 id="xpack.upgradeAssistant.overview.whatsNewLink"
-                defaultMessage="What's new in version {currentMajor}.0?"
-                values={{ currentMajor }}
+                defaultMessage="What's new in version {nextMajor}.0?"
+                values={{ nextMajor }}
               />
             </EuiLink>
           </EuiText>
@@ -83,9 +83,9 @@ export const Overview: FunctionComponent = () => {
 
         <EuiSteps
           steps={[
-            getReviewLogsStep({ currentMajor }),
+            getReviewLogsStep({ nextMajor }),
             getFixDeprecationLogsStep(),
-            getUpgradeStep({ docLinks, currentMajor }),
+            getUpgradeStep({ docLinks, nextMajor }),
           ]}
         />
       </EuiPageContent>

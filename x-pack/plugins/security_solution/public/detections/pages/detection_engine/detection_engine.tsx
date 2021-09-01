@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+// No bueno, I know! Encountered when reverting RBAC work post initial BCs
+// Don't want to include large amounts of refactor in this temporary workaround
+// TODO: Refactor code - component can be broken apart
+/* eslint-disable complexity */
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +21,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
+
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { isTab } from '../../../../../timelines/public';
@@ -71,6 +76,7 @@ import {
   AlertsTableFilterGroup,
   FILTER_OPEN,
 } from '../../components/alerts_table/alerts_filter_group';
+import { EmptyPage } from '../../../common/components/empty_page';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -112,12 +118,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [
     {
       loading: userInfoLoading,
-      isSignalIndexExists,
       isAuthenticated: isUserAuthenticated,
       hasEncryptionKey,
       signalIndexName,
-      hasIndexWrite,
-      hasIndexMaintenance,
+      hasIndexWrite = false,
+      hasIndexMaintenance = false,
+      canUserCRUD = false,
+      canUserREAD,
+      hasIndexRead,
     },
   ] = useUserData();
   const {
@@ -131,6 +139,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const {
     application: { navigateToUrl },
     timelines: timelinesUi,
+    docLinks,
   } = useKibana().services;
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
@@ -247,6 +256,18 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  const emptyPageActions = useMemo(
+    () => ({
+      feature: {
+        icon: 'documents',
+        label: i18n.GO_TO_DOCUMENTATION,
+        url: `${docLinks.links.siem.privileges}`,
+        target: '_blank',
+      },
+    }),
+    [docLinks]
+  );
+
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
       <SecuritySolutionPageWrapper>
@@ -256,12 +277,12 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     );
   }
 
-  if (!loading && (isSignalIndexExists === false || needsListsConfiguration)) {
+  if (!loading && (indicesExist === false || needsListsConfiguration)) {
     return (
       <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
         <DetectionEngineNoIndex
-          needsSignalsIndex={isSignalIndexExists === false}
+          needsSignalsIndex={indicesExist === false}
           needsListsIndex={needsListsConfiguration}
         />
       </SecuritySolutionPageWrapper>
@@ -273,13 +294,19 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {indicesExist ? (
+      {indicesExist && (hasIndexRead === false || canUserREAD === false) ? (
+        <EmptyPage
+          actions={emptyPageActions}
+          message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
+          data-test-subj="no_feature_permissions-alerts"
+          title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
+        />
+      ) : indicesExist && hasIndexRead && canUserREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
-
           <SecuritySolutionPageWrapper
             noPadding={globalFullScreen}
             data-test-subj="detectionsAlertsPage"
@@ -303,7 +330,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {timelinesUi.getLastUpdated({ updatedAt: updatedAt || 0, showUpdating: loading })}
+                  {timelinesUi.getLastUpdated({
+                    updatedAt: updatedAt || 0,
+                    showUpdating: loading,
+                  })}
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
@@ -335,8 +365,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             <AlertsTable
               timelineId={TimelineId.detectionsPage}
               loading={loading}
-              hasIndexWrite={hasIndexWrite ?? false}
-              hasIndexMaintenance={hasIndexMaintenance ?? false}
+              hasIndexWrite={(hasIndexWrite ?? false) && (canUserCRUD ?? false)}
+              hasIndexMaintenance={(hasIndexMaintenance ?? false) && (canUserCRUD ?? false)}
               from={from}
               defaultFilters={alertsTableDefaultFilters}
               showBuildingBlockAlerts={showBuildingBlockAlerts}

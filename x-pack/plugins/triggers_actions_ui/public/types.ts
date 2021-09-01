@@ -24,6 +24,7 @@ import {
   ActionGroup,
   AlertActionParam,
   SanitizedAlert,
+  ResolvedSanitizedRule,
   AlertAction,
   AlertAggregations,
   AlertTaskState,
@@ -40,6 +41,7 @@ import {
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type Alert = SanitizedAlert<AlertTypeParams>;
+type ResolvedRule = ResolvedSanitizedRule<AlertTypeParams>;
 
 export {
   Alert,
@@ -52,6 +54,7 @@ export {
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
   AlertTypeParams,
+  ResolvedRule,
 };
 export {
   ActionType,

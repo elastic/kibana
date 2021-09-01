@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { I18nStart, OverlayStart, SavedObjectsClientContract } from 'src/core/public';
 import { SaveResult } from 'src/plugins/saved_objects/public';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
@@ -39,7 +39,7 @@ export function openSaveModal({
   hasData: boolean;
   workspace: GraphWorkspaceSavedObject;
   saveWorkspace: SaveWorkspaceHandler;
-  showSaveModal: (el: React.ReactNode, I18nContext: I18nStart['Context']) => void;
+  showSaveModal: (el: ReactElement, I18nContext: I18nStart['Context']) => void;
   I18nContext: I18nStart['Context'];
   services: SaveWorkspaceServices;
 }) {

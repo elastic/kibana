@@ -411,7 +411,10 @@ export function jobAuditMessagesProvider(
    * Retrieve list of errors per job.
    * @param jobIds
    */
-  async function getJobsErrors(jobIds: string[], earliestMs?: number): Promise<JobsErrorsResponse> {
+  async function getJobsErrorMessages(
+    jobIds: string[],
+    earliestMs?: number
+  ): Promise<JobsErrorsResponse> {
     const { body } = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
@@ -471,6 +474,6 @@ export function jobAuditMessagesProvider(
     getJobAuditMessages,
     getAuditMessagesSummary,
     clearJobAuditMessages,
-    getJobsErrors,
+    getJobsErrorMessages,
   };
 }
