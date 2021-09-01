@@ -11,8 +11,6 @@ import path from 'path';
 import { keyBy } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 function uniq<T>(input: T[]): T[] {
   return [...new Set(input)];
 }
