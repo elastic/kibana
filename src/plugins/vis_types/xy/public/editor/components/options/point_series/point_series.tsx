@@ -28,16 +28,7 @@ import { getPositions } from '../../../collections';
 
 const legendPositions = getPositions();
 
-export function PointSeriesOptions(
-  props: ValidationVisOptionsProps<
-    VisParams,
-    {
-      // TODO: Remove when vis_type_vislib is removed
-      // https://github.com/elastic/kibana/issues/56143
-      showElasticChartsOptions: boolean;
-    }
-  >
-) {
+export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) {
   const { stateParams, setValue, vis, aggs } = props;
   const hasBarChart = useMemo(
     () =>
