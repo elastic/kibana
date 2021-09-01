@@ -116,6 +116,7 @@ export function createMonitoringStatsStream(
 }
 
 export function summarizeMonitoringStats(
+  logger: Logger,
   {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     last_update,
@@ -123,7 +124,7 @@ export function summarizeMonitoringStats(
   }: MonitoringStats,
   config: TaskManagerConfig
 ): RawMonitoringStats {
-  const summarizedStats = withCapacityEstimate({
+  const summarizedStats = withCapacityEstimate(logger, {
     ...(configuration
       ? {
           configuration: {
@@ -136,7 +137,7 @@ export function summarizeMonitoringStats(
       ? {
           runtime: {
             timestamp: runtime.timestamp,
-            ...summarizeTaskRunStat(runtime.value, config),
+            ...summarizeTaskRunStat(logger, runtime.value, config),
           },
         }
       : {}),

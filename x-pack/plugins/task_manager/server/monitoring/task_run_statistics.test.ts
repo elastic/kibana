@@ -10,6 +10,7 @@ import { Subject, Observable } from 'rxjs';
 import stats from 'stats-lite';
 import sinon from 'sinon';
 import { take, tap, bufferCount, skip, map } from 'rxjs/operators';
+import { mockLogger } from '../test_utils';
 
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import {
@@ -34,9 +35,11 @@ import { configSchema } from '../config';
 
 describe('Task Run Statistics', () => {
   let fakeTimer: sinon.SinonFakeTimers;
+  const logger = mockLogger();
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
+    jest.resetAllMocks();
   });
 
   afterAll(() => fakeTimer.restore());
@@ -75,7 +78,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           take(runAtDrift.length),
           bufferCount(runAtDrift.length)
@@ -143,7 +146,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           take(runDurations.length * 2),
           bufferCount(runDurations.length * 2)
@@ -239,7 +242,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           take(10),
           bufferCount(10)
@@ -319,6 +322,7 @@ describe('Task Run Statistics', () => {
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
             value: summarizeTaskRunStat(
+              logger,
               value,
               getTaskManagerConfig({
                 monitored_task_execution_thresholds: {
@@ -409,19 +413,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(
-              value,
-              getTaskManagerConfig({
-                monitored_task_execution_thresholds: {
-                  custom: {
-                    'alerting:test': {
-                      error_threshold: 59,
-                      warn_threshold: 39,
-                    },
-                  },
-                },
-              })
-            ).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig({})).value,
           })),
           take(10),
           bufferCount(10)
@@ -493,13 +485,54 @@ describe('Task Run Statistics', () => {
           }
         });
 
-      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
-      events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
-      events$.next(
-        mockTaskRunEvent(
-          { schedule: { interval: '3s' } },
-          { start: 0, stop: 0 },
-          TaskRunResult.Success
+      taskEvents.forEach((event) => events$.next(event));
+    });
+  });
+
+  test('frequency of polled tasks by their persistence', async () => {
+    const events$ = new Subject<TaskLifecycleEvent>();
+
+    const taskPollingLifecycle = taskPollingLifecycleMock.create({
+      events$: events$ as Observable<TaskLifecycleEvent>,
+    });
+
+    const runningAverageWindowSize = 5;
+    const taskRunAggregator = createTaskRunAggregator(
+      taskPollingLifecycle,
+      runningAverageWindowSize
+    );
+
+    const taskEvents = [
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({ schedule: { interval: '3s' } }),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({ schedule: { interval: '3s' } }),
+      mockTaskPollingEvent({ schedule: { interval: '3s' } }),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({ schedule: { interval: '3s' } }),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({ schedule: { interval: '3s' } }),
+    ];
+
+    return new Promise<void>((resolve, reject) => {
+      taskRunAggregator
+        .pipe(
+          // skip initial stat which is just initialized data which
+          // ensures we don't stall on combineLatest
+          skip(1),
+          // Use 'summarizeTaskRunStat' to receive summarize stats
+          map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
+            key,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig({})).value,
+          })),
+          take(taskEvents.length),
+          bufferCount(taskEvents.length)
         )
       );
       events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed));
@@ -552,7 +585,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           tap(() => {
             expectedTimestamp.push(new Date().toISOString());
