@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObjectsNamespaceType } from '../../../../../../src/core/public';
 import type { FailedImport, ProcessedImportResponse } from '../lib';
 import type { CopyToSpaceSavedObjectTarget } from '../types';
 import { summarizeCopyResult } from './summarize_copy_result';
@@ -31,7 +32,7 @@ const OBJECTS = {
     meta: {
       title: 'my-dashboard-title',
       icon: 'dashboardApp',
-      namespaceType: 'single',
+      namespaceType: 'single' as const,
       hiddenType: false,
     },
     references: [
@@ -45,7 +46,7 @@ const OBJECTS = {
     meta: {
       title: 'visualization-foo-title',
       icon: 'visualizeApp',
-      namespaceType: 'single',
+      namespaceType: 'single' as const,
       hiddenType: false,
     },
     references: [{ type: 'index-pattern', id: 'foo', name: 'Index pattern foo' }],
@@ -56,7 +57,7 @@ const OBJECTS = {
     meta: {
       title: 'visualization-bar-title',
       icon: 'visualizeApp',
-      namespaceType: 'single',
+      namespaceType: 'single' as const,
       hiddenType: false,
     },
     references: [{ type: 'index-pattern', id: 'bar', name: 'Index pattern bar' }],
@@ -67,7 +68,7 @@ const OBJECTS = {
     meta: {
       title: 'index-pattern-foo-title',
       icon: 'indexPatternApp',
-      namespaceType: 'single',
+      namespaceType: 'single' as const,
       hiddenType: false,
     },
     references: [],
@@ -78,7 +79,7 @@ const OBJECTS = {
     meta: {
       title: 'index-pattern-bar-title',
       icon: 'indexPatternApp',
-      namespaceType: 'single',
+      namespaceType: 'single' as const,
       hiddenType: false,
     },
     references: [],
@@ -88,7 +89,7 @@ const OBJECTS = {
 interface ObjectProperties {
   type: string;
   id: string;
-  meta: { title?: string; icon?: string };
+  meta: { title?: string; icon?: string; namespaceType: SavedObjectsNamespaceType };
 }
 
 const createSuccessResult = ({ type, id, meta }: ObjectProperties) => {
