@@ -16,10 +16,14 @@ export async function getServiceSettings(): Promise<IServiceSettings> {
     return loadPromise;
   }
 
-  loadPromise = new Promise(async (resolve) => {
-    const { ServiceSettings } = await import('./lazy');
-    const config = getMapsEmsConfig();
-    resolve(new ServiceSettings(config, config.tilemap));
+  loadPromise = new Promise(async (resolve, reject) => {
+    try {
+      const { ServiceSettings } = await import('./lazy');
+      const config = getMapsEmsConfig();
+      resolve(new ServiceSettings(config, config.tilemap));
+    } catch (error) {
+      reject(error);
+    }
   });
   return loadPromise;
 }
