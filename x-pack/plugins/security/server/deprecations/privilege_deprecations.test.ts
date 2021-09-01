@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { ElasticsearchRole, transformElasticsearchRoleToRole } from '../../../../authorization';
-export { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './put_payload';
+describe('privilege deprecations', () => {
+  it('needs to be tested');
+});

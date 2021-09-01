@@ -44,6 +44,7 @@ import type { AuthorizationServiceSetup, AuthorizationServiceSetupInternal } fro
 import { AuthorizationService } from './authorization';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
+import { registerPrivilegeDeprecations } from './deprecations';
 import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
@@ -284,6 +285,12 @@ export class SecurityPlugin
       getSpacesService: () => spaces?.spacesService,
       features,
       getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+    });
+
+    registerPrivilegeDeprecations({
+      deprecationsService: core.deprecations,
+      authz: this.authorizationSetup,
+      license,
     });
 
     setupSpacesClient({
