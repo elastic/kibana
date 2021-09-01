@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiContextMenuItem, EuiContextMenuItemProps } from '@elastic/eui';
 import { NavigateToAppOptions } from 'kibana/public';
-import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 
 export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps {
   navigateAppId: string;

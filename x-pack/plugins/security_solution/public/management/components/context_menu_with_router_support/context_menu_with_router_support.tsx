@@ -7,33 +7,32 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
-  EuiButtonIcon,
+  CommonProps,
   EuiContextMenuPanel,
+  EuiContextMenuPanelProps,
   EuiPopover,
   EuiPopoverProps,
-  EuiContextMenuPanelProps,
-  EuiIconProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   ContextMenuItemNavByRouter,
   ContextMenuItemNavByRouterProps,
-} from '../context_menu_with_router_support/context_menu_item_nav_by_rotuer';
+} from './context_menu_item_nav_by_rotuer';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
-export interface ActionsContextMenuProps {
+export interface ContextMenuWithRouterSupportProps
+  extends CommonProps,
+    Pick<EuiPopoverProps, 'button' | 'anchorPosition' | 'panelPaddingSize'> {
   items: ContextMenuItemNavByRouterProps[];
-  /** Default icon is `boxesHorizontal` */
-  icon?: EuiIconProps['type'];
-  'data-test-subj'?: string;
 }
 
 /**
- * Display a context menu behind a icon button (which defaults to the three horizontal dots icon)
+ * A context menu that allows for items in the menu to route to other Kibana destinations using the Router
+ * (thus avoiding full page refreshes).
+ * Menu also supports automatically closing the popup when an item is clicked.
  */
-export const ActionsContextMenu = memo<ActionsContextMenuProps>(
-  ({ items, 'data-test-subj': dataTestSubj, icon = 'boxesHorizontal' }) => {
-    const getTestId = useTestIdGenerator(dataTestSubj);
+export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportProps>(
+  ({ items, button, panelPaddingSize, anchorPosition, ...commonProps }) => {
+    const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
     const [isOpen, setIsOpen] = useState(false);
 
     const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
@@ -61,18 +60,15 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
 
     return (
       <EuiPopover
-        anchorPosition="downRight"
-        panelPaddingSize="none"
+        {...commonProps}
+        anchorPosition={anchorPosition}
+        panelPaddingSize={panelPaddingSize}
         panelProps={panelProps}
         button={
-          <EuiButtonIcon
-            data-test-subj={getTestId('button')}
-            iconType={icon}
-            onClick={handleToggleMenu}
-            aria-label={i18n.translate('xpack.securitySolution.actionsContextMenu.label', {
-              defaultMessage: 'Open',
-            })}
-          />
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+          <div className="eui-displayInlineBlock" onClick={handleToggleMenu}>
+            {button}
+          </div>
         }
         isOpen={isOpen}
         closePopover={handleCloseMenu}
@@ -82,4 +78,4 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
     );
   }
 );
-ActionsContextMenu.displayName = 'ActionsContextMenu';
+ContextMenuWithRouterSupport.displayName = 'ContextMenuWithRouterSupport';

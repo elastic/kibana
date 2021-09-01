@@ -12,7 +12,7 @@ import { EffectScope, EffectScopeProps } from './effect_scope';
 
 export type SubHeaderProps = TouchedByUsersProps & EffectScopeProps;
 
-export const SubHeader = memo<SubHeaderProps>(({ createdBy, updatedBy, policies }) => {
+export const CardSubHeader = memo<SubHeaderProps>(({ createdBy, updatedBy, policies }) => {
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -24,4 +24,4 @@ export const SubHeader = memo<SubHeaderProps>(({ createdBy, updatedBy, policies 
     </EuiFlexGroup>
   );
 });
-SubHeader.displayName = 'SubHeader';
+CardSubHeader.displayName = 'CardSubHeader';
