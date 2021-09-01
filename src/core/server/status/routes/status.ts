@@ -63,9 +63,19 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
       },
       validate: {
-        query: schema.object({
-          v8format: schema.boolean({ defaultValue: false }),
-        }),
+        query: schema.object(
+          {
+            v7format: schema.maybe(schema.boolean()),
+            v8format: schema.maybe(schema.boolean()),
+          },
+          {
+            validate: ({ v7format, v8format }) => {
+              if (typeof v7format === 'boolean' && typeof v8format === 'boolean') {
+                return `provide only one format option: v7format or v8format`;
+              }
+            },
+          }
+        ),
       },
     },
     async (context, req, res) => {
@@ -73,8 +83,10 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
       const versionWithoutSnapshot = version.replace(SNAPSHOT_POSTFIX, '');
       const [overall, core, plugins] = await combinedStatus$.pipe(first()).toPromise();
 
+      const { v8format = true, v7format = false } = req.query ?? {};
+
       let statusInfo: StatusInfo | LegacyStatusInfo;
-      if (req.query?.v8format) {
+      if (!v7format && v8format) {
         statusInfo = {
           overall,
           core,
