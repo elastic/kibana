@@ -76,7 +76,7 @@ export const configureAppAngularModule = (
   isLocalAngular: boolean,
   getHistory?: () => History
 ) => {
-  const core = 'core' in newPlatform ? newPlatform.core : newPlatform;
+  const core = ('core' in newPlatform ? newPlatform.core : newPlatform) as CoreStart;
   const packageInfo = newPlatform.env.packageInfo;
 
   angularModule
