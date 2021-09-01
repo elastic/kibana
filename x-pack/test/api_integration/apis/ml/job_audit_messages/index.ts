@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('job_audit_messages', function () {
     loadTestFile(require.resolve('./get_job_audit_messages'));
+    loadTestFile(require.resolve('./clear_messages'));
   });
 }
 
