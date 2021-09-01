@@ -98,6 +98,7 @@ import { EndpointMetadataService } from './endpoint/services/metadata';
 import { createIndicatorMatchAlertType } from './lib/detection_engine/rule_types/indicator_match/create_indicator_match_alert_type';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
+import { dangerousWorkaroundToMigrateActionsSideCarSavedObjects } from './lib/detection_engine/rule_actions/migrations';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -343,6 +344,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     let manifestManager: ManifestManager | undefined;
 
     this.licensing$ = plugins.licensing.license$;
+
+    dangerousWorkaroundToMigrateActionsSideCarSavedObjects({ logger, savedObjectsClient });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
