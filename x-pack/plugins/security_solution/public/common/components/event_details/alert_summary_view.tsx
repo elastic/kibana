@@ -157,7 +157,7 @@ function getEventFieldsToDisplay({
 }): EventSummaryField[] {
   switch (eventCode) {
     // memory protection fields
-    case EventCode.MALICIOUS_THREAD:
+    case EventCode.SHELLCODE_THREAD:
       return memoryShellCodeAlertFields;
     case EventCode.MEMORY_SIGNATURE:
       return memorySignatureAlertFields;
