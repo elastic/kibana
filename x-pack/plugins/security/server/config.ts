@@ -391,11 +391,18 @@ export function createConfig(
 function getSessionConfig(session: RawConfigType['session'], providers: ProvidersConfigType) {
   return {
     cleanupInterval: session.cleanupInterval,
-    getExpirationTimeouts({ type, name }: AuthenticationProvider) {
+    getExpirationTimeouts(provider: AuthenticationProvider | undefined) {
       // Both idle timeout and lifespan from the provider specific session config can have three
       // possible types of values: `Duration`, `null` and `undefined`. The `undefined` type means that
       // provider doesn't override session config and we should fall back to the global one instead.
-      const providerSessionConfig = providers[type as keyof ProvidersConfigType]?.[name]?.session;
+      // Note: using an `undefined` provider argument returns the global timeouts.
+      let providerSessionConfig:
+        | { idleTimeout?: Duration | null; lifespan?: Duration | null }
+        | undefined;
+      if (provider) {
+        const { type, name } = provider;
+        providerSessionConfig = providers[type as keyof ProvidersConfigType]?.[name]?.session;
+      }
       const [idleTimeout, lifespan] = [
         [session.idleTimeout, providerSessionConfig?.idleTimeout],
         [session.lifespan, providerSessionConfig?.lifespan],
