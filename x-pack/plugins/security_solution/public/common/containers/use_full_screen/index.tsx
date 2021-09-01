@@ -94,11 +94,6 @@ export const useTimelineFullScreen = (): TimelineFullScreen => {
     useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
   const setTimelineFullScreen = useCallback(
     (fullScreen: boolean) => {
-      if (fullScreen) {
-        setDataGridFullScreen(true);
-      } else {
-        setDataGridFullScreen(false);
-      }
       dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen }));
     },
     [dispatch]
