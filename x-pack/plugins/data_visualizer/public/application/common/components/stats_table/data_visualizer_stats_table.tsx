@@ -23,7 +23,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { JOB_FIELD_TYPES, JobFieldType, DataVisualizerTableState } from '../../../../../common';
-import { FieldTypeIcon } from '../field_type_icon';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { DistinctValues } from './components/field_data_row/distinct_values';
 import { IndexBasedNumberContentPreview } from './components/field_data_row/number_content_preview';
@@ -37,6 +36,7 @@ import {
 } from './types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
+import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const FIELD_NAME = 'fieldName';
 
@@ -143,7 +143,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           defaultMessage: 'Type',
         }),
         render: (fieldType: JobFieldType) => {
-          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} needsAria={true} />;
+          // @todo: fix scripted
+          return <FieldIcon type={fieldType} label={fieldType} scripted={false} />;
         },
         width: '75px',
         sortable: true,
