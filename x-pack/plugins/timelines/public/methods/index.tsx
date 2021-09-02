@@ -52,7 +52,7 @@ export const getTGridLazy = (
 ) => {
   initializeStore({ store, storage, setStore });
   return (
-    <Suspense fallback={<TGridLoading height={props.type === 'embedded' ? 'tall' : 'short'} />}>
+    <Suspense fallback={<TGridLoading height={props.type === 'standalone' ? 'tall' : 'short'} />}>
       <TimelineLazy {...props} store={store} storage={storage} data={data} setStore={setStore} />
     </Suspense>
   );
