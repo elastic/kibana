@@ -12,7 +12,7 @@ import Style from 'style-it';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
 import { isTextInput } from '../../lib/is_text_input';
-import { WORKPAD_CANVAS_BUFFER } from '../../../common/lib/constants';
+import { HEADER_BANNER_HEIGHT, WORKPAD_CANVAS_BUFFER } from '../../../common/lib/constants';
 
 export class Workpad extends React.PureComponent {
   static propTypes = {
@@ -104,7 +104,16 @@ export class Workpad extends React.PureComponent {
 
           <Fullscreen>
             {({ isFullscreen, windowSize }) => {
-              const scale = Math.min(windowSize.height / height, windowSize.width / width);
+              const hasHeaderBanner = document.getElementsByClassName('kbnBody--hasHeaderBanner')
+                .length;
+
+              const headerBannerOffset = hasHeaderBanner ? HEADER_BANNER_HEIGHT : 0;
+
+              const scale = Math.min(
+                (windowSize.height - headerBannerOffset) / height,
+                windowSize.width / width
+              );
+
               const fsStyle = isFullscreen
                 ? {
                     transform: `scale3d(${scale}, ${scale}, 1)`,
@@ -112,6 +121,7 @@ export class Workpad extends React.PureComponent {
                     msTransform: `scale3d(${scale}, ${scale}, 1)`,
                     height: windowSize.height < height ? 'auto' : height,
                     width: windowSize.width < width ? 'auto' : width,
+                    top: hasHeaderBanner ? `${headerBannerOffset / 2}px` : undefined,
                   }
                 : {};
 
