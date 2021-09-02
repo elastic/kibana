@@ -56,7 +56,7 @@ export const applyFormatterIfComplexField = (aspect: Aspect, value: unknown) =>
 export const getComplexAccessor = (fieldName: string) => (
   aspect: Aspect,
   index?: number
-): Accessor | AccessorFn | undefined => {
+): AccessorFn | undefined => {
   if (!aspect.accessor) {
     return;
   }
