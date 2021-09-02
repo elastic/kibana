@@ -103,7 +103,7 @@ logging:
 --
 
 [[change-overall-log-level]]
-===== Change overall log level.
+===== Change overall log level
 
 [source,yaml]
 ----
