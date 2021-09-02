@@ -14,11 +14,11 @@ import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_tab
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
-import type { CorrelationsTerm } from '../../../../common/search_strategies/failed_transactions_correlations/types';
+import type { FieldValuePair } from '../../../../common/search_strategies/types';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 
-export type SelectedCorrelationTerm<T extends CorrelationsTerm> = Pick<
+export type SelectedCorrelationTerm<T extends FieldValuePair> = Pick<
   T,
   'fieldName' | 'fieldValue'
 >;
@@ -35,7 +35,7 @@ interface Props<T> {
   sorting?: EuiTableSortingType<T>;
 }
 
-export function CorrelationsTable<T extends CorrelationsTerm>({
+export function CorrelationsTable<T extends FieldValuePair>({
   significantTerms,
   status,
   setSelectedSignificantTerm,

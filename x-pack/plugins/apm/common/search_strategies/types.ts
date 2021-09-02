@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export interface FieldValuePair {
+  fieldName: string;
+  fieldValue: string;
+}
+
 export interface HistogramItem {
   key: number;
   doc_count: number;

@@ -31,11 +31,6 @@ export const isFailedTransactionsCorrelations = (
 
 export type FailedTransactionsCorrelationsImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
 
-export interface CorrelationsTerm {
-  fieldName: string;
-  fieldValue: string;
-}
-
 export type FailedTransactionsCorrelationsParams = SearchStrategyClientParams;
 
 export interface FailedTransactionsCorrelationsRawResponse

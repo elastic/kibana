@@ -9,7 +9,10 @@ import type { ElasticsearchClient } from 'src/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
+import type {
+  FieldValuePair,
+  SearchStrategyParams,
+} from '../../../../common/search_strategies/types';
 
 import type { AsyncSearchServiceLog } from '../async_search_service_log';
 import type { AsyncSearchServiceState } from '../latency_correlations/async_search_service_state';
@@ -18,17 +21,9 @@ import { TERMS_SIZE } from '../constants';
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
-export type FieldName = string;
-
-interface FieldValuePair {
-  fieldName: FieldName;
-  fieldValue: string;
-}
-export type FieldValuePairs = FieldValuePair[];
-
 export const getTermsAggRequest = (
   params: SearchStrategyParams,
-  fieldName: FieldName
+  fieldName: string
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
   body: {
@@ -50,7 +45,7 @@ const fetchTransactionDurationFieldTerms = async (
   params: SearchStrategyParams,
   fieldName: string,
   addLogMessage: AsyncSearchServiceLog['addLogMessage']
-): Promise<FieldValuePairs> => {
+): Promise<FieldValuePair[]> => {
   try {
     const resp = await esClient.search(getTermsAggRequest(params, fieldName));
 
@@ -82,8 +77,8 @@ const fetchTransactionDurationFieldTerms = async (
 };
 
 async function fetchInSequence(
-  fieldCandidates: FieldName[],
-  fn: (fieldCandidate: string) => Promise<FieldValuePairs>
+  fieldCandidates: string[],
+  fn: (fieldCandidate: string) => Promise<FieldValuePair[]>
 ) {
   const results = [];
 
@@ -97,10 +92,10 @@ async function fetchInSequence(
 export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
-  fieldCandidates: FieldName[],
+  fieldCandidates: string[],
   state: AsyncSearchServiceState,
   addLogMessage: AsyncSearchServiceLog['addLogMessage']
-): Promise<FieldValuePairs> => {
+): Promise<FieldValuePair[]> => {
   let fieldValuePairsProgress = 1;
 
   return await fetchInSequence(

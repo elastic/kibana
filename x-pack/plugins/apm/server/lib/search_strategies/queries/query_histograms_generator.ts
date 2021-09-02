@@ -9,7 +9,10 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from 'src/core/server';
 
-import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
+import type {
+  FieldValuePair,
+  SearchStrategyParams,
+} from '../../../../common/search_strategies/types';
 
 import type { AsyncSearchServiceLog } from '../async_search_service_log';
 import type { AsyncSearchServiceState } from '../latency_correlations/async_search_service_state';
@@ -18,8 +21,6 @@ import { CORRELATION_THRESHOLD, KS_TEST_THRESHOLD } from '../constants';
 import { getPrioritizedFieldValuePairs } from './get_prioritized_field_value_pairs';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationRanges } from './query_ranges';
-
-import type { FieldValuePairs } from './query_field_value_pairs';
 
 export async function* fetchTransactionDurationHistograms(
   esClient: ElasticsearchClient,
@@ -31,7 +32,7 @@ export async function* fetchTransactionDurationHistograms(
   fractions: number[],
   histogramRangeSteps: number[],
   totalDocCount: number,
-  fieldValuePairs: FieldValuePairs
+  fieldValuePairs: FieldValuePair[]
 ) {
   for (const item of getPrioritizedFieldValuePairs(fieldValuePairs)) {
     if (params === undefined || item === undefined || state.getIsCancelled()) {

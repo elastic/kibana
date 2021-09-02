@@ -8,10 +8,10 @@
 import { FIELDS_TO_ADD_AS_CANDIDATE } from '../constants';
 import { hasPrefixToInclude } from '../utils';
 
-import type { FieldValuePairs } from './query_field_value_pairs';
+import type { FieldValuePair } from '../../../../common/search_strategies/types';
 
 export const getPrioritizedFieldValuePairs = (
-  fieldValuePairs: FieldValuePairs
+  fieldValuePairs: FieldValuePair[]
 ) => {
   const prioritizedFields = [...FIELDS_TO_ADD_AS_CANDIDATE];
 

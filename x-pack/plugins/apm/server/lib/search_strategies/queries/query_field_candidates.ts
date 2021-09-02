@@ -21,7 +21,6 @@ import { hasPrefixToInclude } from '../utils';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
-import type { FieldName } from './query_field_value_pairs';
 
 export const shouldBeExcluded = (fieldName: string) => {
   return (
@@ -53,7 +52,7 @@ export const getRandomDocsRequest = (
 export const fetchTransactionDurationFieldCandidates = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams
-): Promise<{ fieldCandidates: FieldName[] }> => {
+): Promise<{ fieldCandidates: string[] }> => {
   const { index } = params;
   // Get all fields with keyword mapping
   const respMapping = await esClient.fieldCaps({
