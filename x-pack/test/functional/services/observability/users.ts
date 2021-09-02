@@ -5,106 +5,84 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { Role } from '../../../../plugins/security/common/model';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 type CreateRolePayload = Pick<Role, 'metadata' | 'elasticsearch' | 'kibana'>;
 
-interface ObservabilityTestUserDefinition {
-  userName: string;
-  password: string;
-  roleDefinition: {
-    roleName: string;
-    role: CreateRolePayload;
-  };
-}
-
-const OBSERVABILITY_TEST_ROLE_NAME_PREFIX = 'observability-functional-test-role';
-const OBSERVABILITY_TEST_USER_NAME_PREFIX = 'observability-functional-test-user';
-const OBSERVABILITY_TEST_USER_PASSWORD = 'observability-functional-test-password';
+const OBSERVABILITY_TEST_ROLE_NAME = 'observability-functional-test-role';
 
 export function ObservabilityUsersProvider({ getPageObject, getService }: FtrProviderContext) {
-  const securityPageObject = getPageObject('security');
   const security = getService('security');
 
   /**
-   * Defines an observability test user with a given role.
+   * Creates a test role and set it as the test user's role. Performs a page
+   * reload to apply the role change, but doesn't require a re-login.
    *
-   * Note: This does not actually create the user in the system under test.
+   * @arg roleDefinition - the privileges of the test role
    */
-  const defineTestUser = (role: CreateRolePayload): ObservabilityTestUserDefinition => {
-    const uniqueUserSuffix = uuid.v4();
+  const setTestUserRole = async (roleDefinition: CreateRolePayload) => {
+    await security.role.create(OBSERVABILITY_TEST_ROLE_NAME, roleDefinition);
 
-    return {
-      userName: [OBSERVABILITY_TEST_USER_NAME_PREFIX, uniqueUserSuffix].join('-'),
-      password: OBSERVABILITY_TEST_USER_PASSWORD,
-      roleDefinition: {
-        roleName: [OBSERVABILITY_TEST_ROLE_NAME_PREFIX, uniqueUserSuffix].join('-'),
-        role,
-      },
-    };
+    await security.testUser.setRoles([OBSERVABILITY_TEST_ROLE_NAME]);
   };
 
   /**
-   * Creates in an observability test user that matches the given user
-   * definition. The user and role are created via the Kibana API.
-   *
-   * @arg user - the test user definition
+   * Deletes the test role and restores thedefault test user role. Performs a
+   * page reload to apply the role change, but doesn't require a re-login.
    */
-  const createUser = async (user: ObservabilityTestUserDefinition) => {
-    await security.role.create(user.roleDefinition.roleName, user.roleDefinition.role);
-
-    await security.user.create(user.userName, {
-      password: user.password,
-      roles: [user.roleDefinition.roleName],
-      full_name: user.userName,
-    });
-  };
-
-  /**
-   * Creates and logs in an observability test user that matches the given user
-   * definition. The user and role are created via the Kibana API.
-   *
-   * @arg user - the test user definition
-   */
-  const createUserAndLogIn = async (user: ObservabilityTestUserDefinition) => {
-    await createUser(user);
-
-    await securityPageObject.forceLogout();
-
-    await securityPageObject.login(user.userName, user.password, {
-      expectSpaceSelector: false,
-    });
-  };
-
-  /**
-   * Deletes an observability test user via the Kibana API.
-   *
-   * @arg user - the test user definition
-   */
-  const deleteUser = async (user: ObservabilityTestUserDefinition) => {
+  const restoreDefaultTestUserRole = async () => {
     await Promise.all([
-      security.role.delete(user.roleDefinition.roleName),
-      security.user.delete(user.userName),
+      security.role.delete(OBSERVABILITY_TEST_ROLE_NAME),
+      security.testUser.restoreDefaults(),
     ]);
   };
 
-  /**
-   * Logs out and deletes an observability test user via the Kibana API.
-   *
-   * @arg user - the test user definition
-   */
-  const logOutAndDeleteUser = async (user: ObservabilityTestUserDefinition) => {
-    await securityPageObject.forceLogout();
-    await deleteUser(user);
-  };
-
   return {
-    createUser,
-    createUserAndLogIn,
-    defineTestUser,
-    deleteUser,
-    logOutAndDeleteUser,
+    defineBasicObservabilityRole,
+    restoreDefaultTestUserRole,
+    setTestUserRole,
   };
 }
+
+/**
+ * Generates a combination of Elasticsearch and Kibana privileges for given
+ * observability features.
+ */
+const defineBasicObservabilityRole = (
+  features: Partial<{
+    observabilityCases: string[];
+    apm: string[];
+    logs: string[];
+    infrastructure: string[];
+    uptime: string[];
+  }>
+): CreateRolePayload => {
+  return {
+    elasticsearch: {
+      cluster: ['all'],
+      indices: [
+        ...((features.logs?.length ?? 0) > 0
+          ? [{ names: ['filebeat-*', 'logs-*'], privileges: ['all'] }]
+          : []),
+        ...((features.infrastructure?.length ?? 0) > 0
+          ? [{ names: ['metricbeat-*', 'metrics-*'], privileges: ['all'] }]
+          : []),
+        ...((features.apm?.length ?? 0) > 0 ? [{ names: ['apm-*'], privileges: ['all'] }] : []),
+        ...((features.uptime?.length ?? 0) > 0
+          ? [{ names: ['heartbeat-*,synthetics-*'], privileges: ['all'] }]
+          : []),
+      ],
+      run_as: [],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        // @ts-expect-error TypeScript doesn't distinguish between missing and
+        // undefined props yet
+        feature: features,
+      },
+    ],
+  };
+};

@@ -21,21 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
-  const casesAllUser = observability.users.defineTestUser({
-    elasticsearch: { cluster: [], indices: [], run_as: [] },
-    kibana: [{ spaces: ['*'], base: [], feature: { observabilityCases: ['all'], logs: ['all'] } }],
-  });
-
-  const casesReadUser = observability.users.defineTestUser({
-    elasticsearch: { cluster: [], indices: [], run_as: [] },
-    kibana: [{ spaces: ['*'], base: [], feature: { observabilityCases: ['read'], logs: ['all'] } }],
-  });
-
-  const casesNoneUser = observability.users.defineTestUser({
-    elasticsearch: { cluster: [], indices: [], run_as: [] },
-    kibana: [{ spaces: ['*'], base: [], feature: { discover: ['all'] } }],
-  });
-
   describe('observability security feature controls', function () {
     this.tags(['skipFirefox']);
     before(async () => {
@@ -48,14 +33,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('observability cases all privileges', () => {
       before(async () => {
-        await observability.users.createUserAndLogIn(casesAllUser);
+        await observability.users.setTestUserRole(
+          observability.users.defineBasicObservabilityRole({
+            observabilityCases: ['all'],
+            logs: ['all'],
+          })
+        );
       });
 
       after(async () => {
-        await observability.users.logOutAndDeleteUser(casesAllUser);
+        await observability.users.restoreDefaultTestUserRole();
       });
 
       it('shows observability/cases navlink', async () => {
+        await PageObjects.common.navigateToActualUrl('observability');
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Cases');
       });
@@ -92,11 +83,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('observability cases read-only privileges', () => {
       before(async () => {
-        await observability.users.createUserAndLogIn(casesReadUser);
+        await observability.users.setTestUserRole(
+          observability.users.defineBasicObservabilityRole({
+            observabilityCases: ['read'],
+            logs: ['all'],
+          })
+        );
       });
 
       after(async () => {
-        await observability.users.logOutAndDeleteUser(casesReadUser);
+        await observability.users.restoreDefaultTestUserRole();
       });
 
       it('shows observability/cases navlink', async () => {
@@ -137,11 +133,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('no observability privileges', () => {
       before(async () => {
-        await observability.users.createUserAndLogIn(casesNoneUser);
+        await observability.users.setTestUserRole({
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [{ spaces: ['*'], base: [], feature: { discover: ['all'] } }],
+        });
       });
 
       after(async () => {
-        await observability.users.logOutAndDeleteUser(casesNoneUser);
+        await observability.users.restoreDefaultTestUserRole();
       });
 
       it(`returns a 403`, async () => {
