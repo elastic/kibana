@@ -11,9 +11,11 @@ import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
-import { getPreviousDiagTaskTimestamp } from './helpers';
-import { TelemetryEventsSender, TelemetryEvent } from './sender';
+} from '../../../../../task_manager/server';
+import { getPreviousDiagTaskTimestamp } from '../helpers';
+import { TelemetryEventsSender } from '../sender';
+import { TelemetryEvent } from '../types';
+import { TelemetryReceiver } from '../receiver';
 
 export const TelemetryDiagTaskConstants = {
   TIMEOUT: '1m',
@@ -25,14 +27,17 @@ export const TelemetryDiagTaskConstants = {
 export class TelemetryDiagTask {
   private readonly logger: Logger;
   private readonly sender: TelemetryEventsSender;
+  private readonly receiver: TelemetryReceiver;
 
   constructor(
     logger: Logger,
     taskManager: TaskManagerSetupContract,
-    sender: TelemetryEventsSender
+    sender: TelemetryEventsSender,
+    receiver: TelemetryReceiver
   ) {
     this.logger = logger;
     this.sender = sender;
+    this.receiver = receiver;
 
     taskManager.registerTaskDefinitions({
       [TelemetryDiagTaskConstants.TYPE]: {
@@ -99,7 +104,7 @@ export class TelemetryDiagTask {
       return 0;
     }
 
-    const response = await this.sender.fetchDiagnosticAlerts(searchFrom, searchTo);
+    const response = await this.receiver.fetchDiagnosticAlerts(searchFrom, searchTo);
 
     const hits = response.hits?.hits || [];
     if (!Array.isArray(hits) || !hits.length) {
