@@ -286,7 +286,7 @@ describe('Lens Attribute', () => {
                 'transaction.type: page-load and processor.event: transaction and transaction.type : *',
             },
             isBucketed: false,
-            label: 'test-series',
+            label: 'Pages loaded',
             operationType: 'formula',
             params: {
               format: {
@@ -497,7 +497,7 @@ describe('Lens Attribute', () => {
                 'transaction.type: page-load and processor.event: transaction and transaction.type : *',
             },
             isBucketed: false,
-            label: 'test-series',
+            label: 'Pages loaded',
             operationType: 'formula',
             params: {
               format: {
