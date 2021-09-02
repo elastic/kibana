@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { omit } from 'lodash';
+import { omit, keyBy } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
@@ -39,14 +39,17 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       expect(body.messages.length).to.eql(2);
-      expect(omit(body.messages[0], 'timestamp')).to.eql({
+
+      const messagesDict = keyBy(body.messages, 'job_id');
+
+      expect(omit(messagesDict.test_get_job_audit_messages_2, 'timestamp')).to.eql({
         job_id: 'test_get_job_audit_messages_2',
         message: 'Job created',
         level: 'info',
         node_name: 'node-01',
         job_type: 'anomaly_detector',
       });
-      expect(omit(body.messages[1], 'timestamp')).to.eql({
+      expect(omit(messagesDict.test_get_job_audit_messages_1, 'timestamp')).to.eql({
         job_id: 'test_get_job_audit_messages_1',
         message: 'Job created',
         level: 'info',
