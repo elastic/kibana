@@ -8,11 +8,10 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { get, includes } from 'lodash';
-// import { i18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Legacy } from '../../legacy_shims';
-// import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../../components/setup_mode/enter_button';
 import { SetupModeFeature } from '../../../common/enums';
 import { ISetupModeContext } from '../../components/setup_mode/setup_mode_context';
@@ -78,22 +77,19 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
   setupModeState.data = data;
   const hasPermissions = get(data, '_meta.hasPermissions', false);
   if (!hasPermissions) {
-    // TODO: show notification
-    // let text: string = '';
-    // if (!hasPermissions) {
-    //   text = i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
-    //     defaultMessage: 'You do not have the necessary permissions to do this.',
-    //   });
-    // }
+    let text: string = '';
+    if (!hasPermissions) {
+      text = i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
+        defaultMessage: 'You do not have the necessary permissions to do this.',
+      });
+    }
 
-    // angularState.scope.$evalAsync(() => {
-    //   Legacy.shims.toastNotifications.addDanger({
-    //     title: i18n.translate('xpack.monitoring.setupMode.notAvailableTitle', {
-    //       defaultMessage: 'Setup mode is not available',
-    //     }),
-    //     text,
-    //   });
-    // });
+    Legacy.shims.toastNotifications.addDanger({
+      title: i18n.translate('xpack.monitoring.setupMode.notAvailableTitle', {
+        defaultMessage: 'Setup mode is not available',
+      }),
+      text,
+    });
     return toggleSetupMode(false);
   }
   notifySetupModeDataChange();
@@ -110,28 +106,26 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
   }
 };
 
-// export const hideBottomBar = () => {
-//   setupModeState.hideBottomBar = true;
-//   notifySetupModeDataChange();
-// };
-// export const showBottomBar = () => {
-//   setupModeState.hideBottomBar = false;
-//   notifySetupModeDataChange();
-// };
+export const hideBottomBar = () => {
+  setupModeState.hideBottomBar = true;
+  notifySetupModeDataChange();
+};
+export const showBottomBar = () => {
+  setupModeState.hideBottomBar = false;
+  notifySetupModeDataChange();
+};
 
-// export const disableElasticsearchInternalCollection = async () => {
-//   const http = angularState.injector.get('$http');
-//   const globalState = angularState.injector.get('globalState');
-//   const clusterUuid = globalState.cluster_uuid;
-//   const url = `../api/monitoring/v1/setup/collection/${clusterUuid}/disable_internal_collection`;
-//   try {
-//     const response = await http.post(url);
-//     return response.data;
-//   } catch (err) {
-//     // TODO: handle errors
-//     throw new Error(err);
-//   }
-// };
+export const disableElasticsearchInternalCollection = async () => {
+  const clusterUuid = globalState.cluster_uuid;
+  const url = `../api/monitoring/v1/setup/collection/${clusterUuid}/disable_internal_collection`;
+  try {
+    const response = await httpService.post(url);
+    return response;
+  } catch (err) {
+    // TODO: handle errors
+    throw new Error(err);
+  }
+};
 
 export const toggleSetupMode = (inSetupMode: boolean) => {
   setupModeState.enabled = inSetupMode;
@@ -163,9 +157,6 @@ export const setSetupModeMenuItem = () => {
     document.getElementById('setupModeNav')
   );
 };
-
-// is this used ?!?!?!
-export const addSetupModeCallback = (callback: () => void) => (setupModeState.callback = callback);
 
 export const initSetupModeState = async (
   state: GlobalState,
