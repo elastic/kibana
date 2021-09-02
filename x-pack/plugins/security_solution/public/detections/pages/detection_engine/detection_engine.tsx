@@ -103,6 +103,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const updatedAt = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
   );
+  const isAlertsLoading = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).isLoading
+  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -142,6 +145,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     docLinks,
   } = useKibana().services;
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+
+  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -331,8 +336,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   {timelinesUi.getLastUpdated({
-                    updatedAt: updatedAt || 0,
-                    showUpdating: loading,
+                    updatedAt: updatedAt || Date.now(),
+                    showUpdating,
                   })}
                 </EuiFlexItem>
               </EuiFlexGroup>

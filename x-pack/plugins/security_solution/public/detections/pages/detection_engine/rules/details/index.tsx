@@ -180,6 +180,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const updatedAt = useShallowEqualSelector(
     (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
   );
+  const isAlertsLoading = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).isLoading
+  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -284,6 +287,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       setRuleDetailTab(RuleDetailTabs.alerts);
     }
   }, [hasIndexRead]);
+
+  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
 
   const title = useMemo(
     () => (
@@ -773,8 +778,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     {timelinesUi.getLastUpdated({
-                      updatedAt: updatedAt || 0,
-                      showUpdating: loading,
+                      updatedAt: updatedAt || Date.now(),
+                      showUpdating,
                     })}
                   </EuiFlexItem>
                 </EuiFlexGroup>
