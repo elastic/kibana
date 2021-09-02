@@ -303,8 +303,19 @@ export function MachineLearningStackManagementJobsProvider(
       }
     },
 
-    async selectExportJobSelectAll() {
+    async selectExportJobSelectAll(jobType: JobType) {
       await testSubjects.click('mlJobMgmtExportJobsSelectAllButton');
+      const subjLabel =
+        jobType === 'anomaly-detector'
+          ? 'mlJobMgmtExportJobsADJobList'
+          : 'mlJobMgmtExportJobsDFAJobList';
+      const subj = await testSubjects.find(subjLabel);
+      const inputs = await subj.findAllByTagName('input');
+      const allInputValues = await Promise.all(inputs.map((input) => input.getAttribute('value')));
+      expect(allInputValues.every((i) => i === 'on')).to.eql(
+        true,
+        `Expected all inputs to be checked`
+      );
     },
 
     async getDownload(filePath: string) {
@@ -330,6 +341,7 @@ export function MachineLearningStackManagementJobsProvider(
 
     async selectExportJobs() {
       await testSubjects.click('mlJobMgmtExportExportButton');
+      await testSubjects.missingOrFail('mlJobMgmtExportJobsFlyout', { timeout: 60 * 1000 });
     },
 
     async assertExportedADJobsAreCorrect(expectedJobs: Array<{ job: Job; datafeed: Datafeed }>) {
@@ -337,9 +349,7 @@ export function MachineLearningStackManagementJobsProvider(
         await this.getDownload(this.getExportedFile('anomaly_detection_jobs'))
       );
       const loadedFile = Array.isArray(file) ? file : [file];
-      const sortedActualJobs = loadedFile.sort((a, b) =>
-        a.job.job_id.localeCompare((a = b.job.job_id))
-      );
+      const sortedActualJobs = loadedFile.sort((a, b) => a.job.job_id.localeCompare(b.job.job_id));
 
       const sortedExpectedJobs = expectedJobs.sort((a, b) =>
         a.job.job_id.localeCompare(b.job.job_id)
@@ -350,17 +360,21 @@ export function MachineLearningStackManagementJobsProvider(
       );
 
       sortedExpectedJobs.forEach((expectedJob, i) => {
-        expect(expectedJob.job.job_id).to.eql(
-          sortedActualJobs[i].job.job_id,
+        expect(sortedActualJobs[i].job.job_id).to.eql(
+          expectedJob.job.job_id,
           `Expected job id to be '${expectedJob.job.job_id}' (got '${sortedActualJobs[i].job.job_id}')`
         );
-        expect(expectedJob.job.analysis_config.detectors.length).to.eql(
-          sortedActualJobs[i].job.analysis_config.detectors.length,
+        expect(sortedActualJobs[i].job.analysis_config.detectors.length).to.eql(
+          expectedJob.job.analysis_config.detectors.length,
           `Expected detectors length to be '${expectedJob.job.analysis_config.detectors.length}' (got '${sortedActualJobs[i].job.analysis_config.detectors.length}')`
         );
-        expect(expectedJob.job.analysis_config.detectors[0].function).to.eql(
-          sortedActualJobs[i].job.analysis_config.detectors[0].function,
+        expect(sortedActualJobs[i].job.analysis_config.detectors[0].function).to.eql(
+          expectedJob.job.analysis_config.detectors[0].function,
           `Expected first detector function to be '${expectedJob.job.analysis_config.detectors[0].function}' (got '${sortedActualJobs[i].job.analysis_config.detectors[0].function}')`
+        );
+        expect(sortedActualJobs[i].datafeed.datafeed_id).to.eql(
+          expectedJob.datafeed.datafeed_id,
+          `Expected job id to be '${expectedJob.datafeed.datafeed_id}' (got '${sortedActualJobs[i].datafeed.datafeed_id}')`
         );
       });
     },
@@ -380,18 +394,18 @@ export function MachineLearningStackManagementJobsProvider(
       );
 
       sortedExpectedJobs.forEach((expectedJob, i) => {
-        expect(expectedJob.id).to.eql(
-          sortedActualJobs[i].id,
+        expect(sortedActualJobs[i].id).to.eql(
+          expectedJob.id,
           `Expected job id to be '${expectedJob.id}' (got '${sortedActualJobs[i].id}')`
         );
         const expectedType = Object.keys(expectedJob.analysis)[0];
         const actualType = Object.keys(sortedActualJobs[i].analysis)[0];
-        expect(expectedType).to.eql(
-          actualType,
+        expect(actualType).to.eql(
+          expectedType,
           `Expected job type to be '${expectedType}' (got '${actualType}')`
         );
-        expect(expectedJob.dest.index).to.eql(
-          sortedActualJobs[i].dest.index,
+        expect(sortedActualJobs[i].dest.index).to.eql(
+          expectedJob.dest.index,
           `Expected destination index to be '${expectedJob.dest.index}' (got '${sortedActualJobs[i].dest.index}')`
         );
       });

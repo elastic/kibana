@@ -298,7 +298,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('opens export flyout and exports anomaly detector jobs', async () => {
       await ml.stackManagementJobs.openExportFlyout();
       await ml.stackManagementJobs.selectExportJobType('anomaly-detector');
-      await ml.stackManagementJobs.selectExportJobSelectAll();
+      await ml.stackManagementJobs.selectExportJobSelectAll('anomaly-detector');
       await ml.stackManagementJobs.selectExportJobs();
       await ml.stackManagementJobs.assertExportedADJobsAreCorrect(testADJobs);
     });
@@ -306,7 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('opens export flyout and exports data frame analytics jobs', async () => {
       await ml.stackManagementJobs.openExportFlyout();
       await ml.stackManagementJobs.selectExportJobType('data-frame-analytics');
-      await ml.stackManagementJobs.selectExportJobSelectAll();
+      await ml.stackManagementJobs.selectExportJobSelectAll('data-frame-analytics');
       await ml.stackManagementJobs.selectExportJobs();
       await ml.stackManagementJobs.assertExportedDFAJobsAreCorrect(testDFAJobs);
     });

@@ -275,10 +275,17 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                           isDisabled={isDisabled}
                           data-test-subj="mlJobMgmtExportJobsSelectAllButton"
                         >
-                          <FormattedMessage
-                            id="xpack.ml.importExport.exportFlyout.adSelectAllButton"
-                            defaultMessage="Select all"
-                          />
+                          {selectedJobIds.length === adJobIds.length ? (
+                            <FormattedMessage
+                              id="xpack.ml.importExport.exportFlyout.adDeselectAllButton"
+                              defaultMessage="Deselect all"
+                            />
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.ml.importExport.exportFlyout.adSelectAllButton"
+                              defaultMessage="Select all"
+                            />
+                          )}
                         </EuiButtonEmpty>
 
                         <EuiSpacer size="xs" />
@@ -312,10 +319,17 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                           isDisabled={isDisabled}
                           data-test-subj="mlJobMgmtExportJobsSelectAllButton"
                         >
-                          <FormattedMessage
-                            id="xpack.ml.importExport.exportFlyout.dfaSelectAllButton"
-                            defaultMessage="Select all"
-                          />
+                          {selectedJobIds.length === dfaJobIds.length ? (
+                            <FormattedMessage
+                              id="xpack.ml.importExport.exportFlyout.dfaDeselectAllButton"
+                              defaultMessage="Deselect all"
+                            />
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.ml.importExport.exportFlyout.dfaSelectAllButton"
+                              defaultMessage="Select all"
+                            />
+                          )}
                         </EuiButtonEmpty>
 
                         <EuiSpacer size="xs" />
