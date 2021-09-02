@@ -137,7 +137,7 @@ describe('get_filter', () => {
       });
     });
 
-    test('return query for threat_match rule, despite saved_id is specify', async () => {
+    test('returns the query persisted to the threat_match rule, despite saved_id being specified', async () => {
       const filter = await getFilter({
         type: 'threat_match',
         filters: undefined,
@@ -160,7 +160,7 @@ describe('get_filter', () => {
       });
     });
 
-    test('return query for threshold rule, despite saved_id is specify', async () => {
+    test('returns the query persisted to the threshold rule, despite saved_id being specified', async () => {
       const filter = await getFilter({
         type: 'threat_match',
         filters: undefined,
