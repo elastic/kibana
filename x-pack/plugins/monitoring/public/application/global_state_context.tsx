@@ -11,16 +11,20 @@ import { MonitoringStartPluginDependencies } from '../types';
 interface GlobalStateProviderProps {
   query: MonitoringStartPluginDependencies['data']['query'];
   toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts'];
-  children: React.ReactNode;
 }
 
 interface State {
   cluster_uuid?: string;
+  ccs?: any;
 }
 
 export const GlobalStateContext = createContext({} as State);
 
-export const GlobalStateProvider = ({ query, toasts, children }: GlobalStateProviderProps) => {
+export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
+  query,
+  toasts,
+  children,
+}) => {
   // TODO: remove fakeAngularRootScope and fakeAngularLocation when angular is removed
   const fakeAngularRootScope: Partial<ng.IRootScopeService> = {
     $on: (

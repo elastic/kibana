@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ConfigPath } from '@kbn/config';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HotObservable } from 'rxjs/internal/testing/HotObservable';
 import { TestScheduler } from 'rxjs/testing';
@@ -29,12 +30,31 @@ import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 
 describe('CoreUsageDataService', () => {
+  function getConfigServiceAtPathMockImplementation() {
+    return (path: ConfigPath) => {
+      if (path === 'elasticsearch') {
+        return new BehaviorSubject(RawElasticsearchConfig.schema.validate({}));
+      } else if (path === 'server') {
+        return new BehaviorSubject(RawHttpConfig.schema.validate({}));
+      } else if (path === 'logging') {
+        return new BehaviorSubject(RawLoggingConfig.schema.validate({}));
+      } else if (path === 'savedObjects') {
+        return new BehaviorSubject(RawSavedObjectsConfig.schema.validate({}));
+      } else if (path === 'kibana') {
+        return new BehaviorSubject(RawKibanaConfig.schema.validate({}));
+      }
+      return new BehaviorSubject({});
+    };
+  }
+
   const getTestScheduler = () =>
     new TestScheduler((actual, expected) => {
       expect(actual).toEqual(expected);
     });
 
   let service: CoreUsageDataService;
+  let configService: ReturnType<typeof configServiceMock.create>;
+
   const mockConfig = {
     unused_config: {},
     elasticsearch: { username: 'kibana_system', password: 'changeme' },
@@ -60,27 +80,11 @@ describe('CoreUsageDataService', () => {
     },
   };
 
-  const configService = configServiceMock.create({
-    getConfig$: mockConfig,
-  });
-
-  configService.atPath.mockImplementation((path) => {
-    if (path === 'elasticsearch') {
-      return new BehaviorSubject(RawElasticsearchConfig.schema.validate({}));
-    } else if (path === 'server') {
-      return new BehaviorSubject(RawHttpConfig.schema.validate({}));
-    } else if (path === 'logging') {
-      return new BehaviorSubject(RawLoggingConfig.schema.validate({}));
-    } else if (path === 'savedObjects') {
-      return new BehaviorSubject(RawSavedObjectsConfig.schema.validate({}));
-    } else if (path === 'kibana') {
-      return new BehaviorSubject(RawKibanaConfig.schema.validate({}));
-    }
-    return new BehaviorSubject({});
-  });
-  const coreContext = mockCoreContext.create({ configService });
-
   beforeEach(() => {
+    configService = configServiceMock.create({ getConfig$: mockConfig });
+    configService.atPath.mockImplementation(getConfigServiceAtPathMockImplementation());
+
+    const coreContext = mockCoreContext.create({ configService });
     service = new CoreUsageDataService(coreContext);
   });
 
@@ -150,7 +154,7 @@ describe('CoreUsageDataService', () => {
 
   describe('start', () => {
     describe('getCoreUsageData', () => {
-      it('returns core metrics for default config', async () => {
+      function setup() {
         const http = httpServiceMock.createInternalSetupContract();
         const metrics = metricsServiceMock.createInternalSetupContract();
         const savedObjectsStartPromise = Promise.resolve(
@@ -208,6 +212,11 @@ describe('CoreUsageDataService', () => {
           exposedConfigsToUsage: new Map(),
           elasticsearch,
         });
+        return { getCoreUsageData };
+      }
+
+      it('returns core metrics for default config', async () => {
+        const { getCoreUsageData } = setup();
         expect(getCoreUsageData()).resolves.toMatchInlineSnapshot(`
           Object {
             "config": Object {
@@ -226,6 +235,7 @@ describe('CoreUsageDataService', () => {
                 "logQueries": false,
                 "numberOfHostsConfigured": 1,
                 "pingTimeoutMs": 30000,
+                "principal": "unknown",
                 "requestHeadersWhitelistConfigured": false,
                 "requestTimeoutMs": 30000,
                 "shardTimeoutMs": 30000,
@@ -353,6 +363,60 @@ describe('CoreUsageDataService', () => {
             },
           }
         `);
+      });
+
+      describe('elasticsearch.principal', () => {
+        async function doTest({
+          username,
+          serviceAccountToken,
+          expectedPrincipal,
+        }: {
+          username?: string;
+          serviceAccountToken?: string;
+          expectedPrincipal: string;
+        }) {
+          const defaultMockImplementation = getConfigServiceAtPathMockImplementation();
+          configService.atPath.mockImplementation((path) => {
+            if (path === 'elasticsearch') {
+              return new BehaviorSubject(
+                RawElasticsearchConfig.schema.validate({ username, serviceAccountToken })
+              );
+            }
+            return defaultMockImplementation(path);
+          });
+          const { getCoreUsageData } = setup();
+          return expect(getCoreUsageData()).resolves.toEqual(
+            expect.objectContaining({
+              config: expect.objectContaining({
+                elasticsearch: expect.objectContaining({ principal: expectedPrincipal }),
+              }),
+            })
+          );
+        }
+
+        it('returns expected usage data for elastic.username "elastic"', async () => {
+          return doTest({ username: 'elastic', expectedPrincipal: 'elastic_user' });
+        });
+
+        it('returns expected usage data for elastic.username "kibana"', async () => {
+          return doTest({ username: 'kibana', expectedPrincipal: 'kibana_user' });
+        });
+
+        it('returns expected usage data for elastic.username "kibana_system"', async () => {
+          return doTest({ username: 'kibana_system', expectedPrincipal: 'kibana_system_user' });
+        });
+
+        it('returns expected usage data for elastic.username anything else', async () => {
+          return doTest({ username: 'anything else', expectedPrincipal: 'other_user' });
+        });
+
+        it('returns expected usage data for elastic.serviceAccountToken', async () => {
+          // Note: elastic.username and elastic.serviceAccountToken are mutually exclusive
+          return doTest({
+            serviceAccountToken: 'any',
+            expectedPrincipal: 'kibana_service_account',
+          });
+        });
       });
     });
 

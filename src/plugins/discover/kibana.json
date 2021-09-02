@@ -17,9 +17,10 @@
   ],
   "optionalPlugins": ["home", "share", "usageCollection"],
   "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "fieldFormats"],
+  "extraPublicDirs": ["common"],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Data Discovery",
+    "githubTeam": "kibana-data-discovery"
   },
   "description": "This plugin contains the Discover application and the saved search embeddable."
 }
