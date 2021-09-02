@@ -60,7 +60,7 @@ export const getPersisted = async ({
       );
       await spaces.ui.redirectLegacyUrl(
         newPath,
-        i18n.translate('xpack.lens.appName', {
+        i18n.translate('xpack.lens.legacyUrlConflict.objectNoun', {
           defaultMessage: 'Lens visualization',
         })
       );

@@ -176,7 +176,7 @@ const SavedObjectConflictMessage = ({ json }: { json: string }) => {
     <>
       <FormattedMessage
         id="xpack.lens.embeddable.legacyURLConflict.longMessage"
-        defaultMessage="You have encountered a legacy URL alias conflict. See the {documentationLink} for more information."
+        defaultMessage=" A {documentationLink} is also associated with this object."
         values={{
           documentationLink: (
             <EuiLink
@@ -185,7 +185,7 @@ const SavedObjectConflictMessage = ({ json }: { json: string }) => {
               target="_blank"
             >
               {i18n.translate('xpack.lens.embeddable.legacyURLConflict.documentationLinkText', {
-                defaultMessage: 'documentation',
+                defaultMessage: 'legacy URL',
               })}
             </EuiLink>
           ),
@@ -195,7 +195,7 @@ const SavedObjectConflictMessage = ({ json }: { json: string }) => {
       {expandError ? (
         <EuiCallOut
           title={i18n.translate('xpack.lens.embeddable.legacyURLConflict.expandErrorText', {
-            defaultMessage: `Found a specified object and an alias for the same URL. You can disable the alias to resolve this error: {json}`,
+            defaultMessage: `An object and an alias have the same URL. Disable the alias to resolve this error: {json}`,
             values: { json },
           })}
           color="danger"
@@ -214,7 +214,7 @@ const SavedObjectConflictMessage = ({ json }: { json: string }) => {
 
 export const savedObjectConflictError = (json: string): ErrorMessage => ({
   shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
-    defaultMessage: 'Legacy URL Alias Conflict',
+    defaultMessage: `You've encountered a URL conflict`,
   }),
   longMessage: <SavedObjectConflictMessage json={json} />,
 });
