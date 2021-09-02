@@ -6,78 +6,80 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE, SavedObjectsClientCommon } from '../..';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, SavedObjectsClientCommon } from '../..';
 
-import { createIndexPatternCache } from '.';
+import { createDataViewCache } from '.';
 import type { RuntimeField } from '../types';
-import { IndexPattern } from './index_pattern';
-import {
-  createEnsureDefaultIndexPattern,
-  EnsureDefaultIndexPattern,
-} from './ensure_default_index_pattern';
+import { DataView } from './index_pattern';
+import { createEnsureDefaultDataView, EnsureDefaultDataView } from './ensure_default_index_pattern';
 import {
   OnNotification,
   OnError,
   UiSettingsCommon,
-  IIndexPatternsApiClient,
+  IDataViewsApiClient,
   GetFieldsOptions,
-  IndexPatternSpec,
-  IndexPatternAttributes,
+  DataViewSpec,
+  DataViewAttributes,
   FieldAttrs,
   FieldSpec,
-  IndexPatternFieldMap,
+  DataViewFieldMap,
   TypeMeta,
 } from '../types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '../../../../field_formats/common/';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../kibana_utils/common';
-import { IndexPatternMissingIndices } from '../lib';
+import { DataViewMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
-import { DuplicateIndexPatternError } from '../errors';
-import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
+import { DuplicateDataViewError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
-export type IndexPatternSavedObjectAttrs = Pick<
-  IndexPatternAttributes,
-  'title' | 'type' | 'typeMeta'
->;
+export type IndexPatternSavedObjectAttrs = Pick<DataViewAttributes, 'title' | 'type' | 'typeMeta'>;
 
 export type IndexPatternListSavedObjectAttrs = Pick<
-  IndexPatternAttributes,
+  DataViewAttributes,
   'title' | 'type' | 'typeMeta'
 >;
 
-export interface IndexPatternListItem {
+export interface DataViewListItem {
   id: string;
   title: string;
   type?: string;
   typeMeta?: TypeMeta;
 }
 
+/**
+ * @deprecated Use DataViewListItem. All index pattern interfaces were renamed.
+ */
+
+export type IndexPatternListItem = DataViewListItem;
+
 interface IndexPatternsServiceDeps {
   uiSettings: UiSettingsCommon;
   savedObjectsClient: SavedObjectsClientCommon;
-  apiClient: IIndexPatternsApiClient;
+  apiClient: IDataViewsApiClient;
   fieldFormats: FieldFormatsStartCommon;
   onNotification: OnNotification;
   onError: OnError;
   onRedirectNoIndexPattern?: () => void;
 }
 
-export class IndexPatternsService {
+export class DataViewsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;
   private savedObjectsCache?: Array<SavedObject<IndexPatternSavedObjectAttrs>> | null;
-  private apiClient: IIndexPatternsApiClient;
+  private apiClient: IDataViewsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
-  private indexPatternCache: ReturnType<typeof createIndexPatternCache>;
+  private indexPatternCache: ReturnType<typeof createDataViewCache>;
 
-  ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
+  ensureDefaultIndexPattern: EnsureDefaultDataView;
 
   constructor({
     uiSettings,
@@ -94,12 +96,12 @@ export class IndexPatternsService {
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
-    this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
+    this.ensureDefaultIndexPattern = createEnsureDefaultDataView(
       uiSettings,
       onRedirectNoIndexPattern
     );
 
-    this.indexPatternCache = createIndexPatternCache();
+    this.indexPatternCache = createDataViewCache();
   }
 
   /**
@@ -107,7 +109,7 @@ export class IndexPatternsService {
    */
   private async refreshSavedObjectsCache() {
     const so = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
-      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
       fields: ['title', 'type', 'typeMeta'],
       perPage: 10000,
     });
@@ -148,9 +150,9 @@ export class IndexPatternsService {
    * @param size
    * @returns IndexPattern[]
    */
-  find = async (search: string, size: number = 10): Promise<IndexPattern[]> => {
+  find = async (search: string, size: number = 10): Promise<DataView[]> => {
     const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
-      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
       fields: ['title'],
       search,
       searchFields: ['title'],
@@ -233,6 +235,13 @@ export class IndexPatternsService {
   };
 
   /**
+   * Checks if current user has a user created index pattern ignoring fleet's server default index patterns
+   */
+  async hasUserIndexPattern(): Promise<boolean> {
+    return this.apiClient.hasUserIndexPattern();
+  }
+
+  /**
    * Get field list by providing { pattern }
    * @param options
    * @returns FieldSpec[]
@@ -254,7 +263,7 @@ export class IndexPatternsService {
    * @returns FieldSpec[]
    */
   getFieldsForIndexPattern = async (
-    indexPattern: IndexPattern | IndexPatternSpec,
+    indexPattern: DataView | DataViewSpec,
     options?: GetFieldsOptions
   ) =>
     this.getFieldsForWildcard({
@@ -268,7 +277,7 @@ export class IndexPatternsService {
    * Refresh field list for a given index pattern
    * @param indexPattern
    */
-  refreshFields = async (indexPattern: IndexPattern) => {
+  refreshFields = async (indexPattern: DataView) => {
     try {
       const fields = (await this.getFieldsForIndexPattern(indexPattern)) as FieldSpec[];
       fields.forEach((field) => (field.isMapped = true));
@@ -279,7 +288,7 @@ export class IndexPatternsService {
       );
       indexPattern.fields.replaceAll(fieldsWithSavedAttrs);
     } catch (err) {
-      if (err instanceof IndexPatternMissingIndices) {
+      if (err instanceof DataViewMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
       }
 
@@ -301,7 +310,7 @@ export class IndexPatternsService {
    * @returns Record<string, FieldSpec>
    */
   private refreshFieldSpecMap = async (
-    fields: IndexPatternFieldMap,
+    fields: DataViewFieldMap,
     id: string,
     title: string,
     options: GetFieldsOptions,
@@ -324,7 +333,7 @@ export class IndexPatternsService {
 
       return this.fieldArrayToMap(updatedFieldList, fieldAttrs);
     } catch (err) {
-      if (err instanceof IndexPatternMissingIndices) {
+      if (err instanceof DataViewMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
         return {};
       }
@@ -346,7 +355,7 @@ export class IndexPatternsService {
    * @returns Record<string, FieldSpec>
    */
   fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
-    fields.reduce<IndexPatternFieldMap>((collector, field) => {
+    fields.reduce<DataViewFieldMap>((collector, field) => {
       collector[field.name] = {
         ...field,
         customLabel: fieldAttrs?.[field.name]?.customLabel,
@@ -361,7 +370,7 @@ export class IndexPatternsService {
    * @returns IndexPatternSpec
    */
 
-  savedObjectToSpec = (savedObject: SavedObject<IndexPatternAttributes>): IndexPatternSpec => {
+  savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {
     const {
       id,
       version,
@@ -406,15 +415,15 @@ export class IndexPatternsService {
     };
   };
 
-  private getSavedObjectAndInit = async (id: string): Promise<IndexPattern> => {
-    const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
-      INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  private getSavedObjectAndInit = async (id: string): Promise<DataView> => {
+    const savedObject = await this.savedObjectsClient.get<DataViewAttributes>(
+      DATA_VIEW_SAVED_OBJECT_TYPE,
       id
     );
 
     if (!savedObject.version) {
       throw new SavedObjectNotFound(
-        INDEX_PATTERN_SAVED_OBJECT_TYPE,
+        DATA_VIEW_SAVED_OBJECT_TYPE,
         id,
         'management/kibana/indexPatterns'
       );
@@ -424,8 +433,8 @@ export class IndexPatternsService {
   };
 
   private initFromSavedObject = async (
-    savedObject: SavedObject<IndexPatternAttributes>
-  ): Promise<IndexPattern> => {
+    savedObject: SavedObject<DataViewAttributes>
+  ): Promise<DataView> => {
     const spec = this.savedObjectToSpec(savedObject);
     const { title, type, typeMeta, runtimeFieldMap } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
@@ -464,7 +473,7 @@ export class IndexPatternsService {
         }
       }
     } catch (err) {
-      if (err instanceof IndexPatternMissingIndices) {
+      if (err instanceof DataViewMissingIndices) {
         this.onNotification({
           title: (err as any).message,
           color: 'danger',
@@ -494,7 +503,7 @@ export class IndexPatternsService {
    * @param id
    */
 
-  get = async (id: string): Promise<IndexPattern> => {
+  get = async (id: string): Promise<DataView> => {
     const indexPatternPromise =
       this.indexPatternCache.get(id) ||
       this.indexPatternCache.set(id, this.getSavedObjectAndInit(id));
@@ -513,11 +522,11 @@ export class IndexPatternsService {
    * @param skipFetchFields
    * @returns IndexPattern
    */
-  async create(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
+  async create(spec: DataViewSpec, skipFetchFields = false): Promise<DataView> {
     const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 
-    const indexPattern = new IndexPattern({
+    const indexPattern = new DataView({
       spec,
       fieldFormats: this.fieldFormats,
       shortDotsEnable,
@@ -538,7 +547,7 @@ export class IndexPatternsService {
    * @param skipFetchFields Whether to skip field refresh step.
    */
 
-  async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
+  async createAndSave(spec: DataViewSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
     const createdIndexPattern = await this.createSavedObject(indexPattern, override);
     await this.setDefault(createdIndexPattern.id!);
@@ -551,24 +560,24 @@ export class IndexPatternsService {
    * @param override Overwrite if existing index pattern exists
    */
 
-  async createSavedObject(indexPattern: IndexPattern, override = false) {
+  async createSavedObject(indexPattern: DataView, override = false) {
     const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
     if (dupe) {
       if (override) {
         await this.delete(dupe.id);
       } else {
-        throw new DuplicateIndexPatternError(`Duplicate index pattern: ${indexPattern.title}`);
+        throw new DuplicateDataViewError(`Duplicate index pattern: ${indexPattern.title}`);
       }
     }
 
     const body = indexPattern.getAsSavedObjectBody();
-    const response: SavedObject<IndexPatternAttributes> = (await this.savedObjectsClient.create(
-      INDEX_PATTERN_SAVED_OBJECT_TYPE,
+    const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
+      DATA_VIEW_SAVED_OBJECT_TYPE,
       body,
       {
         id: indexPattern.id,
       }
-    )) as SavedObject<IndexPatternAttributes>;
+    )) as SavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response);
     this.indexPatternCache.set(createdIndexPattern.id!, Promise.resolve(createdIndexPattern));
@@ -585,7 +594,7 @@ export class IndexPatternsService {
    */
 
   async updateSavedObject(
-    indexPattern: IndexPattern,
+    indexPattern: DataView,
     saveAttempts: number = 0,
     ignoreErrors: boolean = false
   ): Promise<void | Error> {
@@ -604,7 +613,7 @@ export class IndexPatternsService {
     });
 
     return this.savedObjectsClient
-      .update(INDEX_PATTERN_SAVED_OBJECT_TYPE, indexPattern.id, body, {
+      .update(DATA_VIEW_SAVED_OBJECT_TYPE, indexPattern.id, body, {
         version: indexPattern.version,
       })
       .then((resp) => {
@@ -674,8 +683,18 @@ export class IndexPatternsService {
    */
   async delete(indexPatternId: string) {
     this.indexPatternCache.clear(indexPatternId);
-    return this.savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, indexPatternId);
+    return this.savedObjectsClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, indexPatternId);
   }
 }
 
-export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;
+/**
+ * @deprecated Use DataViewsService. All index pattern interfaces were renamed.
+ */
+export class IndexPatternsService extends DataViewsService {}
+
+export type DataViewsContract = PublicMethodsOf<DataViewsService>;
+
+/**
+ * @deprecated Use DataViewsContract. All index pattern interfaces were renamed.
+ */
+export type IndexPatternsContract = DataViewsContract;

@@ -95,6 +95,7 @@ export function createApmEventClient({
         ...withPossibleLegacyDataFilter,
         ignore_throttled: !includeFrozen,
         ignore_unavailable: true,
+        preference: 'any',
       };
 
       // only "search" operation is currently supported

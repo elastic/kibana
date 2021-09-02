@@ -8,6 +8,6 @@
     "githubTeam": "kibana-app-services"
   },
   "requiredPlugins": ["inspector", "uiActions"],
-  "extraPublicDirs": ["public/lib/test_samples"],
+  "extraPublicDirs": ["public/lib/test_samples", "common"],
   "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils"]
 }

@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 
 import { ElasticsearchConnectionStatus } from '../../common';
 import type { EnrollResult } from '../elasticsearch_service';
+import type { WriteConfigParameters } from '../kibana_config_writer';
 import type { RouteDefinitionParams } from './';
 
 /**
@@ -73,12 +74,20 @@ export function defineEnrollRoutes({
         });
       }
 
-      let enrollResult: EnrollResult;
+      // Convert a plain hex string returned in the enrollment token to a format that ES client
+      // expects, i.e. to a colon delimited hex string in upper case: deadbeef -> DE:AD:BE:EF.
+      const colonFormattedCaFingerprint =
+        request.body.caFingerprint
+          .toUpperCase()
+          .match(/.{1,2}/g)
+          ?.join(':') ?? '';
+
+      let configToWrite: WriteConfigParameters & EnrollResult;
       try {
-        enrollResult = await elasticsearch.enroll({
+        configToWrite = await elasticsearch.enroll({
           apiKey: request.body.apiKey,
           hosts: request.body.hosts,
-          caFingerprint: request.body.caFingerprint,
+          caFingerprint: colonFormattedCaFingerprint,
         });
       } catch {
         // For security reasons, we shouldn't leak to the user whether Elasticsearch node couldn't process enrollment
@@ -90,7 +99,7 @@ export function defineEnrollRoutes({
       }
 
       try {
-        await kibanaConfigWriter.writeConfig(enrollResult);
+        await kibanaConfigWriter.writeConfig(configToWrite);
       } catch {
         // For security reasons, we shouldn't leak any filesystem related errors.
         return response.customError({

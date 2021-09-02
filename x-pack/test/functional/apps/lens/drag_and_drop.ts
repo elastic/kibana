@@ -8,9 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
-  const retry = getService('retry');
 
   describe('lens drag and drop tests', () => {
     describe('basic drag and drop', () => {
@@ -19,9 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickVisType('lens');
         await PageObjects.lens.goToTimeRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async () => {
-          await PageObjects.lens.dragFieldToWorkspace('@timestamp');
-        });
+        await PageObjects.lens.dragFieldToWorkspace('@timestamp');
 
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
           '@timestamp'

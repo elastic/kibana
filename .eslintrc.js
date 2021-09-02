@@ -1567,7 +1567,6 @@ module.exports = {
     {
       files: [
         'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
-        'src/plugins/spaces_oss/**/*.{js,mjs,ts,tsx}',
         'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
@@ -1655,6 +1654,25 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
+      },
+    },
+
+    /**
+     * Disallow `export *` syntax in plugin/core public/server/common index files and instead
+     * require that plugins/core explicitly export the APIs that should be accessible outside the plugin.
+     *
+     * To add your plugin to this list just update the relevant glob with the name of your plugin
+     */
+    {
+      files: [
+        'src/core/{server,public,common}/index.ts',
+        'src/plugins/*/{server,public,common}/index.ts',
+        'src/plugins/*/*/{server,public,common}/index.ts',
+        'x-pack/plugins/*/{server,public,common}/index.ts',
+        'x-pack/plugins/*/*/{server,public,common}/index.ts',
+      ],
+      rules: {
+        '@kbn/eslint/no_export_all': 'error',
       },
     },
   ],

@@ -35,19 +35,25 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('Rule detects against a keyword and constant_keyword of event.dataset', () => {
-    beforeEach(async () => {
-      await createSignalsIndex(supertest);
+    before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_keyword_family/const_keyword');
       await esArchiver.load('x-pack/test/functional/es_archives/rule_keyword_family/keyword');
+    });
+
+    after(async () => {
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/rule_keyword_family/const_keyword'
+      );
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_keyword_family/keyword');
+    });
+
+    beforeEach(async () => {
+      await createSignalsIndex(supertest);
     });
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/rule_keyword_family/const_keyword'
-      );
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_keyword_family/keyword');
     });
 
     describe('"kql" rule type', () => {

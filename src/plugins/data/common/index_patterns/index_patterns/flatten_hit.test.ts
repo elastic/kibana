@@ -8,12 +8,9 @@
 
 import { IndexPattern } from './index_pattern';
 
-// @ts-expect-error
-import mockLogStashFields from './fixtures/logstash_fields';
-import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
-
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import { flattenHitWrapper } from './flatten_hit';
+import { stubbedSavedObjectIndexPattern } from '../index_pattern.stub';
 
 class MockFieldFormatter {}
 
@@ -33,7 +30,7 @@ function create(id: string) {
       type,
       version,
       timeFieldName,
-      fields,
+      fields: JSON.parse(fields),
       title,
       runtimeFieldMap: {},
     },

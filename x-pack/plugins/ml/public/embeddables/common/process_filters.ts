@@ -49,10 +49,12 @@ export function processFilters(
       };
     }
 
-    if (negate) {
-      mustNot.push(filterQuery);
-    } else {
-      must.push(filterQuery);
+    if (filterQuery) {
+      if (negate) {
+        mustNot.push(filterQuery);
+      } else {
+        must.push(filterQuery);
+      }
     }
   }
   return {
