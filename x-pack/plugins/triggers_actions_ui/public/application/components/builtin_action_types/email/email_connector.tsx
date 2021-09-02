@@ -25,13 +25,13 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
-import { emailServices } from './email';
+import { getEmailServices } from './email';
 import { useEmailConfig } from './use_email_config';
 
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
-  const { docLinks, http } = useKibana().services;
+  const { docLinks, http, isCloud } = useKibana().services;
   const { from, host, port, secure, hasAuth, service } = action.config;
   const { user, password } = action.secrets;
 
@@ -123,7 +123,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               disabled={readOnly}
               isInvalid={isServiceInvalid}
               data-test-subj="emailServiceSelectInput"
-              options={emailServices}
+              options={getEmailServices(isCloud)}
               onChange={(e) => {
                 setEmailService(e.target.value);
               }}

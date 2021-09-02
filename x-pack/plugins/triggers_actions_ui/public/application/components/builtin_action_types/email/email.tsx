@@ -15,7 +15,7 @@ import {
 } from '../../../../types';
 import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
 
-export const emailServices: EuiSelectOption[] = [
+const emailServices: EuiSelectOption[] = [
   {
     text: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.gmailServerTypeLabel',
@@ -71,6 +71,12 @@ export const emailServices: EuiSelectOption[] = [
     value: 'other',
   },
 ];
+
+export function getEmailServices(isCloudEnabled: boolean) {
+  return isCloudEnabled
+    ? emailServices
+    : emailServices.filter((service) => service.value !== 'elastic_cloud');
+}
 
 export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
