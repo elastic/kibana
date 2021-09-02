@@ -53,6 +53,13 @@ const REMOVE_NON_SUMMARY_BROWSER_CHECKS = {
   ],
 };
 
+function isStringArray(value: unknown): value is string[] {
+  if (!Array.isArray(value)) return false;
+  // are all array items strings
+  if (!value.some((s) => typeof s !== 'string')) return true;
+  throw Error('Excluded locations can only be strings');
+}
+
 export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = async ({
   uptimeEsClient,
   dateRange: { from, to },
@@ -86,9 +93,8 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
   };
 
   // if there are excluded locations, add a clause to the query's filter
-  const excludedLocationsArray =
-    typeof excludedLocations !== 'undefined' ? JSON.parse(excludedLocations) : undefined;
-  if (Array.isArray(excludedLocationsArray) && excludedLocationsArray.length > 0) {
+  const excludedLocationsArray: unknown = excludedLocations && JSON.parse(excludedLocations);
+  if (isStringArray(excludedLocationsArray) && excludedLocationsArray.length > 0) {
     searchBody.query.bool.filter.push({
       bool: {
         must_not: [

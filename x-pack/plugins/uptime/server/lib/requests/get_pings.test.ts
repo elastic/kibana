@@ -424,6 +424,20 @@ describe('getAll', () => {
     `);
   });
 
+  it('throws error for invalid exclusions', async () => {
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
+    await expect(
+      getPings({
+        uptimeEsClient,
+        dateRange: { from: 'now-1h', to: 'now' },
+        excludedLocations: `["fairbanks", 2345]`,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Excluded locations can only be strings"`);
+  });
+
   it('adds a filter for monitor status', async () => {
     const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
