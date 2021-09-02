@@ -22,7 +22,7 @@ import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_
 import {
   ALERT_DURATION,
   ALERT_END,
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
@@ -228,7 +228,7 @@ export const createLifecycleExecutor = (
     hits.hits.forEach((hit) => {
       const fields = parseTechnicalFields(hit.fields);
       const indexName = hit._index;
-      const alertId = fields[ALERT_ID];
+      const alertId = fields[ALERT_INSTANCE_ID];
       trackedAlertsDataMap[alertId] = {
         indexName,
         fields,
@@ -260,7 +260,7 @@ export const createLifecycleExecutor = (
         ...currentAlertData,
         [ALERT_DURATION]: (options.startedAt.getTime() - new Date(started).getTime()) * 1000,
 
-        [ALERT_ID]: alertId,
+        [ALERT_INSTANCE_ID]: alertId,
         [ALERT_START]: started,
         [ALERT_UUID]: alertUuid,
         [ALERT_STATUS]: isRecovered ? ALERT_STATUS_RECOVERED : ALERT_STATUS_ACTIVE,
@@ -278,9 +278,7 @@ export const createLifecycleExecutor = (
     });
 
   const trackedEventsToIndex = makeEventsDataMapFor(trackedAlertIds);
-
   const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
-
   const allEventsToIndex = [...trackedEventsToIndex, ...newEventsToIndex];
 
   if (allEventsToIndex.length > 0 && ruleDataClient.isWriteEnabled()) {
@@ -300,7 +298,7 @@ export const createLifecycleExecutor = (
     allEventsToIndex
       .filter(({ event }) => event[ALERT_STATUS] !== 'closed')
       .map(({ event }) => {
-        const alertId = event[ALERT_ID]!;
+        const alertId = event[ALERT_INSTANCE_ID]!;
         const alertUuid = event[ALERT_UUID]!;
         const started = new Date(event[ALERT_START]!).toISOString();
         return [alertId, { alertId, alertUuid, started }];

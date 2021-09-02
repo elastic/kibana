@@ -37,10 +37,12 @@ export function ServiceOverviewThroughputChart({
   height,
   environment,
   kuery,
+  transactionName,
 }: {
   height?: number;
   environment: string;
   kuery: string;
+  transactionName?: string;
 }) {
   const theme = useTheme();
 
@@ -80,6 +82,7 @@ export function ServiceOverviewThroughputChart({
               transactionType,
               comparisonStart,
               comparisonEnd,
+              transactionName,
             },
           },
         });
@@ -94,6 +97,7 @@ export function ServiceOverviewThroughputChart({
       transactionType,
       comparisonStart,
       comparisonEnd,
+      transactionName,
     ]
   );
 
