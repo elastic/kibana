@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { SearchBar } from './search_bar';
+export { KibanaDeprecations } from './kibana_deprecations';
+export { EsDeprecations } from './es_deprecations';
+export { ComingSoonPrompt } from './coming_soon_prompt';
+export { Overview } from './overview';
