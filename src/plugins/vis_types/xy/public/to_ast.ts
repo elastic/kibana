@@ -127,6 +127,7 @@ const prepareXYDimension = (data: Dimension) => {
     aggType: data.aggType,
     label: data.label,
     visDimension: prepareVisDimension(data),
+    id: data.id,
   });
 
   return buildExpression([xyDimension]);

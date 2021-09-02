@@ -255,10 +255,14 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         categoryLines: args.gridCategoryLines,
         valueAxis: args.gridValueAxis,
       },
-      seriesParams: args.seriesParams.map((seriesParam) => ({
-        ...seriesParam,
-        type: seriesParam.seriesParamType,
-      })),
+      seriesParams: args.seriesParams.map((seriesParam) => {
+        const matchedSeries = args.yDimension.filter((y) => y.id === seriesParam.data.id);
+        return {
+          ...seriesParam,
+          show: matchedSeries.length > 0,
+          type: seriesParam.seriesParamType,
+        };
+      }),
       radiusRatio: args.radiusRatio,
       times: args.times,
       isVislibVis: args.isVislibVis,

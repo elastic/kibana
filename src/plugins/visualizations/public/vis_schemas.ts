@@ -24,6 +24,7 @@ export interface SchemaConfig {
   format: SerializedFieldFormat;
   params: SchemaConfigParams;
   aggType: string;
+  id?: number | string;
 }
 
 export interface Schemas {
@@ -86,6 +87,7 @@ export const getVisSchemas = <TVisParams>(
       params,
       label,
       aggType: agg.type.name,
+      id: agg.id,
     };
   };
 
