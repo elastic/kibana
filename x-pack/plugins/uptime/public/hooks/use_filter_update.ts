@@ -35,6 +35,17 @@ const getUpdateFilters = (
   return persistedFilters.length === 0 ? '' : JSON.stringify(persistedFilters);
 };
 
+export function addUpdatedField(
+  current: string,
+  key: string,
+  updated: string,
+  objToUpdate: { [key: string]: string }
+): void {
+  if (current !== updated || current !== '') {
+    objToUpdate[key] = updated;
+  }
+}
+
 export const useFilterUpdate = (
   fieldName?: string,
   values?: string[],
@@ -55,17 +66,10 @@ export const useFilterUpdate = (
       const newExclusionsString = getUpdateFilters(currentExclusionsMap, fieldName, notValues);
 
       const update: { [key: string]: string } = {};
-      if (urlParams.filters !== newFiltersString) {
-        update.filters = newFiltersString;
-      } else {
-        update.filters = urlParams.filters;
-      }
 
-      if (urlParams.excludedFilters !== newExclusionsString) {
-        update.excludedFilters = newExclusionsString;
-      } else {
-        update.excludedFilters = urlParams.excludedFilters;
-      }
+      addUpdatedField(urlParams.filters, 'filters', newFiltersString, update);
+      addUpdatedField(urlParams.excludedFilters, 'excludedFilters', newExclusionsString, update);
+
       if (shouldUpdateUrl && Object.keys(update).length > 0) {
         // reset pagination whenever filters change
         updateUrl({ ...update, pagination: '' });

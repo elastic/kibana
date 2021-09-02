@@ -25,8 +25,6 @@ export enum SyntaxType {
 }
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
-const DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL = 800;
-
 interface UseQueryBarUtils {
   // The Query object used by the search bar
   query: Query;
@@ -38,6 +36,8 @@ interface UseQueryBarUtils {
    */
   submitImmediately: () => void;
 }
+
+export const DEBOUNCE_INTERVAL = 800;
 
 /**
  * Provides state management and automatic dispatching of a Query object.
@@ -70,7 +70,7 @@ export const useQueryBar = (): UseQueryBarUtils => {
 
   const indexPattern = useIndexPattern();
 
-  const updateUrlParams = useUrlParams()[1];
+  const [, updateUrlParams] = useUrlParams();
 
   const [esFilters, error] = useUpdateKueryString(
     indexPattern,
@@ -88,7 +88,7 @@ export const useQueryBar = (): UseQueryBarUtils => {
     esFilters,
     setEsKueryFilters,
   ]);
-  const [, cancelEsKueryUpdate] = useDebounce(setEs, DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL, [
+  const [, cancelEsKueryUpdate] = useDebounce(setEs, DEBOUNCE_INTERVAL, [
     esFilters,
     setEsKueryFilters,
   ]);
@@ -97,16 +97,12 @@ export const useQueryBar = (): UseQueryBarUtils => {
     if (query.language === SyntaxType.text && queryParam !== query.query) {
       updateUrlParams({ query: query.query as string });
     }
-    if (query.language === SyntaxType.kuery) {
+    if (query.language === SyntaxType.kuery && queryParam !== '') {
       updateUrlParams({ query: '' });
     }
   }, [query.language, query.query, queryParam, updateUrlParams]);
 
-  const [, cancelQueryUpdate] = useDebounce(
-    handleQueryUpdate,
-    DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL,
-    [query]
-  );
+  const [, cancelQueryUpdate] = useDebounce(handleQueryUpdate, DEBOUNCE_INTERVAL, [query]);
 
   const submitImmediately = useCallback(() => {
     cancelQueryUpdate();
@@ -117,17 +113,18 @@ export const useQueryBar = (): UseQueryBarUtils => {
 
   useDebounce(
     () => {
-      if (query.language === SyntaxType.kuery && !error && esFilters) {
+      if (query.language === SyntaxType.kuery && !error && esFilters && search !== query.query) {
         updateUrlParams({ search: query.query as string });
       }
-      if (query.language === SyntaxType.text) {
+      if (query.language === SyntaxType.text && search !== '') {
         updateUrlParams({ search: '' });
       }
-      if (query.language === SyntaxType.kuery && query.query === '') {
+      // this calls when it probably doesn't need to
+      if (query.language === SyntaxType.kuery && query.query === '' && search !== '') {
         updateUrlParams({ search: '' });
       }
     },
-    250,
+    DEBOUNCE_INTERVAL,
     [esFilters, error]
   );
 
