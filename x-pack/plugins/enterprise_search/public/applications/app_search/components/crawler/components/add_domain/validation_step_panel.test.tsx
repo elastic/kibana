@@ -50,7 +50,7 @@ describe('ValidationStepPanel', () => {
       expect(wrapper.find('[data-test-subj="action"]')).toHaveLength(1);
     });
 
-    it('displays the passed error message and action is warning', () => {
+    it('displays the passed error message and action when state is warning', () => {
       const wrapper = shallow(
         <ValidationStepPanel
           step={{ state: 'warning', message: errorMessage }}

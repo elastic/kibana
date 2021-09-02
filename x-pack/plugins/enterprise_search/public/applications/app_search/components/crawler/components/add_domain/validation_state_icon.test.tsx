@@ -20,7 +20,7 @@ describe('ValidationStateIcon', () => {
     expect(wrapper.find(EuiIcon).prop('color')).toEqual('success');
   });
 
-  it('shows an alert icon when invalid', () => {
+  it('shows a warning icon when warning', () => {
     const wrapper = shallow(<ValidationStateIcon state="warning" />);
 
     expect(wrapper.find(EuiIcon).prop('color')).toEqual('warning');
