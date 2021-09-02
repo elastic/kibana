@@ -207,7 +207,6 @@ describe('SavedObjectsRepository', () => {
     }
     const namespaceId = namespaces[0] === 'default' ? undefined : namespaces[0];
 
-    // const namespaceId = objectNamespace === 'default' ? undefined : objectNamespace ?? namespace;
     return {
       // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
       found: true,
@@ -790,7 +789,7 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`returns error when there is a conflict with an existing multi-namespace saved object with initialNamespaces (get)`, async () => {
+      it(`returns error when there is an unresolvable conflict with an existing multi-namespace saved object when using initialNamespaces (get)`, async () => {
         const obj = {
           ...obj3,
           type: MULTI_NAMESPACE_TYPE,
@@ -2220,7 +2219,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.get).toHaveBeenCalled();
       });
 
-      it(`throws when there is a conflict with an existing multi-namespace saved object when using initialNamespaces (get)`, async () => {
+      it(`throws when there is an unresolvable conflict with an existing multi-namespace saved object when using initialNamespaces (get)`, async () => {
         const response = getMockGetResponse({ type: MULTI_NAMESPACE_ISOLATED_TYPE, id }, namespace);
         client.get.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(response)
