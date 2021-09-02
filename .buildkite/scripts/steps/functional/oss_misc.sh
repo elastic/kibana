@@ -7,6 +7,9 @@ export BUILD_TS_REFS_DISABLE=false
 
 source .buildkite/scripts/steps/functional/common.sh
 
+# Required, at least for plugin_functional tests
+.buildkite/scripts/build_kibana_plugins.sh
+
 echo --- Build kbn_sample_panel_action
 
 cd test/plugin_functional/plugins/kbn_sample_panel_action
