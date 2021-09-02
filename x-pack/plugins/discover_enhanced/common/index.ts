@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Config } from './config';
+export type { Config } from './config';
