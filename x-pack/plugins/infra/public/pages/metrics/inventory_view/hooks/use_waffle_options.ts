@@ -44,6 +44,7 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   legend: DEFAULT_LEGEND,
   source: 'default',
   sort: { by: 'name', direction: 'desc' },
+  timelineOpen: false,
 };
 
 export const useWaffleOptions = () => {
@@ -134,6 +135,11 @@ export const useWaffleOptions = () => {
     setCustomMetrics(state.customMetrics);
   }, [state, inventoryPrefill]);
 
+  const changeTimelineOpen = useCallback(
+    (timelineOpen: boolean) => setState((previous) => ({ ...previous, timelineOpen })),
+    [setState]
+  );
+
   return {
     ...DEFAULT_WAFFLE_OPTIONS_STATE,
     ...state,
@@ -149,6 +155,7 @@ export const useWaffleOptions = () => {
     changeCustomMetrics,
     changeLegend,
     changeSort,
+    changeTimelineOpen,
     setWaffleOptionsState: setState,
   };
 };
@@ -188,7 +195,7 @@ export const WaffleOptionsStateRT = rt.intersection([
     customMetrics: rt.array(SnapshotCustomMetricInputRT),
     sort: WaffleSortOptionRT,
   }),
-  rt.partial({ source: rt.string, legend: WaffleLegendOptionsRT }),
+  rt.partial({ source: rt.string, legend: WaffleLegendOptionsRT, timelineOpen: rt.boolean }),
 ]);
 
 export type WaffleSortOption = rt.TypeOf<typeof WaffleSortOptionRT>;

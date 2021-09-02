@@ -39,6 +39,7 @@ export const useWaffleViewState = () => {
     region,
     legend,
     sort,
+    timelineOpen,
     setWaffleOptionsState,
   } = useWaffleOptionsContext();
   const { currentTime, isAutoReloading, setWaffleTimeState } = useWaffleTimeContext();
@@ -60,6 +61,7 @@ export const useWaffleViewState = () => {
     autoReload: isAutoReloading,
     filterQuery,
     legend,
+    timelineOpen,
   };
 
   const onViewChange = useCallback(
@@ -77,6 +79,7 @@ export const useWaffleViewState = () => {
         accountId: newState.accountId,
         region: newState.region,
         legend: newState.legend,
+        timelineOpen: newState.timelineOpen,
       });
 
       if (newState.time) {
