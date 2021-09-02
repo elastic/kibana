@@ -47,8 +47,8 @@ interface TaskExecutor extends Pick<ExportTypeDefinition, 'jobContentEncoding'> 
   jobExecutor: RunTaskFn<BasePayload>;
 }
 
-function isOutput(output: any): output is CompletedReportOutput {
-  return output?.size != null;
+function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
+  return (output as CompletedReportOutput).size != null;
 }
 
 function reportFromTask(task: ReportTaskParams) {
