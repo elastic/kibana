@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 
 import { EditConnector, EditConnectorProps } from './index';
 import { getFormMock, useFormMock } from '../__mock__/form';
@@ -50,8 +50,6 @@ const defaultProps: EditConnectorProps = {
 };
 
 describe('EditConnector ', () => {
-  const sampleConnector = '123';
-  const formHookMock = getFormMock({ connectorId: sampleConnector });
   beforeEach(() => {
     jest.clearAllMocks();
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
@@ -60,26 +58,25 @@ describe('EditConnector ', () => {
       iconClass: 'logoSecurity',
     });
   });
+  const sampleConnector = '123';
+  const formHookMock = getFormMock({ connectorId: sampleConnector });
 
-  it('Renders no connector, and then edit', async () => {
-    const wrapper = mount(
+  it('Renders service now connector from case initially', async () => {
+    const serviceNowProps = {
+      ...defaultProps,
+      caseData: {
+        ...defaultProps.caseData,
+        connector: { ...defaultProps.caseData.connector, id: 'servicenow-1' },
+      },
+    };
+
+    render(
       <TestProviders>
-        <EditConnector {...defaultProps} />
+        <EditConnector {...serviceNowProps} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeTruthy();
-    wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
 
-    expect(
-      wrapper.find(`span[data-test-subj="dropdown-connector-no-connector"]`).last().exists()
-    ).toBeTruthy();
-
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.update();
-    wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
-    await waitFor(() => wrapper.update());
-
-    expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
+    expect(await screen.findByText('My Connector')).toBeInTheDocument();
   });
 
   it('Renders no connector, and then edit', async () => {
