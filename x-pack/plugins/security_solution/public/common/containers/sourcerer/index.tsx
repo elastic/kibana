@@ -17,7 +17,7 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ALERTS_PATH, RULES_PATH, UEBA_PATH } from '../../../../common/constants';
 import { TimelineId } from '../../../../common';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { getPatternList } from '../../store/sourcerer/helpers';
+import { getPatternList, getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export const useInitSourcerer = (
@@ -83,11 +83,15 @@ export const useInitSourcerer = (
       initialTimelineSourcerer.current
     ) {
       initialTimelineSourcerer.current = false;
-      console.log('replace me! setSelectedIndexPatterns containers/sourcerer L85');
       dispatch(
-        sourcererActions.setSelectedIndexPatterns({
+        sourcererActions.setSelectedKip({
           id: SourcererScopeName.timeline,
-          selectedPatterns: [...defaultIndexPatternSelection, signalIndexName],
+          selectedKipId: defaultIndexPattern.id,
+          selectedPatterns: getScopePatternListSelection(
+            defaultIndexPattern,
+            SourcererScopeName.timeline,
+            signalIndexName
+          ),
         })
       );
     } else if (
@@ -96,16 +100,21 @@ export const useInitSourcerer = (
       initialTimelineSourcerer.current
     ) {
       initialTimelineSourcerer.current = false;
-      console.log('replace me! setSelectedIndexPatterns containers/sourcerer L98');
       dispatch(
-        sourcererActions.setSelectedIndexPatterns({
+        sourcererActions.setSelectedKip({
           id: SourcererScopeName.timeline,
-          selectedPatterns: [...defaultIndexPatternSelection, signalIndexNameSelector],
+          selectedKipId: defaultIndexPattern.id,
+          selectedPatterns: getScopePatternListSelection(
+            defaultIndexPattern,
+            SourcererScopeName.timeline,
+            signalIndexNameSelector
+          ),
         })
       );
     }
   }, [
     activeTimeline,
+    defaultIndexPattern,
     defaultIndexPatternSelection,
     dispatch,
     loadingSignalIndex,
@@ -122,11 +131,15 @@ export const useInitSourcerer = (
       initialDetectionSourcerer.current
     ) {
       initialDetectionSourcerer.current = false;
-      console.log('replace me! setSelectedIndexPatterns containers/sourcerer L123');
       dispatch(
-        sourcererActions.setSelectedIndexPatterns({
+        sourcererActions.setSelectedKip({
           id: SourcererScopeName.detections,
-          selectedPatterns: [signalIndexName],
+          selectedKipId: defaultIndexPattern.id,
+          selectedPatterns: getScopePatternListSelection(
+            defaultIndexPattern,
+            SourcererScopeName.detections,
+            signalIndexName
+          ),
         })
       );
     } else if (
@@ -135,15 +148,24 @@ export const useInitSourcerer = (
       initialTimelineSourcerer.current
     ) {
       initialDetectionSourcerer.current = false;
-      console.log('replace me! setSelectedIndexPatterns containers/sourcerer L137');
-      dispatch(
-        sourcererActions.setSelectedIndexPatterns({
-          id: SourcererScopeName.detections,
-          selectedPatterns: [signalIndexNameSelector],
-        })
-      );
+      sourcererActions.setSelectedKip({
+        id: SourcererScopeName.detections,
+        selectedKipId: defaultIndexPattern.id,
+        selectedPatterns: getScopePatternListSelection(
+          defaultIndexPattern,
+          SourcererScopeName.detections,
+          signalIndexNameSelector
+        ),
+      });
     }
-  }, [dispatch, isSignalIndexExists, scopeId, signalIndexName, signalIndexNameSelector]);
+  }, [
+    defaultIndexPattern,
+    dispatch,
+    isSignalIndexExists,
+    scopeId,
+    signalIndexName,
+    signalIndexNameSelector,
+  ]);
 };
 
 export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {
