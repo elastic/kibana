@@ -26,13 +26,18 @@ describe('HeaderActionMenu', () => {
   });
 
   const refresh = () => {
-    new Promise(async (resolve) => {
-      if (component) {
-        act(() => {
-          component.update();
-        });
+    new Promise(async (resolve, reject) => {
+      try {
+        if (component) {
+          act(() => {
+            component.update();
+          });
+        }
+
+        setImmediate(() => resolve(component)); // flushes any pending promises
+      } catch (error) {
+        reject(error);
       }
-      setImmediate(() => resolve(component)); // flushes any pending promises
     });
   };
 
