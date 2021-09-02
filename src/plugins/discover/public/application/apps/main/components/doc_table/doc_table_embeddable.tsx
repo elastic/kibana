@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
@@ -21,14 +21,10 @@ export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount: number;
 }
 
-const scrollTop = () => {
-  const scrollDiv = document.querySelector('.kbnDocTableWrapper') as HTMLElement;
-  scrollDiv.scrollTo(0, 0);
-};
-
 const DocTableWrapperMemoized = memo(DocTableWrapper);
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
   const {
     currentPage,
     pageSize,
@@ -41,6 +37,12 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     totalItems: props.rows.length,
   });
 
+  const scrollTop = useCallback(() => {
+    if (tableWrapperRef.current) {
+      tableWrapperRef.current.scrollTo(0, 0);
+    }
+  }, []);
+
   const pageOfItems = useMemo(() => props.rows.slice(startIndex, pageSize + startIndex), [
     pageSize,
     startIndex,
@@ -52,7 +54,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
       scrollTop();
       changePage(page);
     },
-    [changePage]
+    [changePage, scrollTop]
   );
 
   const onPageSizeChange = useCallback(
@@ -60,13 +62,17 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
       scrollTop();
       changePageSize(size);
     },
-    [changePageSize]
+    [changePageSize, scrollTop]
   );
 
   /**
-   * Go to the first page if filter was applied
+   * Go to the first page if the current is no longer available
    */
-  useEffect(() => onPageChange(0), [onPageChange, props.rows.length]);
+  useEffect(() => {
+    if (totalPages < currentPage + 1) {
+      onPageChange(0);
+    }
+  }, [currentPage, totalPages, onPageChange]);
 
   const shouldShowLimitedResultsWarning = () =>
     !hasNextPage && props.rows.length < props.totalHitCount;
@@ -119,7 +125,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
       </EuiFlexItem>
 
       <EuiFlexItem style={{ minHeight: 0 }}>
-        <DocTableWrapperMemoized {...props} render={renderDocTable} />
+        <DocTableWrapperMemoized ref={tableWrapperRef} {...props} render={renderDocTable} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

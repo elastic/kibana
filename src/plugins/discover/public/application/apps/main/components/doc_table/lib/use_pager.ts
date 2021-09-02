@@ -33,10 +33,7 @@ export const usePager = ({ totalItems }: { totalItems: number }) => {
 
   const changePage = useCallback((pageIndex: number) => setCurrentPage(pageIndex), []);
 
-  const changePageSize = useCallback((newPageSize: number) => {
-    setPageSize(newPageSize);
-    setCurrentPage(0);
-  }, []);
+  const changePageSize = useCallback((newPageSize: number) => setPageSize(newPageSize), []);
 
   return {
     ...meta,
