@@ -2,17 +2,12 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/steps/functional/common.sh
 
 export CI_GROUP=${CI_GROUP:-$((BUILDKITE_PARALLEL_JOB+1))}
 export JOB=kibana-default-ciGroup${CI_GROUP}
 
 echo "--- Default CI Group $CI_GROUP"
-
-.buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
-
-echo "--- Running $JOB"
 
 cd "$XPACK_DIR"
 
