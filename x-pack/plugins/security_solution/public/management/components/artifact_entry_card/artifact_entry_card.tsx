@@ -8,17 +8,23 @@
 import React, { memo, useMemo } from 'react';
 import { CommonProps, EuiHorizontalRule, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CardHeader } from './components/card_header';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { CardHeader, CardHeaderProps } from './components/card_header';
 import { APP_ID } from '../../../../common/constants';
 import { CardSubHeader } from './components/card_sub_header';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { CriteriaConditions } from './components/criteria_conditions';
 import { EffectScopeProps } from './components/effect_scope';
+import { TrustedApp } from '../../../../common/endpoint/types';
 
-// FIXME:PT fix types for the artifact type
+type AnyArtifact = ExceptionListItemSchema & TrustedApp;
 
-export interface ArtifactEntryCardProps<T extends {} = {}> extends CommonProps {
+export interface ArtifactEntryCardProps<T extends AnyArtifact = AnyArtifact> extends CommonProps {
   item: T;
+  /**
+   * The list of actions for the card. Will display an icon with the actions in a menu if defined.
+   */
+  actions?: CardHeaderProps['actions'];
   /**
    * An object with policy names keyed by their `id`s. Used when the Artifact's `effectScope` is
    * per policy to display them in a popup menu
@@ -27,10 +33,16 @@ export interface ArtifactEntryCardProps<T extends {} = {}> extends CommonProps {
 }
 
 /**
- * Display Artifact Items (ex. Trusted App, Event Filter, etc) as a card
+ * Display Artifact Items (ex. Trusted App, Event Filter, etc) as a card.
+ * This component is a TS Generic that allows you to set what the Item type is
  */
-export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
-  ({ item, policyNames, ...commonProps }) => {
+export const ArtifactEntryCard = memo(
+  <T extends AnyArtifact = AnyArtifact>({
+    item,
+    policyNames,
+    actions,
+    ...commonProps
+  }: ArtifactEntryCardProps<T>) => {
     // FIXME: make component generic for the data type
     // FIXME: revisit all dev code below
 
@@ -52,24 +64,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
             name={item.name}
             createdDate={item.created_at}
             updatedDate={item.updated_at}
-            actions={[
-              {
-                'data-test-subj': 'unIsolateLink',
-                icon: 'logoSecurity',
-                key: 'unIsolateHost',
-                navigateAppId: APP_ID,
-                navigateOptions: {
-                  path: 'test/test',
-                },
-                href: 'test/test',
-                children: (
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.actions.TEST_TEST"
-                    defaultMessage="Release host"
-                  />
-                ),
-              },
-            ]}
+            actions={actions}
           />
           <CardSubHeader
             createdBy={item.created_by}

@@ -10,13 +10,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { DateFieldValue } from './date_field_value';
 import { ActionsContextMenu, ActionsContextMenuProps } from '../../actions_context_menu';
 
-export const CardHeader = memo<{
+export interface CardHeaderProps {
   name: string;
   createdDate: string;
   updatedDate: string;
   /** If defined, then an overflow menu will be shown with the actions provided */
   actions?: ActionsContextMenuProps['items'];
-}>(({ name, createdDate, updatedDate, actions }) => {
+}
+
+export const CardHeader = memo<CardHeaderProps>(({ name, createdDate, updatedDate, actions }) => {
   return (
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={true}>

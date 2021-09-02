@@ -11,8 +11,10 @@ import { NavigateToAppOptions } from 'kibana/public';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 
 export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps {
-  navigateAppId: string;
-  navigateOptions: NavigateToAppOptions;
+  /** The Kibana (plugin) app id */
+  navigateAppId?: string;
+  /** Additional options for the navigation action via react-router */
+  navigateOptions?: NavigateToAppOptions;
   children: React.ReactNode;
 }
 
@@ -22,13 +24,16 @@ export interface ContextMenuItemNavByRouterProps extends EuiContextMenuItemProps
  */
 export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
   ({ navigateAppId, navigateOptions, onClick, children, ...otherMenuItemProps }) => {
-    const handleOnClick = useNavigateToAppEventHandler(navigateAppId, {
+    const handleOnClickViaNavigateToApp = useNavigateToAppEventHandler(navigateAppId ?? '', {
       ...navigateOptions,
       onClick,
     });
 
     return (
-      <EuiContextMenuItem {...otherMenuItemProps} onClick={handleOnClick}>
+      <EuiContextMenuItem
+        {...otherMenuItemProps}
+        onClick={navigateAppId ? handleOnClickViaNavigateToApp : onClick}
+      >
         {children}
       </EuiContextMenuItem>
     );
