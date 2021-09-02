@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110891
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export const COLOR_MAPPING_SETTING = 'visualization:colorMapping';
 export * from './palette';
 export * from './constants';
