@@ -7968,8 +7968,6 @@
     "xpack.enterpriseSearch.appSearch.documentCreation.api.example": "実行中のAPIを表示するには、コマンドラインまたはクライアントライブラリを使用して、次の要求の例で実験することができます。",
     "xpack.enterpriseSearch.appSearch.documentCreation.api.title": "APIでインデックス",
     "xpack.enterpriseSearch.appSearch.documentCreation.buttons.api": "API からインデックス",
-    "xpack.enterpriseSearch.appSearch.documentCreation.buttons.betaTitle": "ベータ",
-    "xpack.enterpriseSearch.appSearch.documentCreation.buttons.betaTooltip": "Elastic Crawler は GA ではありません。不具合が発生したら報告してください。",
     "xpack.enterpriseSearch.appSearch.documentCreation.buttons.crawl": "Crawler を使用",
     "xpack.enterpriseSearch.appSearch.documentCreation.buttons.file": "JSON ファイルのアップロード",
     "xpack.enterpriseSearch.appSearch.documentCreation.buttons.text": "JSON の貼り付け",
