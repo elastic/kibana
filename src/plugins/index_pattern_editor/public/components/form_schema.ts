@@ -47,7 +47,7 @@ export const schema = {
   },
   id: {
     label: i18n.translate('indexPatternEditor.editor.form.customIdLabel', {
-      defaultMessage: 'Custom index pattern ID',
+      defaultMessage: 'Custom data view ID',
     }),
     helpText: i18n.translate('indexPatternEditor.editor.form.customIdHelp', {
       defaultMessage:
