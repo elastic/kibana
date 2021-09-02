@@ -96,9 +96,23 @@ const defaultOptions = {
     id: '1',
     title: 'my_index_pattern',
     hasRestrictions: false,
-    fields: [{ name: sourceField, type: 'number', displayName: sourceField }],
+    fields: [
+      {
+        name: sourceField,
+        type: 'number',
+        displayName: sourceField,
+        searchable: true,
+        aggregatable: true,
+      },
+    ],
     getFieldByName: getFieldByNameFactory([
-      { name: sourceField, type: 'number', displayName: sourceField },
+      {
+        name: sourceField,
+        type: 'number',
+        displayName: sourceField,
+        searchable: true,
+        aggregatable: true,
+      },
     ]),
   },
   operationDefinitionMap: {},
