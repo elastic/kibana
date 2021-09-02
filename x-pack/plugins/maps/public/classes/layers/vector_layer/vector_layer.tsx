@@ -910,7 +910,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
       mbMap.addLayer(mbLayer);
     }
-    if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
+
+    if (this.getSource().showTooManyFeaturesBounds() && !mbMap.getLayer(tooManyFeaturesLayerId)) {
       const mbTooManyFeaturesLayer: MbLayer = {
         id: tooManyFeaturesLayerId,
         type: 'line',
@@ -921,8 +922,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         mbTooManyFeaturesLayer['source-layer'] = MVT_META_SOURCE_LAYER_NAME;
       }
       mbMap.addLayer(mbTooManyFeaturesLayer);
-
-      // todo this filter should not be used for agg-layers
       mbMap.setFilter(tooManyFeaturesLayerId, [
         'all',
         ['==', ['get', MVT_HITS_TOTAL_RELATION], 'gte'],
@@ -955,8 +954,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
 
-    this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
-    mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
+    if (this.getSource().showTooManyFeaturesBounds()) {
+      this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
+      mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
+    }
   }
 
   _setMbCentroidProperties(
@@ -1061,15 +1062,11 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   getMbLayerIds() {
-    return [
-      this._getMbPointLayerId(),
-      this._getMbTextLayerId(),
-      this._getMbCentroidLayerId(),
-      this._getMbSymbolLayerId(),
-      this._getMbLineLayerId(),
-      this._getMbPolygonLayerId(),
-      this._getMbTooManyFeaturesLayerId(),
-    ];
+    const layers = this.getMbTooltipLayerIds();
+    if (this.getSource().showTooManyFeaturesBounds()) {
+      layers.push(this._getMbTooManyFeaturesLayerId());
+    }
+    return layers;
   }
 
   ownsMbLayerId(mbLayerId: string) {

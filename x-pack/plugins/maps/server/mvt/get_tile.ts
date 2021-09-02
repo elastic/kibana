@@ -8,10 +8,7 @@
 import _ from 'lodash';
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-import {
-  DEFAULT_MAX_RESULT_WINDOW,
-  ES_GEO_FIELD_TYPE,
-} from '../../common/constants';
+import { DEFAULT_MAX_RESULT_WINDOW, ES_GEO_FIELD_TYPE } from '../../common/constants';
 
 function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
@@ -26,9 +23,6 @@ export async function getEsTile({
   y,
   z,
   requestBody = {},
-  geoFieldType,
-  searchSessionId,
-  abortSignal,
 }: {
   x: number;
   y: number;
@@ -39,35 +33,26 @@ export async function getEsTile({
   logger: Logger;
   requestBody: any;
   geoFieldType: ES_GEO_FIELD_TYPE;
-  searchSessionId?: string;
-  abortSignal: AbortSignal;
 }): Promise<Buffer | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
-    console.log('getEsTileP', path);
-    console.log('requestboy', requestBody);
-
     let fields = _.uniq(requestBody.docvalue_fields.concat(requestBody.stored_fields));
-    fields = fields.filter(f => f !== geometryFieldName);
+    fields = fields.filter((f) => f !== geometryFieldName);
     const body = {
       size: DEFAULT_MAX_RESULT_WINDOW,
       grid_precision: 0, // no aggs
       exact_bounds: true,
       extent: 4096, // full resolution,
       query: requestBody.query,
-      fields: fields,
+      fields,
       runtime_mappings: requestBody.runtime_mappings,
-      // script_fields: requestBody.script_fields,
     };
-
     const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'GET',
       path,
       body,
     });
-    const buffer = tile.body;
-    console.log('buf length', buffer.length);
-    return buffer;
+    return (tile.body as unknown) as Buffer;
   } catch (e) {
     if (!isAbortError(e)) {
       // These are often circuit breaking exceptions

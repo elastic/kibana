@@ -15,7 +15,6 @@ import {
   EuiSwitchEvent,
   EuiTitle,
   EuiToolTip,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -123,10 +122,9 @@ export class ScalingForm extends Component<Props, State> {
 
     const enabledInfo = (
       <>
-        <EuiBetaBadge label={'beta'} />
         <EuiHorizontalRule margin="xs" />
         {i18n.translate('xpack.maps.source.esSearch.mvtDescription', {
-          defaultMessage: 'Use vector tiles for faster display of large datasets.',
+          defaultMessage: 'Use Elasticsearch vector tiles for faster display of large datasets.',
         })}
       </>
     );

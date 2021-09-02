@@ -46,6 +46,7 @@ export interface BoundsFilters {
 
 export interface IVectorSource extends ISource {
   isMvt(): boolean;
+  showTooManyFeaturesBounds(): boolean;
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
@@ -100,6 +101,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   isBoundsAware(): boolean {
+    return false;
+  }
+
+  showTooManyFeaturesBounds() {
     return false;
   }
 
