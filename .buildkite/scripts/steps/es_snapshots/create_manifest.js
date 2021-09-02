@@ -6,9 +6,9 @@ const { execSync } = require('child_process');
 
   const destination = process.argv[2] || __dirname + '/test';
 
-  let ES_BRANCH = process.env.ELASTICSEARCH_BRANCH;
-  let GIT_COMMIT = process.env.ELASTICSEARCH_GIT_COMMIT;
-  let GIT_COMMIT_SHORT = process.env.ELASTICSEARCH_GIT_COMMIT_SHORT;
+  const ES_BRANCH = process.env.ELASTICSEARCH_BRANCH;
+  const GIT_COMMIT = process.env.ELASTICSEARCH_GIT_COMMIT;
+  const GIT_COMMIT_SHORT = process.env.ELASTICSEARCH_GIT_COMMIT_SHORT;
 
   let VERSION = '';
   let SNAPSHOT_ID = '';
@@ -30,8 +30,8 @@ const { execSync } = require('child_process');
   try {
     const files = fs.readdirSync(destination);
     const manifestEntries = files
-      .filter((f) => !f.match(/.sha512$/))
-      .filter((f) => !f.match(/.json$/))
+      .filter((filename) => !filename.match(/.sha512$/))
+      .filter((filename) => !filename.match(/.json$/))
       .map((filename) => {
         const parts = filename.replace('elasticsearch-oss', 'oss').split('-');
 

@@ -2,7 +2,7 @@ steps:
   - block: 'Promote'
     prompt: "Enter the details for the snapshot you'd like to promote"
     if: "build.env('ES_SNAPSHOT_MANIFEST') == null"
-    # TODO make this dropbox with auto-fill?
+    # Later, this could be a dropdown dynamically filled with recent builds
     fields:
       - text: 'ES_SNAPSHOT_MANIFEST'
         key: 'ES_SNAPSHOT_MANIFEST'
