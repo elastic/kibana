@@ -71,6 +71,15 @@ describe('initializeEs', () => {
     expect(esContext.esAdapter.setLegacyIndexTemplateToHidden).not.toHaveBeenCalled();
   });
 
+  test(`should continue initialization if updating existing index templates throws an error`, async () => {
+    esContext.esAdapter.getExistingLegacyIndexTemplates.mockRejectedValue(new Error('Fail'));
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalled();
+    expect(esContext.logger.error).toHaveBeenCalled();
+    expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalled();
+  });
+
   test(`should update existing index settings if any exist and are not hidden`, async () => {
     const testSettings = {
       settings: {
@@ -144,6 +153,15 @@ describe('initializeEs', () => {
     expect(esContext.esAdapter.setIndexToHidden).not.toHaveBeenCalled();
   });
 
+  test(`should continue initialization if updating existing index settings throws an error`, async () => {
+    esContext.esAdapter.getExistingIndices.mockRejectedValue(new Error('Fail'));
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingIndices).toHaveBeenCalled();
+    expect(esContext.logger.error).toHaveBeenCalled();
+    expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalled();
+  });
+
   test(`should update existing index aliases if any exist and are not hidden`, async () => {
     const testAliases = {
       aliases: {
@@ -180,6 +198,15 @@ describe('initializeEs', () => {
     await initializeEs(esContext);
     expect(esContext.esAdapter.getExistingIndexAliases).toHaveBeenCalled();
     expect(esContext.esAdapter.setIndexAliasToHidden).not.toHaveBeenCalled();
+  });
+
+  test(`should continue initialization if updating existing index aliases throws an error`, async () => {
+    esContext.esAdapter.getExistingIndexAliases.mockRejectedValue(new Error('Fail'));
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingIndexAliases).toHaveBeenCalled();
+    expect(esContext.logger.error).toHaveBeenCalled();
+    expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalled();
   });
 
   test(`should create ILM policy if it doesn't exist`, async () => {
