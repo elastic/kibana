@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getOr } from 'lodash/fp';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { SignalSourceHit } from './types';
 
@@ -20,6 +21,47 @@ export interface BuildReasonMessageUtilArgs extends BuildReasonMessageArgs {
 
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
 
+interface FieldsOfInterest {
+  destinationAddress?: string | string[] | null;
+  destinationPort?: string | string[] | null;
+  eventCategory?: string | string[] | null;
+  fileName?: string | string[] | null;
+  hostName?: string | string[] | null;
+  processName?: string | string[] | null;
+  processParentName?: string | string[] | null;
+  sourceAddress?: string | string[] | null;
+  sourcePort?: string | string[] | null;
+  userName?: string | string[] | null;
+}
+const getFieldsFromDoc = (mergedDoc: SignalSourceHit) => {
+  const fieldsOfInterest: FieldsOfInterest = {};
+
+  if (mergedDoc?.fields) {
+    fieldsOfInterest.destinationAddress = mergedDoc.fields['destination.address'] ?? null;
+    fieldsOfInterest.destinationPort = mergedDoc.fields['destination.port'] ?? null;
+    fieldsOfInterest.eventCategory = mergedDoc.fields['event.category'] ?? null;
+    fieldsOfInterest.fileName = mergedDoc.fields['file.name'] ?? null;
+    fieldsOfInterest.hostName = mergedDoc.fields['host.name'] ?? null;
+    fieldsOfInterest.processName = mergedDoc.fields['process.name'] ?? null;
+    fieldsOfInterest.processParentName = mergedDoc.fields['process.parent.name'] ?? null;
+    fieldsOfInterest.sourceAddress = mergedDoc.fields['source.address'] ?? null;
+    fieldsOfInterest.sourcePort = mergedDoc.fields['source.port'] ?? null;
+    fieldsOfInterest.userName = mergedDoc.fields['user.name'] ?? null;
+  } else {
+    fieldsOfInterest.destinationAddress = getOr(null, 'destination.address', mergedDoc);
+    fieldsOfInterest.destinationPort = getOr(null, 'destination.port', mergedDoc);
+    fieldsOfInterest.eventCategory = getOr(null, 'event.category', mergedDoc);
+    fieldsOfInterest.fileName = getOr(null, 'file.name', mergedDoc);
+    fieldsOfInterest.hostName = getOr(null, 'host.name', mergedDoc);
+    fieldsOfInterest.processName = getOr(null, 'process.name', mergedDoc);
+    fieldsOfInterest.processParentName = getOr(null, 'process.parent.name', mergedDoc);
+    fieldsOfInterest.sourceAddress = getOr(null, 'source.address', mergedDoc);
+    fieldsOfInterest.sourcePort = getOr(null, 'source.port', mergedDoc);
+    fieldsOfInterest.userName = getOr(null, 'user.name', mergedDoc);
+  }
+
+  return fieldsOfInterest;
+};
 /**
  * Currently all security solution rule types share a common reason message string. This function composes that string
  * In the future there may be different configurations based on the different rule types, so the plumbing has been put in place
@@ -31,28 +73,18 @@ export const buildReasonMessageUtil = ({ rule, mergedDoc }: BuildReasonMessageUt
     // This should never happen, but in case, better to not show a malformed string
     return '';
   }
-  let destinationAddress;
-  let destinationPort;
-  let eventCategory;
-  let fileName;
-  let hostName;
-  let processName;
-  let processParentName;
-  let sourceAddress;
-  let sourcePort;
-  let userName;
-  if (mergedDoc?.fields) {
-    destinationAddress = mergedDoc.fields['destination.address'] ?? null;
-    destinationPort = mergedDoc.fields['destination.port'] ?? null;
-    eventCategory = mergedDoc.fields['event.category'] ?? null;
-    fileName = mergedDoc.fields['file.name'] ?? null;
-    hostName = mergedDoc.fields['host.name'] ?? null;
-    processName = mergedDoc.fields['process.name'] ?? null;
-    processParentName = mergedDoc.fields['process.parent.name'] ?? null;
-    sourceAddress = mergedDoc.fields['source.address'] ?? null;
-    sourcePort = mergedDoc.fields['source.port'] ?? null;
-    userName = mergedDoc.fields['user.name'] ?? null;
-  }
+  const {
+    destinationAddress,
+    destinationPort,
+    eventCategory,
+    fileName,
+    hostName,
+    processName,
+    processParentName,
+    sourceAddress,
+    sourcePort,
+    userName,
+  } = getFieldsFromDoc(mergedDoc);
 
   const fieldPresenceTracker = { hasFieldOfInterest: false };
 

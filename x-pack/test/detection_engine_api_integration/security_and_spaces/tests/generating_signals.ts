@@ -665,7 +665,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             signal: {
               reason:
-                'anomoly event on zeek-sensor-amsterdam created high alert Signal Testing Query.',
+                'anomoly event with process bro, by root on zeek-sensor-amsterdam created high alert Signal Testing Query.',
               rule: fullSignal.signal.rule,
               group: fullSignal.signal.group,
               original_time: fullSignal.signal.original_time,
@@ -756,7 +756,8 @@ export default ({ getService }: FtrProviderContext) => {
               status: 'open',
               depth: 2,
               group: source.signal.group,
-              reason: 'event on zeek-sensor-amsterdam created high alert Signal Testing Query.',
+              reason:
+                'event by root on zeek-sensor-amsterdam created high alert Signal Testing Query.',
               rule: source.signal.rule,
               ancestors: [
                 {
@@ -1097,7 +1098,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               status: 'open',
-              reason: `event created high alert Signal Testing Query`,
+              reason: `event created high alert Signal Testing Query.`,
               rule: fullSignal.signal.rule,
               original_time: fullSignal.signal.original_time,
               depth: 1,
@@ -1695,7 +1696,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             status: 'open',
-            reason: `Alert boot created with a high severity and risk score of 1 on zeek-sensor-amsterdam.`,
+            reason: `event on zeek-sensor-amsterdam created high alert boot.`,
             rule: {
               ...fullSignal.signal.rule,
               name: 'boot',
