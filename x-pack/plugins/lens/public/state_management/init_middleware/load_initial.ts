@@ -104,8 +104,8 @@ export function loadInitial(
   }: {
     redirectCallback: (savedObjectId?: string) => void;
     initialInput?: LensEmbeddableInput;
-    emptyState: LensAppState;
-    history: History<unknown>;
+    emptyState?: LensAppState;
+    history?: History<unknown>;
   }
 ) {
   const { getState, dispatch } = store;

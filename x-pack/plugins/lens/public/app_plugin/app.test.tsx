@@ -1260,7 +1260,18 @@ describe('Lens App', () => {
     });
   });
   it('should display a conflict callout if saved object conflicts', async () => {
+    const history = createMemoryHistory();
     const { services } = await mountWith({
+      props: {
+        ...makeDefaultProps(),
+        history: {
+          ...history,
+          location: {
+            ...history.location,
+            search: '?_g=test',
+          },
+        },
+      },
       preloadedState: {
         persistedDoc: defaultDoc,
         sharingSavedObjectProps: {
@@ -1273,7 +1284,7 @@ describe('Lens App', () => {
       currentObjectId: '1234',
       objectNoun: 'Lens visualization',
       otherObjectId: '2',
-      otherObjectPath: '/testbasepath/app/lens#/edit/2',
+      otherObjectPath: '#/edit/2?_g=test',
     });
   });
 });

@@ -12,6 +12,7 @@ import {
   createMockDatasource,
   DatasourceMock,
 } from '../../mocks';
+import { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
 import { loadInitial } from './load_initial';
 import { LensEmbeddableInput } from '../../embeddable';
@@ -84,8 +85,10 @@ describe('Mounter', () => {
           datasourceMap,
           visualizationMap,
         },
-        jest.fn(),
-        ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+        {
+          redirectCallback: jest.fn(),
+          initialInput: ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput,
+        }
       );
     });
     expect(mockDatasource.initialize).toHaveBeenCalled();
@@ -109,7 +112,7 @@ describe('Mounter', () => {
           datasourceMap,
           visualizationMap,
         },
-        jest.fn()
+        { redirectCallback: jest.fn() }
       );
     });
     expect(mockDatasource.initialize).toHaveBeenCalled();
@@ -139,7 +142,7 @@ describe('Mounter', () => {
           datasourceMap,
           visualizationMap,
         },
-        jest.fn()
+        { redirectCallback: jest.fn() }
       );
       expect(services.attributeService.unwrapAttributes).not.toHaveBeenCalled();
     });
@@ -180,7 +183,11 @@ describe('Mounter', () => {
       const emptyState = getPreloadedState(storeDeps) as LensAppState;
       services.attributeService.unwrapAttributes = jest.fn();
       await act(async () => {
-        await loadInitial(lensStore, storeDeps, jest.fn(), undefined, emptyState);
+        await loadInitial(lensStore, storeDeps, {
+          redirectCallback: jest.fn(),
+          initialInput: undefined,
+          emptyState,
+        });
       });
 
       expect(lensStore.getState()).toEqual({
@@ -205,19 +212,22 @@ describe('Mounter', () => {
           outcome: 'exactMatch',
         },
       });
+      const storeDeps = {
+        lensServices: services,
+        datasourceMap,
+        visualizationMap,
+      };
+      const emptyState = getPreloadedState(storeDeps) as LensAppState;
 
       const lensStore = await makeLensStore({ data: services.data, preloadedState });
       await act(async () => {
-        await loadInitial(
-          lensStore,
-          {
-            lensServices: services,
-            datasourceMap,
-            visualizationMap,
-          },
-          jest.fn(),
-          ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
-        );
+        await loadInitial(lensStore, storeDeps, {
+          redirectCallback: jest.fn(),
+          initialInput: ({
+            savedObjectId: defaultSavedObjectId,
+          } as unknown) as LensEmbeddableInput,
+          emptyState,
+        });
       });
 
       expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
@@ -250,8 +260,12 @@ describe('Mounter', () => {
             datasourceMap,
             visualizationMap,
           },
-          jest.fn(),
-          ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+          {
+            redirectCallback: jest.fn(),
+            initialInput: ({
+              savedObjectId: defaultSavedObjectId,
+            } as unknown) as LensEmbeddableInput,
+          }
         );
       });
 
@@ -263,8 +277,12 @@ describe('Mounter', () => {
             datasourceMap,
             visualizationMap,
           },
-          jest.fn(),
-          ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+          {
+            redirectCallback: jest.fn(),
+            initialInput: ({
+              savedObjectId: defaultSavedObjectId,
+            } as unknown) as LensEmbeddableInput,
+          }
         );
       });
 
@@ -278,8 +296,10 @@ describe('Mounter', () => {
             datasourceMap,
             visualizationMap,
           },
-          jest.fn(),
-          ({ savedObjectId: '5678' } as unknown) as LensEmbeddableInput
+          {
+            redirectCallback: jest.fn(),
+            initialInput: ({ savedObjectId: '5678' } as unknown) as LensEmbeddableInput,
+          }
         );
       });
 
@@ -302,8 +322,12 @@ describe('Mounter', () => {
             datasourceMap,
             visualizationMap,
           },
-          redirectCallback,
-          ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+          {
+            redirectCallback,
+            initialInput: ({
+              savedObjectId: defaultSavedObjectId,
+            } as unknown) as LensEmbeddableInput,
+          }
         );
       });
       expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
@@ -315,7 +339,6 @@ describe('Mounter', () => {
 
     it('redirects if saved object is an aliasMatch', async () => {
       const services = makeDefaultServices();
-      const redirectCallback = jest.fn();
 
       const lensStore = makeLensStore({ data: services.data, preloadedState });
 
@@ -335,8 +358,17 @@ describe('Mounter', () => {
             datasourceMap,
             visualizationMap,
           },
-          redirectCallback,
-          ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+          {
+            redirectCallback: jest.fn(),
+            initialInput: ({
+              savedObjectId: defaultSavedObjectId,
+            } as unknown) as LensEmbeddableInput,
+            history: {
+              location: {
+                search: '?search',
+              } as Location,
+            } as History,
+          }
         );
       });
       expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
@@ -344,7 +376,7 @@ describe('Mounter', () => {
       });
 
       expect(services.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-        '/testbasepath/app/lens#/edit/id2',
+        '#/edit/id2?search',
         'Lens visualization'
       );
     });
@@ -360,8 +392,12 @@ describe('Mounter', () => {
             datasourceMap,
             visualizationMap,
           },
-          jest.fn(),
-          ({ savedObjectId: defaultSavedObjectId } as unknown) as LensEmbeddableInput
+          {
+            redirectCallback: jest.fn(),
+            initialInput: ({
+              savedObjectId: defaultSavedObjectId,
+            } as unknown) as LensEmbeddableInput,
+          }
         );
       });
 
