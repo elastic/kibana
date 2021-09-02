@@ -22,7 +22,7 @@ import { ApplicationStart, HttpStart, IUiSettingsClient } from 'kibana/public';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
-import { KibanaContextProvider, RedirectAppLinks } from '../../../kibana_react/public';
+import { KibanaContextProvider } from '../../../kibana_react/public';
 import { SharePluginStart } from '../../../share/public';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
@@ -135,9 +135,7 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
-          <RedirectAppLinks application={dependencies.application}>
-            {this.renderSelectedPanel()}
-          </RedirectAppLinks>
+          {this.renderSelectedPanel()}
         </EuiFlyoutBody>
       </KibanaContextProvider>
     );

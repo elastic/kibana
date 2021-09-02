@@ -17,7 +17,7 @@ import {
 import {
   AppState as ContextState,
   GetStateReturn as ContextGetStateReturn,
-} from '../angular/context_state';
+} from '../apps/context/services/context_state';
 import { getStateColumnActions } from '../apps/main/components/doc_table/actions/columns';
 
 interface UseDataGridColumnsProps {
