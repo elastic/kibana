@@ -35,12 +35,20 @@ const DocTableInfiniteContent = (props: DocTableRenderProps) => {
     const scheduleCheck = debounce(() => {
       const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
       const usedScrollDiv = isMobileView ? scrollMobileElem : scrollDiv;
-
+      console.log('What element to scroll', usedScrollDiv);
       const scrollusedHeight = usedScrollDiv.scrollHeight;
       const scrollTop = Math.abs(usedScrollDiv.scrollTop);
       const clientHeight = usedScrollDiv.clientHeight;
-
+      console.log({
+        scrollusedHeight,
+        scrollTop,
+        clientHeight,
+        scrollTopPlusClientHeight: scrollTop + clientHeight,
+        compareResult: scrollTop + clientHeight === scrollusedHeight,
+      });
+      // Well, I guess this check might be the problem
       if (scrollTop + clientHeight === scrollusedHeight) {
+        console.log('Show more records');
         setLimit((prevLimit) => prevLimit + 50);
       }
     }, 50);
