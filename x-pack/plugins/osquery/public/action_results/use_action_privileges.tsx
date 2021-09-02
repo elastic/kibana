@@ -16,7 +16,6 @@ export const useActionResultsPrivileges = () => {
     () => http.get('/internal/osquery/privileges_check'),
     {
       keepPreviousData: true,
-      select: (response) => response?.has_all_requested ?? false,
     }
   );
 };

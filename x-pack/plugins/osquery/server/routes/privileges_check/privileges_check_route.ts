@@ -19,31 +19,26 @@ export const privilegesCheckRoute = (router: IRouter, osqueryContext: OsqueryApp
       },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-
       if (osqueryContext.security.authz.mode.useRbacForRequest(request)) {
-        const privileges = (
-          await esClient.security.hasPrivileges({
-            body: {
-              index: [
-                {
-                  names: [`logs-${OSQUERY_INTEGRATION_NAME}.result*`],
-                  privileges: ['read'],
-                },
-              ],
+        const checkPrivileges = osqueryContext.security.authz.checkPrivilegesDynamicallyWithRequest(
+          request
+        );
+        const { hasAllRequested } = await checkPrivileges({
+          elasticsearch: {
+            cluster: [],
+            index: {
+              [`logs-${OSQUERY_INTEGRATION_NAME}.result*`]: ['read'],
             },
-          })
-        ).body;
+          },
+        });
 
         return response.ok({
-          body: privileges,
+          body: `${hasAllRequested}`,
         });
       }
 
       return response.ok({
-        body: {
-          has_all_requested: true,
-        },
+        body: 'true',
       });
     }
   );
