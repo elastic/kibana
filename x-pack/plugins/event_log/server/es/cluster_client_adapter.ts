@@ -345,9 +345,11 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
                     },
                   },
                   {
-                    term: {
-                      'kibana.version': {
-                        value: 'NULL',
+                    bool: {
+                      must_not: {
+                        exists: {
+                          field: 'kibana.version',
+                        },
                       },
                     },
                   },
