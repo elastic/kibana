@@ -40,9 +40,6 @@ const DocTableInfiniteContent = ({
     onSkipBottomButtonClick();
   }, [onSetMaxLimit, onSkipBottomButtonClick]);
 
-  // eslint-disable-next-line no-console
-  console.log('RENDER table');
-
   return (
     <Fragment>
       <SkipBottomButton onClick={onSkipBottomButton} />
@@ -106,17 +103,11 @@ export const DocTableInfinite = (props: DocTableProps) => {
       const scrollTop = Math.abs(usedScrollDiv.scrollTop);
       const clientHeight = usedScrollDiv.clientHeight;
 
-      // eslint-disable-next-line no-console
-      console.log('checking');
       if (scrollTop + clientHeight === scrollusedHeight) {
-        // eslint-disable-next-line no-console
-        console.log('setting limit');
         setLimit((prevLimit) => prevLimit + 50);
       }
     }, 50);
 
-    // eslint-disable-next-line no-console
-    console.log('adding event listener', scrollDesktopElem);
     scrollDesktopElem.addEventListener('scroll', scheduleCheck);
     window.addEventListener('scroll', scheduleCheck);
 
@@ -154,9 +145,6 @@ export const DocTableInfinite = (props: DocTableProps) => {
     ),
     [limit, onBackToTop, setMaxLimit]
   );
-
-  // eslint-disable-next-line no-console
-  console.log('RENDER WRAPPER9');
 
   return <DocTableWrapperMemoized ref={tableWrapperRef} render={renderDocTable} {...props} />;
 };
