@@ -13,6 +13,8 @@ import {
   ContextMenuWithRouterSupport,
   ContextMenuWithRouterSupportProps,
 } from '../../context_menu_with_router_support';
+import { getPolicyDetailPath } from '../../../common/routing';
+import { APP_ID } from '../../../../../common/constants';
 
 interface PolicyAttributes {
   id: string;
@@ -57,10 +59,11 @@ type WithContextMenuProps<T extends PolicyAttributes = PolicyAttributes> = Props
 export const WithContextMenu = memo<WithContextMenuProps>(({ policies, children }) => {
   const menuItems: ContextMenuWithRouterSupportProps['items'] = useMemo(() => {
     return policies.map(({ id, name }) => {
-      // FIXME:PT add routing data to the link
       return {
-        navigateAppId: '',
-        navigateOptions: {},
+        navigateAppId: APP_ID,
+        navigateOptions: {
+          path: getPolicyDetailPath(id),
+        },
         children: name,
       };
     });

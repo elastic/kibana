@@ -60,14 +60,12 @@ export interface CriteriaConditionsProps<T extends ConditionEntry = ConditionEnt
 export const CriteriaConditions = memo<CriteriaConditionsProps>(({ os, entries }) => {
   return (
     <div>
-      {os && (
-        <div>
-          <strong>
-            <EuiExpression description={''} value={CONDITION_OS} />
-            <EuiExpression description={CONDITION_OPERATOR_TYPE_MATCH} value={OS_LABELS[os]} />
-          </strong>
-        </div>
-      )}
+      <div>
+        <strong>
+          <EuiExpression description={''} value={CONDITION_OS} />
+          <EuiExpression description={CONDITION_OPERATOR_TYPE_MATCH} value={OS_LABELS[os]} />
+        </strong>
+      </div>
       {entries.map(({ field, type, value }) => {
         return (
           <div>
