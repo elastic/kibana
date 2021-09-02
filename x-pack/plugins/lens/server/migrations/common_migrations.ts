@@ -101,17 +101,6 @@ export const commonUpdateVisLayerType = (
   return newAttributes as LensDocShape715<VisStatePost715>;
 };
 
-// ref: x-pack/plugins/lens/public/shared_components/coloring/utils.ts
-function reversePalette(paletteColorRepresentation: Required<CustomPaletteParams['stops']> = []) {
-  const stops = paletteColorRepresentation.map(({ stop }) => stop);
-  return paletteColorRepresentation
-    .map(({ color }, i) => ({
-      color,
-      stop: stops[paletteColorRepresentation.length - i - 1],
-    }))
-    .reverse();
-}
-
 function moveDefaultPaletteToPercentCustomInPlace(palette?: PaletteOutput<CustomPaletteParams>) {
   if (palette?.params?.reverse && palette.params.name !== 'custom' && palette.params.stops) {
     // change to palette type to custom and migrate to a percentage type of mode
@@ -132,12 +121,10 @@ function moveDefaultPaletteToPercentCustomInPlace(palette?: PaletteOutput<Custom
       color,
       stop: (index * 100) / steps,
     }));
-    palette.params.stops = reversePalette(
-      palette.params.stops.map(({ color }, index) => ({
-        color,
-        stop: ((1 + index) * 100) / steps,
-      }))
-    );
+    palette.params.stops = palette.params.stops.map(({ color }, index) => ({
+      color,
+      stop: ((1 + index) * 100) / steps,
+    }));
   }
 }
 

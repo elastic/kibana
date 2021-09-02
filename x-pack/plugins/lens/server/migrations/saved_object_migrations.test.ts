@@ -1336,11 +1336,11 @@ describe('Lens migrations', () => {
         expect(column.palette!.params!.reverse).toBeTruthy(); // still true
         expect(column.palette!.params!.rangeType).toBe('percent');
         expect(column.palette!.params!.stops).toEqual([
-          { color: 'yellow', stop: 20 },
-          { color: 'green', stop: 40 },
+          { color: 'red', stop: 20 },
+          { color: 'blue', stop: 40 },
           { color: 'pink', stop: 60 },
-          { color: 'blue', stop: 80 },
-          { color: 'red', stop: 100 },
+          { color: 'green', stop: 80 },
+          { color: 'yellow', stop: 100 },
         ]);
         expect(column.palette!.params!.colorStops).toEqual([
           { color: 'red', stop: 0 },
@@ -1383,11 +1383,11 @@ describe('Lens migrations', () => {
       expect(state.palette!.params!.reverse).toBeTruthy(); // still true
       expect(state.palette!.params!.rangeType).toBe('percent');
       expect(state.palette!.params!.stops).toEqual([
-        { color: 'yellow', stop: 20 },
-        { color: 'green', stop: 40 },
+        { color: 'red', stop: 20 },
+        { color: 'blue', stop: 40 },
         { color: 'pink', stop: 60 },
-        { color: 'blue', stop: 80 },
-        { color: 'red', stop: 100 },
+        { color: 'green', stop: 80 },
+        { color: 'yellow', stop: 100 },
       ]);
       expect(state.palette!.params!.colorStops).toEqual([
         { color: 'red', stop: 0 },
