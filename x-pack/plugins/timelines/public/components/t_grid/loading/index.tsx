@@ -6,23 +6,26 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { FullWidthFlexGroup, FullWidthFlexGroupHeight } from '../styles';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-export const TGridLoading: React.FC<{ height?: FullWidthFlexGroupHeight }> = ({
-  height = 'tall',
-}) => {
+const heights = {
+  tall: 490,
+  short: 250,
+};
+
+export const TGridLoading: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
   return (
-    <FullWidthFlexGroup
-      $height={height}
-      $color="subdued"
-      alignItems="center"
-      justifyContent="center"
-      data-test-subj="loading-alerts-panel"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="xl" />
-      </EuiFlexItem>
-    </FullWidthFlexGroup>
+    <EuiPanel color="subdued">
+      <EuiFlexGroup
+        style={{ height: heights[height] }}
+        alignItems="center"
+        justifyContent="center"
+        data-test-subj="loading-alerts-panel"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
