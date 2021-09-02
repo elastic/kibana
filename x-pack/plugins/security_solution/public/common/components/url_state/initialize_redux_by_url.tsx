@@ -51,7 +51,8 @@ export const dispatchSetInitialStateFromUrl = (
           dispatch(
             sourcererActions.setSelectedKip({
               id: scope,
-              selectedKipId: sourcererState[scope] ?? DEFAULT_INDEX_PATTERN_ID,
+              selectedKipId: sourcererState[scope]?.id ?? DEFAULT_INDEX_PATTERN_ID,
+              selectedPatterns: sourcererState[scope]?.selectedPatterns,
             })
           );
         });

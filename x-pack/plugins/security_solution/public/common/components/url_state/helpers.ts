@@ -163,7 +163,16 @@ export const makeMapStateToProps = () => {
     const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
     const selectedPatterns: SourcererScopePatterns = activeScopes
       .filter((scope) => scope === SourcererScopeName.default)
-      .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedKipId }), {});
+      .reduce(
+        (acc, scope) => ({
+          ...acc,
+          [scope]: {
+            id: sourcerer[scope]?.selectedKipId,
+            selectedPatterns: sourcerer[scope]?.selectedPatterns,
+          },
+        }),
+        {}
+      );
 
     return {
       urlState: {

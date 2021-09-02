@@ -102,6 +102,9 @@ export const initialSourcererState: SourcererModel = {
 };
 
 export type FSourcererScopePatterns = {
-  [id in SourcererScopeName]: string;
+  [id in SourcererScopeName]: {
+    id: string;
+    selectedPatterns: string[];
+  };
 };
 export type SourcererScopePatterns = Partial<FSourcererScopePatterns>;

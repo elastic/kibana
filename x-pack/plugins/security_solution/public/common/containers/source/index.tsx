@@ -288,7 +288,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       addWarning,
       data.search,
       dispatch,
-      kipId,
       patternList,
       selectedPatterns,
       setLoading,
@@ -305,5 +304,5 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [kipId]);
+  }, [indexFieldsSearch, kipId]);
 };
