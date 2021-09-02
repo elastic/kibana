@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { flow, mapValues } from 'lodash';
+import { mapValues } from 'lodash';
 import { LensServerPluginSetup } from '../../../../lens/server';
 
 import {
@@ -148,49 +148,43 @@ export const createCommentsMigrations = (
   ) as MigrateFunctionsObject;
 
   const commentsMigrations = {
-    '7.11.0': flow(
-      (
-        doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
-      ): SavedObjectSanitizedDoc<SanitizedComment> => {
-        return {
-          ...doc,
-          attributes: {
-            ...doc.attributes,
-            type: CommentType.user,
-          },
-          references: doc.references || [],
-        };
-      }
-    ),
-    '7.12.0': flow(
-      (
-        doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
-      ): SavedObjectSanitizedDoc<SanitizedCommentForSubCases> => {
-        let attributes: SanitizedCommentForSubCases & UnsanitizedComment = {
+    '7.11.0': (
+      doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
+    ): SavedObjectSanitizedDoc<SanitizedComment> => {
+      return {
+        ...doc,
+        attributes: {
           ...doc.attributes,
-          associationType: AssociationType.case,
-        };
+          type: CommentType.user,
+        },
+        references: doc.references || [],
+      };
+    },
+    '7.12.0': (
+      doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
+    ): SavedObjectSanitizedDoc<SanitizedCommentForSubCases> => {
+      let attributes: SanitizedCommentForSubCases & UnsanitizedComment = {
+        ...doc.attributes,
+        associationType: AssociationType.case,
+      };
 
-        // only add the rule object for alert comments. Prior to 7.12 we only had CommentType.alert, generated alerts are
-        // introduced in 7.12.
-        if (doc.attributes.type === CommentType.alert) {
-          attributes = { ...attributes, rule: { id: null, name: null } };
-        }
+      // only add the rule object for alert comments. Prior to 7.12 we only had CommentType.alert, generated alerts are
+      // introduced in 7.12.
+      if (doc.attributes.type === CommentType.alert) {
+        attributes = { ...attributes, rule: { id: null, name: null } };
+      }
 
-        return {
-          ...doc,
-          attributes,
-          references: doc.references || [],
-        };
-      }
-    ),
-    '7.14.0': flow(
-      (
-        doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-      ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
-        return addOwnerToSO(doc);
-      }
-    ),
+      return {
+        ...doc,
+        attributes,
+        references: doc.references || [],
+      };
+    },
+    '7.14.0': (
+      doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+    ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
+      return addOwnerToSO(doc);
+    },
   };
 
   return mergeMigrationFunctionMaps(commentsMigrations, embeddableMigrations);
