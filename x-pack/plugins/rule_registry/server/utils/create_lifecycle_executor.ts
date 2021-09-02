@@ -239,6 +239,7 @@ export const createLifecycleExecutor = (
   const makeEventsDataMapFor = (alertIds: string[]) =>
     alertIds.map((alertId) => {
       const alertData = trackedAlertsDataMap[alertId];
+      const currentAlertData = currentAlerts[alertId];
 
       if (!alertData) {
         logger.warn(`Could not find alert data for ${alertId}`);
@@ -256,13 +257,14 @@ export const createLifecycleExecutor = (
       const event: ParsedTechnicalFields = {
         ...alertData?.fields,
         ...commonRuleFields,
+        ...currentAlertData,
         [ALERT_DURATION]: (options.startedAt.getTime() - new Date(started).getTime()) * 1000,
 
         [ALERT_ID]: alertId,
         [ALERT_START]: started,
         [ALERT_UUID]: alertUuid,
         [ALERT_STATUS]: isRecovered ? ALERT_STATUS_RECOVERED : ALERT_STATUS_ACTIVE,
-        [ALERT_WORKFLOW_STATUS]: alertData.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
+        [ALERT_WORKFLOW_STATUS]: alertData?.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
         [EVENT_KIND]: 'signal',
         [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
         [VERSION]: ruleDataClient.kibanaVersion,
@@ -287,7 +289,7 @@ export const createLifecycleExecutor = (
     await ruleDataClient.getWriter().bulk({
       body: allEventsToIndex.flatMap(({ event, indexName }) => [
         indexName
-          ? { update: { _id: event[ALERT_UUID]!, _index: indexName } }
+          ? { index: { _id: event[ALERT_UUID]!, _index: indexName, require_alias: false } }
           : { index: { _id: event[ALERT_UUID]! } },
         event,
       ]),

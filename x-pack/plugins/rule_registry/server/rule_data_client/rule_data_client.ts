@@ -120,10 +120,12 @@ export class RuleDataClient implements IRuleDataClient {
 
         const requestWithDefaultParameters = {
           ...request,
+          require_alias: true,
           index: alias,
         };
 
         return clusterClient.bulk(requestWithDefaultParameters).then((response) => {
+          ///
           if (response.body.errors) {
             if (
               response.body.items.length > 0 &&
