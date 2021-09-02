@@ -42,6 +42,9 @@ describe('TaskManagerPlugin', () => {
           enabled: false,
           request_capacity: 10,
         },
+        internal: {
+          exclude_task_types: [],
+        },
       });
 
       pluginInitializerContext.env.instanceUuid = '';
@@ -81,6 +84,9 @@ describe('TaskManagerPlugin', () => {
         ephemeral_tasks: {
           enabled: true,
           request_capacity: 10,
+        },
+        internal: {
+          exclude_task_types: [],
         },
       });
 

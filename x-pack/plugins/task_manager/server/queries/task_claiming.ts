@@ -9,6 +9,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import apm from 'elastic-apm-node';
+import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
 import { map, mergeScan } from 'rxjs/operators';
 import { difference, partition, groupBy, mapValues, countBy, pick, isPlainObject } from 'lodash';
@@ -359,16 +360,7 @@ export class TaskClaiming {
 
   private isTaskTypeExcluded(taskType: string) {
     for (const excludedType of this.excludedTaskTypes) {
-      const indexOfWildcard = excludedType.indexOf('*');
-      if (indexOfWildcard > -1) {
-        const safeStr = `${excludedType.slice(0, indexOfWildcard)}*${excludedType.slice(
-          indexOfWildcard + 1
-        )}`;
-        const regexp = new RegExp(safeStr);
-        if (regexp.test(taskType)) {
-          return true;
-        }
-      } else if (excludedType === taskType) {
+      if (minimatch(excludedType, taskType)) {
         return true;
       }
     }
