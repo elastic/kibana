@@ -13,6 +13,7 @@ import { Logger, ElasticsearchClient } from 'src/core/server';
 import util from 'util';
 import { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { IndicesAliasDefinition } from '@elastic/elasticsearch/api/types';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 
@@ -152,17 +153,18 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   public async doesIndexTemplateExist(name: string): Promise<boolean> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const { body } = await esClient.indices.existsTemplate({ name });
-      return body as boolean;
+      const { body: legacyResult } = await esClient.indices.existsTemplate({ name });
+      const { body: indexTemplateResult } = await esClient.indices.existsIndexTemplate({ name });
+      return (legacyResult as boolean) || (indexTemplateResult as boolean);
     } catch (err) {
-      throw new Error(`error checking existance of index template: ${err.message}`);
+      throw new Error(`error checking existence of index template: ${err.message}`);
     }
   }
 
   public async createIndexTemplate(name: string, template: Record<string, unknown>): Promise<void> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      await esClient.indices.putTemplate({ name, body: template, create: true });
+      await esClient.indices.putIndexTemplate({ name, body: template });
     } catch (err) {
       // The error message doesn't have a type attribute we can look to guarantee it's due
       // to the template already existing (only long message) so we'll check ourselves to see
@@ -174,6 +176,111 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         Object.assign(error, { wrapped: err });
         throw error;
       }
+    }
+  }
+
+  public async getCurrentIndexTemplates(
+    indexTemplatePattern: string
+  ): Promise<estypes.IndicesGetTemplateResponse> {
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      const { body: templates } = await esClient.indices.getTemplate(
+        { name: indexTemplatePattern },
+        { ignore: [404] }
+      );
+      return templates;
+    } catch (err) {
+      return {};
+    }
+  }
+
+  public async setIndexTemplateToHidden(
+    indexTemplateName: string,
+    currentIndexTemplate: estypes.IndicesTemplateMapping
+  ): Promise<void> {
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.indices.putTemplate({
+        name: indexTemplateName,
+        body: {
+          ...currentIndexTemplate,
+          settings: {
+            ...currentIndexTemplate.settings,
+            'index.hidden': true,
+          },
+        },
+      });
+    } catch (err) {
+      return;
+    }
+  }
+
+  public async getCurrentIndices(
+    indexPattern: string
+  ): Promise<estypes.IndicesGetSettingsResponse> {
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      const { body: indexSettings } = await esClient.indices.getSettings(
+        { index: indexPattern },
+        { ignore: [404] }
+      );
+      return indexSettings;
+    } catch (err) {
+      return {};
+    }
+  }
+
+  public async setIndexToHidden(indexName: string): Promise<void> {
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.indices.putSettings({
+        index: indexName,
+        body: {
+          settings: {
+            'index.hidden': true,
+          },
+        },
+      });
+    } catch (err) {
+      return;
+    }
+  }
+
+  public async getCurrentIndexAliases(
+    indexPattern: string
+  ): Promise<estypes.IndicesGetAliasResponse> {
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      const { body: indexAliases } = await esClient.indices.getAlias(
+        { index: indexPattern },
+        { ignore: [404] }
+      );
+      return indexAliases;
+    } catch (err) {
+      return {};
+    }
+  }
+
+  public async setIndexAliasToHidden(
+    indexName: string,
+    currentAliases: estypes.IndicesGetAliasIndexAliases
+  ): Promise<void> {
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.indices.updateAliases({
+        body: {
+          actions: Object.keys(currentAliases.aliases).map((aliasName) => ({
+            add: {
+              index: indexName,
+              alias: aliasName,
+              is_hidden: true,
+              is_write_index: currentAliases.aliases[aliasName]?.is_write_index,
+            },
+          })),
+        },
+      });
+    } catch (err) {
+      return;
     }
   }
 
