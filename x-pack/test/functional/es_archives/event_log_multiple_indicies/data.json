@@ -106,8 +106,7 @@
             "type": "event_log_test"
           }
         ],
-        "server_uuid": "5b2de169-2785-441b-ae8c-186a1936b17d",
-        "version": "8.0.0"
+        "server_uuid": "5b2de169-2785-441b-ae8c-186a1936b17d"
       },
       "message": "test 2020-10-28T15:19:53.825Z"
     }
@@ -139,8 +138,7 @@
             "type": "event_log_test"
           }
         ],
-        "server_uuid": "5b2de169-2785-441b-ae8c-186a1936b17d",
-        "version": "8.0.0"
+        "server_uuid": "5b2de169-2785-441b-ae8c-186a1936b17d"
       },
       "message": "test 2020-10-28T15:19:54.849Z"
     }
@@ -172,8 +170,7 @@
             "type": "event_log_test"
           }
         ],
-        "server_uuid": "5b2de169-2785-441b-ae8c-186a1936b17d",
-        "version": "8.0.0"
+        "server_uuid": "5b2de169-2785-441b-ae8c-186a1936b17d"
       },
       "message": "test 2020-10-28T15:19:54.881Z"
     }

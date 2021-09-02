@@ -167,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const {
           body: { data, total },
-        } = await findEvents(undefined, id, {});
+        } = await findEventsByIds(undefined, [id], {}, [id]);
 
         expect(data.length).to.be(6);
         expect(total).to.be(6);
@@ -200,13 +200,10 @@ export default function ({ getService }: FtrProviderContext) {
           body: { data, total },
         } = await findEventsByIds(undefined, [id], {}, [legacyId]);
 
-        expect(data.length).to.be(8);
-        expect(total).to.be(8);
+        expect(data.length).to.be(5);
+        expect(total).to.be(5);
 
         expect(data.map((foundEvent: IEvent) => foundEvent?.message)).to.eql([
-          'test 2020-10-28T15:19:53.825Z',
-          'test 2020-10-28T15:19:54.849Z',
-          'test 2020-10-28T15:19:54.881Z',
           'test 2020-10-28T15:19:55.913Z',
           'test legacy 2020-10-28T15:19:55.913Z',
           'test 2020-10-28T15:19:55.938Z',
@@ -222,13 +219,10 @@ export default function ({ getService }: FtrProviderContext) {
           body: { data, total },
         } = await findEventsByIds(undefined, [id], {});
 
-        expect(data.length).to.be(6);
-        expect(total).to.be(6);
+        expect(data.length).to.be(3);
+        expect(total).to.be(3);
 
         expect(data.map((foundEvent: IEvent) => foundEvent?.message)).to.eql([
-          'test 2020-10-28T15:19:53.825Z',
-          'test 2020-10-28T15:19:54.849Z',
-          'test 2020-10-28T15:19:54.881Z',
           'test 2020-10-28T15:19:55.913Z',
           'test 2020-10-28T15:19:55.938Z',
           'test 2020-10-28T15:19:55.962Z',
@@ -250,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
             .map(([key, val]) => `${key}=${val}`)
             .join('&')}`
     }`;
-    await delay(3000); // wait for buffer to be written
+    await delay(1000); // wait for buffer to be written
     log.debug(`Finding Events for Saved Object with ${url}`);
     return await supertest.get(url).set('kbn-xsrf', 'foo').expect(200);
   }
