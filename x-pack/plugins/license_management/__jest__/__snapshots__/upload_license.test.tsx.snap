@@ -156,11 +156,11 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
   <Provider
     store={
       Object {
+        "@@observable": [Function],
         "dispatch": [Function],
         "getState": [Function],
         "replaceReducer": [Function],
         "subscribe": [Function],
-        Symbol(observable): [Function],
       }
     }
   >
@@ -1108,11 +1108,11 @@ exports[`UploadLicense should display an error when ES says license is expired 1
   <Provider
     store={
       Object {
+        "@@observable": [Function],
         "dispatch": [Function],
         "getState": [Function],
         "replaceReducer": [Function],
         "subscribe": [Function],
-        Symbol(observable): [Function],
       }
     }
   >
@@ -1820,11 +1820,11 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
   <Provider
     store={
       Object {
+        "@@observable": [Function],
         "dispatch": [Function],
         "getState": [Function],
         "replaceReducer": [Function],
         "subscribe": [Function],
-        Symbol(observable): [Function],
       }
     }
   >
@@ -2532,11 +2532,11 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
   <Provider
     store={
       Object {
+        "@@observable": [Function],
         "dispatch": [Function],
         "getState": [Function],
         "replaceReducer": [Function],
         "subscribe": [Function],
-        Symbol(observable): [Function],
       }
     }
   >
@@ -3244,11 +3244,11 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
   <Provider
     store={
       Object {
+        "@@observable": [Function],
         "dispatch": [Function],
         "getState": [Function],
         "replaceReducer": [Function],
         "subscribe": [Function],
-        Symbol(observable): [Function],
       }
     }
   >
