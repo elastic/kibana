@@ -9,6 +9,7 @@ import {
   ALERT_REASON,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
+  ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
@@ -43,7 +44,7 @@ export const generateAlertId = (alert: RACAlert) => {
     .update(
       (alert['kibana.alert.ancestors'] as Ancestor[])
         .reduce((acc, ancestor) => acc.concat(ancestor.id, ancestor.index), '')
-        .concat(alert['kibana.alert.rule.id'] as string)
+        .concat(alert[ALERT_RULE_UUID] as string)
     )
     .digest('hex');
 };
@@ -119,6 +120,9 @@ export const buildAlert = (
     []
   );
 
+  const { id, ...mappedRule } = rule;
+  mappedRule.uuid = id;
+
   return ({
     [TIMESTAMP]: new Date().toISOString(),
     [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
@@ -128,7 +132,7 @@ export const buildAlert = (
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_DEPTH]: depth,
     [ALERT_REASON]: reason,
-    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, rule),
+    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, mappedRule as RulesSchema),
   } as unknown) as RACAlert;
 };
 

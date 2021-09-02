@@ -72,8 +72,6 @@ describe('buildAlert', () => {
       SPACE_ID,
       jest.fn()
     );
-    const alertGroup1Id = alertGroup[0]._id;
-    const alertGroup2Id = alertGroup[1]._id;
     expect(alertGroup.length).toEqual(3);
     expect(alertGroup[0]).toEqual(
       expect.objectContaining({
@@ -127,14 +125,14 @@ describe('buildAlert', () => {
             },
             {
               depth: 1,
-              id: alertGroup1Id,
+              id: alertGroup[0]._id,
               index: '',
               rule: 'abcd',
               type: 'signal',
             },
             {
               depth: 1,
-              id: alertGroup2Id,
+              id: alertGroup[1]._id,
               index: '',
               rule: 'abcd',
               type: 'signal',

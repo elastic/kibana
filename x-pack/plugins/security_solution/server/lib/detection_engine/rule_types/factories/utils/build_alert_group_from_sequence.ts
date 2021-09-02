@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+
 import { Logger } from 'kibana/server';
 
 import { SavedObject } from 'src/core/types';
@@ -18,7 +20,11 @@ import { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
 import { objectArrayIntersection } from '../../../signals/build_bulk_body';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
-import { ALERT_GROUP_ID, ALERT_GROUP_INDEX } from '../../field_maps/field_names';
+import {
+  ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_GROUP_ID,
+  ALERT_GROUP_INDEX,
+} from '../../field_maps/field_names';
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -
@@ -44,7 +50,7 @@ export const buildAlertGroupFromSequence = (
   try {
     buildingBlocks = sequence.events.map((event) => ({
       ...buildBulkBody(spaceId, ruleSO, event, mergeStrategy, false, buildReasonMessage),
-      'kibana.alert.building_block_type': 'default',
+      [ALERT_BUILDING_BLOCK_TYPE]: 'default',
     }));
   } catch (error) {
     logger.error(error);
@@ -57,13 +63,14 @@ export const buildAlertGroupFromSequence = (
     _index: '',
     _source: {
       ...block,
+      [ALERT_INSTANCE_ID]: buildingBlockIds[i],
     },
   }));
 
   // Now that we have an array of building blocks for the events in the sequence,
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
-  const doc = buildAlertFromSequence(wrappedBuildingBlocks, ruleSO, spaceId, buildReasonMessage);
+  const doc = buildAlertRoot(wrappedBuildingBlocks, ruleSO, spaceId, buildReasonMessage);
   const sequenceAlert = {
     _id: generateAlertId(doc),
     _index: '',
@@ -78,16 +85,16 @@ export const buildAlertGroupFromSequence = (
   return [...wrappedBuildingBlocks, sequenceAlert];
 };
 
-export const buildAlertFromSequence = (
-  alerts: WrappedRACAlert[],
+export const buildAlertRoot = (
+  wrappedBuildingBlocks: WrappedRACAlert[],
   ruleSO: SavedObject<AlertAttributes>,
   spaceId: string | null | undefined,
   buildReasonMessage: BuildReasonMessage
 ): RACAlert => {
   const rule = buildRuleWithoutOverrides(ruleSO);
   const reason = buildReasonMessage({ rule });
-  const doc = buildAlert(alerts, rule, spaceId, reason);
-  const mergedAlerts = objectArrayIntersection(alerts.map((alert) => alert._source));
+  const doc = buildAlert(wrappedBuildingBlocks, rule, spaceId, reason);
+  const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   return {
     ...mergedAlerts,
     event: {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SavedObject } from 'src/core/types';
 import { getMergeStrategy } from './source_fields_merging/strategies';
 import {
@@ -56,7 +57,7 @@ export const buildBulkBody = (
   };
   const signalHit: SignalHit = {
     ...filteredSource,
-    '@timestamp': timestamp,
+    [TIMESTAMP]: timestamp,
     event,
     signal,
   };
@@ -127,7 +128,7 @@ export const buildSignalFromSequence = (
   const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
   return {
     ...mergedEvents,
-    '@timestamp': timestamp,
+    [TIMESTAMP]: timestamp,
     event: {
       kind: 'signal',
     },
@@ -167,7 +168,7 @@ export const buildSignalFromEvent = (
   // TODO: better naming for SignalHit - it's really a new signal to be inserted
   const signalHit: SignalHit = {
     ...filteredSource,
-    '@timestamp': timestamp,
+    [TIMESTAMP]: timestamp,
     event: eventFields,
     signal,
   };

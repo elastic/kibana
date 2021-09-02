@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { createHash } from 'crypto';
 import { Ancestor } from '../../../signals/types';
+import { ALERT_ANCESTORS } from '../../field_maps/field_names';
 import { RACAlert } from '../../types';
 
 /**
@@ -20,12 +22,12 @@ export const generateBuildingBlockIds = (buildingBlocks: RACAlert[]): string[] =
     (baseString, block) =>
       baseString
         .concat(
-          (block['kibana.alert.ancestors'] as Ancestor[]).reduce(
+          (block[ALERT_ANCESTORS] as Ancestor[]).reduce(
             (acc, ancestor) => acc.concat(ancestor.id, ancestor.index),
             ''
           )
         )
-        .concat(block['kibana.alert.rule.id'] as string),
+        .concat(block[ALERT_RULE_UUID] as string),
     ''
   );
   return buildingBlocks.map((block, idx) =>
