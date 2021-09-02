@@ -17,9 +17,7 @@ export function shouldShowAlertBadge(
   if (!alerts) {
     return false;
   }
-
   const inSetupMode = isInSetupMode(context);
-
   const alertExists = alertTypeIds.find(
     (name) => alerts[name] && alerts[name].find((rule) => rule.states.length > 0)
   );
