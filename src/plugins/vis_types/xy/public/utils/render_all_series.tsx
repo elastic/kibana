@@ -78,13 +78,12 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      const yAspects = aspects.y.filter(({ accessor, id }) => {
-        return id === paramId && accessor !== null;
-      });
+      const yAspects = aspects.y.filter(({ accessor }) => accessor !== null);
 
       if (!show || !yAspects.length) {
         return null;
       }
+
       const yAccessors: string[] = yAspects.map((aspect) => aspect.accessor ?? '');
 
       const id = `${type}-${yAccessors[0]}`;
