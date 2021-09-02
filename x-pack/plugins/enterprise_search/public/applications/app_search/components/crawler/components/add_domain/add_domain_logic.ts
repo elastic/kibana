@@ -17,7 +17,7 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { ENGINE_CRAWLER_DOMAIN_PATH } from '../../../../routes';
 import { EngineLogic, generateEnginePath } from '../../../engine';
 
-import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
+import { CrawlerLogic } from '../../crawler_logic';
 import {
   CrawlerDataFromServer,
   CrawlerDomain,
@@ -262,7 +262,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
         });
 
         const crawlerData = crawlerDataServerToClient(response as CrawlerDataFromServer);
-        CrawlerOverviewLogic.actions.onReceiveCrawlerData(crawlerData);
+        CrawlerLogic.actions.onReceiveCrawlerData(crawlerData);
         const newDomain = crawlerData.domains[crawlerData.domains.length - 1];
         if (newDomain) {
           actions.onSubmitNewDomainSuccess(newDomain);
