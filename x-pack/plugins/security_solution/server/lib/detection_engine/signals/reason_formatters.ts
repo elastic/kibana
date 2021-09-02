@@ -21,7 +21,7 @@ export interface BuildReasonMessageUtilArgs extends BuildReasonMessageArgs {
 
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
 
-interface FieldsOfInterest {
+interface ReasonFields {
   destinationAddress?: string | string[] | null;
   destinationPort?: string | string[] | null;
   eventCategory?: string | string[] | null;
@@ -34,33 +34,21 @@ interface FieldsOfInterest {
   userName?: string | string[] | null;
 }
 const getFieldsFromDoc = (mergedDoc: SignalSourceHit) => {
-  const fieldsOfInterest: FieldsOfInterest = {};
+  const reasonFields: ReasonFields = {};
+  const docToUse = mergedDoc?.fields || mergedDoc;
 
-  if (mergedDoc?.fields) {
-    fieldsOfInterest.destinationAddress = mergedDoc.fields['destination.address'] ?? null;
-    fieldsOfInterest.destinationPort = mergedDoc.fields['destination.port'] ?? null;
-    fieldsOfInterest.eventCategory = mergedDoc.fields['event.category'] ?? null;
-    fieldsOfInterest.fileName = mergedDoc.fields['file.name'] ?? null;
-    fieldsOfInterest.hostName = mergedDoc.fields['host.name'] ?? null;
-    fieldsOfInterest.processName = mergedDoc.fields['process.name'] ?? null;
-    fieldsOfInterest.processParentName = mergedDoc.fields['process.parent.name'] ?? null;
-    fieldsOfInterest.sourceAddress = mergedDoc.fields['source.address'] ?? null;
-    fieldsOfInterest.sourcePort = mergedDoc.fields['source.port'] ?? null;
-    fieldsOfInterest.userName = mergedDoc.fields['user.name'] ?? null;
-  } else {
-    fieldsOfInterest.destinationAddress = getOr(null, 'destination.address', mergedDoc);
-    fieldsOfInterest.destinationPort = getOr(null, 'destination.port', mergedDoc);
-    fieldsOfInterest.eventCategory = getOr(null, 'event.category', mergedDoc);
-    fieldsOfInterest.fileName = getOr(null, 'file.name', mergedDoc);
-    fieldsOfInterest.hostName = getOr(null, 'host.name', mergedDoc);
-    fieldsOfInterest.processName = getOr(null, 'process.name', mergedDoc);
-    fieldsOfInterest.processParentName = getOr(null, 'process.parent.name', mergedDoc);
-    fieldsOfInterest.sourceAddress = getOr(null, 'source.address', mergedDoc);
-    fieldsOfInterest.sourcePort = getOr(null, 'source.port', mergedDoc);
-    fieldsOfInterest.userName = getOr(null, 'user.name', mergedDoc);
-  }
+  reasonFields.destinationAddress = getOr(null, 'destination.address', docToUse);
+  reasonFields.destinationPort = getOr(null, 'destination.port', docToUse);
+  reasonFields.eventCategory = getOr(null, 'event.category', docToUse);
+  reasonFields.fileName = getOr(null, 'file.name', docToUse);
+  reasonFields.hostName = getOr(null, 'host.name', docToUse);
+  reasonFields.processName = getOr(null, 'process.name', docToUse);
+  reasonFields.processParentName = getOr(null, 'process.parent.name', docToUse);
+  reasonFields.sourceAddress = getOr(null, 'source.address', docToUse);
+  reasonFields.sourcePort = getOr(null, 'source.port', docToUse);
+  reasonFields.userName = getOr(null, 'user.name', docToUse);
 
-  return fieldsOfInterest;
+  return reasonFields;
 };
 /**
  * Currently all security solution rule types share a common reason message string. This function composes that string
