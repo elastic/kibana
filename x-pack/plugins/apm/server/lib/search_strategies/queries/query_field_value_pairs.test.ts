@@ -77,12 +77,12 @@ describe('query_field_value_pairs', () => {
 
       expect(progress.loadedFieldValuePairs).toBe(1);
       expect(resp).toEqual([
-        { field: 'myFieldCandidate1', value: 'myValue1' },
-        { field: 'myFieldCandidate1', value: 'myValue2' },
-        { field: 'myFieldCandidate2', value: 'myValue1' },
-        { field: 'myFieldCandidate2', value: 'myValue2' },
-        { field: 'myFieldCandidate3', value: 'myValue1' },
-        { field: 'myFieldCandidate3', value: 'myValue2' },
+        { fieldName: 'myFieldCandidate1', fieldValue: 'myValue1' },
+        { fieldName: 'myFieldCandidate1', fieldValue: 'myValue2' },
+        { fieldName: 'myFieldCandidate2', fieldValue: 'myValue1' },
+        { fieldName: 'myFieldCandidate2', fieldValue: 'myValue2' },
+        { fieldName: 'myFieldCandidate3', fieldValue: 'myValue1' },
+        { fieldName: 'myFieldCandidate3', fieldValue: 'myValue2' },
       ]);
       expect(esClientSearchMock).toHaveBeenCalledTimes(3);
       expect(getLogMessages()).toEqual([]);
