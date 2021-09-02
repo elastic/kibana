@@ -40,10 +40,10 @@ import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
 import { HealthBadge } from './HealthBadge';
-import { ServiceListMetric } from './ServiceListMetric';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 
 type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
@@ -97,7 +97,7 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
         defaultMessage: 'Name',
       }),
-      width: '40%',
+      width: `${unit * 16}px`,
       sortable: true,
       render: (_, { serviceName, agentName }) => (
         <TruncateWithTooltip
@@ -152,18 +152,17 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, latency }) => (
-        <ServiceListMetric
+        <SparkPlot
           series={comparisonData?.currentPeriod[serviceName]?.latency}
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.latency
           }
-          hideSeries={!showWhenSmallOrGreaterThanLarge}
           color="euiColorVis1"
           valueLabel={asMillisecondDuration(latency || 0)}
         />
       ),
       align: 'left',
-      width: showWhenSmallOrGreaterThanLarge ? `${unit * 11}px` : 'auto',
+      width: 'auto',
     },
     {
       field: 'throughput',
@@ -173,18 +172,17 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       render: (_, { serviceName, throughput }) => (
-        <ServiceListMetric
+        <SparkPlot
           series={comparisonData?.currentPeriod[serviceName]?.throughput}
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.throughput
           }
-          hideSeries={!showWhenSmallOrGreaterThanLarge}
           color="euiColorVis0"
           valueLabel={asTransactionRate(throughput)}
         />
       ),
       align: 'left',
-      width: showWhenSmallOrGreaterThanLarge ? `${unit * 11}px` : 'auto',
+      width: 'auto',
     },
     {
       field: 'transactionErrorRate',
@@ -196,21 +194,20 @@ export function getServiceColumns({
       render: (_, { serviceName, transactionErrorRate }) => {
         const valueLabel = asPercent(transactionErrorRate, 1);
         return (
-          <ServiceListMetric
+          <SparkPlot
             series={
               comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
             }
             comparisonSeries={
               comparisonData?.previousPeriod[serviceName]?.transactionErrorRate
             }
-            hideSeries={!showWhenSmallOrGreaterThanLarge}
             color="euiColorVis7"
             valueLabel={valueLabel}
           />
         );
       },
       align: 'left',
-      width: showWhenSmallOrGreaterThanLarge ? `${unit * 10}px` : 'auto',
+      width: 'auto',
     },
   ];
 }

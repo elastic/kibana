@@ -69,6 +69,8 @@ export function DependenciesTable(props: Props) {
     {
       field: 'name',
       name: nameColumnTitle,
+      width: `${unit * 16}px`,
+
       render: (_, item) => {
         const { name, link: itemLink } = item;
         return <TruncateWithTooltip text={name} content={itemLink} />;
@@ -80,7 +82,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnLatency', {
         defaultMessage: 'Latency (avg.)',
       }),
-      width: `${unit * 11}px`,
+      width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
@@ -99,7 +101,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnThroughput', {
         defaultMessage: 'Throughput',
       }),
-      width: `${unit * 11}px`,
+      width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
@@ -118,7 +120,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),
-      width: `${unit * 10}px`,
+      width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
@@ -137,7 +139,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
         defaultMessage: 'Impact',
       }),
-      width: `${unit * 5}px`,
+      width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
           <EuiFlexGroup gutterSize="xs" direction="column">

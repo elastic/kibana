@@ -49,6 +49,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnName',
         { defaultMessage: 'Name' }
       ),
+      width: `${unit * 16}px`,
       render: (_, { name, transactionType: type }) => {
         return (
           <TruncateWithTooltip
@@ -71,7 +72,7 @@ export function getColumns({
       field: 'latency',
       sortable: true,
       name: getLatencyColumnLabel(latencyAggregationType),
-      width: `${unit * 11}px`,
+      width: 'auto',
       render: (_, { latency, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.latency;
@@ -97,7 +98,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: `${unit * 11}px`,
+      width: 'auto',
       render: (_, { throughput, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.throughput;
@@ -124,7 +125,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
         { defaultMessage: 'Failed transaction rate' }
       ),
-      width: `${unit * 8}px`,
+      width: 'auto',
       render: (_, { errorRate, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.errorRate;
@@ -150,7 +151,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnImpact',
         { defaultMessage: 'Impact' }
       ),
-      width: `${unit * 5}px`,
+      width: 'auto',
       render: (_, { name }) => {
         const currentImpact =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.impact ??

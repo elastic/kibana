@@ -67,6 +67,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnNodeName',
         { defaultMessage: 'Node name' }
       ),
+      width: `${unit * 16}px`,
       render: (_, item) => {
         const { serviceNodeName } = item;
         const isMissingServiceNodeName =
@@ -101,7 +102,7 @@ export function getColumns({
     {
       field: 'latency',
       name: getLatencyColumnLabel(latencyAggregationType),
-      width: `${unit * 11}px`,
+      width: 'auto',
       render: (_, { serviceNodeName, latency }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.latency;
@@ -126,7 +127,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: `${unit * 11}px`,
+      width: 'auto',
       render: (_, { serviceNodeName, throughput }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.throughput;
@@ -152,7 +153,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnErrorRate',
         { defaultMessage: 'Failed transaction rate' }
       ),
-      width: `${unit * 8}px`,
+      width: 'auto',
       render: (_, { serviceNodeName, errorRate }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.errorRate;
@@ -178,7 +179,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnCpuUsage',
         { defaultMessage: 'CPU usage (avg.)' }
       ),
-      width: `${unit * 8}px`,
+      width: 'auto',
       render: (_, { serviceNodeName, cpuUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.cpuUsage;
@@ -204,7 +205,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnMemoryUsage',
         { defaultMessage: 'Memory usage (avg.)' }
       ),
-      width: `${unit * 9}px`,
+      width: 'auto',
       render: (_, { serviceNodeName, memoryUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.memoryUsage;

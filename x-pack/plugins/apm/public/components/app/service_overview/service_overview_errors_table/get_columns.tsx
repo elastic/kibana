@@ -34,6 +34,7 @@ export function getColumns({
       name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
         defaultMessage: 'Name',
       }),
+      width: `${unit * 16}px`,
       render: (_, { name, group_id: errorGroupId }) => {
         return (
           <TruncateWithTooltip
@@ -59,9 +60,13 @@ export function getColumns({
         }
       ),
       render: (_, { lastSeen }) => {
-        return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
+        return (
+          <span style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            <TimestampTooltip time={lastSeen} timeUnit="minutes" />
+          </span>
+        );
       },
-      width: `${unit * 9}px`,
+      width: 'auto',
       align: 'right',
     },
     {
@@ -72,7 +77,7 @@ export function getColumns({
           defaultMessage: 'Occurrences',
         }
       ),
-      width: `${unit * 12}px`,
+      width: 'auto',
       render: (_, { occurrences, group_id: errorGroupId }) => {
         const currentPeriodTimeseries =
           errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]
