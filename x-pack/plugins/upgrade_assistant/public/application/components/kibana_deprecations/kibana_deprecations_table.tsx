@@ -140,17 +140,18 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       },
     },
     {
-      field: 'deprecationType',
+      field: 'filterType',
       name: i18nTexts.typeColumnTitle,
       width: '20%',
       truncateText: true,
       sortable: true,
-      render: (deprecationType: KibanaDeprecationDetails['deprecationType']) => {
-        switch (deprecationType) {
+      render: (filterType: KibanaDeprecationDetails['filterType']) => {
+        switch (filterType) {
           case 'config':
             return i18nTexts.configDeprecationTypeCellLabel;
           case 'feature':
             return i18nTexts.featureDeprecationTypeCellLabel;
+          case 'uncategorized':
           default:
             return i18nTexts.unknownDeprecationTypeCellLabel;
         }
@@ -194,7 +195,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       },
       {
         type: 'field_value_selection',
-        field: 'deprecationType',
+        field: 'filterType',
         name: i18nTexts.typeFilterLabel,
         multiSelect: false,
         options: [
@@ -205,6 +206,10 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
           {
             value: 'feature',
             name: i18nTexts.featureDeprecationTypeCellLabel,
+          },
+          {
+            value: 'uncategorized',
+            name: i18nTexts.unknownDeprecationTypeCellLabel,
           },
         ],
       },

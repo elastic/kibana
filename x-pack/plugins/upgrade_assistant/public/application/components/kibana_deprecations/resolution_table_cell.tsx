@@ -78,43 +78,42 @@ export const ResolutionTableCell: React.FunctionComponent<Props> = ({
   if (isAutomated) {
     if (deprecationResolutionState?.id === deprecationId) {
       const { resolveDeprecationStatus } = deprecationResolutionState;
-      if (resolveDeprecationStatus === 'in_progress') {
-        return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="resolutionStatusCell">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{i18nTexts.automationInProgressCellLabel}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      }
 
-      if (resolveDeprecationStatus === 'ok') {
-        return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="resolutionStatusCell">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="check" color="success" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{i18nTexts.automationCompleteCellLabel}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      }
-
-      if (resolveDeprecationStatus === 'fail') {
-        return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="resolutionStatusCell">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="alert" color="danger" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{i18nTexts.automationFailedCellLabel}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
+      switch (resolveDeprecationStatus) {
+        case 'in_progress':
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="resolutionStatusCell">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{i18nTexts.automationInProgressCellLabel}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        case 'fail':
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="resolutionStatusCell">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="alert" color="danger" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{i18nTexts.automationFailedCellLabel}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        case 'ok':
+        default:
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="resolutionStatusCell">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="check" color="success" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{i18nTexts.automationCompleteCellLabel}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
       }
     }
 

@@ -86,6 +86,7 @@ export interface DeprecationResolutionState {
 
 export interface KibanaDeprecationDetails extends DomainDeprecationDetails {
   id: string;
+  filterType: DomainDeprecationDetails['deprecationType'] | 'uncategorized';
 }
 
 const getDeprecationCountByLevel = (deprecations: KibanaDeprecationDetails[]) => {
@@ -153,6 +154,7 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
         filteredDeprecations.push({
           ...deprecation,
           id: uuid.v4(), // Associate an unique ID with each deprecation to track resolution state
+          filterType: deprecation.deprecationType ?? 'uncategorized', // deprecationType is currently optional, in order to correctly handle sort/filter, we default any undefined types to "uncategorized"
         });
       });
 

@@ -62,6 +62,8 @@ describe('Kibana deprecations table', () => {
   it('refreshes deprecation data', async () => {
     const { actions } = testBed;
 
+    expect(deprecationService.getAllDeprecations).toHaveBeenCalledTimes(1);
+
     await actions.table.clickRefreshButton();
 
     expect(deprecationService.getAllDeprecations).toHaveBeenCalledTimes(2);
@@ -78,37 +80,22 @@ describe('Kibana deprecations table', () => {
     it('filters by "critical" status', async () => {
       const { actions, table } = testBed;
 
+      // Show only critical deprecations
       await actions.searchBar.clickCriticalFilterButton();
-
       const { rows: criticalRows } = table.getMetaData('kibanaDeprecationsTable');
-
       expect(criticalRows.length).toEqual(criticalDeprecations.length);
 
+      // Show all deprecations
       await actions.searchBar.clickCriticalFilterButton();
-
       const { rows: allRows } = table.getMetaData('kibanaDeprecationsTable');
-
       expect(allRows.length).toEqual(kibanaDeprecationsMockResponse.length);
     });
 
     it('filters by type', async () => {
-      const { component, table, actions } = testBed;
+      const { table, actions } = testBed;
 
-      await actions.searchBar.clickTypeFilterDropdownAt(0);
-
-      // We need to read the document "body" as the filter dropdown options are added there and not inside
-      // the component DOM tree.
-      const configTypeFilterButton: HTMLButtonElement | null = document.body.querySelector(
-        '.euiFilterSelect__items .euiFilterSelectItem'
-      );
-
-      expect(configTypeFilterButton).not.toBeNull();
-
-      await act(async () => {
-        configTypeFilterButton!.click();
-      });
-
-      component.update();
+      await actions.searchBar.openTypeFilterDropdown();
+      await actions.searchBar.filterByConfigType();
 
       const { rows: configRows } = table.getMetaData('kibanaDeprecationsTable');
 

@@ -52,14 +52,14 @@ const createActions = (testBed: TestBed) => {
   };
 
   const searchBarActions = {
-    clickTypeFilterDropdownAt: async (index: number) => {
+    openTypeFilterDropdown: async () => {
       await act(async () => {
         // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
         find('kibanaDeprecations')
           .find('.euiSearchBar__filtersHolder')
           .find('.euiPopover')
           .find('.euiFilterButton')
-          .at(index)
+          .at(0)
           .simulate('click');
       });
 
@@ -74,6 +74,20 @@ const createActions = (testBed: TestBed) => {
           .find('.euiFilterButton')
           .at(0)
           .simulate('click');
+      });
+
+      component.update();
+    },
+
+    filterByConfigType: async () => {
+      // We need to read the document "body" as the filter dropdown options are added there and not inside
+      // the component DOM tree. The "Config" option is expected to be the first item.
+      const configTypeFilterButton: HTMLButtonElement | null = document.body.querySelector(
+        '.euiFilterSelect__items .euiFilterSelectItem'
+      );
+
+      await act(async () => {
+        configTypeFilterButton!.click();
       });
 
       component.update();
