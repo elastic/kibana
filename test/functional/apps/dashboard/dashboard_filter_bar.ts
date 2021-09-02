@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+  const security = getService('security');
   const PageObjects = getPageObjects([
     'common',
     'dashboard',
@@ -28,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visualize',
     'timePicker',
   ]);
-  const security = getService('security');
 
   describe('dashboard filter bar', () => {
     before(async () => {
