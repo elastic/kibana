@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useUiTracker } from '../../../../../../observability/public';
+import { useUrlState } from '../../../../utils/use_url_state';
 import { InfraFormatter } from '../../../../lib/lib';
 import { Timeline } from './timeline/timeline';
 
@@ -28,13 +29,21 @@ export const BottomDrawer: React.FC<{
   formatter: InfraFormatter;
   width: number;
 }> = ({ measureRef, width, interval, formatter, children }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [urlState, setUrlState] = useUrlState<boolean>({
+    defaultState: false,
+    decodeUrlState: (state: any) => Boolean(state),
+    encodeUrlState: (state: boolean) => state,
+    urlStateKey: 'timelineOpen',
+  });
+
+  const [isOpen, setIsOpen] = useState(urlState);
 
   const trackDrawerOpen = useUiTracker({ app: 'infra_metrics' });
   const onClick = useCallback(() => {
     if (!isOpen) trackDrawerOpen({ metric: 'open_timeline_drawer__inventory' });
     setIsOpen(!isOpen);
-  }, [isOpen, trackDrawerOpen]);
+    setUrlState(!isOpen);
+  }, [isOpen, trackDrawerOpen, setUrlState]);
 
   return (
     <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen} outerWidth={width}>
