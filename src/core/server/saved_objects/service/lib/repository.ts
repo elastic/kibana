@@ -301,7 +301,9 @@ export class SavedObjectsRepository {
     let savedObjectNamespaces: string[] | undefined;
 
     if (this._registry.isSingleNamespace(type)) {
-      savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
+      savedObjectNamespace = initialNamespaces
+        ? normalizeNamespace(initialNamespaces[0])
+        : namespace;
     } else if (this._registry.isMultiNamespace(type)) {
       if (id && overwrite) {
         // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
@@ -486,7 +488,9 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
-          savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
+          savedObjectNamespace = initialNamespaces
+            ? normalizeNamespace(initialNamespaces[0])
+            : namespace;
         } else if (this._registry.isMultiNamespace(object.type)) {
           savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
         }
