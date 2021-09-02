@@ -40,7 +40,7 @@ describe('ValidationStepPanel', () => {
       const wrapper = shallow(
         <ValidationStepPanel
           step={{ state: 'invalid', message: errorMessage }}
-          label={'initialValidation'}
+          label="initialValidation"
           action={action}
         />
       );
@@ -54,7 +54,7 @@ describe('ValidationStepPanel', () => {
       const wrapper = shallow(
         <ValidationStepPanel
           step={{ state: 'warning', message: errorMessage }}
-          label={'initialValidation'}
+          label="initialValidation"
           action={action}
         />
       );
@@ -68,7 +68,7 @@ describe('ValidationStepPanel', () => {
       const wrapper = shallow(
         <ValidationStepPanel
           step={{ state: 'loading', message: errorMessage }}
-          label={'initialValidation'}
+          label="initialValidation"
           action={action}
         />
       );
