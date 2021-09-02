@@ -12,7 +12,7 @@ import { CoreStart, OverlayRef } from 'src/core/public';
 import {
   toMountPoint,
   DataPublicPluginStart,
-  DataView,
+  IndexPattern,
   UsageCollectionStart,
 } from './shared_imports';
 
@@ -23,7 +23,7 @@ import { removeFields } from './lib/remove_fields';
 
 export interface OpenFieldDeleteModalOptions {
   ctx: {
-    indexPattern: DataView;
+    indexPattern: IndexPattern;
   };
   onDelete?: (fieldNames: string[]) => void;
   fieldName: string | string[];

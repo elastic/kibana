@@ -8,12 +8,12 @@
 
 import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
 import { NotificationsStart, CoreStart } from 'src/core/public';
-import type { DataView, DataPublicPluginStart } from '../shared_imports';
+import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
 import { ApiService } from '../lib/api';
 import type { InternalFieldType, PluginStart } from '../types';
 
 export interface Context {
-  indexPattern: DataView;
+  indexPattern: IndexPattern;
   fieldTypeToProcess: InternalFieldType;
   uiSettings: CoreStart['uiSettings'];
   links: {

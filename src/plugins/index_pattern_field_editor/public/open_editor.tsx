@@ -13,9 +13,9 @@ import { i18n } from '@kbn/i18n';
 import {
   createKibanaReactContext,
   toMountPoint,
-  DataViewField,
+  IndexPatternField,
   DataPublicPluginStart,
-  DataView,
+  IndexPattern,
   UsageCollectionStart,
 } from './shared_imports';
 
@@ -26,9 +26,9 @@ import { FieldEditorLoader } from './components/field_editor_loader';
 
 export interface OpenFieldEditorOptions {
   ctx: {
-    indexPattern: DataView;
+    indexPattern: IndexPattern;
   };
-  onSave?: (field: DataViewField[]) => void;
+  onSave?: (field: IndexPatternField[]) => void;
   fieldName?: string;
 }
 
@@ -80,7 +80,7 @@ export const getFieldEditorOpener = ({
       }
     };
 
-    const onSaveField = (updatedField: DataViewField[]) => {
+    const onSaveField = (updatedField: IndexPatternField[]) => {
       closeEditor();
 
       if (onSave) {

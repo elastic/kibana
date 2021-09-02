@@ -25,7 +25,7 @@ import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
 import { FieldEditorLoader } from './components/field_editor_loader';
 import { IndexPatternFieldEditorPlugin } from './plugin';
 import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
-import { DataView } from './shared_imports';
+import { IndexPattern } from './shared_imports';
 
 const noop = () => {};
 
@@ -112,7 +112,7 @@ describe('IndexPatternFieldEditorPlugin', () => {
     };
     const { openDeleteModal } = await plugin.start(coreStartMocked, pluginStartMocked);
 
-    const indexPatternMock = ({ removeRuntimeField: removeFieldSpy } as unknown) as DataView;
+    const indexPatternMock = ({ removeRuntimeField: removeFieldSpy } as unknown) as IndexPattern;
 
     openDeleteModal({
       onDelete: onDeleteSpy,
