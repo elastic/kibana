@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import type { ResponseError } from '../../../lib/api';
 import { SystemIndicesFlyout, SystemIndicesFlyoutProps } from './flyout';
 import { GlobalFlyout } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
@@ -83,12 +84,16 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
   const {
     services: { api },
   } = useAppContext();
+  const [statusStartUpgrade, setStatusStartUpgrade] = useState<{
+    statusType: string;
+    details?: ResponseError;
+  }>({ statusType: 'idle' });
 
   const [showFlyout, setShowFlyout] = useState(false);
   const {
     data,
     error,
-    resendRequest,
+    resendRequest: refetchSystemIndicesStatus,
     isLoading,
     isInitialRequest,
   } = api.useLoadSystemIndicesUpgradeStatus();
@@ -119,11 +124,24 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
     }
   }, [addContentToGlobalFlyout, data, showFlyout, closeFlyout]);
 
+  const beginSystemIndicesUpgrade = useCallback(async () => {
+    const { error: startUpgradeError } = await api.upgradeSystemIndices();
+
+    setStatusStartUpgrade({
+      statusType: startUpgradeError ? 'error' : 'started',
+      details: startUpgradeError ?? undefined,
+    });
+
+    if (!startUpgradeError) {
+      refetchSystemIndicesStatus();
+    }
+  }, [api, refetchSystemIndicesStatus]);
+
   if (error) {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiButton color="danger" isLoading={isLoading} onClick={resendRequest}>
+          <EuiButton color="danger" isLoading={isLoading} onClick={refetchSystemIndicesStatus}>
             {i18nTexts.retryButtonLabel}
           </EuiButton>
         </EuiFlexItem>
@@ -157,18 +175,32 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
   const isUpgrading = data?.upgrade_status === 'IN_PROGRESS';
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiButton isLoading={isUpgrading} isDisabled={isButtonDisabled}>
-          {isUpgrading ? i18nTexts.inProgressButtonLabel : i18nTexts.startButtonLabel}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={() => setShowFlyout(true)} isDisabled={isButtonDisabled}>
-          {i18nTexts.viewSystemIndices}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            isLoading={isUpgrading}
+            isDisabled={isButtonDisabled}
+            onClick={beginSystemIndicesUpgrade}
+          >
+            {isUpgrading ? i18nTexts.inProgressButtonLabel : i18nTexts.startButtonLabel}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={() => setShowFlyout(true)} isDisabled={isButtonDisabled}>
+            {i18nTexts.viewSystemIndices}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {statusStartUpgrade.status === 'error' && (
+        <EuiText color="danger">
+          <p>
+            {error.details.statusCode} - {error.details.message}
+          </p>
+        </EuiText>
+      )}
+    </>
   );
 };
 

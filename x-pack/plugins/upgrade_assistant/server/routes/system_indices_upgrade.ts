@@ -46,8 +46,8 @@ const mockedResponse = {
     },
   ],
   // upgrade_status: 'NO_UPGRADE_NEEDED',
-  // upgrade_status: 'UPGRADE_NEEDED',
-  upgrade_status: 'IN_PROGRESS',
+  upgrade_status: 'UPGRADE_NEEDED',
+  // upgrade_status: 'IN_PROGRESS',
 };
 
 export function registerSystemIndicesUpgradeRoutes({
@@ -61,6 +61,21 @@ export function registerSystemIndicesUpgradeRoutes({
       try {
         return response.ok({
           body: mockedResponse,
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
+      }
+    })
+  );
+
+  router.post(
+    { path: `${API_BASE_PATH}/system_indices_upgrade`, validate: false },
+    versionCheckHandlerWrapper(async (context, request, response) => {
+      try {
+        return response.ok({
+          body: {
+            accepted: true,
+          },
         });
       } catch (error) {
         return handleEsError({ error, response });

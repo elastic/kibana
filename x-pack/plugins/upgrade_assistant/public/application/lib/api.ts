@@ -71,6 +71,15 @@ export class ApiService {
     });
   }
 
+  public async upgradeSystemIndices() {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/system_indices_upgrade`,
+      method: 'post',
+    });
+
+    return result;
+  }
+
   public useLoadEsDeprecations() {
     return this.useRequest<ESUpgradeStatus>({
       path: `${API_BASE_PATH}/es_deprecations`,
