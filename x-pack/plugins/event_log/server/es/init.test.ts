@@ -15,6 +15,173 @@ describe('initializeEs', () => {
     esContext = contextMock.create();
   });
 
+  test(`should update existing index templates if any exist and are not hidden`, async () => {
+    const testTemplate = {
+      order: 0,
+      index_patterns: ['foo-bar-*'],
+      settings: {
+        index: {
+          lifecycle: {
+            name: 'foo-bar-policy',
+            rollover_alias: 'foo-bar-1',
+          },
+          number_of_shards: '1',
+          auto_expand_replicas: '0-1',
+        },
+      },
+      mappings: {},
+      aliases: {},
+    };
+    esContext.esAdapter.getExistingLegacyIndexTemplates.mockResolvedValue({
+      'foo-bar-template': testTemplate,
+    });
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalled();
+    expect(esContext.esAdapter.setLegacyIndexTemplateToHidden).toHaveBeenCalledWith(
+      'foo-bar-template',
+      testTemplate
+    );
+  });
+
+  test(`should not update existing index templates if any exist and are already hidden`, async () => {
+    const testTemplate = {
+      order: 0,
+      index_patterns: ['foo-bar-*'],
+      settings: {
+        index: {
+          lifecycle: {
+            name: 'foo-bar-policy',
+            rollover_alias: 'foo-bar-1',
+          },
+          hidden: 'true',
+          number_of_shards: '1',
+          auto_expand_replicas: '0-1',
+        },
+      },
+      mappings: {},
+      aliases: {},
+    };
+    esContext.esAdapter.getExistingLegacyIndexTemplates.mockResolvedValue({
+      'foo-bar-template': testTemplate,
+    });
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingLegacyIndexTemplates).toHaveBeenCalled();
+    expect(esContext.esAdapter.setLegacyIndexTemplateToHidden).not.toHaveBeenCalled();
+  });
+
+  test(`should update existing index settings if any exist and are not hidden`, async () => {
+    const testSettings = {
+      settings: {
+        index: {
+          lifecycle: {
+            name: 'foo-bar-policy',
+            rollover_alias: 'foo-bar-1',
+          },
+          routing: {
+            allocation: {
+              include: {
+                _tier_preference: 'data_content',
+              },
+            },
+          },
+          number_of_shards: '1',
+          auto_expand_replicas: '0-1',
+          provided_name: '.kibana-event-log-7.15.0-000001',
+          creation_date: '1630439186791',
+          number_of_replicas: '0',
+          uuid: 'Ure4d9edQbCMtcmyy0ObrA',
+          version: {
+            created: '7150099',
+          },
+        },
+      },
+    };
+    esContext.esAdapter.getExistingIndices.mockResolvedValue({
+      'foo-bar-000001': testSettings,
+    });
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingIndices).toHaveBeenCalled();
+    expect(esContext.esAdapter.setIndexToHidden).toHaveBeenCalledWith('foo-bar-000001');
+  });
+
+  test(`should not update existing index settings if any exist and are already hidden`, async () => {
+    const testSettings = {
+      settings: {
+        index: {
+          lifecycle: {
+            name: 'foo-bar-policy',
+            rollover_alias: 'foo-bar-1',
+          },
+          routing: {
+            allocation: {
+              include: {
+                _tier_preference: 'data_content',
+              },
+            },
+          },
+          hidden: 'true',
+          number_of_shards: '1',
+          auto_expand_replicas: '0-1',
+          provided_name: '.kibana-event-log-7.15.0-000001',
+          creation_date: '1630439186791',
+          number_of_replicas: '0',
+          uuid: 'Ure4d9edQbCMtcmyy0ObrA',
+          version: {
+            created: '7150099',
+          },
+        },
+      },
+    };
+    esContext.esAdapter.getExistingIndices.mockResolvedValue({
+      'foo-bar-000001': testSettings,
+    });
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingIndices).toHaveBeenCalled();
+    expect(esContext.esAdapter.setIndexToHidden).not.toHaveBeenCalled();
+  });
+
+  test(`should update existing index aliases if any exist and are not hidden`, async () => {
+    const testAliases = {
+      aliases: {
+        'foo-bar': {
+          is_write_index: true,
+        },
+      },
+    };
+    esContext.esAdapter.getExistingIndexAliases.mockResolvedValue({
+      'foo-bar-000001': testAliases,
+    });
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingIndexAliases).toHaveBeenCalled();
+    expect(esContext.esAdapter.setIndexAliasToHidden).toHaveBeenCalledWith(
+      'foo-bar-000001',
+      testAliases
+    );
+  });
+
+  test(`should not update existing index aliases if any exist and are already hidden`, async () => {
+    const testAliases = {
+      aliases: {
+        'foo-bar': {
+          is_write_index: true,
+          is_hidden: true,
+        },
+      },
+    };
+    esContext.esAdapter.getExistingIndexAliases.mockResolvedValue({
+      'foo-bar-000001': testAliases,
+    });
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.getExistingIndexAliases).toHaveBeenCalled();
+    expect(esContext.esAdapter.setIndexAliasToHidden).not.toHaveBeenCalled();
+  });
+
   test(`should create ILM policy if it doesn't exist`, async () => {
     esContext.esAdapter.doesIlmPolicyExist.mockResolvedValue(false);
 

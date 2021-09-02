@@ -49,8 +49,9 @@ class EsInitializationSteps {
         this.esContext.esNames.indexPattern
       );
       Object.keys(indexTemplates).forEach(async (indexTemplateName: string) => {
+        const hidden: string | boolean = indexTemplates[indexTemplateName]?.settings?.index?.hidden;
         // Check to see if this index template is hidden
-        if (indexTemplates[indexTemplateName]?.settings?.index?.hidden !== true) {
+        if (hidden !== true && hidden !== 'true') {
           this.esContext.logger.debug(
             `setting existing ${indexTemplateName} index template to hidden.`
           );
@@ -77,12 +78,11 @@ class EsInitializationSteps {
         this.esContext.esNames.indexPattern
       );
       Object.keys(indices).forEach(async (indexName: string) => {
+        const hidden: string | boolean | undefined = (indices[indexName]
+          ?.settings as IndicesIndexStatePrefixedSettings)?.index?.hidden;
         // Check to see if this index template is hidden
-        if (
-          (indices[indexName]?.settings as IndicesIndexStatePrefixedSettings)?.index?.hidden !==
-          'true'
-        ) {
-          this.esContext.logger.info(`setting existing ${indexName} index to hidden.`);
+        if (hidden !== true && hidden !== 'true') {
+          this.esContext.logger.debug(`setting existing ${indexName} index to hidden.`);
           await this.esContext.esAdapter.setIndexToHidden(indexName);
         }
       });
@@ -107,7 +107,7 @@ class EsInitializationSteps {
         });
 
         if (hasNotHiddenAliases) {
-          this.esContext.logger.info(`setting existing ${indexName} index aliases to hidden.`);
+          this.esContext.logger.debug(`setting existing ${indexName} index aliases to hidden.`);
           await this.esContext.esAdapter.setIndexAliasToHidden(indexName, indexAliases[indexName]);
         }
       });

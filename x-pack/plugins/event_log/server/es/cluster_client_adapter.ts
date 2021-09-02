@@ -192,7 +192,6 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         { name: indexTemplatePattern },
         { ignore: [404] }
       );
-      console.log(`getExistingLegacyIndexTemplates - ${JSON.stringify(templates)}`);
       return templates;
     } catch (err) {
       throw new Error(`error getting existing legacy index templates: ${err.message}`);
@@ -231,7 +230,6 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         { index: indexPattern },
         { ignore: [404] }
       );
-      console.log(`getExistingIndices - ${JSON.stringify(indexSettings)}`);
       return indexSettings;
     } catch (err) {
       throw new Error(
@@ -265,7 +263,6 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         { index: indexPattern },
         { ignore: [404] }
       );
-      console.log(`getCurrentIndexAliases - ${JSON.stringify(indexAliases)}`);
       return indexAliases;
     } catch (err) {
       throw new Error(
