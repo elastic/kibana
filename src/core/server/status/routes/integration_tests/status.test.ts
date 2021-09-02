@@ -29,6 +29,7 @@ describe('GET /api/status', () => {
   let server: HttpService;
   let httpSetup: InternalHttpServiceSetup;
   let metrics: jest.Mocked<MetricsServiceSetup>;
+  let incrementUsageCounter: jest.Mock;
 
   const setupServer = async ({ allowAnonymous = true }: { allowAnonymous?: boolean } = {}) => {
     const coreContext = createCoreContext({ coreId });
@@ -49,6 +50,8 @@ describe('GET /api/status', () => {
       c: { level: ServiceStatusLevels.unavailable, summary: 'c is unavailable' },
       d: { level: ServiceStatusLevels.critical, summary: 'd is critical' },
     });
+
+    incrementUsageCounter = jest.fn();
 
     const router = httpSetup.createRouter('');
     registerStatusRoute({
@@ -71,6 +74,7 @@ describe('GET /api/status', () => {
         core$: status.core$,
         plugins$: pluginsStatus$,
       },
+      incrementUsageCounter,
     });
 
     // Register dummy auth provider for testing auth
@@ -204,6 +208,8 @@ describe('GET /api/status', () => {
         .get('/api/status?v7format=true')
         .expect(200);
       expect(result.body.status).toEqual(legacyFormat);
+      expect(incrementUsageCounter).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounter).toHaveBeenCalledWith({ counterName: 'status_v7format' });
     });
 
     it('returns legacy status format when v8format=false is provided', async () => {
@@ -212,6 +218,8 @@ describe('GET /api/status', () => {
         .get('/api/status?v8format=false')
         .expect(200);
       expect(result.body.status).toEqual(legacyFormat);
+      expect(incrementUsageCounter).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounter).toHaveBeenCalledWith({ counterName: 'status_v7format' });
     });
   });
 
@@ -255,6 +263,7 @@ describe('GET /api/status', () => {
       await setupServer();
       const result = await supertest(httpSetup.server.listener).get('/api/status').expect(200);
       expect(result.body.status).toEqual(newFormat);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
     });
 
     it('returns new status format when v8format=true is provided', async () => {
@@ -263,6 +272,7 @@ describe('GET /api/status', () => {
         .get('/api/status?v8format=true')
         .expect(200);
       expect(result.body.status).toEqual(newFormat);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
     });
 
     it('returns new status format when v7format=false is provided', async () => {
@@ -271,6 +281,7 @@ describe('GET /api/status', () => {
         .get('/api/status?v7format=false')
         .expect(200);
       expect(result.body.status).toEqual(newFormat);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
     });
   });
 
@@ -280,6 +291,7 @@ describe('GET /api/status', () => {
       await supertest(httpSetup.server.listener)
         .get('/api/status?v8format=true&v7format=true')
         .expect(400);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
     });
 
     it('v8format=true and v7format=false', async () => {
@@ -287,6 +299,7 @@ describe('GET /api/status', () => {
       await supertest(httpSetup.server.listener)
         .get('/api/status?v8format=true&v7format=false')
         .expect(400);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
     });
 
     it('v8format=false and v7format=false', async () => {
@@ -294,6 +307,7 @@ describe('GET /api/status', () => {
       await supertest(httpSetup.server.listener)
         .get('/api/status?v8format=false&v7format=false')
         .expect(400);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
     });
 
     it('v8format=false and v7format=true', async () => {
@@ -301,6 +315,7 @@ describe('GET /api/status', () => {
       await supertest(httpSetup.server.listener)
         .get('/api/status?v8format=false&v7format=true')
         .expect(400);
+      expect(incrementUsageCounter).not.toHaveBeenCalled();
     });
   });
 });

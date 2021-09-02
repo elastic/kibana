@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../http';
 import { MetricsServiceSetup } from '../../metrics';
+import type { CoreIncrementUsageCounter } from '../../core_usage_data/types';
 import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '../types';
 import { PluginName } from '../../plugins';
 import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
@@ -34,6 +35,7 @@ interface Deps {
     core$: Observable<CoreStatus>;
     plugins$: Observable<Record<PluginName, ServiceStatus>>;
   };
+  incrementUsageCounter: CoreIncrementUsageCounter;
 }
 
 interface StatusInfo {
@@ -47,7 +49,13 @@ interface StatusHttpBody extends Omit<StatusResponse, 'status'> {
   status: StatusInfo | LegacyStatusInfo;
 }
 
-export const registerStatusRoute = ({ router, config, metrics, status }: Deps) => {
+export const registerStatusRoute = ({
+  router,
+  config,
+  metrics,
+  status,
+  incrementUsageCounter,
+}: Deps) => {
   // Since the status.plugins$ observable is not subscribed to elsewhere, we need to subscribe it here to eagerly load
   // the plugins status when Kibana starts up so this endpoint responds quickly on first boot.
   const combinedStatus$ = new ReplaySubject<
@@ -93,6 +101,7 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
           plugins,
         };
       } else {
+        incrementUsageCounter({ counterName: 'status_v7format' });
         statusInfo = calculateLegacyStatus({
           overall,
           core,
