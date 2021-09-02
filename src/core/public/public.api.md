@@ -473,6 +473,10 @@ export interface DocLinksStart {
     // (undocumented)
     readonly links: {
         readonly settings: string;
+        readonly apm: {
+            readonly kibanaSettings: string;
+            readonly supportedServiceMaps: string;
+        };
         readonly canvas: {
             readonly guide: string;
         };
@@ -592,6 +596,7 @@ export interface DocLinksStart {
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
+            readonly privileges: string;
             readonly guide: string;
             readonly gettingStarted: string;
             readonly ml: string;
