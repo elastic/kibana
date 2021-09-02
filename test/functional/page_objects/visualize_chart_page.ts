@@ -448,18 +448,7 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   public async getChartValues(selector: string) {
-    if (await this.isNewLibraryChart(selector)) {
-      const barSeries = (await this.getEsChartDebugState(selector))?.bars ?? [];
-      return barSeries.filter(({ visible }) => visible).flatMap((bars) => bars.labels);
-    }
-
-    const elements = await this.find.allByCssSelector('.series.histogram text');
-    const values = await Promise.all(
-      elements.map(async (element) => {
-        const text = await element.getVisibleText();
-        return text;
-      })
-    );
-    return values;
+    const barSeries = (await this.getEsChartDebugState(selector))?.bars ?? [];
+    return barSeries.filter(({ visible }) => visible).flatMap((bars) => bars.labels);
   }
 }
