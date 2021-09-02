@@ -23,14 +23,14 @@ import { isTypeObject } from '../utils/is_type_object';
  * on this function and the general strategies.
  *
  * @param doc The document with "_source" and "fields"
- * @param throwOnFailSafe Defaults to false, but if set to true it will cause a throw if the fail safe is triggered to indicate we need to add a new explicit test condition
+ * @param ignoreFields Any fields that we should ignore and never merge from "fields". If the value exists within doc._source it will be untouched. If it does not, it will not be added.
  * @returns The two merged together in one object where we can
  */
-export const mergeAllFieldsWithSource: MergeStrategyFunction = ({ doc }) => {
+export const mergeAllFieldsWithSource: MergeStrategyFunction = ({ doc, ignoreFields }) => {
   const source = doc._source ?? {};
   const fields = doc.fields ?? {};
   const fieldEntries = Object.entries(fields);
-  const filteredEntries = filterFieldEntries(fieldEntries);
+  const filteredEntries = filterFieldEntries(fieldEntries, ignoreFields);
 
   const transformedSource = filteredEntries.reduce(
     (merged, [fieldsKey, fieldsValue]: [string, FieldsType]) => {

@@ -249,6 +249,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         lists: plugins.lists,
         logger: this.logger,
         mergeStrategy: this.config.alertMergeStrategy,
+        ignoreFields: this.config.alertIgnoreFields,
         ml: plugins.ml,
         ruleDataClient,
         ruleDataService,
@@ -295,6 +296,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ml: plugins.ml,
         lists: plugins.lists,
         mergeStrategy: this.config.alertMergeStrategy,
+        ignoreFields: this.config.alertIgnoreFields,
         experimentalFeatures,
         ruleDataService: plugins.ruleRegistry.ruleDataService,
       });

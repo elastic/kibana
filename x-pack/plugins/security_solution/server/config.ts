@@ -27,6 +27,9 @@ export const configSchema = schema.object({
       defaultValue: 'missingFields',
     }
   ),
+  alertIgnoreFields: schema.arrayOf(schema.string(), {
+    defaultValue: [],
+  }),
   [SIGNALS_INDEX_KEY]: schema.string({ defaultValue: DEFAULT_SIGNALS_INDEX }),
 
   /**
