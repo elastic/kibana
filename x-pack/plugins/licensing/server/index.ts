@@ -22,6 +22,8 @@ export type {
   ILicense,
 } from '../common/types';
 
+export { LICENSE_TYPE } from '../common/types';
+
 export type { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
 export type {
