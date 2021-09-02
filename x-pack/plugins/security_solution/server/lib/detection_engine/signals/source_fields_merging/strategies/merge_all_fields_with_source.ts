@@ -23,7 +23,9 @@ import { isTypeObject } from '../utils/is_type_object';
  * on this function and the general strategies.
  *
  * @param doc The document with "_source" and "fields"
- * @param ignoreFields Any fields that we should ignore and never merge from "fields". If the value exists within doc._source it will be untouched. If it does not, it will not be added.
+ * @param ignoreFields Any fields that we should ignore and never merge from "fields". If the value exists
+ * within doc._source it will be untouched and used. If the value does not exist within the doc._source,
+ * it will not be added from fields.
  * @returns The two merged together in one object where we can
  */
 export const mergeAllFieldsWithSource: MergeStrategyFunction = ({ doc, ignoreFields }) => {
