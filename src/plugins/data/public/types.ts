@@ -17,7 +17,7 @@ import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
-import { IndexPatternsContract } from './index_patterns';
+import { DataViewsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
 import { Setup as InspectorSetup } from '../../inspector/public';
@@ -77,10 +77,16 @@ export interface DataPublicPluginStart {
    */
   autocomplete: AutocompleteStart;
   /**
-   * index patterns service
-   * {@link IndexPatternsContract}
+   * data views service
+   * {@link DataViewsContract}
    */
-  indexPatterns: IndexPatternsContract;
+  dataViews: DataViewsContract;
+  /**
+   * index patterns service
+   * {@link DataViewsContract}
+   * @deprecated Use dataViews service instead.  All index pattern interfaces were renamed.
+   */
+  indexPatterns: DataViewsContract;
   /**
    * search service
    * {@link ISearchStart}
