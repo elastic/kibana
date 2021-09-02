@@ -72,6 +72,7 @@ export function registerSystemIndicesUpgradeRoutes({
     { path: `${API_BASE_PATH}/system_indices_upgrade`, validate: false },
     versionCheckHandlerWrapper(async (context, request, response) => {
       try {
+        throw new Error('PEPE');
         return response.ok({
           body: {
             accepted: true,

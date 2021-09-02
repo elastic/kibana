@@ -193,12 +193,15 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {statusStartUpgrade.status === 'error' && (
-        <EuiText color="danger">
-          <p>
-            {error.details.statusCode} - {error.details.message}
-          </p>
-        </EuiText>
+      {statusStartUpgrade.statusType === 'error' && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText color="danger">
+            <p>
+              {statusStartUpgrade.details!.statusCode} - {statusStartUpgrade.details!.message}
+            </p>
+          </EuiText>
+        </>
       )}
     </>
   );
