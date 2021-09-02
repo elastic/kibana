@@ -24,35 +24,39 @@ export class VerificationCode {
 
   public verify(code: string | undefined) {
     if (this.failedAttempts >= this.maxFailedAttempts) {
-      this.logger.error('Maximum number of attempts exceeded. Restart Kibana to retry.');
+      this.logger.error(
+        'Maximum number of attempts exceeded. Restart Kibana to generate a new code and retry.'
+      );
       return false;
     }
 
-    const formattedCode = chalk.black.bgCyanBright(
+    const highlightedCode = chalk.black.bgCyanBright(
       ` ${this.code.substr(0, 3)} ${this.code.substr(3)} `
     );
 
     if (code === undefined) {
-      this.logger.info(`Your verification code is: ${formattedCode}`);
+      this.logger.info(`Your verification code is: ${highlightedCode}`);
       return false;
     }
 
     if (code !== this.code) {
       this.failedAttempts++;
       this.logger.error(
-        `Invalid verification code '${code}' provided. ${this.remainingAttempts} attempts left. Your verification code is: ${formattedCode}`
+        `Invalid verification code '${code}' provided. ${this.remainingAttempts} attempts left. Your verification code is: ${highlightedCode}`
       );
       return false;
     }
 
-    this.logger.info('Code verified successfully');
+    this.logger.debug(`Code '${code}' verified successfully`);
 
     this.failedAttempts = 0;
     return true;
   }
 
   private static generate(length = 6) {
-    return Math.floor(secureRandomNumber() * Math.pow(10, length)).toString();
+    return Math.floor(secureRandomNumber() * Math.pow(10, length))
+      .toString()
+      .padStart(length, '0');
   }
 }
 
