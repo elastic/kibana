@@ -43,6 +43,7 @@ const applyFormatter = (aspect: Aspect, value: unknown, shouldApply: boolean = f
 export const applyFormatterIfSimpleField = (aspect: Aspect, value: unknown) =>
   applyFormatter(aspect, value, isSimpleField(aspect.format));
 
+// complex field is a field, which has some specific structure, as `range`, for example, not pure value
 export const applyFormatterIfComplexField = (aspect: Aspect, value: unknown) =>
   applyFormatter(aspect, value, !isSimpleField(aspect.format));
 
@@ -65,6 +66,11 @@ export const getComplexAccessor = (fieldName: string) => (
     if (v === undefined) {
       return;
     }
+    // Because of the specific logic of chart, it cannot compare complex values to display,
+    // thats why it is necessary to apply formatters before its comparison while rendering.
+    // What about simple values, formatting them at this step is breaking the logic of intervals (xDomain).
+    // If the value will be formatted on this step, it will be rendered without any respect to the passed bounds
+    // and the chart will render not all the range, but only the part of range, which contains data.
     return applyFormatterIfComplexField(aspect, v);
   };
 
