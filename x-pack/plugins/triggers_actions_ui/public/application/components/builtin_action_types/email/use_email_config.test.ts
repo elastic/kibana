@@ -110,7 +110,7 @@ describe('useEmailConfig', () => {
       port: 465,
       secure: true,
     });
-    const { result, waitForNextUpdate } = renderUseEmailConfigHook('gmail');
+    const { result } = renderUseEmailConfigHook('gmail');
     expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/gmail');
     expect(editActionConfig).not.toHaveBeenCalled();
     expect(result.current.emailServiceConfigurable).toEqual(false);
