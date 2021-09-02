@@ -7,15 +7,20 @@
 
 import React, { memo, useMemo } from 'react';
 import { CommonProps, EuiHorizontalRule, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import styled from 'styled-components';
 import { CardHeader, CardHeaderProps } from './components/card_header';
-import { APP_ID } from '../../../../common/constants';
 import { CardSubHeader } from './components/card_sub_header';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { CriteriaConditions } from './components/criteria_conditions';
 import { EffectScopeProps } from './components/effect_scope';
 import { TrustedApp } from '../../../../common/endpoint/types';
+
+const CardContainerPanel = styled(EuiPanel)`
+  &.artifactEntryCard + &.artifactEntryCard {
+    margin-top: ${({ theme }) => theme.eui.spacerSizes.l};
+  }
+`;
 
 type AnyArtifact = ExceptionListItemSchema & TrustedApp;
 
@@ -58,7 +63,12 @@ export const ArtifactEntryCard = memo(
     }, [item.effectScope.policies, item.effectScope.type, policyNames]);
 
     return (
-      <EuiPanel hasBorder={true} {...commonProps} paddingSize="none">
+      <CardContainerPanel
+        hasBorder={true}
+        {...commonProps}
+        paddingSize="none"
+        className="artifactEntryCard"
+      >
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
           <CardHeader
             name={item.name}
@@ -84,7 +94,7 @@ export const ArtifactEntryCard = memo(
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
           <CriteriaConditions os={item.os} entries={item.entries} />
         </EuiPanel>
-      </EuiPanel>
+      </CardContainerPanel>
     );
   }
 );
