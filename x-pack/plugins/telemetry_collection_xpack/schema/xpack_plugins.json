@@ -5455,6 +5455,12 @@
             "description": "Indicates if audit logging is both enabled and supported by the current license."
           }
         },
+        "auditLoggingType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "If auditLoggingEnabled is true, indicates what type is enabled (ECS or legacy)."
+          }
+        },
         "loginSelectorEnabled": {
           "type": "boolean",
           "_meta": {
@@ -5489,6 +5495,24 @@
             "_meta": {
               "description": "The set of enabled http auth schemes. Used for api-based usage, and when credentials are provided via reverse-proxy."
             }
+          }
+        },
+        "sessionIdleTimeoutInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session idle timeout expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionLifespanInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session lifespan expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionCleanupInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
           }
         }
       }
