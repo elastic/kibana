@@ -555,6 +555,25 @@ describe('SavedObjectsRepository', () => {
         await test(namespace);
       });
 
+      it(`normalizes initialNamespaces from 'default' to undefined`, async () => {
+        const test = async (namespace) => {
+          const objects = [{ ...obj1, type: 'dashboard', initialNamespaces: ['default'] }];
+          await bulkCreateSuccess(objects, { namespace, overwrite: true });
+          const body = [
+            { index: expect.objectContaining({ _id: `dashboard:${obj1.id}` }) },
+            expect.not.objectContaining({ namespace: 'default' }),
+          ];
+          expect(client.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({ body }),
+            expect.anything()
+          );
+          client.bulk.mockClear();
+          client.mget.mockClear();
+        };
+        await test(undefined);
+        await test(namespace);
+      });
+
       it(`doesn't add namespaces to request body for any types that are not multi-namespace`, async () => {
         const test = async (namespace) => {
           const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
@@ -2026,6 +2045,24 @@ describe('SavedObjectsRepository', () => {
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_TYPE}:${id}`,
             body: expect.objectContaining({ namespaces: [ns2, ns3] }),
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`normalizes initialNamespaces from 'default' to undefined`, async () => {
+        await savedObjectsRepository.create('dashboard', attributes, {
+          id,
+          namespace,
+          initialNamespaces: ['default'],
+        });
+
+        expect(client.create).toHaveBeenCalledTimes(1);
+        expect(client.create).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            id: `dashboard:${id}`,
+            body: expect.not.objectContaining({ namespace: 'default' }),
           }),
           expect.anything()
         );
