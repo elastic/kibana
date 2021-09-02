@@ -741,43 +741,60 @@ class AgentPolicyService {
     if (!defaultOutputId) {
       throw new Error('Default output is not setup');
     }
-    const defaultOutput = await outputService.get(soClient, defaultOutputId);
+
+    const dataOutputId = agentPolicy.data_output_id || defaultOutputId;
+    const monitoringOutputId = agentPolicy.monitoring_output_id || defaultOutputId;
+
+    const outputs = await Promise.all(
+      Array.from(new Set([dataOutputId, monitoringOutputId])).map((outputId) =>
+        outputService.get(soClient, outputId)
+      )
+    );
+
+    const dataOutput = outputs.find((output) => output.id === dataOutputId);
+    if (!dataOutput) {
+      throw new Error(`Data output not found ${dataOutputId}`);
+    }
+    const monitoringOutput = outputs.find((output) => output.id === monitoringOutputId);
+    if (!monitoringOutput) {
+      throw new Error(`Monitoring output not found ${monitoringOutputId}`);
+    }
 
     const fullAgentPolicy: FullAgentPolicy = {
       id: agentPolicy.id,
       outputs: {
-        // TEMPORARY as we only support a default output
-        ...[defaultOutput].reduce<FullAgentPolicy['outputs']>(
+        ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          (outputs, { config_yaml, name, type, hosts, ca_sha256, api_key }) => {
-            const configJs = config_yaml ? safeLoad(config_yaml) : {};
-            outputs[name] = {
-              type,
-              hosts,
-              ca_sha256,
-              api_key,
-              ...configJs,
-            };
+          const { config_yaml, name, type, hosts, ca_sha256, api_key } = output;
+          const configJs = config_yaml ? safeLoad(config_yaml) : {};
+          acc[getOutputIdForAgentPolicy(output)] = {
+            type,
+            hosts,
+            ca_sha256,
+            api_key,
+            ...configJs,
+          };
 
-            if (options?.standalone) {
-              delete outputs[name].api_key;
-              outputs[name].username = 'ES_USERNAME';
-              outputs[name].password = 'ES_PASSWORD';
-            }
+          if (options?.standalone) {
+            delete acc[name].api_key;
+            acc[name].username = 'ES_USERNAME';
+            acc[name].password = 'ES_PASSWORD';
+          }
 
-            return outputs;
-          },
-          {}
-        ),
+          return acc;
+        }, {}),
       },
-      inputs: storedPackagePoliciesToAgentInputs(agentPolicy.package_policies as PackagePolicy[]),
+      inputs: storedPackagePoliciesToAgentInputs(
+        agentPolicy.package_policies as PackagePolicy[],
+        getOutputIdForAgentPolicy(dataOutput)
+      ),
       revision: agentPolicy.revision,
       ...(agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
         ? {
             agent: {
               monitoring: {
                 namespace: agentPolicy.namespace,
-                use_output: defaultOutput.name,
+                use_output: getOutputIdForAgentPolicy(monitoringOutput),
                 enabled: true,
                 logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
                 metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
@@ -801,13 +818,12 @@ class AgentPolicyService {
     };
 
     // TODO: fetch this from the elastic agent package
-    const monitoringOutput = fullAgentPolicy.agent?.monitoring.use_output;
     const monitoringNamespace = fullAgentPolicy.agent?.monitoring.namespace;
     if (
       fullAgentPolicy.agent?.monitoring.enabled &&
       monitoringNamespace &&
       monitoringOutput &&
-      fullAgentPolicy.outputs[monitoringOutput]?.type === 'elasticsearch'
+      monitoringOutput.type === 'elasticsearch'
     ) {
       let names: string[] = [];
       if (fullAgentPolicy.agent.monitoring.logs) {
@@ -856,6 +872,18 @@ class AgentPolicyService {
     }
     return fullAgentPolicy;
   }
+}
+
+/**
+ * Get id used in full agent policy (sent to the agents)
+ * we use "default" for the default policy to avoid breaking changes
+ */
+function getOutputIdForAgentPolicy(output: Output) {
+  if (output.is_default) {
+    return 'default';
+  }
+
+  return output.id;
 }
 
 export const agentPolicyService = new AgentPolicyService();

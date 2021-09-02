@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
+import { safeDump } from 'js-yaml';
 
 import type {
   NewPackagePolicy,
@@ -17,16 +18,16 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
   PreconfigurationError,
+  PreconfiguredOutput,
 } from '../../common';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
-
 import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_LATEST_KEYWORD,
 } from '../constants';
+import { isSavedObjectNotFoundError } from '../errors';
 
 import { escapeSearchQueryPhrase } from './saved_object';
-
 import { pkgToPkgKey } from './epm/registry';
 import { getInstallation, getPackageInfo } from './epm/packages';
 import { ensurePackagesCompletedInstall } from './epm/packages/install';
@@ -35,11 +36,44 @@ import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
 import { overridePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
+import { outputService } from './output';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
   packages: string[];
   nonFatalErrors: PreconfigurationError[];
+}
+
+export async function ensurePreconfiguredOutputs(
+  soClient: SavedObjectsClientContract,
+  outputs: PreconfiguredOutput[]
+) {
+  await Promise.all(
+    outputs.map(async (output) => {
+      const existingOutput = await outputService.getOutputById(soClient, output.id).catch((err) => {
+        if (isSavedObjectNotFoundError(err)) {
+          return undefined;
+        }
+
+        throw err;
+      });
+
+      const { id, config, ...outputData } = output;
+
+      const configYaml = config ? safeDump(config) : undefined;
+
+      const data = {
+        ...outputData,
+        config_yaml: configYaml,
+      };
+
+      if (!existingOutput) {
+        return outputService.create(soClient, data, { id });
+      } else {
+        return outputService.update(soClient, id, data);
+      }
+    })
+  );
 }
 
 export async function ensurePreconfiguredPackagesAndPolicies(

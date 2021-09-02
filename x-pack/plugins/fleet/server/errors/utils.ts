@@ -6,11 +6,16 @@
  */
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { isBoom } from '@hapi/boom';
 
 export function isESClientError(error: unknown): error is ResponseError {
   return error instanceof ResponseError;
 }
 
-export const isElasticsearchVersionConflictError = (error: Error): boolean => {
+export function isElasticsearchVersionConflictError(error: Error): boolean {
   return isESClientError(error) && error.meta.statusCode === 409;
-};
+}
+
+export function isSavedObjectNotFoundError(error: Error): boolean {
+  return isBoom(error) && error.output.statusCode === 404;
+}

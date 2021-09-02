@@ -26,6 +26,10 @@ class OutputService {
     });
   }
 
+  public async getOutputById(soClient: SavedObjectsClientContract, id: string) {
+    return await soClient.get<OutputSOAttributes>(OUTPUT_SAVED_OBJECT_TYPE, id);
+  }
+
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
     const outputs = await this.getDefaultOutput(soClient);
 
@@ -75,6 +79,14 @@ class OutputService {
     options?: { id?: string }
   ): Promise<Output> {
     const data = { ...output };
+
+    // ensure only default output exists
+    if (data.is_default) {
+      const defaultOuput = await this.getDefaultOutputId(soClient);
+      if (defaultOuput) {
+        throw new Error(`A default output already exists (${defaultOuput})`);
+      }
+    }
 
     if (data.hosts) {
       data.hosts = data.hosts.map(normalizeHostsForAgents);

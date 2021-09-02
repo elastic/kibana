@@ -156,6 +156,8 @@ const getSavedObjectTypes = (
         revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword', index: false },
         is_preconfigured: { type: 'keyword' },
+        data_output_id: { type: 'keyword' },
+        monitoring_output_id: { type: 'keyword' },
       },
     },
     migrations: {
@@ -201,8 +203,10 @@ const getSavedObjectTypes = (
         is_default: { type: 'boolean' },
         hosts: { type: 'keyword' },
         ca_sha256: { type: 'keyword', index: false },
-        config: { type: 'flattened' },
-        config_yaml: { type: 'text' },
+        config: { type: 'flattened', index: false },
+        config_yaml: { type: 'text', index: false },
+        is_preconfigured: { type: 'boolean' },
+        fleet_server_service_token: { type: 'text', index: false },
       },
     },
     migrations: {
