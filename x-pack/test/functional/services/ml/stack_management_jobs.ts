@@ -6,11 +6,16 @@
  */
 
 import expect from '@kbn/expect';
+import { REPO_ROOT } from '@kbn/utils';
+import fs from 'fs';
+import path from 'path';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlADJobTable } from './job_table';
-import { MlDFAJobTable } from './data_frame_analytics_table';
-import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlADJobTable } from './job_table';
+import type { MlDFAJobTable } from './data_frame_analytics_table';
+import type { JobType } from '../../../../plugins/ml/common/types/saved_objects';
+import type { Job, Datafeed } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import type { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 type SyncFlyoutObjectType =
   | 'MissingObjects'
@@ -206,9 +211,16 @@ export function MachineLearningStackManagementJobsProvider(
       });
     },
 
-    async selectFileToImport(path: string, expectError: boolean = false) {
-      log.debug(`Importing file '${path}' ...`);
-      await PageObjects.common.setFileInputPath(path);
+    async openExportFlyout() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('mlJobsExportButton', 1000);
+        await testSubjects.existOrFail('mlJobMgmtExportJobsFlyout');
+      });
+    },
+
+    async selectFileToImport(filePath: string, expectError: boolean = false) {
+      log.debug(`Importing file '${filePath}' ...`);
+      await PageObjects.common.setFileInputPath(filePath);
 
       if (expectError) {
         await testSubjects.existOrFail('~mlJobMgmtImportJobsFileReadErrorCallout');
@@ -220,7 +232,6 @@ export function MachineLearningStackManagementJobsProvider(
 
     async assertJobIdsExist(expectedJobIds: string[]) {
       const inputs = await testSubjects.findAll('mlJobMgmtImportJobIdInput');
-      // const inputs = await subj.findAllByTagName('input');
       const actualJobIds = await Promise.all(inputs.map((i) => i.getAttribute('value')));
 
       expect(actualJobIds.sort()).to.eql(
@@ -274,23 +285,116 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async importJobs() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.click('mlJobMgmtImportImportButton', 1000);
-      });
-      await retry.tryForTime(40000, async () => {
-        await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout');
-      });
-    },
-
-    async assertImportedJobIdsExist(expectedJobIds: string[]) {
-      await retry.tryForTime(40000, async () => {
-        await testSubjects.click('mlRefreshJobListButton', 1000);
-        await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout');
-      });
+      await testSubjects.click('mlJobMgmtImportImportButton', 1000);
+      await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout', { timeout: 60 * 1000 });
     },
 
     async assertReadErrorCalloutExists() {
       await testSubjects.existOrFail('~mlJobMgmtImportJobsFileReadErrorCallout');
+    },
+
+    async selectExportJobType(jobType: JobType) {
+      if (jobType === 'anomaly-detector') {
+        await testSubjects.click('mlJobMgmtExportJobsADTab');
+        await testSubjects.existOrFail('mlJobMgmtExportJobsADJobList');
+      } else {
+        await testSubjects.click('mlJobMgmtExportJobsDFATab');
+        await testSubjects.existOrFail('mlJobMgmtExportJobsDFAJobList');
+      }
+    },
+
+    async selectExportJobSelectAll() {
+      await testSubjects.click('mlJobMgmtExportJobsSelectAllButton');
+    },
+
+    async getDownload(filePath: string) {
+      return retry.tryForTime(5000, async () => {
+        expect(fs.existsSync(filePath)).to.be(true);
+        return fs.readFileSync(filePath).toString();
+      });
+    },
+
+    getExportedFile(fileName: string) {
+      return path.resolve(REPO_ROOT, `target/functional-tests/downloads/${fileName}.json`);
+    },
+
+    deleteExportedFiles(fileNames: string[]) {
+      fileNames.forEach((file) => {
+        try {
+          fs.unlinkSync(this.getExportedFile(file));
+        } catch (e) {
+          // it might not have been there to begin with
+        }
+      });
+    },
+
+    async selectExportJobs() {
+      await testSubjects.click('mlJobMgmtExportExportButton');
+    },
+
+    async assertExportedADJobsAreCorrect(expectedJobs: Array<{ job: Job; datafeed: Datafeed }>) {
+      const file = JSON.parse(
+        await this.getDownload(this.getExportedFile('anomaly_detection_jobs'))
+      );
+      const loadedFile = Array.isArray(file) ? file : [file];
+      const sortedActualJobs = loadedFile.sort((a, b) =>
+        a.job.job_id.localeCompare((a = b.job.job_id))
+      );
+
+      const sortedExpectedJobs = expectedJobs.sort((a, b) =>
+        a.job.job_id.localeCompare(b.job.job_id)
+      );
+      expect(sortedActualJobs.length).to.eql(
+        sortedExpectedJobs.length,
+        `Expected length of exported jobs to be '${sortedExpectedJobs.length}' (got '${sortedActualJobs.length}')`
+      );
+
+      sortedExpectedJobs.forEach((expectedJob, i) => {
+        expect(expectedJob.job.job_id).to.eql(
+          sortedActualJobs[i].job.job_id,
+          `Expected job id to be '${expectedJob.job.job_id}' (got '${sortedActualJobs[i].job.job_id}')`
+        );
+        expect(expectedJob.job.analysis_config.detectors.length).to.eql(
+          sortedActualJobs[i].job.analysis_config.detectors.length,
+          `Expected detectors length to be '${expectedJob.job.analysis_config.detectors.length}' (got '${sortedActualJobs[i].job.analysis_config.detectors.length}')`
+        );
+        expect(expectedJob.job.analysis_config.detectors[0].function).to.eql(
+          sortedActualJobs[i].job.analysis_config.detectors[0].function,
+          `Expected first detector function to be '${expectedJob.job.analysis_config.detectors[0].function}' (got '${sortedActualJobs[i].job.analysis_config.detectors[0].function}')`
+        );
+      });
+    },
+
+    async assertExportedDFAJobsAreCorrect(expectedJobs: DataFrameAnalyticsConfig[]) {
+      const file = JSON.parse(
+        await this.getDownload(this.getExportedFile('data_frame_analytics_jobs'))
+      );
+      const loadedFile = Array.isArray(file) ? file : [file];
+      const sortedActualJobs = loadedFile.sort((a, b) => a.id.localeCompare(b.id));
+
+      const sortedExpectedJobs = expectedJobs.sort((a, b) => a.id.localeCompare(b.id));
+
+      expect(sortedActualJobs.length).to.eql(
+        sortedExpectedJobs.length,
+        `Expected length of exported jobs to be '${sortedExpectedJobs.length}' (got '${sortedActualJobs.length}')`
+      );
+
+      sortedExpectedJobs.forEach((expectedJob, i) => {
+        expect(expectedJob.id).to.eql(
+          sortedActualJobs[i].id,
+          `Expected job id to be '${expectedJob.id}' (got '${sortedActualJobs[i].id}')`
+        );
+        const expectedType = Object.keys(expectedJob.analysis)[0];
+        const actualType = Object.keys(sortedActualJobs[i].analysis)[0];
+        expect(expectedType).to.eql(
+          actualType,
+          `Expected job type to be '${expectedType}' (got '${actualType}')`
+        );
+        expect(expectedJob.dest.index).to.eql(
+          sortedActualJobs[i].dest.index,
+          `Expected destination index to be '${expectedJob.dest.index}' (got '${sortedActualJobs[i].dest.index}')`
+        );
+      });
     },
   };
 }
