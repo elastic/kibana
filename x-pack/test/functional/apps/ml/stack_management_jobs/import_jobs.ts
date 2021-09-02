@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const testDataListPositive = [
     {
-      filePath: path.join(__dirname, 'files_to_import', 'anomaly_detection_jobs.json'),
+      filePath: path.join(__dirname, 'files_to_import', 'anomaly_detection_jobs_7.16.json'),
       expected: {
         jobType: 'anomaly-detector' as JobType,
         jobIds: ['ad-test1', 'ad-test3'],
@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       },
     },
     {
-      filePath: path.join(__dirname, 'files_to_import', 'data_frame_analytics_jobs.json'),
+      filePath: path.join(__dirname, 'files_to_import', 'data_frame_analytics_jobs_7.16.json'),
       expected: {
         jobType: 'data-frame-analytics' as JobType,
         jobIds: ['dfa-test1'],
