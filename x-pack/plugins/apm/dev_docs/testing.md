@@ -24,7 +24,7 @@ API tests are separated in two suites:
 - a trial license test suite (the equivalent of gold+)
 
 ```
-node scripts/tests/api [--trial] [--help]
+node scripts/test/api [--trial] [--help]
 ```
 
 The API tests are located in `x-pack/test/apm_api_integration/`.
@@ -39,7 +39,7 @@ The API tests are located in `x-pack/test/apm_api_integration/`.
 ## E2E Tests (Cypress)
 
 ```
-node scripts/tests/e2e [--trial] [--help]
+node scripts/test/e2e [--trial] [--help]
 ```
 
 The E2E tests are located [here](../../ftr_e2e)
