@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
-  FEATURE_ID_PROPERTY_NAME,
+  GEOJSON_FEATURE_ID_PROPERTY_NAME,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
@@ -154,7 +154,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   getMbFeatureIdPropertyName(): string {
-    return this.getSource().isMvt() ? MVT_FEATURE_ID_PROPERTY_NAME : FEATURE_ID_PROPERTY_NAME;
+    return this.getSource().isMvt()
+      ? MVT_FEATURE_ID_PROPERTY_NAME
+      : GEOJSON_FEATURE_ID_PROPERTY_NAME;
   }
 
   getSource(): IVectorSource {
@@ -711,6 +713,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   _getSourceFeatureCollection() {
+    if (this.getSource().isMvt()) {
+      return null;
+    }
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest ? (sourceDataRequest.getData() as FeatureCollection) : null;
   }
@@ -1115,7 +1120,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const targetFeature = featureCollection.features.find((feature) => {
-      return feature.properties?.[FEATURE_ID_PROPERTY_NAME] === id;
+      return feature.properties?.[this.getMbFeatureIdPropertyName()] === id;
     });
     return targetFeature ? targetFeature : null;
   }

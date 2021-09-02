@@ -12,8 +12,6 @@ import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 // @ts-ignore not typed
 import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
-import { VectorTile } from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
@@ -21,8 +19,8 @@ import {
   ES_GEO_FIELD_TYPE,
   RENDER_AS,
 } from '../../common/constants';
-import {  getEsTile } from './get_tile';
-import {  getEsGridTile } from './get_grid_tile';
+import { getEsTile } from './get_tile';
+import { getEsGridTile } from './get_grid_tile';
 
 const CACHE_TIMEOUT_SECONDS = 60 * 60;
 
@@ -59,10 +57,11 @@ export function initMVTRoutes({
     ) => {
       const { query, params } = request;
 
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+      // todo - replace with direct abortion of raw transport request
+      // const abortController = new AbortController();
+      // request.events.aborted$.subscribe(() => {
+      //   abortController.abort();
+      // });
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
@@ -76,18 +75,7 @@ export function initMVTRoutes({
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
-        searchSessionId: query.searchSessionId,
-        abortSignal: abortController.signal,
       });
-
-      // try {
-      //   console.log('sdfsdl', tile.length, typeof tile);
-      //   const jsonTile = new VectorTile(new Protobuf(tile));
-      //   console.log('jst', jsonTile);
-      // } catch (e) {
-      //   console.error('Cant parse vector tile');
-      //   console.error(e);
-      // }
 
       return sendResponse(response, tile);
     }
@@ -119,10 +107,12 @@ export function initMVTRoutes({
       response: KibanaResponseFactory
     ) => {
       const { query, params } = request;
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+
+      // todo - replace with direct abortion of raw transport request
+      // const abortController = new AbortController();
+      // request.events.aborted$.subscribe(() => {
+      //   abortController.abort();
+      // });
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
@@ -137,18 +127,7 @@ export function initMVTRoutes({
         requestBody: requestBodyDSL as any,
         requestType: query.requestType as RENDER_AS.POINT | RENDER_AS.GRID,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
-        searchSessionId: query.searchSessionId,
-        abortSignal: abortController.signal,
       });
-
-      // try {
-      //   console.log('sdfsdl', tile.length, typeof tile);
-      //   const jsonTile = new VectorTile(new Protobuf(tile));
-      //   console.log('jst', jsonTile);
-      // } catch (e) {
-      //   console.error('Cant parse vector tile');
-      //   console.error(e);
-      // }
 
       return sendResponse(response, tile);
     }
