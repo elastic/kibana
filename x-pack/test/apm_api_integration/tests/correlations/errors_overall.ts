@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await readUserClient(urlConfig);
 
         expect(response.status).to.be(200);
-        expect(response.body).to.be(undefined);
+        expect(response.body.overall).to.be(null);
       });
     }
   );
