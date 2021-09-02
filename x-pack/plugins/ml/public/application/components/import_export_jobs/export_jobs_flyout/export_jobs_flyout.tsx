@@ -196,9 +196,6 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
   }, [selectedJobIds]);
 
   function switchTab(jobType: JobType) {
-    // const jobType =
-    //   selectedJobType === 'anomaly-detector' ? 'data-frame-analytics' : 'anomaly-detector';
-
     setSwitchTabConfirmVisible(false);
     setSelectedJobIds([]);
     setSelectedJobType(jobType);
