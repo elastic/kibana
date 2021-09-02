@@ -803,6 +803,126 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('when upgrading to a version where an input with no variables has variables added', function () {
+      withTestPackageVersion('0.8.0-add-vars-to-stream-with-no-vars');
+
+      beforeEach(async function () {
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test policy',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: packagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'package_policy_upgrade_1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            output_id: '',
+            inputs: [
+              {
+                policy_template: 'package_policy_upgrade',
+                type: 'test_input',
+                enabled: true,
+                streams: [
+                  {
+                    id: 'test-package_policy_upgrade-xxxx',
+                    enabled: true,
+                    data_stream: {
+                      type: 'test_stream',
+                      dataset: 'package_policy_upgrade.test_stream',
+                    },
+                  },
+                ],
+              },
+            ],
+            package: {
+              name: 'package_policy_upgrade',
+              title: 'This is a test package for upgrading package policies',
+              version: '0.7.0-add-stream-with-no-vars',
+            },
+          });
+
+        packagePolicyId = packagePolicyResponse.item.id;
+      });
+
+      afterEach(async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .expect(200);
+      });
+
+      describe('dry run', function () {
+        it('returns a valid diff', async function () {
+          const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
+            .post(`/api/fleet/package_policies/upgrade`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packagePolicyIds: [packagePolicyId],
+              dryRun: true,
+            })
+            .expect(200);
+
+          expect(body[0].hasErrors).to.be(false);
+
+          const oldInput = body[0].diff?.[0].inputs.find((input) => input.type === 'test_input');
+          const oldStream = oldInput?.streams.find(
+            (stream) => stream.data_stream.dataset === 'package_policy_upgrade.test_stream'
+          );
+
+          expect(oldStream?.vars).to.be(undefined);
+
+          const newInput = body[0].diff?.[1].inputs.find((input) => input.type === 'test_input');
+          const newStream = newInput?.streams.find(
+            (stream) => stream.data_stream.dataset === 'package_policy_upgrade.test_stream'
+          );
+
+          expect(newStream?.vars).to.eql({
+            test_var_new: {
+              value: 'Test Var New',
+              type: 'text',
+            },
+            test_var_new_2: {
+              value: 'Test Var New 2',
+              type: 'text',
+            },
+          });
+        });
+      });
+
+      describe('upgrade', function () {
+        it('successfully upgrades package policy', async function () {
+          const { body }: { body: UpgradePackagePolicyResponse } = await supertest
+            .post(`/api/fleet/package_policies/upgrade`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packagePolicyIds: [packagePolicyId],
+              dryRun: false,
+            })
+            .expect(200);
+
+          expect(body[0].success).to.be(true);
+        });
+      });
+    });
+
     describe('when package policy is not found', function () {
       it('should return an 200 with errors when "dryRun:true" is provided', async function () {
         const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest

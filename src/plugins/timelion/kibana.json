@@ -17,7 +17,7 @@
     "kibanaLegacy"
   ],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
   }
 }
