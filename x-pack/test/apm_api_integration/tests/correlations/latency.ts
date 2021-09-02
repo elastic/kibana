@@ -253,8 +253,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const correlation = finalRawResponse?.latencyCorrelations[0];
         expect(typeof correlation).to.be('object');
-        expect(correlation?.field).to.be('transaction.result');
-        expect(correlation?.value).to.be('success');
+        expect(correlation?.fieldName).to.be('transaction.result');
+        expect(correlation?.fieldValue).to.be('success');
         expect(correlation?.correlation).to.be(0.6275246559191225);
         expect(correlation?.ksTest).to.be(4.806503252860024e-13);
         expect(correlation?.histogram.length).to.be(101);
