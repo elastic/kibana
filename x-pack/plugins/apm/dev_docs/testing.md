@@ -3,7 +3,7 @@
 ## Unit Tests (Jest)
 
 ```
-node scripts/tests/jest [--watch] [--updateSnapshot]
+node scripts/test/jest [--watch] [--updateSnapshot]
 ```
 
 #### Coverage
