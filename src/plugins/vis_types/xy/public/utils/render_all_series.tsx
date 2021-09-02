@@ -22,6 +22,7 @@ import {
 import { DatatableRow } from '../../../../expressions/public';
 import { ChartType } from '../../common';
 import { AxisMode, ChartMode, InterpolationMode, SeriesParam, VisConfig } from '../types';
+import { isValidSeriesForDimension } from './accessors';
 
 /**
  * Matches vislib curve to elastic charts
@@ -78,7 +79,9 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      const yAspects = aspects.y.filter(({ accessor }) => accessor !== null);
+      const yAspects = aspects.y.filter(({ id, accessor }) =>
+        isValidSeriesForDimension(paramId)({ id, accessor })
+      );
 
       if (!show || !yAspects.length) {
         return null;

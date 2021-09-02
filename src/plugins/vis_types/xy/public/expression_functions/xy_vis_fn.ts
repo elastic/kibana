@@ -16,7 +16,7 @@ import type {
 import { prepareLogTable, Dimension } from '../../../../visualizations/public';
 import type { ChartType } from '../../common';
 import type { VisParams, XYVisConfig } from '../types';
-import { isPercentileIdEqualToSeriesId } from '../utils/accessors';
+import { isValidSeriesForDimension } from '../utils/accessors';
 
 export const visName = 'xy_vis';
 export interface RenderValue {
@@ -257,10 +257,8 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         valueAxis: args.gridValueAxis,
       },
       seriesParams: args.seriesParams.map((seriesParam) => {
-        const matchedSeries = args.yDimension.filter(
-          (y) =>
-            y.id === seriesParam.data.id ||
-            isPercentileIdEqualToSeriesId(y.id ?? '', seriesParam.data.id)
+        const matchedSeries = args.yDimension.filter(({ id, accessor }) =>
+          isValidSeriesForDimension(seriesParam.data.id)({ id, accessor })
         );
         return {
           ...seriesParam,

@@ -7,6 +7,7 @@
  */
 
 import { AccessorFn, Accessor } from '@elastic/charts';
+import { DatatableColumn } from '../../../../expressions';
 import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { FakeParams } from '../../../../visualizations/public';
 import { Aspect } from '../types';
@@ -97,3 +98,13 @@ export const getSplitSeriesAccessorFnMap = (
 // For percentile aggregation id is comming in the form `%d.%d`, where first `%d` is `id` and the second - `percents`
 export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
   columnId.toString().split('.')[0] === seriesColumnId;
+
+export const isValidSeriesForDimension = (seriesColumnId: string) => ({
+  id,
+  accessor,
+}: {
+  id?: string | number;
+  accessor?: string | number | DatatableColumn | null;
+}) =>
+  (id === seriesColumnId || isPercentileIdEqualToSeriesId(id ?? '', seriesColumnId)) &&
+  accessor !== null;
