@@ -77,6 +77,14 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(403);
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');
+
+      const { body: getBody } = await supertest
+        .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      expect(getBody.messages[0].cleared).to.not.eql(true);
     });
 
     it('should not mark audit messages as cleared for unauthorized user', async () => {
@@ -91,6 +99,14 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(403);
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');
+
+      const { body: getBody } = await supertest
+        .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      expect(getBody.messages[0].cleared).to.not.eql(true);
     });
   });
 };
