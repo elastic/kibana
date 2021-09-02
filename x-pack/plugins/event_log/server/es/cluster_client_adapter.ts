@@ -7,13 +7,12 @@
 
 import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
-import { reject, isUndefined, isNumber } from 'lodash';
+import { reject, isUndefined, isNumber, pick } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from 'src/core/server';
 import util from 'util';
 import { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { IndicesAliasDefinition } from '@elastic/elasticsearch/api/types';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 
@@ -164,7 +163,12 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   public async createIndexTemplate(name: string, template: Record<string, unknown>): Promise<void> {
     try {
       const esClient = await this.elasticsearchClientPromise;
-      await esClient.indices.putIndexTemplate({ name, body: template });
+      await esClient.indices.putIndexTemplate({
+        name,
+        body: template,
+        // @ts-expect-error doesn't exist in @elastic/elasticsearch
+        create: true,
+      });
     } catch (err) {
       // The error message doesn't have a type attribute we can look to guarantee it's due
       // to the template already existing (only long message) so we'll check ourselves to see
@@ -179,7 +183,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
-  public async getCurrentIndexTemplates(
+  public async getExistingLegacyIndexTemplates(
     indexTemplatePattern: string
   ): Promise<estypes.IndicesGetTemplateResponse> {
     try {
@@ -188,13 +192,14 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         { name: indexTemplatePattern },
         { ignore: [404] }
       );
+      console.log(`getExistingLegacyIndexTemplates - ${JSON.stringify(templates)}`);
       return templates;
     } catch (err) {
-      return {};
+      throw new Error(`error getting existing legacy index templates: ${err.message}`);
     }
   }
 
-  public async setIndexTemplateToHidden(
+  public async setLegacyIndexTemplateToHidden(
     indexTemplateName: string,
     currentIndexTemplate: estypes.IndicesTemplateMapping
   ): Promise<void> {
@@ -211,11 +216,13 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         },
       });
     } catch (err) {
-      return;
+      throw new Error(
+        `error setting existing legacy index template ${indexTemplateName} to hidden: ${err.message}`
+      );
     }
   }
 
-  public async getCurrentIndices(
+  public async getExistingIndices(
     indexPattern: string
   ): Promise<estypes.IndicesGetSettingsResponse> {
     try {
@@ -224,9 +231,12 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         { index: indexPattern },
         { ignore: [404] }
       );
+      console.log(`getExistingIndices - ${JSON.stringify(indexSettings)}`);
       return indexSettings;
     } catch (err) {
-      return {};
+      throw new Error(
+        `error getting existing indices matching pattern ${indexPattern}: ${err.message}`
+      );
     }
   }
 
@@ -242,11 +252,11 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         },
       });
     } catch (err) {
-      return;
+      throw new Error(`error setting existing index ${indexName} to hidden: ${err.message}`);
     }
   }
 
-  public async getCurrentIndexAliases(
+  public async getExistingIndexAliases(
     indexPattern: string
   ): Promise<estypes.IndicesGetAliasResponse> {
     try {
@@ -255,9 +265,12 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         { index: indexPattern },
         { ignore: [404] }
       );
+      console.log(`getCurrentIndexAliases - ${JSON.stringify(indexAliases)}`);
       return indexAliases;
     } catch (err) {
-      return {};
+      throw new Error(
+        `error getting existing index aliases matching pattern ${indexPattern}: ${err.message}`
+      );
     }
   }
 
@@ -269,18 +282,29 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.updateAliases({
         body: {
-          actions: Object.keys(currentAliases.aliases).map((aliasName) => ({
-            add: {
-              index: indexName,
-              alias: aliasName,
-              is_hidden: true,
-              is_write_index: currentAliases.aliases[aliasName]?.is_write_index,
-            },
-          })),
+          actions: Object.keys(currentAliases.aliases).map((aliasName) => {
+            const existingAliasOptions = pick(currentAliases.aliases[aliasName], [
+              'is_write_index',
+              'filter',
+              'index_routing',
+              'routing',
+              'search_routing',
+            ]);
+            return {
+              add: {
+                ...existingAliasOptions,
+                index: indexName,
+                alias: aliasName,
+                is_hidden: true,
+              },
+            };
+          }),
         },
       });
     } catch (err) {
-      return;
+      throw new Error(
+        `error setting existing index aliases for index ${indexName} to is_hidden: ${err.message}`
+      );
     }
   }
 

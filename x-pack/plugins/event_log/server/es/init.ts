@@ -38,55 +38,86 @@ class EsInitializationSteps {
   }
 
   async setExistingIndexTemplatesToHidden() {
-    // Look up existing index templates and update index.hidden to true if that
-    // setting is currently false or undefined
-    const indexTemplates = await this.esContext.esAdapter.getCurrentIndexTemplates(
-      this.esContext.esNames.indexPattern
-    );
-    Object.keys(indexTemplates).forEach(async (indexTemplateName: string) => {
-      // Check to see if this index template is hidden
-      if (indexTemplates[indexTemplateName]?.settings?.index?.hidden !== true) {
-        await this.esContext.esAdapter.setIndexTemplateToHidden(
-          indexTemplateName,
-          indexTemplates[indexTemplateName]
-        );
-      }
-    });
+    try {
+      // look up existing index templates and update index.hidden to true if that
+      // setting is currently false or undefined
+
+      // since we are updating to the new index template API and converting new event log
+      // indices to hidden in the same PR, we only need to use the legacy template API to
+      // look for and update existing event log indices.
+      const indexTemplates = await this.esContext.esAdapter.getExistingLegacyIndexTemplates(
+        this.esContext.esNames.indexPattern
+      );
+      Object.keys(indexTemplates).forEach(async (indexTemplateName: string) => {
+        // Check to see if this index template is hidden
+        if (indexTemplates[indexTemplateName]?.settings?.index?.hidden !== true) {
+          this.esContext.logger.debug(
+            `setting existing ${indexTemplateName} index template to hidden.`
+          );
+          await this.esContext.esAdapter.setLegacyIndexTemplateToHidden(
+            indexTemplateName,
+            indexTemplates[indexTemplateName]
+          );
+        }
+      });
+    } catch (err) {
+      // errors when trying to update existing index templates to hidden
+      // should not block the rest of initialization, log the error and move on
+      this.esContext.logger.error(
+        `error setting existing index templates to hidden - ${err.message}`
+      );
+    }
   }
 
   async setExistingIndicesToHidden() {
-    // Look up existing indices and update index.hidden to true if that
-    // setting is currently false or undefined
-    const indices = await this.esContext.esAdapter.getCurrentIndices(
-      this.esContext.esNames.indexPattern
-    );
-    Object.keys(indices).forEach(async (indexName: string) => {
-      // Check to see if this index template is hidden
-      if (
-        (indices[indexName]?.settings as IndicesIndexStatePrefixedSettings)?.index?.hidden !==
-        'true'
-      ) {
-        await this.esContext.esAdapter.setIndexToHidden(indexName);
-      }
-    });
+    try {
+      // look up existing indices and update index.hidden to true if that
+      // setting is currently false or undefined
+      const indices = await this.esContext.esAdapter.getExistingIndices(
+        this.esContext.esNames.indexPattern
+      );
+      Object.keys(indices).forEach(async (indexName: string) => {
+        // Check to see if this index template is hidden
+        if (
+          (indices[indexName]?.settings as IndicesIndexStatePrefixedSettings)?.index?.hidden !==
+          'true'
+        ) {
+          this.esContext.logger.info(`setting existing ${indexName} index to hidden.`);
+          await this.esContext.esAdapter.setIndexToHidden(indexName);
+        }
+      });
+    } catch (err) {
+      // errors when trying to update existing indices to hidden
+      // should not block the rest of initialization, log the error and move on
+      this.esContext.logger.error(`error setting existing indices to hidden - ${err.message}`);
+    }
   }
 
   async setExistingIndexAliasesToHidden() {
-    // Look up existing index aliases and update index.is_hidden to true if that
-    // setting is currently false or undefined
-    const indexAliases = await this.esContext.esAdapter.getCurrentIndexAliases(
-      this.esContext.esNames.indexPattern
-    );
-    Object.keys(indexAliases).forEach(async (indexName: string) => {
-      const aliases = indexAliases[indexName]?.aliases;
-      const hasNotHiddenAliases: boolean = Object.keys(aliases).some((alias: string) => {
-        return (aliases[alias] as IndicesAlias)?.is_hidden !== true;
-      });
+    try {
+      // Look up existing index aliases and update index.is_hidden to true if that
+      // setting is currently false or undefined
+      const indexAliases = await this.esContext.esAdapter.getExistingIndexAliases(
+        this.esContext.esNames.indexPattern
+      );
+      Object.keys(indexAliases).forEach(async (indexName: string) => {
+        const aliases = indexAliases[indexName]?.aliases;
+        const hasNotHiddenAliases: boolean = Object.keys(aliases).some((alias: string) => {
+          return (aliases[alias] as IndicesAlias)?.is_hidden !== true;
+        });
 
-      if (hasNotHiddenAliases) {
-        await this.esContext.esAdapter.setIndexAliasToHidden(indexName, indexAliases[indexName]);
-      }
-    });
+        if (hasNotHiddenAliases) {
+          this.esContext.logger.info(`setting existing ${indexName} index aliases to hidden.`);
+          await this.esContext.esAdapter.setIndexAliasToHidden(indexName, indexAliases[indexName]);
+        }
+      });
+    } catch (err) {
+      // errors when trying to update existing index aliases to is_hidden
+      // should not block the rest of initialization, log the error and move on
+      this.esContext.logger.error(
+        `error setting existing index aliases to is_hidden - ${err.message}`
+      );
+    }
   }
 
   async setExistingAssetsToHidden(): Promise<void> {
