@@ -73,7 +73,6 @@ export class OptionsListEmbeddable extends Embeddable<
   // internal state for this input control.
   private selectedOptions: Set<string>;
   private typeaheadSubject: Subject<string> = new Subject<string>();
-  private searchString: string = '';
 
   private componentState: OptionsListComponentState;
   private componentStateSubject$ = new Subject<OptionsListComponentState>();
@@ -99,7 +98,7 @@ export class OptionsListEmbeddable extends Embeddable<
 
     // fetch available options when input changes or when search string has changed
     const typeaheadPipe = this.typeaheadSubject.pipe(
-      tap((newSearchString) => (this.searchString = newSearchString)),
+      tap((newSearchString) => this.updateComponentState({ searchString: newSearchString })),
       debounceTime(100)
     );
     const inputPipe = this.getInput$().pipe(
@@ -136,7 +135,7 @@ export class OptionsListEmbeddable extends Embeddable<
 
     const { indexPattern, timeRange, filters, field, query } = this.getInput();
     let newOptions = await this.fetchData({
-      search: this.searchString,
+      search: this.componentState.searchString,
       indexPattern,
       timeRange,
       filters,

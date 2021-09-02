@@ -1,0 +1,103 @@
+.controlGroup {
+  transition: background-color 150ms ease;
+  background-color: none;
+}
+
+.controlFrame--cloneWrapper {
+  width: max-content;
+
+  .controlFrame--formControlLayout {
+    &-clone {
+      box-shadow: 0 0 0 1px $euiShadowColor,
+        0 1px 6px 0 $euiShadowColor;
+      cursor: grabbing !important;
+    }
+
+    .controlFrame--dragHandle {
+      cursor: grabbing;
+    }
+  }
+}
+
+.controlFrame--wrapper {
+  flex-basis: auto;
+  position: relative;
+  display: block;
+
+  &-small {
+    width: $euiSize * 14;
+  }
+
+  &-medium {
+    width: $euiSize * 25;
+  }
+
+  &-large {
+    width: $euiSize * 50;
+  }
+
+  .controlFrame--floatingActions {
+    visibility: hidden;
+    opacity: 0;
+
+    // slower transition on hover leave in case the user accidentally stops hover
+    transition: visibility .3s, opacity .3s;
+
+    z-index: 1;
+    position: absolute;
+
+    &-oneLine {
+      right:$euiSizeXS;
+      top: -$euiSizeL;
+      padding: $euiSizeXS;
+      border-radius: $euiBorderRadius;
+      background-color: $euiColorEmptyShade;
+      box-shadow: 0 0 0 1pt $euiColorLightShade;
+    }
+
+    &-twoLine {
+      right:$euiSizeXS;
+      top: -$euiSizeXS;
+    }
+  }
+
+  &:hover {
+    .controlFrame--floatingActions {
+      transition:visibility .1s, opacity .1s;
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+
+  .controlFrame--formControlLayout {
+    width: 100%;
+    min-width: $euiSize * 14;
+
+    &-over {
+      box-shadow: 0 0 0 1pt transparentize($euiColorSecondary, .5);
+    }
+
+    &-isDragging {
+      background-color: $euiColorEmptyShade !important;
+      color: $euiColorLightShade !important;
+    }
+
+    &:not(.controlFrame--formControlLayout-clone) {
+      .controlFrame--dragHandle {
+        cursor: grab;
+      }
+    }
+
+    .controlFrame--control {
+      height: 100%;
+
+      &-isDragging {
+        opacity: .3;
+      }
+
+      &.controlFrame--twoLine {
+        width: 100%;
+      }
+    }
+  }
+}

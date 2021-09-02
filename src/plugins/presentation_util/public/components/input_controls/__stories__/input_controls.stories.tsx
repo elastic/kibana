@@ -6,15 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
 import { decorators } from './decorators';
-import { getEuiSelectableOptions, flightFields, flightFieldLabels, FlightField } from './flights';
-import { OptionsListEmbeddableFactory, OptionsListEmbeddable } from '../control_types/options_list';
-import { ControlFrame } from '../control_frame/control_frame';
-import { ControlGroupEuiComponent } from '../control_group/control_group_eui_component';
+import { getEuiSelectableOptions, flightFields } from './flights';
+import { OptionsListEmbeddableFactory } from '../control_types/options_list';
+import { ControlGroup } from '../control_group/control_group_component';
 
 export default {
   title: 'Input Controls',
@@ -54,20 +51,11 @@ const OptionsListStoryComponent = ({ fields, twoLine }: OptionsListStorybookArgs
     []
   );
 
-  return (
-    <ControlGroupEuiComponent
-      fields={fields}
-      twoLine={twoLine}
-      optionsListEmbeddableFactory={optionsListEmbeddableFactory}
-    />
-  );
+  return <ControlGroup embeddableFactory={optionsListEmbeddableFactory} fields={fields} />;
 };
 
 export const OptionsListStory = ({ fields, twoLine }: OptionsListStorybookArgs) => (
-  <>
-    <OptionsListStoryComponent fields={fields} twoLine={twoLine} />
-    <EuiSpacer size="xxl" />
-  </>
+  <OptionsListStoryComponent fields={fields} twoLine={twoLine} />
 );
 
 OptionsListStory.args = storybookArgs;
