@@ -91,12 +91,12 @@ export const useHoverActionItems = ({
     kibana.services.data.query.filterManager,
   ]);
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { filterManager: activeFilterMananager } = useDeepEqualSelector((state) =>
+  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
     getManageTimeline(state, timelineId ?? '')
   );
   const filterManager = useMemo(
-    () => (timelineId === TimelineId.active ? activeFilterMananager : filterManagerBackup),
-    [timelineId, activeFilterMananager, filterManagerBackup]
+    () => (timelineId === TimelineId.active ? activeFilterManager : filterManagerBackup),
+    [timelineId, activeFilterManager, filterManagerBackup]
   );
 
   //  Regarding data from useManageTimeline:

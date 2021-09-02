@@ -193,7 +193,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   } = useSourcererScope(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
-  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
+  const filterManager = useMemo(() => new FilterManager(uiSettings), [uiSettings]);
   const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
     query: string;
