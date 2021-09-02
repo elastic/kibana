@@ -62,17 +62,11 @@ export const registerUpdateRuntimeFieldRoute = (
         throw new ErrorIndexPatternFieldNotFound(id, name);
       }
 
-      // We remove a possible format as the ES "format" (string) is different
-      // from our Kibana field format definition.
-      const { format, ...previousField } = existingRuntimeField;
-
-      const updatedRuntimeField: EnhancedRuntimeField = {
-        ...previousField,
-        ...runtimeField,
-      };
-
       indexPattern.removeRuntimeField(name);
-      indexPattern.addRuntimeField(name, updatedRuntimeField);
+      indexPattern.addRuntimeField(name, {
+        ...existingRuntimeField,
+        ...runtimeField,
+      });
 
       await indexPatternsService.updateSavedObject(indexPattern);
 
