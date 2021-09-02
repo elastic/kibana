@@ -18,6 +18,7 @@ import {
   commonMigrateVislibPie,
   commonAddEmptyValueColorRule,
   commonMigrateTagCloud,
+  commonAddDropLastBucketIntoTSVBModel,
 } from './visualization_common_migrations';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -945,6 +946,23 @@ const hideTSVBLastValueIndicator: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+const addDropLastBucketIntoTSVBModel: SavedObjectMigrationFn<any, any> = (doc) => {
+  try {
+    const visState = JSON.parse(doc.attributes.visState);
+    const newVisState = commonAddDropLastBucketIntoTSVBModel(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+  return doc;
+};
+
 const removeDefaultIndexPatternAndTimeFieldFromTSVBModel: SavedObjectMigrationFn<any, any> = (
   doc
 ) => {
@@ -1100,6 +1118,7 @@ export const visualizationSavedObjectTypeMigrations = {
     addEmptyValueColorRule,
     migrateVislibPie,
     migrateTagCloud,
-    replaceIndexPatternReference
+    replaceIndexPatternReference,
+    addDropLastBucketIntoTSVBModel
   ),
 };
