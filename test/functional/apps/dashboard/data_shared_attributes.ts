@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
+  const security = getService('security');
 
   describe('dashboard data-shared attributes', function describeIndexTests() {
     let originalPanelTitles: string[];
