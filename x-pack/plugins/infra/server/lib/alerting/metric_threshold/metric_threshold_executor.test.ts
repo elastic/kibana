@@ -515,7 +515,7 @@ services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: a
   }
   if (metric === 'test.metric.2') {
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
-      mocks.alternateMetricResponse(from)
+      mocks.alternateMetricResponse()
     );
   } else if (metric === 'test.metric.3') {
     return elasticsearchClientMock.createSuccessTransportRequestPromise(
@@ -524,9 +524,7 @@ services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: a
         : mocks.emptyMetricResponse
     );
   }
-  return elasticsearchClientMock.createSuccessTransportRequestPromise(
-    mocks.basicMetricResponse(from)
-  );
+  return elasticsearchClientMock.createSuccessTransportRequestPromise(mocks.basicMetricResponse());
 });
 services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
   if (sourceId === 'alternate')
