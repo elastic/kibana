@@ -36,7 +36,7 @@ export const getTooltipData = (
   if (header) {
     data.push({
       label: aspects.x.title,
-      // already formatted while execiting accessor on such a complex field as `*_range`
+      // already formatted while executing accessor on such a complex field type as `*_range`
       value:
         isSimpleField(aspects.x.format) && aspects.x.formatter
           ? aspects.x.formatter(header.value)
