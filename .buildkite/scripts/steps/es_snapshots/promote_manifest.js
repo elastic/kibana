@@ -1,8 +1,8 @@
 const fs = require('fs');
 const { execSync } = require('child_process');
 
-const BASE_BUCKET_DAILY = 'ci-artifacts.kibana.dev/es-snapshots-daily-buildkite';
-const BASE_BUCKET_PERMANENT = 'ci-artifacts.kibana.dev/es-snapshots-permanent-buildkite';
+const BASE_BUCKET_DAILY = 'kibana-ci-es-snapshots-daily/buildkite';
+const BASE_BUCKET_PERMANENT = 'kibana-ci-es-snapshots-permanent/buildkite';
 
 (async () => {
   try {

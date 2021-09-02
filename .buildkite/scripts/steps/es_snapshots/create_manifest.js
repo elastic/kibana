@@ -42,7 +42,7 @@ const { execSync } = require('child_process');
         return {
           filename: filename,
           checksum: filename + '.sha512',
-          url: `https://ci-artifacts.kibana.dev/es-snapshots-daily-buildkite/${DESTINATION}/${filename}`,
+          url: `https://storage.googleapis.com/kibana-ci-es-snapshots-daily/buildkite/${DESTINATION}/${filename}`,
           version: parts[1],
           platform: parts[3],
           architecture: parts[4].split('.')[0],
@@ -52,7 +52,7 @@ const { execSync } = require('child_process');
 
     const manifest = {
       id: SNAPSHOT_ID,
-      bucket: `ci-artifacts.kibana.dev/es-snapshots-daily-buildkite/${DESTINATION}`.toString(),
+      bucket: `kibana-ci-es-snapshots-daily/buildkite/${DESTINATION}`.toString(),
       branch: ES_BRANCH,
       sha: GIT_COMMIT,
       sha_short: GIT_COMMIT_SHORT,
@@ -72,11 +72,11 @@ const { execSync } = require('child_process');
 
       echo '--- Upload files to GCS'
       cd "${destination}"
-      gsutil -m cp -r *.* gs://ci-artifacts.kibana.dev/es-snapshots-daily-buildkite/${DESTINATION}
+      gsutil -m cp -r *.* gs://kibana-ci-es-snapshots-daily/buildkite/${DESTINATION}
       cp manifest.json manifest-latest.json
-      gsutil cp manifest-latest.json gs://ci-artifacts.kibana.dev/es-snapshots-daily-buildkite/${VERSION}
+      gsutil cp manifest-latest.json gs://kibana-ci-es-snapshots-daily/buildkite/${VERSION}
 
-      buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST 'https://ci-artifacts.kibana.dev/es-snapshots-daily-buildkite/${DESTINATION}/manifest.json'
+      buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily/buildkite/${DESTINATION}/manifest.json'
       buildkite-agent meta-data set ES_SNAPSHOT_VERSION '${VERSION}'
       buildkite-agent meta-data set ES_SNAPSHOT_ID '${SNAPSHOT_ID}'
     `,
