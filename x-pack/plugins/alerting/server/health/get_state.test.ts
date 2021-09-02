@@ -211,8 +211,8 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
       })
     ).toPromise();
 
-    expect(status.level).toEqual(ServiceStatusLevels.unavailable);
-    expect(status.summary).toEqual('Alerting framework is unavailable');
+    expect(status.level).toEqual(ServiceStatusLevels.degraded);
+    expect(status.summary).toEqual('Alerting framework is degraded');
     expect(status.meta).toBeUndefined();
   });
 
@@ -268,8 +268,8 @@ describe('getHealthServiceStatusWithRetryAndErrorHandling', () => {
       }),
       retryDelay
     ).subscribe((status) => {
-      expect(status.level).toEqual(ServiceStatusLevels.unavailable);
-      expect(status.summary).toEqual('Alerting framework is unavailable');
+      expect(status.level).toEqual(ServiceStatusLevels.degraded);
+      expect(status.summary).toEqual('Alerting framework is degraded');
       expect(status.meta).toEqual({ error: err });
     });
 

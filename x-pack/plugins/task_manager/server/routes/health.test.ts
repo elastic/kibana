@@ -20,7 +20,7 @@ import {
   RawMonitoringStats,
   summarizeMonitoringStats,
 } from '../monitoring';
-import { ServiceStatusLevels } from 'src/core/server';
+import { ServiceStatusLevels, Logger } from 'src/core/server';
 import { configSchema, TaskManagerConfig } from '../config';
 import { calculateHealthStatusMock } from '../lib/calculate_health_status.mock';
 
@@ -29,14 +29,14 @@ jest.mock('../lib/log_health_metrics', () => ({
 }));
 
 describe('healthRoute', () => {
+  const logger = loggingSystemMock.create().get();
+
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   it('registers the route', async () => {
     const router = httpServiceMock.createRouter();
-
-    const logger = loggingSystemMock.create().get();
     healthRoute(router, of(), logger, uuid.v4(), getTaskManagerConfig());
 
     const [config] = router.get.mock.calls[0];
@@ -46,7 +46,6 @@ describe('healthRoute', () => {
 
   it('logs the Task Manager stats at a fixed interval', async () => {
     const router = httpServiceMock.createRouter();
-    const logger = loggingSystemMock.create().get();
     const calculateHealthStatus = calculateHealthStatusMock.create();
     calculateHealthStatus.mockImplementation(() => HealthStatus.OK);
     const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
@@ -86,19 +85,22 @@ describe('healthRoute', () => {
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...ignoreCapacityEstimation(summarizeMonitoringStats(mockStat, getTaskManagerConfig({}))),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(logger, mockStat, getTaskManagerConfig({}))
+      ),
     });
     expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
       status: expect.any(String),
-      ...ignoreCapacityEstimation(summarizeMonitoringStats(nextMockStat, getTaskManagerConfig({}))),
+      ...ignoreCapacityEstimation(
+        summarizeMonitoringStats(logger, nextMockStat, getTaskManagerConfig({}))
+      ),
     });
   });
 
   it(`logs at a warn level if the status is warning`, async () => {
     const router = httpServiceMock.createRouter();
-    const logger = loggingSystemMock.create().get();
     const calculateHealthStatus = calculateHealthStatusMock.create();
     calculateHealthStatus.mockImplementation(() => HealthStatus.Warning);
     const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
@@ -137,7 +139,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(warnRuntimeStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, warnRuntimeStat, getTaskManagerConfig({}))
       ),
     });
     expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
@@ -145,7 +147,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(warnConfigurationStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, warnConfigurationStat, getTaskManagerConfig({}))
       ),
     });
     expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
@@ -153,14 +155,13 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(warnWorkloadStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, warnWorkloadStat, getTaskManagerConfig({}))
       ),
     });
   });
 
   it(`logs at an error level if the status is error`, async () => {
     const router = httpServiceMock.createRouter();
-    const logger = loggingSystemMock.create().get();
     const calculateHealthStatus = calculateHealthStatusMock.create();
     calculateHealthStatus.mockImplementation(() => HealthStatus.Error);
     const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
@@ -199,7 +200,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(errorRuntimeStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, errorRuntimeStat, getTaskManagerConfig({}))
       ),
     });
     expect(logHealthMetrics.mock.calls[1][0]).toMatchObject({
@@ -207,7 +208,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(errorConfigurationStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, errorConfigurationStat, getTaskManagerConfig({}))
       ),
     });
     expect(logHealthMetrics.mock.calls[2][0]).toMatchObject({
@@ -215,7 +216,7 @@ describe('healthRoute', () => {
       timestamp: expect.any(String),
       status: expect.any(String),
       ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(errorWorkloadStat, getTaskManagerConfig({}))
+        summarizeMonitoringStats(logger, errorWorkloadStat, getTaskManagerConfig({}))
       ),
     });
   });
@@ -228,7 +229,7 @@ describe('healthRoute', () => {
     const serviceStatus$ = healthRoute(
       router,
       stats$,
-      loggingSystemMock.create().get(),
+      logger,
       uuid.v4(),
       getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
@@ -246,7 +247,7 @@ describe('healthRoute', () => {
 
     stats$.next(
       mockHealthStats({
-        last_update: new Date(Date.now() - 1500).toISOString(),
+        last_update: new Date(Date.now() - 3001).toISOString(),
       })
     );
 
@@ -255,6 +256,7 @@ describe('healthRoute', () => {
         status: 'error',
         ...ignoreCapacityEstimation(
           summarizeMonitoringStats(
+            logger,
             mockHealthStats({
               last_update: expect.any(String),
               stats: {
@@ -281,9 +283,15 @@ describe('healthRoute', () => {
     });
 
     expect(await serviceStatus).toMatchObject({
-      level: ServiceStatusLevels.unavailable,
-      summary: 'Task Manager is unavailable',
+      level: ServiceStatusLevels.degraded,
+      summary: 'Task Manager is unhealthy',
     });
+    const debugCalls = (logger as jest.Mocked<Logger>).debug.mock.calls as string[][];
+    const warnMessage = /^setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana/;
+    const found = debugCalls
+      .map((arr) => arr[0])
+      .find((message) => message.match(warnMessage) != null);
+    expect(found).toMatch(warnMessage);
   });
 
   it('returns a error status if the workload stats have not been updated within the required cold freshness', async () => {
@@ -294,7 +302,7 @@ describe('healthRoute', () => {
     healthRoute(
       router,
       stats$,
-      loggingSystemMock.create().get(),
+      logger,
       uuid.v4(),
       getTaskManagerConfig({
         monitored_stats_required_freshness: 5000,
@@ -326,6 +334,7 @@ describe('healthRoute', () => {
         status: 'error',
         ...ignoreCapacityEstimation(
           summarizeMonitoringStats(
+            logger,
             mockHealthStats({
               last_update: expect.any(String),
               stats: {
@@ -359,7 +368,7 @@ describe('healthRoute', () => {
     healthRoute(
       router,
       stats$,
-      loggingSystemMock.create().get(),
+      logger,
       uuid.v4(),
       getTaskManagerConfig({
         monitored_stats_required_freshness: 1000,
@@ -370,7 +379,7 @@ describe('healthRoute', () => {
     await sleep(0);
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const last_successful_poll = new Date(Date.now() - 2000).toISOString();
+    const last_successful_poll = new Date(Date.now() - 3001).toISOString();
     stats$.next(
       mockHealthStats({
         stats: {
@@ -394,6 +403,7 @@ describe('healthRoute', () => {
         status: 'error',
         ...ignoreCapacityEstimation(
           summarizeMonitoringStats(
+            logger,
             mockHealthStats({
               last_update: expect.any(String),
               stats: {

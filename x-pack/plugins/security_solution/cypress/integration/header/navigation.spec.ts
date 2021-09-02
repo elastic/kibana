@@ -26,7 +26,6 @@ import {
   ALERTS_URL,
   CASES_URL,
   HOSTS_URL,
-  KIBANA_HOME,
   ENDPOINTS_URL,
   TRUSTED_APPS_URL,
   EVENT_FILTERS_URL,
@@ -113,7 +112,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
 
 describe('Kibana navigation to all pages in the Security app ', () => {
   before(() => {
-    loginAndWaitForPage(KIBANA_HOME);
+    loginAndWaitForPage(TIMELINES_URL);
   });
   beforeEach(() => {
     openKibanaNavigation();
