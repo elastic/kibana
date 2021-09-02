@@ -4,7 +4,7 @@
 <titleabbrev>Logging settings</titleabbrev>
 ++++
 
-{kib} relies on three high-level entities to set the logging service: _appenders_, _loggers_ and _root_.
+{kib} relies on three high-level entities to set the logging service: appenders, loggers, and root.
 
 __Appenders__ define where log messages are displayed (e.g. stdout or console) and stored (eg. file on the disk), and their layout.
 
