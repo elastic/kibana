@@ -20,6 +20,27 @@ export const commonAddSupportOfDualIndexSelectionModeInTSVB = (visState: any) =>
   return visState;
 };
 
+export const commonAddDropLastBucketIntoTSVBModel = (visState: any) => {
+  if (visState && visState.type === 'metrics') {
+    return {
+      ...visState,
+      params: {
+        ...visState.params,
+        series: visState.params?.series?.map((s: any) =>
+          s.override_index_pattern
+            ? {
+                ...s,
+                series_drop_last_bucket: s.series_drop_last_bucket ?? 1,
+              }
+            : s
+        ),
+        drop_last_bucket: visState.params.drop_last_bucket ?? 1,
+      },
+    };
+  }
+  return visState;
+};
+
 export const commonHideTSVBLastValueIndicator = (visState: any) => {
   if (visState && visState.type === 'metrics' && visState.params.type !== 'timeseries') {
     return {
