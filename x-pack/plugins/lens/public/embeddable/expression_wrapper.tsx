@@ -181,7 +181,7 @@ const SavedObjectConflictMessage = ({ json }: { json: string }) => {
           documentationLink: (
             <EuiLink
               external
-              href="https://www.elastic.co/guide/en/kibana/master/resolve_copy_saved_objects_conflicts.html"
+              href="https://www.elastic.co/guide/en/kibana/master/legacy-url-aliases.html"
               target="_blank"
             >
               {i18n.translate('xpack.lens.embeddable.legacyURLConflict.documentationLinkText', {

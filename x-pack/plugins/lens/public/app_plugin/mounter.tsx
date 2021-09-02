@@ -205,7 +205,9 @@ export async function mountApp(
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
 
-      lensStore.dispatch(loadInitial({ redirectCallback, initialInput, emptyState }));
+      lensStore.dispatch(
+        loadInitial({ redirectCallback, initialInput, emptyState, history: props.history })
+      );
 
       return (
         <Provider store={lensStore}>

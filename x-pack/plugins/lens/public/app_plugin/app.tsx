@@ -38,7 +38,7 @@ import {
   runSaveLensVisualization,
 } from './save_modal_container';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
-import { getFullPath } from '../../common';
+import { getEditPath } from '../../common';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -177,7 +177,9 @@ export function App({
       // callout with a warning for the user, and provide a way for them to navigate to the other object.
       const currentObjectId = persistedDoc.savedObjectId;
       const otherObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'conflict'
-      const otherObjectPath = http.basePath.prepend(getFullPath(otherObjectId));
+      const otherObjectPath = http.basePath.prepend(
+        `${getEditPath(otherObjectId)}${history.location.search}`
+      );
       return spaces.ui.components.getLegacyUrlConflict({
         objectNoun: i18n.translate('xpack.lens.appName', {
           defaultMessage: 'Lens visualization',
@@ -188,7 +190,7 @@ export function App({
       });
     }
     return null;
-  }, [persistedDoc, sharingSavedObjectProps, spaces, http]);
+  }, [persistedDoc, sharingSavedObjectProps, spaces, http, history]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
