@@ -28,8 +28,9 @@ import { findNewUuid } from '../../components/renderers/lib/find_new_uuid';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { GlobalStateContext } from '../../application/global_state_context';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 
-export class SetupModeRenderer extends React.Component {
+class WrappedSetupModeRenderer extends React.Component {
   globalState;
   state = {
     renderState: false,
@@ -41,8 +42,10 @@ export class SetupModeRenderer extends React.Component {
 
   UNSAFE_componentWillMount() {
     this.globalState = this.context;
-    initSetupModeState(this.globalState, (_oldData) => {
+    const { kibana } = this.props;
+    initSetupModeState(this.globalState, kibana.services.http, (_oldData) => {
       const newState = { renderState: true };
+
       const { productName } = this.props;
       if (!productName) {
         this.setState(newState);
@@ -210,4 +213,5 @@ export class SetupModeRenderer extends React.Component {
   }
 }
 
-SetupModeRenderer.contextType = GlobalStateContext;
+WrappedSetupModeRenderer.contextType = GlobalStateContext;
+export const SetupModeRenderer = withKibana(WrappedSetupModeRenderer);

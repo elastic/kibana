@@ -63,7 +63,7 @@ export const ClusterOverview: React.FC<{}> = () => {
               <Overview
                 cluster={clusters[0]}
                 alerts={[]}
-                setupMode={{}}
+                setupMode={setupMode}
                 showLicenseExpiration={externalConfig.showLicenseExpiration}
               />
               {/* <EnableAlertsModal alerts={this.alerts} /> */}

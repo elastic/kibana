@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { includes } from 'lodash';
+import { get, includes } from 'lodash';
 // import { i18n } from '@kbn/i18n';
+import { HttpStart } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Legacy } from '../../legacy_shims';
 // import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../../components/setup_mode/enter_button';
-// import { SetupModeFeature } from '../../../common/enums';
+import { SetupModeFeature } from '../../../common/enums';
 import { ISetupModeContext } from '../../components/setup_mode/setup_mode_context';
 import { State as GlobalState } from '../../application/global_state_context';
 
@@ -22,6 +23,7 @@ function isOnPage(hash: string) {
 }
 
 let globalState: GlobalState;
+let httpService: HttpStart;
 
 interface ISetupModeState {
   enabled: boolean;
@@ -38,78 +40,75 @@ const setupModeState: ISetupModeState = {
 
 export const getSetupModeState = () => setupModeState;
 
-// export const setNewlyDiscoveredClusterUuid = (clusterUuid: string) => {
-//   const globalState = angularState.injector.get('globalState');
-//   const executor = angularState.injector.get('$executor');
-//   angularState.scope.$apply(() => {
-//     globalState.cluster_uuid = clusterUuid;
-//     globalState.save();
-//   });
-//   executor.run();
-// };
+export const setNewlyDiscoveredClusterUuid = (clusterUuid: string) => {
+  globalState.cluster_uuid = clusterUuid;
+  globalState.save?.();
+};
 
-// export const fetchCollectionData = async (uuid?: string, fetchWithoutClusterUuid = false) => {
-//   const http = angularState.injector.get('$http');
-//   const globalState = angularState.injector.get('globalState');
-//   const clusterUuid = globalState.cluster_uuid;
-//   const ccs = globalState.ccs;
+export const fetchCollectionData = async (uuid?: string, fetchWithoutClusterUuid = false) => {
+  const clusterUuid = globalState.cluster_uuid;
+  const ccs = globalState.ccs;
 
-//   let url = '../api/monitoring/v1/setup/collection';
-//   if (uuid) {
-//     url += `/node/${uuid}`;
-//   } else if (!fetchWithoutClusterUuid && clusterUuid) {
-//     url += `/cluster/${clusterUuid}`;
-//   } else {
-//     url += '/cluster';
-//   }
+  let url = '../api/monitoring/v1/setup/collection';
+  if (uuid) {
+    url += `/node/${uuid}`;
+  } else if (!fetchWithoutClusterUuid && clusterUuid) {
+    url += `/cluster/${clusterUuid}`;
+  } else {
+    url += '/cluster';
+  }
 
-//   try {
-//     const response = await http.post(url, { ccs });
-//     return response.data;
-//   } catch (err) {
-//     // TODO: handle errors
-//     throw new Error(err);
-//   }
-// };
+  try {
+    const response = await httpService.post(url, {
+      body: JSON.stringify({
+        ccs,
+      }),
+    });
+    return response;
+  } catch (err) {
+    // TODO: handle errors
+    throw new Error(err);
+  }
+};
 
 const notifySetupModeDataChange = () => setupModeState.callback && setupModeState.callback();
 
-// export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid = false) => {
-//   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
-//   setupModeState.data = data;
-//   const hasPermissions = get(data, '_meta.hasPermissions', false);
-//   if (!hasPermissions) {
-//     let text: string = '';
-//     if (!hasPermissions) {
-//       text = i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
-//         defaultMessage: 'You do not have the necessary permissions to do this.',
-//       });
-//     }
+export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid = false) => {
+  const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
+  setupModeState.data = data;
+  const hasPermissions = get(data, '_meta.hasPermissions', false);
+  if (!hasPermissions) {
+    // TODO: show notification
+    // let text: string = '';
+    // if (!hasPermissions) {
+    //   text = i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
+    //     defaultMessage: 'You do not have the necessary permissions to do this.',
+    //   });
+    // }
 
-//     angularState.scope.$evalAsync(() => {
-//       Legacy.shims.toastNotifications.addDanger({
-//         title: i18n.translate('xpack.monitoring.setupMode.notAvailableTitle', {
-//           defaultMessage: 'Setup mode is not available',
-//         }),
-//         text,
-//       });
-//     });
-//     return toggleSetupMode(false);
-//   }
-//   notifySetupModeDataChange();
+    // angularState.scope.$evalAsync(() => {
+    //   Legacy.shims.toastNotifications.addDanger({
+    //     title: i18n.translate('xpack.monitoring.setupMode.notAvailableTitle', {
+    //       defaultMessage: 'Setup mode is not available',
+    //     }),
+    //     text,
+    //   });
+    // });
+    return toggleSetupMode(false);
+  }
+  notifySetupModeDataChange();
 
-//   const globalState = angularState.injector.get('globalState');
-//   const clusterUuid = globalState.cluster_uuid;
-//   if (!clusterUuid) {
-//     const liveClusterUuid: string = get(data, '_meta.liveClusterUuid');
-//     const migratedEsNodes = Object.values(get(data, 'elasticsearch.byUuid', {})).filter(
-//       (node: any) => node.isPartiallyMigrated || node.isFullyMigrated
-//     );
-//     if (liveClusterUuid && migratedEsNodes.length > 0) {
-//       setNewlyDiscoveredClusterUuid(liveClusterUuid);
-//     }
-//   }
-// };
+  const clusterUuid = globalState.cluster_uuid;
+  if (!clusterUuid) {
+    const liveClusterUuid: string = get(data, '_meta.liveClusterUuid');
+    const migratedEsNodes = Object.values(get(data, 'elasticsearch.byUuid', {})).filter(
+      (node: any) => node.isPartiallyMigrated || node.isFullyMigrated
+    );
+    if (liveClusterUuid && migratedEsNodes.length > 0) {
+      setNewlyDiscoveredClusterUuid(liveClusterUuid);
+    }
+  }
+};
 
 // export const hideBottomBar = () => {
 //   setupModeState.hideBottomBar = true;
@@ -142,9 +141,8 @@ export const toggleSetupMode = (inSetupMode: boolean) => {
   notifySetupModeDataChange();
 
   if (inSetupMode) {
-    // console.log('updating the setup mode');
     // Intentionally do not await this so we don't block UI operations
-    // updateSetupModeData();
+    updateSetupModeData();
   }
 };
 
@@ -169,8 +167,13 @@ export const setSetupModeMenuItem = () => {
 // is this used ?!?!?!
 export const addSetupModeCallback = (callback: () => void) => (setupModeState.callback = callback);
 
-export const initSetupModeState = async (state: GlobalState, callback?: () => void) => {
+export const initSetupModeState = async (
+  state: GlobalState,
+  http: HttpStart,
+  callback?: () => void
+) => {
   globalState = state;
+  httpService = http;
   if (callback) {
     setupModeState.callback = callback;
   }
@@ -191,14 +194,16 @@ export const isInSetupMode = (context?: ISetupModeContext) => {
   return globalState.inSetupMode;
 };
 
-// export const isSetupModeFeatureEnabled = (feature: SetupModeFeature) => {
-//   if (!setupModeState.enabled) {
-//     return false;
-//   }
-//   if (feature === SetupModeFeature.MetricbeatMigration) {
-//     if (Legacy.shims.isCloud) {
-//       return false;
-//     }
-//   }
-//   return true;
-// };
+export const isSetupModeFeatureEnabled = (feature: SetupModeFeature) => {
+  if (!setupModeState.enabled) {
+    return false;
+  }
+
+  if (feature === SetupModeFeature.MetricbeatMigration) {
+    if (Legacy.shims.isCloud) {
+      return false;
+    }
+  }
+
+  return true;
+};
