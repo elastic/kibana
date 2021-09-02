@@ -30,7 +30,6 @@ import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
-import { DEFAULT_INDEX_PATTERN_ID } from '../../../../common/constants';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -162,7 +161,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     () =>
       kibanaIndexPatterns.map(({ title, id }) => ({
         inputDisplay:
-          id === DEFAULT_INDEX_PATTERN_ID ? (
+          id === defaultIndexPattern.id ? (
             <span data-test-subj="kip-option-super">
               <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_KIP_LABEL}
             </span>
@@ -173,19 +172,19 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           ),
         value: id,
       })),
-    [kibanaIndexPatterns]
+    [defaultIndexPattern.id, kibanaIndexPatterns]
   );
 
   const comboBox = useMemo(
     () => (
       <EuiComboBox
         data-test-subj="indexPattern-switcher"
-        placeholder={i18n.PICK_INDEX_PATTERNS}
         fullWidth
-        options={selectableOptions}
-        selectedOptions={selectedOptions}
         onChange={onChangeCombo}
+        options={selectableOptions}
+        placeholder={i18n.PICK_INDEX_PATTERNS}
         renderOption={renderOption}
+        selectedOptions={selectedOptions}
       />
     ),
     [selectableOptions, onChangeCombo, renderOption, selectedOptions]

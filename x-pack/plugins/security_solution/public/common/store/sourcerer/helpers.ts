@@ -17,8 +17,6 @@ export interface Args {
   state: SourcererModel;
 }
 
-export const getPatternList = (kip: KibanaIndexPattern): string[] => kip.title.split(',');
-
 export const getScopePatternListSelection = (
   theKip: KibanaIndexPattern | undefined,
   sourcererScope: SourcererScopeName,
@@ -29,12 +27,12 @@ export const getScopePatternListSelection = (
   // when our SIEM KIP is set, here are the defaults
   if (theKip && theKip.id === DEFAULT_INDEX_PATTERN_ID) {
     if (sourcererScope === SourcererScopeName.default) {
-      patternList = patternList.filter((index) => index !== signalIndexName);
+      patternList = patternList.filter((index) => index !== signalIndexName).sort();
     } else if (sourcererScope === SourcererScopeName.detections) {
       patternList = patternList.filter((index) => index === signalIndexName);
     }
   }
-  return patternList;
+  return patternList.sort();
 };
 
 export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, state }: Args) => {

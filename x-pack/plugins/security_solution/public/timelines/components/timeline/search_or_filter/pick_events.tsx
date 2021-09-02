@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
@@ -32,7 +33,8 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineEventsType } from '../../../../../common';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import * as i18n from './translations';
-import { getPatternList } from '../../../../common/store/sourcerer/helpers';
+import { getScopePatternListSelection } from '../../../../common/store/sourcerer/helpers';
+import { SIEM_KIP_LABEL } from '../../../../common/components/sourcerer/translations';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -90,7 +92,7 @@ const PickEventContainer = styled.div`
   }
 `;
 
-const getEventTypeOptions = (isCustomDisabled: boolean = true) => [
+const getEventTypeOptions = (isCustomDisabled: boolean = true, isDefaultPattern: boolean) => [
   {
     id: 'all',
     label: (
@@ -102,10 +104,12 @@ const getEventTypeOptions = (isCustomDisabled: boolean = true) => [
   {
     id: 'raw',
     label: <EuiHealth color="subdued"> {i18n.RAW_EVENT}</EuiHealth>,
+    disabled: !isDefaultPattern,
   },
   {
     id: 'alert',
     label: <EuiHealth color="warning"> {i18n.DETECTION_ALERTS_EVENT}</EuiHealth>,
+    disabled: !isDefaultPattern,
   },
   {
     id: 'custom',
@@ -116,9 +120,14 @@ const getEventTypeOptions = (isCustomDisabled: boolean = true) => [
 
 interface PickEventTypeProps {
   eventType: TimelineEventsType;
-  onChangeEventTypeAndIndexesName: (value: TimelineEventsType, indexNames: string[]) => void;
+  onChangeEventTypeAndIndexesName: (
+    value: TimelineEventsType,
+    indexNames: string[],
+    kipId: string
+  ) => void;
 }
 
+// AKA TimelineSourcerer
 const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   eventType = 'all',
   onChangeEventTypeAndIndexesName,
@@ -127,56 +136,55 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const [showAdvanceSettings, setAdvanceSettings] = useState(eventType === 'custom');
   const [filterEventType, setFilterEventType] = useState<TimelineEventsType>(eventType);
   const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
-  const { defaultIndexPattern, kibanaIndexPatterns, signalIndexName, sourcererScope } = useSelector<
-    State,
-    SourcererScopeSelector
-  >((state) => sourcererScopeSelector(state, SourcererScopeName.timeline), deepEqual);
+  const {
+    defaultIndexPattern,
+    kibanaIndexPatterns,
+    signalIndexName,
+    sourcererScope: { loading, selectedPatterns, selectedKipId },
+  } = useSelector<State, SourcererScopeSelector>(
+    (state) => sourcererScopeSelector(state, SourcererScopeName.timeline),
+    deepEqual
+  );
+
+  const [kipId, setKipId] = useState<string>(selectedKipId ?? '');
+  const { patternList, selectablePatterns } = useMemo(() => {
+    const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
+    return theKip != null
+      ? { patternList: theKip.title.split(','), selectablePatterns: theKip.patternList }
+      : { patternList: [], selectablePatterns: [] };
+  }, [kibanaIndexPatterns, kipId]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    sourcererScope.selectedPatterns.map((indexSelected) => ({
-      label: indexSelected,
-      value: indexSelected,
+    selectedPatterns.map((indexName) => ({
+      label: indexName,
+      value: indexName,
     }))
   );
-
-  const indexesPatternOptions = useMemo(
-    () =>
-      [...kibanaIndexPatterns.map((kip) => kip.title), signalIndexName].reduce<
-        Array<EuiComboBoxOptionOption<string>>
-      >((acc, index) => {
-        if (index != null && !acc.some((o) => o.label.includes(index))) {
-          return [...acc, { label: index, value: index }];
-        }
-        return acc;
-      }, []),
-    [kibanaIndexPatterns, signalIndexName]
-  );
-
-  const renderOption = useCallback(
-    (option) => {
-      const { value } = option;
-      if (kibanaIndexPatterns.some((kip) => kip.title === value)) {
-        return (
-          <>
-            <EuiIcon type="logoKibana" size="s" /> {value}
-          </>
-        );
-      }
-      return <>{value}</>;
-    },
-    [kibanaIndexPatterns]
-  );
+  const selectableOptions = useMemo(() => {
+    return patternList.map((indexName) => ({
+      label: indexName,
+      value: indexName,
+      disabled: !selectablePatterns.includes(indexName),
+    }));
+  }, [selectablePatterns, patternList]);
 
   const onChangeCombo = useCallback(
     (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       const localSelectedPatterns = newSelectedOptions.map((nso) => nso.label);
-      const defaultPatterns = getPatternList(defaultIndexPattern);
-      if (
-        localSelectedPatterns.sort().join() === [...defaultPatterns, signalIndexName].sort().join()
-      ) {
+      if (localSelectedPatterns.sort().join() === selectablePatterns.sort().join()) {
         setFilterEventType('all');
-      } else if (localSelectedPatterns.sort().join() === defaultPatterns.sort().join()) {
+      } else if (
+        kipId === defaultIndexPattern.id &&
+        localSelectedPatterns.sort().join() ===
+          selectablePatterns
+            .filter((index) => index !== signalIndexName)
+            .sort()
+            .join()
+      ) {
         setFilterEventType('raw');
-      } else if (localSelectedPatterns.sort().join() === signalIndexName) {
+      } else if (
+        kipId === defaultIndexPattern.id &&
+        localSelectedPatterns.sort().join() === signalIndexName
+      ) {
         setFilterEventType('alert');
       } else {
         setFilterEventType('custom');
@@ -184,26 +192,27 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
       setSelectedOptions(newSelectedOptions);
     },
-    [defaultIndexPattern, signalIndexName]
+    [defaultIndexPattern.id, kipId, selectablePatterns, signalIndexName]
   );
 
   const onChangeFilter = useCallback(
     (filter) => {
       setFilterEventType(filter);
-      const defaultPatterns = getPatternList(defaultIndexPattern);
-      if (filter === 'all') {
+      if (filter === 'all' || filter === 'kibana') {
         setSelectedOptions(
-          [...defaultPatterns, signalIndexName ?? ''].map((indexSelected) => ({
+          selectablePatterns.map((indexSelected) => ({
             label: indexSelected,
             value: indexSelected,
           }))
         );
       } else if (filter === 'raw') {
         setSelectedOptions(
-          defaultPatterns.map((indexSelected) => ({
-            label: indexSelected,
-            value: indexSelected,
-          }))
+          selectablePatterns
+            .filter((index) => index !== signalIndexName)
+            .map((indexSelected) => ({
+              label: indexSelected,
+              value: indexSelected,
+            }))
         );
       } else if (filter === 'alert') {
         setSelectedOptions([
@@ -212,16 +221,9 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             value: signalIndexName ?? '',
           },
         ]);
-      } else if (filter === 'kibana') {
-        setSelectedOptions(
-          kibanaIndexPatterns.map((kip) => ({
-            label: kip.title,
-            value: kip.title,
-          }))
-        );
       }
     },
-    [defaultIndexPattern, kibanaIndexPatterns, signalIndexName]
+    [selectablePatterns, signalIndexName]
   );
 
   const togglePopover = useCallback(
@@ -234,39 +236,92 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const handleSaveIndices = useCallback(() => {
     onChangeEventTypeAndIndexesName(
       filterEventType,
-      selectedOptions.map((so) => so.label)
+      selectedOptions.map((so) => so.label),
+      kipId
     );
     setPopover(false);
-  }, [filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
+  }, [kipId, filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
 
   const resetDataSources = useCallback(() => {
+    setKipId(defaultIndexPattern.id);
     setSelectedOptions(
-      sourcererScope.selectedPatterns.map((indexSelected) => ({
+      getScopePatternListSelection(
+        defaultIndexPattern,
+        SourcererScopeName.timeline,
+        signalIndexName
+      ).map((indexSelected: string) => ({
         label: indexSelected,
         value: indexSelected,
       }))
     );
     setFilterEventType(eventType);
-  }, [eventType, sourcererScope.selectedPatterns]);
+  }, [defaultIndexPattern, eventType, signalIndexName]);
+  const onChangeSuper = useCallback(
+    (newSelectedOption) => {
+      setFilterEventType('all');
+      setKipId(newSelectedOption);
+      setSelectedOptions(
+        getScopePatternListSelection(
+          kibanaIndexPatterns.find((kip) => kip.id === newSelectedOption),
+          SourcererScopeName.timeline,
+          signalIndexName
+        ).map((indexSelected: string) => ({
+          label: indexSelected,
+          value: indexSelected,
+        }))
+      );
+    },
+    [kibanaIndexPatterns, signalIndexName]
+  );
 
+  const kipSelectOptions = useMemo(
+    () =>
+      kibanaIndexPatterns.map(({ title, id }) => ({
+        inputDisplay:
+          id === defaultIndexPattern.id ? (
+            <span data-test-subj="kip-option-super">
+              <EuiIcon type="logoSecurity" size="s" /> {SIEM_KIP_LABEL}
+            </span>
+          ) : (
+            <span data-test-subj="kip-option-super">
+              <EuiIcon type="logoKibana" size="s" /> {title}
+            </span>
+          ),
+        value: id,
+      })),
+    [defaultIndexPattern.id, kibanaIndexPatterns]
+  );
+  const superSelect = useMemo(
+    () => (
+      <EuiSuperSelect
+        data-test-subj="indexPattern-switcher"
+        placeholder={i18n.PICK_INDEX_PATTERNS}
+        fullWidth
+        options={kipSelectOptions}
+        valueOfSelected={kipId}
+        onChange={onChangeSuper}
+      />
+    ),
+    [kipSelectOptions, onChangeSuper, kipId]
+  );
   const comboBox = useMemo(
     () => (
       <EuiComboBox
         data-test-subj="timeline-sourcerer"
         fullWidth
         onChange={onChangeCombo}
-        options={indexesPatternOptions}
+        options={selectableOptions}
         placeholder={i18n.PICK_INDEX_PATTERNS}
-        renderOption={renderOption}
         selectedOptions={selectedOptions}
       />
     ),
-    [onChangeCombo, indexesPatternOptions, renderOption, selectedOptions]
+    [onChangeCombo, selectableOptions, selectedOptions]
   );
 
-  const filterOptions = useMemo(() => getEventTypeOptions(filterEventType !== 'custom'), [
-    filterEventType,
-  ]);
+  const filterOptions = useMemo(
+    () => getEventTypeOptions(filterEventType !== 'custom', kipId === defaultIndexPattern.id),
+    [defaultIndexPattern.id, filterEventType, kipId]
+  );
 
   const filter = useMemo(
     () => (
@@ -282,23 +337,23 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   );
 
   const button = useMemo(() => {
-    const options = getEventTypeOptions();
+    const options = getEventTypeOptions(true, kipId === defaultIndexPattern.id);
     return (
       <MyEuiButton
         data-test-subj="sourcerer-timeline-trigger"
         iconType="arrowDown"
         iconSide="right"
-        isLoading={sourcererScope.loading}
+        isLoading={loading}
         onClick={togglePopover}
       >
         {options.find((opt) => opt.id === eventType)?.label}
       </MyEuiButton>
     );
-  }, [eventType, sourcererScope.loading, togglePopover]);
+  }, [defaultIndexPattern.id, eventType, kipId, loading, togglePopover]);
 
   const tooltipContent = useMemo(
-    () => (isPopoverOpen ? null : sourcererScope.selectedPatterns.sort().join(', ')),
-    [isPopoverOpen, sourcererScope.selectedPatterns]
+    () => (isPopoverOpen ? null : selectedPatterns.sort().join(', ')),
+    [isPopoverOpen, selectedPatterns]
   );
 
   const ButtonContent = useMemo(
@@ -313,7 +368,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   );
 
   useEffect(() => {
-    const newSelectedOptions = sourcererScope.selectedPatterns.map((indexSelected) => ({
+    const newSelectedOptions = selectedPatterns.map((indexSelected) => ({
       label: indexSelected,
       value: indexSelected,
     }));
@@ -323,7 +378,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       }
       return prevSelectedOptions;
     });
-  }, [sourcererScope.selectedPatterns]);
+  }, [selectedPatterns]);
 
   useEffect(() => {
     setFilterEventType((prevFilter) => (prevFilter !== eventType ? eventType : prevFilter));
@@ -356,6 +411,8 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             >
               <>
                 <EuiSpacer size="s" />
+                {superSelect}
+                <EuiSpacer size="xs" />
                 {comboBox}
               </>
             </EuiAccordion>

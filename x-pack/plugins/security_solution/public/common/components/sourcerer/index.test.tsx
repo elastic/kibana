@@ -18,7 +18,6 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore, State } from '../../store';
-import { getPatternList } from '../../store/sourcerer/helpers';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -38,7 +37,7 @@ describe('Sourcerer component', () => {
     jest.restoreAllMocks();
   });
   const state: State = mockGlobalState;
-  const defaultAsList = getPatternList(state.sourcerer.defaultIndexPattern);
+  const { patternList } = state.sourcerer.defaultIndexPattern;
   const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => {
     return {
       availableOptionCount: wrapper.find(`[data-test-subj="kip-option"]`).length,
@@ -95,7 +94,7 @@ describe('Sourcerer component', () => {
           [SourcererScopeName.default]: {
             ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
             loading: false,
-            selectedPatterns: [...defaultAsList, 'auditbeat-*'],
+            selectedPatterns: [...patternList, 'auditbeat-*'],
           },
         },
       },
@@ -195,7 +194,7 @@ describe('Sourcerer component', () => {
     );
     wrapper
       .find(
-        `[data-test-subj="indexPattern-switcher"] [title="${defaultAsList}"] button.euiBadge__iconButton`
+        `[data-test-subj="indexPattern-switcher"] [title="${patternList}"] button.euiBadge__iconButton`
       )
       .first()
       .simulate('click');

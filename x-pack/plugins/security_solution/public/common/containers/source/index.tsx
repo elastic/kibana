@@ -147,6 +147,7 @@ export const useFetchIndex = (
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
+        // TODO: Steph/sourcerer this stinks i think bug here
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { indices: iNames, onlyCheckIfIndicesExist },
@@ -304,5 +305,6 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [indexFieldsSearch, kipId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kipId]);
 };

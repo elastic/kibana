@@ -17,7 +17,7 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ALERTS_PATH, RULES_PATH, UEBA_PATH } from '../../../../common/constants';
 import { TimelineId } from '../../../../common';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { getPatternList, getScopePatternListSelection } from '../../store/sourcerer/helpers';
+import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export const useInitSourcerer = (
@@ -50,9 +50,7 @@ export const useInitSourcerer = (
       });
     }
   }, [addError, defaultIndexPattern]);
-  const defaultIndexPatternSelection = useMemo(() => getPatternList(defaultIndexPattern), [
-    defaultIndexPattern,
-  ]);
+
   const getSignalIndexNameSelector = useMemo(
     () => sourcererSelectors.signalIndexNameSelector(),
     []
@@ -115,7 +113,6 @@ export const useInitSourcerer = (
   }, [
     activeTimeline,
     defaultIndexPattern,
-    defaultIndexPatternSelection,
     dispatch,
     loadingSignalIndex,
     signalIndexName,

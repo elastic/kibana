@@ -15,7 +15,6 @@ import {
   SourcererScopeById,
   SourcererScopeName,
 } from './model';
-import { getPatternList, getScopePatternListSelection } from './helpers';
 
 export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): KibanaIndexPatterns =>
   sourcerer.kibanaIndexPatterns;
@@ -47,24 +46,6 @@ export const signalIndexNameSelector = () =>
 export const defaultIndexPatternSelector = () =>
   createSelector(sourcererDefaultIndexPatternSelector, (patterns) => patterns);
 
-export const getIndexNamesSelectedSelector = () => {
-  const getScopeSelector = scopeIdSelector();
-  const getDefaultIndexPatternSelector = defaultIndexPatternSelector();
-  return (
-    state: State,
-    scopeId: SourcererScopeName
-  ): { indexNames: string[]; previousIndexNames: string } => {
-    const scope = getScopeSelector(state, scopeId);
-    const defaultIndexPattern = getDefaultIndexPatternSelector(state);
-    return {
-      indexNames:
-        scope.selectedPatterns.length === 0
-          ? getPatternList(defaultIndexPattern)
-          : scope.selectedPatterns,
-      previousIndexNames: scope.indexPattern.title,
-    };
-  };
-};
 export interface SelectedKip {
   kipId: string;
   patternList: string[];
@@ -82,29 +63,27 @@ export const getSelectedKipSelector = () => {
     const kipId = scope.selectedKipId === null ? defaultIndexPattern.id : scope.selectedKipId;
     const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
 
-    const patternList = theKip != null ? theKip.patternList : [];
+    const patternList = theKip != null ? theKip.title.split(',') : [];
     const selectedPatterns =
       scope.selectedPatterns.length === 0 && theKip != null
-        ? getScopePatternListSelection(kibanaIndexPatterns, kipId, scopeId)
+        ? theKip.patternList
         : scope.selectedPatterns;
     return {
       kipId,
+      // all patterns in KIP
       patternList,
+      // selected patterns in KIP
       selectedPatterns,
     };
   };
 };
 
 export const getAllExistingIndexNamesSelector = () => {
-  const getSignalIndexNameSelector = signalIndexNameSelector();
   const getDefaultIndexPatternSelector = defaultIndexPatternSelector();
 
   return (state: State): string[] => {
-    const signalIndexName = getSignalIndexNameSelector(state);
-    const defaultIndexPattern = getPatternList(getDefaultIndexPatternSelector(state));
-    return signalIndexName != null
-      ? [...defaultIndexPattern, signalIndexName]
-      : defaultIndexPattern;
+    const defaultIndexPattern = getDefaultIndexPatternSelector(state);
+    return defaultIndexPattern.patternList;
   };
 };
 
