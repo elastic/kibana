@@ -40,4 +40,21 @@ export class UpgradeAssistantPageObject extends FtrService {
       await this.testSubjects.click('kibanaStatsPanel');
     });
   }
+
+  async clickKibanaDeprecation(selectedIssue: string) {
+    const table = await this.testSubjects.find('kibanaDeprecationsTable');
+    const rows = await table.findAllByTestSubject('row');
+
+    const selectedRow = rows.find(async (row) => {
+      const issue = await (await row.findByTestSubject('issueCell')).getVisibleText();
+      return issue === selectedIssue;
+    });
+
+    if (selectedRow) {
+      const issueLink = await selectedRow.findByTestSubject('deprecationDetailsLink');
+      await issueLink.click();
+    } else {
+      this.log.debug('Unable to find selected deprecation row');
+    }
+  }
 }

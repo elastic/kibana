@@ -75,22 +75,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Kibana deprecations page', async () => {
-      await PageObjects.common.navigateToUrl(
-        'management',
-        'stack/upgrade_assistant/kibana_deprecations',
-        {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-          shouldUseHashForSubUrl: false,
-        }
-      );
+    describe('Kibana deprecations page', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToUrl(
+          'management',
+          'stack/upgrade_assistant/kibana_deprecations',
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+            shouldUseHashForSubUrl: false,
+          }
+        );
 
-      await retry.waitFor('Kibana deprecations to be visible', async () => {
-        return testSubjects.exists('kibanaDeprecationsContent');
+        await retry.waitFor('Kibana deprecations to be visible', async () => {
+          return testSubjects.exists('kibanaDeprecations');
+        });
       });
 
-      await a11y.testAppSnapshot();
+      it('Deprecations table', async () => {
+        await a11y.testAppSnapshot();
+      });
+
+      it('Deprecation details flyout', async () => {
+        await PageObjects.upgradeAssistant.clickKibanaDeprecation(
+          'xpack.securitySolution has a deprecated setting' // This deprecation was added to the test runner config so should be guaranteed
+        );
+
+        await retry.waitFor('Kibana deprecation details flyout to be visible', async () => {
+          return testSubjects.exists('kibanaDeprecationDetails');
+        });
+
+        await a11y.testAppSnapshot();
+      });
     });
   });
 }

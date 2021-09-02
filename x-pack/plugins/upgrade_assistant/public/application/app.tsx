@@ -8,16 +8,12 @@
 import React from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { ScopedHistory } from 'src/core/public';
-import { GlobalFlyout } from '../shared_imports';
 
-import { APP_WRAPPER_CLASS } from '../shared_imports';
-import { AppContextProvider, useAppContext } from './app_context';
-import { ComingSoonPrompt } from './components/coming_soon_prompt';
-import { EsDeprecations } from './components/es_deprecations';
-import { KibanaDeprecationsContent } from './components/kibana_deprecations';
-import { Overview } from './components/overview';
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
+import { APP_WRAPPER_CLASS, GlobalFlyout } from '../shared_imports';
 import { AppDependencies } from '../types';
+import { AppContextProvider, useAppContext } from './app_context';
+import { EsDeprecations, ComingSoonPrompt, KibanaDeprecations, Overview } from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
@@ -33,7 +29,7 @@ const App: React.FunctionComponent = () => {
     <Switch>
       <Route exact path="/overview" component={Overview} />
       <Route exact path="/es_deprecations" component={EsDeprecations} />
-      <Route exact path="/kibana_deprecations" component={KibanaDeprecationsContent} />
+      <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
       <Redirect from="/" to="/overview" />
     </Switch>
   );

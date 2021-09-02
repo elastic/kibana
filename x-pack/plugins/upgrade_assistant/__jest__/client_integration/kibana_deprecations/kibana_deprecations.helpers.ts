@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { KibanaDeprecationsContent } from '../../../public/application/components/kibana_deprecations';
+import { act } from 'react-dom/test-utils';
+import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
+import { KibanaDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
@@ -22,17 +22,92 @@ export type KibanaTestBed = TestBed & {
 };
 
 const createActions = (testBed: TestBed) => {
+  const { component, find, table } = testBed;
+
   /**
    * User Actions
    */
+  const tableActions = {
+    clickRefreshButton: async () => {
+      await act(async () => {
+        find('refreshButton').simulate('click');
+      });
 
-  const clickExpandAll = () => {
-    const { find } = testBed;
-    find('expandAll').simulate('click');
+      component.update();
+    },
+
+    clickDeprecationAt: async (index: number) => {
+      const { rows } = table.getMetaData('kibanaDeprecationsTable');
+
+      const deprecationDetailsLink = findTestSubject(
+        rows[index].reactWrapper,
+        'deprecationDetailsLink'
+      );
+
+      await act(async () => {
+        deprecationDetailsLink.simulate('click');
+      });
+      component.update();
+    },
+  };
+
+  const searchBarActions = {
+    openTypeFilterDropdown: async () => {
+      await act(async () => {
+        // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
+        find('kibanaDeprecations')
+          .find('.euiSearchBar__filtersHolder')
+          .find('.euiPopover')
+          .find('.euiFilterButton')
+          .at(0)
+          .simulate('click');
+      });
+
+      component.update();
+    },
+
+    clickCriticalFilterButton: async () => {
+      await act(async () => {
+        // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
+        find('kibanaDeprecations')
+          .find('.euiSearchBar__filtersHolder')
+          .find('.euiFilterButton')
+          .at(0)
+          .simulate('click');
+      });
+
+      component.update();
+    },
+
+    filterByConfigType: async () => {
+      // We need to read the document "body" as the filter dropdown options are added there and not inside
+      // the component DOM tree. The "Config" option is expected to be the first item.
+      const configTypeFilterButton: HTMLButtonElement | null = document.body.querySelector(
+        '.euiFilterSelect__items .euiFilterSelectItem'
+      );
+
+      await act(async () => {
+        configTypeFilterButton!.click();
+      });
+
+      component.update();
+    },
+  };
+
+  const flyoutActions = {
+    clickResolveButton: async () => {
+      await act(async () => {
+        find('resolveButton').simulate('click');
+      });
+
+      component.update();
+    },
   };
 
   return {
-    clickExpandAll,
+    table: tableActions,
+    flyout: flyoutActions,
+    searchBar: searchBarActions,
   };
 };
 
@@ -40,7 +115,7 @@ export const setupKibanaPage = async (
   overrides?: Record<string, unknown>
 ): Promise<KibanaTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(KibanaDeprecationsContent, overrides),
+    WithAppDependencies(KibanaDeprecations, overrides),
     testBedConfig
   );
   const testBed = await initTestBed();

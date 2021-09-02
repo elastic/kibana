@@ -6,7 +6,4 @@
  */
 
 export { NoDeprecationsPrompt } from './no_deprecations';
-export { DeprecationHealth } from './health';
-export { SearchBar } from './search_bar';
-export { DeprecationPagination } from './deprecation_pagination';
-export { DeprecationListBar } from './deprecation_list_bar';
+export { DeprecationCount } from './deprecation_count';
