@@ -78,11 +78,9 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      const yAspects = aspects.y.filter(
-        ({ aggId, accessor }) =>
-          ((Array.isArray(aggId) && aggId?.includes(paramId)) || aggId === paramId) &&
-          accessor !== null
-      );
+      const yAspects = aspects.y.filter(({ accessor, id }) => {
+        return id === paramId && accessor !== null;
+      });
 
       if (!show || !yAspects.length) {
         return null;

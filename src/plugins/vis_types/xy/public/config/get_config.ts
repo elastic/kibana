@@ -96,11 +96,7 @@ const shouldEnableHistogramMode = (
   yAspects: Aspect[],
   yAxes: Array<AxisConfig<ScaleContinuousType>>
 ): boolean => {
-  const bars = seriesParams.filter(({ type, data: { id: paramId } }) => {
-    return (
-      type === ChartType.Histogram && yAspects.find(({ aggId }) => aggId === paramId) !== undefined
-    );
-  });
+  const bars = seriesParams.filter(({ type }) => type === ChartType.Histogram);
 
   const groupIds = [
     ...bars.reduce<Set<string>>((acc, { valueAxis: groupId, mode }) => {

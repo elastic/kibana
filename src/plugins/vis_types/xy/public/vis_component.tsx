@@ -219,11 +219,7 @@ const VisComponent = (props: VisComponentProps) => {
   // @TODO: move this logic to the `pointseries` function or kind of that to separate
   // view from logic of processing the result of fetching.
   // This will enable the possibility to reuse `xy_vis` as a rendering function.
-  const hasBars = visParams.seriesParams.some(
-    ({ type, data: { id: paramId } }) =>
-      type === ChartType.Histogram &&
-      config.aspects.y.find(({ aggId }) => aggId === paramId) !== undefined
-  );
+  const hasBars = visParams.seriesParams.some(({ type }) => type === ChartType.Histogram);
   // -------------------------------------------------------------------------------------------------------
 
   // @TODO: move this logic from `xy_vis` function and renderer to a separate function, which would proceed

@@ -76,7 +76,7 @@ function getAspectsFromDimension(
 
 const getAspect = (
   { id: accessor, name: title }: DatatableColumn,
-  { accessor: column, format, params, aggType }: Dimension
+  { accessor: column, format, params, aggType, id }: Dimension
 ): Aspect => ({
   accessor,
   column,
@@ -86,4 +86,5 @@ const getAspect = (
   aggId: getAggId(accessor),
   formatter: (value: any) => getFormatService().deserialize(format).convert(value),
   params,
+  id,
 });

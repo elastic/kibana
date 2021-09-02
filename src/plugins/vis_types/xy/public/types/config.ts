@@ -36,6 +36,7 @@ export interface Aspect {
   format?: Dimension['format'];
   formatter?: TickFormatter;
   params: Dimension['params'];
+  id?: Dimension['id'];
 }
 
 export interface Aspects {
