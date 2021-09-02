@@ -9,7 +9,6 @@ import { EuiCallOut, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { ElasticDocsLink } from '../../../../../../shared/Links/ElasticDocsLink';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export function DroppedSpansWarning({
@@ -17,6 +16,7 @@ export function DroppedSpansWarning({
 }: {
   transactionDoc: Transaction;
 }) {
+  const { docLinks } = useApmPluginContext().core;
   const dropped = transactionDoc.transaction.span_count?.dropped;
   if (!dropped) {
     return null;
