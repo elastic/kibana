@@ -128,208 +128,225 @@ export const importRulesRoute = (
           const batchParseObjects = chunkParseObjects.shift() ?? [];
           const newImportRuleResponse = await Promise.all(
             batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
-              const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve) => {
-                if (parsedRule instanceof Error) {
-                  // If the JSON object had a validation or parse error then we return
-                  // early with the error and an (unknown) for the ruleId
-                  resolve(
-                    createBulkErrorObject({
-                      statusCode: 400,
-                      message: parsedRule.message,
-                    })
-                  );
-                  return null;
-                }
-                const {
-                  anomaly_threshold: anomalyThreshold,
-                  author,
-                  building_block_type: buildingBlockType,
-                  description,
-                  enabled,
-                  event_category_override: eventCategoryOverride,
-                  false_positives: falsePositives,
-                  from,
-                  immutable,
-                  query: queryOrUndefined,
-                  language: languageOrUndefined,
-                  license,
-                  machine_learning_job_id: machineLearningJobId,
-                  output_index: outputIndex,
-                  saved_id: savedId,
-                  meta,
-                  filters: filtersRest,
-                  rule_id: ruleId,
-                  index,
-                  interval,
-                  max_signals: maxSignals,
-                  risk_score: riskScore,
-                  risk_score_mapping: riskScoreMapping,
-                  rule_name_override: ruleNameOverride,
-                  name,
-                  severity,
-                  severity_mapping: severityMapping,
-                  tags,
-                  threat,
-                  threat_filters: threatFilters,
-                  threat_index: threatIndex,
-                  threat_query: threatQuery,
-                  threat_mapping: threatMapping,
-                  threat_language: threatLanguage,
-                  threat_indicator_path: threatIndicatorPath,
-                  concurrent_searches: concurrentSearches,
-                  items_per_search: itemsPerSearch,
-                  threshold,
-                  timestamp_override: timestampOverride,
-                  to,
-                  type,
-                  references,
-                  note,
-                  timeline_id: timelineId,
-                  timeline_title: timelineTitle,
-                  throttle,
-                  version,
-                  exceptions_list: exceptionsList,
-                } = parsedRule;
+              const importsWorkerPromise = new Promise<ImportRuleResponse>(
+                async (resolve, reject) => {
+                  try {
+                    if (parsedRule instanceof Error) {
+                      // If the JSON object had a validation or parse error then we return
+                      // early with the error and an (unknown) for the ruleId
+                      resolve(
+                        createBulkErrorObject({
+                          statusCode: 400,
+                          message: parsedRule.message,
+                        })
+                      );
+                      return null;
+                    }
 
-                try {
-                  const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
-
-                  const language =
-                    !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
-
-                  // TODO: Fix these either with an is conversion or by better typing them within io-ts
-                  const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-
-                  throwHttpError(await mlAuthz.validateRuleType(type));
-
-                  const rule = await readRules({ rulesClient, ruleId, id: undefined });
-                  if (rule == null) {
-                    await createRules({
-                      rulesClient,
-                      anomalyThreshold,
+                    const {
+                      anomaly_threshold: anomalyThreshold,
                       author,
-                      buildingBlockType,
+                      building_block_type: buildingBlockType,
                       description,
                       enabled,
-                      eventCategoryOverride,
-                      falsePositives,
+                      event_category_override: eventCategoryOverride,
+                      false_positives: falsePositives,
                       from,
                       immutable,
-                      query,
-                      language,
+                      query: queryOrUndefined,
+                      language: languageOrUndefined,
                       license,
-                      machineLearningJobId,
-                      outputIndex: signalsIndex,
-                      savedId,
-                      timelineId,
-                      timelineTitle,
+                      machine_learning_job_id: machineLearningJobId,
+                      output_index: outputIndex,
+                      saved_id: savedId,
                       meta,
-                      filters,
-                      ruleId,
+                      filters: filtersRest,
+                      rule_id: ruleId,
                       index,
                       interval,
-                      maxSignals,
-                      name,
-                      riskScore,
-                      riskScoreMapping,
-                      ruleNameOverride,
-                      severity,
-                      severityMapping,
-                      tags,
-                      throttle,
-                      to,
-                      type,
-                      threat,
-                      threshold,
-                      threatFilters,
-                      threatIndex,
-                      threatIndicatorPath,
-                      threatQuery,
-                      threatMapping,
-                      threatLanguage,
-                      concurrentSearches,
-                      itemsPerSearch,
-                      timestampOverride,
-                      references,
-                      note,
-                      version,
-                      exceptionsList,
-                      actions: [], // Actions are not imported nor exported at this time
-                    });
-                    resolve({ rule_id: ruleId, status_code: 200 });
-                  } else if (rule != null && request.query.overwrite) {
-                    await patchRules({
-                      rulesClient,
-                      author,
-                      buildingBlockType,
-                      spaceId: context.securitySolution.getSpaceId(),
-                      ruleStatusClient,
-                      description,
-                      enabled,
-                      eventCategoryOverride,
-                      falsePositives,
-                      from,
-                      query,
-                      language,
-                      license,
-                      outputIndex,
-                      savedId,
-                      timelineId,
-                      timelineTitle,
-                      meta,
-                      filters,
-                      rule,
-                      index,
-                      interval,
-                      maxSignals,
-                      riskScore,
-                      riskScoreMapping,
-                      ruleNameOverride,
+                      max_signals: maxSignals,
+                      risk_score: riskScore,
+                      risk_score_mapping: riskScoreMapping,
+                      rule_name_override: ruleNameOverride,
                       name,
                       severity,
-                      severityMapping,
+                      severity_mapping: severityMapping,
                       tags,
-                      timestampOverride,
-                      throttle,
+                      threat,
+                      threat_filters: threatFilters,
+                      threat_index: threatIndex,
+                      threat_query: threatQuery,
+                      threat_mapping: threatMapping,
+                      threat_language: threatLanguage,
+                      threat_indicator_path: threatIndicatorPath,
+                      concurrent_searches: concurrentSearches,
+                      items_per_search: itemsPerSearch,
+                      threshold,
+                      timestamp_override: timestampOverride,
                       to,
                       type,
-                      threat,
-                      threshold,
-                      threatFilters,
-                      threatIndex,
-                      threatQuery,
-                      threatMapping,
-                      threatLanguage,
-                      concurrentSearches,
-                      itemsPerSearch,
                       references,
                       note,
+                      timeline_id: timelineId,
+                      timeline_title: timelineTitle,
+                      throttle,
                       version,
-                      exceptionsList,
-                      anomalyThreshold,
-                      machineLearningJobId,
-                      actions: undefined,
-                    });
-                    resolve({ rule_id: ruleId, status_code: 200 });
-                  } else if (rule != null) {
-                    resolve(
-                      createBulkErrorObject({
+                      exceptions_list: exceptionsList,
+                    } = parsedRule;
+
+                    try {
+                      const query =
+                        !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
+                      const language =
+                        !isMlRule(type) && languageOrUndefined == null
+                          ? 'kuery'
+                          : languageOrUndefined; // TODO: Fix these either with an is conversion or by better typing them within io-ts
+
+                      const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
+                      throwHttpError(await mlAuthz.validateRuleType(type));
+                      const rule = await readRules({
+                        rulesClient,
                         ruleId,
-                        statusCode: 409,
-                        message: `rule_id: "${ruleId}" already exists`,
-                      })
-                    );
+                        id: undefined,
+                      });
+
+                      if (rule == null) {
+                        await createRules({
+                          rulesClient,
+                          anomalyThreshold,
+                          author,
+                          buildingBlockType,
+                          description,
+                          enabled,
+                          eventCategoryOverride,
+                          falsePositives,
+                          from,
+                          immutable,
+                          query,
+                          language,
+                          license,
+                          machineLearningJobId,
+                          outputIndex: signalsIndex,
+                          savedId,
+                          timelineId,
+                          timelineTitle,
+                          meta,
+                          filters,
+                          ruleId,
+                          index,
+                          interval,
+                          maxSignals,
+                          name,
+                          riskScore,
+                          riskScoreMapping,
+                          ruleNameOverride,
+                          severity,
+                          severityMapping,
+                          tags,
+                          throttle,
+                          to,
+                          type,
+                          threat,
+                          threshold,
+                          threatFilters,
+                          threatIndex,
+                          threatIndicatorPath,
+                          threatQuery,
+                          threatMapping,
+                          threatLanguage,
+                          concurrentSearches,
+                          itemsPerSearch,
+                          timestampOverride,
+                          references,
+                          note,
+                          version,
+                          exceptionsList,
+                          actions: [], // Actions are not imported nor exported at this time
+                        });
+                        resolve({
+                          rule_id: ruleId,
+                          status_code: 200,
+                        });
+                      } else if (rule != null && request.query.overwrite) {
+                        await patchRules({
+                          rulesClient,
+                          author,
+                          buildingBlockType,
+                          spaceId: context.securitySolution.getSpaceId(),
+                          ruleStatusClient,
+                          description,
+                          enabled,
+                          eventCategoryOverride,
+                          falsePositives,
+                          from,
+                          query,
+                          language,
+                          license,
+                          outputIndex,
+                          savedId,
+                          timelineId,
+                          timelineTitle,
+                          meta,
+                          filters,
+                          rule,
+                          index,
+                          interval,
+                          maxSignals,
+                          riskScore,
+                          riskScoreMapping,
+                          ruleNameOverride,
+                          name,
+                          severity,
+                          severityMapping,
+                          tags,
+                          timestampOverride,
+                          throttle,
+                          to,
+                          type,
+                          threat,
+                          threshold,
+                          threatFilters,
+                          threatIndex,
+                          threatQuery,
+                          threatMapping,
+                          threatLanguage,
+                          concurrentSearches,
+                          itemsPerSearch,
+                          references,
+                          note,
+                          version,
+                          exceptionsList,
+                          anomalyThreshold,
+                          machineLearningJobId,
+                          actions: undefined,
+                        });
+                        resolve({
+                          rule_id: ruleId,
+                          status_code: 200,
+                        });
+                      } else if (rule != null) {
+                        resolve(
+                          createBulkErrorObject({
+                            ruleId,
+                            statusCode: 409,
+                            message: `rule_id: "${ruleId}" already exists`,
+                          })
+                        );
+                      }
+                    } catch (err) {
+                      resolve(
+                        createBulkErrorObject({
+                          ruleId,
+                          statusCode: err.statusCode ?? 400,
+                          message: err.message,
+                        })
+                      );
+                    }
+                  } catch (error) {
+                    reject(error);
                   }
-                } catch (err) {
-                  resolve(
-                    createBulkErrorObject({
-                      ruleId,
-                      statusCode: err.statusCode ?? 400,
-                      message: err.message,
-                    })
-                  );
                 }
-              });
+              );
               return [...accum, importsWorkerPromise];
             }, [])
           );
