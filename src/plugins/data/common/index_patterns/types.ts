@@ -11,24 +11,23 @@ import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notificatio
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
+import { RUNTIME_FIELD_TYPES } from './constants';
 import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES, DataViewField } from '..';
 import { FieldFormat } from '../../../field_formats/common';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
-export type RuntimeType = estypes.MappingRuntimeFieldType | 'composite';
+export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 /**
  * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
- * We extends the object until @elastic/elasticsearch supports "composite" type
- * and its "fields" object.
- *
- * To simplify the consuming code we enforce the script to be `InlineScript` type (and not also `string`)
  */
-export interface ESRuntimeField extends Omit<estypes.MappingRuntimeField, 'type' | 'script'> {
+export interface ESRuntimeField {
   type: RuntimeType;
-  script?: estypes.InlineScript;
+  script?: {
+    source: string;
+  };
   fields?: Record<
     string,
     {
