@@ -25,8 +25,8 @@ import {
 } from '../../../../common/elasticsearch_util';
 import {
   ESTermSourceDescriptor,
+  ESTermSourceSyncMeta,
   VectorJoinSourceRequestMeta,
-  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
@@ -171,12 +171,15 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
-    return {
+  getSyncMeta(): ESTermSourceSyncMeta | null {
+    const meta: ESTermSourceSyncMeta = {
       indexPatternId: this._descriptor.indexPatternId,
       term: this._descriptor.term,
-      size: this._descriptor.size,
     };
+    if (this._descriptor.size !== undefined) {
+      meta.size = this._descriptor.size;
+    }
+    return meta;
   }
 
   getRightFields(): IField[] {
