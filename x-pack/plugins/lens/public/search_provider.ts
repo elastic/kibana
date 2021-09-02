@@ -10,7 +10,7 @@ import { from, of } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { GlobalSearchResultProvider } from '../../global_search/public';
-import { getFullPath } from '../common';
+import { getFullPath } from '../common/constants';
 
 /**
  * Global search provider adding a Lens entry.

@@ -16,7 +16,7 @@ import type {
 
 import { SavedObjectIndexStore, Document } from './persistence';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
-import { DOC_TYPE } from '../common';
+import { DOC_TYPE } from '../common/constants';
 
 export type LensAttributeService = AttributeService<
   LensSavedObjectAttributes,

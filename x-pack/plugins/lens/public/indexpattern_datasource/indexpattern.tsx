@@ -70,12 +70,7 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
   };
 }
 
-export type {
-  FormatColumnArgs,
-  TimeScaleArgs,
-  CounterRateArgs,
-  ExpressionFunctionCounterRate,
-} from '../../common/expressions';
+export type { FormatColumnArgs, TimeScaleArgs, CounterRateArgs } from '../../common/expressions';
 
 export {
   getSuffixFormatter,
