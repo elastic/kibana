@@ -46,6 +46,7 @@ import type {
   Installation,
   Output,
   DeletePackagePoliciesResponse,
+  FullAgentPolicyOutputPermissions,
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
 import {
@@ -808,17 +809,25 @@ class AgentPolicyService {
           }),
     };
 
-    const permissions = (await storedPackagePoliciesToAgentPermissions(
+    const dataPermissions = (await storedPackagePoliciesToAgentPermissions(
       soClient,
       agentPolicy.package_policies
     )) || { _fallback: DEFAULT_PERMISSIONS };
 
-    permissions._elastic_agent_checks = {
+    dataPermissions._elastic_agent_checks = {
       cluster: DEFAULT_PERMISSIONS.cluster,
     };
 
     // TODO: fetch this from the elastic agent package
     const monitoringNamespace = fullAgentPolicy.agent?.monitoring.namespace;
+    const monitoringPermissions: FullAgentPolicyOutputPermissions =
+      monitoringOutputId === dataOutputId
+        ? dataPermissions
+        : {
+            _elastic_agent_checks: {
+              cluster: DEFAULT_PERMISSIONS.cluster,
+            },
+          };
     if (
       fullAgentPolicy.agent?.monitoring.enabled &&
       monitoringNamespace &&
@@ -837,7 +846,7 @@ class AgentPolicyService {
         );
       }
 
-      permissions._elastic_agent_checks.indices = [
+      monitoringPermissions._elastic_agent_checks.indices = [
         {
           names,
           privileges: ['auto_configure', 'create_doc'],
@@ -848,10 +857,13 @@ class AgentPolicyService {
     // Only add permissions if output.type is "elasticsearch"
     fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
       NonNullable<FullAgentPolicy['output_permissions']>
-    >((outputPermissions, outputName) => {
-      const output = fullAgentPolicy.outputs[outputName];
+    >((outputPermissions, outputId) => {
+      const output = fullAgentPolicy.outputs[outputId];
       if (output && output.type === 'elasticsearch') {
-        outputPermissions[outputName] = permissions;
+        outputPermissions[outputId] =
+          outputId === getOutputIdForAgentPolicy(dataOutput)
+            ? dataPermissions
+            : monitoringPermissions;
       }
       return outputPermissions;
     }, {});

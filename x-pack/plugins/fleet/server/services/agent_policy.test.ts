@@ -51,15 +51,36 @@ jest.mock('./output', () => {
   return {
     outputService: {
       getDefaultOutputId: () => 'test-id',
-      get: (): Output => {
-        return {
-          id: 'test-id',
-          is_default: true,
-          name: 'default',
-          // @ts-ignore
-          type: 'elasticsearch',
-          hosts: ['http://127.0.0.1:9201'],
-        };
+      get: (soClient: any, id: string): Output => {
+        switch (id) {
+          case 'data-output-id':
+            return {
+              id: 'data-output-id',
+              is_default: false,
+              name: 'Data output',
+              // @ts-ignore
+              type: 'elasticsearch',
+              hosts: ['http://es-data.co:9201'],
+            };
+          case 'monitoring-output-id':
+            return {
+              id: 'monitoring-output-id',
+              is_default: false,
+              name: 'Monitoring output',
+              // @ts-ignore
+              type: 'elasticsearch',
+              hosts: ['http://es-monitoring.co:9201'],
+            };
+          default:
+            return {
+              id: 'test-id',
+              is_default: true,
+              name: 'default',
+              // @ts-ignore
+              type: 'elasticsearch',
+              hosts: ['http://127.0.0.1:9201'],
+            };
+        }
       },
     },
   };
@@ -286,6 +307,43 @@ describe('agent policy', () => {
           },
         },
       });
+    });
+
+    it('should support a different monitoring output', async () => {
+      const soClient = getSavedObjectMock({
+        namespace: 'default',
+        revision: 1,
+        monitoring_enabled: ['metrics'],
+        monitoring_output_id: 'monitoring-output-id',
+      });
+      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
+
+      expect(agentPolicy).toMatchSnapshot();
+    });
+
+    it('should support a different data output', async () => {
+      const soClient = getSavedObjectMock({
+        namespace: 'default',
+        revision: 1,
+        monitoring_enabled: ['metrics'],
+        data_output_id: 'data-output-id',
+      });
+      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
+
+      expect(agentPolicy).toMatchSnapshot();
+    });
+
+    it('should support both different outputs for data and monitoring ', async () => {
+      const soClient = getSavedObjectMock({
+        namespace: 'default',
+        revision: 1,
+        monitoring_enabled: ['metrics'],
+        data_output_id: 'data-output-id',
+        monitoring_output_id: 'monitoring-output-id',
+      });
+      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
+
+      expect(agentPolicy).toMatchSnapshot();
     });
   });
 
