@@ -17,6 +17,9 @@ import type {
 import { DataMain$, DataRefetch$ } from '../services/use_saved_search';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 
+/**
+ * This function returns an observable that's used to trigger data fetching
+ */
 export function getFetch$({
   autoRefreshDoneCb,
   data,
@@ -51,8 +54,8 @@ export function getFetch$({
            */
           currentFetchStatus !== FetchStatus.LOADING &&
           currentFetchStatus !== FetchStatus.PARTIAL &&
-          // don't autofetch if it's a index pattern without time field, however this is a temorary solutiom
-          // till we've got a better UI
+          // prevent auto refresh if it's a index pattern without time field, because there is
+          // no UI to stop it
           Boolean(searchSource.getField('index')?.isTimeBased())
         );
       })

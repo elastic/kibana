@@ -11,37 +11,94 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { DataPublicPluginStart } from '../../../../../../data/public';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { DataRefetch$ } from '../services/use_saved_search';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
+import { savedSearchMock, savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
 
-describe('getFetchObserveable', () => {
-  test('refetch$.next should trigger fetch$.next', async (done) => {
-    const searchSessionManagerMock = createSearchSessionMock();
-    const dataMock = ({
-      query: {
-        queryString: {
-          getUpdates$: () => {
-            return new Subject();
-          },
+function createDataMock(
+  queryString$: Subject<unknown>,
+  filterManager$: Subject<unknown>,
+  timefilterFetch$: Subject<unknown>,
+  autoRefreshFetch$: Subject<unknown>
+) {
+  return ({
+    query: {
+      queryString: {
+        getUpdates$: () => {
+          return queryString$;
         },
-        filterManager: {
-          getFetches$: () => {
-            return new Subject();
-          },
+      },
+      filterManager: {
+        getFetches$: () => {
+          return filterManager$;
         },
+      },
+      timefilter: {
         timefilter: {
-          timefilter: {
-            getFetch$: () => {
-              return new Subject();
-            },
-            getAutoRefreshFetch$: () => {
-              return new Subject();
-            },
+          getFetch$: () => {
+            return timefilterFetch$;
+          },
+          getAutoRefreshFetch$: () => {
+            return autoRefreshFetch$;
           },
         },
       },
-    } as unknown) as DataPublicPluginStart;
+    },
+  } as unknown) as DataPublicPluginStart;
+}
+
+describe('getFetchObservable', () => {
+  test('refetch$.next should trigger fetch$.next', async (done) => {
+    const searchSessionManagerMock = createSearchSessionMock();
+
     const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
     const refetch$: DataRefetch$ = new Subject();
+    const fetch$ = getFetch$({
+      autoRefreshDoneCb: undefined,
+      main$,
+      refetch$,
+      data: createDataMock(new Subject(), new Subject(), new Subject(), new Subject()),
+      searchSessionManager: searchSessionManagerMock.searchSessionManager,
+      searchSource: savedSearchMock.searchSource,
+    });
+
+    fetch$.subscribe(() => {
+      done();
+    });
+    refetch$.next();
+  });
+  test('getAutoRefreshFetch$ should trigger fetch$.next when index pattern has a timefield', async () => {
+    jest.useFakeTimers();
+    const searchSessionManagerMock = createSearchSessionMock();
+    const autoRefreshFetch$ = new Subject();
+
+    const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
+    const refetch$: DataRefetch$ = new Subject();
+    const dataMock = createDataMock(new Subject(), new Subject(), new Subject(), autoRefreshFetch$);
+    const fetch$ = getFetch$({
+      autoRefreshDoneCb: undefined,
+      main$,
+      refetch$,
+      data: dataMock,
+      searchSessionManager: searchSessionManagerMock.searchSessionManager,
+      searchSource: savedSearchMockWithTimeField.searchSource,
+    });
+
+    const fetchfnMock = jest.fn();
+    fetch$.subscribe(() => {
+      fetchfnMock();
+    });
+    autoRefreshFetch$.next();
+    jest.runAllTimers();
+    expect(fetchfnMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('getAutoRefreshFetch$ should not trigger fetch$.next when index pattern has no timefield', async () => {
+    jest.useFakeTimers();
+    const searchSessionManagerMock = createSearchSessionMock();
+    const autoRefreshFetch$ = new Subject();
+
+    const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
+    const refetch$: DataRefetch$ = new Subject();
+    const dataMock = createDataMock(new Subject(), new Subject(), new Subject(), autoRefreshFetch$);
     const fetch$ = getFetch$({
       autoRefreshDoneCb: undefined,
       main$,
@@ -51,9 +108,13 @@ describe('getFetchObserveable', () => {
       searchSource: savedSearchMock.searchSource,
     });
 
+    const fetchfnMock = jest.fn();
+
     fetch$.subscribe(() => {
-      done();
+      fetchfnMock();
     });
-    refetch$.next();
+    autoRefreshFetch$.next();
+    jest.runAllTimers();
+    expect(fetchfnMock).toHaveBeenCalledTimes(0);
   });
 });
