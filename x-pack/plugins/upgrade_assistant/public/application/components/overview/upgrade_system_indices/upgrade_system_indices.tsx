@@ -15,6 +15,7 @@ import {
   EuiButton,
   EuiSpacer,
   EuiLink,
+  EuiIcon,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -53,6 +54,10 @@ const i18nTexts = {
   ),
   inProgressButtonLabel: i18n.translate('xpack.upgradeAssistant.overview.inProgressButtonLabel', {
     defaultMessage: 'Upgrading system indices',
+  }),
+  noUpgradeNeeded: i18n.translate('xpack.upgradeAssistant.overview.noUpgradeNeeded', {
+    // NOTE: This could be that all indices have either been upgraded or dont need to be upgraded
+    defaultMessage: 'All system indices have been upgraded',
   }),
   viewSystemIndices: i18n.translate(
     'xpack.upgradeAssistant.system_indices.overview.viewSystemIndices',
@@ -98,6 +103,7 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
         id: FLYOUT_ID,
         Component: SystemIndicesFlyout,
         props: {
+          data: data!,
           closeFlyout,
         },
         flyoutProps: {
@@ -105,7 +111,7 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
         },
       });
     }
-  }, [addContentToGlobalFlyout, showFlyout, closeFlyout]);
+  }, [addContentToGlobalFlyout, data, showFlyout, closeFlyout]);
 
   if (error) {
     return (
@@ -126,20 +132,36 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
     );
   }
 
+  if (data?.upgrade_status === 'NO_UPGRADE_NEEDED') {
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="check" color="success" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText color="green">
+            <p>{i18nTexts.noUpgradeNeeded}</p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  const isButtonDisabled = isInitialRequest && isLoading;
+  const isUpgrading = data?.upgrade_status === 'IN_PROGRESS';
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiButton isDisabled={isInitialRequest && isLoading}>
-          {i18nTexts.startButtonLabel}
+        <EuiButton isLoading={isUpgrading} isDisabled={isButtonDisabled}>
+          {isUpgrading ? i18nTexts.inProgressButtonLabel : i18nTexts.startButtonLabel}
         </EuiButton>
       </EuiFlexItem>
-      {data?.upgrade_status !== 'UPGRADE_NEEDED' && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={() => setShowFlyout(true)}>
-            {i18nTexts.viewSystemIndices}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty onClick={() => setShowFlyout(true)} isDisabled={isButtonDisabled}>
+          {i18nTexts.viewSystemIndices}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

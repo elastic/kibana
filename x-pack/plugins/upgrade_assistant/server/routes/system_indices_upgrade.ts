@@ -14,6 +14,28 @@ const mockedResponse = {
     {
       feature_name: 'security',
       minimum_index_version: '7.1.1',
+      upgrade_status: 'NO_UPGRADE_NEEDED',
+      indices: [
+        {
+          index: '.security-7',
+          index_version: '7.1.1',
+        },
+      ],
+    },
+    {
+      feature_name: 'security',
+      minimum_index_version: '7.1.1',
+      upgrade_status: 'IN_PROGRESS',
+      indices: [
+        {
+          index: '.security-7',
+          index_version: '7.1.1',
+        },
+      ],
+    },
+    {
+      feature_name: 'security',
+      minimum_index_version: '7.1.1',
       upgrade_status: 'UPGRADE_NEEDED',
       indices: [
         {
@@ -23,7 +45,9 @@ const mockedResponse = {
       ],
     },
   ],
-  upgrade_status: 'UPGRADE_NEEDED',
+  // upgrade_status: 'NO_UPGRADE_NEEDED',
+  // upgrade_status: 'UPGRADE_NEEDED',
+  upgrade_status: 'IN_PROGRESS',
 };
 
 export function registerSystemIndicesUpgradeRoutes({

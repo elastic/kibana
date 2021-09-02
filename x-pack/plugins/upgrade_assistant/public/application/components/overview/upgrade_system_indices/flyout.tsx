@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -15,13 +16,23 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLoadingSpinner,
   EuiTitle,
   EuiText,
+  EuiIcon,
+  EuiSpacer,
   EuiInMemoryTable,
 } from '@elastic/eui';
 
+import {
+  SystemIndicesUpgradeStatus,
+  SystemIndicesUpgradeFeature,
+  UPGRADE_STATUS,
+} from '../../../../../common/types';
+
 export interface SystemIndicesFlyoutProps {
   closeFlyout: () => void;
+  data: SystemIndicesUpgradeStatus;
 }
 
 const i18nTexts = {
@@ -37,6 +48,51 @@ const i18nTexts = {
   }),
 };
 
+const renderMigrationStatus = (status: UPGRADE_STATUS /* , data: SystemIndicesUpgradeStatus*/) => {
+  if (status === 'NO_UPGRADE_NEEDED') {
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="checkInCircleFilled" color="success" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText color="green" size="s">
+            <p>Upgrade complete</p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (status === 'IN_PROGRESS') {
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="s">
+            <p>Upgrading...</p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="alert" color="danger" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText color="danger" size="s">
+          <p>Error: TODO</p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const columns = [
   {
     field: 'feature_name',
@@ -48,25 +104,18 @@ const columns = [
     field: 'upgrade_status',
     name: 'Status',
     sortable: true,
+    render: renderMigrationStatus,
   },
 ];
 
-const dataMock = [
-  {
-    id: '1',
-    feature_name: 'security',
-    minimum_index_version: '7.1.1',
-    upgrade_status: 'UPGRADE_NEEDED',
-    indices: [
-      {
-        index: '.security-7',
-        index_version: '7.1.1',
-      },
-    ],
-  },
-];
+export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutProps) => {
+  const featuresWithId = useMemo(() => {
+    return data.features.map((feature) => ({
+      ...feature,
+      id: uuid.v4(),
+    }));
+  }, [data]);
 
-export const SystemIndicesFlyout = ({ closeFlyout }: SystemIndicesFlyoutProps) => {
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -78,7 +127,13 @@ export const SystemIndicesFlyout = ({ closeFlyout }: SystemIndicesFlyoutProps) =
         <EuiText>
           <p>{i18nTexts.flyoutDescription}</p>
         </EuiText>
-        <EuiInMemoryTable items={dataMock} columns={columns} pagination={true} sorting={true} />
+        <EuiSpacer size="l" />
+        <EuiInMemoryTable<SystemIndicesUpgradeFeature>
+          items={featuresWithId}
+          columns={columns}
+          pagination={true}
+          sorting={true}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

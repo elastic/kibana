@@ -39,18 +39,3 @@ export interface DeprecationLoggingPreviewProps {
   resendRequest: () => void;
   toggleLogging: () => void;
 }
-
-export type UPGRADE_STATUS_STATUS = 'UPGRADE_NEEDED' | 'NO_UPGRADE_NEEDED' | 'IN_PROGRESS';
-export interface SystemIndicesUpgradeStatus {
-  features: Array<{
-    id: string;
-    feature_name: string;
-    minimum_index_version: string;
-    upgrade_status: UPGRADE_STATUS_STATUS;
-    indices: Array<{
-      index: string;
-      index_version: string;
-    }>;
-  }>;
-  upgrade_status: UPGRADE_STATUS_STATUS;
-}
