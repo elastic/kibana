@@ -4370,7 +4370,6 @@
     "visTypeTimeseries.markdown.editor.toggleEditorAriaLabel": "数列エディターを切り替える",
     "visTypeTimeseries.markdown.editor.variableNamePlaceholder": "変数名",
     "visTypeTimeseries.markdown.optionsTab.backgroundColorLabel": "背景色：",
-    "visTypeTimeseries.markdown.optionsTab.customCSSLabel": "カスタム CSS (Less をサポート) ",
     "visTypeTimeseries.markdown.optionsTab.dataLabel": "データ",
     "visTypeTimeseries.markdown.optionsTab.ignoreGlobalFilterLabel": "グローバルフィルターを無視しますか？",
     "visTypeTimeseries.markdown.optionsTab.openLinksInNewTab": "新規タブでリンクを開きますか？",

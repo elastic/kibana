@@ -4389,7 +4389,6 @@
     "visTypeTimeseries.markdown.editor.toggleEditorAriaLabel": "切换序列编辑器",
     "visTypeTimeseries.markdown.editor.variableNamePlaceholder": "变量名称",
     "visTypeTimeseries.markdown.optionsTab.backgroundColorLabel": "背景色：",
-    "visTypeTimeseries.markdown.optionsTab.customCSSLabel": "定制 CSS（支持 Less）",
     "visTypeTimeseries.markdown.optionsTab.dataLabel": "数据",
     "visTypeTimeseries.markdown.optionsTab.ignoreGlobalFilterLabel": "忽略全局筛选？",
     "visTypeTimeseries.markdown.optionsTab.openLinksInNewTab": "在新标签页中打开链接？",

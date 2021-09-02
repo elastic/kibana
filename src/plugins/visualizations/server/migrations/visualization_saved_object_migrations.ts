@@ -1050,6 +1050,40 @@ export const replaceIndexPatternReference: SavedObjectMigrationFn<any, any> = (d
     : doc.references,
 });
 
+export const removeMarkdownLessFromTSVB: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const params: any = get(visState, 'params') || {};
+
+      if (params.type === 'markdown') {
+        // remove less
+        delete params.markdown_less;
+        // remove markdown id from css
+        params.markdown_css = params.markdown_css
+          .replace(new RegExp(`#markdown-${params.id}`, 'g'), '')
+          .trim();
+      }
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -1102,4 +1136,5 @@ export const visualizationSavedObjectTypeMigrations = {
     migrateTagCloud,
     replaceIndexPatternReference
   ),
+  '7.15.0': flow(removeMarkdownLessFromTSVB),
 };
