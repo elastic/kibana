@@ -17,6 +17,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
+  let notificationIndices: string[] = [];
+
   describe('clear_messages', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -25,6 +27,14 @@ export default ({ getService }: FtrProviderContext) => {
       for (const jobConfig of getJobConfig(2)) {
         await ml.api.createAnomalyDetectionJob(jobConfig);
       }
+
+      const { body } = await supertest
+        .get(`/api/ml/job_audit_messages/messages`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      notificationIndices = body.notificationIndices;
     });
 
     after(async () => {
@@ -40,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
         .set(COMMON_REQUEST_HEADERS)
         .send({
           jobId: 'test_get_job_audit_messages_1',
-          notificationIndices: ['.ml-notifications-000002'],
+          notificationIndices,
         })
         .expect(200);
 
@@ -72,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
         .set(COMMON_REQUEST_HEADERS)
         .send({
           jobId: 'test_get_job_audit_messages_2',
-          notificationIndices: ['.ml-notifications-000002'],
+          notificationIndices,
         })
         .expect(403);
       expect(body.error).to.eql('Forbidden');
@@ -94,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
         .set(COMMON_REQUEST_HEADERS)
         .send({
           jobId: 'test_get_job_audit_messages_2',
-          notificationIndices: ['.ml-notifications-000002'],
+          notificationIndices,
         })
         .expect(403);
       expect(body.error).to.eql('Forbidden');
