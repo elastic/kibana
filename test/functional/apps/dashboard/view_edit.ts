@@ -31,6 +31,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     it('create new dashboard opens in edit mode', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();

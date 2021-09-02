@@ -40,6 +40,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     describe('Add a filter bar', function () {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
