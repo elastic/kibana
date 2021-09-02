@@ -11,9 +11,10 @@ import { OperationDefinition } from './index';
 import { ReferenceBasedIndexPatternColumn } from './column_types';
 import type { IndexPattern } from '../../types';
 import { useDebouncedValue } from '../../../shared_components';
+import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDefault', {
-  defaultMessage: 'Static Value',
+  defaultMessage: 'Static value',
 });
 
 const defaultValue = 100;
@@ -27,13 +28,9 @@ function ofName(value: number | string | undefined) {
     return defaultLabel;
   }
   return i18n.translate('xpack.lens.indexPattern.staticValueLabelWithValue', {
-    defaultMessage: 'Static Value: {value}',
+    defaultMessage: 'Static value: {value}',
     values: { value },
   });
-}
-
-function isValidValue(value: string | undefined): value is string {
-  return !isEmptyValue(value) && !Number.isNaN(value);
 }
 
 export interface StaticValueIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
@@ -67,7 +64,7 @@ export const staticValueOperation: OperationDefinition<
       return;
     }
 
-    return !isValidValue(column.params.value)
+    return !isValidNumber(column.params.value)
       ? [
           i18n.translate('xpack.lens.indexPattern.staticValueError', {
             defaultMessage: 'The static value of {value} is not a valid number',
@@ -88,7 +85,7 @@ export const staticValueOperation: OperationDefinition<
     const params = currentColumn.params;
     // TODO: improve this logic
     const useDisplayLabel = currentColumn.label !== defaultLabel;
-    const label = !isValidValue(params.value)
+    const label = isValidNumber(params.value)
       ? useDisplayLabel
         ? currentColumn.label
         : params?.value ?? defaultLabel
@@ -97,18 +94,25 @@ export const staticValueOperation: OperationDefinition<
     return [
       {
         type: 'function',
-        function: isValidValue(params.value) ? 'mathColumn' : 'mapColumn',
+        function: isValidNumber(params.value) ? 'mathColumn' : 'mapColumn',
         arguments: {
           id: [columnId],
           name: [label || defaultLabel],
-          expression: [isValidValue(params.value) ? params.value : defaultValue],
+          expression: [isValidNumber(params.value) ? params.value! : String(defaultValue)],
         },
       },
     ];
   },
   buildColumn({ previousColumn, layer, indexPattern }, columnParams, operationDefinitionMap) {
+    const existingStaticValue =
+      previousColumn?.operationType === 'static_value' &&
+      previousColumn.params &&
+      'value' in previousColumn.params
+        ? previousColumn.params.value
+        : undefined;
     const previousParams: StaticValueIndexPatternColumn['params'] = {
-      ...previousColumn?.params,
+      ...{ value: existingStaticValue },
+      ...getFormatFromPreviousColumn(previousColumn),
       ...columnParams,
     };
     return {
@@ -117,7 +121,7 @@ export const staticValueOperation: OperationDefinition<
       operationType: 'static_value',
       isBucketed: false,
       scale: 'ratio',
-      params: previousParams,
+      params: { ...previousParams, value: previousParams.value ?? String(defaultValue) },
       references: [],
     };
   },
@@ -146,6 +150,10 @@ export const staticValueOperation: OperationDefinition<
   }) {
     const onChange = useCallback(
       (newValue) => {
+        // even if debounced it's triggering for empty string with the previous valid value
+        if (currentColumn.params.value === newValue) {
+          return;
+        }
         updateLayer({
           ...layer,
           columns: {
@@ -175,7 +183,7 @@ export const staticValueOperation: OperationDefinition<
     const onChangeHandler = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.currentTarget.value;
-        handleInputChange(value === '' ? undefined : value);
+        handleInputChange(isValidNumber(value) ? value : undefined);
       },
       [handleInputChange]
     );
@@ -189,7 +197,7 @@ export const staticValueOperation: OperationDefinition<
         </EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiFieldNumber
-          data-test-subj="lns-indexPattern-percentile-input"
+          data-test-subj="lns-indexPattern-static_value-input"
           compressed
           value={inputValue ?? ''}
           onChange={onChangeHandler}

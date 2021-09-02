@@ -196,6 +196,9 @@ export function getIndexPatternDatasource({
 
     initializeDimension(state, layerId, { columnId, groupId, label, dataType, staticValue }) {
       const indexPattern = state.indexPatterns[state.layers[layerId]?.indexPatternId];
+      if (staticValue == null) {
+        return state;
+      }
       return mergeLayer({
         state,
         layerId,

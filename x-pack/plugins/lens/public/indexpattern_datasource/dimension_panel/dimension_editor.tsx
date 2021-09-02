@@ -678,7 +678,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
   return (
     <div id={columnId}>
       {hasTabs ? (
-        <EuiTabs size="s" className="lnsIndexPatternDimensionEditor__header">
+        <EuiTabs
+          size="s"
+          className="lnsIndexPatternDimensionEditor__header"
+          data-test-subj="lens-dimensionTabs"
+        >
           {supportStaticValue ? (
             <EuiTab
               isSelected={
