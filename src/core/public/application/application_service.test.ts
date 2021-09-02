@@ -811,21 +811,12 @@ describe('#start()', () => {
       const stop$ = new Subject();
       const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
 
-      await navigateToApp('alpha');
-      await navigateToApp('beta');
-      await navigateToApp('gamma');
       await navigateToApp('delta', { openInNewTab: true });
       stop$.next();
 
       const appIds = await promise;
 
-      expect(appIds).toMatchInlineSnapshot(`
-        Array [
-          "alpha",
-          "beta",
-          "gamma",
-        ]
-      `);
+      expect(appIds).toBeUndefined();
     });
 
     it('updates httpLoadingCount$ while mounting', async () => {
