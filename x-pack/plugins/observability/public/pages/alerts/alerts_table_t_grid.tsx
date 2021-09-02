@@ -14,6 +14,7 @@ import {
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_TYPED,
 } from '@kbn/rule-data-utils';
@@ -173,6 +174,9 @@ function ObservabilityActions({
   const alertDataConsumer = useMemo<string>(() => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0], [
     dataFieldEs,
   ]);
+  const alertDataProducer = useMemo<string>(() => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0], [
+    dataFieldEs,
+  ]);
 
   const alert = parseObservabilityAlert(dataFieldEs);
   const { prepend } = core.http.basePath;
@@ -204,7 +208,10 @@ function ObservabilityActions({
     }
   }, [setActionsPopover, refetch]);
 
-  const alertPermissions = useGetUserAlertsPermissions(capabilities, alertDataConsumer);
+  const alertPermissions = useGetUserAlertsPermissions(
+    capabilities,
+    alertDataConsumer === 'alerts' ? alertDataProducer : alertDataConsumer
+  );
 
   const statusActionItems = useStatusBulkActionItems({
     eventIds: [eventId],
@@ -298,8 +305,11 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const casePermissions = useGetUserCasesPermissions();
 
   const hasAlertsCrudPermissions = useCallback(
-    (featureId: string) => {
-      return getAlertsPermissions(capabilities, featureId).crud;
+    ({ ruleConsumer, ruleProducer }: { ruleConsumer: string; ruleProducer?: string }) => {
+      if (ruleConsumer === 'alerts' && ruleProducer) {
+        return getAlertsPermissions(capabilities, ruleProducer).crud;
+      }
+      return getAlertsPermissions(capabilities, ruleConsumer).crud;
     },
     [capabilities]
   );

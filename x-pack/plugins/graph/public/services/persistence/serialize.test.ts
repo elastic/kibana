@@ -146,7 +146,7 @@ describe('serialize', () => {
       target: appState.workspace.nodes[0],
       weight: 5,
       width: 5,
-    });
+    } as WorkspaceEdge);
 
     // C <-> E
     appState.workspace.edges.push({
@@ -155,7 +155,7 @@ describe('serialize', () => {
       target: appState.workspace.nodes[4],
       weight: 5,
       width: 5,
-    });
+    } as WorkspaceEdge);
   });
 
   it('should serialize given workspace', () => {

@@ -59,7 +59,7 @@ const TimelineDetailsPanel = () => {
     <DetailsPanel
       browserFields={browserFields}
       docValueFields={docValueFields}
-      entityType="alerts"
+      entityType="events"
       isFlyoutView
       timelineId={TimelineId.casePage}
     />
