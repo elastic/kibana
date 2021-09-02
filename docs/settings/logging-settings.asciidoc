@@ -12,7 +12,7 @@ __Loggers__ define what logging settings (e.g. the `level` of verbosity and the 
 
 __Root__ is a special _logger_ that applies to all the log entries in {kib}.
 
-See the <<log-settings-examples, examples>> below for some common configuration use cases. To learn more about all the possible configuration values, go to {kibana-ref}/logging-service.html[{kib}'s Logging service].
+Refer to the <<log-settings-examples, examples>> for common configuration use cases. To learn more about possible configuration values, go to {kibana-ref}/logging-service.html[{kib}'s Logging service].
 
 [[log-settings-compatibility]]
 ==== Backwards compatibility
