@@ -18,6 +18,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiToolTip,
+  EuiCode,
 } from '@elastic/eui';
 
 import type { PopoverProps } from './types';
@@ -75,7 +76,11 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
               <FormattedMessage
                 id="visTypeTimeseries.indexPatternSelect.switchModePopover.tooltip"
                 defaultMessage="Using Elasticsearch indices is not recommended.
-      To use index patterns, go to **Advanced Settings**, then enable **Allow string indices in TSVB**."
+      To use index patterns, go to {advancedSettings}, then enable {allowStringIndices}."
+                values={{
+                  advancedSettings: <strong>Advanced Settings</strong>,
+                  allowStringIndices: <strong>Allow string indices in TSVB</strong>,
+                }}
               />
             )
           }
