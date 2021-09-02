@@ -172,14 +172,11 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   }
 
   getSyncMeta(): ESTermSourceSyncMeta | null {
-    const meta: ESTermSourceSyncMeta = {
+    return {
       indexPatternId: this._descriptor.indexPatternId,
+      size: this._descriptor.size,
       term: this._descriptor.term,
     };
-    if (this._descriptor.size !== undefined) {
-      meta.size = this._descriptor.size;
-    }
-    return meta;
   }
 
   getRightFields(): IField[] {
