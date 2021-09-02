@@ -48,7 +48,7 @@ describe('Config Deprecations', () => {
     expect(migrated.data.autocomplete.valueSuggestions.terminateAfter).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"kibana.autocompleteTerminateAfter\\" is deprecated and has been replaced by \\"data.autocomplete.valueSuggestions.terminateAfter\\"",
+        "Setting \\"kibana.autocompleteTerminateAfter\\" has been replaced by \\"data.autocomplete.valueSuggestions.terminateAfter\\"",
       ]
     `);
   });
@@ -64,7 +64,7 @@ describe('Config Deprecations', () => {
     expect(migrated.data.autocomplete.valueSuggestions.timeout).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"kibana.autocompleteTimeout\\" is deprecated and has been replaced by \\"data.autocomplete.valueSuggestions.timeout\\"",
+        "Setting \\"kibana.autocompleteTimeout\\" has been replaced by \\"data.autocomplete.valueSuggestions.timeout\\"",
       ]
     `);
   });

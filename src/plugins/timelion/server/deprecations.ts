@@ -49,6 +49,7 @@ export async function getDeprecations({
 
   if (count > 0) {
     deprecations.push({
+      title: 'Found Timelion worksheets',
       message: `You have ${count} Timelion worksheets. The Timelion app will be removed in 7.16. To continue using your Timelion worksheets, migrate them to a dashboard.`,
       documentationUrl:
         'https://www.elastic.co/guide/en/kibana/current/create-panels-with-timelion.html',
