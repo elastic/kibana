@@ -51,7 +51,7 @@ export interface RuntimeField extends ESRuntimeField {
  *
  * @see {@link RuntimeField}
  */
-export interface EnhancedRuntimeField extends Omit<RuntimeField, 'format'> {
+export interface EnhancedRuntimeField extends RuntimeField {
   format?: SerializedFieldFormat;
   customLabel?: string;
   popularity?: number;
