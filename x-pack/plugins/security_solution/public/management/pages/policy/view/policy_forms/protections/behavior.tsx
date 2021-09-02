@@ -28,13 +28,13 @@ export const BehaviorProtection = React.memo(() => {
   const protectionLabel = i18n.translate(
     'xpack.securitySolution.endpoint.policy.protections.behavior',
     {
-      defaultMessage: 'Behavior protections',
+      defaultMessage: 'Behavior',
     }
   );
   return (
     <ConfigForm
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.behavior_protection', {
-        defaultMessage: 'Behavior Protection',
+        defaultMessage: 'Behavior',
       })}
       supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
       dataTestSubj="behaviorProtectionsForm"
@@ -51,7 +51,7 @@ export const BehaviorProtection = React.memo(() => {
           defaultMessage="View {detectionRulesLink}. Prebuilt rules are tagged “Elastic” on the Detection Rules page."
           values={{
             detectionRulesLink: (
-              <LinkToApp appId={`${APP_ID}:${SecurityPageName.detections}`} appPath={`/rules`}>
+              <LinkToApp appId={APP_ID} deepLinkId={SecurityPageName.rules}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policy.details.detectionRulesLink"
                   defaultMessage="related detection rules"

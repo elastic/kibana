@@ -8,7 +8,13 @@
 import React from 'react';
 import moment from 'moment';
 
-import { ALERT_END, ALERT_START, ALERT_STATUS, ALERT_REASON } from '@kbn/rule-data-utils';
+import {
+  ALERT_END,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_REASON,
+} from '@kbn/rule-data-utils';
 
 import { AlertTypeInitializer } from '.';
 import { getMonitorRouteFromMonitorId } from './common';
@@ -53,7 +59,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
     reason: fields[ALERT_REASON] || '',
     link: getMonitorRouteFromMonitorId({
       monitorId: fields['monitor.id']!,
-      dateRangeEnd: fields[ALERT_STATUS] === 'open' ? 'now' : fields[ALERT_END]!,
+      dateRangeEnd: fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE ? 'now' : fields[ALERT_END]!,
       dateRangeStart: moment(new Date(fields[ALERT_START]!)).subtract('5', 'm').toISOString(),
       filters: {
         'observer.geo.name': [fields['observer.geo.name'][0]],

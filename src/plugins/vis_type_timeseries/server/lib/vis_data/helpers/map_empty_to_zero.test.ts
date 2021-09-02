@@ -7,10 +7,12 @@
  */
 
 import { mapEmptyToZero } from './map_empty_to_zero';
+import { METRIC_TYPES } from '../../../../../data/common';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 
 describe('mapEmptyToZero(metric, buckets)', () => {
   test('returns bucket key and value for basic metric', () => {
-    const metric = { id: 'AVG', type: 'avg' };
+    const metric = { id: 'AVG', type: METRIC_TYPES.AVG };
     const buckets = [
       {
         key: 1234,
@@ -20,7 +22,7 @@ describe('mapEmptyToZero(metric, buckets)', () => {
     expect(mapEmptyToZero(metric, buckets)).toEqual([[1234, 1]]);
   });
   test('returns bucket key and value for std_deviation', () => {
-    const metric = { id: 'STDDEV', type: 'std_deviation' };
+    const metric = { id: 'STDDEV', type: TSVB_METRIC_TYPES.STD_DEVIATION };
     const buckets = [
       {
         key: 1234,
@@ -30,7 +32,7 @@ describe('mapEmptyToZero(metric, buckets)', () => {
     expect(mapEmptyToZero(metric, buckets)).toEqual([[1234, 1]]);
   });
   test('returns bucket key and value for percentiles', () => {
-    const metric = { id: 'PCT', type: 'percentile', percent: 50 };
+    const metric = { id: 'PCT', type: TSVB_METRIC_TYPES.PERCENTILE, percent: 50 };
     const buckets = [
       {
         key: 1234,
@@ -40,7 +42,7 @@ describe('mapEmptyToZero(metric, buckets)', () => {
     expect(mapEmptyToZero(metric, buckets)).toEqual([[1234, 1]]);
   });
   test('returns bucket key and value for derivative', () => {
-    const metric = { id: 'DERV', type: 'derivative', field: 'io', unit: '1s' };
+    const metric = { id: 'DERV', type: METRIC_TYPES.DERIVATIVE, field: 'io', unit: '1s' };
     const buckets = [
       {
         key: 1234,

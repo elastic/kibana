@@ -243,17 +243,7 @@ export const InteractivePage = compose(
   })),
   withProps((...props) => ({
     ...props,
-    canDragElement: (element) => {
-      return !isEmbeddableBody(element) && isInWorkpad(element);
-
-      const hasClosest = typeof element.closest === 'function';
-
-      if (hasClosest) {
-        return !element.closest('.embeddable') || element.closest('.embPanel__header');
-      } else {
-        return !closest.call(element, '.embeddable') || closest.call(element, '.embPanel__header');
-      }
-    },
+    canDragElement: (element) => !isEmbeddableBody(element) && isInWorkpad(element),
   })),
   withHandlers(eventHandlers), // Captures user intent, needs to have reconciled state
   () => InteractiveComponent

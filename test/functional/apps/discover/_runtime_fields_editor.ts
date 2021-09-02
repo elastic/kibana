@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from './ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -33,12 +32,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
-      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      log.debug('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it('allows adding custom label to existing fields', async function () {

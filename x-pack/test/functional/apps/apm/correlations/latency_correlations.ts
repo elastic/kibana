@@ -144,10 +144,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('loads the correlation results', async function () {
         await retry.try(async () => {
           // Assert that the data fully loaded to 100%
-          const apmCorrelationsLatencyCorrelationsProgressTitle = await testSubjects.getVisibleText(
-            'apmCorrelationsLatencyCorrelationsProgressTitle'
+          const apmLatencyCorrelationsProgressTitle = await testSubjects.getVisibleText(
+            'apmCorrelationsProgressTitle'
           );
-          expect(apmCorrelationsLatencyCorrelationsProgressTitle).to.be('Progress: 100%');
+          expect(apmLatencyCorrelationsProgressTitle).to.be('Progress: 100%');
 
           // Assert that the Correlations Chart and its header are present
           const apmCorrelationsLatencyCorrelationsChartTitle = await testSubjects.getVisibleText(

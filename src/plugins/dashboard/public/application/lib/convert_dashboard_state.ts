@@ -11,23 +11,19 @@ import type { KibanaExecutionContext } from 'src/core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
-import {
-  convertPanelStateToSavedDashboardPanel,
-  convertSavedDashboardPanelToPanelState,
-} from '../../../common/embeddable/embeddable_saved_object_converters';
+import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardState,
   RawDashboardState,
-  DashboardPanelMap,
-  SavedDashboardPanel,
   DashboardAppServices,
   DashboardContainerInput,
   DashboardBuildContext,
 } from '../../types';
+import { convertSavedPanelsToPanelMap } from './convert_saved_panels_to_panel_map';
 
 interface SavedObjectToDashboardStateProps {
   version: string;
-  hideWriteControls: boolean;
+  showWriteControls: boolean;
   savedDashboard: DashboardSavedObject;
   usageCollection: DashboardAppServices['usageCollection'];
   savedObjectsTagging: DashboardAppServices['savedObjectsTagging'];
@@ -55,9 +51,9 @@ interface StateToRawDashboardStateProps {
  */
 export const savedObjectToDashboardState = ({
   version,
-  hideWriteControls,
   savedDashboard,
   usageCollection,
+  showWriteControls,
   savedObjectsTagging,
 }: SavedObjectToDashboardStateProps): DashboardState => {
   const rawState = migrateAppState(
@@ -70,18 +66,14 @@ export const savedObjectToDashboardState = ({
       description: savedDashboard.description || '',
       tags: getTagsFromSavedDashboard(savedDashboard, savedObjectsTagging),
       panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
-      viewMode: savedDashboard.id || hideWriteControls ? ViewMode.VIEW : ViewMode.EDIT,
+      viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
       options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
     },
     version,
     usageCollection
   );
 
-  const panels: DashboardPanelMap = {};
-  rawState.panels?.forEach((panel: SavedDashboardPanel) => {
-    panels[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
-  });
-  return { ...rawState, panels };
+  return { ...rawState, panels: convertSavedPanelsToPanelMap(rawState.panels) };
 };
 
 /**

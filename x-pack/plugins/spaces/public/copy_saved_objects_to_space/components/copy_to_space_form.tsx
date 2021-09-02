@@ -9,16 +9,16 @@ import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { CopyOptions, SavedObjectTarget } from '../types';
+import type { SpacesDataEntry } from '../../types';
+import type { CopyOptions, CopyToSpaceSavedObjectTarget } from '../types';
 import type { CopyMode } from './copy_mode_control';
 import { CopyModeControl } from './copy_mode_control';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 
 interface Props {
-  savedObjectTarget: Required<SavedObjectTarget>;
-  spaces: Space[];
+  savedObjectTarget: Required<CopyToSpaceSavedObjectTarget>;
+  spaces: SpacesDataEntry[];
   onUpdate: (copyOptions: CopyOptions) => void;
   copyOptions: CopyOptions;
 }
