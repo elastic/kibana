@@ -87,7 +87,7 @@ export const transformMetricsApiResponseToSnapshotResponse = (
 
       const path = applyMetadataToLastPath(series, node, snapshotRequest, source);
       const lastPath = last(path);
-      const name = (lastPath && lastPath.label) || 'N/A';
+      const name = lastPath?.label ?? 'N/A';
 
       return { ...node, path, name };
     })
