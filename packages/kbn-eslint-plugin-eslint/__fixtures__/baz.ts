@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110893
-/* eslint-disable @kbn/eslint/no_export_all */
+/* eslint-disable no-restricted-syntax */
 
-export * from './constants';
+export const one = 1;
+export const two = 2;
+export const three = 3;
