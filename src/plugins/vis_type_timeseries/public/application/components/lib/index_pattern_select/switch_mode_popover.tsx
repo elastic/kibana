@@ -18,7 +18,6 @@ import {
   EuiSwitch,
   EuiText,
   EuiToolTip,
-  EuiCode,
 } from '@elastic/eui';
 
 import type { PopoverProps } from './types';
