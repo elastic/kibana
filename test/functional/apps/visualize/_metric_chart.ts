@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/106121
-  describe('metric chart', function () {
+  describe.skip('metric chart', function () {
     before(async function () {
       await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');

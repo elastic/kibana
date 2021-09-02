@@ -132,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('add and remove columns', function () {
+    describe.skip('add and remove columns', function () {
       const extraColumns = ['phpmemory', 'ip'];
 
       afterEach(async function () {
@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       });
 
-      it('should add more columns to the table', async function () {
+      it.skip('should add more columns to the table', async function () {
         for (const column of extraColumns) {
           await PageObjects.discover.clearFieldSearchInput();
           await PageObjects.discover.findFieldByName(column);
