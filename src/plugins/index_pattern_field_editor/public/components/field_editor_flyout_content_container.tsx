@@ -209,7 +209,7 @@ export const FieldEditorFlyoutContentContainer = ({
       setIsSaving(true);
 
       try {
-        const editedFields: DataViewField[] =
+        const editedFields: IndexPatternField[] =
           fieldTypeToProcess === 'runtime'
             ? updateRuntimeField(updatedField)
             : updateConcreteField(updatedField as Field);
