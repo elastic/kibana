@@ -472,12 +472,12 @@ exports[`Source Viewer component renders json code editor 1`] = `
                 >
                   <EuiToolTip
                     delay="regular"
+                    display="inlineBlock"
                     onMouseOut={[Function]}
                     position="top"
                   >
                     <span
                       className="euiToolTipAnchor"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >

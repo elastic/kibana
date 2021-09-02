@@ -1296,11 +1296,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   <EuiToolTip
                                     content="See report info."
                                     delay="regular"
+                                    display="inlineBlock"
                                     position="top"
                                   >
                                     <span
                                       className="euiToolTipAnchor"
-                                      onKeyUp={[Function]}
                                       onMouseOut={[Function]}
                                       onMouseOver={[Function]}
                                     >
@@ -2310,11 +2310,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   <EuiToolTip
                                     content="See report info."
                                     delay="regular"
+                                    display="inlineBlock"
                                     position="top"
                                   >
                                     <span
                                       className="euiToolTipAnchor"
-                                      onKeyUp={[Function]}
                                       onMouseOut={[Function]}
                                       onMouseOver={[Function]}
                                     >
@@ -2904,11 +2904,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <EuiToolTip
                                   content="Download report"
                                   delay="regular"
+                                  display="inlineBlock"
                                   position="top"
                                 >
                                   <span
                                     className="euiToolTipAnchor"
-                                    onKeyUp={[Function]}
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
@@ -3353,11 +3353,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   <EuiToolTip
                                     content="See report info."
                                     delay="regular"
+                                    display="inlineBlock"
                                     position="top"
                                   >
                                     <span
                                       className="euiToolTipAnchor"
-                                      onKeyUp={[Function]}
                                       onMouseOut={[Function]}
                                       onMouseOver={[Function]}
                                     >
@@ -3971,11 +3971,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <EuiToolTip
                                   content="Download report with warnings"
                                   delay="regular"
+                                  display="inlineBlock"
                                   position="top"
                                 >
                                   <span
                                     className="euiToolTipAnchor"
-                                    onKeyUp={[Function]}
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
@@ -4424,11 +4424,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   <EuiToolTip
                                     content="See report info and warnings."
                                     delay="regular"
+                                    display="inlineBlock"
                                     position="top"
                                   >
                                     <span
                                       className="euiToolTipAnchor"
-                                      onKeyUp={[Function]}
                                       onMouseOut={[Function]}
                                       onMouseOver={[Function]}
                                     >
@@ -5018,11 +5018,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <EuiToolTip
                                   content="Download report"
                                   delay="regular"
+                                  display="inlineBlock"
                                   position="top"
                                 >
                                   <span
                                     className="euiToolTipAnchor"
-                                    onKeyUp={[Function]}
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
@@ -5467,11 +5467,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   <EuiToolTip
                                     content="See report info."
                                     delay="regular"
+                                    display="inlineBlock"
                                     position="top"
                                   >
                                     <span
                                       className="euiToolTipAnchor"
-                                      onKeyUp={[Function]}
                                       onMouseOut={[Function]}
                                       onMouseOver={[Function]}
                                     >
@@ -6061,11 +6061,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <EuiToolTip
                                   content="Download report"
                                   delay="regular"
+                                  display="inlineBlock"
                                   position="top"
                                 >
                                   <span
                                     className="euiToolTipAnchor"
-                                    onKeyUp={[Function]}
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
@@ -6510,11 +6510,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   <EuiToolTip
                                     content="See report info."
                                     delay="regular"
+                                    display="inlineBlock"
                                     position="top"
                                   >
                                     <span
                                       className="euiToolTipAnchor"
-                                      onKeyUp={[Function]}
                                       onMouseOut={[Function]}
                                       onMouseOver={[Function]}
                                     >
@@ -7104,11 +7104,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <EuiToolTip
                                   content="Download report"
                                   delay="regular"
+                                  display="inlineBlock"
                                   position="top"
                                 >
                                   <span
                                     className="euiToolTipAnchor"
-                                    onKeyUp={[Function]}
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
@@ -7553,11 +7553,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   <EuiToolTip
                                     content="See report info."
                                     delay="regular"
+                                    display="inlineBlock"
                                     position="top"
                                   >
                                     <span
                                       className="euiToolTipAnchor"
-                                      onKeyUp={[Function]}
                                       onMouseOut={[Function]}
                                       onMouseOver={[Function]}
                                     >
@@ -8184,11 +8184,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <EuiToolTip
                                   content="Download report with warnings"
                                   delay="regular"
+                                  display="inlineBlock"
                                   position="top"
                                 >
                                   <span
                                     className="euiToolTipAnchor"
-                                    onKeyUp={[Function]}
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
@@ -8633,11 +8633,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   <EuiToolTip
                                     content="See report info and warnings."
                                     delay="regular"
+                                    display="inlineBlock"
                                     position="top"
                                   >
                                     <span
                                       className="euiToolTipAnchor"
-                                      onKeyUp={[Function]}
                                       onMouseOut={[Function]}
                                       onMouseOver={[Function]}
                                     >
@@ -9264,11 +9264,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 <EuiToolTip
                                   content="Download report with warnings"
                                   delay="regular"
+                                  display="inlineBlock"
                                   position="top"
                                 >
                                   <span
                                     className="euiToolTipAnchor"
-                                    onKeyUp={[Function]}
                                     onMouseOut={[Function]}
                                     onMouseOver={[Function]}
                                   >
@@ -9713,11 +9713,11 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   <EuiToolTip
                                     content="See report info and warnings."
                                     delay="regular"
+                                    display="inlineBlock"
                                     position="top"
                                   >
                                     <span
                                       className="euiToolTipAnchor"
-                                      onKeyUp={[Function]}
                                       onMouseOut={[Function]}
                                       onMouseOver={[Function]}
                                     >

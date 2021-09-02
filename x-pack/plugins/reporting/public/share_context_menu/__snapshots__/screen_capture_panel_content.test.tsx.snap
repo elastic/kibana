@@ -354,12 +354,12 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
                   <EuiToolTip
                     anchorClassName="eui-displayBlock"
                     delay="regular"
+                    display="inlineBlock"
                     onMouseOut={[Function]}
                     position="top"
                   >
                     <span
                       className="euiToolTipAnchor eui-displayBlock"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -792,12 +792,12 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
                   <EuiToolTip
                     anchorClassName="eui-displayBlock"
                     delay="regular"
+                    display="inlineBlock"
                     onMouseOut={[Function]}
                     position="top"
                   >
                     <span
                       className="euiToolTipAnchor eui-displayBlock"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >
@@ -1102,12 +1102,12 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
                   <EuiToolTip
                     anchorClassName="eui-displayBlock"
                     delay="regular"
+                    display="inlineBlock"
                     onMouseOut={[Function]}
                     position="top"
                   >
                     <span
                       className="euiToolTipAnchor eui-displayBlock"
-                      onKeyUp={[Function]}
                       onMouseOut={[Function]}
                       onMouseOver={[Function]}
                     >

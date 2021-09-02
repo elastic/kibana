@@ -5,6 +5,7 @@ exports[`SortIndicator rendering renders correctly against snapshot 1`] = `
   content="Sorted descending"
   data-test-subj="sort-indicator-tooltip"
   delay="regular"
+  display="inlineBlock"
   position="top"
 >
   <EuiIcon
