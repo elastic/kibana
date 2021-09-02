@@ -176,7 +176,7 @@ const SavedObjectConflictMessage = ({ json }: { json: string }) => {
     <>
       <FormattedMessage
         id="xpack.lens.embeddable.legacyURLConflict.longMessage"
-        defaultMessage=" A {documentationLink} is also associated with this object."
+        defaultMessage="Disable the {documentationLink} associated with this object."
         values={{
           documentationLink: (
             <EuiLink
@@ -185,7 +185,7 @@ const SavedObjectConflictMessage = ({ json }: { json: string }) => {
               target="_blank"
             >
               {i18n.translate('xpack.lens.embeddable.legacyURLConflict.documentationLinkText', {
-                defaultMessage: 'legacy URL',
+                defaultMessage: 'legacy URL alias',
               })}
             </EuiLink>
           ),
@@ -195,7 +195,7 @@ const SavedObjectConflictMessage = ({ json }: { json: string }) => {
       {expandError ? (
         <EuiCallOut
           title={i18n.translate('xpack.lens.embeddable.legacyURLConflict.expandErrorText', {
-            defaultMessage: `An object and an alias have the same URL. Disable the alias to resolve this error: {json}`,
+            defaultMessage: `This object has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
             values: { json },
           })}
           color="danger"
