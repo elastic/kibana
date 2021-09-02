@@ -6,11 +6,9 @@
 
 {kib} relies on three high-level entities to set the logging service: appenders, loggers, and root.
 
-__Appenders__ define where log messages are displayed (e.g. stdout or console) and stored (eg. file on the disk), and their layout.
-
-__Loggers__ define what logging settings, such as the level of verbosity and the appenders,  to apply to a particular context. Each log entry context provides information about the service or plugin that emits it and any of its sub-parts, for example, `metrics.ops` or `elasticsearch.query`.
-
-Root is a logger that applies to all the log entries in {kib}.
+- Appenders define where log messages are displayed (stdout or console) and stored (file on the disk), and their layout.
+- Loggers define what logging settings, such as the level of verbosity and the appenders, to apply to a particular context. Each log entry context provides information about the service or plugin that emits it and any of its sub-parts, for example, `metrics.ops` or `elasticsearch.query`.
+- Root is a logger that applies to all the log entries in {kib}.
 
 Refer to the <<log-settings-examples, examples>> for common configuration use cases. To learn more about possible configuration values, go to {kibana-ref}/logging-service.html[{kib}'s Logging service].
 
@@ -47,9 +45,9 @@ logging:
 ----
 
 [[log-in-json-ECS-example]]
-===== Log in json format
+===== Log in JSON format
 
-Log the default log format to json layout instead of pattern (the default).
+Log the default log format to JSON layout instead of pattern (the default).
 With `json` layout log messages will be formatted as JSON strings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS format] that includes a timestamp, log level, logger, message text and any other metadata that may be associated with the log message itself
 
 [source,yaml]
