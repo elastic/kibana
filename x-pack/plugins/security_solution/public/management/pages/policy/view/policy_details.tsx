@@ -33,6 +33,7 @@ import {
 import { useKibana, toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
 import { useToasts } from '../../../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { AppAction } from '../../../../common/store/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
@@ -43,6 +44,7 @@ import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderLinkBack } from '../../../../common/components/header_page';
 import { PolicyDetailsForm } from './policy_details_form';
+import { PolicyTabs } from './tabs';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 
 export const PolicyDetails = React.memo(() => {
@@ -54,6 +56,9 @@ export const PolicyDetails = React.memo(() => {
   } = useKibana<{ application: ApplicationStart }>();
   const toasts = useToasts();
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
+  const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
+    'trustedAppsByPolicyEnabled'
+  );
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -188,8 +193,10 @@ export const PolicyDetails = React.memo(() => {
         headerBackComponent={backToEndpointList}
         actions={headerRightContent}
         restrictWidth={true}
+        hasBottomBorder={!isTrustedAppsByPolicyEnabled}
       >
-        <PolicyDetailsForm />
+        {isTrustedAppsByPolicyEnabled ? <PolicyTabs /> : <PolicyDetailsForm />}
+
         <EuiSpacer size="xxl" />
         <EuiBottomBar paddingSize="s">
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
