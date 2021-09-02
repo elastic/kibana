@@ -22,7 +22,7 @@ import { registry } from '../../../common/registry';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiSupertest = createApmApiSupertest(getService('supertest'));
+  const { readUserClient } = getService('supertestClients');
   const es = getService('es');
 
   const archiveName = 'apm_8.0.0';
@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await apmApiSupertest({
+        const response = await readUserClient({
           endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
           params: {
             path: { serviceName: 'opbeans-java' },
@@ -212,7 +212,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           refresh: 'wait_for',
         });
 
-        response = await apmApiSupertest({
+        response = await readUserClient({
           endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
           params: {
             path: { serviceName: 'opbeans-java' },
@@ -314,7 +314,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        response = await apmApiSupertest({
+        response = await readUserClient({
           endpoint: `GET /api/apm/services/{serviceName}/dependencies`,
           params: {
             path: { serviceName: 'opbeans-python' },

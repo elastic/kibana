@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function annotationApiTests({ getService }: FtrProviderContext) {
-  const supertestRead = createApmApiSupertest(getService('supertestAsApmReadUser'));
+  const { readUserClient } = getService('supertestClients');
   const es = getService('es');
 
   const dates = [
@@ -128,7 +128,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           });
 
           response = (
-            await supertestRead({
+            await readUserClient({
               endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
               params: {
                 path: {

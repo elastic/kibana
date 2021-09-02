@@ -18,7 +18,7 @@ import { createApmApiSupertest } from '../../common/apm_api_supertest';
 import { getServiceNodeIds } from './get_service_node_ids';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
   const apmApiSupertest = createApmApiSupertest(supertest);
 
   const archiveName = 'apm_8.0.0';
