@@ -211,6 +211,7 @@ export const initSetupModeState = async ($scope: any, $injector: any, callback?:
 };
 
 export const isInSetupMode = (context?: ISetupModeContext) => {
+  if (isReactMigrationEnabled()) return setupModeReact.isInSetupMode(context);
   if (context?.setupModeSupported === false) {
     return false;
   }

@@ -36,15 +36,12 @@ import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badg
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 import { SetupModeContext } from '../../setup_mode/setup_mode_context';
-import { ExternalConfigContext } from '../../../application/external_config_context';
 
 const INSTANCES_PANEL_ALERTS = [RULE_KIBANA_VERSION_MISMATCH];
 
 export function KibanaPanel(props) {
   const setupMode = props.setupMode;
   const alerts = props.alerts;
-  const externalConfigContext = React.useContext(ExternalConfigContext);
-  const reactMigrationEnabled = externalConfigContext.renderReactApp;
   const setupModeContext = React.useContext(SetupModeContext);
   const showDetectedKibanas =
     setupMode.enabled && get(setupMode.data, 'kibana.detected.doesExist', false);
@@ -69,9 +66,7 @@ export function KibanaPanel(props) {
   ) : null;
 
   let instancesAlertStatus = null;
-  if (
-    shouldShowAlertBadge(alerts, INSTANCES_PANEL_ALERTS, setupModeContext, reactMigrationEnabled)
-  ) {
+  if (shouldShowAlertBadge(alerts, INSTANCES_PANEL_ALERTS, setupModeContext)) {
     const alertsList = INSTANCES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     instancesAlertStatus = (
       <EuiFlexItem grow={false}>

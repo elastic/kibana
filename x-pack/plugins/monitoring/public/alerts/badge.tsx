@@ -12,12 +12,10 @@ import { AlertState, CommonAlertStatus } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 // @ts-ignore
 import { formatDateTimeLocal } from '../../common/formatting';
-import { isInSetupMode as isInSetupModeOld } from '../lib/setup_mode';
-import { isInSetupMode as isInSetupModeNew } from '../application/setup_mode/setup_mode';
+import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 import { getAlertPanelsByCategory } from './lib/get_alert_panels_by_category';
 import { getAlertPanelsByNode } from './lib/get_alert_panels_by_node';
-import { ExternalConfigContext } from '../application/external_config_context';
 
 export const numberOfAlertsLabel = (count: number) => `${count} alert${count > 1 ? 's' : ''}`;
 export const numberOfRulesLabel = (count: number) => `${count} rule${count > 1 ? 's' : ''}`;
@@ -51,11 +49,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const alerts = alertsList.filter((alertItem) => Boolean(alertItem?.sanitizedRule));
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
 
-  const externalConfigContext = React.useContext(ExternalConfigContext);
-  const reactMigrationEnabled = externalConfigContext.renderReactApp;
-
-  const context = React.useContext(SetupModeContext);
-  const inSetupMode = reactMigrationEnabled ? isInSetupModeNew(context) : isInSetupModeOld(context);
+  const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 
   const alertCount = inSetupMode
     ? alerts.length
