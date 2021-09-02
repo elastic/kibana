@@ -6,7 +6,7 @@
  */
 import url from 'url';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';

@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { last, omit, pick, sortBy } from 'lodash';
 import { ValuesType } from 'utility-types';
 import { Node, NodeType } from '../../../../../plugins/apm/common/connections';
-import { createApmApiSupertest } from '../../../common/apm_api_supertest';
 import { roundNumber } from '../../../utils';
 import {
   ENVIRONMENT_ALL,
