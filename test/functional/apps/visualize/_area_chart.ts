@@ -204,7 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.visEditor.toggleOpenEditor(2);
         await PageObjects.visEditor.setInterval('Second');
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         await inspector.open();
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
@@ -236,7 +236,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.visEditor.toggleAdvancedParams('2');
         await PageObjects.visEditor.toggleScaleMetrics();
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         await inspector.open();
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
@@ -270,7 +270,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectAggregation('Top Hit', 'metrics');
         await PageObjects.visEditor.selectField('bytes', 'metrics');
         await PageObjects.visEditor.selectAggregateWith('average');
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         await inspector.open();
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
@@ -304,7 +304,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickYAxisOptions(axisId);
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers(xyChartSelector);
         const minLabel = 1;
         const maxLabel = 900;
@@ -316,7 +316,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting log scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers(xyChartSelector);
         const minLabel = 1;
         const maxLabel = 900;
@@ -329,7 +329,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show ticks on selecting square root scale', async () => {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'square root');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -337,7 +337,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting square root scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -346,7 +346,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show ticks on selecting linear scale', async () => {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'linear');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         log.debug(labels);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
@@ -355,7 +355,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting linear scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -380,7 +380,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.selectField('@timestamp');
         await PageObjects.visEditor.setInterval('Year');
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         // This svg area is composed by 7 years (2013 - 2019).
         // 7 points are used to draw the upper line (usually called y1)
         // 7 points compose the lower line (usually called y0)
@@ -403,7 +403,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.selectField('@timestamp');
         await PageObjects.visEditor.setInterval('Month');
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         // This svg area is composed by 67 months 3 (2013) + 5 * 12 + 4 (2019)
         // 67 points are used to draw the upper line (usually called y1)
         // 67 points compose the lower line (usually called y0)

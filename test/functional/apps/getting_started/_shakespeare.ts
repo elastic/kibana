@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Remove refresh click when vislib is removed
       // https://github.com/elastic/kibana/issues/56143
-      await PageObjects.visualize.clickRefresh();
+      await PageObjects.visualize.clickRefresh(true);
 
       const expectedChartValues = [111396];
       await retry.try(async () => {

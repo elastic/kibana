@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('embeddableErrorLabel');
       await enableNewChartLibraryDebug();
-      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, '');
+      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
     });
 

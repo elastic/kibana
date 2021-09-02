@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickYAxisOptions(axisId);
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers(xyChartSelector);
         const minLabel = 1;
         const maxLabel = 900;
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting log scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers(xyChartSelector);
         const minLabel = 1;
         const maxLabel = 900;
@@ -159,7 +159,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show ticks on selecting square root scale', async () => {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'square root');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -167,7 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting square root scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -176,7 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show ticks on selecting linear scale', async () => {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'linear');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         log.debug(labels);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
@@ -185,7 +185,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show filtered ticks on selecting linear scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         const expectedLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
@@ -203,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.common.sleep(1003);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['503', '404', '200']; // sorting aligned with rendered geometries
@@ -230,7 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.common.sleep(1003);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = [
@@ -256,7 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct series when disabling first agg', async function () {
         await PageObjects.visEditor.toggleDisabledAgg(3);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['win 7', 'osx', 'ios', 'win xp', 'win 8'];
@@ -275,7 +275,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.common.sleep(1003);
-        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickGo(true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = ['Derivative of Count'];
