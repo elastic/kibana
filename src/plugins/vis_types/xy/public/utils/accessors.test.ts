@@ -7,21 +7,19 @@
  */
 
 import { COMPLEX_SPLIT_ACCESSOR, getComplexAccessor } from './accessors';
-import { BUCKET_TYPES } from '../../../../data/common';
 import { AccessorFn, Datum } from '@elastic/charts';
 
 describe('XY chart datum accessors', () => {
   const aspectBase = {
     accessor: 'col-0-2',
     formatter: (value: Datum) => value,
-    aggId: '',
+    id: '',
     title: '',
     params: {},
   };
 
   it('should return complex accessor for IP range aggregation', () => {
     const aspect = {
-      aggType: BUCKET_TYPES.IP_RANGE,
       ...aspectBase,
     };
     const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
@@ -39,7 +37,6 @@ describe('XY chart datum accessors', () => {
 
   it('should return complex accessor for date range aggregation', () => {
     const aspect = {
-      aggType: BUCKET_TYPES.DATE_RANGE,
       ...aspectBase,
     };
     const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
@@ -56,7 +53,6 @@ describe('XY chart datum accessors', () => {
 
   it('should return complex accessor when isComplex option set to true', () => {
     const aspect = {
-      aggType: BUCKET_TYPES.TERMS,
       ...aspectBase,
     };
     const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
@@ -67,7 +63,6 @@ describe('XY chart datum accessors', () => {
 
   it('should return simple string accessor for not range (date histogram) aggregation', () => {
     const aspect = {
-      aggType: BUCKET_TYPES.DATE_HISTOGRAM,
       ...aspectBase,
     };
     const accessor = getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(aspect);
@@ -78,7 +73,6 @@ describe('XY chart datum accessors', () => {
 
   it('should return simple string accessor when aspect has no formatter', () => {
     const aspect = {
-      aggType: BUCKET_TYPES.RANGE,
       ...aspectBase,
       formatter: undefined,
     };
@@ -90,7 +84,7 @@ describe('XY chart datum accessors', () => {
 
   it('should return undefined when aspect has no accessor', () => {
     const aspect = {
-      aggType: BUCKET_TYPES.RANGE,
+
       ...aspectBase,
       accessor: null,
     };
