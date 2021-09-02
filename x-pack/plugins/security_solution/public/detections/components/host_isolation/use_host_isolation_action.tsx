@@ -80,12 +80,13 @@ export const useHostIsolationAction = ({
       isIsolationAllowed &&
       isEndpointAlert &&
       isolationSupported &&
-      isHostIsolationPanelOpen === false
+      isHostIsolationPanelOpen === false &&
+      loadingHostIsolationStatus === false &&
+      agentStatus !== HostStatus.UNENROLLED
         ? [
             <EuiContextMenuItem
               key="isolate-host-action-item"
               data-test-subj="isolate-host-action-item"
-              disabled={loadingHostIsolationStatus || agentStatus === HostStatus.UNENROLLED}
               onClick={isolateHostHandler}
             >
               {isolateHostTitle}
