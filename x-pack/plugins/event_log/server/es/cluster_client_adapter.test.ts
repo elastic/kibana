@@ -945,9 +945,11 @@ describe('queryEventsBySavedObject', () => {
                                   },
                                 },
                                 {
-                                  term: {
-                                    'kibana.version': {
-                                      value: 'NULL',
+                                  bool: {
+                                    must_not: {
+                                      exists: {
+                                        field: 'kibana.version',
+                                      },
                                     },
                                   },
                                 },
