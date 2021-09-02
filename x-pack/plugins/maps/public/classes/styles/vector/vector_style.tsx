@@ -493,8 +493,6 @@ export class VectorStyle implements IVectorStyle {
 
   async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
 
-    console.log('pluck style meta!', metaFeatures);
-
 
     // const shapeTypeCountMeta: VectorShapeTypeCounts = metaFeatures.reduce(
     //   (accumulator: VectorShapeTypeCounts, tileMeta: TileMetaFeature) => {
@@ -550,8 +548,6 @@ export class VectorStyle implements IVectorStyle {
       return styleMeta;
     }
 
-    console.log('dun props', dynamicProperties);
-    
     dynamicProperties.forEach((dynamicProperty) => {
       const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(
         metaFeatures
@@ -561,7 +557,6 @@ export class VectorStyle implements IVectorStyle {
       );
 
       const name = dynamicProperty.getFieldName();
-      console.log('name', name, ordinalStyleMeta, categoricalStyleMeta);
       if (!styleMeta.fieldMeta[name]) {
         styleMeta.fieldMeta[name] = {};
       }

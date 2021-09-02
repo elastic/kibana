@@ -45,6 +45,7 @@ export interface BoundsFilters {
 }
 
 export interface IVectorSource extends ISource {
+  isMvt(): boolean;
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
@@ -80,6 +81,10 @@ export interface IVectorSource extends ISource {
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
   getFieldNames(): string[] {
     return [];
+  }
+
+  isMvt() {
+    return false;
   }
 
   createField({ fieldName }: { fieldName: string }): IField {

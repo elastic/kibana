@@ -313,13 +313,11 @@ export class DynamicStyleProperty<T>
   pluckOrdinalStyleMetaFromTileMetaFeatures(
     metaFeatures: TileMetaFeature[]
   ): RangeFieldMeta | null {
-    console.log('pluck ordinal stylemeta', metaFeatures);
     if (!this.isOrdinal()) {
       return null;
     }
 
     const name = this.getFieldName();
-    console.log('na', name);
     let min = this._field?.isCountable() ? 0 : Infinity;
     let max = this._field?.isCountable() ? 0 : -Infinity;
     for (let i = 0; i < metaFeatures.length; i++) {

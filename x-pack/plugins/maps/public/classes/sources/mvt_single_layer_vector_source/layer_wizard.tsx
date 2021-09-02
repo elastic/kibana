@@ -23,7 +23,6 @@ export const mvtVectorSourceWizardConfig: LayerWizard = {
   icon: VectorTileLayerIcon,
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: TiledSingleLayerVectorSourceSettings) => {
-      console.log('change!', sourceConfig);
       const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor(sourceConfig);
       const layerDescriptor = TiledVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       previewLayers([layerDescriptor]);

@@ -248,13 +248,6 @@ export class MapsPlugin implements Plugin {
 
   // @ts-ignore
   start(core: CoreStart, plugins: StartDeps) {
-
-    console.log('****************************');
-    // console.log('core.elasticsearch.client', core.elasticsearch.client.asInternalUser.extend.toString());
-    console.log('****************************');
-
-
-
     setInternalRepository(core.savedObjects.createInternalRepository);
     setIndexPatternsService(
       plugins.data.indexPatterns.indexPatternsServiceFactory,

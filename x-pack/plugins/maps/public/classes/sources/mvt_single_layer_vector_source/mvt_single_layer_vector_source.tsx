@@ -82,6 +82,10 @@ export class MVTSingleLayerVectorSource
       .filter((f) => f !== null) as MVTField[];
   }
 
+  isMvt() {
+    return true;
+  }
+
   async supportsFitToBounds() {
     return false;
   }

@@ -63,9 +63,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   syncIconSizeWithMb(symbolLayerId: string, mbMap: MbMap) {
-    console.log('ICOM', symbolLayerId);
     const rangeFieldMeta = this.getRangeFieldMeta();
-    console.log('sync icon size', rangeFieldMeta, this.getMbFieldName());
     if (this._isSizeDynamicConfigComplete() && rangeFieldMeta) {
       const halfIconPixels = this.getIconPixelSize() / 2;
       const targetName = this.getMbFieldName();
@@ -96,9 +94,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   syncCircleRadiusWithMb(mbLayerId: string, mbMap: MbMap) {
-    console.log('sync cyrcleradio!');
     const circleRadius = this.getMbSizeExpression();
-    console.log('cr', circleRadius);
     mbMap.setPaintProperty(mbLayerId, 'circle-radius', circleRadius);
   }
 

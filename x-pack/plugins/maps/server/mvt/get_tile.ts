@@ -80,8 +80,6 @@ export async function getEsTile({
       // script_fields: requestBody.script_fields,
     };
 
-    console.log('bo---');
-    console.log(body);
     const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
       method: 'GET',
       path,

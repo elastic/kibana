@@ -92,6 +92,7 @@ export class FeatureProperties extends Component<Props, State> {
   }
 
   _loadProperties = async () => {
+    console.log('load props', this.props.featureId, this.props.layerId, this.props.mbProperties);
     this._fetchProperties({
       nextFeatureId: this.props.featureId,
       nextLayerId: this.props.layerId,

@@ -42,7 +42,6 @@ export function isSearchSourceAbortError(error: Error) {
 }
 
 export interface IESSource extends IVectorSource {
-  isMvt(): boolean;
   isESSource(): true;
   getId(): string;
   getIndexPattern(): Promise<IndexPattern>;

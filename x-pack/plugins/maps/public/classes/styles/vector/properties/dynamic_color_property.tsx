@@ -79,8 +79,6 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
 
   syncFillColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
     const color = this._getMbColor();
-    console.log('color', color);
-    window._c = color;
     mbMap.setPaintProperty(mbLayerId, 'fill-color', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
   }
@@ -148,7 +146,6 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
 
   _getOrdinalColorMbExpression() {
     const targetName = this.getMbFieldName();
-    console.log('tn', targetName);
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
         // custom color ramp config is not complete
@@ -207,8 +204,6 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     if (!rangeFieldMeta) {
       return null;
     }
-
-    console.log('rf', rangeFieldMeta);
 
     const colorStops = getOrdinalMbColorRampStops(
       this._options.color ? this._options.color : null,

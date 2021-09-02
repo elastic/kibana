@@ -30,7 +30,11 @@ import {
   FieldFormatter,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
   KBN_IS_TILE_COMPLETE,
-  MVT_META_SOURCE_LAYER_NAME, DEFAULT_MAX_RESULT_WINDOW, MVT_HITS_TOTAL_RELATION, MVT_HITS_TOTAL_VALUE,
+  MVT_META_SOURCE_LAYER_NAME,
+  DEFAULT_MAX_RESULT_WINDOW,
+  MVT_HITS_TOTAL_RELATION,
+  MVT_HITS_TOTAL_VALUE,
+  MVT_FEATURE_ID_PROPERTY_NAME,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -80,6 +84,8 @@ export interface VectorLayerArguments {
 }
 
 export interface IVectorLayer extends ILayer {
+  getMbTooltipLayerIds(): string[];
+  getMbFeatureIdPropertyName(): string;
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getJoins(): InnerJoin[];
@@ -145,6 +151,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       this,
       chartsPaletteServiceGetColor
     );
+  }
+
+  getMbFeatureIdPropertyName(): string {
+    return this.getSource().isMvt() ? MVT_FEATURE_ID_PROPERTY_NAME : FEATURE_ID_PROPERTY_NAME;
   }
 
   getSource(): IVectorSource {
@@ -511,7 +521,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName(source);
 
-      console.log('going to load style meta');
       const styleMeta = await (source as IESSource).loadStylePropsMeta({
         layerName,
         style,
@@ -521,11 +530,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         timeFilters: nextMeta.timeFilters,
         searchSessionId: dataFilters.searchSessionId,
       });
-      console.log('done lading to load style meta', styleMeta);
 
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
-      console.log(error);
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(dataRequestId, requestToken, error.message);
       }
@@ -873,7 +880,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     mvtSourceLayer?: string,
     timesliceMaskConfig?: TimesliceMaskConfig
   ) {
-    console.log('set mvlin', mvtSourceLayer);
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
@@ -916,7 +922,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
       mbMap.addLayer(mbTooManyFeaturesLayer);
 
-      //todo this filter should not be used for agg-layers
+      // todo this filter should not be used for agg-layers
       mbMap.setFilter(tooManyFeaturesLayerId, [
         'all',
         ['==', ['get', MVT_HITS_TOTAL_RELATION], 'gte'],
@@ -1041,6 +1047,17 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   _getMbTooManyFeaturesLayerId() {
     return this.makeMbLayerId('toomanyfeatures');
+  }
+
+  getMbTooltipLayerIds() {
+    return [
+      this._getMbPointLayerId(),
+      this._getMbTextLayerId(),
+      this._getMbCentroidLayerId(),
+      this._getMbSymbolLayerId(),
+      this._getMbLineLayerId(),
+      this._getMbPolygonLayerId(),
+    ];
   }
 
   getMbLayerIds() {

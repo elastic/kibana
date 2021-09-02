@@ -114,7 +114,6 @@ export class TiledVectorLayer extends VectorLayer {
     onLoadError,
     dataFilters,
   }: DataRequestContext) {
-    console.log('syncmvt template');
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_REQUEST_ID}`);
     const searchFilters: VectorSourceRequestMeta = await this._getSearchFilters(
       dataFilters,
@@ -142,10 +141,7 @@ export class TiledVectorLayer extends VectorLayer {
         const canSkip = noChangesInSourceState && noChangesInSearchState;
 
         if (canSkip) {
-          console.log('can skip!');
           return null;
-        } else {
-          console.log('cannot skip');
         }
       }
     }
@@ -236,7 +232,6 @@ export class TiledVectorLayer extends VectorLayer {
       return;
     }
 
-    console.log('sync stlye proprs');
     this._setMbPointsProperties(mbMap, sourceMeta.layerName);
     this._setMbLinePolygonProperties(mbMap, sourceMeta.layerName);
     this._setMbCentroidProperties(mbMap, sourceMeta.layerName);
@@ -244,7 +239,6 @@ export class TiledVectorLayer extends VectorLayer {
 
   queryTileMetaFeatures(mbMap: MbMap): TileMetaFeature[] | null {
     if (!this.getSource().isESSource()) {
-      console.log('not an es srouce, cant show merta');
       return null;
     }
 
@@ -294,8 +288,6 @@ export class TiledVectorLayer extends VectorLayer {
         return null;
       }
     });
-
-    console.log('meta featyres', metaFeatures);
 
     const filtered = metaFeatures.filter(f => f!==null);
     return filtered as TileMetaFeature[];

@@ -9,8 +9,8 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
-import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
 import {
@@ -55,14 +55,17 @@ import {
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { TimeRange } from '../../../../../../../src/plugins/data/common';
+import {
+  SortDirection,
+  SortDirectionNumeric,
+  TimeRange,
+} from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import { GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
 import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
-import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
@@ -202,6 +205,10 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getFieldNames(): string[] {
     return [this._descriptor.geoField];
+  }
+
+  isMvt() {
+    return this._descriptor.scalingType === SCALING_TYPES.MVT;
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
@@ -554,7 +561,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return this._tooltipFields.length > 0;
   }
 
-  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: IndexPattern) {
+  async _loadTooltipProperties(docId: string | number, esIndex: string, indexPattern: IndexPattern) {
+    console.log('ttp', docId, esIndex);
     if (this._tooltipFields.length === 0) {
       return {};
     }
@@ -575,7 +583,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const query = {
       language: 'kuery',
-      query: `_id:"${docId}" and _index:"${index}"`,
+      query: esIndex ? `_id:"${docId}" and _index:"${esIndex}"` : `_id:"${docId}"`,
     };
 
     searchSource.setField('query', query);

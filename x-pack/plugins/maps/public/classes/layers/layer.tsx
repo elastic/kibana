@@ -366,14 +366,12 @@ export class AbstractLayer implements ILayer {
       // @ts-expect-error
       mbStyle.layers.forEach((mbLayer) => {
         if (this.ownsMbLayerId(mbLayer.id)) {
-          console.log('remove layer!', mbLayer.id);
           // @ts-expect-error
           mbMap.removeLayer(mbLayer.id);
         }
       });
       Object.keys(mbStyle.sources).some((mbSourceId) => {
         if (this.ownsMbSourceId(mbSourceId)) {
-          console.log('remove source!', mbSourceId);
           // @ts-expect-error
           mbMap.removeSource(mbSourceId);
         }

@@ -20,7 +20,6 @@ import { Geometry } from 'geojson';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import {
-  FEATURE_ID_PROPERTY_NAME,
   GEO_JSON_TYPE,
   LON_INDEX,
   RawValue,
@@ -207,7 +206,8 @@ export class TooltipControl extends Component<Props, {}> {
       if (!layer) {
         break;
       }
-      const featureId = mbFeature.properties?.[FEATURE_ID_PROPERTY_NAME];
+      const featureId = mbFeature.properties?.[layer.getMbFeatureIdPropertyName()];
+      console.log('fi', featureId);
       const layerId = layer.getId();
       let match = false;
       for (let j = 0; j < uniqueFeatures.length; j++) {
@@ -253,7 +253,6 @@ export class TooltipControl extends Component<Props, {}> {
     this._updateHoverTooltipState.cancel(); // ignore any possible moves
 
     const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
-    console.log('lock', mbFeatures);
     if (!mbFeatures.length) {
       // No features at click location so there is no tooltip to open
       return;
@@ -283,16 +282,17 @@ export class TooltipControl extends Component<Props, {}> {
     }
 
     const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
-    console.log('mbFeatures', mbFeatures);
+    console.log('tooltip', mbFeatures);
     if (!mbFeatures.length) {
       this.props.closeOnHoverTooltip();
       return;
     }
 
     const targetMbFeature = mbFeatures[0];
-    if (this.props.openTooltips[0] && this.props.openTooltips[0].features.length) {
+    const layer = this._getLayerByMbLayerId(targetMbFeature.layer.id);
+    if (layer && this.props.openTooltips[0] && this.props.openTooltips[0].features.length) {
       const firstFeature = this.props.openTooltips[0].features[0];
-      if (targetMbFeature.properties?.[FEATURE_ID_PROPERTY_NAME] === firstFeature.id) {
+      if (targetMbFeature.properties?.[layer.getMbFeatureIdPropertyName()] === firstFeature.id) {
         // ignore hover events when hover tooltip is all ready opened for feature
         return;
       }
@@ -318,7 +318,7 @@ export class TooltipControl extends Component<Props, {}> {
       (accumulator: string[], layer: ILayer) => {
         // tooltips are only supported for vector layers, filter out all other layer types
         return layer.isVisible() && isVectorLayer(layer)
-          ? accumulator.concat(layer.getMbLayerIds())
+          ? accumulator.concat((layer as IVectorLayer).getMbTooltipLayerIds())
           : accumulator;
       },
       []
