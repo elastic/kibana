@@ -49,6 +49,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dashboard_unsaved_state'));
       loadTestFile(require.resolve('./dashboard_unsaved_listing'));
       loadTestFile(require.resolve('./edit_visualizations'));
+      loadTestFile(require.resolve('./time_zones'));
       loadTestFile(require.resolve('./dashboard_options'));
       loadTestFile(require.resolve('./data_shared_attributes'));
       loadTestFile(require.resolve('./share'));
@@ -87,8 +88,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
     // the data once to save on time. Eventually, all of these tests should just use current data and we can reserve
     // legacy data only for specifically testing BWC situations.
-
-    // TODO: Move relevant tests to use the new format, delete tests that relate to legacy data imports
     describe('using legacy data', function () {
       this.tags('ciGroup4');
       before(loadLogstash);
@@ -96,6 +95,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
+      loadTestFile(require.resolve('./bwc_import'));
       loadTestFile(require.resolve('./panel_replacing'));
       loadTestFile(require.resolve('./panel_cloning'));
       loadTestFile(require.resolve('./copy_panel_to'));

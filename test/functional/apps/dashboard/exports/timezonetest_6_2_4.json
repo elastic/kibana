@@ -1,0 +1,25 @@
+[
+  {
+    "_id": "61d06bc0-5215-11e8-82a7-0b6f5e824cae",
+    "_type": "dashboard",
+    "_source": {
+      "title": "time zone test",
+      "hits": 0,
+      "description": "",
+      "panelsJSON": "[{\"gridData\":{\"h\":3,\"i\":\"1\",\"w\":6,\"x\":0,\"y\":0},\"id\":\"3fe22200-3dcb-11e8-8660-4d65aa086b3c\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"version\":\"6.2.4\"}]",
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+      "version": 1,
+      "timeRestore": true,
+      "timeTo": "Tue Apr 09 2018 23:00:00 GMT-0500",
+      "timeFrom": "Mon Apr 09 2018 22:00:00 GMT-0500",
+      "refreshInterval": {
+        "display": "Off",
+        "pause": false,
+        "value": 0
+      },
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+      }
+    }
+  }
+]
