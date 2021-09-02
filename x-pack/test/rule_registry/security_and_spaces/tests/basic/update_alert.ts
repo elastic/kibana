@@ -164,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     }
 
-    describe('Security Solution', () => {
+    describe.skip('Security Solution', () => {
       const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll];
       const authorizedOnlyInSpace1 = [secOnly, obsSec];
       const authorizedOnlyInSpace2 = [secOnlySpace2, obsSecAllSpace2];
