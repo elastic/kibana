@@ -64,6 +64,7 @@ interface SearchStrategyReturnBase {
   cancelFetch: () => void;
 }
 
+// Function overload for Latency Correlations
 export function useSearchStrategy(
   searchStrategyName: typeof APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
   options: {
@@ -74,6 +75,7 @@ export function useSearchStrategy(
   data: LatencyCorrelationsRawResponse;
 } & SearchStrategyReturnBase;
 
+// Function overload for Failed Transactions Correlations
 export function useSearchStrategy(
   searchStrategyName: typeof APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS
 ): {
@@ -108,21 +110,18 @@ export function useSearchStrategy<
 
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
-  // options get passed in as a Generic and we don't want to support
-  // an updated on options changes, they should be considered non-changing options
-  // to initialize the search service.
   const optionsRef = useRef(options);
 
   const startFetch = useCallback(() => {
+    searchSubscription$.current?.unsubscribe();
+    abortCtrl.current.abort();
+    abortCtrl.current = new AbortController();
     setFetchState({
       ...getInitialFetchState(),
       error: undefined,
     });
-    searchSubscription$.current?.unsubscribe();
-    abortCtrl.current.abort();
-    abortCtrl.current = new AbortController();
 
-    const req = {
+    const request = {
       params: {
         environment,
         serviceName,
@@ -140,28 +139,28 @@ export function useSearchStrategy<
       .search<
         IKibanaSearchRequest<SearchStrategyClientParams & (TOptions | {})>,
         IKibanaSearchResponse<TRawResponse>
-      >(req, {
+      >(request, {
         strategy: searchStrategyName,
         abortSignal: abortCtrl.current.signal,
       })
       .subscribe({
-        next: (res: IKibanaSearchResponse<TRawResponse>) => {
-          setRawResponse(res.rawResponse);
+        next: (response: IKibanaSearchResponse<TRawResponse>) => {
+          setRawResponse(response.rawResponse);
           setFetchState({
-            isRunning: res.isRunning || false,
-            loaded: res.loaded,
-            total: res.total,
+            isRunning: response.isRunning || false,
+            loaded: response.loaded,
+            total: response.total,
           });
 
-          if (isCompleteResponse(res)) {
+          if (isCompleteResponse(response)) {
             searchSubscription$.current?.unsubscribe();
             setFetchState({
               isRunning: false,
             });
-          } else if (isErrorResponse(res)) {
+          } else if (isErrorResponse(response)) {
             searchSubscription$.current?.unsubscribe();
             setFetchState({
-              error: (res as unknown) as Error,
+              error: (response as unknown) as Error,
               isRunning: false,
             });
           }

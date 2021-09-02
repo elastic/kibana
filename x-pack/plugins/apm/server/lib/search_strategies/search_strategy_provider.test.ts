@@ -17,7 +17,6 @@ import type { LatencyCorrelationsParams } from '../../../common/search_strategie
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 import { latencyCorrelationsAsyncSearchServiceProvider } from './latency_correlations';
-
 import { searchStrategyProvider } from './search_strategy_provider';
 
 // helper to trigger promises in the async search service
