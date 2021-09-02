@@ -15,6 +15,7 @@ import { httpServerMock } from 'src/core/server/mocks';
 
 import { ElasticsearchConnectionStatus } from '../../common';
 import { interactiveSetupMock } from '../mocks';
+import type { RouteDefinitionParams } from './';
 import { defineConfigureRoute } from './configure';
 import { routeDefinitionParamsMock } from './index.mock';
 
@@ -28,7 +29,7 @@ describe('Configure routes', () => {
 
     mockContext = ({} as unknown) as RequestHandlerContext;
 
-    defineConfigureRoute(mockRouteParams);
+    defineConfigureRoute((mockRouteParams as unknown) as RouteDefinitionParams);
   });
 
   describe('#configure', () => {
@@ -57,7 +58,11 @@ describe('Configure routes', () => {
       expect(() =>
         bodySchema.validate({ host: 'localhost:9200' })
       ).toThrowErrorMatchingInlineSnapshot(`"[host]: expected URI with scheme [http|https]."`);
-      expect(() => bodySchema.validate({ host: 'http://localhost:9200' })).not.toThrowError();
+      expect(bodySchema.validate({ host: 'http://localhost:9200' })).toMatchInlineSnapshot(`
+        Object {
+          "host": "http://localhost:9200",
+        }
+      `);
       expect(() =>
         bodySchema.validate({ host: 'http://localhost:9200', username: 'elastic' })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -71,21 +76,57 @@ describe('Configure routes', () => {
       expect(() =>
         bodySchema.validate({ host: 'http://localhost:9200', password: 'password' })
       ).toThrowErrorMatchingInlineSnapshot(`"[password]: a value wasn't expected to be present"`);
-      expect(() =>
+      expect(
         bodySchema.validate({
           host: 'http://localhost:9200',
           username: 'kibana_system',
           password: '',
         })
-      ).not.toThrowError();
+      ).toMatchInlineSnapshot(`
+        Object {
+          "host": "http://localhost:9200",
+          "password": "",
+          "username": "kibana_system",
+        }
+      `);
       expect(() =>
         bodySchema.validate({ host: 'https://localhost:9200' })
       ).toThrowErrorMatchingInlineSnapshot(
         `"[caCert]: expected value of type [string] but got [undefined]"`
       );
-      expect(() =>
-        bodySchema.validate({ host: 'https://localhost:9200', caCert: 'der' })
-      ).not.toThrowError();
+      expect(bodySchema.validate({ host: 'https://localhost:9200', caCert: 'der' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "caCert": "der",
+          "host": "https://localhost:9200",
+        }
+      `);
+      expect(bodySchema.validate({ host: 'https://localhost:9200', caCert: 'der', code: '123456' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "caCert": "der",
+          "code": "123456",
+          "host": "https://localhost:9200",
+        }
+      `);
+    });
+
+    it('fails if verification code is invalid.', async () => {
+      mockRouteParams.verificationCode.verify.mockReturnValue(false);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: { host: 'host1' },
+      });
+
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 403,
+        })
+      );
+
+      expect(mockRouteParams.elasticsearch.authenticate).not.toHaveBeenCalled();
+      expect(mockRouteParams.kibanaConfigWriter.writeConfig).not.toHaveBeenCalled();
+      expect(mockRouteParams.preboot.completeSetup).not.toHaveBeenCalled();
     });
 
     it('fails if setup is not on hold.', async () => {

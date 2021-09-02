@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { IHttpFetchError } from 'kibana/public';
 
+import { VERIFICATION_CODE_LENGTH } from '../common';
 import { SingleCharsField } from './single_chars_field';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
@@ -52,7 +53,7 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
         errors.code = i18n.translate('interactiveSetup.verificationCodeForm.codeRequiredError', {
           defaultMessage: 'Enter a verification code.',
         });
-      } else if (values.code.length !== 6) {
+      } else if (values.code.length !== VERIFICATION_CODE_LENGTH) {
         errors.code = i18n.translate('interactiveSetup.verificationCodeForm.codeMinLengthError', {
           defaultMessage: 'Enter all six digits.',
         });
@@ -123,8 +124,8 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
             >
               <SingleCharsField
                 defaultValue={form.values.code}
-                length={6}
-                separator={3}
+                length={VERIFICATION_CODE_LENGTH}
+                separator={VERIFICATION_CODE_LENGTH / 2}
                 onChange={(value) => form.setValue('code', value)}
                 isInvalid={form.touched.code && !!form.errors.code}
                 autoFocus

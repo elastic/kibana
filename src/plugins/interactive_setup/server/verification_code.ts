@@ -11,10 +11,12 @@ import crypto from 'crypto';
 
 import type { Logger } from 'src/core/server';
 
+import { VERIFICATION_CODE_LENGTH } from '../common';
+
 export class VerificationCode {
-  public readonly code = VerificationCode.generate();
+  public readonly code = VerificationCode.generate(VERIFICATION_CODE_LENGTH);
   private failedAttempts = 0;
-  private readonly maxFailedAttempts = 10;
+  private readonly maxFailedAttempts = 5;
 
   constructor(private readonly logger: Logger) {}
 
@@ -35,15 +37,26 @@ export class VerificationCode {
     );
 
     if (code === undefined) {
-      this.logger.info(`Your verification code is: ${highlightedCode}`);
+      // eslint-disable-next-line no-console
+      console.log(`
+
+Your verification code is: ${highlightedCode}
+
+`);
       return false;
     }
 
     if (code !== this.code) {
       this.failedAttempts++;
       this.logger.error(
-        `Invalid verification code '${code}' provided. ${this.remainingAttempts} attempts left. Your verification code is: ${highlightedCode}`
+        `Invalid verification code '${code}' provided. ${this.remainingAttempts} attempts left.`
       );
+      // eslint-disable-next-line no-console
+      console.log(`
+
+Your verification code is: ${highlightedCode}
+
+`);
       return false;
     }
 
@@ -53,7 +66,7 @@ export class VerificationCode {
     return true;
   }
 
-  private static generate(length = 6) {
+  private static generate(length: number) {
     return Math.floor(secureRandomNumber() * Math.pow(10, length))
       .toString()
       .padStart(length, '0');

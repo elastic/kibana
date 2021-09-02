@@ -176,21 +176,10 @@ const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = (
           defaultMessage="Connect to"
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="lock" />
-      </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ overflow: 'hidden' }}>
-        <TextTruncate>{token.adr[0]}</TextTruncate>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="logoElasticsearch" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} className="eui-textNoWrap">
-        <FormattedMessage
-          id="interactiveSetup.enrollmentTokenDetails.elasticsearchVersion"
-          defaultMessage="Elasticsearch (v{version})"
-          values={{ version: token.ver }}
-        />
+        <TextTruncate>
+          <strong>{token.adr[0]}</strong>
+        </TextTruncate>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiText>

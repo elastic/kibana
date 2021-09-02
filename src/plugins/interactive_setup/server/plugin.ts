@@ -101,11 +101,14 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
           const pathname = core.http.basePath.prepend('/');
           const { protocol, hostname, port } = core.http.getServerInfo();
           const url = `${protocol}://${hostname}:${port}${pathname}?code=${code}`;
-          this.#logger.info(`
+
+          // eslint-disable-next-line no-console
+          console.log(`
 
 ${chalk.whiteBright.bold(`${chalk.cyanBright('i')} Kibana has not been configured.`)}
 
 Go to ${chalk.cyanBright.underline(url)} to get started.
+
 `);
         }
       }

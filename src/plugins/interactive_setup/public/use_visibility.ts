@@ -14,6 +14,6 @@ export type VisibilityReturnTuple<T> = [boolean, RefObject<T>];
 export function useVisibility<T extends HTMLElement>(): VisibilityReturnTuple<T> {
   const elementRef = useRef<T>(null);
 
-  // When an element is hidding using `display` style or `hidden` attribute it has no offset parent.
+  // When an element is hidden using `display: none` or `hidden` attribute it has no offset parent.
   return [!!elementRef.current?.offsetParent, elementRef];
 }
