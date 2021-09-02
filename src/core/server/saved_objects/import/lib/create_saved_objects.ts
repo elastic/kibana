@@ -7,6 +7,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
+import type { ObjectKeyProvider } from './get_object_key';
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from '../types';
 
@@ -14,10 +15,13 @@ interface CreateSavedObjectsParams<T> {
   objects: Array<SavedObject<T>>;
   accumulatedErrors: SavedObjectsImportFailure[];
   savedObjectsClient: SavedObjectsClientContract;
+  getObjKey: ObjectKeyProvider;
   importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
+  importNamespaces: boolean;
   namespace?: string;
   overwrite?: boolean;
 }
+
 interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;
   errors: SavedObjectsImportFailure[];
@@ -31,16 +35,18 @@ export const createSavedObjects = async <T>({
   objects,
   accumulatedErrors,
   savedObjectsClient,
+  getObjKey,
   importIdMap,
+  importNamespaces,
   namespace,
   overwrite,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
   // filter out any objects that resulted in errors
   const errorSet = accumulatedErrors.reduce(
-    (acc, { type, id }) => acc.add(`${type}:${id}`),
+    (acc, obj) => acc.add(getObjKey(obj)),
     new Set<string>()
   );
-  const filteredObjects = objects.filter(({ type, id }) => !errorSet.has(`${type}:${id}`));
+  const filteredObjects = objects.filter((obj) => !errorSet.has(getObjKey(obj)));
 
   // exit early if there are no objects to create
   if (filteredObjects.length === 0) {
@@ -49,7 +55,7 @@ export const createSavedObjects = async <T>({
 
   // generate a map of the raw object IDs
   const objectIdMap = filteredObjects.reduce(
-    (map, object) => map.set(`${object.type}:${object.id}`, object),
+    (map, object) => map.set(getObjKey(object), object),
     new Map<string, SavedObject<T>>()
   );
 
@@ -58,7 +64,13 @@ export const createSavedObjects = async <T>({
     // use the import ID map to ensure that each reference is being created with the correct ID
     const references = object.references?.map((reference) => {
       const { type, id } = reference;
-      const importIdEntry = importIdMap.get(`${type}:${id}`);
+      const importIdEntry = importIdMap.get(
+        getObjKey({
+          type,
+          id,
+          namespaces: object.namespaces,
+        })
+      );
       if (importIdEntry?.id) {
         return { ...reference, id: importIdEntry.id };
       }
@@ -66,9 +78,9 @@ export const createSavedObjects = async <T>({
     });
     // use the import ID map to ensure that each object is being created with the correct ID, also ensure that the `originId` is set on
     // the created object if it did not have one (or is omitted if specified)
-    const importIdEntry = importIdMap.get(`${object.type}:${object.id}`);
+    const importIdEntry = importIdMap.get(getObjKey(object));
     if (importIdEntry?.id) {
-      objectIdMap.set(`${object.type}:${importIdEntry.id}`, object);
+      objectIdMap.set(getObjKey({ ...object, id: importIdEntry.id }), object);
       const originId = importIdEntry.omitOriginId ? undefined : object.originId ?? object.id;
       return { ...object, id: importIdEntry.id, originId, ...(references && { references }) };
     }
@@ -78,23 +90,46 @@ export const createSavedObjects = async <T>({
   const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
   let expectedResults = objectsToCreate;
   if (!accumulatedErrors.some(({ error: { type } }) => resolvableErrors.includes(type))) {
-    const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
-      namespace,
-      overwrite,
-    });
+    const bulkCreateResponse = await savedObjectsClient.bulkCreate(
+      objectsToCreate.map(({ namespaces, ...obj }) => ({
+        ...obj,
+        ...(importNamespaces ? { initialNamespaces: namespaces } : {}),
+      })),
+      {
+        namespace,
+        overwrite,
+      }
+    );
     expectedResults = bulkCreateResponse.saved_objects;
   }
 
   // remap results to reflect the object IDs that were submitted for import
   // this ensures that consumers understand the results
   const remappedResults = expectedResults.map<CreatedObject<T>>((result) => {
-    const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
+    // the (non-agnostic) created objects will always have a `namespaces` field populated,
+    // but the keys we're using in the rest of the algorithm don't have it, so in that case, we exclude the namespaces
+    // when generating the key from the created object.
+    // TODO: not sure omitting namespaces is still required now that we extracted getObjKey
+    const resultKey = getObjKey(
+      importNamespaces
+        ? result
+        : {
+            ...result,
+            namespaces: undefined,
+          }
+    );
+
+    const { id } = objectIdMap.get(resultKey)!;
     // also, include a `destinationId` field if the object create attempt was made with a different ID
-    return { ...result, id, ...(id !== result.id && { destinationId: result.id }) };
+    return {
+      ...result,
+      id,
+      ...(id !== result.id && { destinationId: result.id }),
+    };
   });
 
   return {
     createdObjects: remappedResults.filter((obj) => !obj.error),
-    errors: extractErrors(remappedResults, objects),
+    errors: extractErrors(remappedResults, objects, getObjKey),
   };
 };

@@ -14,22 +14,22 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('resolve_import_errors', () => {
+  describe('TOTO resolve_import_errors', () => {
     // mock success results including metadata
     const indexPattern = {
       type: 'index-pattern',
       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-      meta: { title: 'logstash-*', icon: 'indexPatternApp' },
+      meta: { title: 'logstash-*', icon: 'indexPatternApp', namespaceType: 'single' },
     };
     const visualization = {
       type: 'visualization',
       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-      meta: { title: 'Count of requests', icon: 'visualizeApp' },
+      meta: { title: 'Count of requests', icon: 'visualizeApp', namespaceType: 'single' },
     };
     const dashboard = {
       type: 'dashboard',
       id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-      meta: { title: 'Requests', icon: 'dashboardApp' },
+      meta: { title: 'Requests', icon: 'dashboardApp', namespaceType: 'single' },
     };
     const SPACE_ID = 'ftr-so-resolve_import_errors';
 
@@ -162,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
                 {
                   type: 'visualization',
                   id: '1',
-                  meta: { title: 'My favorite vis', icon: 'visualizeApp' },
+                  meta: { title: 'My favorite vis', icon: 'visualizeApp', namespaceType: 'single' },
                 },
               ],
               warnings: [],

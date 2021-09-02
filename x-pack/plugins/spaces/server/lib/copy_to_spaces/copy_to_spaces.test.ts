@@ -210,6 +210,7 @@ describe('copySavedObjectsToSpaces', () => {
     const importOptions = {
       createNewCopies: false,
       overwrite: true,
+      importNamespaces: false,
       readStream: expect.any(Readable),
     };
     expect(savedObjectsImporter.import).toHaveBeenNthCalledWith(1, {
@@ -275,6 +276,7 @@ describe('copySavedObjectsToSpaces', () => {
     const importOptions = {
       createNewCopies: true,
       overwrite: false,
+      importNamespaces: false,
       readStream: expect.any(Readable),
     };
     expect(savedObjectsImporter.import).toHaveBeenNthCalledWith(1, {

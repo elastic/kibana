@@ -11,10 +11,11 @@ import type { KibanaRequest } from '../../http';
 import type { Logger } from '../../logging';
 import { SavedObjectsClientContract, SavedObjectsExportablePredicate } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { getObjKey, ObjectKeyProvider } from '../import/lib';
 import type { SavedObjectsExportTransform } from './types';
 import { applyExportTransforms } from './apply_export_transforms';
 
-interface CollectExportedObjectOptions {
+export interface CollectExportedObjectOptions {
   savedObjectsClient: SavedObjectsClientContract;
   objects: SavedObject[];
   /** flag to also include all related saved objects in the export stream. */
@@ -29,7 +30,7 @@ interface CollectExportedObjectOptions {
   logger: Logger;
 }
 
-interface CollectExportedObjectResult {
+export interface CollectExportedObjectResult {
   objects: SavedObject[];
   excludedObjects: ExcludedObject[];
   missingRefs: CollectedReference[];
@@ -38,7 +39,14 @@ interface CollectExportedObjectResult {
 interface ExcludedObject {
   id: string;
   type: string;
+  namespaces?: string[];
   reason: ExclusionReason;
+}
+
+interface ObjectMetaFields {
+  id: string;
+  type: string;
+  namespaces?: string[];
 }
 
 export type ExclusionReason = 'predicate_error' | 'excluded';
@@ -59,6 +67,8 @@ export const collectExportedObjects = async ({
   const collectedMissingRefs: CollectedReference[] = [];
   const collectedNonExportableObjects: ExcludedObject[] = [];
   const alreadyProcessed: Set<string> = new Set();
+
+  const objKey: ObjectKeyProvider = (obj: ObjectMetaFields) => getObjKey(obj, typeRegistry);
 
   let currentObjects = objects;
   do {
@@ -85,7 +95,8 @@ export const collectExportedObjects = async ({
     // last, evict additional objects that are not exportable
     const { included: exportableInitialObjects, excluded: additionalObjects } = splitByKeys(
       transformedObjects,
-      untransformedExportableInitialObjects.map((obj) => objKey(obj))
+      untransformedExportableInitialObjects.map((obj) => objKey(obj)),
+      objKey
     );
     const {
       exportable: exportableAdditionalObjects,
@@ -97,7 +108,7 @@ export const collectExportedObjects = async ({
 
     // if `includeReferences` is true, recurse on exportable objects' references.
     if (includeReferences) {
-      const references = collectReferences(allExportableObjects, alreadyProcessed);
+      const references = collectReferences(allExportableObjects, alreadyProcessed, objKey);
       if (references.length) {
         const { objects: fetchedObjects, missingRefs } = await fetchReferences({
           references,
@@ -121,25 +132,27 @@ export const collectExportedObjects = async ({
   };
 };
 
-const objKey = (obj: { type: string; id: string }) => `${obj.type}:${obj.id}`;
-
-type ObjectKey = string;
-
 interface CollectedReference {
   id: string;
   type: string;
+  namespaces?: string[];
 }
 
 const collectReferences = (
   objects: SavedObject[],
-  alreadyProcessed: Set<ObjectKey>
+  alreadyProcessed: Set<string>,
+  objKey: ObjectKeyProvider
 ): CollectedReference[] => {
   const references: Map<string, CollectedReference> = new Map();
   objects.forEach((obj) => {
     obj.references?.forEach((ref) => {
-      const refKey = objKey(ref);
+      // we're assuming that the references lives in the same space(s) as the outward object.
+      // for single-NS types, it should necessarily be true unless in case of missing refs.
+      // for multi-NS types, it should too, except in rare edge cases (such as manually unsharing a referenced object
+      // from some of the spaces the outbound objects referencing it are, which we'll consider as missing refs for now).
+      const refKey = objKey({ ...ref, namespaces: obj.namespaces });
       if (!alreadyProcessed.has(refKey)) {
-        references.set(refKey, { type: ref.type, id: ref.id });
+        references.set(refKey, { type: ref.type, id: ref.id, namespaces: obj.namespaces });
       }
     });
   });
@@ -210,6 +223,7 @@ const splitByExportability = (
         nonExportableObjects.push({
           id: obj.id,
           type: obj.type,
+          namespaces: obj.namespaces,
           reason: 'excluded',
         });
       }
@@ -233,7 +247,7 @@ const splitByExportability = (
   };
 };
 
-const splitByKeys = (objects: SavedObject[], keys: ObjectKey[]) => {
+const splitByKeys = (objects: SavedObject[], keys: string[], objKey: ObjectKeyProvider) => {
   const included: SavedObject[] = [];
   const excluded: SavedObject[] = [];
   objects.forEach((obj) => {

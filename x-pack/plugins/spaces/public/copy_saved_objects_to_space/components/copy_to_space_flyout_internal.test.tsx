@@ -504,7 +504,13 @@ describe.skip('CopyToSpaceFlyout', () => {
             meta: {},
           },
         ],
-        successResults: [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id, meta: {} }],
+        successResults: [
+          {
+            type: savedObjectToCopy.type,
+            id: savedObjectToCopy.id,
+            meta: { namespaceType: 'single' },
+          },
+        ],
         warnings: [],
       },
     });

@@ -9,13 +9,20 @@
 import { SavedObject } from '../../types';
 import { extractErrors } from './extract_errors';
 import { SavedObjectsErrorHelpers } from '../../service';
+import type { ObjectKeyProvider } from './get_object_key';
 import { CreatedObject } from '../types';
 
 describe('extractErrors()', () => {
+  let getObjKey: ObjectKeyProvider;
+
+  beforeEach(() => {
+    getObjKey = ({ type, id }) => `${type}:${id}`;
+  });
+
   test('returns empty array when no errors exist', () => {
     const savedObjects: SavedObject[] = [];
-    const result = extractErrors(savedObjects, savedObjects);
-    expect(result).toMatchInlineSnapshot(`Array []`);
+    const result = extractErrors(savedObjects, savedObjects, getObjKey);
+    expect(result).toEqual([]);
   });
 
   test('extracts errors from saved objects', () => {
@@ -49,47 +56,48 @@ describe('extractErrors()', () => {
         destinationId: 'foo',
       },
     ];
-    const result = extractErrors(savedObjects, savedObjects);
-    expect(result).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "error": Object {
-      "type": "conflict",
-    },
-    "id": "2",
-    "meta": Object {
-      "title": "My Dashboard 2",
-    },
-    "title": "My Dashboard 2",
-    "type": "dashboard",
-  },
-  Object {
-    "error": Object {
-      "error": "Bad Request",
-      "message": "Bad Request",
-      "statusCode": 400,
-      "type": "unknown",
-    },
-    "id": "3",
-    "meta": Object {
-      "title": "My Dashboard 3",
-    },
-    "title": "My Dashboard 3",
-    "type": "dashboard",
-  },
-  Object {
-    "error": Object {
-      "destinationId": "foo",
-      "type": "conflict",
-    },
-    "id": "4",
-    "meta": Object {
-      "title": "My Dashboard 4",
-    },
-    "title": "My Dashboard 4",
-    "type": "dashboard",
-  },
-]
-`);
+    const result = extractErrors(savedObjects, savedObjects, getObjKey);
+    expect(result).toEqual([
+      {
+        type: 'dashboard',
+        id: '2',
+        error: {
+          type: 'conflict',
+        },
+
+        meta: {
+          title: 'My Dashboard 2',
+        },
+        title: 'My Dashboard 2',
+      },
+      {
+        type: 'dashboard',
+        id: '3',
+        error: {
+          error: 'Bad Request',
+          message: 'Bad Request',
+          statusCode: 400,
+          type: 'unknown',
+        },
+
+        meta: {
+          title: 'My Dashboard 3',
+        },
+        title: 'My Dashboard 3',
+      },
+      {
+        type: 'dashboard',
+        id: '4',
+        error: {
+          destinationId: 'foo',
+          type: 'conflict',
+        },
+
+        meta: {
+          title: 'My Dashboard 4',
+        },
+        title: 'My Dashboard 4',
+      },
+    ]);
   });
 });

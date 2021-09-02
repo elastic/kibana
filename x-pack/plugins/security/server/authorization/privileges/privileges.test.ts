@@ -278,6 +278,10 @@ describe('features', () => {
                 actions.ui.get('spaces', 'manage'),
                 actions.ui.get('management', 'kibana', 'spaces'),
                 actions.ui.get('catalogue', 'spaces'),
+                actions.api.get('importAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+                actions.api.get('exportAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
               ]
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
@@ -407,6 +411,12 @@ describe('features', () => {
           actions.login,
           actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectManageSpaces
+            ? [
+                actions.api.get('exportAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
+              ]
+            : []),
           actions.ui.get('catalogue', 'read-catalogue-1'),
           actions.ui.get('catalogue', 'read-catalogue-2'),
           actions.ui.get('management', 'read-management', 'read-management-1'),
@@ -494,6 +504,10 @@ describe('features', () => {
                 actions.ui.get('spaces', 'manage'),
                 actions.ui.get('management', 'kibana', 'spaces'),
                 actions.ui.get('catalogue', 'spaces'),
+                actions.api.get('importAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+                actions.api.get('exportAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
               ]
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
@@ -502,6 +516,12 @@ describe('features', () => {
           actions.login,
           actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectManageSpaces
+            ? [
+                actions.api.get('exportAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
+              ]
+            : []),
         ]);
       });
 
@@ -560,6 +580,10 @@ describe('features', () => {
                 actions.ui.get('spaces', 'manage'),
                 actions.ui.get('management', 'kibana', 'spaces'),
                 actions.ui.get('catalogue', 'spaces'),
+                actions.api.get('importAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+                actions.api.get('exportAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
               ]
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
@@ -568,6 +592,12 @@ describe('features', () => {
           actions.login,
           actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectManageSpaces
+            ? [
+                actions.api.get('exportAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
+              ]
+            : []),
         ]);
       });
 
@@ -627,6 +657,10 @@ describe('features', () => {
                 actions.ui.get('spaces', 'manage'),
                 actions.ui.get('management', 'kibana', 'spaces'),
                 actions.ui.get('catalogue', 'spaces'),
+                actions.api.get('importAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+                actions.api.get('exportAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
               ]
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
@@ -635,6 +669,12 @@ describe('features', () => {
           actions.login,
           actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectManageSpaces
+            ? [
+                actions.api.get('exportAllSavedObjects'),
+                actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
+              ]
+            : []),
         ]);
       });
     });
@@ -893,6 +933,10 @@ describe('subFeatures', () => {
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
+        actions.api.get('importAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('foo', 'foo'),
       ]);
@@ -900,6 +944,8 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.ui.get('foo', 'foo'),
       ]);
 
@@ -1059,6 +1105,10 @@ describe('subFeatures', () => {
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
+        actions.api.get('importAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
@@ -1083,6 +1133,8 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1292,12 +1344,18 @@ describe('subFeatures', () => {
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
+        actions.api.get('importAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.ui.get('enterpriseSearch', 'all'),
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
       ]);
 
       expect(actual).toHaveProperty('space.all', [actions.login, actions.version]);
@@ -1431,6 +1489,10 @@ describe('subFeatures', () => {
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
+        actions.api.get('importAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
@@ -1455,6 +1517,8 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.ui.get('foo', 'foo'),
       ]);
 
@@ -1613,12 +1677,18 @@ describe('subFeatures', () => {
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
+        actions.api.get('importAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.ui.get('enterpriseSearch', 'all'),
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
       ]);
 
       expect(actual).toHaveProperty('space.all', [actions.login, actions.version]);
@@ -1741,6 +1811,10 @@ describe('subFeatures', () => {
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
+        actions.api.get('importAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
@@ -1765,6 +1839,8 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1972,6 +2048,10 @@ describe('subFeatures', () => {
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
+        actions.api.get('importAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
@@ -1996,6 +2076,8 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2237,6 +2319,10 @@ describe('subFeatures', () => {
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
+        actions.api.get('importAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'importAcrossSpaces'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
@@ -2278,6 +2364,8 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.api.get('exportAllSavedObjects'),
+        actions.ui.get('savedObjectsManagement', 'exportAcrossSpaces'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),

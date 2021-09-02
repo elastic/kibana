@@ -9,20 +9,23 @@
 import { createObjectsFilter } from './create_objects_filter';
 
 describe('createObjectsFilter()', () => {
-  test('filter should return false when contains empty parameters', () => {
-    const fn = createObjectsFilter([]);
-    expect(fn({ type: 'a', id: '1', attributes: {}, references: [] })).toEqual(false);
+  it('should return false when contains empty parameters', () => {
+    const filter = createObjectsFilter([], ({ type, id }) => `${type}:${id}`);
+    expect(filter({ type: 'a', id: '1', attributes: {}, references: [] })).toEqual(false);
   });
 
-  test('filter should return true for objects that are being retried', () => {
-    const fn = createObjectsFilter([
-      {
-        type: 'a',
-        id: '1',
-        overwrite: false,
-        replaceReferences: [],
-      },
-    ]);
+  it('should return true for objects that are being retried', () => {
+    const fn = createObjectsFilter(
+      [
+        {
+          type: 'a',
+          id: '1',
+          overwrite: false,
+          replaceReferences: [],
+        },
+      ],
+      ({ type, id }) => `${type}:${id}`
+    );
     expect(
       fn({
         type: 'a',
@@ -33,15 +36,18 @@ describe('createObjectsFilter()', () => {
     ).toEqual(true);
   });
 
-  test(`filter should return false for objects that aren't being retried`, () => {
-    const fn = createObjectsFilter([
-      {
-        type: 'a',
-        id: '1',
-        overwrite: false,
-        replaceReferences: [],
-      },
-    ]);
+  it(`should return false for objects that aren't being retried`, () => {
+    const fn = createObjectsFilter(
+      [
+        {
+          type: 'a',
+          id: '1',
+          overwrite: false,
+          replaceReferences: [],
+        },
+      ],
+      ({ type, id }) => `${type}:${id}`
+    );
     expect(
       fn({
         type: 'b',
@@ -58,5 +64,77 @@ describe('createObjectsFilter()', () => {
         references: [],
       })
     ).toEqual(false);
+  });
+
+  it('should return false for single-namespaced object from another space', () => {
+    const fn = createObjectsFilter(
+      [
+        {
+          type: 'a',
+          id: '1',
+          namespaces: ['ns-1'],
+          overwrite: false,
+          replaceReferences: [],
+        },
+      ],
+      ({ type, id, namespaces }) => `${namespaces![0]}:${type}:${id}`
+    );
+    expect(
+      fn({
+        type: 'a',
+        id: '1',
+        namespaces: ['ns-2'],
+        attributes: {},
+        references: [],
+      })
+    ).toEqual(false);
+  });
+
+  it('should return true for single-namespaced object from the same space', () => {
+    const fn = createObjectsFilter(
+      [
+        {
+          type: 'a',
+          id: '1',
+          namespaces: ['ns-1'],
+          overwrite: false,
+          replaceReferences: [],
+        },
+      ],
+      ({ type, id, namespaces }) => `${namespaces![0]}:${type}:${id}`
+    );
+    expect(
+      fn({
+        type: 'a',
+        id: '1',
+        namespaces: ['ns-1'],
+        attributes: {},
+        references: [],
+      })
+    ).toEqual(true);
+  });
+
+  it('should return true for matching multi-namespaced object', () => {
+    const fn = createObjectsFilter(
+      [
+        {
+          type: 'shareable-type',
+          id: '1',
+          namespaces: ['ns-1', 'ns-2'],
+          overwrite: false,
+          replaceReferences: [],
+        },
+      ],
+      ({ type, id }) => `${type}:${id}`
+    );
+    expect(
+      fn({
+        type: 'shareable-type',
+        id: '1',
+        namespaces: ['ns-1', 'ns-2'],
+        attributes: {},
+        references: [],
+      })
+    ).toEqual(true);
   });
 });

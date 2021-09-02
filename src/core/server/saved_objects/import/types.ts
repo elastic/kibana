@@ -7,7 +7,7 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObject } from '../types';
+import { SavedObject, SavedObjectsNamespaceType } from '../types';
 
 /**
  * Describes a retry operation for importing a saved object.
@@ -16,6 +16,8 @@ import { SavedObject } from '../types';
 export interface SavedObjectsImportRetry {
   type: string;
   id: string;
+  namespaces?: string[];
+
   overwrite: boolean;
   /**
    * The object ID that will be created or overwritten. If not specified, the `id` field will be used.
@@ -89,11 +91,16 @@ export interface SavedObjectsImportMissingReferencesError {
 export interface SavedObjectsImportFailure {
   id: string;
   type: string;
+  namespaces?: string[];
   /**
    * @deprecated Use `meta.title` instead
    */
   title?: string;
-  meta: { title?: string; icon?: string };
+  meta: {
+    title?: string;
+    icon?: string;
+    namespaceType?: SavedObjectsNamespaceType;
+  };
   /**
    * If `overwrite` is specified, an attempt was made to overwrite an existing object.
    */
@@ -113,6 +120,7 @@ export interface SavedObjectsImportFailure {
 export interface SavedObjectsImportSuccess {
   id: string;
   type: string;
+  namespaces?: string[];
   /**
    * If `destinationId` is specified, the new object has a new ID that is different from the import ID.
    */
@@ -127,6 +135,7 @@ export interface SavedObjectsImportSuccess {
   meta: {
     title?: string;
     icon?: string;
+    namespaceType: SavedObjectsNamespaceType;
   };
   /**
    * If `overwrite` is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution).
@@ -159,6 +168,13 @@ export interface SavedObjectsImportOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  /**
+   * TODO: doc
+   * Defaults to false.
+   *
+   * Remarks: the stream of document will be validated accordingly
+   */
+  importNamespaces?: boolean;
 }
 
 /**
@@ -174,6 +190,13 @@ export interface SavedObjectsResolveImportErrorsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  /**
+   * TODO: doc
+   * Defaults to false.
+   *
+   * Remarks: the stream of document will be validated accordingly
+   */
+  importNamespaces?: boolean;
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };

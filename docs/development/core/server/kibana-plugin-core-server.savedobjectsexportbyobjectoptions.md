@@ -16,5 +16,5 @@ export interface SavedObjectsExportByObjectOptions extends SavedObjectExportBase
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [objects](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.objects.md) | <code>Array&lt;{</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }&gt;</code> | optional array of objects to export. |
+|  [objects](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.objects.md) | <code>Array&lt;{</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>        namespace?: string;</code><br/><code>    }&gt;</code> | optional array of objects to export. |
 

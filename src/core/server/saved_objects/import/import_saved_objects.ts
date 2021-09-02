@@ -22,6 +22,7 @@ import {
   regenerateIds,
   collectSavedObjects,
   executeImportHooks,
+  getObjectKeyProvider,
 } from './lib';
 
 /**
@@ -44,6 +45,8 @@ export interface ImportSavedObjectsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  /** If true, the namespaces of the objects from the import file will be imported. Defaults to false. */
+  importNamespaces: boolean;
 }
 
 /**
@@ -61,54 +64,72 @@ export async function importSavedObjectsFromStream({
   typeRegistry,
   importHooks,
   namespace,
+  importNamespaces,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
-  let errorAccumulator: SavedObjectsImportFailure[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
+
+  let errorAccumulator: SavedObjectsImportFailure[] = [];
+
+  const getObjKey = getObjectKeyProvider({
+    typeRegistry,
+    namespace,
+    useObjectNamespaces: importNamespaces,
+    useProvidedNamespace: namespace !== undefined,
+  });
 
   // Get the objects to import
   const collectSavedObjectsResult = await collectSavedObjects({
     readStream,
     objectLimit,
     supportedTypes,
+    getObjKey,
   });
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
+
+  // validate the presence of namespaces or not depending on `importNamespaces`
+  // TODO (?)
+
   /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
   let importIdMap = collectSavedObjectsResult.importIdMap;
   let pendingOverwrites = new Set<string>();
 
   // Validate references
-  const validateReferencesResult = await validateReferences(
-    collectSavedObjectsResult.collectedObjects,
+  const validateReferencesResult = await validateReferences({
+    savedObjects: collectSavedObjectsResult.collectedObjects,
     savedObjectsClient,
-    namespace
-  );
+    getObjKey,
+    namespace,
+  });
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {
-    importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
+    importIdMap = regenerateIds({
+      objects: collectSavedObjectsResult.collectedObjects,
+      getObjKey,
+    });
   } else {
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
-    const checkConflictsParams = {
+    const checkConflictsResult = await checkConflicts({
       objects: collectSavedObjectsResult.collectedObjects,
       savedObjectsClient,
+      getObjKey,
       namespace,
       ignoreRegularConflicts: overwrite,
-    };
-    const checkConflictsResult = await checkConflicts(checkConflictsParams);
+    });
     errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
     pendingOverwrites = checkConflictsResult.pendingOverwrites;
 
     // Check multi-namespace object types for origin conflicts in this namespace
-    const checkOriginConflictsParams = {
+    const checkOriginConflictsResult = await checkOriginConflicts({
       objects: checkConflictsResult.filteredObjects,
       savedObjectsClient,
+      getObjKey,
       typeRegistry,
       namespace,
       ignoreRegularConflicts: overwrite,
       importIdMap,
-    };
-    const checkOriginConflictsResult = await checkOriginConflicts(checkOriginConflictsParams);
+    });
     errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
     pendingOverwrites = new Set([
@@ -118,29 +139,33 @@ export async function importSavedObjectsFromStream({
   }
 
   // Create objects in bulk
-  const createSavedObjectsParams = {
+  const createSavedObjectsResult = await createSavedObjects({
     objects: collectSavedObjectsResult.collectedObjects,
     accumulatedErrors: errorAccumulator,
     savedObjectsClient,
+    getObjKey,
     importIdMap,
     overwrite,
     namespace,
-  };
-  const createSavedObjectsResult = await createSavedObjects(createSavedObjectsParams);
+    importNamespaces,
+  });
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
 
   const successResults = createSavedObjectsResult.createdObjects.map((createdObject) => {
-    const { type, id, destinationId, originId } = createdObject;
-    const getTitle = typeRegistry.getType(type)?.management?.getTitle;
+    const { type, id, destinationId, originId, namespaces } = createdObject;
+    const objectType = typeRegistry.getType(type)!;
+    const getTitle = objectType.management?.getTitle;
     const meta = {
       title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
-      icon: typeRegistry.getType(type)?.management?.icon,
+      icon: objectType.management?.icon,
+      namespaceType: objectType.namespaceType,
     };
-    const attemptedOverwrite = pendingOverwrites.has(`${type}:${id}`);
+    const attemptedOverwrite = pendingOverwrites.has(getObjKey(createdObject));
     return {
       type,
       id,
       meta,
+      ...(importNamespaces && { namespaces }),
       ...(attemptedOverwrite && { overwrite: true }),
       ...(destinationId && { destinationId }),
       ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
@@ -148,10 +173,12 @@ export async function importSavedObjectsFromStream({
   });
   const errorResults = errorAccumulator.map((error) => {
     const icon = typeRegistry.getType(error.type)?.management?.icon;
-    const attemptedOverwrite = pendingOverwrites.has(`${error.type}:${error.id}`);
+    const namespaceType = typeRegistry.getType(error.type)?.namespaceType;
+    const attemptedOverwrite = pendingOverwrites.has(getObjKey(error));
     return {
       ...error,
-      meta: { ...error.meta, icon },
+      namespaces: importNamespaces ? error.namespaces : undefined,
+      meta: { ...error.meta, icon, namespaceType },
       ...(attemptedOverwrite && { overwrite: true }),
     };
   });

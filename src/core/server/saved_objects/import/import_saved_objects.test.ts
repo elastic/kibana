@@ -28,6 +28,8 @@ import {
   checkOriginConflicts,
   createSavedObjects,
   executeImportHooks,
+  getObjectKeyProvider,
+  ObjectKeyProvider,
 } from './lib';
 
 jest.mock('./lib/collect_saved_objects');
@@ -37,12 +39,17 @@ jest.mock('./lib/check_conflicts');
 jest.mock('./lib/check_origin_conflicts');
 jest.mock('./lib/create_saved_objects');
 jest.mock('./lib/execute_import_hooks');
+jest.mock('./lib/get_object_key');
 
 const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
   fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
 
 describe('#importSavedObjectsFromStream', () => {
+  let getObjKey: jest.MockedFunction<ObjectKeyProvider>;
+
   beforeEach(() => {
+    getObjKey = jest.fn().mockImplementation(({ type, id }) => `${type}:${id}`);
+
     jest.clearAllMocks();
     // mock empty output of each of these mocked modules so the import doesn't throw an error
     getMockFn(collectSavedObjects).mockResolvedValue({
@@ -65,6 +72,7 @@ describe('#importSavedObjectsFromStream', () => {
     });
     getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
     getMockFn(executeImportHooks).mockResolvedValue([]);
+    getMockFn(getObjectKeyProvider).mockReturnValue(getObjKey);
   });
 
   let readStream: Readable;
@@ -82,10 +90,12 @@ describe('#importSavedObjectsFromStream', () => {
         management: { icon: `${type}-icon` },
       } as any),
     importHooks = {},
+    importNamespaces = false,
   }: {
     createNewCopies?: boolean;
     getTypeImpl?: (name: string) => any;
     importHooks?: Record<string, SavedObjectsImportHook[]>;
+    importNamespaces?: boolean;
   } = {}): ImportSavedObjectsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -100,6 +110,7 @@ describe('#importSavedObjectsFromStream', () => {
       namespace,
       createNewCopies,
       importHooks,
+      importNamespaces,
     };
   };
   const createObject = ({
@@ -133,6 +144,36 @@ describe('#importSavedObjectsFromStream', () => {
    * intermediate steps in the interest of brevity.
    */
   describe('module calls', () => {
+    test('generates object key provider', async () => {
+      const options = setupOptions();
+
+      await importSavedObjectsFromStream(options);
+
+      expect(getObjectKeyProvider).toHaveBeenCalledTimes(1);
+      expect(getObjectKeyProvider).toHaveBeenCalledWith({
+        typeRegistry,
+        namespace,
+        useObjectNamespaces: false,
+        useProvidedNamespace: true,
+      });
+    });
+
+    test('uses correct arguments for the object key provider when `importNamespaces` is true', async () => {
+      const options = setupOptions({
+        importNamespaces: true,
+      });
+
+      await importSavedObjectsFromStream({ ...options, namespace: undefined });
+
+      expect(getObjectKeyProvider).toHaveBeenCalledTimes(1);
+      expect(getObjectKeyProvider).toHaveBeenCalledWith({
+        typeRegistry,
+        namespace: undefined,
+        useObjectNamespaces: true,
+        useProvidedNamespace: false,
+      });
+    });
+
     test('collects saved objects from stream', async () => {
       const options = setupOptions();
       const supportedTypes = ['foo-type'];
@@ -142,8 +183,12 @@ describe('#importSavedObjectsFromStream', () => {
 
       await importSavedObjectsFromStream(options);
       expect(typeRegistry.getImportableAndExportableTypes).toHaveBeenCalled();
-      const collectSavedObjectsOptions = { readStream, objectLimit, supportedTypes };
-      expect(collectSavedObjects).toHaveBeenCalledWith(collectSavedObjectsOptions);
+      expect(collectSavedObjects).toHaveBeenCalledWith({
+        readStream,
+        objectLimit,
+        supportedTypes,
+        getObjKey,
+      });
     });
 
     test('validates references', async () => {
@@ -156,11 +201,12 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       await importSavedObjectsFromStream(options);
-      expect(validateReferences).toHaveBeenCalledWith(
-        collectedObjects,
+      expect(validateReferences).toHaveBeenCalledWith({
+        savedObjects: collectedObjects,
         savedObjectsClient,
-        namespace
-      );
+        namespace,
+        getObjKey,
+      });
     });
 
     test('executes import hooks', async () => {
@@ -212,13 +258,14 @@ describe('#importSavedObjectsFromStream', () => {
         });
 
         await importSavedObjectsFromStream(options);
-        const checkConflictsParams = {
+
+        expect(checkConflicts).toHaveBeenCalledWith({
           objects: collectedObjects,
           savedObjectsClient,
+          getObjKey,
           namespace,
           ignoreRegularConflicts: overwrite,
-        };
-        expect(checkConflicts).toHaveBeenCalledWith(checkConflictsParams);
+        });
       });
 
       test('checks origin conflicts', async () => {
@@ -233,15 +280,16 @@ describe('#importSavedObjectsFromStream', () => {
         });
 
         await importSavedObjectsFromStream(options);
-        const checkOriginConflictsParams = {
+
+        expect(checkOriginConflicts).toHaveBeenCalledWith({
           objects: filteredObjects,
           savedObjectsClient,
+          getObjKey,
           typeRegistry,
           namespace,
           ignoreRegularConflicts: overwrite,
           importIdMap,
-        };
-        expect(checkOriginConflicts).toHaveBeenCalledWith(checkOriginConflictsParams);
+        });
       });
 
       test('creates saved objects', async () => {
@@ -277,15 +325,17 @@ describe('#importSavedObjectsFromStream', () => {
           ['bar', { id: 'newId1' }],
           ['baz', { id: 'newId2' }],
         ]);
-        const createSavedObjectsParams = {
+
+        expect(createSavedObjects).toHaveBeenCalledWith({
           objects: collectedObjects,
           accumulatedErrors: errors,
           savedObjectsClient,
+          getObjKey,
           importIdMap,
+          importNamespaces: false,
           overwrite,
           namespace,
-        };
-        expect(createSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
+        });
       });
     });
 
@@ -300,7 +350,11 @@ describe('#importSavedObjectsFromStream', () => {
         });
 
         await importSavedObjectsFromStream(options);
-        expect(regenerateIds).toHaveBeenCalledWith(collectedObjects);
+
+        expect(regenerateIds).toHaveBeenCalledWith({
+          objects: collectedObjects,
+          getObjKey,
+        });
       });
 
       test('does not check conflicts or check origin conflicts', async () => {
@@ -335,6 +389,8 @@ describe('#importSavedObjectsFromStream', () => {
           accumulatedErrors: errors,
           savedObjectsClient,
           importIdMap,
+          importNamespaces: false,
+          getObjKey,
           overwrite,
           namespace,
         };

@@ -7,29 +7,30 @@
  */
 
 import { SavedObject } from '../../types';
+import type { ObjectKeyProvider } from './get_object_key';
 import { SavedObjectsImportFailure, CreatedObject } from '../types';
 
 export function extractErrors(
   // TODO: define saved object type
   savedObjectResults: Array<CreatedObject<unknown>>,
-  savedObjectsToImport: Array<SavedObject<any>>
+  savedObjectsToImport: Array<SavedObject<any>>,
+  getObjKey: ObjectKeyProvider
 ) {
   const errors: SavedObjectsImportFailure[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject<{ title: string }>>();
   for (const savedObject of savedObjectsToImport) {
-    originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
+    originalSavedObjectsMap.set(getObjKey(savedObject), savedObject);
   }
   for (const savedObject of savedObjectResults) {
     if (savedObject.error) {
-      const originalSavedObject = originalSavedObjectsMap.get(
-        `${savedObject.type}:${savedObject.id}`
-      );
+      const originalSavedObject = originalSavedObjectsMap.get(getObjKey(savedObject));
       const title = originalSavedObject?.attributes?.title;
       const { destinationId } = savedObject;
       if (savedObject.error.statusCode === 409) {
         errors.push({
           id: savedObject.id,
           type: savedObject.type,
+          namespaces: savedObject.namespaces,
           title,
           meta: { title },
           error: {
@@ -42,6 +43,7 @@ export function extractErrors(
       errors.push({
         id: savedObject.id,
         type: savedObject.type,
+        namespaces: savedObject.namespaces,
         title,
         meta: { title },
         error: {

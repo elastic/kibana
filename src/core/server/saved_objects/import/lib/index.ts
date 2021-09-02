@@ -19,3 +19,5 @@ export { splitOverwrites } from './split_overwrites';
 export { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
 export { validateRetries } from './validate_retries';
 export { executeImportHooks } from './execute_import_hooks';
+export { getObjKey, getObjectKeyProvider } from './get_object_key';
+export type { ObjectKeyProvider } from './get_object_key';

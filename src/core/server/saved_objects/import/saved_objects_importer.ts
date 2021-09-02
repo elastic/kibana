@@ -66,12 +66,14 @@ export class SavedObjectsImporter {
     createNewCopies,
     namespace,
     overwrite,
+    importNamespaces = false,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     return importSavedObjectsFromStream({
       readStream,
       createNewCopies,
       namespace,
       overwrite,
+      importNamespaces,
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
@@ -90,12 +92,14 @@ export class SavedObjectsImporter {
     createNewCopies,
     namespace,
     retries,
+    importNamespaces,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     return resolveSavedObjectsImportErrors({
       readStream,
       createNewCopies,
       namespace,
       retries,
+      importNamespaces,
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,

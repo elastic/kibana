@@ -15,32 +15,41 @@ import {
 } from '@kbn/utils';
 
 import { SavedObject } from '../../types';
+import type { ObjectKeyProvider } from './get_object_key';
 import { SavedObjectsImportFailure } from '../types';
 import { SavedObjectsImportError } from '../errors';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 import { createLimitStream } from './create_limit_stream';
 
-interface CollectSavedObjectsOptions {
+export interface CollectSavedObjectsOptions {
   readStream: Readable;
   objectLimit: number;
   filter?: (obj: SavedObject) => boolean;
+  getObjKey: ObjectKeyProvider;
   supportedTypes: string[];
+}
+
+export interface CollectSavedObjectsResult {
+  errors: SavedObjectsImportFailure[];
+  importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
+  collectedObjects: Array<SavedObject<{ title?: string }>>;
 }
 
 export async function collectSavedObjects({
   readStream,
   objectLimit,
   filter,
+  getObjKey,
   supportedTypes,
-}: CollectSavedObjectsOptions) {
+}: CollectSavedObjectsOptions): Promise<CollectSavedObjectsResult> {
   const errors: SavedObjectsImportFailure[] = [];
-  const entries: Array<{ type: string; id: string }> = [];
+  const entries: Array<{ type: string; id: string; namespaces?: string[] }> = [];
   const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
   const collectedObjects: Array<SavedObject<{ title?: string }>> = await createPromiseFromStreams([
     readStream,
     createLimitStream(objectLimit),
     createFilterStream<SavedObject<{ title: string }>>((obj) => {
-      entries.push({ type: obj.type, id: obj.id });
+      entries.push({ type: obj.type, id: obj.id, namespaces: obj.namespaces });
       if (supportedTypes.includes(obj.type)) {
         return true;
       }
@@ -48,6 +57,7 @@ export async function collectSavedObjects({
       errors.push({
         id: obj.id,
         type: obj.type,
+        namespaces: obj.namespaces,
         title,
         meta: { title },
         error: {
@@ -58,15 +68,16 @@ export async function collectSavedObjects({
     }),
     createFilterStream<SavedObject>((obj) => (filter ? filter(obj) : true)),
     createMapStream((obj: SavedObject) => {
-      importIdMap.set(`${obj.type}:${obj.id}`, {});
+      importIdMap.set(getObjKey(obj), {});
       // Ensure migrations execute on every saved object
-      return Object.assign({ migrationVersion: {} }, obj);
+      return { ...{ migrationVersion: {} }, ...obj };
     }),
     createConcatStream([]),
   ]);
 
   // throw a BadRequest error if we see the same import object type/id more than once
-  const nonUniqueEntries = getNonUniqueEntries(entries);
+  // for `single` namespaceType object, this is done on a per-space basis.
+  const nonUniqueEntries = getNonUniqueEntries(entries, getObjKey);
   if (nonUniqueEntries.length > 0) {
     throw SavedObjectsImportError.nonUniqueImportObjects(nonUniqueEntries);
   }

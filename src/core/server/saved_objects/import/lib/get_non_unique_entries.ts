@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-type Entries = Array<{ type: string; id: string }>;
+import type { ObjectKeyProvider } from './get_object_key';
 
-export const getNonUniqueEntries = (objects: Entries) => {
-  const idCountMap = objects.reduce((acc, { type, id }) => {
-    const key = `${type}:${id}`;
+type Entries = Array<{ type: string; id: string; namespaces?: string[] }>;
+
+export const getNonUniqueEntries = (objects: Entries, getObjKey: ObjectKeyProvider) => {
+  const idCountMap = objects.reduce((acc, obj) => {
+    const key = getObjKey(obj);
     const val = acc.get(key) ?? 0;
     return acc.set(key, val + 1);
   }, new Map<string, number>());

@@ -27,10 +27,15 @@ interface RouteDependencies {
 
 type EitherExportOptions = SavedObjectsExportByTypeOptions | SavedObjectsExportByObjectOptions;
 
+interface ObjectIdentifier {
+  id: string;
+  type: string;
+}
+
 interface ExportRawOptions {
   type?: string | string[];
   hasReference?: { id: string; type: string } | Array<{ id: string; type: string }>;
-  objects?: Array<{ id: string; type: string }>;
+  objects?: ObjectIdentifier[];
   search?: string;
   includeReferencesDeep: boolean;
   excludeExportDetails: boolean;
@@ -39,7 +44,7 @@ interface ExportRawOptions {
 interface ExportOptions {
   types?: string[];
   hasReference?: Array<{ id: string; type: string }>;
-  objects?: Array<{ id: string; type: string }>;
+  objects?: ObjectIdentifier[];
   search?: string;
   includeReferencesDeep: boolean;
   excludeExportDetails: boolean;
@@ -195,8 +200,8 @@ export const registerExportRoute = (
 
       try {
         const exportStream = isExportByTypeOptions(options)
-          ? await exporter.exportByTypes(options)
-          : await exporter.exportByObjects(options);
+          ? await exporter.exportByTypes({ ...options, includeNamespaces: false })
+          : await exporter.exportByObjects({ ...options, includeNamespaces: false });
 
         const docsToExport: string[] = await createPromiseFromStreams([
           exportStream,

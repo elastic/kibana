@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
-import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import { getDefaultTitle, getSavedObjectLabel, isInNamespace, SpacesInfo } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
   SavedObjectsManagementActionServiceStart,
@@ -38,6 +38,7 @@ import {
 
 export interface TableProps {
   taggingApi?: SavedObjectsTaggingApi;
+  spacesInfo?: SpacesInfo;
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
@@ -49,12 +50,12 @@ export interface TableProps {
   capabilities: ApplicationStart['capabilities'];
   onDelete: () => void;
   onActionRefresh: (objects: Array<{ type: string; id: string }>) => void;
-  onExport: (includeReferencesDeep: boolean) => void;
+  onExport: (exportOptions: { includeReferences: boolean; includeNamespaces: boolean }) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   pageIndex: number;
   pageSize: number;
   items: SavedObjectWithMetadata[];
-  itemId: string | (() => string);
+  itemId: string | ((obj: SavedObjectWithMetadata) => string);
   totalItemCount: number;
   onQueryChange: (query: any) => void;
   onTableChange: (table: any) => void;
@@ -69,6 +70,7 @@ interface TableState {
   parseErrorMessage: any;
   isExportPopoverOpen: boolean;
   isIncludeReferencesDeepChecked: boolean;
+  isIncludeNamespacesChecked: boolean;
   activeAction?: SavedObjectsManagementAction;
 }
 
@@ -78,6 +80,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     parseErrorMessage: null,
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
+    isIncludeNamespacesChecked: false,
     activeAction: undefined,
   };
 
@@ -117,10 +120,19 @@ export class Table extends PureComponent<TableProps, TableState> {
     }));
   };
 
+  toggleIsIncludeNamespacesChecked = () => {
+    this.setState((state) => ({
+      isIncludeNamespacesChecked: !state.isIncludeNamespacesChecked,
+    }));
+  };
+
   onExportClick = () => {
     const { onExport } = this.props;
-    const { isIncludeReferencesDeepChecked } = this.state;
-    onExport(isIncludeReferencesDeepChecked);
+    const { isIncludeReferencesDeepChecked, isIncludeNamespacesChecked } = this.state;
+    onExport({
+      includeReferences: isIncludeReferencesDeepChecked,
+      includeNamespaces: isIncludeNamespacesChecked,
+    });
     this.setState({ isExportPopoverOpen: false });
   };
 
@@ -145,13 +157,24 @@ export class Table extends PureComponent<TableProps, TableState> {
       actionRegistry,
       columnRegistry,
       taggingApi,
+      spacesInfo,
     } = this.props;
+
+    const canExportAcrossSpace = capabilities.savedObjectsManagement.exportAcrossSpaces;
 
     const pagination = {
       pageIndex,
       pageSize,
       totalItemCount,
       pageSizeOptions: [5, 10, 20, 50],
+    };
+
+    // only allow to execute actions for objects present in current namespace
+    const canExecuteAction = (obj: SavedObjectWithMetadata): boolean => {
+      if (!spacesInfo) {
+        return true;
+      }
+      return isInNamespace(obj, spacesInfo.active.id);
     };
 
     const filters = [
@@ -165,6 +188,34 @@ export class Table extends PureComponent<TableProps, TableState> {
         options: filterOptions,
       },
       ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
+      ...(spacesInfo && canExportAcrossSpace
+        ? [
+            {
+              type: 'field_value_selection',
+              field: 'space',
+              name: i18n.translate('savedObjectsManagement.objectsTable.table.spaceFilterName', {
+                defaultMessage: 'Space',
+              }),
+              multiSelect: 'or',
+              options: [
+                {
+                  value: '*',
+                  name: i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.spaceFilter.allSpaces',
+                    {
+                      defaultMessage: `All (*)`,
+                    }
+                  ),
+                },
+                ...spacesInfo.all.map((space) => ({
+                  value: space.id,
+                  name: space.name,
+                  view: `${space.name}`,
+                })),
+              ],
+            },
+          ]
+        : []),
     ];
 
     const columns = [
@@ -243,7 +294,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             type: 'icon',
             icon: 'inspect',
             onClick: (object) => goInspectObject(object),
-            available: (object) => !!object.meta.editUrl,
+            available: (object) => !!object.meta.editUrl && canExecuteAction(object),
             'data-test-subj': 'savedObjectsTableAction-inspect',
           },
           {
@@ -261,6 +312,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             type: 'icon',
             icon: 'kqlSelector',
             onClick: (object) => onShowRelationships(object),
+            available: (object) => canExecuteAction(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
           ...actionRegistry.getAll().map((action) => {
@@ -268,6 +320,12 @@ export class Table extends PureComponent<TableProps, TableState> {
             return {
               ...action.euiAction,
               'data-test-subj': `savedObjectsTableAction-${action.id}`,
+              available: (object: SavedObjectWithMetadata) => {
+                return (
+                  canExecuteAction(object) &&
+                  (action.euiAction.available ? action.euiAction.available(object as any) : true)
+                );
+              },
               onClick: (object: SavedObjectWithMetadata) => {
                 this.setState({
                   activeAction: action,
@@ -376,6 +434,21 @@ export class Table extends PureComponent<TableProps, TableState> {
                   onChange={this.toggleIsIncludeReferencesDeepChecked}
                 />
               </EuiFormRow>
+              {canExportAcrossSpace && (
+                <EuiFormRow>
+                  <EuiSwitch
+                    name="includeNamespaces"
+                    label={
+                      <FormattedMessage
+                        id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeNamespaces"
+                        defaultMessage="Include namespace information"
+                      />
+                    }
+                    checked={this.state.isIncludeNamespacesChecked}
+                    onChange={this.toggleIsIncludeNamespacesChecked}
+                  />
+                </EuiFormRow>
+              )}
               <EuiFormRow>
                 <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
                   <FormattedMessage

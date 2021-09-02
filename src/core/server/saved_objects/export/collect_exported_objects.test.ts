@@ -14,7 +14,7 @@ import { SavedObject, SavedObjectError } from '../../../types';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';
 import { collectExportedObjects, ExclusionReason } from './collect_exported_objects';
-import { SavedObjectsExportablePredicate } from '../types';
+import { SavedObjectsExportablePredicate, SavedObjectsNamespaceType } from '../types';
 
 const createObject = (parts: Partial<SavedObject>): SavedObject => ({
   id: 'id',
@@ -32,6 +32,12 @@ const createError = (parts: Partial<SavedObjectError> = {}): SavedObjectError =>
 });
 
 const toIdTuple = (obj: SavedObject) => ({ type: obj.type, id: obj.id });
+const toIdTypeNsTuple = (obj: SavedObject) => ({
+  type: obj.type,
+  id: obj.id,
+  namespaces: obj.namespaces,
+});
+
 const toExcludedObject = (obj: SavedObject, reason: ExclusionReason = 'excluded') => ({
   type: obj.type,
   id: obj.id,
@@ -51,15 +57,17 @@ describe('collectExportedObjects', () => {
     {
       onExport,
       isExportable,
+      namespaceType = 'single',
     }: {
       onExport?: SavedObjectsExportTransform;
       isExportable?: SavedObjectsExportablePredicate;
+      namespaceType?: SavedObjectsNamespaceType;
     } = {}
   ) => {
     typeRegistry.registerType({
       name,
       hidden: false,
-      namespaceType: 'single',
+      namespaceType,
       mappings: { properties: {} },
       management: {
         importableAndExportable: true,
@@ -400,6 +408,10 @@ describe('collectExportedObjects', () => {
     });
 
     it('returns the missing references', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('missing');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -459,6 +471,8 @@ describe('collectExportedObjects', () => {
     });
 
     it('does not call `client.bulkGet` when no objects have references', async () => {
+      registerType('foo');
+
       const obj1 = createObject({
         type: 'foo',
         id: '1',
@@ -493,6 +507,9 @@ describe('collectExportedObjects', () => {
     });
 
     it('calls `applyExportTransforms` for each iteration', async () => {
+      registerType('foo');
+      registerType('bar');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -541,6 +558,10 @@ describe('collectExportedObjects', () => {
     });
 
     it('ignores references that are already included in the export', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -612,6 +633,11 @@ describe('collectExportedObjects', () => {
     });
 
     it('does not fetch duplicates of references', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+      registerType('baz');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -669,6 +695,11 @@ describe('collectExportedObjects', () => {
     });
 
     it('fetch references for additional objects returned by the export transform', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+      registerType('baz');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -718,6 +749,11 @@ describe('collectExportedObjects', () => {
     });
 
     it('fetch references for additional objects returned by the export transform of nested references', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+      registerType('baz');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -785,6 +821,11 @@ describe('collectExportedObjects', () => {
     });
 
     it('excludes references filtered by the `isExportable` predicate for additional objects returned by the export transform', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+      registerType('baz', { isExportable: () => false });
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -821,11 +862,6 @@ describe('collectExportedObjects', () => {
         id: '4',
       });
 
-      registerType('foo');
-      registerType('bar');
-      registerType('dolly');
-      registerType('baz', { isExportable: () => false });
-
       applyExportTransformsMock.mockImplementationOnce(({ objects }) => [...objects, bar2]);
 
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -848,6 +884,9 @@ describe('collectExportedObjects', () => {
 
   describe('when `includeReferences` is `false`', () => {
     it('does not fetch the object references', async () => {
+      registerType('foo');
+      registerType('bar');
+
       const obj1 = createObject({
         type: 'foo',
         id: '1',
@@ -878,6 +917,179 @@ describe('collectExportedObjects', () => {
       ]);
 
       expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('exporting single-namespaced objects from multiple namespaces', () => {
+    it('exports objects with the same id from different namespaces', async () => {
+      registerType('single', { namespaceType: 'single' });
+
+      const obj1 = createObject({
+        type: 'single',
+        id: '1',
+        namespaces: ['ns1'],
+      });
+      const obj2 = createObject({
+        type: 'single',
+        id: '1',
+        namespaces: ['ns2'],
+      });
+
+      const { objects } = await collectExportedObjects({
+        objects: [obj1, obj2],
+        savedObjectsClient,
+        request,
+        typeRegistry,
+        includeReferences: true,
+        logger,
+      });
+
+      expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+      expect(objects.map(toIdTypeNsTuple)).toEqual([obj1, obj2].map(toIdTypeNsTuple));
+    });
+
+    it('exports references from different namespaces', async () => {
+      registerType('single', { namespaceType: 'single' });
+      registerType('ref', { namespaceType: 'single' });
+
+      const obj1 = createObject({
+        type: 'single',
+        id: '1',
+        namespaces: ['ns1'],
+        references: [
+          {
+            id: '2',
+            type: 'ref',
+            name: 'ref-ns1',
+          },
+        ],
+      });
+      const obj2 = createObject({
+        type: 'single',
+        id: '1',
+        namespaces: ['ns2'],
+        references: [
+          {
+            id: '2',
+            type: 'ref',
+            name: 'ref-ns2',
+          },
+        ],
+      });
+
+      const ref1 = createObject({
+        type: 'ref',
+        id: '2',
+        namespaces: ['ns1'],
+      });
+      const ref2 = createObject({
+        type: 'ref',
+        id: '2',
+        namespaces: ['ns2'],
+      });
+
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [ref1, ref2],
+      });
+
+      const { objects } = await collectExportedObjects({
+        objects: [obj1, obj2],
+        savedObjectsClient,
+        request,
+        typeRegistry,
+        includeReferences: true,
+        logger,
+      });
+
+      expect(objects.map(toIdTypeNsTuple)).toEqual([obj1, obj2, ref1, ref2].map(toIdTypeNsTuple));
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+        [
+          {
+            type: 'ref',
+            id: '2',
+            namespaces: ['ns1'],
+          },
+          {
+            type: 'ref',
+            id: '2',
+            namespaces: ['ns2'],
+          },
+        ],
+        expect.any(Object)
+      );
+    });
+  });
+
+  describe('exporting multi-namespaced objects from multiple namespaces', () => {
+    it(`uses the object's namespaces to fetch the references`, async () => {
+      registerType('multi', { namespaceType: 'multiple' });
+      registerType('ref', { namespaceType: 'multiple' });
+
+      const obj1 = createObject({
+        type: 'single',
+        id: '1',
+        namespaces: ['ns1', 'ns2', 'ns3'],
+        references: [
+          {
+            id: '1',
+            type: 'ref',
+            name: 'ref-ns1',
+          },
+        ],
+      });
+      const obj2 = createObject({
+        type: 'single',
+        id: '1',
+        namespaces: ['*'],
+        references: [
+          {
+            id: '2',
+            type: 'ref',
+            name: 'ref-ns2',
+          },
+        ],
+      });
+
+      const ref1 = createObject({
+        type: 'ref',
+        id: '1',
+        namespaces: ['ns1', 'ns2'],
+      });
+      const ref2 = createObject({
+        type: 'ref',
+        id: '2',
+        namespaces: ['*'],
+      });
+
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [ref1, ref2],
+      });
+
+      const { objects } = await collectExportedObjects({
+        objects: [obj1, obj2],
+        savedObjectsClient,
+        request,
+        typeRegistry,
+        includeReferences: true,
+        logger,
+      });
+
+      expect(objects.map(toIdTypeNsTuple)).toEqual([obj1, obj2, ref1, ref2].map(toIdTypeNsTuple));
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+        [
+          {
+            type: 'ref',
+            id: '1',
+            namespaces: ['ns1', 'ns2', 'ns3'],
+          },
+          {
+            type: 'ref',
+            id: '2',
+            namespaces: ['*'],
+          },
+        ],
+        expect.any(Object)
+      );
     });
   });
 });

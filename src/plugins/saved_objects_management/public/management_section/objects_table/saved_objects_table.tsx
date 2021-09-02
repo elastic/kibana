@@ -34,6 +34,10 @@ import {
   extractExportDetails,
   SavedObjectsExportResultDetails,
   getTagFindReferences,
+  SpacesInfo,
+  getObjectKey,
+  getObjectIdentifier,
+  isInNamespace,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
@@ -64,6 +68,7 @@ export interface SavedObjectsTableProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   taggingApi?: SavedObjectsTaggingApi;
+  spacesInfo?: SpacesInfo;
   http: HttpStart;
   search: DataPublicPluginStart['search'];
   overlays: OverlayStart;
@@ -94,6 +99,7 @@ export interface SavedObjectsTableState {
   exportAllOptions: ExportAllOption[];
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
+  isIncludeNamespacesChecked: boolean;
 }
 
 const unableFindSavedObjectsNotificationMessage = i18n.translate(
@@ -104,6 +110,7 @@ const unableFindSavedObjectNotificationMessage = i18n.translate(
   'savedObjectsManagement.objectsTable.unableFindSavedObjectNotificationMessage',
   { defaultMessage: 'Unable to find saved object' }
 );
+
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
 
@@ -132,6 +139,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
+      isIncludeNamespacesChecked: false,
     };
   }
 
@@ -149,7 +157,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   fetchCounts = async () => {
     const { allowedTypes, taggingApi } = this.props;
-    const { queryText, visibleTypes, selectedTags } = parseQuery(this.state.activeQuery);
+    const { queryText, visibleTypes, selectedTags, selectedSpaces } = parseQuery(
+      this.state.activeQuery
+    );
 
     const selectedTypes = allowedTypes.filter(
       (type) => !visibleTypes || visibleTypes.includes(type)
@@ -162,6 +172,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       http: this.props.http,
       typesToInclude: selectedTypes,
       searchString: queryText,
+      namespaces: selectedSpaces?.length ? selectedSpaces : undefined,
       references,
     });
 
@@ -208,7 +219,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   debouncedFindObjects = debounce(async () => {
     const { activeQuery: query, page, perPage } = this.state;
     const { notifications, http, allowedTypes, taggingApi } = this.props;
-    const { queryText, visibleTypes, selectedTags } = parseQuery(query);
+    const { queryText, visibleTypes, selectedTags, selectedSpaces } = parseQuery(query);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: SavedObjectsFindOptions = {
@@ -217,6 +228,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       page: page + 1,
       fields: ['id'],
       type: allowedTypes.filter((type) => !visibleTypes || visibleTypes.includes(type)),
+      namespaces: selectedSpaces?.length ? selectedSpaces : undefined,
     };
     if (findOptions.type.length > 1) {
       findOptions.sortField = 'type';
@@ -316,7 +328,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       (acc, obj) => acc.add(getObjectKey(obj)),
       new Set<string>()
     );
-    const objectsToFetch = objects.filter((obj) => currentObjectsSet.has(getObjectKey(obj)));
+    // TODO: The action API returns only the type/id tuple, so we can't forge the proper key as we're doing everywhere else.
+    //       However the only targets of the copy/share actions are shareable types, so this work-around is acceptable for now.
+    const objectsToFetch = objects.filter((obj) =>
+      currentObjectsSet.has(
+        getObjectKey({
+          ...obj,
+          meta: { namespaceType: 'multiple' },
+        })
+      )
+    );
     if (objectsToFetch.length) {
       this.fetchSavedObjects(objectsToFetch);
     }
@@ -369,14 +390,24 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
   };
 
-  onExport = async (includeReferencesDeep: boolean) => {
+  onExport = async ({
+    includeReferences,
+    includeNamespaces,
+  }: {
+    includeReferences: boolean;
+    includeNamespaces: boolean;
+  }) => {
     const { selectedSavedObjects } = this.state;
-    const { notifications, http } = this.props;
-    const objectsToExport = selectedSavedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
+    const { notifications, http, spacesInfo } = this.props;
+    const objectsToExport = selectedSavedObjects.map((obj) =>
+      includeNamespaces
+        ? getObjectIdentifier(obj, spacesInfo?.active?.id)
+        : { type: obj.type, id: obj.id }
+    );
 
     let blob;
     try {
-      blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep);
+      blob = await fetchExportObjects(http, objectsToExport, includeReferences, includeNamespaces);
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
@@ -393,9 +424,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   onExportAll = async () => {
-    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
+    const {
+      exportAllSelectedOptions,
+      isIncludeReferencesDeepChecked,
+      isIncludeNamespacesChecked,
+      activeQuery,
+    } = this.state;
     const { notifications, http, taggingApi } = this.props;
-    const { queryText, selectedTags } = parseQuery(activeQuery);
+    const { queryText, selectedTags, selectedSpaces } = parseQuery(activeQuery);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
         accum.push(id);
@@ -413,6 +449,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         types: exportTypes,
         references,
         includeReferencesDeep: isIncludeReferencesDeepChecked,
+        includeNamespaces: isIncludeNamespacesChecked,
+        ...(isIncludeNamespacesChecked && { namespaces: selectedSpaces }),
       });
     } catch (e) {
       notifications.toasts.addDanger({
@@ -482,6 +520,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   onDelete = () => {
+    const { selectedSavedObjects } = this.state;
+    const { spacesInfo } = this.props;
+    if (spacesInfo) {
+      const nonSpaceObjects = selectedSavedObjects.filter(
+        (obj) => !isInNamespace(obj, spacesInfo.active.id)
+      );
+      if (nonSpaceObjects.length) {
+        return this.props.notifications.toasts.addDanger(
+          i18n.translate('savedObjectsManagement.objectsTable.cannotDeleteAcrossSpace', {
+            defaultMessage: 'Cannot delete objects that are not in the current space',
+          })
+        );
+      }
+    }
+
     this.setState({ isShowingDeleteConfirmModal: true });
   };
 
@@ -530,10 +583,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     if (!this.state.isShowingImportFlyout) {
       return null;
     }
-    const { applications } = this.props;
+    const { applications, spacesInfo } = this.props;
     const newIndexPatternUrl = applications.getUrlForApp('management', {
       path: 'kibana/indexPatterns',
     });
+
+    const canImportAcrossSpace =
+      Boolean(applications.capabilities.savedObjectsManagement.importAcrossSpaces) &&
+      Boolean(spacesInfo);
 
     return (
       <Flyout
@@ -547,6 +604,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         overlays={this.props.overlays}
         basePath={this.props.http.basePath}
         search={this.props.search}
+        canImportNamespaces={canImportAcrossSpace}
       />
     );
   }
@@ -589,17 +647,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   renderExportAllOptionsModal() {
+    const { capabilities } = this.props.applications;
     const {
       isShowingExportAllOptionsModal,
       filteredItemCount,
       exportAllOptions,
       exportAllSelectedOptions,
       isIncludeReferencesDeepChecked,
+      isIncludeNamespacesChecked,
     } = this.state;
 
     if (!isShowingExportAllOptionsModal) {
       return null;
     }
+
+    const canExportAcrossSpace = Boolean(capabilities.savedObjectsManagement.exportAcrossSpaces);
 
     return (
       <ExportModal
@@ -621,6 +683,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             isIncludeReferencesDeepChecked: newIncludeReferences,
           });
         }}
+        showIncludeNamespacesToggle={canExportAcrossSpace}
+        includeNamespaces={isIncludeNamespacesChecked}
+        onIncludeNamespacesChange={(newIncludeNamespaces) => {
+          this.setState({
+            isIncludeNamespacesChecked: newIncludeNamespaces,
+          });
+        }}
       />
     );
   }
@@ -635,7 +704,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       isSearching,
       savedObjectCounts,
     } = this.state;
-    const { http, taggingApi, allowedTypes, applications } = this.props;
+    const { http, taggingApi, allowedTypes, applications, spacesInfo } = this.props;
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
@@ -664,8 +733,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           <Table
             basePath={http.basePath}
             taggingApi={taggingApi}
+            spacesInfo={spacesInfo}
             initialQuery={this.props.initialQuery}
-            itemId={'id'}
+            itemId={getObjectKey}
             actionRegistry={this.props.actionRegistry}
             columnRegistry={this.props.columnRegistry}
             selectionConfig={selectionConfig}
@@ -690,8 +760,4 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       </div>
     );
   }
-}
-
-function getObjectKey(obj: { type: string; id: string }) {
-  return `${obj.type}:${obj.id}`;
 }

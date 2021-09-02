@@ -2108,12 +2108,14 @@ export interface SavedObjectsExportByObjectOptions extends SavedObjectExportBase
     objects: Array<{
         id: string;
         type: string;
+        namespace?: string;
     }>;
 }
 
 // @public
 export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOptions {
     hasReference?: SavedObjectsFindOptionsReference[];
+    namespaces?: string[];
     search?: string;
     types: string[];
 }
@@ -2150,6 +2152,7 @@ export class SavedObjectsExportError extends Error {
 // @public (undocumented)
 export interface SavedObjectsExportExcludedObject {
     id: string;
+    namespaces?: string[];
     reason?: string;
     type: string;
 }

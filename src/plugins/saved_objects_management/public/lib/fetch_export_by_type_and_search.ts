@@ -13,20 +13,26 @@ export async function fetchExportByTypeAndSearch({
   search,
   types,
   references,
+  namespaces,
   includeReferencesDeep = false,
+  includeNamespaces = false,
 }: {
   http: HttpStart;
   types: string[];
   search?: string;
+  namespaces?: string[];
   references?: SavedObjectsFindOptionsReference[];
   includeReferencesDeep?: boolean;
+  includeNamespaces?: boolean;
 }): Promise<Blob> {
-  return http.post('/api/saved_objects/_export', {
+  const endpoint = includeNamespaces ? '_export_across_space' : '_export';
+  return http.post(`/api/saved_objects/${endpoint}`, {
     body: JSON.stringify({
       type: types,
       search,
       hasReference: references,
       includeReferencesDeep,
+      ...(includeNamespaces ? { namespaces } : {}),
     }),
   });
 }

@@ -16,6 +16,7 @@ export interface SavedObjectsExportExcludedObject
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [id](./kibana-plugin-core-server.savedobjectsexportexcludedobject.id.md) | <code>string</code> | id of the excluded object |
+|  [namespaces](./kibana-plugin-core-server.savedobjectsexportexcludedobject.namespaces.md) | <code>string[]</code> | the namespace(s) of the excluded object, when not agnostic |
 |  [reason](./kibana-plugin-core-server.savedobjectsexportexcludedobject.reason.md) | <code>string</code> | optional cause of the exclusion |
 |  [type](./kibana-plugin-core-server.savedobjectsexportexcludedobject.type.md) | <code>string</code> | type of the excluded object |
 

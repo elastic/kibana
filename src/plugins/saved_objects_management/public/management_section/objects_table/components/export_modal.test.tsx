@@ -15,6 +15,7 @@ describe('ExportModal', () => {
   let onCancel: jest.Mock;
   let onSelectedOptionsChange: jest.Mock;
   let onIncludeReferenceChange: jest.Mock;
+  let onIncludeNamespacesChange: jest.Mock;
 
   const options = [
     { id: '1', label: 'option 1' },
@@ -30,6 +31,7 @@ describe('ExportModal', () => {
     onCancel = jest.fn();
     onSelectedOptionsChange = jest.fn();
     onIncludeReferenceChange = jest.fn();
+    onIncludeNamespacesChange = jest.fn();
   });
 
   it('Displays a checkbox for each option', () => {
@@ -43,6 +45,9 @@ describe('ExportModal', () => {
         selectedOptions={selectedOptions}
         includeReferences={false}
         onIncludeReferenceChange={onIncludeReferenceChange}
+        showIncludeNamespacesToggle={false}
+        includeNamespaces={false}
+        onIncludeNamespacesChange={onIncludeNamespacesChange}
       />
     );
 
@@ -60,6 +65,9 @@ describe('ExportModal', () => {
         selectedOptions={selectedOptions}
         includeReferences={false}
         onIncludeReferenceChange={onIncludeReferenceChange}
+        showIncludeNamespacesToggle={false}
+        includeNamespaces={false}
+        onIncludeNamespacesChange={onIncludeNamespacesChange}
       />
     );
     wrapper.find('EuiButtonEmpty').simulate('click');
@@ -79,6 +87,9 @@ describe('ExportModal', () => {
         selectedOptions={selectedOptions}
         includeReferences={false}
         onIncludeReferenceChange={onIncludeReferenceChange}
+        showIncludeNamespacesToggle={false}
+        includeNamespaces={false}
+        onIncludeNamespacesChange={onIncludeNamespacesChange}
       />
     );
     wrapper.find('EuiButton').simulate('click');

@@ -14,12 +14,14 @@ import {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from '../../types';
+import type { ObjectKeyProvider } from './get_object_key';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 interface CheckOriginConflictsParams {
   objects: Array<SavedObject<{ title?: string }>>;
   savedObjectsClient: SavedObjectsClientContract;
   typeRegistry: ISavedObjectTypeRegistry;
+  getObjKey: ObjectKeyProvider;
   namespace?: string;
   ignoreRegularConflicts?: boolean;
   importIdMap: Map<string, unknown>;
@@ -32,6 +34,7 @@ type CheckOriginConflictParams = Omit<CheckOriginConflictsParams, 'objects'> & {
 interface GetImportIdMapForRetriesParams {
   objects: SavedObject[];
   retries: SavedObjectsImportRetry[];
+  getObjKey: ObjectKeyProvider;
   createNewCopies: boolean;
 }
 
@@ -39,14 +42,17 @@ interface InexactMatch<T> {
   object: SavedObject<T>;
   destinations: Array<{ id: string; title?: string; updatedAt?: string }>;
 }
+
 interface Left<T> {
   tag: 'left';
   value: InexactMatch<T>;
 }
+
 interface Right<T> {
   tag: 'right';
   value: SavedObject<T>;
 }
+
 type Either<T> = Left<T> | Right<T>;
 const isLeft = <T>(object: Either<T>): object is Left<T> => object.tag === 'left';
 
@@ -87,7 +93,7 @@ const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
 const checkOriginConflict = async (
   params: CheckOriginConflictParams
 ): Promise<Either<{ title?: string }>> => {
-  const { object, savedObjectsClient, typeRegistry, namespace, importIdMap } = params;
+  const { object, savedObjectsClient, getObjKey, typeRegistry, namespace, importIdMap } = params;
   const importIds = new Set(importIdMap.keys());
   const { type, originId } = object;
 
@@ -106,6 +112,7 @@ const checkOriginConflict = async (
     fields: ['title'],
     sortField: 'updated_at',
     sortOrder: 'desc' as const,
+    // TODO: probably need to adapt
     ...(namespace && { namespaces: [namespace] }),
   };
   const findResult = await savedObjectsClient.find<{ title?: string }>(findOptions);
@@ -114,7 +121,7 @@ const checkOriginConflict = async (
     return { tag: 'right', value: object };
   }
   // This is an "inexact match" so far; filter the conflict destination(s) to exclude any that exactly match other objects we are importing.
-  const objects = savedObjects.filter((obj) => !importIds.has(`${obj.type}:${obj.id}`));
+  const objects = savedObjects.filter((obj) => !importIds.has(getObjKey(obj)));
   const destinations = transformObjectsToAmbiguousConflictFields(objects);
   if (destinations.length === 0) {
     // No conflict destinations remain after filtering, so this is a "no match" result.
@@ -142,6 +149,7 @@ const checkOriginConflict = async (
  *     B. Otherwise, this is an "ambiguous conflict" result; return an error.
  */
 export async function checkOriginConflicts({ objects, ...params }: CheckOriginConflictsParams) {
+  const { getObjKey } = params;
   // Check each object for possible destination conflicts, ensuring we don't too many concurrent searches running.
   const mapper = async (object: SavedObject<{ title?: string }>) =>
     checkOriginConflict({ object, ...params });
@@ -170,12 +178,13 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
       ambiguousConflictSourcesMap.get(key)!
     );
     const { object, destinations } = result.value;
+    const objKey = getObjKey(object);
     const { type, id, attributes } = object;
     if (sources.length === 1 && destinations.length === 1) {
       // This is a simple "inexact match" result -- a single import object has a single destination conflict.
       if (params.ignoreRegularConflicts) {
-        importIdMap.set(`${type}:${id}`, { id: destinations[0].id });
-        pendingOverwrites.add(`${type}:${id}`);
+        importIdMap.set(objKey, { id: destinations[0].id });
+        pendingOverwrites.add(objKey);
       } else {
         const { title } = attributes;
         errors.push({
@@ -198,7 +207,10 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
     if (sources.length > 1) {
       // In the case of ambiguous source conflicts, don't treat them as errors; instead, regenerate the object ID and reset its origin
       // (e.g., the same outcome as if `createNewCopies` was enabled for the entire import operation).
-      importIdMap.set(`${type}:${id}`, { id: uuidv4(), omitOriginId: true });
+      importIdMap.set(objKey, {
+        id: uuidv4(),
+        omitOriginId: true,
+      });
       return;
     }
     const { title } = attributes;
@@ -220,24 +232,28 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
 /**
  * Assume that all objects exist in the `retries` map (due to filtering at the beginning of `resolveSavedObjectsImportErrors`).
  */
-export function getImportIdMapForRetries(params: GetImportIdMapForRetriesParams) {
-  const { objects, retries, createNewCopies } = params;
-
+export function getImportIdMapForRetries({
+  objects,
+  retries,
+  createNewCopies,
+  getObjKey,
+}: GetImportIdMapForRetriesParams) {
   const retryMap = retries.reduce(
-    (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
+    (acc, cur) => acc.set(getObjKey(cur), cur),
     new Map<string, SavedObjectsImportRetry>()
   );
   const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
 
-  objects.forEach(({ type, id }) => {
-    const retry = retryMap.get(`${type}:${id}`);
+  objects.forEach((obj) => {
+    const objKey = getObjKey(obj);
+    const retry = retryMap.get(objKey);
     if (!retry) {
-      throw new Error(`Retry was expected for "${type}:${id}" but not found`);
+      throw new Error(`Retry was expected for "${objKey}" but not found`);
     }
     const { destinationId } = retry;
     const omitOriginId = createNewCopies || Boolean(retry.createNewCopy);
-    if (destinationId && destinationId !== id) {
-      importIdMap.set(`${type}:${id}`, { id: destinationId, omitOriginId });
+    if (destinationId && destinationId !== obj.id) {
+      importIdMap.set(objKey, { id: destinationId, omitOriginId });
     }
   });
 

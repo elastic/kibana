@@ -12,5 +12,6 @@ optional array of objects to export.
 objects: Array<{
         id: string;
         type: string;
+        namespace?: string;
     }>;
 ```

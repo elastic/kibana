@@ -31,10 +31,10 @@ export class ShareToSpaceSavedObjectsManagementColumn
   public euiColumn = {
     field: 'namespaces',
     name: i18n.translate('savedObjectsManagement.shareToSpace.columnTitle', {
-      defaultMessage: 'Shared spaces',
+      defaultMessage: 'Spaces',
     }),
     description: i18n.translate('savedObjectsManagement.shareToSpace.columnDescription', {
-      defaultMessage: 'The other spaces that this object is currently shared to',
+      defaultMessage: 'The spaces that this object is currently shared to',
     }),
     render: (namespaces: string[] | undefined) => {
       if (!namespaces) {
@@ -43,6 +43,7 @@ export class ShareToSpaceSavedObjectsManagementColumn
 
       const props: SpaceListProps = {
         namespaces,
+        behaviorContext: 'outside-space',
       };
 
       return <Wrapper spacesApiUi={this.spacesApiUi} props={props} />;

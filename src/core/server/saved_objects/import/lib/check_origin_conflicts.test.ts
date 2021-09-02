@@ -18,9 +18,11 @@ import { checkOriginConflicts, getImportIdMapForRetries } from './check_origin_c
 import { savedObjectsClientMock } from '../../../mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { ObjectKeyProvider } from './get_object_key';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckOriginConflictsParams = Parameters<typeof checkOriginConflicts>[0];
+type GetImportIdMapForRetriesParams = Parameters<typeof getImportIdMapForRetries>[0];
 
 /**
  * Function to create a realistic-looking import object given a type, ID, optional originId, and optional updated_at
@@ -63,17 +65,21 @@ describe('#checkOriginConflicts', () => {
     namespace?: string;
     importIdMap?: Map<string, unknown>;
     ignoreRegularConflicts?: boolean;
+    getObjKey?: ObjectKeyProvider;
   }): CheckOriginConflictsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     find = savedObjectsClient.find;
     find.mockResolvedValue(getResultMock()); // mock zero hits response by default
     typeRegistry = typeRegistryMock.create();
     typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
+    typeRegistry.isSingleNamespace.mockImplementation((type) => type !== MULTI_NS_TYPE);
+    const getObjKey: ObjectKeyProvider = ({ type, id }) => `${type}:${id}`;
     return {
       importIdMap: new Map<string, unknown>(), // empty by default
-      ...partial,
       savedObjectsClient,
       typeRegistry,
+      getObjKey,
+      ...partial,
     };
   };
 
@@ -522,6 +528,9 @@ describe('#checkOriginConflicts', () => {
 });
 
 describe('#getImportIdMapForRetries', () => {
+  let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
+  const namespace = 'foo-ns';
+
   const createRetry = (
     { type, id }: { type: string; id: string },
     params: { destinationId?: string; createNewCopy?: boolean } = {}
@@ -530,12 +539,30 @@ describe('#getImportIdMapForRetries', () => {
     return { type, id, overwrite: false, destinationId, replaceReferences: [], createNewCopy };
   };
 
+  const setupParams = (partials: {
+    objects: SavedObjectType[];
+    retries: SavedObjectsImportRetry[];
+    createNewCopies: boolean;
+    namespace?: string;
+    getObjKey?: ObjectKeyProvider;
+  }): GetImportIdMapForRetriesParams => {
+    typeRegistry = typeRegistryMock.create();
+    typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
+    typeRegistry.isSingleNamespace.mockImplementation((type) => type !== MULTI_NS_TYPE);
+    const getObjKey: ObjectKeyProvider = ({ type, id }) => `${type}:${id}`;
+    return {
+      getObjKey,
+      namespace,
+      ...partials,
+    };
+  };
+
   test('throws an error if retry is not found for an object', async () => {
     const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
     const obj2 = createObject(MULTI_NS_TYPE, 'id-2');
     const objects = [obj1, obj2];
     const retries = [createRetry(obj1)];
-    const params = { objects, retries, createNewCopies: false };
+    const params = setupParams({ objects, retries, createNewCopies: false });
 
     expect(() => getImportIdMapForRetries(params)).toThrowErrorMatchingInlineSnapshot(
       `"Retry was expected for \\"multi:id-2\\" but not found"`
@@ -554,7 +581,7 @@ describe('#getImportIdMapForRetries', () => {
       createRetry(obj3, { destinationId: 'id-X' }), // this retry will get added to the `importIdMap`!
       createRetry(obj4, { destinationId: 'id-Y', createNewCopy: true }), // this retry will get added to the `importIdMap`!
     ];
-    const params = { objects, retries, createNewCopies: false };
+    const params = setupParams({ objects, retries, createNewCopies: false });
 
     const checkOriginConflictsResult = await getImportIdMapForRetries(params);
     expect(checkOriginConflictsResult).toEqual(
@@ -569,7 +596,7 @@ describe('#getImportIdMapForRetries', () => {
     const obj = createObject('type-1', 'id-1');
     const objects = [obj];
     const retries = [createRetry(obj, { destinationId: 'id-X' })];
-    const params = { objects, retries, createNewCopies: true };
+    const params = setupParams({ objects, retries, createNewCopies: true });
 
     const checkOriginConflictsResult = await getImportIdMapForRetries(params);
     expect(checkOriginConflictsResult).toEqual(

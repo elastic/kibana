@@ -110,6 +110,7 @@ export const registerResolveImportErrorsRoute = (
           readStream,
           retries: req.body.retries,
           createNewCopies,
+          importNamespaces: false,
         });
 
         return res.ok({ body: result });

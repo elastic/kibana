@@ -41,6 +41,9 @@ export const registerFindRoute = (
           fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
+          namespaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
         }),
       },
     },
@@ -51,6 +54,8 @@ export const registerFindRoute = (
 
       const searchTypes = Array.isArray(query.type) ? query.type : [query.type];
       const includedFields = Array.isArray(query.fields) ? query.fields : [query.fields];
+      const namespaces =
+        typeof req.query.namespaces === 'string' ? [req.query.namespaces] : req.query.namespaces;
 
       const importAndExportableTypes = searchTypes.filter((type) =>
         typeRegistry.isImportableAndExportable(type)
@@ -73,6 +78,7 @@ export const registerFindRoute = (
       const findResponse = await client.find<any>({
         ...query,
         fields: undefined,
+        namespaces,
         searchFields: [...searchFields],
       });
 

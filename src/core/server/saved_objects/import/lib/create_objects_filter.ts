@@ -7,11 +7,15 @@
  */
 
 import { SavedObject } from '../../types';
+import type { ObjectKeyProvider } from './get_object_key';
 import { SavedObjectsImportRetry } from '../types';
 
-export function createObjectsFilter(retries: SavedObjectsImportRetry[]) {
-  const retryKeys = new Set<string>(retries.map((retry) => `${retry.type}:${retry.id}`));
+export function createObjectsFilter(
+  retries: SavedObjectsImportRetry[],
+  getObjKey: ObjectKeyProvider
+): (obj: SavedObject) => boolean {
+  const retryKeys = new Set<string>(retries.map((retry) => getObjKey(retry)));
   return (obj: SavedObject) => {
-    return retryKeys.has(`${obj.type}:${obj.id}`);
+    return retryKeys.has(getObjKey(obj));
   };
 }

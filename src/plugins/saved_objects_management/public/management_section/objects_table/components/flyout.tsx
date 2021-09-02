@@ -28,6 +28,7 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiLink,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -59,6 +60,7 @@ import { ImportSummary } from './import_summary';
 
 const CREATE_NEW_COPIES_DEFAULT = false;
 const OVERWRITE_ALL_DEFAULT = true;
+const IMPORT_NAMESPACES_DEFAULT = false;
 
 export interface FlyoutProps {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
@@ -71,6 +73,7 @@ export interface FlyoutProps {
   http: HttpStart;
   basePath: IBasePath;
   search: DataPublicPluginStart['search'];
+  canImportNamespaces: boolean;
 }
 
 export interface FlyoutState {
@@ -91,6 +94,7 @@ export interface FlyoutState {
   loadingMessage?: string;
   isLegacyFile: boolean;
   status: string;
+  importNamespaces: boolean;
 }
 
 interface ConflictingRecord {
@@ -127,7 +131,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       file: undefined,
       importCount: 0,
       indexPatterns: undefined,
-      importMode: { createNewCopies: CREATE_NEW_COPIES_DEFAULT, overwrite: OVERWRITE_ALL_DEFAULT },
+      importMode: {
+        createNewCopies: CREATE_NEW_COPIES_DEFAULT,
+        overwrite: OVERWRITE_ALL_DEFAULT,
+      },
+      importNamespaces: IMPORT_NAMESPACES_DEFAULT,
       loadingMessage: undefined,
       isLegacyFile: false,
       status: 'idle',
@@ -150,6 +158,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     this.setState(() => ({ importMode }));
   };
 
+  changeImportNamespacesChecked = (importNamespaces: boolean) => {
+    this.setState(() => ({ importNamespaces }));
+  };
+
   setImportFile = (files: FileList | null) => {
     if (!files || !files[0]) {
       this.setState({ file: undefined, isLegacyFile: false });
@@ -169,12 +181,12 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    */
   import = async () => {
     const { http } = this.props;
-    const { file, importMode } = this.state;
+    const { file, importMode, importNamespaces } = this.state;
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     try {
-      const response = await importFile(http, file!, importMode);
+      const response = await importFile(http, file!, importMode, importNamespaces);
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc
@@ -619,7 +631,9 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       isLegacyFile,
       importMode,
       importWarnings,
+      importNamespaces,
     } = this.state;
+    const { canImportNamespaces } = this.props;
 
     if (status === 'loading') {
       return (
@@ -786,6 +800,22 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             updateSelection={(newValues: ImportMode) => this.changeImportMode(newValues)}
           />
         </EuiFormRow>
+        {canImportNamespaces && !isLegacyFile && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiSwitch
+              name="includeNamespaces"
+              label={
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.flyout.importNamespaces"
+                  defaultMessage="Import namespace information"
+                />
+              }
+              checked={importNamespaces}
+              onChange={() => this.changeImportNamespacesChecked(!importNamespaces)}
+            />
+          </>
+        )}
       </EuiForm>
     );
   }

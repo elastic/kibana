@@ -12,6 +12,7 @@ import { SavedObjectReference, SavedObjectsImportRetry } from 'kibana/public';
 import { SavedObjectsClientContract, SavedObject } from '../../types';
 import { SavedObjectsErrorHelpers } from '../../service';
 import { checkConflicts } from './check_conflicts';
+import type { ObjectKeyProvider } from './get_object_key';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckConflictsParams = Parameters<typeof checkConflicts>[0];
@@ -64,11 +65,13 @@ describe('#checkConflicts', () => {
     ignoreRegularConflicts?: boolean;
     retries?: SavedObjectsImportRetry[];
     createNewCopies?: boolean;
+    getObjKey?: ObjectKeyProvider;
   }): CheckConflictsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     socCheckConflicts = savedObjectsClient.checkConflicts;
     socCheckConflicts.mockResolvedValue({ errors: [] }); // by default, mock to empty results
-    return { ...partial, savedObjectsClient };
+    const getObjKey: ObjectKeyProvider = ({ type, id }) => `${type}:${id}`;
+    return { savedObjectsClient, getObjKey, ...partial };
   };
 
   beforeEach(() => {

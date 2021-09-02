@@ -52,6 +52,7 @@ export function copySavedObjectsToSpacesFactory(
         overwrite: options.overwrite,
         readStream: objectsStream,
         createNewCopies: options.createNewCopies,
+        importNamespaces: false,
       });
 
       return {

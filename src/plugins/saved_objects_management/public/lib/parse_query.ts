@@ -12,12 +12,14 @@ interface ParsedQuery {
   queryText?: string;
   visibleTypes?: string[];
   selectedTags?: string[];
+  selectedSpaces?: string[];
 }
 
 export function parseQuery(query: Query): ParsedQuery {
   let queryText: string | undefined;
   let visibleTypes: string[] | undefined;
   let selectedTags: string[] | undefined;
+  let selectedSpaces: string[] | undefined;
 
   if (query) {
     if (query.ast.getTermClauses().length) {
@@ -32,11 +34,15 @@ export function parseQuery(query: Query): ParsedQuery {
     if (query.ast.getFieldClauses('tag')) {
       selectedTags = query.ast.getFieldClauses('tag')[0].value as string[];
     }
+    if (query.ast.getFieldClauses('space')) {
+      selectedSpaces = query.ast.getFieldClauses('space')[0].value as string[];
+    }
   }
 
   return {
     queryText,
     visibleTypes,
     selectedTags,
+    selectedSpaces,
   };
 }

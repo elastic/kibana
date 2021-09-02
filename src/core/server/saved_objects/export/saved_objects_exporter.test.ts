@@ -14,6 +14,7 @@ import { httpServerMock } from '../../http/http_server.mocks';
 import { loggerMock, MockedLogger } from '../../logging/logger.mock';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
+import { SavedObjectsNamespaceType } from 'kibana/server';
 
 async function readStreamToCompletion(stream: Readable): Promise<Array<SavedObject<any>>> {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -37,6 +38,26 @@ describe('getSortedObjectsForExport()', () => {
       logger,
       savedObjectsClient,
       typeRegistry,
+    });
+
+    const testTypes = [
+      { name: 'search', namespaceType: 'single' },
+      {
+        name: 'index-pattern',
+        namespaceType: 'single',
+      },
+      { name: 'other', namespaceType: 'single' },
+      { name: 'multi', namespaceType: 'multiple' },
+    ];
+    testTypes.forEach(({ name, namespaceType }) => {
+      typeRegistry.registerType({
+        name,
+        namespaceType: namespaceType as SavedObjectsNamespaceType,
+        hidden: false,
+        mappings: {
+          properties: {},
+        },
+      });
     });
   });
 
@@ -817,9 +838,7 @@ describe('getSortedObjectsForExport()', () => {
               Object {
                 "hasReference": undefined,
                 "hasReferenceOperator": undefined,
-                "namespaces": Array [
-                  "foo",
-                ],
+                "namespaces": undefined,
                 "perPage": 1000,
                 "pit": Object {
                   "id": "some_pit_id",
@@ -1258,43 +1277,82 @@ describe('getSortedObjectsForExport()', () => {
         ]
       `);
       expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-            [MockFunction] {
-              "calls": Array [
-                Array [
-                  Array [
-                    Object {
-                      "id": "2",
-                      "type": "search",
-                    },
-                  ],
-                  Object {
-                    "namespace": undefined,
-                  },
-                ],
-                Array [
-                  Array [
-                    Object {
-                      "id": "1",
-                      "type": "index-pattern",
-                    },
-                  ],
-                  Object {
-                    "namespace": undefined,
-                  },
-                ],
-              ],
-              "results": Array [
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              Array [
                 Object {
-                  "type": "return",
-                  "value": Promise {},
-                },
-                Object {
-                  "type": "return",
-                  "value": Promise {},
+                  "id": "2",
+                  "type": "search",
                 },
               ],
-            }
-        `);
+              Object {
+                "namespace": undefined,
+              },
+            ],
+            Array [
+              Array [
+                Object {
+                  "id": "1",
+                  "namespaces": undefined,
+                  "type": "index-pattern",
+                },
+              ],
+              Object {
+                "namespace": undefined,
+              },
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": Promise {},
+            },
+            Object {
+              "type": "return",
+              "value": Promise {},
+            },
+          ],
+        }
+      `);
+    });
+
+    test(`uses the object's spaces when calling 'bulkGet' if present`, async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [],
+      });
+      await exporter.exportByObjects({
+        request,
+        objects: [
+          {
+            type: 'index-pattern',
+            id: '1',
+            namespace: 'ns-1',
+          },
+          {
+            type: 'search',
+            id: '2',
+            namespace: 'ns-2',
+          },
+        ],
+      });
+
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+        [
+          {
+            type: 'index-pattern',
+            id: '1',
+            namespaces: ['ns-1'],
+          },
+          {
+            type: 'search',
+            id: '2',
+            namespaces: ['ns-2'],
+          },
+        ],
+        {}
+      );
     });
   });
 });

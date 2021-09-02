@@ -8,10 +8,14 @@
 
 import { SavedObjectsImportRetry } from '../types';
 import { getNonUniqueEntries } from './get_non_unique_entries';
+import type { ObjectKeyProvider } from './get_object_key';
 import { SavedObjectsImportError } from '../errors';
 
-export const validateRetries = (retries: SavedObjectsImportRetry[]) => {
-  const nonUniqueRetryObjects = getNonUniqueEntries(retries);
+export const validateRetries = (
+  retries: SavedObjectsImportRetry[],
+  getObjKey: ObjectKeyProvider
+) => {
+  const nonUniqueRetryObjects = getNonUniqueEntries(retries, getObjKey);
   if (nonUniqueRetryObjects.length > 0) {
     throw SavedObjectsImportError.nonUniqueRetryObjects(nonUniqueRetryObjects);
   }
@@ -19,7 +23,7 @@ export const validateRetries = (retries: SavedObjectsImportRetry[]) => {
   const destinationEntries = retries
     .filter((retry) => retry.destinationId !== undefined)
     .map(({ type, destinationId }) => ({ type, id: destinationId! }));
-  const nonUniqueRetryDestinations = getNonUniqueEntries(destinationEntries);
+  const nonUniqueRetryDestinations = getNonUniqueEntries(destinationEntries, getObjKey);
   if (nonUniqueRetryDestinations.length > 0) {
     throw SavedObjectsImportError.nonUniqueRetryDestinations(nonUniqueRetryDestinations);
   }

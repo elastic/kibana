@@ -131,19 +131,30 @@ export class SavedObjectsExporter {
       ? exportedObjects
       : exportedObjects.map<SavedObject<unknown>>(({ namespaces, ...object }) => object);
 
+    const redactedExcludedObjects = includeNamespaces
+      ? excludedObjects
+      : excludedObjects.map(({ namespaces, ...object }) => object);
+
     const exportDetails: SavedObjectsExportResultDetails = {
       exportedCount: exportedObjects.length,
       missingRefCount: missingReferences.length,
       missingReferences,
       excludedObjectsCount: excludedObjects.length,
-      excludedObjects,
+      excludedObjects: redactedExcludedObjects,
     };
     this.#log.debug(`Exporting [${redactedObjects.length}] saved objects.`);
     return createListStream([...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
   }
 
   private async fetchByObjects({ objects, namespace }: SavedObjectsExportByObjectOptions) {
-    const bulkGetResult = await this.#savedObjectsClient.bulkGet(objects, { namespace });
+    const bulkGetResult = await this.#savedObjectsClient.bulkGet(
+      objects.map((object) => ({
+        type: object.type,
+        id: object.id,
+        ...(object.namespace ? { namespaces: [object.namespace] } : {}),
+      })),
+      { namespace }
+    );
     const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {
       throw SavedObjectsExportError.objectFetchError(erroredObjects);
@@ -153,16 +164,16 @@ export class SavedObjectsExporter {
 
   private async fetchByTypes({
     types,
-    namespace,
     hasReference,
     search,
+    namespaces,
   }: SavedObjectsExportByTypeOptions) {
     const finder = this.#savedObjectsClient.createPointInTimeFinder({
       type: types,
       hasReference,
       hasReferenceOperator: hasReference ? 'OR' : undefined,
       search,
-      namespaces: namespace ? [namespace] : undefined,
+      namespaces: namespaces ?? undefined,
     });
 
     const hits: SavedObjectsFindResult[] = [];

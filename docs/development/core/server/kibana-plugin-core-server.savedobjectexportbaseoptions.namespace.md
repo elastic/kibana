@@ -4,7 +4,7 @@
 
 ## SavedObjectExportBaseOptions.namespace property
 
-optional namespace to override the namespace used by the savedObjectsClient.
+optional namespace to override the default namespace used by the savedObjectsClient.
 
 <b>Signature:</b>
 

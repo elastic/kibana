@@ -39,7 +39,11 @@ describe('resolveImportErrors', () => {
     const result = await resolveImportErrors({
       http: httpMock,
       getConflictResolutions,
-      state: { importCount: 0, importMode: { createNewCopies: false, overwrite: false } },
+      state: {
+        importCount: 0,
+        importMode: { createNewCopies: false, overwrite: false },
+        importNamespaces: false,
+      },
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -68,6 +72,7 @@ describe('resolveImportErrors', () => {
           },
         ],
         importMode: { createNewCopies: false, overwrite: false },
+        importNamespaces: false,
       },
     });
     expect(httpMock.post).not.toHaveBeenCalled();
@@ -120,6 +125,7 @@ describe('resolveImportErrors', () => {
           { obj: { type: 'a', id: '3', meta: {} }, error: { type: 'conflict' } },
         ],
         importMode: { createNewCopies: false, overwrite: false },
+        importNamespaces: false,
       },
     });
     expect(result).toMatchInlineSnapshot(`
@@ -186,6 +192,7 @@ describe('resolveImportErrors', () => {
           },
         ],
         importMode: { createNewCopies: false, overwrite: false },
+        importNamespaces: false,
       },
     });
     expect(result).toMatchInlineSnapshot(`
@@ -202,12 +209,14 @@ describe('resolveImportErrors', () => {
     httpMock.post.mockResolvedValueOnce({
       success: false,
       successCount: 0,
-      errors: [{ type: 'a', id: '1', error: { type: 'conflict' } }],
+      errors: [
+        { type: 'a', id: '1', meta: { namespaceType: 'single' }, error: { type: 'conflict' } },
+      ],
     });
     httpMock.post.mockResolvedValueOnce({
       success: true,
       successCount: 1,
-      successResults: [{ type: 'a', id: '1' }],
+      successResults: [{ type: 'a', id: '1', meta: { namespaceType: 'single' } }],
     });
     getConflictResolutions.mockResolvedValueOnce({});
     getConflictResolutions.mockResolvedValueOnce({
@@ -226,6 +235,7 @@ describe('resolveImportErrors', () => {
           },
         ],
         importMode: { createNewCopies: false, overwrite: false },
+        importNamespaces: false,
       },
     });
     expect(result).toMatchInlineSnapshot(`
@@ -236,6 +246,9 @@ describe('resolveImportErrors', () => {
         "successfulImports": Array [
           Object {
             "id": "1",
+            "meta": Object {
+              "namespaceType": "single",
+            },
             "type": "a",
           },
         ],

@@ -9,6 +9,7 @@
 import { Readable } from 'stream';
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportRetry } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { getObjectKeyProvider } from './lib';
 import {
   SavedObjectsImportFailure,
   SavedObjectsImportHook,
@@ -48,6 +49,13 @@ export interface ResolveSavedObjectsImportErrorsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  /**
+   * TODO: doc
+   * Defaults to false.
+   *
+   * Remarks: the stream of document will be validated accordingly
+   */
+  importNamespaces?: boolean;
 }
 
 /**
@@ -64,16 +72,25 @@ export async function resolveSavedObjectsImportErrors({
   typeRegistry,
   importHooks,
   namespace,
+  importNamespaces = false,
   createNewCopies,
 }: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
+  const getObjKey = getObjectKeyProvider({
+    typeRegistry,
+    namespace,
+    useObjectNamespaces: importNamespaces,
+    useProvidedNamespace: namespace !== undefined,
+  });
+
   // throw a BadRequest error if we see invalid retries
-  validateRetries(retries);
+  validateRetries(retries, getObjKey);
+
+  const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
 
   let successCount = 0;
   let errorAccumulator: SavedObjectsImportFailure[] = [];
   let importIdMap: Map<string, { id?: string; omitOriginId?: boolean }> = new Map();
-  const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
-  const filter = createObjectsFilter(retries);
+  const filter = createObjectsFilter(retries, getObjKey);
 
   // Get the objects to resolve errors
   const { errors: collectorErrors, collectedObjects: objectsToResolve } = await collectSavedObjects(
@@ -81,6 +98,7 @@ export async function resolveSavedObjectsImportErrors({
       readStream,
       objectLimit,
       filter,
+      getObjKey,
       supportedTypes,
     }
   );
@@ -88,61 +106,66 @@ export async function resolveSavedObjectsImportErrors({
 
   // Create a map of references to replace for each object to avoid iterating through
   // retries for every object to resolve
-  const retriesReferencesMap = new Map<string, { [key: string]: string }>();
+  const retriesReferencesMap = new Map<string, Record<string, string>>();
   for (const retry of retries) {
-    const map: { [key: string]: string } = {};
+    const map: Record<string, string> = {};
     for (const { type, from, to } of retry.replaceReferences) {
-      map[`${type}:${from}`] = to;
+      map[getObjKey({ type, id: from, namespaces: retry.namespaces })] = to;
     }
-    retriesReferencesMap.set(`${retry.type}:${retry.id}`, map);
+    retriesReferencesMap.set(getObjKey(retry), map);
   }
 
   // Replace references
   for (const savedObject of objectsToResolve) {
-    const refMap = retriesReferencesMap.get(`${savedObject.type}:${savedObject.id}`);
+    const refMap = retriesReferencesMap.get(getObjKey(savedObject));
     if (!refMap) {
       continue;
     }
     for (const reference of savedObject.references || []) {
-      if (refMap[`${reference.type}:${reference.id}`]) {
-        reference.id = refMap[`${reference.type}:${reference.id}`];
+      const refKey = getObjKey({ ...reference, namespaces: savedObject.namespaces });
+      if (refMap[refKey]) {
+        reference.id = refMap[refKey];
       }
     }
   }
 
   // Validate references
-  const validateReferencesResult = await validateReferences(
-    objectsToResolve,
+  const validateReferencesResult = await validateReferences({
+    savedObjects: objectsToResolve,
     savedObjectsClient,
+    getObjKey,
     namespace,
-    retries
-  );
+    retries,
+  });
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {
     // In case any missing reference errors were resolved, ensure that we regenerate those object IDs as well
     // This is because a retry to resolve a missing reference error may not necessarily specify a destinationId
-    importIdMap = regenerateIds(objectsToResolve);
+    importIdMap = regenerateIds({
+      objects: objectsToResolve,
+      getObjKey,
+    });
   }
 
   // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
-  const checkConflictsParams = {
+  const checkConflictsResult = await checkConflicts({
     objects: objectsToResolve,
     savedObjectsClient,
+    getObjKey,
     namespace,
     retries,
     createNewCopies,
-  };
-  const checkConflictsResult = await checkConflicts(checkConflictsParams);
+  });
   errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
 
   // Check multi-namespace object types for regular conflicts and ambiguous conflicts
-  const getImportIdMapForRetriesParams = {
+  const importIdMapForRetries = getImportIdMapForRetries({
     objects: checkConflictsResult.filteredObjects,
     retries,
     createNewCopies,
-  };
-  const importIdMapForRetries = getImportIdMapForRetries(getImportIdMapForRetriesParams);
+    getObjKey,
+  });
   importIdMap = new Map([
     ...importIdMap,
     ...importIdMapForRetries,
@@ -157,33 +180,35 @@ export async function resolveSavedObjectsImportErrors({
     objects: Array<SavedObject<{ title?: string }>>,
     overwrite?: boolean
   ) => {
-    const createSavedObjectsParams = {
+    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects({
       objects,
       accumulatedErrors,
       savedObjectsClient,
+      getObjKey,
       importIdMap,
       namespace,
       overwrite,
-    };
-    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
-      createSavedObjectsParams
-    );
+      importNamespaces,
+    });
     successObjects = [...successObjects, ...createdObjects];
     errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
     successCount += createdObjects.length;
     successResults = [
       ...successResults,
       ...createdObjects.map((createdObject) => {
-        const { type, id, destinationId, originId } = createdObject;
-        const getTitle = typeRegistry.getType(type)?.management?.getTitle;
+        const { type, id, namespaces, destinationId, originId } = createdObject;
+        const objectType = typeRegistry.getType(type)!;
+        const getTitle = objectType.management?.getTitle;
         const meta = {
           title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
           icon: typeRegistry.getType(type)?.management?.icon,
+          namespaceType: objectType.namespaceType,
         };
         return {
           type,
           id,
           meta,
+          ...(importNamespaces && { namespaces }),
           ...(overwrite && { overwrite }),
           ...(destinationId && { destinationId }),
           ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
@@ -191,18 +216,24 @@ export async function resolveSavedObjectsImportErrors({
       }),
     ];
   };
-  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(objectsToResolve, retries);
+  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites({
+    savedObjects: objectsToResolve,
+    retries,
+    getObjKey,
+  });
   await bulkCreateObjects(objectsToOverwrite, true);
   await bulkCreateObjects(objectsToNotOverwrite);
 
   const errorResults = errorAccumulator.map((error) => {
     const icon = typeRegistry.getType(error.type)?.management?.icon;
+    const namespaceType = typeRegistry.getType(error.type)?.namespaceType;
     const attemptedOverwrite = retries.some(
-      ({ type, id, overwrite }) => type === error.type && id === error.id && overwrite
+      ({ overwrite, ...retry }) => getObjKey(retry) === getObjKey(error) && overwrite
     );
     return {
       ...error,
-      meta: { ...error.meta, icon },
+      namespaces: importNamespaces ? error.namespaces : undefined,
+      meta: { ...error.meta, icon, namespaceType },
       ...(attemptedOverwrite && { overwrite: true }),
     };
   });

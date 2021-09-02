@@ -301,7 +301,9 @@ export class SavedObjectsRepository {
     let savedObjectNamespaces: string[] | undefined;
 
     if (this._registry.isSingleNamespace(type)) {
-      savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
+      savedObjectNamespace = initialNamespaces
+        ? normalizeNamespace(initialNamespaces[0])
+        : namespace;
     } else if (this._registry.isMultiNamespace(type)) {
       if (id && overwrite) {
         // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
@@ -476,7 +478,9 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
-          savedObjectNamespace = initialNamespaces ? initialNamespaces[0] : namespace;
+          savedObjectNamespace = initialNamespaces
+            ? normalizeNamespace(initialNamespaces[0])
+            : namespace;
         } else if (this._registry.isMultiNamespace(object.type)) {
           savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
         }
@@ -564,7 +568,7 @@ export class SavedObjectsRepository {
 
     let bulkGetRequestIndexCounter = 0;
     const expectedBulkGetResults: Either[] = objects.map((object) => {
-      const { type, id } = object;
+      const { type, id, namespaces } = object;
 
       if (!this._allowedTypes.includes(type)) {
         return {
@@ -582,16 +586,22 @@ export class SavedObjectsRepository {
         value: {
           type,
           id,
+          namespaces,
           esRequestIndex: bulkGetRequestIndexCounter++,
         },
       };
     });
 
-    const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
-      _id: this._serializer.generateRawId(namespace, type, id),
-      _index: this.getIndexForType(type),
-      _source: { includes: ['type', 'namespaces'] },
-    }));
+    const getNamespaceId = (namespaces?: string[]) =>
+      namespaces !== undefined ? SavedObjectsUtils.namespaceStringToId(namespaces[0]) : namespace;
+
+    const bulkGetDocs = expectedBulkGetResults
+      .filter(isRight)
+      .map(({ value: { type, id, namespaces } }) => ({
+        _id: this._serializer.generateRawId(getNamespaceId(namespaces), type, id),
+        _index: this.getIndexForType(type),
+        _source: { includes: ['type', 'namespaces'] },
+      }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget<SavedObjectsRawDocSource>(
           {
@@ -619,12 +629,13 @@ export class SavedObjectsRepository {
         return;
       }
 
-      const { type, id, esRequestIndex } = expectedResult.value;
+      const { type, id, namespaces, esRequestIndex } = expectedResult.value;
       const doc = bulkGetResponse?.body.docs[esRequestIndex];
       if (doc?.found) {
         errors.push({
           id,
           type,
+          namespaces,
           error: {
             ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
             // @ts-expect-error MultiGetHit._source is optional
