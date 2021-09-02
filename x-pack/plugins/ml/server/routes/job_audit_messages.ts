@@ -101,7 +101,7 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
   /**
    * @apiGroup JobAuditMessages
    *
-   * @api {put} /api/ml/job_audit_messages/clear_messages/{jobId} Index annotation
+   * @api {put} /api/ml/job_audit_messages/clear_messages Index annotation
    * @apiName ClearJobAuditMessages
    * @apiDescription Clear the job audit messages.
    *
