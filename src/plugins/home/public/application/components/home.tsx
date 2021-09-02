@@ -87,7 +87,7 @@ export class Home extends Component<HomeProps, State> {
         if (this.state.isLoading) {
           this.setState({ isWelcomeEnabled: false });
         }
-      }, 500);
+      }, 10000);
 
       const hasUserIndexPattern = await this.props.hasUserIndexPattern();
 

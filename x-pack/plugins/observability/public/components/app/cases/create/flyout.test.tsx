@@ -10,16 +10,13 @@ import { mount } from 'enzyme';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 
 import { CreateCaseFlyout } from './flyout';
+import { render } from '@testing-library/react';
 
-jest.mock('../../../../utils/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      cases: {
-        getCreateCase: jest.fn(),
-      },
-    },
-  }),
-}));
+import { useKibana } from '../../../../utils/kibana_react';
+import { CASES_OWNER } from '../constants';
+
+jest.mock('../../../../utils/kibana_react');
+
 const onCloseFlyout = jest.fn();
 const onSuccess = jest.fn();
 const defaultProps = {
@@ -28,8 +25,17 @@ const defaultProps = {
 };
 
 describe('CreateCaseFlyout', () => {
+  const mockCreateCase = jest.fn();
+
   beforeEach(() => {
     jest.resetAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cases: {
+          getCreateCase: mockCreateCase,
+        },
+      },
+    });
   });
 
   it('renders', () => {
@@ -51,5 +57,23 @@ describe('CreateCaseFlyout', () => {
 
     wrapper.find(`[data-test-subj='euiFlyoutCloseButton']`).first().simulate('click');
     expect(onCloseFlyout).toBeCalled();
+  });
+
+  it('does not show the sync alerts toggle', () => {
+    render(
+      <EuiThemeProvider>
+        <CreateCaseFlyout {...defaultProps} />
+      </EuiThemeProvider>
+    );
+
+    expect(mockCreateCase).toBeCalledTimes(1);
+    expect(mockCreateCase).toBeCalledWith({
+      onCancel: onCloseFlyout,
+      onSuccess,
+      afterCaseCreated: undefined,
+      withSteps: false,
+      owner: [CASES_OWNER],
+      disableAlerts: true,
+    });
   });
 });

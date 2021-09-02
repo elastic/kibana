@@ -9,6 +9,10 @@
 ```typescript
 readonly links: {
         readonly settings: string;
+        readonly apm: {
+            readonly kibanaSettings: string;
+            readonly supportedServiceMaps: string;
+        };
         readonly canvas: {
             readonly guide: string;
         };
@@ -128,6 +132,7 @@ readonly links: {
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
+            readonly privileges: string;
             readonly guide: string;
             readonly gettingStarted: string;
             readonly ml: string;
