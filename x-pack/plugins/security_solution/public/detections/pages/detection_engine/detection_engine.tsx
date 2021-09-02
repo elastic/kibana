@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+// No bueno, I know! Encountered when reverting RBAC work post initial BCs
+// Don't want to include large amounts of refactor in this temporary workaround
+// TODO: Refactor code - component can be broken apart
+/* eslint-disable complexity */
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +21,6 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
-import { AlertsFeatureNoPermissions } from '@kbn/alerts';
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -73,6 +76,7 @@ import {
   AlertsTableFilterGroup,
   FILTER_OPEN,
 } from '../../components/alerts_table/alerts_filter_group';
+import { EmptyPage } from '../../../common/components/empty_page';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -117,7 +121,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       isAuthenticated: isUserAuthenticated,
       hasEncryptionKey,
       signalIndexName,
-      hasIndexWrite,
+      hasIndexWrite = false,
+      hasIndexMaintenance = false,
+      canUserCRUD = false,
+      canUserREAD,
       hasIndexRead,
     },
   ] = useUserData();
@@ -249,6 +256,18 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  const emptyPageActions = useMemo(
+    () => ({
+      feature: {
+        icon: 'documents',
+        label: i18n.GO_TO_DOCUMENTATION,
+        url: `${docLinks.links.siem.privileges}`,
+        target: '_blank',
+      },
+    }),
+    [docLinks]
+  );
+
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
       <SecuritySolutionPageWrapper>
@@ -275,92 +294,89 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {indicesExist ? (
+      {indicesExist && (hasIndexRead === false || canUserREAD === false) ? (
+        <EmptyPage
+          actions={emptyPageActions}
+          message={i18n.ALERTS_FEATURE_NO_PERMISSIONS_MSG}
+          data-test-subj="no_feature_permissions-alerts"
+          title={i18n.FEATURE_NO_PERMISSIONS_TITLE}
+        />
+      ) : indicesExist && hasIndexRead && canUserREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
-          {hasIndexRead ? (
-            <>
-              <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-                <SiemSearchBar id="global" indexPattern={indexPattern} />
-              </FiltersGlobal>
-              <SecuritySolutionPageWrapper
-                noPadding={globalFullScreen}
-                data-test-subj="detectionsAlertsPage"
-              >
-                <Display show={!globalFullScreen}>
-                  <DetectionEngineHeaderPage title={i18n.PAGE_TITLE}>
-                    <LinkAnchor
-                      onClick={goToRules}
-                      href={formatUrl(getRulesUrl())}
-                      data-test-subj="manage-alert-detection-rules"
-                    >
-                      {i18n.BUTTON_MANAGE_RULES}
-                    </LinkAnchor>
-                  </DetectionEngineHeaderPage>
-                  <EuiHorizontalRule margin="m" />
-                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>
-                      <AlertsTableFilterGroup
-                        status={filterGroup}
-                        onFilterGroupChanged={onFilterGroupChangedCallback}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {timelinesUi.getLastUpdated({
-                        updatedAt: updatedAt || 0,
-                        showUpdating: loading,
-                      })}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="m" />
-                  <EuiFlexGroup wrap>
-                    <EuiFlexItem grow={2}>
-                      <AlertsHistogramPanel
-                        chartHeight={CHART_HEIGHT}
-                        filters={alertsHistogramDefaultFilters}
-                        query={query}
-                        showTotalAlertsCount={false}
-                        titleSize={'s'}
-                        signalIndexName={signalIndexName}
-                        updateDateRange={updateDateRangeCallback}
-                      />
-                    </EuiFlexItem>
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+            <SiemSearchBar id="global" indexPattern={indexPattern} />
+          </FiltersGlobal>
+          <SecuritySolutionPageWrapper
+            noPadding={globalFullScreen}
+            data-test-subj="detectionsAlertsPage"
+          >
+            <Display show={!globalFullScreen}>
+              <DetectionEngineHeaderPage title={i18n.PAGE_TITLE}>
+                <LinkAnchor
+                  onClick={goToRules}
+                  href={formatUrl(getRulesUrl())}
+                  data-test-subj="manage-alert-detection-rules"
+                >
+                  {i18n.BUTTON_MANAGE_RULES}
+                </LinkAnchor>
+              </DetectionEngineHeaderPage>
+              <EuiHorizontalRule margin="m" />
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <AlertsTableFilterGroup
+                    status={filterGroup}
+                    onFilterGroupChanged={onFilterGroupChangedCallback}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {timelinesUi.getLastUpdated({
+                    updatedAt: updatedAt || 0,
+                    showUpdating: loading,
+                  })}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup wrap>
+                <EuiFlexItem grow={2}>
+                  <AlertsHistogramPanel
+                    chartHeight={CHART_HEIGHT}
+                    filters={alertsHistogramDefaultFilters}
+                    query={query}
+                    showTotalAlertsCount={false}
+                    titleSize={'s'}
+                    signalIndexName={signalIndexName}
+                    updateDateRange={updateDateRangeCallback}
+                  />
+                </EuiFlexItem>
 
-                    <EuiFlexItem grow={1}>
-                      <AlertsCountPanel
-                        filters={alertsHistogramDefaultFilters}
-                        query={query}
-                        signalIndexName={signalIndexName}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                <EuiFlexItem grow={1}>
+                  <AlertsCountPanel
+                    filters={alertsHistogramDefaultFilters}
+                    query={query}
+                    signalIndexName={signalIndexName}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
 
-                  <EuiSpacer size="l" />
-                </Display>
+              <EuiSpacer size="l" />
+            </Display>
 
-                <AlertsTable
-                  timelineId={TimelineId.detectionsPage}
-                  loading={loading}
-                  hasIndexWrite={hasIndexWrite ?? false}
-                  hasIndexMaintenance={hasIndexWrite ?? false}
-                  from={from}
-                  defaultFilters={alertsTableDefaultFilters}
-                  showBuildingBlockAlerts={showBuildingBlockAlerts}
-                  onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-                  showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-                  onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
-                  to={to}
-                  filterGroup={filterGroup}
-                />
-              </SecuritySolutionPageWrapper>
-            </>
-          ) : (
-            <AlertsFeatureNoPermissions
-              data-test-subj="alertsNoPermissions"
-              documentationUrl={`${docLinks.links.siem.gettingStarted}`}
-              iconType="logoSecurity"
+            <AlertsTable
+              timelineId={TimelineId.detectionsPage}
+              loading={loading}
+              hasIndexWrite={(hasIndexWrite ?? false) && (canUserCRUD ?? false)}
+              hasIndexMaintenance={(hasIndexMaintenance ?? false) && (canUserCRUD ?? false)}
+              from={from}
+              defaultFilters={alertsTableDefaultFilters}
+              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
+              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+              onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
+              to={to}
+              filterGroup={filterGroup}
             />
-          )}
+          </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
         <SecuritySolutionPageWrapper>
