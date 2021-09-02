@@ -1,6 +1,6 @@
 ## Linting
 
-_Note: Run the following commands from `kibana/`._
+_Note: Run the following commands from the root of Kibana._
 
 ### Typescript
 
