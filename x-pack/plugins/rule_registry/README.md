@@ -130,7 +130,7 @@ The following fields are defined in the technical field component template and s
 - `kibana.alert.rule.name`: the name of the rule (as specified by the user).
 - `kibana.alert.rule.category`: the name of the rule type (as defined by the rule type producer)
 - `kibana.alert.rule.consumer`: the feature which produced the alert (inherited from the rule producer field). Usually a Kibana feature id like `apm`, `siem`...
-- `kibana.alert.id`: the id of the alert, that is unique within the context of the rule execution it was created in. E.g., for a rule that monitors latency for all services in all environments, this might be `opbeans-java:production`.
+- `kibana.alert.instance.id`: the id of the alert instance, that is unique within the context of the rule execution it was created in. E.g., for a rule that monitors latency for all services in all environments, this might be `opbeans-java:production`.
 - `kibana.alert.uuid`: the unique identifier for the alert during its lifespan. If an alert recovers (or closes), this identifier is re-generated when it is opened again.
 - `kibana.alert.status`: the status of the alert. Can be `active` or `recovered`.
 - `kibana.alert.start`: the ISO timestamp of the time at which the alert started.
