@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .map((hit) => (hit._source as Ignore).normal_constant)
         .sort();
 
-      // Value should be "undefined for all records"
+      // Value should be "constant_value for all records"
       expect(hits).to.eql(['constant_value', 'constant_value', 'constant_value', 'constant_value']);
     });
 
