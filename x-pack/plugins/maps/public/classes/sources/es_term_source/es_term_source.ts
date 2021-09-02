@@ -172,11 +172,11 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   }
 
   getSyncMeta(): VectorSourceSyncMeta | null {
-    return this._descriptor.size !== undefined
-      ? {
-          size: this._descriptor.size,
-        }
-      : null;
+    return {
+      indexPatternId: this._descriptor.indexPatternId,
+      term: this._descriptor.term,
+      size: this._descriptor.size,
+    };
   }
 
   getRightFields(): IField[] {
