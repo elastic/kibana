@@ -102,14 +102,14 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   useEffect(() => {
     const fetchDryRunData = async () => {
       if (packagePolicyIds && packagePolicyIds.length) {
-        const { data } = await sendUpgradePackagePolicyDryRun(packagePolicyIds);
+        const { data } = await sendUpgradePackagePolicyDryRun(packagePolicyIds, latestVersion);
 
         setDryRunData(data);
       }
     };
 
     fetchDryRunData();
-  }, [packagePolicyIds]);
+  }, [latestVersion, packagePolicyIds]);
 
   const updateAvailable =
     installedVersion && semverLt(installedVersion, latestVersion) ? true : false;

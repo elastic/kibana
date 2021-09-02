@@ -27,6 +27,7 @@ interface PackageInstallItem {
 
 type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
   fromUpdate?: boolean;
+  suppressToasts?: boolean;
 };
 type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
@@ -57,7 +58,13 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
   );
 
   const installPackage = useCallback(
-    async ({ name, version, title, fromUpdate = false }: InstallPackageProps) => {
+    async ({
+      name,
+      version,
+      title,
+      fromUpdate = false,
+      suppressToasts = false,
+    }: InstallPackageProps) => {
       const currStatus = getPackageInstallStatus(name);
       const newStatus = { ...currStatus, name, status: InstallStatus.installing };
       setPackageInstallStatus(newStatus);
@@ -96,22 +103,25 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           });
           history.push(settingsPath);
         }
-        notifications.toasts.addSuccess({
-          title: toMountPoint(
-            <FormattedMessage
-              id="xpack.fleet.integrations.packageInstallSuccessTitle"
-              defaultMessage="Installed {title}"
-              values={{ title }}
-            />
-          ),
-          text: toMountPoint(
-            <FormattedMessage
-              id="xpack.fleet.integrations.packageInstallSuccessDescription"
-              defaultMessage="Successfully installed {title}"
-              values={{ title }}
-            />
-          ),
-        });
+
+        if (!suppressToasts) {
+          notifications.toasts.addSuccess({
+            title: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageInstallSuccessTitle"
+                defaultMessage="Installed {title}"
+                values={{ title }}
+              />
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageInstallSuccessDescription"
+                defaultMessage="Successfully installed {title}"
+                values={{ title }}
+              />
+            ),
+          });
+        }
       }
     },
     [getPackageInstallStatus, notifications.toasts, setPackageInstallStatus, getPath, history]

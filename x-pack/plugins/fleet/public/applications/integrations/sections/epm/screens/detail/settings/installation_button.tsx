@@ -15,6 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { sumBy } from 'lodash';
@@ -33,10 +34,42 @@ import {
   useInstallPackage,
   sendGetAgentPolicies,
   sendUpgradePackagePolicy,
+  useLink,
+  useStartServices,
 } from '../../../../../hooks';
+
+import { toMountPoint } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 
 import { ConfirmPackageUninstall } from './confirm_package_uninstall';
 import { ConfirmPackageInstall } from './confirm_package_install';
+
+/*
+
+  This component defines the logic for two mutative operations related to integrations:
+
+  1. Installing a currently-uninstalled integration
+  2. Updating an installed integration to a new version
+
+  Installing a new integration is straightforward. We display a confirmation modal and make an API call to install
+  the package upon confirmation.
+
+  Updating an integration to a new version entails a bit more logic. We allow the user to choose whether they'd like to
+  simultaneously upgrade any package policies that include the current version of the integration. For example, if
+  a user is running four agent policies that include the `nginx-0.2.4` package and they update to `nginx-0.7.0`, they
+  can elect to also deploy the new integration version to any agent running one of those four agent policies.
+
+  If the user does not elect to upgrade their running policies, we simply install the latest version of the package and
+  navigate to the new version's settings page, e.g. `/detail/nginx-0.7.0/settings`.
+
+  If the user _does_ elect to upgrade their running policies, we display a confirmation modal. In this modal, we'll report the
+  number of agents and policies that will be affected by the upgrade, and if there are any conflicts. In the case of a conflict
+  between versions, an upgrade for a given package policy will be skipped and the user will need to manually recreate their policy
+  to resolve any breaking changes between versions. Once the user confirms, we first install the latest version of the integration,
+  then we make a call to the "upgrade policies" API endpoint with a list of all package policy ID's that include the current version
+  of the integration. This API endpoint will complete the upgrade process in bulk for each package policy provided. Upon completion,
+  we navigate to the new version's settings page, as above.
+
+*/
 
 type InstallationButtonProps = Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'> & {
   disabled?: boolean;
@@ -57,11 +90,15 @@ export function InstallationButton(props: InstallationButtonProps) {
     packagePolicyIds = [],
     dryRunData,
   } = props;
+  const { notifications } = useStartServices();
   const hasWriteCapabilites = useCapabilities().write;
   const installPackage = useInstallPackage();
   const uninstallPackage = useUninstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
+
+  const history = useHistory();
+  const { getPath } = useLink();
 
   const isInstalling = installationStatus === InstallStatus.installing;
   const isRemoving = installationStatus === InstallStatus.uninstalling;
@@ -104,36 +141,65 @@ export function InstallationButton(props: InstallationButtonProps) {
     setIsInstallModalVisible(!isInstallModalVisible);
   }, [isInstallModalVisible]);
 
-  const toggleUpdateModal = useCallback(() => {
-    setIsUpdateModalVisible(!isUpdateModalVisible);
-  }, [isUpdateModalVisible]);
-
   const handleClickInstall = useCallback(() => {
     installPackage({ name, version, title });
     toggleInstallModal();
   }, [installPackage, name, title, toggleInstallModal, version]);
 
-  const handleClickUpdate = useCallback(
-    async (upgradePolicies: boolean = false) => {
-      await installPackage({ name, version, title, fromUpdate: true });
-      if (!upgradePolicies) {
-        return;
-      }
+  const navigateToNewSettingsPage = useCallback(() => {
+    const settingsPath = getPath('integration_details_settings', {
+      pkgkey: `${name}-${version}`,
+    });
+    history.push(settingsPath);
+  }, [history, getPath, name, version]);
 
-      setIsUpgradingPackagePolicies(true);
+  const handleClickUpdate = useCallback(async () => {
+    await installPackage({ name, version, title, fromUpdate: true });
+  }, [installPackage, name, title, version]);
 
-      await sendUpgradePackagePolicy(
-        // Only upgrade policies that don't have conflicts
-        packagePolicyIds.filter(
-          (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
-        )
-      );
+  const handleClickUpgradePolicies = useCallback(async () => {
+    setIsUpgradingPackagePolicies(true);
 
-      setIsUpgradingPackagePolicies(false);
-      setIsUpdateModalVisible(false);
-    },
-    [installPackage, name, title, version, dryRunData, packagePolicyIds]
-  );
+    await installPackage({ name, version, title, suppressToasts: true });
+
+    await sendUpgradePackagePolicy(
+      // Only upgrade policies that don't have conflicts
+      packagePolicyIds.filter(
+        (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
+      )
+    );
+
+    setIsUpgradingPackagePolicies(false);
+    setIsUpdateModalVisible(false);
+
+    notifications.toasts.addSuccess({
+      title: toMountPoint(
+        <FormattedMessage
+          id="xpack.fleet.integrations.packageUpdateSuccessTitle"
+          defaultMessage="Updated {title} and upgraded policies"
+          values={{ title }}
+        />
+      ),
+      text: toMountPoint(
+        <FormattedMessage
+          id="xpack.fleet.integrations.packageUpdateSuccessDescription"
+          defaultMessage="Successfully updated {title} and upgraded policies"
+          values={{ title }}
+        />
+      ),
+    });
+
+    navigateToNewSettingsPage();
+  }, [
+    dryRunData,
+    installPackage,
+    name,
+    version,
+    title,
+    navigateToNewSettingsPage,
+    notifications.toasts,
+    packagePolicyIds,
+  ]);
 
   const handleClickUninstall = useCallback(() => {
     uninstallPackage({ name, version, title, redirectToVersion: latestVersion ?? version });
@@ -187,7 +253,7 @@ export function InstallationButton(props: InstallationButtonProps) {
         <EuiButton
           iconType={'refresh'}
           isLoading={isInstalling}
-          onClick={upgradePackagePolicies ? toggleUpdateModal : () => handleClickUpdate(false)}
+          onClick={upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate}
         >
           <FormattedMessage
             id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"
@@ -270,14 +336,16 @@ export function InstallationButton(props: InstallationButtonProps) {
 
   const updateModal = (
     <EuiConfirmModal
-      isLoading={isInstalling || isUpgradingPackagePolicies}
+      isLoading={isUpgradingPackagePolicies}
       maxWidth={568}
-      onCancel={toggleUpdateModal}
+      onCancel={() => {
+        setIsUpdateModalVisible(false);
+      }}
       cancelButtonText={i18n.translate(
         'xpack.fleet.integrations.settings.confirmUpdateModal.cancel',
         { defaultMessage: 'Cancel' }
       )}
-      onConfirm={() => handleClickUpdate(true)}
+      onConfirm={handleClickUpgradePolicies}
       confirmButtonText={i18n.translate(
         'xpack.fleet.integrations.settings.confirmUpdateModal.confirm',
         { defaultMessage: 'Upgrade {packageName} and policies', values: { packageName: title } }
