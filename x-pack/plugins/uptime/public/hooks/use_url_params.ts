@@ -42,11 +42,12 @@ const getMapFromFilters = (value: any): Map<string, any> | undefined => {
 };
 
 export const useUrlParams: UptimeUrlParamsHook = () => {
-  const location = useLocation();
+  const { pathname, search } = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();
   const selectedFilters = useSelector(selectedFiltersSelector);
   const { filters } = useGetUrlParams();
+
   useEffect(() => {
     if (selectedFilters === null) {
       const filterMap = getMapFromFilters(filters);
@@ -58,8 +59,6 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
 
   const updateUrlParams: UpdateUrlParams = useCallback(
     (updatedParams) => {
-      if (!history || !location) return;
-      const { pathname, search } = location;
       const currentParams = getParsedParams(search);
       const mergedParams = {
         ...currentParams,
@@ -82,10 +81,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
 
       // only update the URL if the search has actually changed
       if (search !== updatedSearch) {
-        history.push({
-          pathname,
-          search: updatedSearch,
-        });
+        history.push({ pathname, search: updatedSearch });
       }
       const filterMap = getMapFromFilters(mergedParams.filters);
       if (!filterMap) {
@@ -94,7 +90,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
         dispatch(setSelectedFilters(getFiltersFromMap(filterMap)));
       }
     },
-    [dispatch, history, location]
+    [dispatch, history, pathname, search]
   );
 
   return [useGetUrlParams, updateUrlParams];
