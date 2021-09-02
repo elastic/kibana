@@ -31,12 +31,12 @@ const { useGlobalFlyout } = GlobalFlyout;
 
 const i18nTexts = {
   title: i18n.translate('xpack.upgradeAssistant.overview.system_indices.title', {
-    defaultMessage: 'Migrate system indices',
+    defaultMessage: 'Upgrade system indices',
   }),
   bodyDescription: (docLink: string) => (
     <FormattedMessage
       id="xpack.upgradeAssistant.overview.system_indices.body"
-      defaultMessage="Migrate your system indices to keep them happy. In addition to regular checkups, it is recommended that you brush and floss your indices twice per day. {learnMoreLink}."
+      defaultMessage="Upgrade your system indices to keep them happy. In addition to regular checkups, it is recommended that you brush and floss your indices twice per day. {learnMoreLink}."
       values={{
         learnMoreLink: (
           <EuiLink href={docLink} target="_blank">
@@ -52,15 +52,21 @@ const i18nTexts = {
       defaultMessage: 'Begin upgrading system indices',
     }
   ),
-  inProgressButtonLabel: i18n.translate('xpack.upgradeAssistant.overview.inProgressButtonLabel', {
-    defaultMessage: 'Upgrading system indices',
-  }),
-  noUpgradeNeeded: i18n.translate('xpack.upgradeAssistant.overview.noUpgradeNeeded', {
-    // NOTE: This could be that all indices have either been upgraded or dont need to be upgraded
-    defaultMessage: 'All system indices have been upgraded',
-  }),
+  inProgressButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.system_indices.inProgressButtonLabel',
+    {
+      defaultMessage: 'Upgrading system indices',
+    }
+  ),
+  noUpgradeNeeded: i18n.translate(
+    'xpack.upgradeAssistant.overview.system_indices.noUpgradeNeeded',
+    {
+      // NOTE: This could be that all indices have either been upgraded or dont need to be upgraded
+      defaultMessage: 'All system indices have been upgraded',
+    }
+  ),
   viewSystemIndices: i18n.translate(
-    'xpack.upgradeAssistant.system_indices.overview.viewSystemIndices',
+    'xpack.upgradeAssistant.system_indices.overview.system_indices.viewSystemIndices',
     {
       defaultMessage: 'View system indices and status',
     }

@@ -36,15 +36,33 @@ export interface SystemIndicesFlyoutProps {
 }
 
 const i18nTexts = {
-  closeButtonLabel: i18n.translate('xpack.upgradeAssistant.overview.flyout.closeButtonLabel', {
-    defaultMessage: 'Close',
-  }),
-  flyoutTitle: i18n.translate('xpack.upgradeAssistant.overview.flyout.title', {
+  closeButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.system_indices.flyoutCloseButtonLabel',
+    {
+      defaultMessage: 'Close',
+    }
+  ),
+  flyoutTitle: i18n.translate('xpack.upgradeAssistant.overview.system_indices.flyoutTitle', {
     defaultMessage: 'Upgrade system indices',
   }),
-  flyoutDescription: i18n.translate('xpack.upgradeAssistant.overview.flyout.description', {
-    defaultMessage:
-      'Migrate your system indices to keep them happy. In addition to regular checkups, it is recommended that you brush and floss your indices twice per day.',
+  flyoutDescription: i18n.translate(
+    'xpack.upgradeAssistant.overview.system_indices.flyoutDescription',
+    {
+      defaultMessage:
+        'Migrate your system indices to keep them happy. In addition to regular checkups, it is recommended that you brush and floss your indices twice per day.',
+    }
+  ),
+  upgradeCompleteLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.system_indices.upgradeCompleteLabel',
+    {
+      defaultMessage: 'Upgrade complete',
+    }
+  ),
+  upgradingLabel: i18n.translate('xpack.upgradeAssistant.overview.system_indices.upgradingLabel', {
+    defaultMessage: 'Upgrading…',
+  }),
+  errorLabel: i18n.translate('xpack.upgradeAssistant.overview.system_indices.errorLabel', {
+    defaultMessage: 'Error: TODO',
   }),
 };
 
@@ -57,7 +75,7 @@ const renderMigrationStatus = (status: UPGRADE_STATUS /* , data: SystemIndicesUp
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="green" size="s">
-            <p>Upgrade complete</p>
+            <p>{i18nTexts.upgradeCompleteLabel}</p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -72,7 +90,7 @@ const renderMigrationStatus = (status: UPGRADE_STATUS /* , data: SystemIndicesUp
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="s">
-            <p>Upgrading...</p>
+            <p>{i18nTexts.upgradingLabel}</p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -86,7 +104,7 @@ const renderMigrationStatus = (status: UPGRADE_STATUS /* , data: SystemIndicesUp
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText color="danger" size="s">
-          <p>Error: TODO</p>
+          <p>{i18nTexts.errorLabel}</p>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
