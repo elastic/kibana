@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectAggregation('Terms');
       log.debug('Field = extension');
       await PageObjects.visEditor.selectField('extension.raw');
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(true);
     };
 
     before(async () => {

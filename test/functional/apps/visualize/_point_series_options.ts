@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('Average memory value axis - ValueAxis-2');
     await PageObjects.visEditor.setSeriesAxis(1, 'ValueAxis-2');
     await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-    await PageObjects.visEditor.clickGo();
+    await PageObjects.visEditor.clickGo(true);
   }
 
   describe('point series', function describeIndexTests() {

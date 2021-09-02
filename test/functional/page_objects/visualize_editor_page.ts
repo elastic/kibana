@@ -63,8 +63,8 @@ export class VisualizeEditorPageObject extends FtrService {
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
-  public async clickGo() {
-    if (await this.visChart.isNewChartsLibraryEnabled()) {
+  public async clickGo(isNewLibrary = false) {
+    if ((await this.visChart.isNewChartsLibraryEnabled()) || isNewLibrary) {
       await this.elasticChart.setNewChartUiDebugFlag();
     }
 

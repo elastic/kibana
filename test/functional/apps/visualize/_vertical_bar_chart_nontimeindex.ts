@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectField('@timestamp');
       await PageObjects.visEditor.setInterval('3h', { type: 'custom' });
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(true);
     };
 
     before(async () => {

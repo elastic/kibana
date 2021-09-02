@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectField('extension.raw');
       log.debug('switch from Rows to Columns');
       await PageObjects.visEditor.clickSplitDirection('Columns');
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(true);
     };
 
     before(async () => {

@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     const initVisualization = async (expression: string, interval: string = '12h') => {
       await visEditor.setTimelionInterval(interval);
       await monacoEditor.setCodeEditorValue(expression);
-      await visEditor.clickGo();
+      await visEditor.clickGo(true);
     };
 
     it('should display correct data for specified index pattern and timefield', async () => {

@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const intervalValue = await PageObjects.visEditor.getInterval();
       log.debug('intervalValue = ' + intervalValue);
       expect(intervalValue[0]).to.be('Auto');
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(true);
     };
 
     before(async function () {

@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Field = @timestamp');
       await PageObjects.visEditor.selectField('@timestamp');
       // leaving Interval set to Auto
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickGo(true);
     };
 
     describe('bar charts x axis tick labels', () => {

@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setHistoricalDataRange();
 
-      const visName = `${AREA_CHART_VIS_NAME} - new charts library`;
+      const visName = AREA_CHART_VIS_NAME;
       await dashboardAddPanel.addVisualization(visName);
       const dashboarName = 'Overridden colors - new charts library';
       await PageObjects.dashboard.saveDashboard(dashboarName);
