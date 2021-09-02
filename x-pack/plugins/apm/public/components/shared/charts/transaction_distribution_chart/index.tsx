@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { flatten } from 'lodash';
 
 import {
@@ -37,7 +37,14 @@ import { HistogramItem } from '../../../../../common/search_strategies/correlati
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
-import { ChartContainer } from '../chart_container';
+import { ChartContainer, ChartContainerProps } from '../chart_container';
+
+export type TransactionDistributionChartLoadingState = Pick<
+  ChartContainerProps,
+  'hasData' | 'status'
+>;
+
+export type OnHasData = (hasData: boolean) => void;
 
 export interface TransactionDistributionChartData {
   id: string;
@@ -50,6 +57,7 @@ interface TransactionDistributionChartProps {
   markerValue: number;
   markerPercentile: number;
   onChartSelection?: BrushEndListener;
+  onHasData?: OnHasData;
   selection?: [number, number];
 }
 
@@ -103,6 +111,7 @@ export function TransactionDistributionChart({
   markerValue,
   markerPercentile,
   onChartSelection,
+  onHasData,
   selection,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
@@ -155,6 +164,20 @@ export function TransactionDistributionChart({
         ]
       : undefined;
 
+  const chartLoadingState: TransactionDistributionChartLoadingState = useMemo(
+    () => ({
+      hasData: Array.isArray(data) && data.length > 0,
+      status: Array.isArray(data) ? FETCH_STATUS.SUCCESS : FETCH_STATUS.LOADING,
+    }),
+    [data]
+  );
+
+  useEffect(() => {
+    if (onHasData) {
+      onHasData(chartLoadingState.hasData);
+    }
+  }, [chartLoadingState, onHasData]);
+
   return (
     <div
       data-test-subj="apmCorrelationsChart"
@@ -162,12 +185,8 @@ export function TransactionDistributionChart({
     >
       <ChartContainer
         height={250}
-        hasData={Array.isArray(data) && data.length > 0}
-        status={
-          Array.isArray(data) && data.length > 0
-            ? FETCH_STATUS.SUCCESS
-            : FETCH_STATUS.LOADING
-        }
+        hasData={chartLoadingState.hasData}
+        status={chartLoadingState.status}
       >
         <Chart>
           <Settings

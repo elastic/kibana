@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BrushEndListener, XYBrushArea } from '@elastic/charts';
 import {
   EuiBadge,
@@ -24,6 +24,7 @@ import { useTransactionDistributionFetcher } from '../../../../hooks/use_transac
 import {
   TransactionDistributionChart,
   TransactionDistributionChartData,
+  OnHasData,
 } from '../../../shared/charts/transaction_distribution_chart';
 import { useUiTracker } from '../../../../../../observability/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -50,10 +51,11 @@ export function getFormattedSelection(selection: Selection): string {
   }`;
 }
 
-interface Props {
+interface TransactionDistributionProps {
   markerCurrentTransaction?: number;
   onChartSelection: BrushEndListener;
   onClearSelection: () => void;
+  onHasData: OnHasData;
   selection?: Selection;
 }
 
@@ -61,8 +63,9 @@ export function TransactionDistribution({
   markerCurrentTransaction,
   onChartSelection,
   onClearSelection,
+  onHasData,
   selection,
-}: Props) {
+}: TransactionDistributionProps) {
   const {
     core: { notifications },
   } = useApmPluginContext();
@@ -71,13 +74,23 @@ export function TransactionDistribution({
 
   const {
     query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/:serviceName/transactions/view');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { urlParams } = useUrlParams();
 
   const { transactionName } = urlParams;
+
+  const [showSelection, setShowSelection] = useState(false);
+
+  const onTransactionDistributionHasData: OnHasData = useCallback(
+    (hasData) => {
+      setShowSelection(hasData);
+      onHasData(hasData);
+    },
+    [onHasData]
+  );
 
   const emptySelectionText = i18n.translate(
     'xpack.apm.transactionDetails.emptySelectionText',
@@ -96,17 +109,12 @@ export function TransactionDistribution({
   const {
     error,
     percentileThresholdValue,
-    isRunning,
     startFetch,
     cancelFetch,
     transactionDistribution,
   } = useTransactionDistributionFetcher();
 
-  useEffect(() => {
-    if (isRunning) {
-      cancelFetch();
-    }
-
+  const startFetchHandler = useCallback(() => {
     startFetch({
       environment,
       kuery,
@@ -117,14 +125,21 @@ export function TransactionDistribution({
       end,
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     });
+  }, [
+    startFetch,
+    environment,
+    serviceName,
+    transactionName,
+    transactionType,
+    kuery,
+    start,
+    end,
+  ]);
 
-    return () => {
-      // cancel any running async partial request when unmounting the component
-      // we want this effect to execute exactly once after the component mounts
-      cancelFetch();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [environment, serviceName, kuery, start, end]);
+  useEffect(() => {
+    startFetchHandler();
+    return cancelFetch;
+  }, [cancelFetch, startFetchHandler]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -181,7 +196,7 @@ export function TransactionDistribution({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-        {!selection && (
+        {showSelection && !selection && (
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               <EuiFlexItem
@@ -199,7 +214,7 @@ export function TransactionDistribution({
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
-        {selection && (
+        {showSelection && selection && (
           <EuiFlexItem grow={false}>
             <EuiBadge
               iconType="cross"
@@ -232,6 +247,7 @@ export function TransactionDistribution({
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={percentileThresholdValue ?? 0}
         onChartSelection={onTrackedChartSelection}
+        onHasData={onTransactionDistributionHasData}
         selection={selection}
       />
     </div>

@@ -45,7 +45,6 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -75,17 +74,6 @@ export function FailedTransactionsCorrelations({
 
   const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const searchServiceParams: SearchServiceParams = {
-    environment,
-    kuery,
-    serviceName,
-    transactionName,
-    transactionType,
-    start,
-    end,
-    percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-  };
-
   const result = useFailedTransactionsCorrelationsFetcher();
 
   const {
@@ -102,26 +90,31 @@ export function FailedTransactionsCorrelations({
   } = result;
 
   const startFetchHandler = useCallback(() => {
-    startFetch(searchServiceParams);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [environment, serviceName, kuery, start, end]);
+    startFetch({
+      environment,
+      kuery,
+      serviceName,
+      transactionName,
+      transactionType,
+      start,
+      end,
+      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+    });
+  }, [
+    startFetch,
+    environment,
+    serviceName,
+    transactionName,
+    transactionType,
+    kuery,
+    start,
+    end,
+  ]);
 
-  // start fetching on load
-  // we want this effect to execute exactly once after the component mounts
   useEffect(() => {
-    if (isRunning) {
-      cancelFetch();
-    }
-
     startFetchHandler();
-
-    return () => {
-      // cancel any running async partial request when unmounting the component
-      // we want this effect to execute exactly once after the component mounts
-      cancelFetch();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startFetchHandler]);
+    return cancelFetch;
+  }, [cancelFetch, startFetchHandler]);
 
   const [
     selectedSignificantTerm,

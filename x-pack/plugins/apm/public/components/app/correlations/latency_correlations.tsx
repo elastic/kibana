@@ -64,7 +64,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const {
     query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/:serviceName/transactions/view');
 
   const { urlParams } = useUrlParams();
 
@@ -98,25 +98,21 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       end,
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [environment, serviceName, kuery, start, end]);
+  }, [
+    startFetch,
+    environment,
+    serviceName,
+    transactionName,
+    transactionType,
+    kuery,
+    start,
+    end,
+  ]);
 
-  // start fetching on load
-  // we want this effect to execute exactly once after the component mounts
   useEffect(() => {
-    if (isRunning) {
-      cancelFetch();
-    }
-
     startFetchHandler();
-
-    return () => {
-      // cancel any running async partial request when unmounting the component
-      // we want this effect to execute exactly once after the component mounts
-      cancelFetch();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startFetchHandler]);
+    return cancelFetch;
+  }, [cancelFetch, startFetchHandler]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
