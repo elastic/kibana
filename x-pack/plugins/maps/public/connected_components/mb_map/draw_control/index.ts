@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { updateEditShape } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { DrawControl } from './draw_control';
-import { DRAW_SHAPE } from '../../../../common';
+import { DRAW_SHAPE } from '../../../../common/constants';
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {

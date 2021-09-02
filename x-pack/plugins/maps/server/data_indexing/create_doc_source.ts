@@ -7,11 +7,11 @@
 
 import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
 import {
-  MAPS_NEW_VECTOR_LAYER_META_CREATED_BY,
   CreateDocSourceResp,
   IndexSourceMappings,
   BodySettings,
-} from '../../common';
+} from '../../common/types';
+import { MAPS_NEW_VECTOR_LAYER_META_CREATED_BY } from '../../common/constants';
 import { IndexPatternsCommonService } from '../../../../../src/plugins/data/server';
 
 const DEFAULT_SETTINGS = { number_of_shards: 1 };
