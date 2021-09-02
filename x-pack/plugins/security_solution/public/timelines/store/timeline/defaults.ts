@@ -19,6 +19,7 @@ export const timelineDefaults: SubsetTimelineModel &
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.query,
   columns: defaultHeaders,
+  documentType: '',
   dataProviders: [],
   dateRange: { start, end },
   deletedEventIds: [],
@@ -50,6 +51,7 @@ export const timelineDefaults: SubsetTimelineModel &
     filterQuery: null,
   },
   loadingEventIds: [],
+  queryFields: [],
   title: '',
   timelineType: TimelineType.default,
   templateTimelineId: null,
@@ -58,6 +60,7 @@ export const timelineDefaults: SubsetTimelineModel &
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   savedObjectId: null,
+  selectAll: false,
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
@@ -69,5 +72,9 @@ export const timelineDefaults: SubsetTimelineModel &
     },
   ],
   status: TimelineStatus.draft,
+  footerText: ''
+  , 
+  loadingText: '', 
+  unit: () => {},
   version: null,
 };
