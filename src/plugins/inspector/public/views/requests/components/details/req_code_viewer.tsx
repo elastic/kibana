@@ -7,7 +7,7 @@
  */
 
 // We want to allow both right-clicking to open in a new tab and clicking through
-// the "Open in Dev Tools" link. We could use `RedirectAppLinks` at the top level
+// the "Open in Console" link. We could use `RedirectAppLinks` at the top level
 // but that inserts a div which messes up the layout of the inspector.
 /* eslint-disable @elastic/eui/href-or-on-click */
 
@@ -28,8 +28,8 @@ const copyToClipboardLabel = i18n.translate('inspector.requests.copyToClipboardL
   defaultMessage: 'Copy to clipboard',
 });
 
-const openInDevToolsLabel = i18n.translate('inspector.requests.openInDevToolsLabel', {
-  defaultMessage: 'Open in Dev Tools',
+const openInConsoleLabel = i18n.translate('inspector.requests.openInConsoleLabel', {
+  defaultMessage: 'Open in Console',
 });
 
 /**
@@ -81,9 +81,9 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
               iconType="wrench"
               href={devToolsHref}
               onClick={handleDevToolsLinkClick}
-              data-test-subj="inspectorRequestOpenInDevToolsButton"
+              data-test-subj="inspectorRequestOpenInConsoleButton"
             >
-              {openInDevToolsLabel}
+              {openInConsoleLabel}
             </EuiButtonEmpty>
           )}
         </div>
