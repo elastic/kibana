@@ -14,8 +14,6 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 
-import { fetchQueryRuleRegistryAlerts } from '../../../containers/detection_engine/alerts/api';
-
 import { getAlertsCountQuery } from './helpers';
 import * as i18n from './translations';
 import { AlertsCount } from './alerts_count';
@@ -49,7 +47,8 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     //   ? fetchQueryRuleRegistryAlerts
     //   : fetchQueryAlerts;
 
-    const fetchMethod = fetchQueryRuleRegistryAlerts;
+    // Disabling the fecth method in useQueryAlerts since it is defaulted to the old one
+    // const fetchMethod = fetchQueryRuleRegistryAlerts;
 
     const additionalFilters = useMemo(() => {
       try {
@@ -73,7 +72,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       request,
       refetch,
     } = useQueryAlerts<{}, AlertsCountAggregation>({
-      fetchMethod,
       query: getAlertsCountQuery(selectedStackByOption, from, to, additionalFilters),
       indexName: signalIndexName,
     });

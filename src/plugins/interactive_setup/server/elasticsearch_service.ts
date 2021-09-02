@@ -19,9 +19,9 @@ import {
   shareReplay,
   takeWhile,
 } from 'rxjs/operators';
+import tls from 'tls';
 
 import type {
-  ElasticsearchClientConfig,
   ElasticsearchServicePreboot,
   ICustomClusterClient,
   Logger,
@@ -29,14 +29,20 @@ import type {
 } from 'src/core/server';
 
 import { ElasticsearchConnectionStatus } from '../common';
-import { getDetailedErrorMessage } from './errors';
+import type { Certificate, PingResult } from '../common';
+import { getDetailedErrorMessage, getErrorStatusCode } from './errors';
 
-interface EnrollParameters {
+export interface EnrollParameters {
   apiKey: string;
   hosts: string[];
-  // TODO: Integrate fingerprint check as soon core supports this new option:
-  // https://github.com/elastic/kibana/pull/108514
-  caFingerprint?: string;
+  caFingerprint: string;
+}
+
+export interface AuthenticateParameters {
+  host: string;
+  username?: string;
+  password?: string;
+  caCert?: string;
 }
 
 export interface ElasticsearchServiceSetupDeps {
@@ -65,6 +71,16 @@ export interface ElasticsearchServiceSetup {
    * to point to exactly same Elasticsearch node, potentially available via different network interfaces.
    */
   enroll: (params: EnrollParameters) => Promise<EnrollResult>;
+
+  /**
+   * Tries to authenticate specified user with cluster.
+   */
+  authenticate: (params: AuthenticateParameters) => Promise<void>;
+
+  /**
+   * Tries to connect to specified cluster and fetches certificate chain.
+   */
+  ping: (host: string) => Promise<PingResult>;
 }
 
 /**
@@ -78,11 +94,18 @@ export interface EnrollResult {
   /**
    * PEM CA certificate for the Elasticsearch HTTP certificates.
    */
-  ca: string;
+  caCert: string;
   /**
    * Service account token for the "elastic/kibana" service account.
    */
   serviceAccountToken: { name: string; value: string };
+}
+
+export interface AuthenticateResult {
+  host: string;
+  username?: string;
+  password?: string;
+  caCert?: string;
 }
 
 export class ElasticsearchService {
@@ -97,7 +120,7 @@ export class ElasticsearchService {
     connectionCheckInterval,
   }: ElasticsearchServiceSetupDeps): ElasticsearchServiceSetup {
     const connectionStatusClient = (this.connectionStatusClient = elasticsearch.createClient(
-      'ping'
+      'connectionStatus'
     ));
 
     return {
@@ -122,6 +145,8 @@ export class ElasticsearchService {
         shareReplay({ refCount: true, bufferSize: 1 })
       ),
       enroll: this.enroll.bind(this, elasticsearch),
+      authenticate: this.authenticate.bind(this, elasticsearch),
+      ping: this.ping.bind(this, elasticsearch),
     };
   }
 
@@ -141,22 +166,25 @@ export class ElasticsearchService {
    * @param apiKey The ApiKey to use to authenticate Kibana enrollment request.
    * @param hosts The list of Elasticsearch node addresses to enroll with. The addresses are supposed
    * to point to exactly same Elasticsearch node, potentially available via different network interfaces.
+   * @param caFingerprint The fingerprint of the root CA certificate that is supposed to sign certificate presented by
+   * the Elasticsearch node we're enrolling with. Should be in a form of a hex colon-delimited string in upper case.
    */
   private async enroll(
     elasticsearch: ElasticsearchServicePreboot,
-    { apiKey, hosts }: EnrollParameters
-  ): Promise<EnrollResult> {
+    { apiKey, hosts, caFingerprint }: EnrollParameters
+  ) {
     const scopeableRequest: ScopeableRequest = { headers: { authorization: `ApiKey ${apiKey}` } };
-    const elasticsearchConfig: Partial<ElasticsearchClientConfig> = {
-      ssl: { verificationMode: 'none' },
-    };
 
     // We should iterate through all provided hosts until we find an accessible one.
     for (const host of hosts) {
-      this.logger.debug(`Trying to enroll with "${host}" host`);
+      this.logger.debug(
+        `Trying to enroll with "${host}" host using "${caFingerprint}" CA fingerprint.`
+      );
+
       const enrollClient = elasticsearch.createClient('enroll', {
-        ...elasticsearchConfig,
         hosts: [host],
+        caFingerprint,
+        ssl: { verificationMode: 'none' },
       });
 
       let enrollmentResponse;
@@ -172,50 +200,51 @@ export class ElasticsearchService {
         // that enrollment will fail for any other host and we should bail out.
         if (err instanceof errors.ConnectionError || err instanceof errors.TimeoutError) {
           this.logger.error(
-            `Unable to connect to "${host}" host, will proceed to the next host if available: ${getDetailedErrorMessage(
+            `Unable to connect to host "${host}", will proceed to the next host if available: ${getDetailedErrorMessage(
               err
             )}`
           );
           continue;
         }
 
-        this.logger.error(`Failed to enroll with "${host}" host: ${getDetailedErrorMessage(err)}`);
+        this.logger.error(`Failed to enroll with host "${host}": ${getDetailedErrorMessage(err)}`);
         throw err;
       } finally {
         await enrollClient.close();
       }
 
       this.logger.debug(
-        `Successfully enrolled with "${host}" host, token name: ${enrollmentResponse.body.token.name}, CA certificate: ${enrollmentResponse.body.http_ca}`
+        `Successfully enrolled with host "${host}", token name: ${enrollmentResponse.body.token.name}, CA certificate: ${enrollmentResponse.body.http_ca}`
       );
 
-      const enrollResult = {
+      const enrollResult: EnrollResult = {
         host,
-        ca: ElasticsearchService.createPemCertificate(enrollmentResponse.body.http_ca),
+        caCert: ElasticsearchService.createPemCertificate(enrollmentResponse.body.http_ca),
         serviceAccountToken: enrollmentResponse.body.token,
       };
 
-      // Now try to use retrieved password and CA certificate to authenticate to this host.
+      // Now try to use retrieved service account and CA certificate to authenticate to this host.
       const authenticateClient = elasticsearch.createClient('authenticate', {
+        caFingerprint,
         hosts: [host],
         serviceAccountToken: enrollResult.serviceAccountToken.value,
-        ssl: { certificateAuthorities: [enrollResult.ca] },
+        ssl: { certificateAuthorities: [enrollResult.caCert] },
       });
 
       this.logger.debug(
-        `Verifying if "${enrollmentResponse.body.token.name}" token can authenticate to "${host}" host.`
+        `Verifying if "${enrollmentResponse.body.token.name}" token can authenticate to host "${host}".`
       );
 
       try {
         await authenticateClient.asInternalUser.security.authenticate();
         this.logger.debug(
-          `Successfully authenticated "${enrollmentResponse.body.token.name}" token to "${host}" host.`
+          `Successfully authenticated "${enrollmentResponse.body.token.name}" token to host "${host}".`
         );
       } catch (err) {
         this.logger.error(
           `Failed to authenticate "${
             enrollmentResponse.body.token.name
-          }" token to "${host}" host: ${getDetailedErrorMessage(err)}.`
+          }" token to host "${host}": ${getDetailedErrorMessage(err)}.`
         );
         throw err;
       } finally {
@@ -228,7 +257,114 @@ export class ElasticsearchService {
     throw new Error('Unable to connect to any of the provided hosts.');
   }
 
-  private static createPemCertificate(derCaString: string) {
+  private async authenticate(
+    elasticsearch: ElasticsearchServicePreboot,
+    { host, username, password, caCert }: AuthenticateParameters
+  ) {
+    const client = elasticsearch.createClient('authenticate', {
+      hosts: [host],
+      username,
+      password,
+      ssl: caCert ? { certificateAuthorities: [caCert] } : undefined,
+    });
+
+    try {
+      // Using `ping` instead of `authenticate` allows us to verify clusters with both
+      // security enabled and disabled.
+      await client.asInternalUser.ping();
+    } catch (error) {
+      this.logger.error(
+        `Failed to authenticate with host "${host}": ${getDetailedErrorMessage(error)}`
+      );
+      throw error;
+    } finally {
+      await client.close();
+    }
+  }
+
+  private async ping(elasticsearch: ElasticsearchServicePreboot, host: string) {
+    const client = elasticsearch.createClient('ping', {
+      hosts: [host],
+      username: '',
+      password: '',
+      ssl: { verificationMode: 'none' },
+    });
+
+    let authRequired = false;
+    try {
+      await client.asInternalUser.ping();
+    } catch (error) {
+      if (
+        error instanceof errors.ConnectionError ||
+        error instanceof errors.TimeoutError ||
+        error instanceof errors.ProductNotSupportedError
+      ) {
+        this.logger.error(`Unable to connect to host "${host}": ${getDetailedErrorMessage(error)}`);
+        throw error;
+      }
+
+      authRequired = getErrorStatusCode(error) === 401;
+    } finally {
+      await client.close();
+    }
+
+    let certificateChain: Certificate[] | undefined;
+    const { protocol, hostname, port } = new URL(host);
+    if (protocol === 'https:') {
+      try {
+        const cert = await ElasticsearchService.fetchPeerCertificate(hostname, port);
+        certificateChain = ElasticsearchService.flattenCertificateChain(cert).map(
+          ElasticsearchService.getCertificate
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to fetch peer certificate from host "${host}": ${getDetailedErrorMessage(error)}`
+        );
+        throw error;
+      }
+    }
+
+    return {
+      authRequired,
+      certificateChain,
+    };
+  }
+
+  private static fetchPeerCertificate(host: string, port: string | number) {
+    return new Promise<tls.DetailedPeerCertificate>((resolve, reject) => {
+      const socket = tls.connect({ host, port: Number(port), rejectUnauthorized: false });
+      socket.once('secureConnect', () => {
+        const cert = socket.getPeerCertificate(true);
+        socket.destroy();
+        resolve(cert);
+      });
+      socket.once('error', reject);
+    });
+  }
+
+  private static flattenCertificateChain(
+    cert: tls.DetailedPeerCertificate,
+    accumulator: tls.DetailedPeerCertificate[] = []
+  ) {
+    accumulator.push(cert);
+    if (cert.issuerCertificate && cert.fingerprint256 !== cert.issuerCertificate.fingerprint256) {
+      ElasticsearchService.flattenCertificateChain(cert.issuerCertificate, accumulator);
+    }
+    return accumulator;
+  }
+
+  private static getCertificate(cert: tls.DetailedPeerCertificate): Certificate {
+    return {
+      issuer: cert.issuer,
+      valid_from: cert.valid_from,
+      valid_to: cert.valid_to,
+      subject: cert.subject,
+      fingerprint256: cert.fingerprint256,
+      raw: cert.raw.toString('base64'),
+    };
+  }
+
+  public static createPemCertificate(derCaString: string) {
     // Use `X509Certificate` class once we upgrade to Node v16.
     return `-----BEGIN CERTIFICATE-----\n${derCaString
       .replace(/_/g, '/')

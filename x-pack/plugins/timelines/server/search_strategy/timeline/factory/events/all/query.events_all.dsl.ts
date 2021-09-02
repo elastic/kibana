@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 
 import {
@@ -67,6 +68,11 @@ export const buildTimelineEventsAllQuery = ({
     ignoreUnavailable: true,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+      aggregations: {
+        producers: {
+          terms: { field: ALERT_RULE_PRODUCER, exclude: ['alerts'] },
+        },
+      },
       query: {
         bool: {
           filter,

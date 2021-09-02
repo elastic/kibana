@@ -29,8 +29,12 @@ const TemplateComponent = ({ defPairs }: Props) => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) => {
+export const formatRow = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  hit: Record<string, any>,
+  indexPattern: IndexPattern,
+  fieldsToShow: string[]
+) => {
   const highlights = hit?.highlight ?? {};
   // Keys are sorted in the hits object
   const flattened = indexPattern.flattenHit(hit);
@@ -54,7 +58,9 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
     }
 
     if (displayKey) {
-      pairs.push([displayKey, val]);
+      if (fieldsToShow.includes(displayKey)) {
+        pairs.push([displayKey, val]);
+      }
     } else {
       pairs.push([key, val]);
     }

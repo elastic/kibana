@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -15,11 +15,12 @@ import {
   CurveType,
   LineAnnotation,
   LineAnnotationDatum,
+  LineAnnotationStyle,
   Position,
   RectAnnotation,
   ScaleType,
   Settings,
-  LineAnnotationStyle,
+  TickFormatter,
 } from '@elastic/charts';
 
 import { euiPaletteColorBlind } from '@elastic/eui';
@@ -28,18 +29,22 @@ import { i18n } from '@kbn/i18n';
 
 import { useChartTheme } from '../../../../../../observability/public';
 
-import {
-  getDurationUnitKey,
-  getUnitLabelAndConvertedValue,
-} from '../../../../../common/utils/formatters';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
-import { ChartContainer } from '../chart_container';
+import { ChartContainer, ChartContainerProps } from '../chart_container';
 
-interface CorrelationsChartProps {
+export type TransactionDistributionChartLoadingState = Pick<
+  ChartContainerProps,
+  'hasData' | 'status'
+>;
+
+export type OnHasData = (hasData: boolean) => void;
+
+interface TransactionDistributionChartProps {
   field?: string;
   value?: string;
   histogram?: HistogramItem[];
@@ -48,6 +53,7 @@ interface CorrelationsChartProps {
   markerPercentile: number;
   overallHistogram?: HistogramItem[];
   onChartSelection?: BrushEndListener;
+  onHasData?: OnHasData;
   selection?: [number, number];
 }
 
@@ -90,17 +96,24 @@ export const replaceHistogramDotsWithBars = (
   }
 };
 
+// Create and call a duration formatter for every value since the durations for the
+// x axis might have a wide range of values e.g. from low milliseconds to large seconds.
+// This way we can get different suitable units across ticks.
+const xAxisTickFormat: TickFormatter<number> = (d) =>
+  getDurationFormatter(d, 0.9999)(d).formatted;
+
 export function TransactionDistributionChart({
-  field,
-  value,
+  field: fieldName,
+  value: fieldValue,
   histogram: originalHistogram,
   markerCurrentTransaction,
   markerValue,
   markerPercentile,
   overallHistogram,
   onChartSelection,
+  onHasData,
   selection,
-}: CorrelationsChartProps) {
+}: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
 
@@ -150,6 +163,24 @@ export function TransactionDistributionChart({
         ]
       : undefined;
 
+  const chartLoadingState: TransactionDistributionChartLoadingState = useMemo(
+    () => ({
+      hasData:
+        Array.isArray(patchedOverallHistogram) &&
+        patchedOverallHistogram.length > 0,
+      status: Array.isArray(patchedOverallHistogram)
+        ? FETCH_STATUS.SUCCESS
+        : FETCH_STATUS.LOADING,
+    }),
+    [patchedOverallHistogram]
+  );
+
+  useEffect(() => {
+    if (onHasData) {
+      onHasData(chartLoadingState.hasData);
+    }
+  }, [chartLoadingState, onHasData]);
+
   return (
     <div
       data-test-subj="apmCorrelationsChart"
@@ -157,15 +188,8 @@ export function TransactionDistributionChart({
     >
       <ChartContainer
         height={250}
-        hasData={
-          Array.isArray(patchedOverallHistogram) &&
-          patchedOverallHistogram.length > 0
-        }
-        status={
-          Array.isArray(patchedOverallHistogram)
-            ? FETCH_STATUS.SUCCESS
-            : FETCH_STATUS.LOADING
-        }
+        hasData={chartLoadingState.hasData}
+        status={chartLoadingState.status}
       >
         <Chart>
           <Settings
@@ -246,17 +270,7 @@ export function TransactionDistributionChart({
             id="x-axis"
             title=""
             position={Position.Bottom}
-            tickFormat={(d) => {
-              const unit = getDurationUnitKey(d, 1);
-              const converted = getUnitLabelAndConvertedValue(unit, d);
-              const convertedValueParts = converted.convertedValue.split('.');
-              const convertedValue =
-                convertedValueParts.length === 2 &&
-                convertedValueParts[1] === '0'
-                  ? convertedValueParts[0]
-                  : converted.convertedValue;
-              return `${convertedValue}${converted.unitLabel}`;
-            }}
+            tickFormat={xAxisTickFormat}
             gridLine={{ visible: false }}
           />
           <Axis
@@ -285,19 +299,11 @@ export function TransactionDistributionChart({
             fit="lookahead"
           />
           {Array.isArray(histogram) &&
-            field !== undefined &&
-            value !== undefined && (
+            fieldName !== undefined &&
+            fieldValue !== undefined && (
               <AreaSeries
-                id={i18n.translate(
-                  'xpack.apm.transactionDistribution.chart.selectedTermLatencyDistributionLabel',
-                  {
-                    defaultMessage: '{fieldName}:{fieldValue}',
-                    values: {
-                      fieldName: field,
-                      fieldValue: value,
-                    },
-                  }
-                )}
+                // id is used as the label for the legend
+                id={`${fieldName}:${fieldValue}`}
                 xScaleType={ScaleType.Log}
                 yScaleType={ScaleType.Log}
                 data={histogram}

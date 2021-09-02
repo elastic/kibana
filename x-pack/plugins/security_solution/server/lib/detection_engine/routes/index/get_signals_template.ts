@@ -48,11 +48,11 @@ export const getSignalsTemplate = (index: string, spaceId: string, aadIndexAlias
   const template = {
     index_patterns: [`${index}-*`],
     template: {
-      aliases: {
-        [aadIndexAliasName]: {
-          is_write_index: false,
-        },
-      },
+      // aliases: {
+      //   [aadIndexAliasName]: {
+      //     is_write_index: false,
+      //   },
+      // },
       settings: {
         index: {
           lifecycle: {
@@ -72,7 +72,7 @@ export const getSignalsTemplate = (index: string, spaceId: string, aadIndexAlias
           ...ecsMapping.mappings.properties,
           ...otherMapping.mappings.properties,
           ...fieldAliases,
-          ...getRbacRequiredFields(spaceId),
+          // ...getRbacRequiredFields(spaceId),
           signal: signalsMapping.mappings.properties.signal,
         },
         _meta: {
