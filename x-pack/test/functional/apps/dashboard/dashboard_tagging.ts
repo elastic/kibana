@@ -12,10 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const retry = getService('retry');
   const find = getService('find');
-  const dashboardAddPanel = getService('dashboardAddPanel');
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects([
     'common',
     'tagManagement',
@@ -28,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardTag = 'extremely-cool-dashboard';
   const dashboardTitle = 'Coolest Blank Dashboard';
 
-  describe.only('dashboard tagging', () => {
+  describe('dashboard tagging', () => {
     const verifyTagFromListingPage = async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await listingTable.waitUntilTableIsLoaded();
