@@ -8,7 +8,7 @@
 
 import { IRouter } from '../../http';
 import { Logger } from '../../logging';
-
+// TODO: Remove this route (https://github.com/elastic/kibana/issues/103921 bullet point 2)
 export const registerLogLegacyImportRoute = (router: IRouter, logger: Logger) => {
   router.post(
     {

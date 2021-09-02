@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+// TODO: remove this
 export async function importLegacyFile(file: File) {
   return new Promise((resolve, reject) => {
     const fr = new FileReader();

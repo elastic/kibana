@@ -13,7 +13,7 @@ import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { setupServer } from '../test_utils';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
-
+// TODO: remove this (https://github.com/elastic/kibana/issues/103921 bullet point 2)
 describe('POST /api/saved_objects/_log_legacy_import', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];

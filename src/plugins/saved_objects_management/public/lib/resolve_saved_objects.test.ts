@@ -33,7 +33,7 @@ const createObj = (props: Partial<SavedObject>): SavedObject =>
   ({
     ...props,
   } as SavedObject);
-
+// tests a potentially unused method
 describe('resolveSavedObjects', () => {
   describe('resolveSavedObjects', () => {
     it('should take in saved objects and spit out conflicts', async () => {

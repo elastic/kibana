@@ -7,7 +7,7 @@
  */
 
 import { importLegacyFile } from './import_legacy_file';
-
+// TODO: remove this
 describe('importFile', () => {
   it('should import a file with valid json format', async () => {
     const file = new File([`{"text": "foo"}`], 'file.json');

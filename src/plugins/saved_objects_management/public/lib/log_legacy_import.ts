@@ -7,7 +7,7 @@
  */
 
 import { HttpStart } from 'src/core/public';
-
+// TODO: remove this
 export async function logLegacyImport(http: HttpStart) {
   return http.post('/api/saved_objects/_log_legacy_import');
 }

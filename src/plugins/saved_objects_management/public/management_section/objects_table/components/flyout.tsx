@@ -59,16 +59,16 @@ export interface FlyoutProps {
   done: () => void;
   newIndexPatternUrl: string;
   indexPatterns: IndexPatternsContract;
-  overlays: OverlayStart;
+  // overlays: OverlayStart; // potentially unused
   http: HttpStart;
   basePath: IBasePath;
   search: DataPublicPluginStart['search'];
 }
 
 export interface FlyoutState {
-  conflictedIndexPatterns?: any[];
-  conflictedSavedObjectsLinkedToSavedSearches?: any[];
-  conflictedSearchDocs?: any[];
+  // conflictedIndexPatterns?: any[]; // potentially unused
+  // conflictedSavedObjectsLinkedToSavedSearches?: any[]; // potentially unused
+  conflictedSearchDocs?: any[]; // potentially unused
   unmatchedReferences?: ProcessedImportResponse['unmatchedReferences'];
   unmatchedReferencesTablePagination: { pageIndex: number; pageSize: number };
   failedImports?: ProcessedImportResponse['failedImports'];
@@ -105,9 +105,9 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     super(props);
 
     this.state = {
-      conflictedIndexPatterns: undefined,
-      conflictedSavedObjectsLinkedToSavedSearches: undefined,
-      conflictedSearchDocs: undefined,
+      // conflictedIndexPatterns: undefined, // potentially unused
+      // conflictedSavedObjectsLinkedToSavedSearches: undefined, // potentially unused
+      // conflictedSearchDocs: undefined, // potentially unused
       unmatchedReferences: undefined,
       unmatchedReferencesTablePagination: {
         pageIndex: 0,

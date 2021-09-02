@@ -20,7 +20,7 @@ import { FailedImport } from './process_import_response';
 import { DuplicateDataViewError, IndexPattern } from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
-
+// potentially not used anymore
 async function getSavedObject(doc: SavedObjectsRawDoc, services: SavedObjectLoader[]) {
   const service = services.find((s) => s.type === doc._type);
   if (!service) {
@@ -32,7 +32,7 @@ async function getSavedObject(doc: SavedObjectsRawDoc, services: SavedObjectLoad
   obj.migrationVersion = doc._migrationVersion;
   return obj;
 }
-
+// potentially not used anymore
 function addJsonFieldToIndexPattern(
   target: Record<string, any>,
   sourceString: string,
@@ -57,6 +57,7 @@ function addJsonFieldToIndexPattern(
     }
   }
 }
+// potentially not used anymore
 async function importIndexPattern(
   doc: SavedObjectsRawDoc,
   indexPatterns: IndexPatternsContract,
@@ -121,7 +122,7 @@ async function importIndexPattern(
   indexPatterns.clearCache(emptyPattern!.id);
   return emptyPattern!.id;
 }
-
+// potentially not used anymore
 async function importDocument(obj: SavedObject, doc: SavedObjectsRawDoc, overwriteAll: boolean) {
   await obj.applyESResp({
     references: doc._references || [],
@@ -129,7 +130,7 @@ async function importDocument(obj: SavedObject, doc: SavedObjectsRawDoc, overwri
   });
   return await obj.save({ confirmOverwrite: !overwriteAll });
 }
-
+// potentially not used anymore
 function groupByType(docs: SavedObjectsRawDoc[]): Record<string, SavedObjectsRawDoc[]> {
   const defaultDocTypes = {
     searches: [],
@@ -151,7 +152,7 @@ function groupByType(docs: SavedObjectsRawDoc[]): Record<string, SavedObjectsRaw
     return types;
   }, defaultDocTypes);
 }
-
+// potentially not used anymore
 export async function resolveIndexPatternConflicts(
   resolutions: Array<{ oldId: string; newId: string }>,
   conflictedIndexPatterns: any[],
@@ -219,7 +220,7 @@ export async function resolveIndexPatternConflicts(
   }
   return importCount;
 }
-
+// potentially not used anymore
 export async function saveObjects(objs: SavedObject[], overwriteAll: boolean) {
   let importCount = 0;
   for (const obj of objs) {
@@ -229,11 +230,11 @@ export async function saveObjects(objs: SavedObject[], overwriteAll: boolean) {
   }
   return importCount;
 }
-
+// potentially not used anymore
 export async function saveObject(obj: SavedObject, overwriteAll: boolean) {
   return await obj.save({ confirmOverwrite: !overwriteAll });
 }
-
+// potentially not used anymore (legacy import not supported)
 export async function resolveSavedSearches(
   savedSearches: any[],
   services: SavedObjectLoader[],
@@ -253,7 +254,7 @@ export async function resolveSavedSearches(
   }
   return importCount;
 }
-
+// potentially not used anymore (legacy import not supported)
 export async function resolveSavedObjects(
   savedObjects: SavedObjectsRawDoc[],
   overwriteAll: boolean,

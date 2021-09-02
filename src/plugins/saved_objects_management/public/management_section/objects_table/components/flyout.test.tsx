@@ -33,7 +33,8 @@ describe('Flyout', () => {
   };
 
   beforeEach(() => {
-    const { http, overlays } = coreMock.createStart();
+    // const { http, overlays } = coreMock.createStart();
+    const { http } = coreMock.createStart();
     const search = dataPluginMock.createStartContract().search;
     const basePath = httpServiceMock.createBasePath();
 
@@ -47,7 +48,7 @@ describe('Flyout', () => {
           { id: '2', attributes: {} },
         ]),
       } as any,
-      overlays,
+      // overlays,
       http,
       allowedTypes: ['search', 'index-pattern', 'visualization'],
       serviceRegistry: serviceRegistryMock.create(),
