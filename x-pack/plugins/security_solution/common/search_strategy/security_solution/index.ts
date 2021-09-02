@@ -125,9 +125,9 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   : T extends HostsQueries.details
   ? HostDetailsStrategyResponse
   : T extends UebaQueries.riskScore
-  ? HostsRiskyHostsStrategyResponse
-  : T extends HostsQueries.riskyHosts
   ? RiskScoreStrategyResponse
+  : T extends HostsQueries.riskyHosts
+  ? HostsRiskyHostsStrategyResponse
   : T extends UebaQueries.hostRules
   ? HostRulesStrategyResponse
   : T extends UebaQueries.userRules
@@ -182,10 +182,10 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
-  : T extends HostsQueries.details
-  ? HostDetailsRequestOptions
   : T extends HostsQueries.riskyHosts
   ? HostsRiskyHostsRequestOptions
+  : T extends HostsQueries.details
+  ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
   : T extends HostsQueries.authentications

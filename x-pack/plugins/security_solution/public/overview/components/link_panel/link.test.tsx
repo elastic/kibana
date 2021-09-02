@@ -6,22 +6,22 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { Link } from './link';
 
 describe('Link', () => {
   it('renders <a> tag when there is a path', () => {
-    const wrapper = mount(<Link copy={'test'} path={'/path'} />);
+    render(<Link copy={'test_copy'} path={'/test-path'} />);
 
-    expect(wrapper.exists('a')).toEqual(true);
-    expect(wrapper.find('a').hostNodes().props().href).toEqual('/path');
-    expect(wrapper.find('a').hostNodes().text()).toEqual('test(opens in a new tab or window)');
+    expect(screen.getByRole('link')).toBeInTheDocument();
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/test-path');
+    expect(screen.getByRole('link')).toHaveTextContent('test_copy');
   });
 
   it('does not render <a> tag when there is no path', () => {
-    const wrapper = mount(<Link copy={'test'} />);
+    render(<Link copy={'test_copy'} />);
 
-    expect(wrapper.exists('a')).toEqual(false);
-    expect(wrapper.find('div').hostNodes().at(0).text()).toEqual('test');
+    expect(screen.getByText('test_copy')).toBeInTheDocument();
+    expect(screen.queryByRole('link')).toBeNull();
   });
 });

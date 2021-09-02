@@ -8,7 +8,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { cloneDeep } from 'lodash/fp';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CtiDisabledModule } from './cti_disabled_module';
 import { ThemeProvider } from 'styled-components';
@@ -35,7 +35,7 @@ describe('CtiDisabledModule', () => {
   });
 
   it('renders splitPanel with "danger" variant', () => {
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
@@ -45,10 +45,7 @@ describe('CtiDisabledModule', () => {
       </Provider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="cti-dashboard-links"] [data-test-subj="cti-inner-panel-danger"]')
-        .hostNodes().length
-    ).toEqual(1);
+    expect(screen.getByTestId('cti-dashboard-links')).toBeInTheDocument();
+    expect(screen.getByTestId('cti-inner-panel-danger')).toBeInTheDocument();
   });
 });

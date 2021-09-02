@@ -8,7 +8,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { cloneDeep } from 'lodash/fp';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ThemeProvider } from 'styled-components';
 import { useRiskyHostLinks } from '../../containers/overview_risky_host_links/use_risky_host_links';
@@ -28,11 +28,6 @@ jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../containers/overview_risky_host_links/use_risky_host_links');
 const useRiskyHostLinksMock = useRiskyHostLinks as jest.Mock;
-useRiskyHostLinksMock.mockReturnValue({
-  loading: false,
-  isModuleEnabled: false,
-  listItems: [],
-});
 
 jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href');
 const useRiskyHostsDashboardButtonHrefMock = useRiskyHostsDashboardButtonHref as jest.Mock;
@@ -62,7 +57,7 @@ describe('RiskyHostLinks', () => {
       listItems: [],
     });
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
@@ -77,11 +72,17 @@ describe('RiskyHostLinks', () => {
       </Provider>
     );
 
-    expect(wrapper.exists('[data-test-subj="risky-hosts-enabled-module"]')).toEqual(true);
+    expect(screen.queryByTestId('risky-hosts-enable-module-button')).not.toBeInTheDocument();
   });
 
   it('renders disabled module view if module is disabled', () => {
-    const wrapper = mount(
+    useRiskyHostLinksMock.mockReturnValueOnce({
+      loading: false,
+      isModuleEnabled: false,
+      listItems: [],
+    });
+
+    render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
@@ -96,6 +97,6 @@ describe('RiskyHostLinks', () => {
       </Provider>
     );
 
-    expect(wrapper.exists('[data-test-subj="risky-hosts-disabled-module"]')).toEqual(true);
+    expect(screen.getByTestId('risky-hosts-enable-module-button')).toBeInTheDocument();
   });
 });

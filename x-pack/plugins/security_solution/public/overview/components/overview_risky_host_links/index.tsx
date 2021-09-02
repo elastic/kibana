@@ -23,17 +23,16 @@ const RiskyHostLinksComponent: React.FC<RiskyHostLinksProps> = (props) => {
           to={props.to}
           from={props.from}
           listItems={listItems}
-          data-test-subj="risky-hosts-enabled-module"
+          dataTestSubj="risky-hosts-enabled-module"
         />
       );
     case false:
-      return <RiskyHostsDisabledModule data-test-subj="risky-hosts-disabled-module" />;
+      return <RiskyHostsDisabledModule dataTestSubj="risky-hosts-disabled-module" />;
     case undefined:
     default:
       return null;
   }
 };
 
-RiskyHostLinksComponent.displayName = 'RiskyHostLinksComponent';
-
 export const RiskyHostLinks = React.memo(RiskyHostLinksComponent);
+RiskyHostLinks.displayName = 'RiskyHostLinks';

@@ -6,17 +6,17 @@
  */
 
 export interface LinkPanelListItem {
-  title: string;
+  [key: string]: string | number | undefined;
+  copy?: string;
   count: number;
   path: string;
-  copy?: string;
-  [key: string]: string | number | undefined;
+  title: string;
 }
 
 export interface LinkPanelViewProps {
   buttonHref?: string;
-  isPluginDisabled?: boolean;
   isInspectEnabled?: boolean;
+  isPluginDisabled?: boolean;
   listItems: LinkPanelListItem[];
   splitPanel?: JSX.Element;
   totalCount?: number;

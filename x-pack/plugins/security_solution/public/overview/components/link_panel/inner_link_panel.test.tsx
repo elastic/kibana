@@ -6,29 +6,28 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { EuiButton } from '@elastic/eui';
 import { TestProviders } from '../../../common/mock';
 import { InnerLinkPanel } from './inner_link_panel';
 
 describe('InnerLinkPanel', () => {
   const defaultProps = {
-    title: 'test_title',
     body: 'test_body',
-    button: <div className={'test-button'} />,
-    dataTestSubj: 'test-subj',
+    button: <EuiButton />,
+    dataTestSubj: 'custom_test_subj',
+    title: 'test_title',
   };
 
   it('renders expected children', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <InnerLinkPanel color="warning" {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.exists('[data-test-subj="test-subj"]')).toEqual(true);
-    expect(wrapper.exists('.test-button')).toEqual(true);
-    expect(wrapper.find('[data-test-subj="inner-link-panel-title"]').hostNodes().text()).toEqual(
-      defaultProps.title
-    );
+    expect(screen.getByTestId('custom_test_subj')).toBeInTheDocument();
+    expect(screen.getByRole('button')).toBeInTheDocument();
+    expect(screen.getByTestId('inner-link-panel-title')).toHaveTextContent(defaultProps.title);
   });
 });

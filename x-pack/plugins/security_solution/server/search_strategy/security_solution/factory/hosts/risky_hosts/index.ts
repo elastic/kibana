@@ -17,7 +17,6 @@ import {
 
 export const riskyHosts: SecuritySolutionFactory<HostsQueries.riskyHosts> = {
   buildDsl: (options: HostsRiskyHostsRequestOptions) => buildRiskyHostsQuery(options),
-  // @ts-ignore
   parse: async (
     options: HostsRiskyHostsRequestOptions,
     response: IEsSearchResponse<unknown>

@@ -30,6 +30,5 @@ export const CtiDisabledModuleComponent = () => {
   );
 };
 
-CtiDisabledModuleComponent.displayName = 'CtiDisabledModule';
-
 export const CtiDisabledModule = React.memo(CtiDisabledModuleComponent);
+CtiDisabledModule.displayName = 'CtiDisabledModule';

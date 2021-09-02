@@ -6,22 +6,14 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { EuiButton, EuiPanel } from '@elastic/eui';
 import { TestProviders } from '../../../common/mock';
 import { LinkPanel } from './link_panel';
 
 describe('LinkPanel', () => {
   const defaultProps = {
-    button: <div className={'test-button'} />,
-    infoPanel: <div className={'info-panel'} />,
-    listItems: [
-      { title: 'a', count: 2, path: '' },
-      { title: 'b', count: 1, path: '/test' },
-    ],
-    panelTitle: 'test-panel-title',
-    splitPanel: <div className={'split-panel'} />,
-    subtitle: <div className={'subtitle'} />,
-    dataTestSubj: 'test-subj',
+    button: <EuiButton data-test-subj="_test_button_" />,
     columns: [
       { name: 'title', field: 'title', sortable: true },
       {
@@ -29,18 +21,28 @@ describe('LinkPanel', () => {
         field: 'count',
       },
     ],
+    dataTestSubj: '_custom_test_subj_',
+    infoPanel: <div className="info-panel" />,
+    listItems: [
+      { title: 'a', count: 2, path: '' },
+      { title: 'b', count: 1, path: '/test' },
+    ],
+    panelTitle: 'test-panel-title',
+    splitPanel: <EuiPanel data-test-subj="_split_panel_" />,
+    subtitle: <EuiPanel data-test-subj="_subtitle_" />,
   };
 
   it('renders expected children', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <LinkPanel {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.exists('[data-test-subj="test-subj"] table')).toEqual(true);
-    expect(wrapper.exists('.test-button')).toEqual(true);
-    expect(wrapper.exists('.info-panel')).toEqual(true);
-    expect(wrapper.exists('.split-panel')).toEqual(true);
+    expect(screen.getByTestId('_custom_test_subj_')).toBeInTheDocument();
+    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getByTestId('_test_button_')).toBeInTheDocument();
+    expect(screen.getByTestId('_split_panel_')).toBeInTheDocument();
+    expect(screen.getByTestId('_subtitle_')).toBeInTheDocument();
   });
 });

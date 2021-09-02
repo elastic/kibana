@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useKibana } from '../../../common/lib/kibana';
 
-const DASHBOARD_REQUEST_BODY_SEARCH = 'Current Risk Score for Hosts';
+const DASHBOARD_REQUEST_BODY_SEARCH = '"Current Risk Score for Hosts"';
 export const DASHBOARD_REQUEST_BODY = {
   type: 'dashboard',
   search: DASHBOARD_REQUEST_BODY_SEARCH,

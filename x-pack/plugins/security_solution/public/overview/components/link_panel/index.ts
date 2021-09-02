@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { LinkPanel } from './link_panel';
 export { InnerLinkPanel } from './inner_link_panel';
-export { LinkPanelListItem } from './types';
 export { isLinkPanelListItem } from './helpers';
+export { LinkPanel } from './link_panel';
+export { LinkPanelListItem } from './types';

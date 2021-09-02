@@ -54,7 +54,6 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
   return (
     <LinkPanel
       {...{
-        dataTestSubj: 'cti-dashboard-links',
         button: useMemo(
           () => (
             <EuiButton
@@ -69,6 +68,7 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
           [buttonHref]
         ),
         columns,
+        dataTestSubj: 'cti-dashboard-links',
         infoPanel: useMemo(
           () =>
             isPluginDisabled ? (

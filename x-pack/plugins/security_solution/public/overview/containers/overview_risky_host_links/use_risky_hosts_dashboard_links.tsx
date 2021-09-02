@@ -9,7 +9,7 @@ import { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-type
 import { useKibana } from '../../../common/lib/kibana';
 import { LinkPanelListItem } from '../../components/link_panel';
 
-const DASHBOARD_REQUEST_BODY_SEARCH = 'Drilldown of Host Risk Score';
+const DASHBOARD_REQUEST_BODY_SEARCH = '"Drilldown of Host Risk Score"';
 export const DASHBOARD_REQUEST_BODY = {
   type: 'dashboard',
   search: DASHBOARD_REQUEST_BODY_SEARCH,

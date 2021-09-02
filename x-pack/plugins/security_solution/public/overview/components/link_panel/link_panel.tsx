@@ -39,22 +39,20 @@ const PAGE_SIZE = 5;
 const sortAndChunkItems = (
   listItems: LinkPanelListItem[],
   sortField: string | number,
-  direction: 'asc' | 'desc'
+  sortDirection: 'asc' | 'desc'
 ) => {
   const sortedItems = [...listItems].sort((a, b) => {
-    if (typeof a[sortField] !== 'undefined' && typeof b[sortField] !== 'undefined') {
-      if (a[sortField]! > b[sortField]! || (a[sortField] === b[sortField] && a.title > b.title)) {
-        return 1;
-      } else if (
-        a[sortField]! < b[sortField]! ||
-        (a[sortField] === b[sortField] && a.title < b.title)
-      ) {
-        return -1;
+    const aSortValue = a[sortField];
+    const bSortValue = b[sortField];
+    if (typeof aSortValue !== 'undefined' && typeof bSortValue !== 'undefined') {
+      if (aSortValue === bSortValue) {
+        return a.title > b.title ? 1 : a.title < b.title ? -1 : 0;
       }
+      return aSortValue > bSortValue ? 1 : aSortValue < bSortValue ? -1 : 0;
     }
     return 0;
   });
-  if (direction === 'desc') {
+  if (sortDirection === 'desc') {
     sortedItems.reverse();
   }
   return chunk(sortedItems, PAGE_SIZE);
@@ -63,27 +61,27 @@ const sortAndChunkItems = (
 const LinkPanelComponent = ({
   button,
   columns,
+  dataTestSubj,
   defaultSortField,
   defaultSortOrder,
   infoPanel,
+  inspectQueryId,
   listItems,
   panelTitle,
   splitPanel,
   subtitle,
-  inspectQueryId,
-  dataTestSubj,
 }: {
   button: React.ReactNode;
   columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>>;
+  dataTestSubj: string;
   defaultSortField?: string;
   defaultSortOrder?: 'asc' | 'desc';
   infoPanel?: React.ReactNode;
+  inspectQueryId?: string;
   listItems: LinkPanelListItem[];
   panelTitle: string;
   splitPanel: React.ReactNode;
   subtitle: React.ReactNode;
-  inspectQueryId?: string;
-  dataTestSubj: string;
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [sortField, setSortField] = useState<string | number>(defaultSortField ?? 'title');
@@ -107,10 +105,10 @@ const LinkPanelComponent = ({
 
   const pagination = useMemo(
     () => ({
+      hidePerPageOptions: true,
       pageIndex,
       pageSize: PAGE_SIZE,
       totalItemCount: listItems.length,
-      hidePerPageOptions: true,
     }),
     [pageIndex, listItems.length]
   );
@@ -118,8 +116,8 @@ const LinkPanelComponent = ({
   const sorting = useMemo(
     () => ({
       sort: {
-        field: sortField,
         direction: sortDirection,
+        field: sortField,
       },
     }),
     [sortField, sortDirection]
@@ -138,12 +136,12 @@ const LinkPanelComponent = ({
               {splitPanel}
               {infoPanel}
               <StyledTable
-                items={chunkedItems[pageIndex] || []}
-                itemId="id"
                 columns={columns}
+                itemId="id"
+                items={chunkedItems[pageIndex] || []}
+                onChange={onTableChange}
                 pagination={pagination}
                 sorting={sorting}
-                onChange={onTableChange}
               />
             </EuiPanel>
           </InspectButtonContainer>
@@ -153,6 +151,6 @@ const LinkPanelComponent = ({
   );
 };
 
-LinkPanelComponent.displayName = 'LinkPanel';
-
 export const LinkPanel = React.memo(LinkPanelComponent);
+
+LinkPanel.displayName = 'LinkPanel';

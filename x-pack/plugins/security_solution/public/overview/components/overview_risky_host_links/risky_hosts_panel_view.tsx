@@ -19,26 +19,25 @@ import { QUERY_ID as RiskyHostsQueryId } from '../../containers/overview_risky_h
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   { name: 'Host Name', field: 'title', sortable: true, truncateText: true, width: '100%' },
   {
-    name: 'Risk Score',
-    field: 'count',
-    sortable: true,
-    truncateText: true,
-    width: '120px',
     align: 'right',
-  },
-  {
-    name: 'Current Risk',
-    field: 'copy',
+    field: 'count',
+    name: 'Risk Score',
     sortable: true,
     truncateText: true,
     width: '120px',
   },
   {
-    name: '',
-    field: 'path',
+    field: 'copy',
+    name: 'Current Risk',
+    sortable: true,
     truncateText: true,
-    // eslint-disable-next-line react/display-name
-    render: (path: string) => <Link path={path} copy={i18n.LINK_COPY} />,
+    width: '120px',
+  },
+  {
+    field: 'path',
+    name: '',
+    render: (path: string) => (<Link path={path} copy={i18n.LINK_COPY} />) as JSX.Element,
+    truncateText: true,
     width: '120px',
   },
 ];
@@ -68,9 +67,6 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
   return (
     <LinkPanel
       {...{
-        dataTestSubj: 'risky-hosts-dashboard-links',
-        defaultSortOrder: 'desc',
-        defaultSortField: 'count',
         button: useMemo(
           () => (
             <EuiButton
@@ -85,6 +81,9 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
           [buttonHref]
         ),
         columns,
+        dataTestSubj: 'risky-hosts-dashboard-links',
+        defaultSortField: 'count',
+        defaultSortOrder: 'desc',
         inspectQueryId: isInspectEnabled ? RiskyHostsQueryId : undefined,
         listItems,
         panelTitle: i18n.PANEL_TITLE,

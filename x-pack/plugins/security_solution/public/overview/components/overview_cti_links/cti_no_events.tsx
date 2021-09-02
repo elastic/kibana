@@ -38,6 +38,5 @@ export const CtiNoEventsComponent = ({ to, from }: { to: string; from: string })
   );
 };
 
-CtiNoEventsComponent.displayName = 'CtiNoEvents';
-
 export const CtiNoEvents = React.memo(CtiNoEventsComponent);
+CtiNoEvents.displayName = 'CtiNoEvents';

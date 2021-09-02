@@ -12,21 +12,22 @@ import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risk
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
 
 const RiskyHostsEnabledModuleComponent: React.FC<{
+  from: string;
   listItems: LinkPanelListItem[];
   to: string;
-  from: string;
 }> = ({ listItems, to, from }) => {
   const { buttonHref } = useRiskyHostsDashboardButtonHref(to, from);
   const { listItemsWithLinks } = useRiskyHostsDashboardLinks(to, from, listItems);
 
   return (
     <RiskyHostsPanelView
+      buttonHref={buttonHref}
+      isInspectEnabled
       listItems={listItemsWithLinks}
       totalCount={listItems.length}
-      isInspectEnabled
-      buttonHref={buttonHref}
     />
   );
 };
 
 export const RiskyHostsEnabledModule = React.memo(RiskyHostsEnabledModuleComponent);
+RiskyHostsEnabledModule.displayName = 'RiskyHostsEnabledModule';

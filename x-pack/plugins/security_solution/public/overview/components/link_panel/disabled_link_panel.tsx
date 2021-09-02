@@ -12,47 +12,46 @@ import { InnerLinkPanel } from './inner_link_panel';
 import { LinkPanelListItem, LinkPanelViewProps } from './types';
 
 interface DisabledLinkPanelProps {
-  docLink: string;
-  listItems: LinkPanelListItem[];
-  titleCopy: string;
   bodyCopy: string;
   buttonCopy: string;
   dataTestSubjPrefix: string;
+  docLink: string;
   LinkPanelViewComponent: React.ComponentType<LinkPanelViewProps>;
+  listItems: LinkPanelListItem[];
+  titleCopy: string;
 }
 
 const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
-  docLink,
-  listItems,
-  titleCopy,
   bodyCopy,
   buttonCopy,
   dataTestSubjPrefix,
+  docLink,
   LinkPanelViewComponent,
-}) => {
-  return (
-    <LinkPanelViewComponent
-      splitPanel={
-        <InnerLinkPanel
-          color="warning"
-          title={titleCopy}
-          body={bodyCopy}
-          button={
-            <EuiButton
-              href={docLink}
-              color="warning"
-              target="_blank"
-              data-test-subj={`${dataTestSubjPrefix}-enable-module-button`}
-            >
-              {buttonCopy}
-            </EuiButton>
-          }
-          dataTestSubj={`${dataTestSubjPrefix}-inner-panel-danger`}
-        />
-      }
-      listItems={listItems}
-    />
-  );
-};
+  listItems,
+  titleCopy,
+}) => (
+  <LinkPanelViewComponent
+    listItems={listItems}
+    splitPanel={
+      <InnerLinkPanel
+        body={bodyCopy}
+        button={
+          <EuiButton
+            href={docLink}
+            color="warning"
+            target="_blank"
+            data-test-subj={`${dataTestSubjPrefix}-enable-module-button`}
+          >
+            {buttonCopy}
+          </EuiButton>
+        }
+        color="warning"
+        dataTestSubj={`${dataTestSubjPrefix}-inner-panel-danger`}
+        title={titleCopy}
+      />
+    }
+  />
+);
 
 export const DisabledLinkPanel = memo(DisabledLinkPanelComponent);
+DisabledLinkPanel.displayName = 'DisabledLinkPanel';

@@ -73,7 +73,6 @@ export const useRiskyHostLinks = ({ to, from }: { to: string; from: string }) =>
         })
       );
     }
-
     return deleteQuery;
   }, [deleteQuery, dispatch, loading, result, setIsModuleEnabled]);
 

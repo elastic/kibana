@@ -8,7 +8,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { cloneDeep } from 'lodash/fp';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ThemeProvider } from 'styled-components';
 import { createStore, State } from '../../../common/store';
@@ -35,7 +35,7 @@ describe('RiskyHostsModule', () => {
   });
 
   it('renders expected children', () => {
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
@@ -45,8 +45,8 @@ describe('RiskyHostsModule', () => {
       </Provider>
     );
 
-    expect(wrapper.exists('[data-test-subj="risky-hosts-dashboard-links"]')).toEqual(true);
-    expect(wrapper.exists('[data-test-subj="risky-hosts-view-dashboard-button"]')).toEqual(true);
-    expect(wrapper.exists('[data-test-subj="risky-hosts-enable-module-button"]')).toEqual(true);
+    expect(screen.getByTestId('risky-hosts-dashboard-links')).toBeInTheDocument();
+    expect(screen.getByTestId('risky-hosts-view-dashboard-button')).toBeInTheDocument();
+    expect(screen.getByTestId('risky-hosts-enable-module-button')).toBeInTheDocument();
   });
 });

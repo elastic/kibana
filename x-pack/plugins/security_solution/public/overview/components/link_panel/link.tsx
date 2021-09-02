@@ -14,7 +14,7 @@ export const Link: React.FC<{ path?: string; copy: string }> = ({ path, copy }) 
       {copy}
     </EuiLink>
   ) : (
-    <EuiText color={'subdued'} size={'s'} data-test-subj="panel-no-link">
+    <EuiText color="subdued" size="s" data-test-subj="panel-no-link">
       {copy}
     </EuiText>
   );
