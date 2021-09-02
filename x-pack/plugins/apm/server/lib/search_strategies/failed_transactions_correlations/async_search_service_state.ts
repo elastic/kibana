@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failed_transactions_correlations/types';
+import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 
 interface Progress {
   started: number;
@@ -51,16 +51,18 @@ export const asyncFailedTransactionsCorrelationsSearchServiceStateProvider = () 
     };
   }
 
-  const values: FailedTransactionsCorrelationValue[] = [];
-  function addValue(d: FailedTransactionsCorrelationValue) {
-    values.push(d);
+  const failedTransactionsCorrelations: FailedTransactionsCorrelation[] = [];
+  function addFailedTransactionsCorrelation(d: FailedTransactionsCorrelation) {
+    failedTransactionsCorrelations.push(d);
   }
-  function addValues(d: FailedTransactionsCorrelationValue[]) {
-    values.push(...d);
+  function addFailedTransactionsCorrelations(
+    d: FailedTransactionsCorrelation[]
+  ) {
+    failedTransactionsCorrelations.push(...d);
   }
 
-  function getValuesSortedByScore() {
-    return values.sort((a, b) => b.score - a.score);
+  function getFailedTransactionsCorrelationsSortedByScore() {
+    return failedTransactionsCorrelations.sort((a, b) => b.score - a.score);
   }
 
   function getState() {
@@ -70,16 +72,16 @@ export const asyncFailedTransactionsCorrelationsSearchServiceStateProvider = () 
       isCancelled,
       isRunning,
       progress,
-      values,
+      failedTransactionsCorrelations,
     };
   }
 
   return {
-    addValue,
-    addValues,
+    addFailedTransactionsCorrelation,
+    addFailedTransactionsCorrelations,
     getOverallProgress,
     getState,
-    getValuesSortedByScore,
+    getFailedTransactionsCorrelationsSortedByScore,
     setCcsWarning,
     setError,
     setIsCancelled,

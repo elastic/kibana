@@ -122,9 +122,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       expect(typeof finalRawResponse?.took).to.be('number');
 
-      expect(finalRawResponse?.values.length).to.eql(
+      expect(finalRawResponse?.failedTransactionsCorrelations.length).to.eql(
         0,
-        `Expected 0 identified correlations, got ${finalRawResponse?.values.length}.`
+        `Expected 0 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations.length}.`
       );
     });
   });
@@ -214,9 +214,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(finalRawResponse?.percentileThresholdValue).to.be(undefined);
       expect(finalRawResponse?.overallHistogram).to.be(undefined);
 
-      expect(finalRawResponse?.values.length).to.eql(
+      expect(finalRawResponse?.failedTransactionsCorrelations.length).to.eql(
         43,
-        `Expected 43 identified correlations, got ${finalRawResponse?.values.length}.`
+        `Expected 43 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations.length}.`
       );
 
       expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
@@ -225,7 +225,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         'Identified 43 significant correlations relating to failed transactions.',
       ]);
 
-      const sortedCorrelations = finalRawResponse?.values.sort();
+      const sortedCorrelations = finalRawResponse?.failedTransactionsCorrelations.sort();
       const correlation = sortedCorrelations[0];
 
       expect(typeof correlation).to.be('object');

@@ -9,7 +9,7 @@ import { RawResponseBase, SearchStrategyClientParams } from '../types';
 
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from './constants';
 
-export interface FailedTransactionsCorrelationValue {
+export interface FailedTransactionsCorrelation {
   key: string;
   doc_count: number;
   bg_count: number;
@@ -34,5 +34,5 @@ export type FailedTransactionsCorrelationsParams = SearchStrategyClientParams;
 export interface FailedTransactionsCorrelationsRawResponse
   extends RawResponseBase {
   log: string[];
-  values: FailedTransactionsCorrelationValue[];
+  failedTransactionsCorrelations: FailedTransactionsCorrelation[];
 }

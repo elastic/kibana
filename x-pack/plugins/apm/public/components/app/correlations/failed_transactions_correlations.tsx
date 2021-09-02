@@ -31,7 +31,7 @@ import {
 } from '../../../../../observability/public';
 
 import { asPercent } from '../../../../common/utils/formatters';
-import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failed_transactions_correlations/types';
+import type { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -65,7 +65,7 @@ export function FailedTransactionsCorrelations({
 
   const {
     state: { error, isRunning, loaded, total },
-    data: { ccsWarning, log, values },
+    data: { ccsWarning, log, failedTransactionsCorrelations },
     startFetch,
     cancelFetch,
   } = useSearchStrategy(
@@ -76,20 +76,23 @@ export function FailedTransactionsCorrelations({
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
-  ] = useState<FailedTransactionsCorrelationValue | null>(null);
+  ] = useState<FailedTransactionsCorrelation | null>(null);
 
   const selectedTerm = useMemo(() => {
     if (selectedSignificantTerm) return selectedSignificantTerm;
-    return Array.isArray(values) && values.length > 0 ? values[0] : undefined;
-  }, [selectedSignificantTerm, values]);
+    return Array.isArray(failedTransactionsCorrelations) &&
+      failedTransactionsCorrelations.length > 0
+      ? failedTransactionsCorrelations[0]
+      : undefined;
+  }, [selectedSignificantTerm, failedTransactionsCorrelations]);
 
   const history = useHistory();
 
   const failedTransactionsCorrelationsColumns: Array<
-    EuiBasicTableColumn<FailedTransactionsCorrelationValue>
+    EuiBasicTableColumn<FailedTransactionsCorrelation>
   > = useMemo(() => {
     const percentageColumns: Array<
-      EuiBasicTableColumn<FailedTransactionsCorrelationValue>
+      EuiBasicTableColumn<FailedTransactionsCorrelation>
     > = inspectEnabled
       ? [
           {
@@ -237,7 +240,7 @@ export function FailedTransactionsCorrelations({
             ),
             icon: 'plusInCircle',
             type: 'icon',
-            onClick: (term: FailedTransactionsCorrelationValue) => {
+            onClick: (term: FailedTransactionsCorrelation) => {
               push(history, {
                 query: {
                   kuery: `${term.fieldName}:"${term.fieldValue}"`,
@@ -258,7 +261,7 @@ export function FailedTransactionsCorrelations({
             ),
             icon: 'minusInCircle',
             type: 'icon',
-            onClick: (term: FailedTransactionsCorrelationValue) => {
+            onClick: (term: FailedTransactionsCorrelation) => {
               push(history, {
                 query: {
                   kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
@@ -273,7 +276,7 @@ export function FailedTransactionsCorrelations({
           'xpack.apm.correlations.correlationsTable.actionsLabel',
           { defaultMessage: 'Filter' }
         ),
-        render: (_: unknown, term: FailedTransactionsCorrelationValue) => {
+        render: (_: unknown, term: FailedTransactionsCorrelation) => {
           return (
             <>
               <EuiLink
@@ -299,7 +302,7 @@ export function FailedTransactionsCorrelations({
           );
         },
       },
-    ] as Array<EuiBasicTableColumn<FailedTransactionsCorrelationValue>>;
+    ] as Array<EuiBasicTableColumn<FailedTransactionsCorrelation>>;
   }, [history, onFilter, trackApmEvent, inspectEnabled]);
 
   useEffect(() => {
@@ -318,7 +321,7 @@ export function FailedTransactionsCorrelations({
   }, [error, notifications.toasts]);
 
   const [sortField, setSortField] = useState<
-    keyof FailedTransactionsCorrelationValue
+    keyof FailedTransactionsCorrelation
   >('normalizedScore');
   const [sortDirection, setSortDirection] = useState<Direction>('desc');
 
@@ -330,11 +333,11 @@ export function FailedTransactionsCorrelations({
   }, []);
 
   const { sorting, correlationTerms } = useMemo(() => {
-    if (!Array.isArray(values)) {
+    if (!Array.isArray(failedTransactionsCorrelations)) {
       return { correlationTerms: [], sorting: undefined };
     }
     const orderedTerms = orderBy(
-      values,
+      failedTransactionsCorrelations,
       // The smaller the p value the higher the impact
       // So we want to sort by the normalized score here
       // which goes from 0 -> 1
@@ -348,9 +351,9 @@ export function FailedTransactionsCorrelations({
           field: sortField,
           direction: sortDirection,
         },
-      } as EuiTableSortingType<FailedTransactionsCorrelationValue>,
+      } as EuiTableSortingType<FailedTransactionsCorrelation>,
     };
-  }, [values, sortField, sortDirection]);
+  }, [failedTransactionsCorrelations, sortField, sortDirection]);
 
   return (
     <div data-test-subj="apmFailedTransactionsCorrelationsTabContent">
@@ -451,7 +454,7 @@ export function FailedTransactionsCorrelations({
 
       <div data-test-subj="apmCorrelationsTable">
         {(isRunning || correlationTerms.length > 0) && (
-          <CorrelationsTable<FailedTransactionsCorrelationValue>
+          <CorrelationsTable<FailedTransactionsCorrelation>
             columns={failedTransactionsCorrelationsColumns}
             significantTerms={correlationTerms}
             status={isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}

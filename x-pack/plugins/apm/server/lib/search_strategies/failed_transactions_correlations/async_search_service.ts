@@ -89,7 +89,7 @@ export const failedTransactionsCorrelationsAsyncSearchServiceProvider: FailedTra
 
             results.forEach((result, idx) => {
               if (result.status === 'fulfilled') {
-                state.addValues(
+                state.addFailedTransactionsCorrelations(
                   result.value.filter(
                     (record) =>
                       record &&
@@ -129,7 +129,7 @@ export const failedTransactionsCorrelationsAsyncSearchServiceProvider: FailedTra
 
     addLogMessage(
       `Identified ${
-        state.getState().values.length
+        state.getState().failedTransactionsCorrelations.length
       } significant correlations relating to failed transactions.`
     );
 
@@ -157,7 +157,7 @@ export const failedTransactionsCorrelationsAsyncSearchServiceProvider: FailedTra
         ccsWarning,
         log: getLogMessages(),
         took: Date.now() - progress.started,
-        values: state.getValuesSortedByScore(),
+        failedTransactionsCorrelations: state.getFailedTransactionsCorrelationsSortedByScore(),
       },
     };
   };
