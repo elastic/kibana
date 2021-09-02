@@ -68,6 +68,7 @@ function CreateCaseFlyoutComponent({
             onSuccess,
             withSteps: false,
             owner: [CASES_OWNER],
+            disableAlerts: true,
           })}
         </FormWrapper>
       </StyledEuiFlyoutBody>

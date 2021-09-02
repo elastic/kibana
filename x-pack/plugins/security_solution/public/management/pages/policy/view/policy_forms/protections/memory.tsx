@@ -28,13 +28,13 @@ export const MemoryProtection = React.memo(() => {
   const protectionLabel = i18n.translate(
     'xpack.securitySolution.endpoint.policy.protections.memory',
     {
-      defaultMessage: 'Memory protections',
+      defaultMessage: 'Memory manipulation',
     }
   );
   return (
     <ConfigForm
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory_protection', {
-        defaultMessage: 'Memory Protection',
+        defaultMessage: 'Memory manipulation',
       })}
       supportedOss={[OperatingSystem.WINDOWS]}
       dataTestSubj="memoryProtectionsForm"
@@ -51,7 +51,7 @@ export const MemoryProtection = React.memo(() => {
           defaultMessage="View {detectionRulesLink}. Prebuilt rules are tagged “Elastic” on the Detection Rules page."
           values={{
             detectionRulesLink: (
-              <LinkToApp appId={`${APP_ID}:${SecurityPageName.detections}`} appPath={`/rules`}>
+              <LinkToApp appId={APP_ID} deepLinkId={SecurityPageName.rules}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policy.details.detectionRulesLink"
                   defaultMessage="related detection rules"

@@ -14,8 +14,8 @@ import React from 'react';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
 import type { SavedObjectReferenceWithContext } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../../common';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
 import { getSpacesContextProviderWrapper } from '../../spaces_context';

@@ -70,6 +70,16 @@ describe('Fleet - validatePackagePolicy()', () => {
           ],
         },
         {
+          dataset: 'bar3',
+          streams: [
+            {
+              input: 'bar',
+              title: 'Bar 3',
+              vars: [{ default: true, name: 'var-name', type: 'bool' }],
+            },
+          ],
+        },
+        {
           dataset: 'disabled',
           streams: [
             {
@@ -185,6 +195,11 @@ describe('Fleet - validatePackagePolicy()', () => {
               enabled: true,
               vars: { 'var-name': { value: undefined, type: 'text' } },
             },
+            {
+              data_stream: { dataset: 'bar3', type: 'logs' },
+              enabled: true,
+              vars: { 'var-name': { value: true, type: 'text' } },
+            },
           ],
         },
         {
@@ -266,6 +281,11 @@ describe('Fleet - validatePackagePolicy()', () => {
               enabled: true,
               vars: { 'var-name': { value: undefined, type: 'text' } },
             },
+            {
+              data_stream: { dataset: 'bar3', type: 'logs' },
+              enabled: true,
+              vars: { 'var-name': { value: 'not a bool', type: 'bool' } },
+            },
           ],
         },
         {
@@ -330,6 +350,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           streams: {
             bar: { vars: { 'var-name': null } },
             bar2: { vars: { 'var-name': null } },
+            bar3: { vars: { 'var-name': null } },
           },
         },
         'with-disabled-streams': {
@@ -377,6 +398,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: {
               bar: { vars: { 'var-name': ['var-name is required'] } },
               bar2: { vars: { 'var-name': null } },
+              bar3: { vars: { 'var-name': ['Boolean values must be either true or false'] } },
             },
           },
           'with-disabled-streams': {
@@ -440,6 +462,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: {
               bar: { vars: { 'var-name': null } },
               bar2: { vars: { 'var-name': null } },
+              bar3: { vars: { 'var-name': null } },
             },
           },
           'with-disabled-streams': {

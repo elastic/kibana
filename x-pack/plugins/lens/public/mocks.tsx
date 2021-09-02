@@ -23,6 +23,7 @@ import { navigationPluginMock } from '../../../../src/plugins/navigation/public/
 import { LensAppServices } from './app_plugin/types';
 import { DOC_TYPE, layerTypes } from '../common';
 import { DataPublicPluginStart, esFilters, UI_SETTINGS } from '../../../../src/plugins/data/public';
+import { inspectorPluginMock } from '../../../../src/plugins/inspector/public/mocks';
 import { dashboardPluginMock } from '../../../../src/plugins/dashboard/public/mocks';
 import type {
   LensByValueInput,
@@ -207,12 +208,14 @@ export const defaultDoc = ({
   savedObjectId: '1234',
   title: 'An extremely cool default document!',
   expression: 'definitely a valid expression',
+  visualizationType: 'testVis',
   state: {
     query: 'kuery',
     filters: [{ query: { match_phrase: { src: 'test' } } }],
     datasourceStates: {
       testDatasource: 'datasource',
     },
+    visualization: {},
   },
   references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
 } as unknown) as Document;
@@ -378,6 +381,7 @@ export function makeDefaultServices(
     navigation: navigationStartMock,
     notifications: core.notifications,
     attributeService: makeAttributeService(),
+    inspector: inspectorPluginMock.createStartContract(),
     dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
     savedObjectsClient: core.savedObjects.client,

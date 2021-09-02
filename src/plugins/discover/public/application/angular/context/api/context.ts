@@ -7,7 +7,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { Filter, IndexPatternsContract, IndexPattern } from 'src/plugins/data/public';
+import { Filter, IndexPatternsContract, IndexPattern, SearchSource } from 'src/plugins/data/public';
 import { reverseSortDir, SortDirection } from './utils/sorting';
 import { extractNanos, convertIsoToMillis } from './utils/date_conversion';
 import { fetchHitsInInterval } from './utils/fetch_hits_in_interval';
@@ -46,7 +46,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
    *
    * @param {SurrDocType} type - `successors` or `predecessors`
    * @param {string} indexPatternId
-   * @param {AnchorHitRecord} anchor - anchor record
+   * @param {EsHitRecord} anchor - anchor record
    * @param {string} timeField - name of the timefield, that's sorted on
    * @param {string} tieBreakerField - name of the tie breaker, the 2nd sort field
    * @param {SortDirection} sortDir - direction of sorting
@@ -68,7 +68,9 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
       return [];
     }
     const indexPattern = await indexPatterns.get(indexPatternId);
-    const searchSource = await createSearchSource(indexPattern, filters);
+    const { data } = getServices();
+    const searchSource = data.search.searchSource.createEmpty() as SearchSource;
+    updateSearchSource(searchSource, indexPattern, filters, Boolean(useNewFieldsApi));
     const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
 
     const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchor.fields[timeField][0]) : '';
@@ -116,20 +118,23 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract, useNewFields
 
     return documents;
   }
+}
 
-  async function createSearchSource(indexPattern: IndexPattern, filters: Filter[]) {
-    const { data } = getServices();
-
-    const searchSource = await data.search.searchSource.create();
-    if (useNewFieldsApi) {
-      searchSource.removeField('fieldsFromSource');
-      searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
-    }
-    return searchSource
-      .setParent(undefined)
-      .setField('index', indexPattern)
-      .setField('filter', filters);
+export function updateSearchSource(
+  searchSource: SearchSource,
+  indexPattern: IndexPattern,
+  filters: Filter[],
+  useNewFieldsApi: boolean
+) {
+  if (useNewFieldsApi) {
+    searchSource.removeField('fieldsFromSource');
+    searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
   }
+  return searchSource
+    .setParent(undefined)
+    .setField('index', indexPattern)
+    .setField('filter', filters)
+    .setField('trackTotalHits', false);
 }
 
 export { fetchContextProvider };

@@ -7,6 +7,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import tls from 'tls';
 
 import { nextTick } from '@kbn/test/jest';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
@@ -16,6 +17,10 @@ import { ConfigSchema } from './config';
 import type { ElasticsearchServiceSetup } from './elasticsearch_service';
 import { ElasticsearchService } from './elasticsearch_service';
 import { interactiveSetupMock } from './mocks';
+
+jest.mock('tls');
+
+const tlsConnectMock = tls.connect as jest.MockedFunction<typeof tls.connect>;
 
 describe('ElasticsearchService', () => {
   let service: ElasticsearchService;
@@ -33,17 +38,21 @@ describe('ElasticsearchService', () => {
     let mockAuthenticateClient: ReturnType<
       typeof elasticsearchServiceMock.createCustomClusterClient
     >;
+    let mockPingClient: ReturnType<typeof elasticsearchServiceMock.createCustomClusterClient>;
     let setupContract: ElasticsearchServiceSetup;
     beforeEach(() => {
       mockConnectionStatusClient = elasticsearchServiceMock.createCustomClusterClient();
       mockEnrollClient = elasticsearchServiceMock.createCustomClusterClient();
       mockAuthenticateClient = elasticsearchServiceMock.createCustomClusterClient();
+      mockPingClient = elasticsearchServiceMock.createCustomClusterClient();
       mockElasticsearchPreboot.createClient.mockImplementation((type) => {
         switch (type) {
           case 'enroll':
             return mockEnrollClient;
           case 'authenticate':
             return mockAuthenticateClient;
+          case 'ping':
+            return mockPingClient;
           default:
             return mockConnectionStatusClient;
         }
@@ -308,7 +317,7 @@ describe('ElasticsearchService', () => {
         mockEnrollClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
         await expect(
-          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1'] })
+          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1'], caFingerprint: 'DE:AD:BE:EF' })
         ).rejects.toMatchInlineSnapshot(`[ResponseError: {"message":"oh no"}]`);
 
         expect(mockEnrollClient.asScoped).toHaveBeenCalledTimes(1);
@@ -327,7 +336,11 @@ describe('ElasticsearchService', () => {
         mockEnrollClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
         await expect(
-          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1', 'host2'] })
+          setupContract.enroll({
+            apiKey: 'apiKey',
+            hosts: ['host1', 'host2'],
+            caFingerprint: 'DE:AD:BE:EF',
+          })
         ).rejects.toMatchInlineSnapshot(`[Error: Unable to connect to any of the provided hosts.]`);
 
         expect(mockEnrollClient.close).toHaveBeenCalledTimes(2);
@@ -351,7 +364,7 @@ describe('ElasticsearchService', () => {
         );
 
         await expect(
-          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1'] })
+          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1'], caFingerprint: 'DE:AD:BE:EF' })
         ).rejects.toMatchInlineSnapshot(`[ResponseError: {"message":"oh no"}]`);
 
         expect(mockEnrollClient.asScoped).toHaveBeenCalledTimes(1);
@@ -404,9 +417,13 @@ some weird+ca/with
 `;
 
         await expect(
-          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1', 'host2'] })
+          setupContract.enroll({
+            apiKey: 'apiKey',
+            hosts: ['host1', 'host2'],
+            caFingerprint: 'DE:AD:BE:EF',
+          })
         ).resolves.toEqual({
-          ca: expectedCa,
+          caCert: expectedCa,
           host: 'host2',
           serviceAccountToken: {
             name: 'some-name',
@@ -417,14 +434,17 @@ some weird+ca/with
         // Check that we created clients with the right parameters
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledTimes(3);
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledWith('enroll', {
+          caFingerprint: 'DE:AD:BE:EF',
           hosts: ['host1'],
           ssl: { verificationMode: 'none' },
         });
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledWith('enroll', {
+          caFingerprint: 'DE:AD:BE:EF',
           hosts: ['host2'],
           ssl: { verificationMode: 'none' },
         });
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledWith('authenticate', {
+          caFingerprint: 'DE:AD:BE:EF',
           hosts: ['host2'],
           serviceAccountToken: 'some-value',
           ssl: { certificateAuthorities: [expectedCa] },
@@ -467,6 +487,133 @@ some weird+ca/with
         expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
       });
     });
+
+    describe('#authenticate()', () => {
+      it('fails if ping call fails', async () => {
+        mockAuthenticateClient.asInternalUser.ping.mockRejectedValue(
+          new errors.ConnectionError(
+            'some-message',
+            interactiveSetupMock.createApiResponse({ body: {} })
+          )
+        );
+
+        await expect(
+          setupContract.authenticate({ host: 'http://localhost:9200' })
+        ).rejects.toMatchInlineSnapshot(`[ConnectionError: some-message]`);
+      });
+
+      it('succeeds if ping call succeeds', async () => {
+        mockAuthenticateClient.asInternalUser.ping.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
+        );
+
+        await expect(
+          setupContract.authenticate({ host: 'http://localhost:9200' })
+        ).resolves.toEqual(undefined);
+      });
+    });
+
+    describe('#ping()', () => {
+      it('fails if host is not reachable', async () => {
+        mockPingClient.asInternalUser.ping.mockRejectedValue(
+          new errors.ConnectionError(
+            'some-message',
+            interactiveSetupMock.createApiResponse({ body: {} })
+          )
+        );
+
+        await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
+          `[ConnectionError: some-message]`
+        );
+      });
+
+      it('fails if host is not supported', async () => {
+        mockPingClient.asInternalUser.ping.mockRejectedValue(
+          new errors.ProductNotSupportedError(interactiveSetupMock.createApiResponse({ body: {} }))
+        );
+
+        await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
+          `[ProductNotSupportedError: The client noticed that the server is not Elasticsearch and we do not support this unknown product.]`
+        );
+      });
+
+      it('succeeds if host does not require authentication', async () => {
+        mockPingClient.asInternalUser.ping.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
+        );
+
+        await expect(setupContract.ping('http://localhost:9200')).resolves.toEqual({
+          authRequired: false,
+          certificateChain: undefined,
+        });
+      });
+
+      it('succeeds if host requires authentication', async () => {
+        mockPingClient.asInternalUser.ping.mockRejectedValue(
+          new errors.ResponseError(
+            interactiveSetupMock.createApiResponse({ statusCode: 401, body: {} })
+          )
+        );
+
+        await expect(setupContract.ping('http://localhost:9200')).resolves.toEqual({
+          authRequired: true,
+          certificateChain: undefined,
+        });
+      });
+
+      it('succeeds if host requires SSL', async () => {
+        mockPingClient.asInternalUser.ping.mockRejectedValue(
+          new errors.ResponseError(
+            interactiveSetupMock.createApiResponse({ statusCode: 401, body: {} })
+          )
+        );
+
+        tlsConnectMock.mockReturnValue(({
+          once: jest.fn((event, fn) => {
+            if (event === 'secureConnect') {
+              fn();
+            }
+          }),
+          getPeerCertificate: jest.fn().mockReturnValue({ raw: Buffer.from('cert') }),
+          destroy: jest.fn(),
+        } as unknown) as tls.TLSSocket);
+
+        await expect(setupContract.ping('https://localhost:9200')).resolves.toEqual({
+          authRequired: true,
+          certificateChain: [
+            expect.objectContaining({
+              raw: 'Y2VydA==',
+            }),
+          ],
+        });
+
+        expect(tlsConnectMock).toHaveBeenCalledWith({
+          host: 'localhost',
+          port: 9200,
+          rejectUnauthorized: false,
+        });
+      });
+
+      it('fails if peer certificate cannot be fetched', async () => {
+        mockPingClient.asInternalUser.ping.mockRejectedValue(
+          new errors.ResponseError(
+            interactiveSetupMock.createApiResponse({ statusCode: 401, body: {} })
+          )
+        );
+
+        tlsConnectMock.mockReturnValue(({
+          once: jest.fn((event, fn) => {
+            if (event === 'error') {
+              fn(new Error('some-message'));
+            }
+          }),
+        } as unknown) as tls.TLSSocket);
+
+        await expect(setupContract.ping('https://localhost:9200')).rejects.toMatchInlineSnapshot(
+          `[Error: some-message]`
+        );
+      });
+    });
   });
 
   describe('#stop()', () => {
@@ -478,7 +625,7 @@ some weird+ca/with
       const mockConnectionStatusClient = elasticsearchServiceMock.createCustomClusterClient();
       mockElasticsearchPreboot.createClient.mockImplementation((type) => {
         switch (type) {
-          case 'ping':
+          case 'connectionStatus':
             return mockConnectionStatusClient;
           default:
             throw new Error(`Unexpected client type: ${type}`);

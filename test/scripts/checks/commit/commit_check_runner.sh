@@ -7,7 +7,7 @@ If you want, you can still manually install the pre-commit hook locally by runni
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 "
 
-  node scripts/precommit_hook.js --ref HEAD~1..HEAD --max-files 200 --verbose
+  node scripts/precommit_hook.js --ref HEAD~1..HEAD --max-files 200
 }
 
 run_quick_commit_checks

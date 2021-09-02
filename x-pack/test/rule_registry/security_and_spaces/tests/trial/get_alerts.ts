@@ -38,9 +38,9 @@ export default ({ getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true')
       .expect(200);
     const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === '.alerts-observability-apm'
+      (indexName) => indexName === '.alerts-observability.apm.alerts'
     );
-    expect(observabilityIndex).to.eql('.alerts-observability-apm');
+    expect(observabilityIndex).to.eql('.alerts-observability.apm.alerts');
     return observabilityIndex;
   };
 

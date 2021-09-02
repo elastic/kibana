@@ -9,7 +9,13 @@ import { omit, set } from 'lodash/fp';
 import React from 'react';
 
 import { defaultHeaders } from './default_headers';
-import { getActionsColumnWidth, getColumnWidthFromType, getColumnHeaders } from './helpers';
+import {
+  BUILT_IN_SCHEMA,
+  getActionsColumnWidth,
+  getColumnWidthFromType,
+  getColumnHeaders,
+  getSchema,
+} from './helpers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
@@ -18,6 +24,7 @@ import {
   SHOW_CHECK_BOXES_COLUMN_WIDTH,
 } from '../constants';
 import { mockBrowserFields } from '../../../../mock/browser_fields';
+import { ColumnHeaderOptions } from '../../../../../common';
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
@@ -59,6 +66,32 @@ describe('helpers', () => {
       expect(getActionsColumnWidth(true, true)).toEqual(
         EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
       );
+    });
+  });
+
+  describe('getSchema', () => {
+    const expected: Record<string, BUILT_IN_SCHEMA> = {
+      date: 'datetime',
+      date_nanos: 'datetime',
+      double: 'numeric',
+      long: 'numeric',
+      number: 'numeric',
+      object: 'json',
+      boolean: 'boolean',
+    };
+
+    Object.keys(expected).forEach((type) =>
+      test(`it returns the expected schema for type '${type}'`, () => {
+        expect(getSchema(type)).toEqual(expected[type]);
+      })
+    );
+
+    test('it returns `undefined` when `type` does NOT match a built-in schema type', () => {
+      expect(getSchema('string')).toBeUndefined(); // 'keyword` doesn't have a schema
+    });
+
+    test('it returns `undefined` when `type` is undefined', () => {
+      expect(getSchema(undefined)).toBeUndefined();
     });
   });
 
@@ -208,6 +241,7 @@ describe('helpers', () => {
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           isSortable,
           name: '@timestamp',
+          schema: 'datetime',
           searchable: true,
           type: 'date',
           initialWidth: 190,
@@ -253,6 +287,63 @@ describe('helpers', () => {
       expect(getColumnHeaders(mockHeader, mockBrowserFields).map(omit('display'))).toEqual(
         expectedData
       );
+    });
+
+    test('it should NOT override a custom `schema` when the `header` provides it', () => {
+      const expected = [
+        {
+          actions,
+          aggregatable: true,
+          category: 'base',
+          columnHeaderType: 'not-filtered',
+          defaultSortDirection,
+          description:
+            'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
+          example: '2016-05-23T08:05:34.853Z',
+          format: '',
+          id: '@timestamp',
+          indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+          isSortable,
+          name: '@timestamp',
+          schema: 'custom', // <-- we expect our custom schema will NOT be overridden by a built-in schema
+          searchable: true,
+          type: 'date', // <-- the built-in schema for `type: 'date'` is 'datetime', but the custom schema overrides it
+          initialWidth: 190,
+        },
+      ];
+
+      const headerWithCustomSchema: ColumnHeaderOptions = {
+        columnHeaderType: 'not-filtered',
+        id: '@timestamp',
+        initialWidth: 190,
+        schema: 'custom', // <-- overrides the default of 'datetime'
+      };
+
+      expect(
+        getColumnHeaders([headerWithCustomSchema], mockBrowserFields).map(omit('display'))
+      ).toEqual(expected);
+    });
+
+    test('it should return an `undefined` `schema` when a `header` does NOT have an entry in `BrowserFields`', () => {
+      const expected = [
+        {
+          actions,
+          columnHeaderType: 'not-filtered',
+          defaultSortDirection,
+          id: 'no_matching_browser_field',
+          isSortable: false,
+          schema: undefined, // <-- no `BrowserFields` entry for this field
+        },
+      ];
+
+      const headerDoesNotMatchBrowserField: ColumnHeaderOptions = {
+        columnHeaderType: 'not-filtered',
+        id: 'no_matching_browser_field',
+      };
+
+      expect(
+        getColumnHeaders([headerDoesNotMatchBrowserField], mockBrowserFields).map(omit('display'))
+      ).toEqual(expected);
     });
   });
 });
