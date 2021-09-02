@@ -163,19 +163,20 @@ export function initIndexingRoutes({
 
   router.get(
     {
-      path: `${GET_MATCHING_INDEXES_PATH}/{indexPattern}`,
+      path: GET_MATCHING_INDEXES_PATH,
       validate: {
-        params: schema.object({
+        query: schema.object({
           indexPattern: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
-      const result = await getMatchingIndexes(
-        request.params.indexPattern,
-        context.core.elasticsearch.client
+      return await getMatchingIndexes(
+        request.query.indexPattern,
+        context.core.elasticsearch.client,
+        response,
+        logger
       );
-      return response.ok({ body: result });
     }
   );
 
