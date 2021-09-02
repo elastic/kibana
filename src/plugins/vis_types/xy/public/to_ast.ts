@@ -124,7 +124,6 @@ const prepareVisDimension = (data: Dimension) => {
 const prepareXYDimension = (data: Dimension) => {
   const xyDimension = buildExpressionFunction('xydimension', {
     params: JSON.stringify(data.params),
-    aggType: data.aggType,
     label: data.label,
     visDimension: prepareVisDimension(data),
     id: data.id,

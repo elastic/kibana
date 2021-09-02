@@ -288,7 +288,8 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         splitColumn: args.splitColumnDimension,
       },
       // ------------------------------------------------------------------------------------------------------------------
-    } as VisParams;
+    } as VisParams; /* @TODO: rewrite this `as VisParams` to real `VisParams` via changing accessor 
+                      to vis_dimension accessor (accepting string, not only number) */
 
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [
