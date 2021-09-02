@@ -25,6 +25,8 @@ export enum SyntaxType {
 }
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
+const DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL = 800;
+
 interface UseQueryBarUtils {
   // The Query object used by the search bar
   query: Query;
@@ -37,7 +39,7 @@ interface UseQueryBarUtils {
   submitImmediately: () => void;
 }
 
-export const DEBOUNCE_INTERVAL = 800;
+export const DEBOUNCE_INTERVAL = 250;
 
 /**
  * Provides state management and automatic dispatching of a Query object.
@@ -88,7 +90,7 @@ export const useQueryBar = (): UseQueryBarUtils => {
     esFilters,
     setEsKueryFilters,
   ]);
-  const [, cancelEsKueryUpdate] = useDebounce(setEs, DEBOUNCE_INTERVAL, [
+  const [, cancelEsKueryUpdate] = useDebounce(setEs, DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL, [
     esFilters,
     setEsKueryFilters,
   ]);
@@ -102,7 +104,11 @@ export const useQueryBar = (): UseQueryBarUtils => {
     }
   }, [query.language, query.query, queryParam, updateUrlParams]);
 
-  const [, cancelQueryUpdate] = useDebounce(handleQueryUpdate, DEBOUNCE_INTERVAL, [query]);
+  const [, cancelQueryUpdate] = useDebounce(
+    handleQueryUpdate,
+    DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL,
+    [query]
+  );
 
   const submitImmediately = useCallback(() => {
     cancelQueryUpdate();

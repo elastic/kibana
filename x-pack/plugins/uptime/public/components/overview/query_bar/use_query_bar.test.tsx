@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { MockRouter, MockKibanaProvider } from '../../../lib/helper/rtl_helpers';
 import { SyntaxType, useQueryBar, DEBOUNCE_INTERVAL } from './use_query_bar';
 import { MountWithReduxProvider } from '../../../lib';
@@ -106,9 +106,11 @@ describe('useQueryBar', () => {
         search,
       });
 
-      current.setQuery({
-        query,
-        language,
+      act(() => {
+        current.setQuery({
+          query,
+          language,
+        });
       });
 
       await waitFor(async () => {
