@@ -8968,9 +8968,17 @@ const BootstrapCommand = {
     // NOTE: We don't probably need this anymore, is actually not being used
 
 
-    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_2__["linkProjectExecutables"])(projects, projectGraph); // Build typescript references
+    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_2__["linkProjectExecutables"])(projects, projectGraph); // Update vscode settings
 
-    await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_1__["spawnStreaming"])('node', ['scripts/build_ts_refs', '--ignore-type-failures', '--info'], {
+    await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_1__["spawnStreaming"])(process.execPath, ['scripts/update_vscode_config'], {
+      cwd: kbn.getAbsolute(),
+      env: process.env
+    }, {
+      prefix: '[vscode]',
+      debug: false
+    }); // Build typescript references
+
+    await Object(_utils_child_process__WEBPACK_IMPORTED_MODULE_1__["spawnStreaming"])(process.execPath, ['scripts/build_ts_refs', '--ignore-type-failures', '--info'], {
       cwd: kbn.getAbsolute(),
       env: process.env
     }, {
@@ -59648,8 +59656,9 @@ class CiStatsReporter {
 
 
         const reason = error !== null && error !== void 0 && (_error$response = error.response) !== null && _error$response !== void 0 && _error$response.status ? `${error.response.status} response` : 'no response';
-        this.log.warning(`failed to reach ci-stats service [reason=${reason}], retrying in ${attempt} seconds`);
-        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        const seconds = attempt * 10;
+        this.log.warning(`failed to reach ci-stats service, retrying in ${seconds} seconds, [reason=${reason}], [error=${error.message}]`);
+        await new Promise(resolve => setTimeout(resolve, seconds * 1000));
       }
     }
   }

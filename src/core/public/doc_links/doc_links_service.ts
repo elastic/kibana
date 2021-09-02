@@ -30,6 +30,10 @@ export class DocLinksService {
       ELASTIC_WEBSITE_URL,
       links: {
         settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
+        apm: {
+          kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
+          supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
+        },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
         },
@@ -204,6 +208,7 @@ export class DocLinksService {
         siem: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
           gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
+          privileges: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/sec-requirements.html`,
           ml: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/machine-learning.html`,
           ruleChangeLog: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/prebuilt-rules-changelog.html`,
           detectionsReq: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/detections-permissions-section.html`,
@@ -450,6 +455,10 @@ export interface DocLinksStart {
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
     readonly settings: string;
+    readonly apm: {
+      readonly kibanaSettings: string;
+      readonly supportedServiceMaps: string;
+    };
     readonly canvas: {
       readonly guide: string;
     };
@@ -569,6 +578,7 @@ export interface DocLinksStart {
     readonly rollupJobs: string;
     readonly elasticsearch: Record<string, string>;
     readonly siem: {
+      readonly privileges: string;
       readonly guide: string;
       readonly gettingStarted: string;
       readonly ml: string;
