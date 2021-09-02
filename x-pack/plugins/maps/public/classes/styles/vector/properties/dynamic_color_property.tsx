@@ -135,7 +135,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getMbColor() {
-    if (!this.getFieldName()) {
+    if (!this.getMbFieldName()) {
       return null;
     }
 
@@ -321,7 +321,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     }
 
     mbStops.push(defaultColor); // last color is default color
-    return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
   _getOrdinalBreaks(symbolId?: string): Break[] {

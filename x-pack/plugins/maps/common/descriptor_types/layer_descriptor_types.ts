@@ -10,20 +10,12 @@
 import { Query } from 'src/plugins/data/public';
 import { Feature } from 'geojson';
 import {
-  FieldMeta,
   HeatmapStyleDescriptor,
   StyleDescriptor,
   VectorStyleDescriptor,
 } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
-import { VectorShapeTypeCounts } from '../get_geometry_counts';
-import {
-  KBN_FEATURE_COUNT,
-  KBN_IS_TILE_COMPLETE,
-  KBN_METADATA_FEATURE,
-  KBN_VECTOR_SHAPE_TYPE_COUNTS,
-} from '../constants';
 
 export type Attribution = {
   label: string;
@@ -37,11 +29,8 @@ export type JoinDescriptor = {
 
 export type TileMetaFeature = Feature & {
   properties: {
-    [KBN_METADATA_FEATURE]: true; //not supported
-    [KBN_IS_TILE_COMPLETE]: boolean; //not supported
-    [KBN_FEATURE_COUNT]: number;
-    [KBN_VECTOR_SHAPE_TYPE_COUNTS]: VectorShapeTypeCounts;//not supported
-    fieldMeta?: FieldMeta; //not supported
+    MVT_HITS_TOTAL_RELATION: string;
+    MVT_HITS_TOTAL_VALUE: number;
   };
 };
 

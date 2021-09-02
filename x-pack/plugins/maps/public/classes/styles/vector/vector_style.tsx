@@ -76,7 +76,6 @@ import { IVectorLayer } from '../../layers/vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
 import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
 import { IESAggField } from '../../fields/agg';
-import { VectorShapeTypeCounts } from '../../../../common/get_geometry_counts';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -492,8 +491,6 @@ export class VectorStyle implements IVectorStyle {
   }
 
   async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
-
-
     // const shapeTypeCountMeta: VectorShapeTypeCounts = metaFeatures.reduce(
     //   (accumulator: VectorShapeTypeCounts, tileMeta: TileMetaFeature) => {
     //     if (

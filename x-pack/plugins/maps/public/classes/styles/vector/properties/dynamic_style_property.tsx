@@ -50,6 +50,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
   getField(): IField | null;
   getFieldName(): string;
+  getMbFieldName(): string;
   getFieldOrigin(): FIELD_ORIGIN | null;
   getRangeFieldMeta(): RangeFieldMeta | null;
   getCategoryFieldMeta(): CategoryFieldMeta | null;
