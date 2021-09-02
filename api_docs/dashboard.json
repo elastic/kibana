@@ -1133,13 +1133,7 @@
             "text": "DashboardAppLocatorParams"
           },
           " extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          }
+          "SerializableRecord"
         ],
         "path": "src/plugins/dashboard/public/locator.ts",
         "deprecated": false,
@@ -1200,13 +1194,7 @@
                 "text": "RefreshInterval"
               },
               " & ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") | undefined"
             ],
             "path": "src/plugins/dashboard/public/locator.ts",
@@ -1330,13 +1318,7 @@
                 "text": "SavedDashboardPanel730ToLatest"
               },
               "[] & ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ") | undefined"
             ],
             "path": "src/plugins/dashboard/public/locator.ts",
@@ -1582,6 +1564,20 @@
                 "text": "EmbeddableInput"
               },
               " & { [k: string]: unknown; }>; }"
+            ],
+            "path": "src/plugins/dashboard/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerInput.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [],
+            "signature": [
+              "KibanaExecutionContext",
+              " | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
             "deprecated": false

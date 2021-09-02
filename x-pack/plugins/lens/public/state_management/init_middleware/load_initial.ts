@@ -7,7 +7,8 @@
 
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { setState } from '..';
+import { i18n } from '@kbn/i18n';
+import { LensAppState, setState } from '..';
 import { updateLayer, updateVisualizationState, LensStoreDeps } from '..';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
@@ -17,7 +18,40 @@ import {
   getVisualizeFieldSuggestions,
   switchToSuggestion,
 } from '../../editor_frame_service/editor_frame/suggestion_helpers';
-import { getPersistedDoc } from '../../app_plugin/save_modal_container';
+import { LensAppServices } from '../../app_plugin/types';
+import { getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
+import { Document, injectFilterReferences } from '../../persistence';
+
+export const getPersisted = async ({
+  initialInput,
+  lensServices,
+}: {
+  initialInput: LensEmbeddableInput;
+  lensServices: LensAppServices;
+}): Promise<{ doc: Document } | undefined> => {
+  const { notifications, attributeService } = lensServices;
+  let doc: Document;
+
+  try {
+    const attributes = await attributeService.unwrapAttributes(initialInput);
+
+    doc = {
+      ...initialInput,
+      ...attributes,
+      type: LENS_EMBEDDABLE_TYPE,
+    };
+
+    return {
+      doc,
+    };
+  } catch (e) {
+    notifications.toasts.addDanger(
+      i18n.translate('xpack.lens.app.docLoadingError', {
+        defaultMessage: 'Error loading saved document',
+      })
+    );
+  }
+};
 
 export function loadInitial(
   store: MiddlewareAPI,
@@ -29,11 +63,13 @@ export function loadInitial(
     initialContext,
   }: LensStoreDeps,
   redirectCallback: (savedObjectId?: string) => void,
-  initialInput?: LensEmbeddableInput
+  initialInput?: LensEmbeddableInput,
+  emptyState?: LensAppState
 ) {
   const { getState, dispatch } = store;
-  const { attributeService, chrome, notifications, data, dashboardFeatureFlag } = lensServices;
+  const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
   const { persistedDoc } = getState().lens;
+
   if (
     !initialInput ||
     (attributeService.inputIsRefType(initialInput) &&
@@ -61,6 +97,7 @@ export function loadInitial(
         );
         dispatch(
           setState({
+            ...emptyState,
             datasourceStates,
             isLoading: false,
           })
@@ -109,17 +146,23 @@ export function loadInitial(
         redirectCallback();
       });
   }
-  getPersistedDoc({
-    initialInput,
-    attributeService,
-    data,
-    chrome,
-    notifications,
-  })
+  getPersisted({ initialInput, lensServices })
     .then(
-      (doc) => {
-        if (doc) {
-          const currentSessionId = data.search.session.getSessionId();
+      (persisted) => {
+        if (persisted) {
+          const { doc } = persisted;
+          if (attributeService.inputIsRefType(initialInput)) {
+            lensServices.chrome.recentlyAccessed.add(
+              getFullPath(initialInput.savedObjectId),
+              doc.title,
+              initialInput.savedObjectId
+            );
+          }
+          // Don't overwrite any pinned filters
+          data.query.filterManager.setAppFilters(
+            injectFilterReferences(doc.state.filters, doc.references)
+          );
+
           const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
             (stateMap, [datasourceId, datasourceState]) => ({
               ...stateMap,
@@ -142,6 +185,8 @@ export function loadInitial(
           )
             .then((result) => {
               const activeDatasourceId = getInitialDatasourceId(datasourceMap, doc);
+
+              const currentSessionId = data.search.session.getSessionId();
 
               dispatch(
                 setState({
