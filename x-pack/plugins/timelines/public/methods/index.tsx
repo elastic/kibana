@@ -17,7 +17,7 @@ import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from '.
 import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
 import { initialTGridState } from '../store/t_grid/reducer';
 import { createStore } from '../store/t_grid';
-import { TGridLoading } from '../components/t_grid/loading';
+import { TGridLoading } from '../components/t_grid/shared';
 
 const initializeStore = ({
   store,

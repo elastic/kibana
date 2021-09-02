@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanelProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
@@ -459,18 +459,11 @@ export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
   })
 )<{ $isVisible: boolean }>``;
 
-export type FullWidthFlexGroupHeight = 'short' | 'tall';
-export const FullWidthFlexGroup = styled(EuiFlexGroup)<{
-  $visible?: boolean;
-  $color?: EuiPanelProps['color'];
-  $height?: FullWidthFlexGroupHeight;
-}>`
+export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
   overflow: hidden;
   margin: 0;
-  min-height: ${({ $height }) => ($height === 'tall' ? '490px' : '250px')};
+  min-height: 490px;
   display: ${({ $visible = true }) => ($visible ? 'flex' : 'none')};
-  background: ${({ $color, theme }) =>
-    $color ? theme.eui.euiPanelBackgroundColorModifiers[$color] : 'transparent'};
 `;
 
 export const UpdatedFlexGroup = styled(EuiFlexGroup)`

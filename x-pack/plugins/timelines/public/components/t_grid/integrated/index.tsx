@@ -46,8 +46,7 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem }
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
-import { TGridLoading } from '../loading';
-import { TGridEmpty } from '../empty';
+import { TGridLoading, TGridEmpty } from '../shared';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 

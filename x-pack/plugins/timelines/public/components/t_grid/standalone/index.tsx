@@ -47,8 +47,7 @@ import {
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
-import { TGridLoading } from '../loading';
-import { TGridEmpty } from '../empty';
+import { TGridLoading, TGridEmpty } from '../shared';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const STANDALONE_ID = 'standalone-t-grid';
