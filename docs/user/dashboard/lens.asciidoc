@@ -1,14 +1,18 @@
 [[lens]]
-=== Lens
+=== Create visualizations with Lens
+++++
+<titleabbrev>Lens</titleabbrev>
+++++
 
-To create visualization panels with *Lens*, you drag the data fields you want to visualize to the workspace, then *Lens* uses heuristics to apply each field and create a visualization for you. 
+To create a visualization, drag the data fields you want to visualize to the workspace, then *Lens* uses visualization best practices to apply the fields and create a visualization that best displays the data. 
 
 With *Lens*, you can:
 
-* Create area, line, and bar charts with multiple layers, indices, and visualization types.
-* Change the aggregation function and labels to customize the data.
+* Create area, line, and bar charts with layers to display multiple indices and chart types.
+* Change the aggregation function to change the data in the visualization.
 * Perform math on aggregations using *Formula*.
-* Use time shifts to compare data for two time intervals, such as month over month.
+* Use time shifts to compare the data in two time intervals, such as month over month.
+* Create custom tables.
 
 ++++
 <script type="text/javascript" async 
@@ -32,15 +36,23 @@ If you're unsure about the visualization type you want to use, or how you want t
 
 If you already know the visualization type you want to use, and how you want to display the data, use the following process:
 
-* *Choose the visualization type.* Open the *Chart type* dropdown, then select the visualization type before you drag any fields.  
-+
-To view more visualizations that *Lens* automatically created for the fields, click the *Suggestions*. If one of the *Suggestions* meets your visualization needs, click *Save and return* to add it to the dashboard.
+Choose the visualization type. 
 
-* *Choose the data you want to visualize.* Drag the fields directly to the layer pane. *Lens* automatically selects the aggregation function.
-+
-If you want to learn more about the data a field contains, click *i* next to the field.
+. Before you drag fields to the workspace, open the *Chart type* dropdown, then select the visualization type.  
 
-* *Edit and delete.* To change the *Quick function* and display options, click the field in the layer pane. To delete a field, close the configuration options, then click *X* next to the field.
+. To view more visualizations that *Lens* automatically created for the fields, click *Suggestions*. If one of the *Suggestions* meets your visualization needs, click *Save and return* to add it to the dashboard.
+
+Choose the data you want to visualize.
+
+. Drag the fields directly to the layer pane. *Lens* automatically selects the aggregation function.
+
+. If you want to learn more about the data a field contains, click the field.
+
+Edit and delete.
+
+. To change the aggregation *Quick function* and display options, click the field in the layer pane. 
+
+. To delete a field, close the configuration options, then click *X* next to the field.
 
 [float]
 [[change-the-fields]]
@@ -60,59 +72,10 @@ image:images/runtime-field-menu.png[Dropdown menu located next to index pattern 
 For more information about adding fields to index patterns and examples, refer to <<runtime-fields>>.
 
 [float]
-[[lens-formulas]]
-==== Use formulas to perform math
-
-Formulas allow you to perform math on aggregated data. The most common formulas divide two values to produce a percent.
-
-. In the layer pane, click a field.
-
-. Click *Formula*, then enter the formula. 
-+
-Filter ratio example:: Use `kql=''` to filter one set of documents, then compare the document set to other documents within the same grouping:
-+
-See how the error rate changes over time:
-+
-```
-count(kql='response.status_code > 400') / count()
-```
-+
-Week over week example:: Use `shift='1w'` to get the value of each grouping from the previous week. Time shift should not be used with the *Top values* function.
-+
-```
-percentile(system.network.in.bytes, percentile=99) /
-percentile(system.network.in.bytes, percentile=99, shift='1w')
-```
-+
-Percent of total example:: Formulas can calculate `overall_sum` for all the groupings,
-which lets you convert each grouping into a percent of total:
-+
-```
-sum(products.base_price) / overall_sum(sum(products.base_price))
-```
-TIP: For detailed information on formulas, click image:dashboard/images/formula_reference.png[Formula reference icon].
-
-. To accurately display the formula, select *Percent* from the *Value format* dropdown.
-
-[float]
-[[compare-data-with-time-offsets]]
-==== Compare differences over time
-
-Compare your real-time data set to the results that are offset by a time increment. For example, you can compare the real-time percentage of a user CPU time spent to the results offset by one hour. 
-
-. In the layer pane, click the field you want to offset.
-
-. From the *Add advanced options* dropdown, select *Time shift*.
-
-. Select the time offset increment. 
-
-For a time shift example, refer to <<compare-time-ranges>>.
-
-[float]
 [[create-custom-tables]]
 ==== Create custom tables
 
-*Lens* tables are highly customizable, and provide you with text alignment, value formatting, coloring options, and more.
+Tables are highly customizable, and provide you with text alignment, value formatting, coloring options, and more.
 
 . From the *Chart type* dropdown, select *Table*. 
 
@@ -167,34 +130,79 @@ image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
 . To confirm the action, press Space bar. To cancel, press Esc.
 
 [float]
-[[configure-the-visualization-components]]
-==== Configure the visualization components
+[[lens-formulas]]
+==== Use formulas to perform math
 
-Each visualiztion type comes with a set of components that you can configure, such as data labels, legend, axes, and more.
+Formulas allow you to perform math on aggregated data. The most common formulas divide two values to produce a percent.
 
-For example, to add data labels to bar and horizontal bar charts, use the *Values* menu.
+. In the layer pane, click a field.
 
-[role="screenshot"]
-image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
+. Click *Formula*, then enter the formula. 
++
+Filter ratio example:: To filter a document set, use `kql=''`, then compare to other documents within the same grouping:
++
+```
+count(kql='response.status_code > 400') / count()
+```
++
+Week over week example:: To get the value for each grouping from the previous week, use `shift='1w'`.
++
+```
+percentile(system.network.in.bytes, percentile=99) /
+percentile(system.network.in.bytes, percentile=99, shift='1w')
+```
+You are unable to combine different time shifts, such as `count(shift="1w") - count()` and `count(shift="1w") - count(shift="1m")`, with the *Top values* function.
++
+Percent of total example:: To convert each grouping into a percent of the total, formulas calculate `overall_sum` for all groupings:
++
+```
+sum(products.base_price) / overall_sum(sum(products.base_price))
+```
+TIP: For detailed information on formulas, click image:dashboard/images/formula_reference.png[Formula reference icon].
 
-To add data labels to pie charts, donut charts, or treemaps, use the *Labels* menu.
+. To accurately display the formula, select *Percent* from the *Value format* dropdown.
 
-[role="screenshot"]
-image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
+[float]
+[[compare-data-with-time-offsets]]
+==== Compare differences over time
+
+Compare your real-time data set to the results that are offset by a time increment. For example, you can compare the real-time percentage of a user CPU time spent to the results offset by one hour. 
+
+. In the layer pane, click the field you want to offset.
+
+. From the *Add advanced options* dropdown, select *Time shift*.
+
+. Select the time offset increment. 
+
+For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
 [[filter-the-data]]
-==== Filter the data
+==== Apply filters with the legend
 
-Apply filters to visualizations directly from the values in the legend. Only *Bar*, *Line and area*, and *Proportion* visualizations support legend filters.
+Apply filters to visualizations directly from the values in the legend. *Bar*, *Line and area*, and *Proportion* visualizations support legend filters.
 
-. In the legend, click the field.
-
-. Choose one of the following options:
+In the legend, click the field, then choose one of the following options:
 
 * *Filter for value* &mdash; Applies a filter that displays only the field data in the visualization.
 
 * *Filter out value* &mdash; Applies a filter that removes the field data from the visualization.
+
+[float]
+[[configure-the-visualization-components]]
+==== Configure the visualization components
+
+Each visualiztion type comes with a set of components that you access from the editor toolbar.
+
+The following component menus are available:
+
+* *Visual options* &mdash; Specifies how to display area, line, and bar chart options. For example, you can specify how to display the labels in bar charts.
+
+* *Labels* &mdash; Specifies how to display the labels for donut charts, pie charts, and treemaps. 
+
+* *Legend* &mdash; Specifies how to display the legend. For example, you can display the legend inside the visualization and truncate the legend values.
+
+* *Left axis*, *Bottom axis*, and *Right axis* &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
 
 [float]
 [[lens-faq]]
@@ -287,7 +295,7 @@ Use formulas to compare multiple {es} aggregations that can be filtered or shift
 
 [discrete]
 [[is-it-possible-to-have-more-than-one-Y-axis-scale]]
-.*Can I add more than one y-axis scale to a visualization?*
+.*Can I add more than one y-axis scale?*
 [%collapsible]
 ====
 For each y-axis, you can select *Left* and *Right*, and configure a different scale.
@@ -327,12 +335,12 @@ refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 .*Why is my field missing from the fields list?*
 [%collapsible]
 ====
-Fields do not appear in the *Available fields* in the following scenarios:
+The following field types do not appear in the *Available fields* list:
 
-* The field is a full-text field.
-* The field is a `geo_point` field
-* The field is a `flattened` field.
-* The field is a `object` field.
+* Full-text
+* geo_point
+* flattened
+* object
 
 Verify if the field appears in the *Empty fields* list. *Lens* uses heuristics to determine if the fields contain values. For sparse data sets, the heuristics are less precise.
 ====
