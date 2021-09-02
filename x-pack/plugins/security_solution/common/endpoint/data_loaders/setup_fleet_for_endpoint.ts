@@ -19,11 +19,17 @@ import {
 } from '../../../../fleet/common';
 import { EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
 
+export interface SetupFleetForEndpointResponse {
+  endpointPackage: BulkInstallPackageInfo;
+}
+
 /**
  * Calls the fleet setup APIs and then installs the latest Endpoint package
  * @param kbnClient
  */
-export const setupFleetForEndpoint = async (kbnClient: KbnClient) => {
+export const setupFleetForEndpoint = async (
+  kbnClient: KbnClient
+): Promise<SetupFleetForEndpointResponse> => {
   // We try to use the kbnClient **private** logger, bug if unable to access it, then just use console
   // @ts-ignore
   const log = kbnClient.log ? kbnClient.log : console;
@@ -65,12 +71,16 @@ export const setupFleetForEndpoint = async (kbnClient: KbnClient) => {
   }
 
   // Install/upgrade the endpoint package
+  let endpointPackage: BulkInstallPackageInfo;
+
   try {
-    await installOrUpgradeEndpointFleetPackage(kbnClient);
+    endpointPackage = await installOrUpgradeEndpointFleetPackage(kbnClient);
   } catch (error) {
     log.error(error);
     throw error;
   }
+
+  return { endpointPackage };
 };
 
 /**
@@ -78,7 +88,9 @@ export const setupFleetForEndpoint = async (kbnClient: KbnClient) => {
  *
  * @param kbnClient
  */
-export const installOrUpgradeEndpointFleetPackage = async (kbnClient: KbnClient): Promise<void> => {
+export const installOrUpgradeEndpointFleetPackage = async (
+  kbnClient: KbnClient
+): Promise<BulkInstallPackageInfo> => {
   const installEndpointPackageResp = (await kbnClient
     .request({
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
@@ -108,6 +120,8 @@ export const installOrUpgradeEndpointFleetPackage = async (kbnClient: KbnClient)
 
     throw new EndpointDataLoadingError(bulkResp[0].error, bulkResp);
   }
+
+  return bulkResp[0] as BulkInstallPackageInfo;
 };
 
 function isFleetBulkInstallError(
