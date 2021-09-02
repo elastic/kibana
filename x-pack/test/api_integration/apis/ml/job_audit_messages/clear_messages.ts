@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
-      for (const jobConfig of getJobConfig(1)) {
+      for (const jobConfig of getJobConfig(2)) {
         await ml.api.createAnomalyDetectionJob(jobConfig);
       }
     });
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send({
-          jobId: 'test_get_job_audit_messages_1',
+          jobId: 'test_get_job_audit_messages_2',
           notificationIndices: ['.ml-notifications-000002'],
         })
         .expect(403);
@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.message).to.eql('Forbidden');
 
       const { body: getBody } = await supertest
-        .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
+        .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_2`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .expect(200);
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .send({
-          jobId: 'test_get_job_audit_messages_1',
+          jobId: 'test_get_job_audit_messages_2',
           notificationIndices: ['.ml-notifications-000002'],
         })
         .expect(403);
@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.message).to.eql('Forbidden');
 
       const { body: getBody } = await supertest
-        .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
+        .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_2`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .expect(200);
