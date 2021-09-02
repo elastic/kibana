@@ -13,4 +13,4 @@ import { MergeStrategyFunction } from '../types';
  * @param ignoreFields We do nothing with this value and ignore it if set
  * @returns The doc as a no operation and do nothing
  */
-export const mergeNoFields: MergeStrategyFunction = ({ doc }) => doc;
+export const mergeNoFields: MergeStrategyFunction = ({ doc, ignoreFields }) => doc;

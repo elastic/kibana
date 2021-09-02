@@ -8,7 +8,7 @@
 import { configSchema } from './config';
 
 describe('config', () => {
-  describe('alertMergeStrategy', () => {
+  describe('alertIgnoreFields', () => {
     test('should default to an empty array', () => {
       expect(configSchema.validate({}).alertIgnoreFields).toEqual([]);
     });
