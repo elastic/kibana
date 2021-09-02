@@ -48,7 +48,6 @@ export const deleteRulesRoute = (
         const { id, rule_id: ruleId } = request.query;
 
         const rulesClient = context.alerting?.getRulesClient();
-        const savedObjectsClient = context.core.savedObjects.client;
 
         if (!rulesClient) {
           return siemResponse.error({ statusCode: 404 });
@@ -71,12 +70,11 @@ export const deleteRulesRoute = (
         });
         await deleteRules({
           rulesClient,
-          savedObjectsClient,
           ruleStatusClient,
           ruleStatuses,
           id: rule.id,
         });
-        const transformed = transform(rule, undefined, ruleStatuses[0]);
+        const transformed = transform(rule, ruleStatuses[0]);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
         } else {

@@ -108,7 +108,7 @@ export const useInvestigateInTimeline = ({
         <EuiContextMenuItem
           key="investigate-in-timeline-action-item"
           data-test-subj="investigate-in-timeline-action-item"
-          disabled={isFetchingAlertEcs === true}
+          disabled={ecsRowData == null && isFetchingAlertEcs === true}
           onClick={investigateInTimelineAlertClick}
         >
           {ACTION_INVESTIGATE_IN_TIMELINE}

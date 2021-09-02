@@ -61,6 +61,9 @@ const mockCore = {
   docLinks: {
     DOC_LINK_VERSION: '0',
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    links: {
+      apm: {},
+    },
   },
   http: {
     basePath: {
@@ -143,7 +146,6 @@ export function MockApmPluginContextWrapper({
   const usedHistory = useMemo(() => {
     return history || contextHistory || createMemoryHistory();
   }, [history, contextHistory]);
-
   return (
     <RouterProvider router={apmRouter as any} history={usedHistory}>
       <ApmPluginContext.Provider

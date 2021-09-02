@@ -18,11 +18,12 @@ import {
   EuiFlyoutBody,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { IUiSettingsClient } from 'kibana/public';
+import { ApplicationStart, HttpStart, IUiSettingsClient } from 'kibana/public';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { KibanaContextProvider, RedirectAppLinks } from '../../../kibana_react/public';
+import { SharePluginStart } from '../../../share/public';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
   return (
@@ -41,7 +42,10 @@ interface InspectorPanelProps {
   options?: unknown;
   views: InspectorViewDescription[];
   dependencies: {
+    application: ApplicationStart;
+    http: HttpStart;
     uiSettings: IUiSettingsClient;
+    share: SharePluginStart;
   };
 }
 
@@ -131,7 +135,9 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
-          {this.renderSelectedPanel()}
+          <RedirectAppLinks application={dependencies.application}>
+            {this.renderSelectedPanel()}
+          </RedirectAppLinks>
         </EuiFlyoutBody>
       </KibanaContextProvider>
     );
