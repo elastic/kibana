@@ -11,7 +11,7 @@ that bring clarity to your data, tell a story about your data, and allow you to 
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
 
-Panels display your data in charts, tables, maps, and more, which allow you to compare your data side-by-side to identify patterns and connections. Dashboards support several editors you can use to create panels, and support many types of panels to display your data.
+Panels display your data in charts, tables, maps, and more, which allow you to compare your data side-by-side to identify patterns and connections. Dashboards support several types of panels to display your data, and several options to create panels.
 
 [cols="2"]
 |===
@@ -33,7 +33,10 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 | Display a table of live streaming logs.
 
 | <<add-controls,Tools>>
-| Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
+| Add interactive filters with *Controls* panels.
+
+| <<add-text,Text>>
+| Add context to your panels with *Text*.
 
 |===
 
@@ -72,18 +75,32 @@ Begin with an empty dashboard, or open an existing dashboard.
 * To open an existing dashboard, click the dashboard *Title* you want to open.
 
 [float]
-[[create-panels-with-lens]]
+[[add-dashboard-panels]]
 === Add panels
 
 Create and add panels of your data to the dashboard, or add existing panels from the library. 
 
-* *Create visualization* &mdash; Opens *Lens*, the recommended editor to create visualizations of your data.
+[float]
+[[create-panels-with-lens]]
+=== Create panels
 
-* *All types* &mdash; Select the editor to create the panel, or select the panel type you want to add to the dashboard.
+You create panels using the editors, which you access from the dashboard toolbar. 
+
+On the dashboard, choose one of the following options:
+
+* *Create visualization* &mdash; Opens the drag-and-drop editor, the recommended way to create visualizations of your data.
+
+* *All types* &mdash; Opens the menu for the advanced editors, *Machine Learning* panels, and *Log stream* panel. 
+
+[float]
+[[add-existing-panels]]
+=== Add existing panels
 
 * *Add from library* &mdash; Add panels from the *Visualize Library*, including search results from <<save-your-search,*Discover*>>. The search results from *Discover* are not aggregated.
 +
 When a panel contains a saved query, both queries are applied.
+
+* Add ML and logs...
 
 [[tsvb]]
 
@@ -260,24 +277,6 @@ Copy panels from one dashboard to another dashboard.
 . Open the panel menu, then select *More > Copy to dashboard*.
 
 . On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
-
-[float]
-[[explore-the-underlying-documents]]
-== Explore the underlying documents
-
-You can add additional interactions that allow you to open *Discover* from dashboard panels. To use the interactions, the panel must use only one index pattern.
-
-Panel interaction:: Opens the data in *Discover* with the current dashboard filters, but does not take the filters
-saved with the panel.
-+
-To enable panel interactions, refer to <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>>.
-+
-NOTE: In {kib} 7.13 and earlier, the panel interaction is enabled by default.
-
-Series interaction::
-Opens the series data in *Discover* from inside the panel.
-+
-To enable series interactions, refer to <<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>>.
 
 [float]
 [[download-csv]]
