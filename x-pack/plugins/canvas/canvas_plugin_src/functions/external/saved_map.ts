@@ -6,7 +6,7 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
 import {
   EmbeddableTypes,
@@ -14,7 +14,7 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-import { MapEmbeddableInput } from '../../../../../plugins/maps/public/embeddable';
+import { MapEmbeddableInput } from '../../../../../plugins/maps/public';
 import { SavedObjectReference } from '../../../../../../src/core/types';
 
 interface Arguments {

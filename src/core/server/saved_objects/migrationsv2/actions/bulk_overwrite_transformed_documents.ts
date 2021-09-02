@@ -23,6 +23,27 @@ import type {
   IndexNotFound,
 } from './index';
 
+/**
+ * Given a document and index, creates a valid body for the Bulk API.
+ */
+export const createBulkOperationBody = (doc: SavedObjectsRawDoc, index: string) => {
+  return [
+    {
+      index: {
+        _index: index,
+        _id: doc._id,
+        // overwrite existing documents
+        op_type: 'index',
+        // use optimistic concurrency control to ensure that outdated
+        // documents are only overwritten once with the latest version
+        if_seq_no: doc._seq_no,
+        if_primary_term: doc._primary_term,
+      },
+    },
+    doc._source,
+  ];
+};
+
 /** @internal */
 export interface BulkOverwriteTransformedDocumentsParams {
   client: ElasticsearchClient;
@@ -47,6 +68,10 @@ export const bulkOverwriteTransformedDocuments = ({
   | RequestEntityTooLargeException,
   'bulk_index_succeeded'
 > => () => {
+  const body = transformedDocs.flatMap((doc) => {
+    return createBulkOperationBody(doc, index);
+  });
+
   return client
     .bulk({
       // Because we only add aliases in the MARK_VERSION_INDEX_READY step we
@@ -60,23 +85,7 @@ export const bulkOverwriteTransformedDocuments = ({
       wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
       refresh,
       filter_path: ['items.*.error'],
-      body: transformedDocs.flatMap((doc) => {
-        return [
-          {
-            index: {
-              _index: index,
-              _id: doc._id,
-              // overwrite existing documents
-              op_type: 'index',
-              // use optimistic concurrency control to ensure that outdated
-              // documents are only overwritten once with the latest version
-              if_seq_no: doc._seq_no,
-              if_primary_term: doc._primary_term,
-            },
-          },
-          doc._source,
-        ];
-      }),
+      body,
     })
     .then((res) => {
       // Filter out version_conflict_engine_exception since these just mean

@@ -25,10 +25,10 @@ import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
 import type {
   APMServerRouteRepository,
-  InspectResponse,
   APMRouteHandlerResources,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server';
+import { InspectResponse } from '../../../typings/common';
 
 export type APMClientOptions = Omit<
   FetchOptions,
