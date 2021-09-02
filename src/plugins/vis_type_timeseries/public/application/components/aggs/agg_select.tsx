@@ -11,229 +11,28 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { getAggsByType, getAggsByPredicate } from '../../../../common/agg_utils';
+import type { Agg } from '../../../../common/agg_utils';
 import type { Metric } from '../../../../common/types';
 import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 
 type AggSelectOption = EuiComboBoxOptionOption;
 
-const metricAggs: AggSelectOption[] = [
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.averageLabel', {
-      defaultMessage: 'Average',
-    }),
-    value: 'avg',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.cardinalityLabel', {
-      defaultMessage: 'Cardinality',
-    }),
-    value: 'cardinality',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.countLabel', {
-      defaultMessage: 'Count',
-    }),
-    value: 'count',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.filterRatioLabel', {
-      defaultMessage: 'Filter Ratio',
-    }),
-    value: 'filter_ratio',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.positiveRateLabel', {
-      defaultMessage: 'Counter Rate',
-    }),
-    value: 'positive_rate',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.maxLabel', {
-      defaultMessage: 'Max',
-    }),
-    value: 'max',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.minLabel', {
-      defaultMessage: 'Min',
-    }),
-    value: 'min',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.percentileLabel', {
-      defaultMessage: 'Percentile',
-    }),
-    value: 'percentile',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.percentileRankLabel', {
-      defaultMessage: 'Percentile Rank',
-    }),
-    value: 'percentile_rank',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.staticValueLabel', {
-      defaultMessage: 'Static Value',
-    }),
-    value: 'static',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.stdDeviationLabel', {
-      defaultMessage: 'Std. Deviation',
-    }),
-    value: 'std_deviation',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.sumLabel', {
-      defaultMessage: 'Sum',
-    }),
-    value: 'sum',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.sumOfSquaresLabel', {
-      defaultMessage: 'Sum of Squares',
-    }),
-    value: 'sum_of_squares',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.topHitLabel', {
-      defaultMessage: 'Top Hit',
-    }),
-    value: 'top_hit',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.valueCountLabel', {
-      defaultMessage: 'Value Count',
-    }),
-    value: 'value_count',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.varianceLabel', {
-      defaultMessage: 'Variance',
-    }),
-    value: 'variance',
-  },
-];
+const mapAggToSelectOption = ({ id, meta }: Agg) => ({ value: id, label: meta.label });
 
-const pipelineAggs: AggSelectOption[] = [
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.pipelineAggs.bucketScriptLabel', {
-      defaultMessage: 'Bucket Script',
-    }),
-    value: 'calculation',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.pipelineAggs.cumulativeSumLabel', {
-      defaultMessage: 'Cumulative Sum',
-    }),
-    value: 'cumulative_sum',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.pipelineAggs.derivativeLabel', {
-      defaultMessage: 'Derivative',
-    }),
-    value: 'derivative',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.pipelineAggs.movingAverageLabel', {
-      defaultMessage: 'Moving Average',
-    }),
-    value: 'moving_average',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.pipelineAggs.positiveOnlyLabel', {
-      defaultMessage: 'Positive Only',
-    }),
-    value: 'positive_only',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.pipelineAggs.serialDifferenceLabel', {
-      defaultMessage: 'Serial Difference',
-    }),
-    value: 'serial_diff',
-  },
-];
-
-const siblingAggs: AggSelectOption[] = [
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.siblingAggs.overallAverageLabel', {
-      defaultMessage: 'Overall Average',
-    }),
-    value: 'avg_bucket',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.siblingAggs.overallMaxLabel', {
-      defaultMessage: 'Overall Max',
-    }),
-    value: 'max_bucket',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.siblingAggs.overallMinLabel', {
-      defaultMessage: 'Overall Min',
-    }),
-    value: 'min_bucket',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.siblingAggs.overallStdDeviationLabel', {
-      defaultMessage: 'Overall Std. Deviation',
-    }),
-    value: 'std_deviation_bucket',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.siblingAggs.overallSumLabel', {
-      defaultMessage: 'Overall Sum',
-    }),
-    value: 'sum_bucket',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.siblingAggs.overallSumOfSquaresLabel', {
-      defaultMessage: 'Overall Sum of Squares',
-    }),
-    value: 'sum_of_squares_bucket',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.siblingAggs.overallVarianceLabel', {
-      defaultMessage: 'Overall Variance',
-    }),
-    value: 'variance_bucket',
-  },
-];
-
-const specialAggs: AggSelectOption[] = [
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.specialAggs.seriesAggLabel', {
-      defaultMessage: 'Series Agg',
-    }),
-    value: 'series_agg',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.specialAggs.mathLabel', {
-      defaultMessage: 'Math',
-    }),
-    value: 'math',
-  },
-];
-
-const FILTER_RATIO_AGGS = [
-  'avg',
-  'cardinality',
-  'count',
-  'positive_rate',
-  'max',
-  'min',
-  'sum',
-  'value_count',
-];
-
-const HISTOGRAM_AGGS = ['avg', 'count', 'sum', 'min', 'max', 'value_count'];
+const {
+  metric: metricAggs,
+  parent_pipeline: pipelineAggs,
+  sibling_pipeline: siblingAggs,
+  special: specialAggs,
+} = getAggsByType(mapAggToSelectOption);
 
 const allAggOptions = [...metricAggs, ...pipelineAggs, ...siblingAggs, ...specialAggs];
 
 function filterByPanelType(panelType: string) {
-  return (agg: AggSelectOption) => {
-    if (panelType === 'table') return agg.value !== 'series_agg';
-    return true;
-  };
+  return (agg: AggSelectOption) =>
+    panelType === 'table' ? agg.value !== TSVB_METRIC_TYPES.SERIES_AGG : true;
 }
 
 interface AggSelectUiProps {
@@ -260,9 +59,13 @@ export function AggSelect(props: AggSelectUiProps) {
   if (panelType === 'metrics') {
     options = metricAggs;
   } else if (panelType === 'filter_ratio') {
-    options = metricAggs.filter((m) => FILTER_RATIO_AGGS.includes(`${m.value}`));
+    options = getAggsByPredicate({ meta: { isFilterRatioSupported: true } }).map(
+      mapAggToSelectOption
+    );
   } else if (panelType === 'histogram') {
-    options = metricAggs.filter((m) => HISTOGRAM_AGGS.includes(`${m.value}`));
+    options = getAggsByPredicate({ meta: { isHistogramSupported: true } }).map(
+      mapAggToSelectOption
+    );
   } else {
     const disableSiblingAggs = (agg: AggSelectOption) => ({
       ...agg,

@@ -34,7 +34,7 @@ import { migrateLegacyQuery } from '../../../helpers/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
 import { SavedSearch } from '../../../../saved_searches';
-import { handleSourceColumnState } from '../../../angular/helpers';
+import { handleSourceColumnState } from '../../../helpers/state_helpers';
 
 export interface AppState {
   /**

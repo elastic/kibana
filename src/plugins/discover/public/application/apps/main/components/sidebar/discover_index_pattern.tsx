@@ -23,7 +23,7 @@ export interface DiscoverIndexPatternProps {
    */
   onChangeIndexPattern: (id: string) => void;
   /**
-   * currently selected index pattern, due to angular issues it's undefined at first rendering
+   * currently selected index pattern
    */
   selectedIndexPattern: IndexPattern;
 }
