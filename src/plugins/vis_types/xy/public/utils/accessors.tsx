@@ -37,6 +37,15 @@ export const isSimpleField = (format: Aspect['format']) => {
   return simpleFormats.includes(format?.id ?? '');
 };
 
+const applyFormatter = (aspect: Aspect, value: unknown, shouldApply: boolean = false) =>
+  shouldApply ? aspect.formatter?.(value) ?? value : value;
+
+export const applyFormatterIfSimpleField = (aspect: Aspect, value: unknown) =>
+  applyFormatter(aspect, value, isSimpleField(aspect.format));
+
+export const applyFormatterIfComplexField = (aspect: Aspect, value: unknown) =>
+  applyFormatter(aspect, value, !isSimpleField(aspect.format));
+
 /**
  * Returns accessor function for complex accessor types
  * @param aspect
@@ -49,7 +58,6 @@ export const getComplexAccessor = (fieldName: string) => (
   if (!aspect.accessor) {
     return;
   }
-  const formatter = aspect.formatter;
   const accessor = aspect.accessor;
 
   const fn: AccessorFn = (d) => {
@@ -57,7 +65,7 @@ export const getComplexAccessor = (fieldName: string) => (
     if (v === undefined) {
       return;
     }
-    return isSimpleField(aspect.format) ? v : formatter?.(v) ?? v;
+    return applyFormatterIfComplexField(aspect, v);
   };
 
   fn.fieldName = getFieldName(fieldName, index);

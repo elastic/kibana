@@ -17,9 +17,9 @@ import {
 } from '@elastic/charts';
 
 import { Aspects } from '../types';
+import { applyFormatterIfSimpleField, COMPLEX_SPLIT_ACCESSOR } from '../utils/accessors';
 
 import './_detailed_tooltip.scss';
-import { COMPLEX_SPLIT_ACCESSOR, isSimpleField } from '../utils/accessors';
 
 interface TooltipData {
   label: string;
@@ -37,10 +37,7 @@ export const getTooltipData = (
     data.push({
       label: aspects.x.title,
       // already formatted while executing accessor on such a complex field type as `*_range`
-      value:
-        isSimpleField(aspects.x.format) && aspects.x.formatter
-          ? aspects.x.formatter(header.value)
-          : `${header.value}`,
+      value: `${applyFormatterIfSimpleField(aspects.x, header.value)}`,
     });
   }
 
@@ -50,20 +47,14 @@ export const getTooltipData = (
   if (yAccessor) {
     data.push({
       label: yAccessor.title,
-      value:
-        isSimpleField(yAccessor.format) && yAccessor.formatter
-          ? yAccessor.formatter(value.value)
-          : `${value.value}`,
+      value: `${applyFormatterIfSimpleField(yAccessor, value.value)}`,
     });
   }
 
   if (aspects.z && !isNil(value.markValue)) {
     data.push({
       label: aspects.z.title,
-      value:
-        isSimpleField(aspects.z.format) && aspects.z.formatter
-          ? aspects.z.formatter(value.markValue)
-          : `${value.markValue}`,
+      value: `${applyFormatterIfSimpleField(aspects.z, value.markValue)}`,
     });
   }
 
