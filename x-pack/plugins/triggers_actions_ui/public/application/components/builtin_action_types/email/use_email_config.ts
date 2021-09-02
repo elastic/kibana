@@ -16,7 +16,7 @@ export function useEmailConfig(
   currentService: string | undefined,
   editActionConfig: (property: string, value: unknown) => void
 ) {
-  const [emailServiceConfigurable, setEmailServiceConfigurable] = useState<boolean>(true);
+  const [emailServiceConfigurable, setEmailServiceConfigurable] = useState<boolean>(false);
   const [emailService, setEmailService] = useState<string | undefined>(undefined);
 
   const getEmailServiceConfig = useCallback(

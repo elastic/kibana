@@ -111,10 +111,6 @@ describe('useEmailConfig', () => {
       secure: true,
     });
     const { result, waitForNextUpdate } = renderUseEmailConfigHook('gmail');
-    await act(async () => {
-      await waitForNextUpdate();
-    });
-
     expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/gmail');
     expect(editActionConfig).not.toHaveBeenCalled();
     expect(result.current.emailServiceConfigurable).toEqual(false);
