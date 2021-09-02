@@ -1083,11 +1083,16 @@ export const removeMarkdownLessFromTSVB: SavedObjectMigrationFn<any, any> = (doc
 
       if (params.type === 'markdown') {
         // remove less
-        delete params.markdown_less;
+        if (params.markdown_less) {
+          delete params.markdown_less;
+        }
+
         // remove markdown id from css
-        params.markdown_css = params.markdown_css
-          .replace(new RegExp(`#markdown-${params.id}`, 'g'), '')
-          .trim();
+        if (params.markdown_css) {
+          params.markdown_css = params.markdown_css
+            .replace(new RegExp(`#markdown-${params.id}`, 'g'), '')
+            .trim();
+        }
       }
 
       return {
