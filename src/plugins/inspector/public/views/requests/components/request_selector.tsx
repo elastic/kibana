@@ -22,6 +22,10 @@ import {
   EuiPopover,
   EuiTextColor,
   EuiToolTip,
+  EuiFormLabel,
+  EuiSuperSelect,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
 import { RequestStatus } from '../../../../common/adapters';
@@ -34,7 +38,7 @@ interface RequestSelectorState {
 interface RequestSelectorProps {
   requests: Request[];
   selectedRequest: Request;
-  onRequestChanged: Function;
+  onRequestChanged: (request: Request) => void;
 }
 
 export class RequestSelector extends Component<RequestSelectorProps, RequestSelectorState> {
@@ -129,14 +133,43 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
   }
 
   render() {
-    const { selectedRequest, requests } = this.props;
+    const { onRequestChanged, selectedRequest, requests } = this.props;
+
+    const options = requests.map((request) => {
+      return { value: request.id, inputDisplay: request.name };
+    });
+    const handleChange = (id: string) => {
+      const request = requests.find((req) => req.id === id);
+      if (request) {
+        onRequestChanged(request);
+      }
+    };
+    const handleComboBoxChange = (o: Array<EuiComboBoxOptionOption<Request>>) => {
+      const value = o[0].value;
+      if (value) {
+        onRequestChanged(value);
+      }
+    };
+    const comboBoxOptions = requests.map((request) => {
+      return { value: request, label: request.name, key: request.id };
+    });
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <strong>
+          <EuiFormLabel>
             <FormattedMessage id="inspector.requests.requestLabel" defaultMessage="Request:" />
-          </strong>
+            <EuiSuperSelect
+              onChange={handleChange}
+              options={options}
+              valueOfSelected={selectedRequest.id}
+            />
+            <EuiComboBox
+              onChange={handleComboBoxChange}
+              options={comboBoxOptions}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           {requests.length <= 1 && (
