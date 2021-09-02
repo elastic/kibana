@@ -49,8 +49,8 @@ export async function* fetchTransactionDurationHistograms(
         ranges,
         fractions,
         totalDocCount,
-        item.field,
-        item.value
+        item.fieldName,
+        item.fieldValue
       );
 
       if (state.getIsCancelled()) {
@@ -68,8 +68,8 @@ export async function* fetchTransactionDurationHistograms(
           esClient,
           params,
           histogramRangeSteps,
-          item.field,
-          item.value
+          item.fieldName,
+          item.fieldValue
         );
         yield {
           ...item,
@@ -85,7 +85,7 @@ export async function* fetchTransactionDurationHistograms(
       // just add the error to the internal log and check if we'd want to set the
       // cross-cluster search compatibility warning to true.
       addLogMessage(
-        `Failed to fetch correlation/kstest for '${item.field}/${item.value}'`,
+        `Failed to fetch correlation/kstest for '${item.fieldName}/${item.fieldValue}'`,
         JSON.stringify(e)
       );
       if (params?.index.includes(':')) {

@@ -21,8 +21,8 @@ import { getRequestBase } from './get_request_base';
 export type FieldName = string;
 
 interface FieldValuePair {
-  field: FieldName;
-  value: string;
+  fieldName: FieldName;
+  fieldValue: string;
 }
 export type FieldValuePairs = FieldValuePair[];
 
@@ -67,8 +67,8 @@ const fetchTransactionDurationFieldTerms = async (
     }>)?.buckets;
     if (buckets?.length >= 1) {
       return buckets.map((d) => ({
-        field: fieldName,
-        value: d.key,
+        fieldName,
+        fieldValue: d.key,
       }));
     }
   } catch (e) {

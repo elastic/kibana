@@ -18,7 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { APM_SEARCH_STRATEGIES } from '../../../../../common/search_strategies/constants';
+import {
+  APM_SEARCH_STRATEGIES,
+  DEFAULT_PERCENTILE_THRESHOLD,
+} from '../../../../../common/search_strategies/constants';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
 import {
@@ -28,7 +31,6 @@ import {
 import { useUiTracker } from '../../../../../../observability/public';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
 
-const DEFAULT_PERCENTILE_THRESHOLD = 95;
 // Enforce min height so it's consistent across all tabs on the same level
 // to prevent "flickering" behavior
 const MIN_TAB_TITLE_HEIGHT = 56;

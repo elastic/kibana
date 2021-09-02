@@ -30,9 +30,9 @@ const totalDocCount = 1234;
 const histogramRangeSteps = [1, 2, 4, 5];
 
 const fieldValuePairs = [
-  { field: 'the-field-name-1', value: 'the-field-value-1' },
-  { field: 'the-field-name-2', value: 'the-field-value-2' },
-  { field: 'the-field-name-2', value: 'the-field-value-3' },
+  { fieldName: 'the-field-name-1', fieldValue: 'the-field-value-1' },
+  { fieldName: 'the-field-name-2', fieldValue: 'the-field-value-2' },
+  { fieldName: 'the-field-name-2', fieldValue: 'the-field-value-3' },
 ];
 
 describe('query_histograms_generator', () => {

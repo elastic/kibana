@@ -22,6 +22,13 @@ export interface FailedTransactionsCorrelation {
   successPercentage: number;
 }
 
+// Basic type guard for array of FailedTransactionsCorrelation
+export const isFailedTransactionsCorrelations = (
+  arg: unknown
+): arg is FailedTransactionsCorrelation[] => {
+  return Array.isArray(arg) && arg.length > 0;
+};
+
 export type FailedTransactionsCorrelationsImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
 
 export interface CorrelationsTerm {

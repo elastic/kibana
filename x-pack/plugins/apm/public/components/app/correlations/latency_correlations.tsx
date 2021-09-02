@@ -29,7 +29,14 @@ import {
 } from '../../../../../observability/public';
 
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
-import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
+import {
+  APM_SEARCH_STRATEGIES,
+  DEFAULT_PERCENTILE_THRESHOLD,
+} from '../../../../common/search_strategies/constants';
+import {
+  isLatencyCorrelations,
+  LatencyCorrelation,
+} from '../../../../common/search_strategies/latency_correlations/types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -45,16 +52,6 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-
-const DEFAULT_PERCENTILE_THRESHOLD = 95;
-
-interface MlCorrelationsTerms {
-  correlation: number;
-  ksTest: number;
-  fieldName: string;
-  fieldValue: string;
-  duplicatedFields?: string[];
-}
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {
@@ -100,23 +97,21 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
-  ] = useState<MlCorrelationsTerms | null>(null);
+  ] = useState<LatencyCorrelation | null>(null);
 
   const selectedHistogram = useMemo(() => {
-    let selected =
-      Array.isArray(latencyCorrelations) && latencyCorrelations.length > 0
-        ? latencyCorrelations[0]
-        : undefined;
+    let selected = isLatencyCorrelations(latencyCorrelations)
+      ? latencyCorrelations[0]
+      : undefined;
 
     if (
-      Array.isArray(latencyCorrelations) &&
-      latencyCorrelations.length > 0 &&
+      isLatencyCorrelations(latencyCorrelations) &&
       selectedSignificantTerm !== null
     ) {
       selected = latencyCorrelations.find(
         (h) =>
-          h.field === selectedSignificantTerm.fieldName &&
-          h.value === selectedSignificantTerm.fieldValue
+          h.fieldName === selectedSignificantTerm.fieldName &&
+          h.fieldValue === selectedSignificantTerm.fieldValue
       );
     }
     return selected;
@@ -126,7 +121,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
   const mlCorrelationColumns: Array<
-    EuiBasicTableColumn<MlCorrelationsTerms>
+    EuiBasicTableColumn<LatencyCorrelation>
   > = useMemo(
     () => [
       {
@@ -194,7 +189,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             ),
             icon: 'plusInCircle',
             type: 'icon',
-            onClick: (term: MlCorrelationsTerms) => {
+            onClick: (term: LatencyCorrelation) => {
               push(history, {
                 query: {
                   kuery: `${term.fieldName}:"${term.fieldValue}"`,
@@ -215,7 +210,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             ),
             icon: 'minusInCircle',
             type: 'icon',
-            onClick: (term: MlCorrelationsTerms) => {
+            onClick: (term: LatencyCorrelation) => {
               push(history, {
                 query: {
                   kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
@@ -235,7 +230,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     [history, onFilter, trackApmEvent]
   );
 
-  const [sortField, setSortField] = useState<keyof MlCorrelationsTerms>(
+  const [sortField, setSortField] = useState<keyof LatencyCorrelation>(
     'correlation'
   );
   const [sortDirection, setSortDirection] = useState<Direction>('desc');
@@ -248,22 +243,10 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   }, []);
 
   const { histogramTerms, sorting } = useMemo(() => {
-    if (!Array.isArray(latencyCorrelations)) {
+    if (!isLatencyCorrelations(latencyCorrelations)) {
       return { histogramTerms: [], sorting: undefined };
     }
-    const orderedTerms = orderBy(
-      latencyCorrelations.map((d) => {
-        return {
-          fieldName: d.field,
-          fieldValue: d.value,
-          ksTest: d.ksTest,
-          correlation: d.correlation,
-          duplicatedFields: d.duplicatedFields,
-        };
-      }),
-      sortField,
-      sortDirection
-    );
+    const orderedTerms = orderBy(latencyCorrelations, sortField, sortDirection);
 
     return {
       histogramTerms: orderedTerms,
@@ -272,7 +255,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           field: sortField,
           direction: sortDirection,
         },
-      } as EuiTableSortingType<MlCorrelationsTerms>,
+      } as EuiTableSortingType<LatencyCorrelation>,
     };
   }, [latencyCorrelations, sortField, sortDirection]);
 
@@ -338,7 +321,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
       <div data-test-subj="apmCorrelationsTable">
         {(isRunning || histogramTerms.length > 0) && (
-          <CorrelationsTable<MlCorrelationsTerms>
+          <CorrelationsTable<LatencyCorrelation>
             columns={mlCorrelationColumns}
             significantTerms={histogramTerms}
             status={isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
@@ -346,8 +329,8 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             selectedTerm={
               selectedHistogram !== undefined
                 ? {
-                    fieldName: selectedHistogram.field,
-                    fieldValue: selectedHistogram.value,
+                    fieldName: selectedHistogram.fieldName,
+                    fieldValue: selectedHistogram.fieldValue,
                   }
                 : undefined
             }

@@ -10,3 +10,5 @@ export const APM_SEARCH_STRATEGIES = {
   APM_LATENCY_CORRELATIONS: 'apmLatencyCorrelations',
 } as const;
 export type ApmSearchStrategies = typeof APM_SEARCH_STRATEGIES[keyof typeof APM_SEARCH_STRATEGIES];
+
+export const DEFAULT_PERCENTILE_THRESHOLD = 95;

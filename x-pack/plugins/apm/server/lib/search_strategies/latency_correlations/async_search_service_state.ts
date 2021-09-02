@@ -72,7 +72,7 @@ export const asyncSearchServiceStateProvider = () => {
   }
 
   const latencyCorrelations: LatencyCorrelation[] = [];
-  function addValue(d: LatencyCorrelation) {
+  function addLatencyCorrelation(d: LatencyCorrelation) {
     latencyCorrelations.push(d);
   }
 
@@ -94,7 +94,7 @@ export const asyncSearchServiceStateProvider = () => {
   }
 
   return {
-    addValue,
+    addLatencyCorrelation,
     getIsCancelled,
     getOverallProgress,
     getState,

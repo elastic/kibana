@@ -214,7 +214,7 @@ export const latencyCorrelationsAsyncSearchServiceProvider: LatencyCorrelationsA
         fieldValuePairs
       )) {
         if (item !== undefined) {
-          state.addValue(item);
+          state.addLatencyCorrelation(item);
         }
         loadedHistograms++;
         state.setProgress({

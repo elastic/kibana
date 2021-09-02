@@ -11,13 +11,13 @@ describe('correlations', () => {
   describe('getPrioritizedFieldValuePairs', () => {
     it('returns fields without prioritization in the same order', () => {
       const fieldValuePairs = [
-        { field: 'the-field-1', value: 'the-value-1' },
-        { field: 'the-field-2', value: 'the-value-2' },
+        { fieldName: 'the-field-1', fieldValue: 'the-value-1' },
+        { fieldName: 'the-field-2', fieldValue: 'the-value-2' },
       ];
       const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(
         fieldValuePairs
       );
-      expect(prioritziedFieldValuePairs.map((d) => d.field)).toEqual([
+      expect(prioritziedFieldValuePairs.map((d) => d.fieldName)).toEqual([
         'the-field-1',
         'the-field-2',
       ]);
@@ -25,13 +25,13 @@ describe('correlations', () => {
 
     it('returns fields with already sorted prioritization in the same order', () => {
       const fieldValuePairs = [
-        { field: 'service.version', value: 'the-value-1' },
-        { field: 'the-field-2', value: 'the-value-2' },
+        { fieldName: 'service.version', fieldValue: 'the-value-1' },
+        { fieldName: 'the-field-2', fieldValue: 'the-value-2' },
       ];
       const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(
         fieldValuePairs
       );
-      expect(prioritziedFieldValuePairs.map((d) => d.field)).toEqual([
+      expect(prioritziedFieldValuePairs.map((d) => d.fieldName)).toEqual([
         'service.version',
         'the-field-2',
       ]);
@@ -39,13 +39,13 @@ describe('correlations', () => {
 
     it('returns fields with unsorted prioritization in the corrected order', () => {
       const fieldValuePairs = [
-        { field: 'the-field-1', value: 'the-value-1' },
-        { field: 'service.version', value: 'the-value-2' },
+        { fieldName: 'the-field-1', fieldValue: 'the-value-1' },
+        { fieldName: 'service.version', fieldValue: 'the-value-2' },
       ];
       const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(
         fieldValuePairs
       );
-      expect(prioritziedFieldValuePairs.map((d) => d.field)).toEqual([
+      expect(prioritziedFieldValuePairs.map((d) => d.fieldName)).toEqual([
         'service.version',
         'the-field-1',
       ]);
@@ -53,14 +53,14 @@ describe('correlations', () => {
 
     it('considers prefixes when sorting', () => {
       const fieldValuePairs = [
-        { field: 'the-field-1', value: 'the-value-1' },
-        { field: 'service.version', value: 'the-value-2' },
-        { field: 'cloud.the-field-3', value: 'the-value-3' },
+        { fieldName: 'the-field-1', fieldValue: 'the-value-1' },
+        { fieldName: 'service.version', fieldValue: 'the-value-2' },
+        { fieldName: 'cloud.the-field-3', fieldValue: 'the-value-3' },
       ];
       const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(
         fieldValuePairs
       );
-      expect(prioritziedFieldValuePairs.map((d) => d.field)).toEqual([
+      expect(prioritziedFieldValuePairs.map((d) => d.fieldName)).toEqual([
         'service.version',
         'cloud.the-field-3',
         'the-field-1',

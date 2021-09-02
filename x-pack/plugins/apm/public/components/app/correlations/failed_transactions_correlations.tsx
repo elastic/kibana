@@ -31,7 +31,10 @@ import {
 } from '../../../../../observability/public';
 
 import { asPercent } from '../../../../common/utils/formatters';
-import type { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
+import {
+  isFailedTransactionsCorrelations,
+  FailedTransactionsCorrelation,
+} from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -80,8 +83,7 @@ export function FailedTransactionsCorrelations({
 
   const selectedTerm = useMemo(() => {
     if (selectedSignificantTerm) return selectedSignificantTerm;
-    return Array.isArray(failedTransactionsCorrelations) &&
-      failedTransactionsCorrelations.length > 0
+    return isFailedTransactionsCorrelations(failedTransactionsCorrelations)
       ? failedTransactionsCorrelations[0]
       : undefined;
   }, [selectedSignificantTerm, failedTransactionsCorrelations]);
@@ -333,7 +335,7 @@ export function FailedTransactionsCorrelations({
   }, []);
 
   const { sorting, correlationTerms } = useMemo(() => {
-    if (!Array.isArray(failedTransactionsCorrelations)) {
+    if (!isFailedTransactionsCorrelations(failedTransactionsCorrelations)) {
       return { correlationTerms: [], sorting: undefined };
     }
     const orderedTerms = orderBy(

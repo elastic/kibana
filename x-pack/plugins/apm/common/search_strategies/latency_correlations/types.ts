@@ -12,12 +12,18 @@ import {
 } from '../types';
 
 export interface LatencyCorrelation {
-  histogram: HistogramItem[];
-  value: string;
-  field: string;
   correlation: number;
+  fieldName: string;
+  fieldValue: string;
+  histogram: HistogramItem[];
   ksTest: number;
-  duplicatedFields?: string[];
+}
+
+// Basic type guard for array of LatencyCorrelation
+export function isLatencyCorrelations(
+  arg: unknown
+): arg is LatencyCorrelation[] {
+  return Array.isArray(arg) && arg.length > 0;
 }
 
 export interface AsyncSearchProviderProgress {
