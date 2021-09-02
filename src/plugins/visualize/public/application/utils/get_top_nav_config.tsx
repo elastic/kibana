@@ -295,8 +295,10 @@ export const getTopNavConfig = (
             query: currentState.query,
             vis: currentState.vis,
             linked: currentState.linked,
-            indexPattern: searchParams.indexPattern as string,
-            savedSearchId: searchParams.savedSearchId as string,
+            indexPattern:
+              visInstance.savedSearch?.searchSource?.getField('index')?.id ??
+              (searchParams.indexPattern as string),
+            savedSearchId: visInstance.savedSearch?.id ?? (searchParams.savedSearchId as string),
           };
           // TODO: support sharing in by-value mode
           share.toggleShareContextMenu({
