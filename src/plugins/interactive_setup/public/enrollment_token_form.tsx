@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTextArea,
