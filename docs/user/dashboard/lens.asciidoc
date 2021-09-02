@@ -9,7 +9,7 @@ To create a visualization, drag the data fields you want to visualize to the wor
 With *Lens*, you can:
 
 * Create area, line, and bar charts with layers to display multiple indices and chart types.
-* Change the aggregation function to change how the data displays.
+* Change the aggregation function to change the data in the visualization.
 * Perform math on aggregations using *Formula*.
 * Use time shifts to compare the data in two time intervals, such as month over month.
 * Create custom tables.
