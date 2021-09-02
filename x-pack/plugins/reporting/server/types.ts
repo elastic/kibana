@@ -63,7 +63,7 @@ export { BaseParams, BasePayload };
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
   context: ReportingRequestHandlerContext,
-  request: KibanaRequest<any, any, any, any>
+  request: KibanaRequest
 ) => Promise<JobPayloadType>;
 
 // default fn type for RunTaskFnFactory

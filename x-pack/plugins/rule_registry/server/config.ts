@@ -17,6 +17,9 @@ export const config = {
       legacyMultiTenancy: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
+      indexUpgrade: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
     }),
   }),
 };

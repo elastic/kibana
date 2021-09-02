@@ -15,7 +15,7 @@ import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
 import { ChromeStart } from 'kibana/public';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
-import { Workspace, GraphWorkspaceSavedObject, IndexPatternSavedObject } from '../types';
+import { Workspace } from '../types';
 import { IndexPattern } from '../../../../../src/plugins/data/public';
 
 export interface MockedGraphEnvironment {
@@ -48,11 +48,8 @@ export function createMockGraphStore({
     blocklistedNodes: [],
   } as unknown) as Workspace;
 
-  const savedWorkspace = ({
-    save: jest.fn(),
-  } as unknown) as GraphWorkspaceSavedObject;
-
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
+    basePath: '',
     addBasePath: jest.fn((url: string) => url),
     changeUrl: jest.fn(),
     chrome: ({
@@ -60,15 +57,11 @@ export function createMockGraphStore({
     } as unknown) as ChromeStart,
     createWorkspace: jest.fn(),
     getWorkspace: jest.fn(() => workspaceMock),
-    getSavedWorkspace: jest.fn(() => savedWorkspace),
     indexPatternProvider: {
       get: jest.fn(() =>
         Promise.resolve(({ id: '123', title: 'test-pattern' } as unknown) as IndexPattern)
       ),
     },
-    indexPatterns: [
-      ({ id: '123', attributes: { title: 'test-pattern' } } as unknown) as IndexPatternSavedObject,
-    ],
     I18nContext: jest
       .fn()
       .mockImplementation(({ children }: { children: React.ReactNode }) => children),
@@ -79,12 +72,9 @@ export function createMockGraphStore({
       },
     } as unknown) as NotificationsStart,
     http: {} as HttpStart,
-    notifyAngular: jest.fn(),
+    notifyReact: jest.fn(),
     savePolicy: 'configAndData',
     showSaveModal: jest.fn(),
-    setLiveResponseFields: jest.fn(),
-    setUrlTemplates: jest.fn(),
-    setWorkspaceInitialized: jest.fn(),
     overlays: ({
       openModal: jest.fn(),
     } as unknown) as OverlayStart,
@@ -92,6 +82,7 @@ export function createMockGraphStore({
       find: jest.fn(),
       get: jest.fn(),
     } as unknown) as SavedObjectsClientContract,
+    handleSearchQueryError: jest.fn(),
     ...mockedDepsOverwrites,
   };
   const sagaMiddleware = createSagaMiddleware();
