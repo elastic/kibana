@@ -41,10 +41,14 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         from: new Array<string>(),
         port: new Array<string>(),
         host: new Array<string>(),
+        provider: new Array<string>(),
       };
       const secretsErrors = {
         user: new Array<string>(),
         password: new Array<string>(),
+        clientId: new Array<string>(),
+        clientSecret: new Array<string>(),
+        tenantId: new Array<string>(),
       };
 
       const validationResult = {
@@ -63,25 +67,31 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
       if (!action.config.host) {
         configErrors.host.push(translations.HOST_REQUIRED);
       }
-      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        secretsErrors.user.push(translations.USERNAME_REQUIRED);
+      if (action.config.hasAuth) {
+        if (!action.secrets.user && !action.secrets.password) {
+          if (!action.secrets.clientId) {
+            secretsErrors.clientId.push(translations.USERNAME_REQUIRED);
+          }
+          if (!action.secrets.clientSecret) {
+            secretsErrors.clientSecret.push(translations.USERNAME_REQUIRED);
+          }
+        } else {
+          if (action.secrets.user && !action.secrets.password) {
+            secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER_USED);
+          }
+          if (!action.secrets.user && action.secrets.password) {
+            secretsErrors.user.push(
+              i18n.translate(
+                'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredUserText',
+                {
+                  defaultMessage: 'Username is required when password is used.',
+                }
+              )
+            );
+          }
+        }
       }
-      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        secretsErrors.password.push(translations.PASSWORD_REQUIRED);
-      }
-      if (action.secrets.user && !action.secrets.password) {
-        secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER_USED);
-      }
-      if (!action.secrets.user && action.secrets.password) {
-        secretsErrors.user.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredUserText',
-            {
-              defaultMessage: 'Username is required when password is used.',
-            }
-          )
-        );
-      }
+
       return validationResult;
     },
     validateParams: async (
