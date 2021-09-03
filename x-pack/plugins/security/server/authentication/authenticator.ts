@@ -87,6 +87,7 @@ export interface AuthenticatorOptions {
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
+  getServerBaseURL: () => string;
 }
 
 // Mapping between provider key defined in the config and authentication
@@ -216,6 +217,7 @@ export class Authenticator {
         client: this.options.clusterClient.asInternalUser,
         logger: this.options.loggers.get('tokens'),
       }),
+      getServerBaseURL: this.options.getServerBaseURL,
     };
 
     this.providers = new Map(
