@@ -19,6 +19,7 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
     lists,
     logger,
     mergeStrategy,
+    ignoreFields,
     ruleDataClient,
     version,
     ruleDataService,
@@ -27,6 +28,7 @@ export const createQueryAlertType = (createOptions: CreateRuleOptions) => {
     lists,
     logger,
     mergeStrategy,
+    ignoreFields,
     ruleDataClient,
     ruleDataService,
   });
