@@ -7,6 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 
+import { pick } from 'lodash';
+
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +22,8 @@ import {
   getListItems,
   getListPagination,
   isListLoading,
+  listOfPolicies,
+  mapOfPoliciesById,
 } from '../../../store/selectors';
 
 import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from '../../hooks';
@@ -58,6 +62,7 @@ export const TrustedAppsGrid = memo(() => {
   const isLoading = useTrustedAppsSelector(isListLoading);
   const error = useTrustedAppsSelector(getListErrorMessage);
   const location = useTrustedAppsSelector(getCurrentLocation);
+  const policyListById = useTrustedAppsSelector(mapOfPoliciesById);
 
   const handlePaginationChange: PaginatedContentProps<
     TrustedApp,
@@ -73,8 +78,20 @@ export const TrustedAppsGrid = memo(() => {
 
     return (trustedApp: TrustedApp): ArtifactEntryCardProps<TrustedApp> => {
       if (!cachedCardProps[trustedApp.id]) {
+        let policyNames: ArtifactEntryCardProps['policyNames'];
+
+        if (trustedApp.effectScope.type === 'policy' && trustedApp.effectScope.policies.length) {
+          policyNames = trustedApp.effectScope.policies.reduce<
+            Required<ArtifactEntryCardProps>['policyNames']
+          >((nameMap, policyId) => {
+            nameMap[policyId] = policyListById[policyId]?.name ?? policyId;
+            return nameMap;
+          }, {});
+        }
+
         cachedCardProps[trustedApp.id] = {
           item: trustedApp,
+          policyNames,
           actions: [
             {
               icon: 'controlsHorizontal',
@@ -112,7 +129,7 @@ export const TrustedAppsGrid = memo(() => {
 
       return cachedCardProps[trustedApp.id];
     };
-  }, [dispatch, history, location]);
+  }, [dispatch, history, location, policyListById]);
 
   return (
     <RootWrapper>

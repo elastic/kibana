@@ -30,7 +30,7 @@ export const EffectScope = memo<EffectScopeProps>(({ policies }) => {
   const [icon, label] = useMemo(() => {
     return policies
       ? ['partial', POLICY_EFFECT_SCOPE(policies.length)]
-      : ['global', GLOBAL_EFFECT_SCOPE];
+      : ['globe', GLOBAL_EFFECT_SCOPE];
   }, [policies]);
 
   const effectiveScopeLabel = (
