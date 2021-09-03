@@ -6,11 +6,7 @@
  */
 
 import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
-import {
-  CreateDocSourceResp,
-  IndexSourceMappings,
-  BodySettings,
-} from '../../common/types';
+import { CreateDocSourceResp, IndexSourceMappings, BodySettings } from '../../common/types';
 import { MAPS_NEW_VECTOR_LAYER_META_CREATED_BY } from '../../common/constants';
 import { IndexPatternsCommonService } from '../../../../../src/plugins/data/server';
 

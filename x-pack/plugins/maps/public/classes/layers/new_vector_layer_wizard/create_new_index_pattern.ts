@@ -6,10 +6,7 @@
  */
 
 import { getHttp } from '../../../kibana_services';
-import {
-  CreateDocSourceResp,
-  IndexSourceMappings,
-} from '../../../../common/types';
+import { CreateDocSourceResp, IndexSourceMappings } from '../../../../common/types';
 import { INDEX_SOURCE_API_PATH } from '../../../../common/constants';
 
 export const createNewIndexAndPattern = async ({
