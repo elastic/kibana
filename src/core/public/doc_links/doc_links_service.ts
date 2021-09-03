@@ -33,6 +33,7 @@ export class DocLinksService {
         apm: {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
+          customLinks: `${KIBANA_DOCS}custom-links.html`,
         },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
