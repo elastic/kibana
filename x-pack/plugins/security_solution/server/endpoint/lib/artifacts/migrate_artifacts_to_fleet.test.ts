@@ -15,14 +15,22 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from 'kibana/server';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { migrateArtifactsToFleet } from './migrate_artifacts_to_fleet';
 import { createEndpointArtifactClientMock } from '../../services/artifacts/mocks';
 import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
+import { InternalArtifactCompleteSchema } from '../../schemas';
+import {
+  generateArtifactEsGetSingleHitMock,
+  generateEsApiResponseMock,
+} from '../../../../../fleet/server/services/artifacts/mocks';
+import { relativeDownloadUrlFromArtifact } from '../../../../../fleet/server';
 
 describe('When migrating artifacts to fleet', () => {
   let soClient: jest.Mocked<SavedObjectsClient>;
   let logger: jest.Mocked<Logger>;
   let artifactClient: ReturnType<typeof createEndpointArtifactClientMock>;
+  let soArtifactEntry: InternalArtifactCompleteSchema;
 
   const createSoFindResult = (
     soHits: SavedObjectsFindResult[] = [],
@@ -41,6 +49,17 @@ describe('When migrating artifacts to fleet', () => {
     soClient = savedObjectsClientMock.create() as jest.Mocked<SavedObjectsClient>;
     logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
     artifactClient = createEndpointArtifactClientMock();
+    soArtifactEntry = await getInternalArtifactMock('windows', 'v1');
+
+    artifactClient._esClient.create.mockImplementation(() => {
+      return elasticsearchServiceMock.createSuccessTransportRequestPromise(
+        generateArtifactEsGetSingleHitMock({
+          ...soArtifactEntry,
+          packageName: 'endpoint',
+          relative_url: relativeDownloadUrlFromArtifact(soArtifactEntry),
+        })
+      );
+    });
 
     soClient.find.mockResolvedValue(createSoFindResult([], 0)).mockResolvedValueOnce(
       createSoFindResult([
@@ -49,7 +68,7 @@ describe('When migrating artifacts to fleet', () => {
           type: '',
           id: 'abc123',
           references: [],
-          attributes: await getInternalArtifactMock('windows', 'v1'),
+          attributes: soArtifactEntry,
         },
       ])
     );
@@ -68,6 +87,20 @@ describe('When migrating artifacts to fleet', () => {
     await migrateArtifactsToFleet(soClient, artifactClient, logger);
     expect(artifactClient.createArtifact).toHaveBeenCalled();
     expect(soClient.delete).toHaveBeenCalled();
+  });
+
+  it('should create artifct in fleet with attributes that match the SO one', async () => {
+    await migrateArtifactsToFleet(soClient, artifactClient, logger);
+
+    expect(artifactClient.createArtifact.mock.results[0].value).resolves.toEqual(
+      expect.objectContaining({
+        ...soArtifactEntry,
+        compressionAlgorithm: 'zlib',
+      })
+    );
+
+    // expect(artifactClient.createArtifact).toHaveBeenCalled();
+    // expect(soClient.delete).toHaveBeenCalled();
   });
 
   it('should ignore 404 responses for SO delete (multi-node kibana setup)', async () => {
