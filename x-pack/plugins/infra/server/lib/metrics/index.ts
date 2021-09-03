@@ -91,12 +91,14 @@ export const query = async (
     return {
       series: groupings.buckets.map((bucket) => {
         const keys = Object.values(bucket.key);
-        return convertHistogramBucketsToTimeseries(
+        const metricsetNames = bucket.metricsets.buckets.map((m) => m.key);
+        const timeseries = convertHistogramBucketsToTimeseries(
           keys,
           options,
           bucket.histogram.buckets,
           bucketSize * 1000
         );
+        return { ...timeseries, metricsets: metricsetNames };
       }),
       info: {
         afterKey: returnAfterKey ? afterKey : null,
