@@ -62,6 +62,18 @@ EOF
 GITHUB_TOKEN=$(vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
 export GITHUB_TOKEN
 
+# Setup Failed Test Reporter Elasticsearch credentials
+{
+  TEST_FAILURES_ES_CLOUD_ID=$(vault read -field=cloud_id secret/kibana-issues/dev/failed_tests_reporter_es)
+  export TEST_FAILURES_ES_CLOUD_ID
+
+  TEST_FAILURES_ES_USERNAME=$(vault read -field=username secret/kibana-issues/dev/failed_tests_reporter_es)
+  export TEST_FAILURES_ES_USERNAME
+
+  TEST_FAILURES_ES_PASSWORD=$(vault read -field=password secret/kibana-issues/dev/failed_tests_reporter_es)
+  export TEST_FAILURES_ES_PASSWORD
+}
+
 # By default, all steps should set up these things to get a full environment before running
 # It can be skipped for pipeline upload steps though, to make job start time a little faster
 if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
