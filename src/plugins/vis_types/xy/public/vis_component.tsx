@@ -345,6 +345,12 @@ const VisComponent = (props: VisComponentProps) => {
     [getSeriesName, legendPosition, props.uiState, setColor, visParams.palette.name]
   );
 
+  const splitChartDimension = visParams.dimensions.splitColumn
+    ? visData.columns[visParams.dimensions.splitColumn[0].accessor]
+    : visParams.dimensions.splitRow
+    ? visData.columns[visParams.dimensions.splitRow[0].accessor]
+    : undefined;
+
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle
@@ -356,6 +362,7 @@ const VisComponent = (props: VisComponentProps) => {
         <ChartSplitter
           splitColumnAccessor={splitChartColumnAccessor}
           splitRowAccessor={splitChartRowAccessor}
+          splitDimension={splitChartDimension}
         />
         <XYSettings
           {...config}
