@@ -552,7 +552,7 @@ describe('embeddable', () => {
 
     expect(expressionRenderer.mock.calls[0][0]).toEqual(
       expect.objectContaining({
-        noInteractivity: true,
+        interactive: false,
         renderMode: 'view',
       })
     );

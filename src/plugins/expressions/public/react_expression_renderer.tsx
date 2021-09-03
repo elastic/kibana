@@ -171,7 +171,7 @@ export const ReactExpressionRenderer = ({
   }, [
     hasCustomRenderErrorHandler,
     onEvent,
-    expressionLoaderOptions.noInteractivity,
+    expressionLoaderOptions.interactive,
     expressionLoaderOptions.renderMode,
     expressionLoaderOptions.syncColors,
   ]);

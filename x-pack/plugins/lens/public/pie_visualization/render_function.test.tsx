@@ -302,10 +302,10 @@ describe('PieVisualization component', () => {
       `);
     });
 
-    test('does not set click listener on noInteractivity mode', () => {
+    test('does not set click listener on non-interactive mode', () => {
       const defaultArgs = getDefaultArgs();
       const component = shallow(
-        <PieComponent args={{ ...args }} {...defaultArgs} noInteractivity />
+        <PieComponent args={{ ...args }} {...defaultArgs} interactive={false} />
       );
       expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
     });

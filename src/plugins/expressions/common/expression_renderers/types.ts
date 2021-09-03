@@ -74,7 +74,7 @@ export interface IInterpreterRenderHandlers {
   /**
    * The chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing.
    */
-  isNoInteractivity: () => boolean;
+  isInteractive: () => boolean;
 
   isSyncColorsEnabled: () => boolean;
   /**

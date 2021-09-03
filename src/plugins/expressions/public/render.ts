@@ -21,7 +21,7 @@ export interface ExpressionRenderHandlerParams {
   onRenderError?: RenderErrorHandlerFnType;
   renderMode?: RenderMode;
   syncColors?: boolean;
-  noInteractivity?: boolean;
+  interactive?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
 }
 
@@ -55,7 +55,7 @@ export class ExpressionRenderHandler {
       onRenderError,
       renderMode,
       syncColors,
-      noInteractivity,
+      interactive,
       hasCompatibleActions = async () => false,
     }: ExpressionRenderHandlerParams = {}
   ) {
@@ -97,8 +97,8 @@ export class ExpressionRenderHandler {
       isSyncColorsEnabled: () => {
         return syncColors || false;
       },
-      isNoInteractivity: () => {
-        return noInteractivity ?? false;
+      isInteractive: () => {
+        return interactive ?? true;
       },
       hasCompatibleActions,
     };

@@ -55,7 +55,7 @@ export function PieComponent(
   props: PieExpressionProps & {
     formatFactory: FormatFactory;
     chartsThemeService: ChartsPluginSetup['theme'];
-    noInteractivity?: boolean;
+    interactive?: boolean;
     paletteService: PaletteRegistry;
     onClickValue: (data: LensFilterEvent['data']) => void;
     renderMode: RenderMode;
@@ -290,7 +290,7 @@ export function PieComponent(
           }
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
-          onElementClick={props.noInteractivity ? undefined : onElementClickHandler}
+          onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}
           legendAction={getLegendAction(firstTable, onClickValue)}
           theme={{
             ...chartTheme,

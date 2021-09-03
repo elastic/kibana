@@ -93,7 +93,7 @@ export type XYChartRenderProps = XYChartProps & {
   formatFactory: FormatFactory;
   timeZone: string;
   minInterval: number | undefined;
-  noInteractivity?: boolean;
+  interactive?: boolean;
   onClickValue: (data: LensFilterEvent['data']) => void;
   onSelectRange: (data: LensBrushEvent['data']) => void;
   renderMode: RenderMode;
@@ -161,7 +161,7 @@ export const getXyChartRenderer = (dependencies: {
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
           minInterval={calculateMinInterval(config)}
-          noInteractivity={handlers.isNoInteractivity()}
+          interactive={handlers.isInteractive()}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
           renderMode={handlers.getRenderMode()}
@@ -235,7 +235,7 @@ export function XYChart({
   minInterval,
   onClickValue,
   onSelectRange,
-  noInteractivity,
+  interactive = true,
   syncColors,
 }: XYChartRenderProps) {
   const {
@@ -530,8 +530,8 @@ export function XYChart({
         }}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={noInteractivity ? undefined : brushHandler}
-        onElementClick={noInteractivity ? undefined : clickHandler}
+        onBrushEnd={interactive ? brushHandler : undefined}
+        onElementClick={interactive ? clickHandler : undefined}
         legendAction={getLegendAction(
           filteredLayers,
           data.tables,

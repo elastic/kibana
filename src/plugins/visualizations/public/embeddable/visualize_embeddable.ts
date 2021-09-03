@@ -402,7 +402,7 @@ export class VisualizeEmbeddable
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
       uiState: this.vis.uiState,
-      noInteractivity: this.input.disableTriggers,
+      interactive: !this.input.disableTriggers,
       inspectorAdapters: this.inspectorAdapters,
       executionContext: context,
     };
