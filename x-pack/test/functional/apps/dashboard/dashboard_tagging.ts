@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('adds a new tag to a new Dashboard', async () => {
       await createTagFromDashboard();
-      PageObjects.dashboard.saveDashboard(dashboardTitle, { tags: [dashboardTag] }, false);
+      PageObjects.dashboard.saveDashboard(dashboardTitle, {}, false);
       await verifyTagFromListingPage();
     });
 
