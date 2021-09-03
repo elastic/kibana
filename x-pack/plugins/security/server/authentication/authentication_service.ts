@@ -41,7 +41,7 @@ interface AuthenticationServiceSetupParams {
 }
 
 interface AuthenticationServiceStartParams {
-  http: Pick<HttpServiceStart, 'auth' | 'basePath'>;
+  http: Pick<HttpServiceStart, 'auth' | 'basePath' | 'getServerInfo'>;
   config: ConfigType;
   clusterClient: IClusterClient;
   legacyAuditLogger: SecurityAuditLogger;
@@ -234,6 +234,17 @@ export class AuthenticationService {
       license: this.license,
     });
 
+    /**
+     * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
+     * to construct a server base URL (deprecated, used by the SAML provider only).
+     */
+    const getServerBaseURL = () => {
+      const { protocol, hostname, port } = http.getServerInfo();
+      const serverConfig = { protocol, hostname, port, ...config.public };
+
+      return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
+    };
+
     const getCurrentUser = (request: KibanaRequest) =>
       http.auth.get<AuthenticatedUser>(request).state ?? null;
 
@@ -247,6 +258,7 @@ export class AuthenticationService {
       config: { authc: config.authc },
       getCurrentUser,
       featureUsageService,
+      getServerBaseURL,
       license: this.license,
       session,
     });
