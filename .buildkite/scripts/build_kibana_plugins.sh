@@ -18,5 +18,4 @@ node scripts/build_kibana_platform_plugins \
   --scan-dir "$XPACK_DIR/test/licensing_plugin/plugins" \
   --scan-dir "$XPACK_DIR/test/usage_collection/plugins" \
   --scan-dir "$XPACK_DIR/test/security_functional/fixtures/common" \
-  --scan-dir "$XPACK_DIR/examples" \
-  --verbose
+  --scan-dir "$XPACK_DIR/examples"
