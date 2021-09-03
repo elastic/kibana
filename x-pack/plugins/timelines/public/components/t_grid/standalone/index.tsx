@@ -335,6 +335,17 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     }
   }, [loading]);
 
+  // Clear checkbox selection when new events are fetched
+  useEffect(() => {
+    dispatch(tGridActions.clearSelected({ id: STANDALONE_ID }));
+    dispatch(
+      tGridActions.setTGridSelectAll({
+        id: STANDALONE_ID,
+        selectAll: false,
+      })
+    );
+  }, [nonDeletedEvents, dispatch]);
+
   return (
     <InspectButtonContainer data-test-subj="events-viewer-panel">
       <AlertsTableWrapper>

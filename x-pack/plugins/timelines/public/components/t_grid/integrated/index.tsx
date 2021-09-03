@@ -291,6 +291,17 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     setQuery(inspect, loading, refetch);
   }, [inspect, loading, refetch, setQuery]);
 
+  // Clear checkbox selection when new events are fetched
+  useEffect(() => {
+    dispatch(tGridActions.clearSelected({ id }));
+    dispatch(
+      tGridActions.setTGridSelectAll({
+        id,
+        selectAll: false,
+      })
+    );
+  }, [nonDeletedEvents, dispatch, id]);
+
   return (
     <InspectButtonContainer>
       <StyledEuiPanel
