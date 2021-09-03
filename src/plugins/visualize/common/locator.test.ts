@@ -8,7 +8,6 @@
 
 import { VisualizeLocatorDefinition } from './locator';
 import { FilterStateStore } from '../../data/common';
-import type { PureVisState } from './types';
 
 describe('visualize locator', () => {
   let definition: VisualizeLocatorDefinition;
