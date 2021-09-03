@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SearchBar } from './search_bar';
+export { registerJobInfoRoutes } from './jobs';
