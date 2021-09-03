@@ -318,13 +318,13 @@ export class DynamicStyleProperty<T>
       return null;
     }
 
-    const name = this.getFieldName();
+    const mbFieldName = this.getMbFieldName();
     let min = this._field?.isCountable() ? 0 : Infinity;
     let max = this._field?.isCountable() ? 0 : -Infinity;
     for (let i = 0; i < metaFeatures.length; i++) {
       const fieldMeta = metaFeatures[i].properties;
-      const minField = `aggregations.${name}.min`;
-      const maxField = `aggregations.${name}.max`;
+      const minField = `aggregations.${mbFieldName}.min`;
+      const maxField = `aggregations.${mbFieldName}.max`;
       if (
         fieldMeta &&
         typeof fieldMeta[minField] === 'number' &&

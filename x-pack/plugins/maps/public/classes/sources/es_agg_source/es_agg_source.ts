@@ -99,17 +99,10 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
   }
 
   getAggKey(aggType: AGG_TYPE, fieldName: string): string {
-    if (this.isMvt()) {
-      return getEsMvSourceAggKey({
-        aggType,
-        aggFieldName: fieldName,
-      });
-    } else {
-      return getSourceAggKey({
-        aggType,
-        aggFieldName: fieldName,
-      });
-    }
+    return getSourceAggKey({
+      aggType,
+      aggFieldName: fieldName,
+    });
   }
 
   getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {
@@ -141,14 +134,14 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     return valueAggsDsl;
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(mbProperties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const metricFields = await this.getFields();
     const promises: Array<Promise<ITooltipProperty>> = [];
     metricFields.forEach((metricField) => {
       let value;
-      for (const key in properties) {
-        if (properties.hasOwnProperty(key) && metricField.getName() === key) {
-          value = properties[key];
+      for (const key in mbProperties) {
+        if (mbProperties.hasOwnProperty(key) && metricField.getMbFieldName() === key) {
+          value = mbProperties[key];
           break;
         }
       }

@@ -31,6 +31,13 @@ export class AggField extends CountAggField {
   }
 
   isValid(): boolean {
+    if (
+      (this._source.isMvt() && this._getAggType() === AGG_TYPE.TERMS) ||
+      this._getAggType() === AGG_TYPE.PERCENTILE
+    ) {
+      return false;
+    }
+
     return !!this._esDocField;
   }
 

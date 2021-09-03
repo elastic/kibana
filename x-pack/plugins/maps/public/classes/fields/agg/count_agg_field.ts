@@ -12,7 +12,6 @@ import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../../tooltips/es_agg_tooltip_property';
 import { IESAggField, CountAggFieldParams } from './agg_field_types';
-import { string } from '../../../../../security_solution/public/resolver/models/schema';
 
 // Agg without field. Essentially a count-aggregation.
 export class CountAggField implements IESAggField {
@@ -32,10 +31,6 @@ export class CountAggField implements IESAggField {
     return AGG_TYPE.COUNT;
   }
 
-  getMbFieldName(): string {
-    return this.getName();
-  }
-
   getSource(): IVectorSource {
     return this._source;
   }
@@ -52,6 +47,9 @@ export class CountAggField implements IESAggField {
     return this._source.getAggKey(this._getAggType(), this.getRootName());
   }
 
+  getMbFieldName(): string {
+    return this._source.isMvt() ? '_count' : this.getName();
+  }
 
   getRootName(): string {
     return '';
