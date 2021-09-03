@@ -301,19 +301,12 @@ export interface CoreUsageCounter {
 }
 
 /** @internal */
-export interface InternalCoreUsageDataSetup {
+export interface InternalCoreUsageDataSetup extends CoreUsageDataSetup {
   registerType(
     typeRegistry: ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
   ): void;
   getClient(): CoreUsageStatsClient;
 
-  /**
-   * @internal
-   * API for a usage tracker plugin to inject the {@link CoreUsageCounter} to use
-   * when tracking events.
-   * @param usageCounter {@link CoreUsageCounter}
-   */
-  registerUsageCounter(usageCounter: CoreUsageCounter): void;
   /** @internal {@link CoreIncrementUsageCounter} **/
   incrementUsageCounter: CoreIncrementUsageCounter;
 }
