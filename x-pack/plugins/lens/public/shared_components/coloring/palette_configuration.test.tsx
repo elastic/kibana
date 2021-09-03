@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
@@ -14,6 +14,7 @@ import { ReactWrapper } from 'enzyme';
 import type { CustomPaletteParams } from '../../../common';
 import { applyPaletteParams } from './utils';
 import { CustomizablePalette } from './palette_configuration';
+import { act } from 'react-dom/test-utils';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -128,71 +129,136 @@ describe('palette panel', () => {
       });
     });
 
-    describe('reverse option', () => {
-      beforeEach(() => {
-        props = {
-          activePalette: { type: 'palette', name: 'positive' },
-          palettes: paletteRegistry,
-          setPalette: jest.fn(),
-          dataBounds: { min: 0, max: 100 },
-        };
-      });
+    it('should rewrite the min/max range values on palette change', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
 
-      function toggleReverse(instance: ReactWrapper, checked: boolean) {
-        return instance
-          .find('[data-test-subj="lnsPalettePanel_dynamicColoring_reverse"]')
-          .first()
-          .prop('onClick')!({} as React.MouseEvent);
-      }
+      changePaletteIn(instance, 'custom');
 
-      it('should reverse the colorStops on click', () => {
-        const instance = mountWithIntl(<CustomizablePalette {...props} />);
-
-        toggleReverse(instance, true);
-
-        expect(props.setPalette).toHaveBeenCalledWith(
-          expect.objectContaining({
-            params: expect.objectContaining({
-              reverse: true,
-            }),
-          })
-        );
+      expect(props.setPalette).toHaveBeenCalledWith({
+        type: 'palette',
+        name: 'custom',
+        params: expect.objectContaining({
+          rangeMin: 0,
+          rangeMax: 50,
+        }),
       });
     });
+  });
 
-    describe('custom stops', () => {
-      beforeEach(() => {
-        props = {
-          activePalette: { type: 'palette', name: 'positive' },
-          palettes: paletteRegistry,
-          setPalette: jest.fn(),
-          dataBounds: { min: 0, max: 100 },
-        };
-      });
-      it('should be visible for predefined palettes', () => {
-        const instance = mountWithIntl(<CustomizablePalette {...props} />);
-        expect(
-          instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_stops"]').exists()
-        ).toEqual(true);
+  describe('reverse option', () => {
+    beforeEach(() => {
+      props = {
+        activePalette: { type: 'palette', name: 'positive' },
+        palettes: paletteRegistry,
+        setPalette: jest.fn(),
+        dataBounds: { min: 0, max: 100 },
+      };
+    });
+
+    function toggleReverse(instance: ReactWrapper, checked: boolean) {
+      return instance
+        .find('[data-test-subj="lnsPalettePanel_dynamicColoring_reverse"]')
+        .first()
+        .prop('onClick')!({} as React.MouseEvent);
+    }
+
+    it('should reverse the colorStops on click', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+
+      toggleReverse(instance, true);
+
+      expect(props.setPalette).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            reverse: true,
+          }),
+        })
+      );
+    });
+  });
+
+  describe('percentage / number modes', () => {
+    beforeEach(() => {
+      props = {
+        activePalette: { type: 'palette', name: 'positive' },
+        palettes: paletteRegistry,
+        setPalette: jest.fn(),
+        dataBounds: { min: 5, max: 200 },
+      };
+    });
+
+    it('should switch mode and range boundaries on click', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+      act(() => {
+        instance
+          .find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"]')
+          .find(EuiButtonGroup)
+          .prop('onChange')!('number');
       });
 
-      it('should be visible for custom palettes', () => {
-        const instance = mountWithIntl(
-          <CustomizablePalette
-            {...props}
-            activePalette={{
-              type: 'palette',
+      act(() => {
+        instance
+          .find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"]')
+          .find(EuiButtonGroup)
+          .prop('onChange')!('percent');
+      });
+
+      expect(props.setPalette).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          params: expect.objectContaining({
+            rangeType: 'number',
+            rangeMin: 5,
+            rangeMax: 102.5 /* (200 - (200-5)/ colors.length: 2) */,
+          }),
+        })
+      );
+
+      expect(props.setPalette).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          params: expect.objectContaining({
+            rangeType: 'percent',
+            rangeMin: 0,
+            rangeMax: 50 /* 100 - (100-0)/ colors.length: 2 */,
+          }),
+        })
+      );
+    });
+  });
+
+  describe('custom stops', () => {
+    beforeEach(() => {
+      props = {
+        activePalette: { type: 'palette', name: 'positive' },
+        palettes: paletteRegistry,
+        setPalette: jest.fn(),
+        dataBounds: { min: 0, max: 100 },
+      };
+    });
+    it('should be visible for predefined palettes', () => {
+      const instance = mountWithIntl(<CustomizablePalette {...props} />);
+      expect(
+        instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_stops"]').exists()
+      ).toEqual(true);
+    });
+
+    it('should be visible for custom palettes', () => {
+      const instance = mountWithIntl(
+        <CustomizablePalette
+          {...props}
+          activePalette={{
+            type: 'palette',
+            name: 'custom',
+            params: {
               name: 'custom',
-              params: {
-                name: 'custom',
-              },
-            }}
-          />
-        );
-        expect(
-          instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_stops"]').exists()
-        ).toEqual(true);
-      });
+            },
+          }}
+        />
+      );
+      expect(
+        instance.find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_stops"]').exists()
+      ).toEqual(true);
     });
   });
 });
