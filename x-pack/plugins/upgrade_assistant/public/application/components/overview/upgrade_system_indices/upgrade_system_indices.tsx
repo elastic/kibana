@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useState, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { DocLinksStart } from 'src/core/public';
@@ -23,13 +23,7 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import type { ResponseError } from '../../../lib/api';
-import { SystemIndicesFlyout, SystemIndicesFlyoutProps } from './flyout';
-import { GlobalFlyout } from '../../../../shared_imports';
-import { useAppContext } from '../../../app_context';
-
-const FLYOUT_ID = 'upgradeSystemIndicesFlyout';
-const { useGlobalFlyout } = GlobalFlyout;
+import { useSystemIndicesUpgrade } from './use_system_indices_upgrade';
 
 const i18nTexts = {
   title: i18n.translate('xpack.upgradeAssistant.overview.system_indices.title', {
@@ -86,62 +80,13 @@ const i18nTexts = {
 
 const UpgradeSystemIndicesStep: FunctionComponent = () => {
   const {
-    services: { api },
-  } = useAppContext();
-  const [statusStartUpgrade, setStatusStartUpgrade] = useState<{
-    statusType: string;
-    details?: ResponseError;
-  }>({ statusType: 'idle' });
+    beginSystemIndicesUpgrade,
+    startUpgradeStatus,
+    upgradeStatus,
+    setShowFlyout,
+  } = useSystemIndicesUpgrade();
 
-  const [showFlyout, setShowFlyout] = useState(false);
-  const {
-    data,
-    error,
-    resendRequest: refetchSystemIndicesStatus,
-    isLoading,
-    isInitialRequest,
-  } = api.useLoadSystemIndicesUpgradeStatus();
-
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
-
-  const closeFlyout = useCallback(() => {
-    setShowFlyout(false);
-    removeContentFromGlobalFlyout(FLYOUT_ID);
-  }, [removeContentFromGlobalFlyout]);
-
-  useEffect(() => {
-    if (showFlyout) {
-      addContentToGlobalFlyout<SystemIndicesFlyoutProps>({
-        id: FLYOUT_ID,
-        Component: SystemIndicesFlyout,
-        props: {
-          data: data!,
-          closeFlyout,
-        },
-        flyoutProps: {
-          onClose: closeFlyout,
-        },
-      });
-    }
-  }, [addContentToGlobalFlyout, data, showFlyout, closeFlyout]);
-
-  const beginSystemIndicesUpgrade = useCallback(async () => {
-    const { error: startUpgradeError } = await api.upgradeSystemIndices();
-
-    setStatusStartUpgrade({
-      statusType: startUpgradeError ? 'error' : 'started',
-      details: startUpgradeError ?? undefined,
-    });
-
-    if (!startUpgradeError) {
-      refetchSystemIndicesStatus();
-    }
-  }, [api, refetchSystemIndicesStatus]);
-
-  if (error) {
+  if (upgradeStatus.error) {
     return (
       <EuiCallOut
         title={i18nTexts.loadingError}
@@ -150,16 +95,20 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
         data-test-subj="systemIndicesErrorCallout"
       >
         <p>
-          {error.statusCode} - {error.message}
+          {upgradeStatus.error.statusCode} - {upgradeStatus.error.message}
         </p>
-        <EuiButton color="danger" isLoading={isLoading} onClick={refetchSystemIndicesStatus}>
+        <EuiButton
+          color="danger"
+          isLoading={upgradeStatus.isLoading}
+          onClick={upgradeStatus.resendRequest}
+        >
           {i18nTexts.retryButtonLabel}
         </EuiButton>
       </EuiCallOut>
     );
   }
 
-  if (data?.upgrade_status === 'NO_UPGRADE_NEEDED') {
+  if (upgradeStatus.data?.upgrade_status === 'NO_UPGRADE_NEEDED') {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -174,19 +123,19 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
     );
   }
 
-  const isButtonDisabled = isInitialRequest && isLoading;
-  const isUpgrading = data?.upgrade_status === 'IN_PROGRESS';
+  const isButtonDisabled = upgradeStatus.isInitialRequest && upgradeStatus.isLoading;
+  const isUpgrading = upgradeStatus.data?.upgrade_status === 'IN_PROGRESS';
 
   return (
     <>
-      {statusStartUpgrade.statusType === 'error' && (
+      {startUpgradeStatus.statusType === 'error' && (
         <>
           <EuiCallOut
             size="s"
             color="danger"
             iconType="alert"
-            title={`${statusStartUpgrade.details!.statusCode} - ${
-              statusStartUpgrade.details!.message
+            title={`${startUpgradeStatus.details!.statusCode} - ${
+              startUpgradeStatus.details!.message
             }`}
           />
           <EuiSpacer size="m" />
