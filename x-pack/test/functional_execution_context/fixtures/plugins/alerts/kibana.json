@@ -1,0 +1,14 @@
+{
+  "id": "alertsFixtures",
+  "owner": {
+    "name": "Core team",
+    "githubTeam": "kibana-core"
+  },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack"],
+  "requiredPlugins": ["taskManager", "features", "actions", "alerting"],
+  "optionalPlugins": ["security", "spaces"],
+  "server": true,
+  "ui": false
+}

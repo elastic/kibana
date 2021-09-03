@@ -5,10 +5,22 @@
  * 2.0.
  */
 import Path from 'path';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { logFilePath } from './test_utils';
+
+const alertTestPlugin = Path.resolve(__dirname, './fixtures/plugins/alerts');
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../../test/functional/config'));
+
+  const servers = {
+    ...functionalConfig.get('servers'),
+    elasticsearch: {
+      ...functionalConfig.get('servers.elasticsearch'),
+      protocol: 'https',
+    },
+  };
 
   return {
     ...functionalConfig.getAll(),
@@ -17,14 +29,22 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Execution Context Functional Tests',
     },
+    servers,
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      ssl: true,
+    },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${alertTestPlugin}`,
+        `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
+        `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
 
         '--execution_context.enabled=true',
         '--logging.appenders.file.type=file',
-        `--logging.appenders.file.fileName=${Path.resolve(__dirname, './kibana.log')}`,
+        `--logging.appenders.file.fileName=${logFilePath}`,
         '--logging.appenders.file.layout.type=json',
 
         '--logging.loggers[0].name=elasticsearch.query',
