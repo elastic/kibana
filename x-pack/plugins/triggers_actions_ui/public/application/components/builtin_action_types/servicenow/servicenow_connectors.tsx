@@ -32,6 +32,8 @@ import { isRESTApiError } from './helpers';
 import { InstallationCallout } from './installation_callout';
 import { MigrationConfirmationModal } from './migration_confirmation_modal';
 import { updateActionConnector } from '../../../lib/action_connector_api';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ENABLE_NEW_SN_ITSM_CONNECTOR } from '../../../../../../actions/server/constants/connectors';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
@@ -100,7 +102,7 @@ const ServiceNowConnectorFields: React.FC<
   }, [action, fetchAppInfo]);
 
   const beforeActionConnectorSave = useCallback(async () => {
-    if (!isLegacy) {
+    if (ENABLE_NEW_SN_ITSM_CONNECTOR && !isLegacy) {
       await getApplicationInfo();
     }
   }, [getApplicationInfo, isLegacy]);
@@ -163,8 +165,8 @@ const ServiceNowConnectorFields: React.FC<
           hasErrors={hasErrorsOrEmptyFields}
         />
       )}
-      {!isLegacy && <InstallationCallout />}
-      {isLegacy && <DeprecatedCallout onMigrate={onMigrateClick} />}
+      {ENABLE_NEW_SN_ITSM_CONNECTOR && !isLegacy && <InstallationCallout />}
+      {ENABLE_NEW_SN_ITSM_CONNECTOR && isLegacy && <DeprecatedCallout onMigrate={onMigrateClick} />}
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow

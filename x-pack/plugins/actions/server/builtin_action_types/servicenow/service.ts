@@ -30,6 +30,7 @@ import {
 import { request, getErrorMessage, addTimeZoneToDate } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ServiceNowSIRActionTypeId } from './config';
+import { ENABLE_NEW_SN_ITSM_CONNECTOR } from '../../constants/connectors';
 
 const SYS_DICTIONARY = `api/now/table/sys_dictionary`;
 const IMPORTATION_SET_TABLE = 'x_elas2_inc_int_elastic_incident';
@@ -73,7 +74,8 @@ export const createExternalService = (
   });
 
   // TODO: Remove ServiceNow SIR check when there is a SN Store app for SIR.
-  const useOldApi = isLegacy || actionTypeId === ServiceNowSIRActionTypeId;
+  const useOldApi =
+    !ENABLE_NEW_SN_ITSM_CONNECTOR || isLegacy || actionTypeId === ServiceNowSIRActionTypeId;
 
   const getCreateIncidentUrl = () => (useOldApi ? tableApiIncidentUrl : importSetTableUrl);
   const getUpdateIncidentUrl = (incidentId: string) =>

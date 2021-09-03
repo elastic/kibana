@@ -14,6 +14,8 @@ import { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon } from '../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ENABLE_NEW_SN_ITSM_CONNECTOR } from '../../../../actions/server/constants/connectors';
 
 export interface Props {
   connectors: ActionConnector[];
@@ -89,7 +91,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <span>{connector.name}</span>
                 </EuiFlexItem>
-                {connector.config.isLegacy && (
+                {ENABLE_NEW_SN_ITSM_CONNECTOR && connector.config.isLegacy && (
                   <EuiFlexItem grow={false}>
                     <EuiIconTip
                       aria-label="Warning"

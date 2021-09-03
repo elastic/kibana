@@ -46,6 +46,8 @@ import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
 import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ENABLE_NEW_SN_ITSM_CONNECTOR } from '../../../../../../actions/server/constants/connectors';
 
 const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
@@ -191,18 +193,19 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                 position="right"
               />
             ) : null}
-            {(item as UserConfiguredActionConnector<
-              Record<string, unknown>,
-              Record<string, unknown>
-            >).config.isLegacy && (
-              <EuiIconTip
-                aria-label="Warning"
-                size="m"
-                type="alert"
-                color="warning"
-                content="Deprecated connector. Please create a new one."
-              />
-            )}
+            {ENABLE_NEW_SN_ITSM_CONNECTOR &&
+              (item as UserConfiguredActionConnector<
+                Record<string, unknown>,
+                Record<string, unknown>
+              >).config.isLegacy && (
+                <EuiIconTip
+                  aria-label="Warning"
+                  size="m"
+                  type="alert"
+                  color="warning"
+                  content="Deprecated connector. Please create a new one."
+                />
+              )}
           </>
         );
 
