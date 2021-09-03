@@ -12,7 +12,7 @@ import { EuiTabbedContent, EuiSpacer, EuiTabbedContentTab } from '@elastic/eui';
 
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import {
-  isOnPolicyDetailsPage,
+  isOnPolicyFormPage,
   isOnPolicyTrustedAppsPage,
 } from '../../store/policy_details/selectors';
 
@@ -21,7 +21,7 @@ import { PolicyFormLayout } from '../policy_forms/components';
 
 export const PolicyTabs = React.memo(() => {
   const history = useHistory();
-  const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyDetailsPage);
+  const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormPage);
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsPage);
 
   const tabs = [
