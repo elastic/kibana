@@ -640,12 +640,12 @@ async function endpointDetailsActivityLogChangedMiddleware({
   });
 
   try {
-    const { page, pageSize } = getActivityLogDataPaging(getState());
+    const { page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
     const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
       agent_id: selectedAgent(getState()),
     });
     const activityLog = await coreStart.http.get<ActivityLog>(route, {
-      query: { page, page_size: pageSize },
+      query: { page, page_size: pageSize, start_date: startDate, end_date: endDate },
     });
     dispatch({
       type: 'endpointDetailsActivityLogChanged',
