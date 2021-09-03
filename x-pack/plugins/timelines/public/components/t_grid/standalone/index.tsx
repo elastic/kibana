@@ -103,6 +103,7 @@ export interface TGridStandaloneProps {
   }) => boolean;
   height?: number;
   indexNames: string[];
+  itemsPerPage: number;
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
@@ -134,6 +135,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   filterStatus,
   hasAlertsCrudPermissions,
   indexNames,
+  itemsPerPage,
   itemsPerPageOptions,
   onRuleChange,
   query,
@@ -310,7 +312,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           end,
         },
         indexNames,
-        itemsPerPage: itemsPerPageStore,
+        itemsPerPage,
         itemsPerPageOptions,
         showCheckboxes: true,
       })
