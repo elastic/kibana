@@ -40,6 +40,7 @@ export const WorkspaceRoute = ({
     getBasePath,
     addBasePath,
     setHeaderActionMenu,
+    spaces,
     indexPatterns: getIndexPatternProvider,
   },
 }: WorkspaceRouteProps) => {
@@ -114,7 +115,7 @@ export const WorkspaceRoute = ({
     })
   );
 
-  const { savedWorkspace, indexPatterns } = useWorkspaceLoader({
+  const { savedWorkspace, indexPatterns, sharingSavedObjectProps } = useWorkspaceLoader({
     workspaceRef,
     store,
     savedObjectsClient,
@@ -130,6 +131,8 @@ export const WorkspaceRoute = ({
       <KibanaContextProvider services={services}>
         <Provider store={store}>
           <WorkspaceLayout
+            spaces={spaces}
+            sharingSavedObjectProps={sharingSavedObjectProps}
             renderCounter={renderCounter}
             workspace={workspaceRef.current}
             loading={loading}

@@ -130,8 +130,14 @@ export async function getSavedWorkspace(
     injectReferences(savedObject, resp.references);
   }
 
+  const sharingSavedObjectProps = {
+    outcome: resolveResult.outcome,
+    aliasTargetId: resolveResult.alias_target_id,
+  };
+
   return {
     savedObject,
+    sharingSavedObjectProps,
   };
 }
 

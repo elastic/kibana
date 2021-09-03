@@ -9,6 +9,7 @@ import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
+import { SpacesApi } from '../../../../spaces/public';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
@@ -33,6 +34,8 @@ import { GraphServices } from '../../application';
 import { ControlPanel } from '../control_panel';
 import { GraphVisualization } from '../graph_visualization';
 import { colorChoices } from '../../helpers/style_choices';
+import { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
+import { getEditUrl } from '../../services/url';
 
 /**
  * Each component, which depends on `worksapce`
@@ -59,6 +62,8 @@ type WorkspaceLayoutProps = Pick<
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
   urlQuery: string | null;
+  sharingSavedObjectProps?: SharingSavedObjectProps;
+  spaces: SpacesApi;
 };
 
 interface WorkspaceLayoutStateProps {
@@ -83,6 +88,8 @@ const WorkspaceLayoutComponent = ({
   canEditDrillDownUrls,
   urlQuery,
   setHeaderActionMenu,
+  sharingSavedObjectProps,
+  spaces,
 }: WorkspaceLayoutProps & WorkspaceLayoutStateProps) => {
   const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern>();
   const [showInspect, setShowInspect] = useState(false);
@@ -154,6 +161,38 @@ const WorkspaceLayoutComponent = ({
     []
   );
 
+  const getLegacyUrlConflictCallout = useCallback(() => {
+    // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
+    const currentObjectId = savedWorkspace.id;
+    if (spaces && sharingSavedObjectProps?.outcome === 'conflict' && currentObjectId) {
+      // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
+      // callout with a warning for the user, and provide a way for them to navigate to the other object.
+      const otherObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'conflict'
+      const otherObjectPath = getEditUrl(coreStart.http.basePath.prepend, { id: otherObjectId });
+      return spaces.ui.components.getLegacyUrlConflict({
+        objectNoun: i18n.translate('xpack.graph.legacyUrlConflict.objectNoun', {
+          defaultMessage: 'Graph',
+        }),
+        currentObjectId,
+        otherObjectId,
+        otherObjectPath,
+      });
+    }
+    return null;
+  }, [savedWorkspace.id, sharingSavedObjectProps, spaces, coreStart.http]);
+
+  if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
+    // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+    const newObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
+    const newPath = getEditUrl(coreStart.http.basePath.prepend, { id: newObjectId });
+    spaces.ui.redirectLegacyUrl(
+      newPath,
+      i18n.translate('xpack.graph.legacyUrlConflict.objectNoun', {
+        defaultMessage: 'Graph',
+      })
+    );
+  }
+
   return (
     <Fragment>
       <WorkspaceTopNavMenu
@@ -176,7 +215,6 @@ const WorkspaceLayoutComponent = ({
         lastResponse={workspace?.lastResponse}
         indexPattern={currentIndexPattern}
       />
-
       {isInitialized && <GraphTitle />}
       <div className="gphGraph__bar">
         <SearchBar
@@ -190,6 +228,7 @@ const WorkspaceLayoutComponent = ({
         <EuiSpacer size="s" />
         <FieldManagerMemoized pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
       </div>
+      {getLegacyUrlConflictCallout()}
       {!isInitialized && (
         <div>
           <GuidancePanelMemoized

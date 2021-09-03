@@ -23,6 +23,10 @@ interface UseWorkspaceLoaderProps {
 interface WorkspaceUrlParams {
   id?: string;
 }
+export interface SharingSavedObjectProps {
+  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
+  aliasTargetId?: string;
+}
 
 export const useWorkspaceLoader = ({
   workspaceRef,
@@ -32,6 +36,7 @@ export const useWorkspaceLoader = ({
 }: UseWorkspaceLoaderProps) => {
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>();
   const [savedWorkspace, setSavedWorkspace] = useState<GraphWorkspaceSavedObject>();
+  const [sharingSavedObjectProps, setSharingSavedObjectProps] = useState<SharingSavedObjectProps>();
   const history = useHistory();
   const location = useLocation();
   const { id } = useParams<WorkspaceUrlParams>();
@@ -71,7 +76,10 @@ export const useWorkspaceLoader = ({
         .then((response) => response.savedObjects);
     }
 
-    async function fetchSavedWorkspace(): Promise<{ savedObject: GraphWorkspaceSavedObject }> {
+    async function fetchSavedWorkspace(): Promise<{
+      savedObject: GraphWorkspaceSavedObject;
+      sharingSavedObjectProps?: SharingSavedObjectProps;
+    }> {
       return id
         ? await getSavedWorkspace(savedObjectsClient, id).catch(function (e) {
             toastNotifications.addError(e, {
@@ -88,7 +96,10 @@ export const useWorkspaceLoader = ({
 
     async function initializeWorkspace() {
       const fetchedIndexPatterns = await fetchIndexPatterns();
-      const { savedObject: fetchedSavedWorkspace } = await fetchSavedWorkspace();
+      const {
+        savedObject: fetchedSavedWorkspace,
+        sharingSavedObjectProps: fetchedSharingSavedObjectProps,
+      } = await fetchSavedWorkspace();
 
       /**
        * Deal with situation of request to open saved workspace. Otherwise clean up store,
@@ -102,6 +113,7 @@ export const useWorkspaceLoader = ({
 
       setIndexPatterns(fetchedIndexPatterns);
       setSavedWorkspace(fetchedSavedWorkspace);
+      setSharingSavedObjectProps(fetchedSharingSavedObjectProps);
     }
 
     initializeWorkspace();
@@ -116,5 +128,5 @@ export const useWorkspaceLoader = ({
     workspaceRef,
   ]);
 
-  return { savedWorkspace, indexPatterns };
+  return { savedWorkspace, indexPatterns, sharingSavedObjectProps };
 };
