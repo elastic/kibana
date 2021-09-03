@@ -21,6 +21,9 @@ Object {
     "chartType": Array [
       "area",
     ],
+    "enableHistogramMode": Array [
+      false,
+    ],
     "gridCategoryLines": Array [
       false,
     ],
