@@ -17,6 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
   const queryBar = getService('queryBar');
+  const elasticChart = getService('elasticChart');
+
+  const enableNewChartLibraryDebug = async () => {
+    await elasticChart.setNewChartUiDebugFlag();
+    await queryBar.submitQuery();
+  };
 
   describe('save a search sessions', () => {
     before(async function () {
@@ -93,6 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.expectState('restored');
       await testSubjects.missingOrFail('embeddableErrorLabel');
       const xyChartSelector = 'visTypeXyChart';
+      await enableNewChartLibraryDebug();
       const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
 
