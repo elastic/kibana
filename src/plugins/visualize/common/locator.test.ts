@@ -119,12 +119,6 @@ describe('visualize locator', () => {
         fakeUIState: 'fakeUIState',
         this: 'value contains a spaces that should be encoded',
       },
-      vis: {
-        title: 'test',
-        type: 'test',
-        aggs: [],
-        params: {},
-      },
       indexPattern,
       savedSearchId,
     });
