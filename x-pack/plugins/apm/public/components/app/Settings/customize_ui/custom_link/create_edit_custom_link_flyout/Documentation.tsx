@@ -12,7 +12,7 @@ import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_ap
 interface Props {
   label: string;
 }
-const { docLinks } = useApmPluginContext().core;
+
 export function Documentation({ label }: Props) {
   const { docLinks } = useApmPluginContext().core;
   return <EuiLink href={docLinks.links.apm.customLinks}>{label}</EuiLink>;
