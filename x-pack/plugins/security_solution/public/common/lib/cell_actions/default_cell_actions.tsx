@@ -116,6 +116,36 @@ export const defaultCellActions: TGridCellAction[] = [
       fieldName: columnId,
     });
 
+    return (
+      <>
+        {timelines.getHoverActions().getCopyButton({
+          Component,
+          field: columnId,
+          isHoverAction: false,
+          ownFocus: false,
+          showTooltip: false,
+          value,
+        })}
+      </>
+    );
+  },
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
+    rowIndex,
+    columnId,
+    Component,
+  }) => {
+    const { timelines } = useKibanaServices();
+
+    const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+    if (pageRowIndex >= data.length) {
+      return null;
+    }
+
+    const value = getMappedNonEcsValue({
+      data: data[pageRowIndex],
+      fieldName: columnId,
+    });
+
     const dataProvider: DataProvider[] = useMemo(
       () =>
         value?.map((x) => ({
@@ -170,58 +200,30 @@ export const defaultCellActions: TGridCellAction[] = [
       fieldName: columnId,
     });
 
-    return (
-      <>
-        {allowTopN({
+    const showButton = useMemo(
+      () =>
+        allowTopN({
           browserField: getAllFieldsByName(browserFields)[columnId],
           fieldName: columnId,
           hideTopN: false,
-        }) && (
-          <ShowTopNButton
-            Component={Component}
-            enablePopOver
-            data-test-subj="hover-actions-show-top-n"
-            field={columnId}
-            onClick={onClick}
-            onFilterAdded={onFilterAdded}
-            ownFocus={false}
-            showTopN={showTopN}
-            showTooltip={false}
-            timelineId={timelineId}
-            value={value}
-          />
-        )}
-      </>
+        }),
+      [columnId]
     );
-  },
-  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
-    rowIndex,
-    columnId,
-    Component,
-  }) => {
-    const { timelines } = useKibanaServices();
 
-    const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-    if (pageRowIndex >= data.length) {
-      return null;
-    }
-
-    const value = getMappedNonEcsValue({
-      data: data[pageRowIndex],
-      fieldName: columnId,
-    });
-
-    return (
-      <>
-        {timelines.getHoverActions().getCopyButton({
-          Component,
-          field: columnId,
-          isHoverAction: false,
-          ownFocus: false,
-          showTooltip: false,
-          value,
-        })}
-      </>
-    );
+    return showButton ? (
+      <ShowTopNButton
+        Component={Component}
+        enablePopOver
+        data-test-subj="hover-actions-show-top-n"
+        field={columnId}
+        onClick={onClick}
+        onFilterAdded={onFilterAdded}
+        ownFocus={false}
+        showTopN={showTopN}
+        showTooltip={false}
+        timelineId={timelineId}
+        value={value}
+      />
+    ) : null;
   },
 ];
