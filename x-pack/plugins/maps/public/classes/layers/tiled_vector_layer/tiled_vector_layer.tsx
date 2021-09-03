@@ -323,7 +323,6 @@ export class TiledVectorLayer extends VectorLayer {
       const mbLayer = mbMap.getLayer(layerIds[i]);
       // The mapbox type in the spec is specified with `source-layer`
       // but the programmable JS-object uses camelcase `sourceLayer`
-      // @ts-expect-error
       if (
         mbLayer &&
         mbLayer.sourceLayer !== tiledSourceMeta.layerName &&

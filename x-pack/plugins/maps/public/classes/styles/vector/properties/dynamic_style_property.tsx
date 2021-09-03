@@ -27,7 +27,6 @@ import {
   OrdinalDataMappingPopover,
 } from '../components/data_mapping';
 import {
-  Category,
   CategoryFieldMeta,
   FieldMetaOptions,
   PercentilesFieldMeta,
@@ -41,10 +40,7 @@ import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
 import { pluckRangeFieldMeta } from '../../../../../common/pluck_range_field_meta';
-import {
-  pluckCategoryFieldMeta,
-  trimCategories,
-} from '../../../../../common/pluck_category_field_meta';
+import { pluckCategoryFieldMeta } from '../../../../../common/pluck_category_field_meta';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;

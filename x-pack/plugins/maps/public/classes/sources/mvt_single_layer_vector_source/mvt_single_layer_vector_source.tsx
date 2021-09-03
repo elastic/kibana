@@ -10,7 +10,7 @@ import uuid from 'uuid/v4';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { BoundsFilters, GeoJsonWithMeta } from '../vector_source';
+import { BoundsFilters, GeoJsonWithMeta, SourceTooltipConfig } from '../vector_source';
 import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import {
   FIELD_ORIGIN,
@@ -25,6 +25,7 @@ import {
   MapExtent,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
+  TileMetaFeature,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
@@ -84,6 +85,24 @@ export class MVTSingleLayerVectorSource
 
   isMvt() {
     return true;
+  }
+
+  isPointsOnly(): boolean {
+    return false;
+  }
+
+  showTooManyFeaturesBounds(): boolean {
+    return false;
+  }
+
+  getSourceTooltipConfigFromTileMeta(
+    tileMetaFeatures: TileMetaFeature[],
+    totalFeaturesCount: number
+  ): SourceTooltipConfig {
+    return {
+      tooltipContent: null,
+      areResultsTrimmed: false,
+    };
   }
 
   async supportsFitToBounds() {
