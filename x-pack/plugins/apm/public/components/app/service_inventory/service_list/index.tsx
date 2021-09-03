@@ -11,6 +11,7 @@ import {
   EuiIcon,
   EuiText,
   EuiToolTip,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
@@ -97,7 +98,6 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
         defaultMessage: 'Name',
       }),
-      width: `${unit * 16}px`,
       sortable: true,
       render: (_, { serviceName, agentName }) => (
         <TruncateWithTooltip
@@ -161,7 +161,7 @@ export function getServiceColumns({
           valueLabel={asMillisecondDuration(latency || 0)}
         />
       ),
-      align: 'left',
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
     },
     {
@@ -181,7 +181,7 @@ export function getServiceColumns({
           valueLabel={asTransactionRate(throughput)}
         />
       ),
-      align: 'left',
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
     },
     {
@@ -206,7 +206,7 @@ export function getServiceColumns({
           />
         );
       },
-      align: 'left',
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
     },
   ];

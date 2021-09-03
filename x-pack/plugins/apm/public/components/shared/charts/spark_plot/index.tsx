@@ -82,7 +82,7 @@ export function SparkPlot({
 
   return (
     <EuiFlexGroup
-      justifyContent="spaceBetween"
+      justifyContent="flexEnd"
       gutterSize="xs"
       responsive={false}
       alignItems="flexEnd"

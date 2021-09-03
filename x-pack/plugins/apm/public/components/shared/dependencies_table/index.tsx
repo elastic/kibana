@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiTitle,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -69,8 +70,6 @@ export function DependenciesTable(props: Props) {
     {
       field: 'name',
       name: nameColumnTitle,
-      width: `${unit * 16}px`,
-
       render: (_, item) => {
         const { name, link: itemLink } = item;
         return <TruncateWithTooltip text={name} content={itemLink} />;
@@ -82,6 +81,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnLatency', {
         defaultMessage: 'Latency (avg.)',
       }),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
@@ -101,6 +101,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnThroughput', {
         defaultMessage: 'Throughput',
       }),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
@@ -120,6 +121,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
@@ -139,10 +141,10 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
         defaultMessage: 'Impact',
       }),
-      width: 'auto',
+      align: RIGHT_ALIGNMENT,
       render: (_, { currentStats, previousStats }) => {
         return (
-          <EuiFlexGroup gutterSize="xs" direction="column">
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" direction="column">
             <EuiFlexItem>
               <ImpactBar value={currentStats.impact} size="m" />
             </EuiFlexItem>

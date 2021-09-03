@@ -8,7 +8,11 @@
 import { useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useDebounce from 'react-use/lib/useDebounce';
-import { isWithinMaxBreakpoint, isWithinMinBreakpoint } from '@elastic/eui';
+import {
+  getBreakpoint,
+  isWithinMaxBreakpoint,
+  isWithinMinBreakpoint,
+} from '@elastic/eui';
 
 export type BreakPoints = ReturnType<typeof getScreenSizes>;
 
@@ -26,15 +30,17 @@ export function getScreenSizes(windowWidth: number) {
 
 export function useBreakPoints() {
   const { width } = useWindowSize();
+  const [breakpoint, setBreakpoint] = useState(getBreakpoint(width));
   const [screenSizes, setScreenSizes] = useState(getScreenSizes(width));
 
   useDebounce(
     () => {
+      setBreakpoint(getBreakpoint(width));
       setScreenSizes(getScreenSizes(width));
     },
     50,
     [width]
   );
 
-  return screenSizes;
+  return { ...screenSizes, breakpoint, width };
 }

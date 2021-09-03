@@ -67,7 +67,6 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnNodeName',
         { defaultMessage: 'Node name' }
       ),
-      width: `${unit * 16}px`,
       render: (_, item) => {
         const { serviceNodeName } = item;
         const isMissingServiceNodeName =
@@ -102,6 +101,7 @@ export function getColumns({
     {
       field: 'latency',
       name: getLatencyColumnLabel(latencyAggregationType),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { serviceNodeName, latency }) => {
         const currentPeriodTimestamp =
@@ -127,6 +127,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { serviceNodeName, throughput }) => {
         const currentPeriodTimestamp =
@@ -153,6 +154,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnErrorRate',
         { defaultMessage: 'Failed transaction rate' }
       ),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { serviceNodeName, errorRate }) => {
         const currentPeriodTimestamp =
@@ -179,6 +181,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnCpuUsage',
         { defaultMessage: 'CPU usage (avg.)' }
       ),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { serviceNodeName, cpuUsage }) => {
         const currentPeriodTimestamp =
@@ -205,6 +208,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnMemoryUsage',
         { defaultMessage: 'Memory usage (avg.)' }
       ),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { serviceNodeName, memoryUsage }) => {
         const currentPeriodTimestamp =

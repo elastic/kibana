@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
@@ -34,7 +34,6 @@ export function getColumns({
       name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
         defaultMessage: 'Name',
       }),
-      width: `${unit * 16}px`,
       render: (_, { name, group_id: errorGroupId }) => {
         return (
           <TruncateWithTooltip
@@ -59,6 +58,8 @@ export function getColumns({
           defaultMessage: 'Last seen',
         }
       ),
+      align: RIGHT_ALIGNMENT,
+      width: 'auto',
       render: (_, { lastSeen }) => {
         return (
           <span style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
@@ -66,8 +67,6 @@ export function getColumns({
           </span>
         );
       },
-      width: 'auto',
-      align: 'right',
     },
     {
       field: 'occurrences',
@@ -77,6 +76,7 @@ export function getColumns({
           defaultMessage: 'Occurrences',
         }
       ),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { occurrences, group_id: errorGroupId }) => {
         const currentPeriodTimeseries =

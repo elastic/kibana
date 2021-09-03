@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
@@ -49,7 +54,6 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnName',
         { defaultMessage: 'Name' }
       ),
-      width: `${unit * 16}px`,
       render: (_, { name, transactionType: type }) => {
         return (
           <TruncateWithTooltip
@@ -72,6 +76,7 @@ export function getColumns({
       field: 'latency',
       sortable: true,
       name: getLatencyColumnLabel(latencyAggregationType),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { latency, name }) => {
         const currentTimeseries =
@@ -98,6 +103,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { throughput, name }) => {
         const currentTimeseries =
@@ -125,6 +131,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
         { defaultMessage: 'Failed transaction rate' }
       ),
+      align: RIGHT_ALIGNMENT,
       width: 'auto',
       render: (_, { errorRate, name }) => {
         const currentTimeseries =
@@ -151,7 +158,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.transactionsTableColumnImpact',
         { defaultMessage: 'Impact' }
       ),
-      width: 'auto',
+      align: RIGHT_ALIGNMENT,
       render: (_, { name }) => {
         const currentImpact =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.impact ??
@@ -159,7 +166,7 @@ export function getColumns({
         const previousImpact =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.impact;
         return (
-          <EuiFlexGroup gutterSize="xs" direction="column">
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" direction="column">
             <EuiFlexItem>
               <ImpactBar value={currentImpact} size="m" />
             </EuiFlexItem>
