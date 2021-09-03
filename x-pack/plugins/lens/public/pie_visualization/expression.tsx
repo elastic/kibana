@@ -44,6 +44,7 @@ export const getPieRenderer = (dependencies: {
           {...config}
           formatFactory={dependencies.formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
+          interactive={handlers.isInteractive()}
           paletteService={dependencies.paletteService}
           onClickValue={onClickValue}
           renderMode={handlers.getRenderMode()}
