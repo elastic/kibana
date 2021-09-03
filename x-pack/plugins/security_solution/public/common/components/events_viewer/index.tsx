@@ -78,6 +78,7 @@ type Props = OwnProps & PropsFromRedux;
 const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
   columns,
+  defaultColumns,
   dataProviders,
   defaultCellActions,
   deletedEventIds,
@@ -128,6 +129,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       createTimeline({
         id,
         columns,
+        defaultColumns,
         excludedRowRendererIds,
         indexNames: selectedPatterns,
         sort,
@@ -145,9 +147,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
   const graphOverlay = useMemo(
     () =>
-      graphEventId != null && graphEventId.length > 0 ? (
-        <GraphOverlay isEventViewer={true} timelineId={id} />
-      ) : null,
+      graphEventId != null && graphEventId.length > 0 ? <GraphOverlay timelineId={id} /> : null,
     [graphEventId, id]
   );
   const setQuery = useCallback(
@@ -250,6 +250,7 @@ const makeMapStateToProps = () => {
     const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
     const {
       columns,
+      defaultColumns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
@@ -263,6 +264,7 @@ const makeMapStateToProps = () => {
 
     return {
       columns,
+      defaultColumns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
