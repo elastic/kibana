@@ -65,8 +65,12 @@
                     }
                   }
                 },
-                "id": {
-                  "type": "keyword"
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "reason": {
                   "type": "keyword"
@@ -325,8 +329,12 @@
                     }
                   }
                 },
-                "id": {
-                  "type": "keyword"
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "reason": {
                   "type": "keyword"
@@ -561,8 +569,12 @@
                     }
                   }
                 },
-                "id": {
-                  "type": "keyword"
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "reason": {
                   "type": "keyword"

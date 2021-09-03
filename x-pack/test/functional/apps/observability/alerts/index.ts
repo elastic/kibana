@@ -11,15 +11,14 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
-  rangeFrom: '2021-08-31T13:36:22.109Z',
-  rangeTo: '2021-09-01T13:36:22.109Z',
+  rangeFrom: '2021-09-01T13:36:22.109Z',
+  rangeTo: '2021-09-03T13:36:22.109Z',
 };
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/110920
-  describe.skip('Observability alerts', function () {
+  describe('Observability alerts', function () {
     this.tags('includeFirefox');
 
     const pageObjects = getPageObjects(['common']);
@@ -46,7 +45,44 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Renders the correct number of cells', async () => {
         // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
         const cells = await testSubjects.findAll('dataGridRowCell');
-        expect(cells.length).to.be(54);
+        expect(cells.length).to.be(72);
+      });
+
+      describe('Filtering', () => {
+        it('Autocompletion works', async () => {
+          const queryBar = await testSubjects.find('queryInput');
+          await queryBar.clearValueWithKeyboard({ charByChar: true });
+          await queryBar.type('kibana.alert.s');
+          await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
+          await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
+        });
+
+        it('Applies filters correctly', async () => {
+          const queryBar = await testSubjects.find('queryInput');
+          await queryBar.clearValueWithKeyboard({ charByChar: true });
+          await queryBar.type('kibana.alert.status: recovered');
+          await (await testSubjects.find('querySubmitButton')).click();
+          const cells = await testSubjects.findAll('dataGridRowCell');
+          expect(cells.length).to.be(24);
+        });
+
+        it('Displays a no data state when filters produce zero results', async () => {
+          const queryBar = await testSubjects.find('queryInput');
+          await queryBar.clearValueWithKeyboard({ charByChar: true });
+          await queryBar.type('kibana.alert.consumer: uptime');
+          await (await testSubjects.find('querySubmitButton')).click();
+          await testSubjects.existOrFail('events-container-loading-false');
+        });
+      });
+
+      describe('Date selection', () => {
+        it('Correctly applies date picker selections', async () => {
+          await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
+          // We shouldn't expect any data for the last 15 minutes
+          await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
+          await testSubjects.existOrFail('events-container-loading-false');
+          await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
+        });
       });
     });
   });
