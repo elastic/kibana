@@ -26,6 +26,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   title,
   href,
   button,
+  layout,
   ...cardRest
 }) => {
   const {
@@ -58,7 +59,8 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       image={addBasePath(`${basePathUrl}elastic_agent_card.svg`)}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
       footer={footer}
-      {...(cardRest as any)}
+      layout={layout as 'vertical' | undefined}
+      {...cardRest}
     />
   );
 };

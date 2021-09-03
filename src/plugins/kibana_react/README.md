@@ -75,20 +75,6 @@ const Demo = ({ kibana }) => {
 export default withKibana(Demo);
 ```
 
-Using `<UseKibana>` render prop.
-
-```tsx
-import { UseKibana } from 'kibana-react';
-
-const Demo = () => {
-  return (
-    <UseKibana>
-      {(kibana) => <div>{kibana.services.uiSettings.get('theme:darkMode') ? 'dark' : 'light'}</div>}
-    </UseKibana>
-  );
-};
-```
-
 ## `uiSettings` service
 
 Wrappers around Core's `uiSettings` service.

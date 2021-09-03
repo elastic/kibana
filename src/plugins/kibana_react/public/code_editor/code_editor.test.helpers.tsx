@@ -9,9 +9,9 @@ import React, { useEffect, KeyboardEventHandler } from 'react';
 import { monaco } from '@kbn/monaco';
 
 function createEditorInstance() {
-  const keyDownListeners: any[] = [];
-  const didShowListeners: any[] = [];
-  const didHideListeners: any[] = [];
+  const keyDownListeners: Array<(e?: unknown) => void> = [];
+  const didShowListeners: Array<(e?: unknown) => void> = [];
+  const didHideListeners: Array<(e?: unknown) => void> = [];
   let areSuggestionsVisible = false;
 
   const editorInstance = {
@@ -69,7 +69,10 @@ type MockedEditor = ReturnType<typeof createEditorInstance>;
 export const mockedEditorInstance: MockedEditor = createEditorInstance();
 
 // <MonacoEditor /> mock
-const mockMonacoEditor = ({ editorWillMount, editorDidMount }: any) => {
+const mockMonacoEditor = ({
+  editorWillMount,
+  editorDidMount,
+}: Record<string, (...args: unknown[]) => void>) => {
   editorWillMount(monaco);
 
   useEffect(() => {

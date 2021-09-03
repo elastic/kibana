@@ -7,7 +7,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiEmptyPrompt, EuiBasicTableColumn } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
@@ -208,7 +208,7 @@ const getTableColumns = (
   useHash: boolean,
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
-  return [
+  return ([
     {
       field: 'title',
       name: dashboardListingTable.getTitleColumnName(),
@@ -235,7 +235,7 @@ const getTableColumns = (
       sortable: true,
     },
     ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
-  ];
+  ] as unknown) as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 };
 
 const getNoItemsMessage = (

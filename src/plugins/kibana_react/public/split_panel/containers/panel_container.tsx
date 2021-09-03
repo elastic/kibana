@@ -17,7 +17,7 @@ export interface Props {
   children: ReactNode;
   className?: string;
   resizerClassName?: string;
-  onPanelWidthChange?: (arrayOfPanelWidths: number[]) => any;
+  onPanelWidthChange?: (arrayOfPanelWidths: number[]) => void;
 }
 
 interface State {
