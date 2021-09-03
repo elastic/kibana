@@ -44,6 +44,20 @@ interface PreconfigurationResult {
   nonFatalErrors: PreconfigurationError[];
 }
 
+function isPreconfiguredOutputDifferentFromCurrent(
+  existingOutput: Output,
+  preconfiguredOutput: Partial<Output>
+): boolean {
+  return (
+    existingOutput.is_default !== preconfiguredOutput.is_default ||
+    existingOutput.name !== preconfiguredOutput.name ||
+    existingOutput.type !== preconfiguredOutput.type ||
+    existingOutput.hosts !== preconfiguredOutput.hosts ||
+    existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
+    existingOutput.config_yaml !== preconfiguredOutput.config_yaml
+  );
+}
+
 export async function ensurePreconfiguredOutputs(
   soClient: SavedObjectsClientContract,
   outputs: PreconfiguredOutput[]
@@ -65,11 +79,12 @@ export async function ensurePreconfiguredOutputs(
       const data = {
         ...outputData,
         config_yaml: configYaml,
+        is_preconfigured: true,
       };
 
       if (!existingOutput) {
         return outputService.create(soClient, data, { id });
-      } else {
+      } else if (isPreconfiguredOutputDifferentFromCurrent(existingOutput, data)) {
         return outputService.update(soClient, id, data);
       }
     })

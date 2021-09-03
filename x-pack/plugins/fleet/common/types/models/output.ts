@@ -18,6 +18,7 @@ export interface NewOutput {
   ca_sha256?: string;
   api_key?: string;
   config_yaml?: string;
+  is_preconfigured?: boolean;
 }
 
 export type OutputSOAttributes = NewOutput;
