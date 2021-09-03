@@ -99,7 +99,7 @@ import { EndpointMetadataService } from './endpoint/services/metadata';
 import { createIndicatorMatchAlertType } from './lib/detection_engine/rule_types/indicator_match/create_indicator_match_alert_type';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 import { ctiFieldMap } from './lib/detection_engine/rule_types/field_maps/cti';
-import { dangerousWorkaroundToMigrateActionsSideCarSavedObjects } from './lib/detection_engine/rule_actions/migrations';
+import { dangerousWorkaroundToMigrateActionsSideCarSavedObjects } from './lib/detection_engine/rule_actions/deletion_migration/dangerous_workaround';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -351,7 +351,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     this.licensing$ = plugins.licensing.license$;
 
-    dangerousWorkaroundToMigrateActionsSideCarSavedObjects({ logger, savedObjectsClient });
+    if (this.config.enableLegacySideCarActionMigration) {
+      logger.debug(
+        'Legacy alerting side car actions data migration is going to run. If you see errors below on each restart, or issues with your actions on your alerts when you are restarting Kibana you can disable this with the config option of "enableLegacySideCarActionMigration: false" in kibana.yml'
+      );
+      dangerousWorkaroundToMigrateActionsSideCarSavedObjects({
+        logger,
+        savedObjectsClient: new SavedObjectsClient(
+          core.savedObjects.createInternalRepository(['alert', 'action'])
+        ),
+      }).then(() => {
+        logger.debug('Legacy side car actions data migration is complete.');
+      });
+    } else {
+      logger.debug(
+        'Legacy side car actions migration is de-activated from the config and did not run'
+      );
+    }
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
