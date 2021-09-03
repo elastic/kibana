@@ -61,7 +61,7 @@ export class DocViewerTab extends React.Component<Props, State> {
     }
 
     if (render) {
-      // doc view is provided by a render function, e.g. for legacy Angular code
+      // doc view is provided by a render function
       return <DocViewRenderTab render={render} renderProps={renderProps} />;
     }
 

@@ -41,7 +41,8 @@ export function visWithSplits(WrappedComponent) {
       [fieldFormatMap, model.id, model.series, palettesService, syncColors, visData]
     );
 
-    if (!model || !visData || !visData[model.id]) return <WrappedComponent {...props} />;
+    if (!model || !visData || !visData[model.id] || visData[model.id].series.length === 1)
+      return <WrappedComponent {...props} />;
     if (visData[model.id].series.every((s) => s.id.split(':').length === 1)) {
       return <WrappedComponent {...props} />;
     }

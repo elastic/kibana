@@ -194,6 +194,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await settings.controlChangeSave();
         });
       });
+
+      it('should display drilldown urls', async () => {
+        const baseURL = 'http://elastic.co/foo/';
+
+        await visualBuilder.clickPanelOptions('table');
+        await visualBuilder.setDrilldownUrl(`${baseURL}{{key}}`);
+
+        await retry.try(async () => {
+          const links = await findService.allByCssSelector(`a[href="${baseURL}ios"]`);
+
+          expect(links.length).to.be(1);
+        });
+      });
     });
   });
 }
