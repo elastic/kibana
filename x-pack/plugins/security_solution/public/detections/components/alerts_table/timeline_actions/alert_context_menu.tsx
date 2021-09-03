@@ -131,7 +131,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     if (timelineId === TimelineId.active) {
       refetchQuery([timelineQuery]);
     } else {
-      refetchQuery([globalQuery]);
+      refetchQuery(globalQuery);
     }
   }, [timelineId, globalQuery, timelineQuery]);
 
@@ -234,11 +234,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 };
 
 const makeMapStateToProps = () => {
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
+  const getGlobalQueries = inputsSelectors.globalQuery();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
   const mapStateToProps = (state: State, { timelineId }: AlertContextMenuProps) => {
     return {
-      globalQuery: getGlobalQuery(state, timelineId),
+      globalQuery: getGlobalQueries(state),
       timelineQuery: getTimelineQuery(state, timelineId),
     };
   };
