@@ -46,7 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Renders the correct number of cells', async () => {
         // NOTE: This isn't ideal, but EuiDataGrid doesn't really have the concept of "rows"
         const cells = await testSubjects.findAll('dataGridRowCell');
-        expect(cells.length).to.be(54);
+        expect(cells.length).to.be(10);
       });
     });
   });
