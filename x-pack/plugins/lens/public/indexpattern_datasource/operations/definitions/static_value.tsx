@@ -60,9 +60,6 @@ export const staticValueOperation: OperationDefinition<
   },
   getErrorMessage(layer, columnId) {
     const column = layer.columns[columnId] as StaticValueIndexPatternColumn;
-    if (!column.params.value) {
-      return;
-    }
 
     return !isValidNumber(column.params.value)
       ? [
@@ -125,7 +122,7 @@ export const staticValueOperation: OperationDefinition<
       references: [],
     };
   },
-  isTransferable: () => {
+  isTransferable: (column) => {
     return true;
   },
   createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
