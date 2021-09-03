@@ -77,7 +77,7 @@ describe('PieVisualization component', () => {
         onClickValue: jest.fn(),
         chartsThemeService,
         paletteService: chartPluginMock.createPaletteRegistry(),
-        renderMode: 'display' as const,
+        renderMode: 'view' as const,
         syncColors: false,
       };
     }
@@ -302,10 +302,10 @@ describe('PieVisualization component', () => {
       `);
     });
 
-    test('does not set click listener on noInteractivity render mode', () => {
+    test('does not set click listener on non-interactive mode', () => {
       const defaultArgs = getDefaultArgs();
       const component = shallow(
-        <PieComponent args={{ ...args }} {...defaultArgs} renderMode="noInteractivity" />
+        <PieComponent args={{ ...args }} {...defaultArgs} interactive={false} />
       );
       expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
     });
