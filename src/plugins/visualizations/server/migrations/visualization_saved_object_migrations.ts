@@ -8,7 +8,7 @@
 
 import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
 
-import type { SavedObjectMigrationFn } from 'kibana/server';
+import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
 
 import { DEFAULT_QUERY_LANGUAGE, INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
 import {
@@ -19,6 +19,7 @@ import {
   commonAddEmptyValueColorRule,
   commonMigrateTagCloud,
   commonAddDropLastBucketIntoTSVBModel,
+  commonRemoveMarkdownLessFromTSVB,
 } from './visualization_common_migrations';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -1078,31 +1079,15 @@ export const removeMarkdownLessFromTSVB: SavedObjectMigrationFn<any, any> = (doc
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
     }
-    if (visState && visState.type === 'metrics') {
-      const params: any = get(visState, 'params') || {};
 
-      if (params.type === 'markdown') {
-        // remove less
-        if (params.markdown_less) {
-          delete params.markdown_less;
-        }
-
-        // remove markdown id from css
-        if (params.markdown_css) {
-          params.markdown_css = params.markdown_css
-            .replace(new RegExp(`#markdown-${params.id}`, 'g'), '')
-            .trim();
-        }
-      }
-
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          visState: JSON.stringify(visState),
-        },
-      };
-    }
+    const newVisState = commonRemoveMarkdownLessFromTSVB(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
   }
   return doc;
 };
@@ -1160,5 +1145,7 @@ export const visualizationSavedObjectTypeMigrations = {
     replaceIndexPatternReference,
     addDropLastBucketIntoTSVBModel
   ),
-  '7.15.0': flow(removeMarkdownLessFromTSVB),
+  '7.15.0': (doc: SavedObjectUnsanitizedDoc) => doc,
+  '7.16.0': (doc: SavedObjectUnsanitizedDoc) => doc,
+  '8.0.0': flow(removeMarkdownLessFromTSVB),
 };
