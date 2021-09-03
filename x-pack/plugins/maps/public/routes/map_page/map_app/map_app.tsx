@@ -448,18 +448,11 @@ export class MapApp extends React.Component<Props, State> {
     }
     await this.props.savedMap.whenReady();
     const { resolvedSavedObject } = await resolveSavedObject(savedObjectId);
-    // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
     if (this.props.spacesApi && resolvedSavedObject) {
       if (resolvedSavedObject.outcome === 'conflict') {
-        // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
-        // callout with a warning for the user, and provide a way for them to navigate to the other object.
         const currentObjectId = resolvedSavedObject.saved_object.id;
-        const otherObjectId = resolvedSavedObject.alias_target_id!; // This is always defined if outcome === 'conflict'
-        // const otherObjectPath = this.props.http.basePath.prepend(
-        //   `${VIEW_NOTE_PATH}/${otherObjectId}${window.location.hash}`
-        // );
-        const otherObjectPath = window.location.href.replace(currentObjectId, otherObjectId);
-        console.log(this.props.http.basePath);
+        const otherObjectId = resolvedSavedObject.alias_target_id!;
+        const otherObjectPath = this.props.http.basePath.prepend(getFullPath(otherObjectId));
         this.setState({
           savedObjectWarning: (
             <>
