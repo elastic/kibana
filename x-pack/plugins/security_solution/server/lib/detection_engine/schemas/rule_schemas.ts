@@ -63,7 +63,16 @@ import {
   updated_at,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
-import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
+import {
+  SIGNALS_ID,
+  SERVER_APP_ID,
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+} from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export const baseRuleParams = t.exact(
@@ -198,10 +207,21 @@ export const notifyWhen = t.union([
   t.null,
 ]);
 
+export const allRuleTypes = t.union([
+  t.literal(SIGNALS_ID),
+  t.literal(EQL_RULE_TYPE_ID),
+  t.literal(ML_RULE_TYPE_ID),
+  t.literal(QUERY_RULE_TYPE_ID),
+  t.literal(SAVED_QUERY_RULE_TYPE_ID),
+  t.literal(INDICATOR_RULE_TYPE_ID),
+  t.literal(THRESHOLD_RULE_TYPE_ID),
+]);
+export type AllRuleTypes = t.TypeOf<typeof allRuleTypes>;
+
 export const internalRuleCreate = t.type({
   name,
   tags,
-  alertTypeId: t.literal(SIGNALS_ID),
+  alertTypeId: allRuleTypes,
   consumer: t.literal(SERVER_APP_ID),
   schedule: t.type({
     interval: t.string,

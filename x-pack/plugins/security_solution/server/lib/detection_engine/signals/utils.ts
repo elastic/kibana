@@ -1008,6 +1008,9 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
   }
 };
 
+/**
+ * Maps legacy rule types to RAC rule type IDs.
+ */
 export const ruleTypeMappings = {
   eql: EQL_RULE_TYPE_ID,
   machine_learning: ML_RULE_TYPE_ID,

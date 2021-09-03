@@ -69,7 +69,11 @@ export const createRulesRoute = (
           }
         }
 
-        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
+        const internalRule = convertCreateAPIToInternalSchema(
+          request.body,
+          siemClient,
+          isRuleRegistryEnabled
+        );
 
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
@@ -118,7 +122,7 @@ export const createRulesRoute = (
           return response.ok({ body: validated ?? {} });
         }
       } catch (err) {
-        const error = transformError(err);
+        const error = transformError(err as Error);
         return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,

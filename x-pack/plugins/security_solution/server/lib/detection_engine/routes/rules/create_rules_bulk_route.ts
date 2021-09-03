@@ -81,7 +81,11 @@ export const createRulesBulkRoute = (
                 });
               }
             }
-            const internalRule = convertCreateAPIToInternalSchema(payloadRule, siemClient);
+            const internalRule = convertCreateAPIToInternalSchema(
+              payloadRule,
+              siemClient,
+              isRuleRegistryEnabled
+            );
             try {
               const validationErrors = createRuleValidateTypeDependents(payloadRule);
               if (validationErrors.length) {
@@ -114,7 +118,10 @@ export const createRulesBulkRoute = (
 
               return transformValidateBulkError(internalRule.params.ruleId, createdRule, undefined);
             } catch (err) {
-              return transformBulkError(internalRule.params.ruleId, err);
+              return transformBulkError(
+                internalRule.params.ruleId,
+                err as Error & { statusCode?: number | undefined }
+              );
             }
           })
       );

@@ -328,6 +328,6 @@ export const getFailingRules = async (
     if (Boom.isBoom(exc)) {
       throw exc;
     }
-    throw new Error(`Failed to get executionStatus with RulesClient: ${exc.message}`);
+    throw new Error(`Failed to get executionStatus with RulesClient: ${(exc as Error).message}`);
   }
 };
