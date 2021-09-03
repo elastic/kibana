@@ -9,7 +9,6 @@
 import { SavedObjectReference } from 'src/core/types';
 import { SearchSourceFields } from './types';
 
-// potentially not used anymore
 export const injectReferences = (
   searchSourceFields: SearchSourceFields & { indexRefName: string },
   references: SavedObjectReference[]
