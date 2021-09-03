@@ -33,7 +33,7 @@ import {
   ReindexTableRow,
 } from './deprecation_types';
 import { DeprecationTableColumns } from '../types';
-import { DEPRECATION_TYPE_MAP } from '../constants';
+import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
 
 const i18nTexts = {
   refreshButtonLabel: i18n.translate(
@@ -99,7 +99,7 @@ const cellToLabelMap = {
 };
 
 const cellTypes = Object.keys(cellToLabelMap) as DeprecationTableColumns[];
-const pageSizeOptions = [50, 100, 200];
+const pageSizeOptions = PAGINATION_CONFIG.pageSizeOptions;
 
 const renderTableRowCells = (deprecation: EnrichedDeprecationInfo) => {
   switch (deprecation.correctiveAction?.type) {
@@ -151,7 +151,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
     sortField: 'isCritical',
   });
 
-  const [itemsPerPage, setItemsPerPage] = useState(pageSizeOptions[0]);
+  const [itemsPerPage, setItemsPerPage] = useState(PAGINATION_CONFIG.initialPageSize);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState<Query>(EuiSearchBar.Query.MATCH_ALL);
   const [searchError, setSearchError] = useState<{ message: string } | undefined>(undefined);
