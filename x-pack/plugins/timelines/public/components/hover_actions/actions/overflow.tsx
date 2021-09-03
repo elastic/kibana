@@ -97,6 +97,7 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
           closePopover={closePopOver}
           panelPaddingSize="none"
           panelClassName="withHoverActions__popover"
+          repositionOnScroll={true}
           anchorPosition="downLeft"
         >
           <StyledEuiContextMenuPanel items={items} />
