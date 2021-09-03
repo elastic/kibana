@@ -1333,6 +1333,8 @@ describe('Lens migrations', () => {
       for (const column of state.columns) {
         expect(column.palette!.name).toBe('custom');
         expect(column.palette!.params!.name).toBe('custom');
+        expect(column.palette!.params!.rangeMin).toBe(0);
+        expect(column.palette!.params!.rangeMax).toBe(80);
         expect(column.palette!.params!.reverse).toBeTruthy(); // still true
         expect(column.palette!.params!.rangeType).toBe('percent');
         expect(column.palette!.params!.stops).toEqual([
@@ -1380,6 +1382,8 @@ describe('Lens migrations', () => {
       >).state.visualization;
       expect(state.palette!.name).toBe('custom');
       expect(state.palette!.params!.name).toBe('custom');
+      expect(state.palette!.params!.rangeMin).toBe(0);
+      expect(state.palette!.params!.rangeMax).toBe(80);
       expect(state.palette!.params!.reverse).toBeTruthy(); // still true
       expect(state.palette!.params!.rangeType).toBe('percent');
       expect(state.palette!.params!.stops).toEqual([

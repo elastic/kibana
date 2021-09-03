@@ -117,6 +117,9 @@ function moveDefaultPaletteToPercentCustomInPlace(palette?: PaletteOutput<Custom
     // but the final result *must* be identical
     palette.params.rangeType = 'percent';
     const steps = palette.params.stops.length;
+    palette.params.rangeMin = 0;
+    palette.params.rangeMax = 80;
+    palette.params.steps = steps;
     palette.params.colorStops = palette.params.stops.map(({ color }, index) => ({
       color,
       stop: (index * 100) / steps,
