@@ -17,6 +17,7 @@ import {
   EuiLink,
   EuiIcon,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -78,6 +79,9 @@ const i18nTexts = {
       defaultMessage: 'Try again',
     }
   ),
+  loadingError: i18n.translate('xpack.upgradeAssistant.overview.system_indices.loadingError', {
+    defaultMessage: 'An error occurred while retrieving the status of system indices',
+  }),
 };
 
 const UpgradeSystemIndicesStep: FunctionComponent = () => {
@@ -139,20 +143,19 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
 
   if (error) {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButton color="danger" isLoading={isLoading} onClick={refetchSystemIndicesStatus}>
-            {i18nTexts.retryButtonLabel}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText color="danger">
-            <p>
-              {error.statusCode} - {error.message}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiCallOut
+        title={i18nTexts.loadingError}
+        color="danger"
+        iconType="alert"
+        data-test-subj="systemIndicesErrorCallout"
+      >
+        <p>
+          {error.statusCode} - {error.message}
+        </p>
+        <EuiButton color="danger" isLoading={isLoading} onClick={refetchSystemIndicesStatus}>
+          {i18nTexts.retryButtonLabel}
+        </EuiButton>
+      </EuiCallOut>
     );
   }
 
@@ -176,6 +179,20 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
 
   return (
     <>
+      {statusStartUpgrade.statusType === 'error' && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="danger"
+            iconType="alert"
+            title={`${statusStartUpgrade.details!.statusCode} - ${
+              statusStartUpgrade.details!.message
+            }`}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -192,17 +209,6 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {statusStartUpgrade.statusType === 'error' && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText color="danger">
-            <p>
-              {statusStartUpgrade.details!.statusCode} - {statusStartUpgrade.details!.message}
-            </p>
-          </EuiText>
-        </>
-      )}
     </>
   );
 };
