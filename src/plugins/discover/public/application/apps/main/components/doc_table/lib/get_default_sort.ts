@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from 'src/plugins/data/common';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { isSortable } from './get_sort';
 import { SortOrder } from '../components/table_header/helpers';
 
