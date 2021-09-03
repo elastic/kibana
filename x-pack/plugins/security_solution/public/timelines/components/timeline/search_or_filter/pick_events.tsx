@@ -294,7 +294,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const superSelect = useMemo(
     () => (
       <EuiSuperSelect
-        data-test-subj="indexPattern-switcher"
+        data-test-subj="sourcerer-combo-box"
         placeholder={i18n.PICK_INDEX_PATTERNS}
         fullWidth
         options={kipSelectOptions}
@@ -440,7 +440,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={handleSaveIndices}
-                  data-test-subj="add-index"
+                  data-test-subj="sourcerer-save"
                   fill
                   fullWidth
                   size="s"

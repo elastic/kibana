@@ -30,7 +30,7 @@ export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatter
   return (
     <I18nProvider>
       <ChangeIndexPattern
-        data-test-subj="indexPattern-switcher"
+        data-test-subj="sourcerer-combo-box"
         trigger={{
           label: indexPattern?.title || notFoundTitleLabel,
           title: indexPattern?.title || notFoundTitleLabel,

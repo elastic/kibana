@@ -7,10 +7,10 @@
 
 export const SOURCERER_TRIGGER = '[data-test-subj="sourcerer-trigger"]';
 export const SOURCERER_INPUT =
-  '[data-test-subj="indexPattern-switcher"] [data-test-subj="comboBoxInput"]';
+  '[data-test-subj="sourcerer-combo-box"] [data-test-subj="comboBoxInput"]';
 export const SOURCERER_OPTIONS =
-  '[data-test-subj="comboBoxOptionsList indexPattern-switcher-optionsList"]';
-export const SOURCERER_SAVE_BUTTON = 'button[data-test-subj="add-index"]';
+  '[data-test-subj="comboBoxOptionsList sourcerer-combo-box-optionsList"]';
+export const SOURCERER_SAVE_BUTTON = 'button[data-test-subj="sourcerer-save"]';
 export const SOURCERER_RESET_BUTTON = 'button[data-test-subj="sourcerer-reset"]';
 export const SOURCERER_POPOVER_TITLE = '.euiPopoverTitle';
 export const HOSTS_STAT = '[data-test-subj="stat-hosts"] [data-test-subj="stat-title"]';

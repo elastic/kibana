@@ -52,7 +52,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const { selectedKipId, selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
-  const [kipId, setKipId] = useState<string>(selectedKipId ?? '');
+  // TODO: Steph/sourcerer this stinks, we are absolutely counting on sourcererScope having
+  // selectedKipId because its initialized from plugin.tsx
+  // but maybe we should do something better
+  const [kipId, setKipId] = useState<string>(selectedKipId ?? defaultIndexPattern.id);
 
   const { patternList, selectablePatterns } = useMemo(() => {
     const theKip = kibanaIndexPatterns.find((kip) => kip.id === kipId);
@@ -60,6 +63,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       ? { patternList: theKip.title.split(','), selectablePatterns: theKip.patternList }
       : { patternList: [], selectablePatterns: [] };
   }, [kibanaIndexPatterns, kipId]);
+
   const selectableOptions = useMemo(() => {
     return patternList.map((indexName) => ({
       label: indexName,
@@ -91,7 +95,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   const renderOption = useCallback(
-    ({ value }) => <span data-test-subj="index-name-option">{value}</span>,
+    ({ value }) => <span data-test-subj="sourcerer-combo-option">{value}</span>,
     []
   );
 
@@ -162,7 +166,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       kibanaIndexPatterns.map(({ title, id }) => ({
         inputDisplay:
           id === defaultIndexPattern.id ? (
-            <span data-test-subj="kip-option-super">
+            <span data-test-subj="security-option-super">
               <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_KIP_LABEL}
             </span>
           ) : (
@@ -178,7 +182,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const comboBox = useMemo(
     () => (
       <EuiComboBox
-        data-test-subj="indexPattern-switcher"
+        data-test-subj="sourcerer-combo-box"
         fullWidth
         onChange={onChangeCombo}
         options={selectableOptions}
@@ -189,10 +193,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     ),
     [selectableOptions, onChangeCombo, renderOption, selectedOptions]
   );
+
+  // TODO: Steph/sourcerer needs tests
   const superSelect = useMemo(
     () => (
       <EuiSuperSelect
-        data-test-subj="indexPattern-switcher"
+        data-test-subj="sourcerer-select"
         placeholder={i18n.PICK_INDEX_PATTERNS}
         fullWidth
         options={kipSelectOptions}
@@ -263,7 +269,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
               <EuiButton
                 onClick={handleSaveIndices}
                 disabled={isSavingDisabled}
-                data-test-subj="add-index"
+                data-test-subj="sourcerer-save"
                 fill
                 fullWidth
                 size="s"

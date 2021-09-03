@@ -77,6 +77,9 @@ export const initSourcererScope = {
 };
 
 // instantiated in plugin.tsx `getKibanaIndexPattern` so these values don't matter
+// this is the state thats pulled into the mocks so it matters for tests
+// but is that really a good idea? maybe we should be throwing an error if its not actually
+// instantiated and delete this shiz
 export const initialSourcererState: SourcererModel = {
   defaultIndexPattern: {
     id: DEFAULT_INDEX_PATTERN_ID,

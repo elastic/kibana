@@ -295,23 +295,33 @@ export const mockGlobalState: State = {
   },
   sourcerer: {
     ...initialSourcererState,
+    defaultIndexPattern: {
+      ...initialSourcererState.defaultIndexPattern,
+      title: `${initialSourcererState.defaultIndexPattern.title},fakebeat-*`,
+    },
+    kibanaIndexPatterns: [
+      {
+        ...initialSourcererState.defaultIndexPattern,
+        title: `${initialSourcererState.defaultIndexPattern.title},fakebeat-*`,
+      },
+    ],
     sourcererScopes: {
       ...initialSourcererState.sourcererScopes,
       [SourcererScopeName.default]: {
         ...initialSourcererState.sourcererScopes[SourcererScopeName.default],
+        selectedKipId: initialSourcererState.defaultIndexPattern.id,
         selectedPatterns: initialSourcererState.defaultIndexPattern.patternList,
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
         docValueFields: mockDocValueFields,
-        loading: false,
       },
       [SourcererScopeName.timeline]: {
         ...initialSourcererState.sourcererScopes[SourcererScopeName.timeline],
+        selectedKipId: initialSourcererState.defaultIndexPattern.id,
         selectedPatterns: initialSourcererState.defaultIndexPattern.patternList,
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
         docValueFields: mockDocValueFields,
-        loading: false,
       },
     },
   },

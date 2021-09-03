@@ -32,40 +32,30 @@ const defaultProps = {
   scope: sourcererModel.SourcererScopeName.default,
 };
 describe('Sourcerer component', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
   const state: State = mockGlobalState;
-  const { patternList } = state.sourcerer.defaultIndexPattern;
-  const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => {
-    return {
-      availableOptionCount: wrapper.find(`[data-test-subj="kip-option"]`).length,
-      optionsSelected: patterns.every((pattern) =>
-        wrapper
-          .find(`[data-test-subj="indexPattern-switcher"] span[title="${pattern}"]`)
-          .first()
-          .exists()
-      ),
-    };
-  };
+  const { id, patternList, title } = state.sourcerer.defaultIndexPattern;
+  const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => ({
+    availableOptionCount: wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).length,
+    optionsSelected: patterns.every((pattern) =>
+      wrapper
+        .find(`[data-test-subj="sourcerer-combo-box"] span[title="${pattern}"]`)
+        .first()
+        .exists()
+    ),
+  });
 
-  const mockOptions = [
-    {
-      label: state.sourcerer.defaultIndexPattern.title,
-      value: state.sourcerer.defaultIndexPattern.title,
-    },
-    {
-      label: 'filebeat-*',
-      value: 'filebeat-*',
-    },
-  ];
+  const mockOptions = patternList.map((p) => ({
+    label: p,
+    value: p,
+  }));
 
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('Mounts with all options selected', () => {
@@ -76,8 +66,8 @@ describe('Sourcerer component', () => {
     );
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     expect(
-      wrapper.find(`[data-test-subj="indexPattern-switcher"]`).first().prop('selectedOptions')
-    ).toEqual([mockOptions[0]]);
+      wrapper.find(`[data-test-subj="sourcerer-combo-box"]`).first().prop('selectedOptions')
+    ).toEqual(mockOptions);
   });
   it('Mounts with multiple options selected', () => {
     const state2 = {
@@ -86,15 +76,17 @@ describe('Sourcerer component', () => {
         ...mockGlobalState.sourcerer,
         kibanaIndexPatterns: [
           state.sourcerer.defaultIndexPattern,
-          { id: '1234', title: 'auditbeat-*' },
-          { id: '1234', title: 'packetbeat-*' },
+          { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
+          { id: '12347', title: 'packetbeat-*', patternList: ['packetbeat-*'] },
         ],
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
           [SourcererScopeName.default]: {
             ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
             loading: false,
-            selectedPatterns: [...patternList, 'auditbeat-*'],
+            patternList,
+            selectedKipId: id,
+            selectedPatterns: patternList.slice(0, 2),
           },
         },
       },
@@ -108,14 +100,12 @@ describe('Sourcerer component', () => {
     );
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
-    expect(
-      checkOptionsAndSelections(wrapper, ['auditbeat-*', state.sourcerer.defaultIndexPattern.title])
-    ).toEqual({
-      availableOptionCount: 1,
+    expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 2))).toEqual({
+      availableOptionCount: title.split(',').length - 2,
       optionsSelected: true,
     });
   });
-  it('onChange calls updateSourcererScopeIndices', async () => {
+  it('onSave dispatches setSelectedKip', async () => {
     store = createStore(
       {
         ...state,
@@ -123,8 +113,17 @@ describe('Sourcerer component', () => {
           ...state.sourcerer,
           kibanaIndexPatterns: [
             state.sourcerer.defaultIndexPattern,
-            { id: '1234', title: 'filebeat-*' },
+            { id: '1234', title: 'filebeat-*', patternList: ['filebeat-*'] },
           ],
+          sourcererScopes: {
+            ...state.sourcerer.sourcererScopes,
+            [SourcererScopeName.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+              loading: false,
+              selectedKipId: id,
+              selectedPatterns: patternList.slice(0, 2),
+            },
+          },
         },
       },
       SUB_PLUGINS_REDUCER,
@@ -138,46 +137,28 @@ describe('Sourcerer component', () => {
     );
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
-    expect(checkOptionsAndSelections(wrapper, [state.sourcerer.defaultIndexPattern.title])).toEqual(
-      {
-        availableOptionCount: 1,
-        optionsSelected: true,
-      }
-    );
-
-    wrapper.find(`[data-test-subj="kip-option"]`).first().simulate('click');
-    expect(
-      checkOptionsAndSelections(wrapper, [mockOptions[0].label, mockOptions[1].label])
-    ).toEqual({
-      availableOptionCount: 0,
+    expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 2))).toEqual({
+      availableOptionCount: title.split(',').length - 2,
       optionsSelected: true,
     });
-    wrapper.find(`[data-test-subj="add-index"]`).first().simulate('click');
+
+    wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).first().simulate('click');
+    expect(checkOptionsAndSelections(wrapper, patternList.slice(0, 3))).toEqual({
+      availableOptionCount: title.split(',').length - 3,
+      optionsSelected: true,
+    });
+    wrapper.find(`[data-test-subj="sourcerer-save"]`).first().simulate('click');
     expect(wrapper.find(`[data-test-subj="sourcerer-popover"]`).first().prop('isOpen')).toBeFalsy();
 
     expect(mockDispatch).toHaveBeenCalledWith(
-      sourcererActions.setSelectedIndexPatterns({
+      sourcererActions.setSelectedKip({
         id: SourcererScopeName.default,
-        selectedPatterns: [mockOptions[0].value, mockOptions[1].value],
+        selectedKipId: id,
+        selectedPatterns: patternList.slice(0, 3),
       })
     );
   });
   it('resets to default index pattern', async () => {
-    store = createStore(
-      {
-        ...state,
-        sourcerer: {
-          ...state.sourcerer,
-          kibanaIndexPatterns: [
-            state.sourcerer.defaultIndexPattern,
-            { id: '1234', title: 'auditbeat-*' },
-          ],
-        },
-      },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
     const wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -186,32 +167,27 @@ describe('Sourcerer component', () => {
     wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
 
-    expect(checkOptionsAndSelections(wrapper, [state.sourcerer.defaultIndexPattern.title])).toEqual(
-      {
-        availableOptionCount: 1,
-        optionsSelected: true,
-      }
-    );
+    expect(checkOptionsAndSelections(wrapper, patternList)).toEqual({
+      availableOptionCount: title.split(',').length - patternList.length, // 1,
+      optionsSelected: true,
+    });
+
     wrapper
       .find(
-        `[data-test-subj="indexPattern-switcher"] [title="${patternList}"] button.euiBadge__iconButton`
+        `[data-test-subj="sourcerer-combo-box"] [title="${patternList[0]}"] button.euiBadge__iconButton`
       )
       .first()
       .simulate('click');
-    expect(checkOptionsAndSelections(wrapper, [state.sourcerer.defaultIndexPattern.title])).toEqual(
-      {
-        availableOptionCount: 2,
-        optionsSelected: false,
-      }
-    );
+    expect(checkOptionsAndSelections(wrapper, patternList.slice(1, patternList.length))).toEqual({
+      availableOptionCount: title.split(',').length - (patternList.length - 1), // 2,
+      optionsSelected: true,
+    });
 
     wrapper.find(`[data-test-subj="sourcerer-reset"]`).first().simulate('click');
-    expect(checkOptionsAndSelections(wrapper, [state.sourcerer.defaultIndexPattern.title])).toEqual(
-      {
-        availableOptionCount: 1,
-        optionsSelected: true,
-      }
-    );
+    expect(checkOptionsAndSelections(wrapper, patternList)).toEqual({
+      availableOptionCount: title.split(',').length - patternList.length, // 1,
+      optionsSelected: true,
+    });
   });
   it('disables saving when no index patterns are selected', () => {
     store = createStore(
@@ -221,7 +197,7 @@ describe('Sourcerer component', () => {
           ...state.sourcerer,
           kibanaIndexPatterns: [
             state.sourcerer.defaultIndexPattern,
-            { id: '1234', title: 'auditbeat-*' },
+            { id: '1234', title: 'auditbeat-*', patternList: ['auditbeat-*'] },
           ],
         },
       },
@@ -236,6 +212,6 @@ describe('Sourcerer component', () => {
     );
     wrapper.find('[data-test-subj="sourcerer-trigger"]').first().simulate('click');
     wrapper.find('[data-test-subj="comboBoxClearButton"]').first().simulate('click');
-    expect(wrapper.find('[data-test-subj="add-index"]').first().prop('disabled')).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="sourcerer-save"]').first().prop('disabled')).toBeTruthy();
   });
 });

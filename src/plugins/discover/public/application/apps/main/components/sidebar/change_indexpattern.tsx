@@ -72,7 +72,7 @@ export function ChangeIndexPattern({
           })}
         </EuiPopoverTitle>
         <EuiSelectable<{ value: string }>
-          data-test-subj="indexPattern-switcher"
+          data-test-subj="sourcerer-combo-box"
           {...selectableProps}
           searchable
           singleSelection="always"
