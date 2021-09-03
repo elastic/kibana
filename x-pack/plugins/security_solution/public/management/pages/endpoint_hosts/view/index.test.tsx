@@ -992,7 +992,7 @@ describe('when on the endpoint list page', () => {
         expect(activityLogCallout).not.toBeNull();
       });
 
-      it.only('should correctly display non-empty comments for actions', async () => {
+      it('should correctly display non-empty comments for actions', async () => {
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
           history.push(
