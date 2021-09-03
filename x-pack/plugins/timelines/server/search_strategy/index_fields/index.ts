@@ -26,8 +26,9 @@ import {
 } from '../../../common/search_strategy/index_fields';
 import { StartPlugins } from '../../types';
 
-const apmIndexPattern = 'apm-*-transaction*';
-const apmDataStreamsPattern = 'traces-apm*';
+// SOMEONE EXPLAIN WHY I SHOULDN'T DELETE?
+// const apmIndexPattern = 'apm-*-transaction*';
+// const apmDataStreamsPattern = 'traces-apm*';
 
 export const indexFieldsProvider = (
   getStartServices: StartServicesAccessor<StartPlugins>
@@ -80,53 +81,43 @@ export const requestIndexFieldSearch = async (
     esClient.asCurrentUser
   );
 
+  // check at the top if indicesExist
   const indicesExist: boolean[] = await findExistingIndices(dedupeIndices, esClient.asCurrentUser);
 
   let fieldDescriptor: FieldDescriptor[][];
-  if (request.kipId) {
-    const kip = await indexPatternService.get(request.kipId);
-    fieldDescriptor = [Object.values(kip.fields.toSpec()) as FieldDescriptor[]];
-  } else {
-    const responsesIndexFields = await Promise.all(
-      dedupeIndices
-        .map(async (index) => {
-          if (
-            request.onlyCheckIfIndicesExist &&
-            (index.includes(apmIndexPattern) || index.includes(apmDataStreamsPattern))
-          ) {
-            // for apm index pattern check also if there's data https://github.com/elastic/kibana/issues/90661
-            const searchResponse = await esClient.asCurrentUser.search({
-              index,
-              body: { query: { match_all: {} }, size: 0 },
-            });
-            return get(searchResponse, 'body.hits.total.value', 0) > 0;
-          } else {
-            if (index.startsWith('.alerts-observability')) {
-              return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-                pattern: index,
-              });
-            } else {
-              return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
-                pattern: index,
-              });
-            }
-          }
-        })
-        .map((p) => p.catch((e) => false))
-    );
-    fieldDescriptor = responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][];
-  }
-
+  // if kipId is provided, get fields from the Kibana Data View
 
   let indexFields: IndexField[] = [];
 
   if (!request.onlyCheckIfIndicesExist) {
+    if (request.kipId) {
+      // TODO: Steph/sourcerer needs unit test
+      const kip = await indexPatternService.get(request.kipId);
+      // type cast because index pattern type is FieldSpec and timeline type is FieldDescriptor, same diff
+      fieldDescriptor = [Object.values(kip.fields.toSpec()) as FieldDescriptor[]];
+    } else {
+      fieldDescriptor = await Promise.all(
+        dedupeIndices
+          .filter((index, i) => indicesExist[i])
+          .map(async (index, n) => {
+            if (index.startsWith('.alerts-observability')) {
+              // TODO: Steph/sourcerer needs unit test
+              return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+                pattern: index,
+              });
+            }
+            return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
+              pattern: index,
+            });
+          })
+      );
+    }
     indexFields = await formatIndexFields(beatFields, fieldDescriptor, dedupeIndices);
   }
 
   return {
     indexFields,
-    indicesExist: dedupeIndices.filter((index, i) => indicesExist[i] !== false),
+    indicesExist: dedupeIndices.filter((index, i) => indicesExist[i]),
     rawResponse: {
       timed_out: false,
       took: -1,

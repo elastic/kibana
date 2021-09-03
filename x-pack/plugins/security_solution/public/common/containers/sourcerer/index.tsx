@@ -63,7 +63,7 @@ export const useInitSourcerer = (
   );
 
   useIndexFields(scopeId);
-  // useIndexFields(SourcererScopeName.timeline);
+  useIndexFields(SourcererScopeName.timeline);
 
   useEffect(() => {
     if (!loadingSignalIndex && signalIndexName != null && signalIndexNameSelector == null) {

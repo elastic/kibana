@@ -147,6 +147,7 @@ export const useFetchIndex = (
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
+        console.log(' indexFieldsSearch STINKY', iNames);
         // TODO: Steph/sourcerer this stinks i think bug here
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
@@ -228,6 +229,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
 
   const indexFieldsSearch = useCallback(
     (selectedKipId: string) => {
+      console.log(' indexFieldsSearch this one is chill');
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);

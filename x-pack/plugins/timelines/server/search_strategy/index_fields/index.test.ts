@@ -796,12 +796,29 @@ describe('Fields Provider', () => {
     const getFieldsForWildcardMock = jest.fn();
     const esClientSearchMock = jest.fn();
 
+    const getStartServices = jest.fn().mockReturnValue([
+      null,
+      {
+        data: {
+          indexPatterns: {
+            indexPatternsServiceFactory: () => ({
+              get: jest.fn(), // () => new Promise((rs) => rs(mockPattern)),
+            }),
+          },
+        },
+      },
+    ]);
+
     const deps = ({
       esClient: { asCurrentUser: { search: esClientSearchMock } },
     } as unknown) as SearchStrategyDependencies;
 
     beforeAll(() => {
       getFieldsForWildcardMock.mockResolvedValue([]);
+
+      esClientSearchMock.mockResolvedValue({
+        body: { hits: { total: { value: 123 } } },
+      });
       IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     });
 
@@ -821,9 +838,9 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: true,
       };
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
-
-      expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
+      // why would we want this?! they said onlyCheckIfIndicesExist, fuck the fields
+      // expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
 
       expect(response.indexFields).toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
@@ -836,7 +853,7 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: false,
       };
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
 
@@ -851,10 +868,11 @@ describe('Fields Provider', () => {
         onlyCheckIfIndicesExist: false,
       };
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
-      expect(esClientSearchMock).not.toHaveBeenCalled();
+      // we're calling it every time now
+      // expect(esClientSearchMock).not.toHaveBeenCalled();
 
       expect(response.indexFields).not.toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
@@ -870,7 +888,7 @@ describe('Fields Provider', () => {
       esClientSearchMock.mockResolvedValue({
         body: { hits: { total: { value: 1 } } },
       });
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(esClientSearchMock).toHaveBeenCalledWith({
         index: indices[0],
@@ -897,7 +915,7 @@ describe('Fields Provider', () => {
         body: { hits: { total: { value: 0 } } },
       });
 
-      const response = await requestIndexFieldSearch(request, deps, beatFields);
+      const response = await requestIndexFieldSearch(request, deps, beatFields, getStartServices);
 
       expect(esClientSearchMock).toHaveBeenCalledWith({
         index: indices[0],
