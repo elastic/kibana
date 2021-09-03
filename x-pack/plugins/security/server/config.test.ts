@@ -179,53 +179,53 @@ describe('config schema', () => {
   describe('public', () => {
     it('properly validates `protocol`', async () => {
       expect(ConfigSchema.validate({ public: { protocol: 'http' } }).public).toMatchInlineSnapshot(`
-                                        Object {
-                                          "protocol": "http",
-                                        }
-                              `);
+        Object {
+          "protocol": "http",
+        }
+      `);
 
       expect(ConfigSchema.validate({ public: { protocol: 'https' } }).public)
         .toMatchInlineSnapshot(`
-                                        Object {
-                                          "protocol": "https",
-                                        }
-                              `);
+        Object {
+          "protocol": "https",
+        }
+      `);
 
       expect(() => ConfigSchema.validate({ public: { protocol: 'ftp' } }))
         .toThrowErrorMatchingInlineSnapshot(`
-"[public.protocol]: types that failed validation:
-- [public.protocol.0]: expected value to equal [http]
-- [public.protocol.1]: expected value to equal [https]"
-`);
+        "[public.protocol]: types that failed validation:
+        - [public.protocol.0]: expected value to equal [http]
+        - [public.protocol.1]: expected value to equal [https]"
+      `);
 
       expect(() => ConfigSchema.validate({ public: { protocol: 'some-protocol' } }))
         .toThrowErrorMatchingInlineSnapshot(`
-"[public.protocol]: types that failed validation:
-- [public.protocol.0]: expected value to equal [http]
-- [public.protocol.1]: expected value to equal [https]"
-`);
+        "[public.protocol]: types that failed validation:
+        - [public.protocol.0]: expected value to equal [http]
+        - [public.protocol.1]: expected value to equal [https]"
+      `);
     });
 
     it('properly validates `hostname`', async () => {
       expect(ConfigSchema.validate({ public: { hostname: 'elastic.co' } }).public)
         .toMatchInlineSnapshot(`
-                                                                                                Object {
-                                                                                                  "hostname": "elastic.co",
-                                                                                                }
-                                                                        `);
+        Object {
+          "hostname": "elastic.co",
+        }
+      `);
 
       expect(ConfigSchema.validate({ public: { hostname: '192.168.1.1' } }).public)
         .toMatchInlineSnapshot(`
-                                                                                                Object {
-                                                                                                  "hostname": "192.168.1.1",
-                                                                                                }
-                                                                        `);
+        Object {
+          "hostname": "192.168.1.1",
+        }
+      `);
 
       expect(ConfigSchema.validate({ public: { hostname: '::1' } }).public).toMatchInlineSnapshot(`
-                                                                                                Object {
-                                                                                                  "hostname": "::1",
-                                                                                                }
-                                                                        `);
+        Object {
+          "hostname": "::1",
+        }
+      `);
 
       expect(() =>
         ConfigSchema.validate({ public: { hostname: 'http://elastic.co' } })
@@ -242,22 +242,22 @@ describe('config schema', () => {
 
     it('properly validates `port`', async () => {
       expect(ConfigSchema.validate({ public: { port: 1234 } }).public).toMatchInlineSnapshot(`
-                                        Object {
-                                          "port": 1234,
-                                        }
-                              `);
+        Object {
+          "port": 1234,
+        }
+      `);
 
       expect(ConfigSchema.validate({ public: { port: 0 } }).public).toMatchInlineSnapshot(`
-                                        Object {
-                                          "port": 0,
-                                        }
-                              `);
+        Object {
+          "port": 0,
+        }
+      `);
 
       expect(ConfigSchema.validate({ public: { port: 65535 } }).public).toMatchInlineSnapshot(`
-                                        Object {
-                                          "port": 65535,
-                                        }
-                              `);
+        Object {
+          "port": 65535,
+        }
+      `);
 
       expect(() =>
         ConfigSchema.validate({ public: { port: -1 } })
