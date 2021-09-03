@@ -121,10 +121,9 @@ export const buildSignalFromSequence = (
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
   const timestamp = new Date().toISOString();
-
-  const reason = buildReasonMessage({ rule });
-  const signal: Signal = buildSignal(events, rule, reason);
   const mergedEvents = objectArrayIntersection(events.map((event) => event._source));
+  const reason = buildReasonMessage({ rule, mergedDoc: mergedEvents as SignalSourceHit });
+  const signal: Signal = buildSignal(events, rule, reason);
   return {
     ...mergedEvents,
     '@timestamp': timestamp,

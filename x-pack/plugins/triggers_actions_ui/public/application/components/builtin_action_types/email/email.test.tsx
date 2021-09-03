@@ -9,6 +9,7 @@ import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '../index';
 import { ActionTypeModel } from '../../../../types';
 import { EmailActionConnector } from '../types';
+import { getEmailServices } from './email';
 
 const ACTION_TYPE_ID = '.email';
 let actionTypeModel: ActionTypeModel;
@@ -29,6 +30,18 @@ describe('actionTypeRegistry.get() works', () => {
   });
 });
 
+describe('getEmailServices', () => {
+  test('should return elastic cloud service if isCloudEnabled is true', () => {
+    const services = getEmailServices(true);
+    expect(services.find((service) => service.value === 'elastic_cloud')).toBeTruthy();
+  });
+
+  test('should not return elastic cloud service if isCloudEnabled is false', () => {
+    const services = getEmailServices(false);
+    expect(services.find((service) => service.value === 'elastic_cloud')).toBeFalsy();
+  });
+});
+
 describe('connector validation', () => {
   test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
@@ -46,6 +59,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        service: 'other',
       },
     } as EmailActionConnector;
 
@@ -55,6 +69,7 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
+          service: [],
         },
       },
       secrets: {
@@ -82,6 +97,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: false,
+        service: 'other',
       },
     } as EmailActionConnector;
 
@@ -91,6 +107,7 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
+          service: [],
         },
       },
       secrets: {
@@ -113,6 +130,7 @@ describe('connector validation', () => {
       config: {
         from: 'test@test.com',
         hasAuth: true,
+        service: 'other',
       },
     } as EmailActionConnector;
 
@@ -122,6 +140,7 @@ describe('connector validation', () => {
           from: [],
           port: ['Port is required.'],
           host: ['Host is required.'],
+          service: [],
         },
       },
       secrets: {
@@ -148,6 +167,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        service: 'other',
       },
     } as EmailActionConnector;
 
@@ -157,6 +177,7 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
+          service: [],
         },
       },
       secrets: {
@@ -183,6 +204,7 @@ describe('connector validation', () => {
         host: 'localhost',
         test: 'test',
         hasAuth: true,
+        service: 'other',
       },
     } as EmailActionConnector;
 
@@ -192,11 +214,50 @@ describe('connector validation', () => {
           from: [],
           port: [],
           host: [],
+          service: [],
         },
       },
       secrets: {
         errors: {
           user: ['Username is required when password is used.'],
+          password: [],
+        },
+      },
+    });
+  });
+  test('connector validation fails when server type is not selected', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'password',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      isPreconfigured: false,
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        port: 2323,
+        host: 'localhost',
+        test: 'test',
+        hasAuth: true,
+      },
+    };
+
+    expect(
+      await actionTypeModel.validateConnector((actionConnector as unknown) as EmailActionConnector)
+    ).toEqual({
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+          service: ['Service is required.'],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
           password: [],
         },
       },

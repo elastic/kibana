@@ -119,6 +119,54 @@ describe('successful migrations', () => {
     });
   });
 
+  describe('7.16.0', () => {
+    test('set service config property for .email connectors if service is undefined', () => {
+      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const action = getMockDataForEmail({ config: { service: undefined } });
+      const migratedAction = migration716(action, context);
+      expect(migratedAction.attributes.config).toEqual({
+        service: 'other',
+      });
+      expect(migratedAction).toEqual({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            service: 'other',
+          },
+        },
+      });
+    });
+
+    test('set service config property for .email connectors if service is null', () => {
+      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const action = getMockDataForEmail({ config: { service: null } });
+      const migratedAction = migration716(action, context);
+      expect(migratedAction.attributes.config).toEqual({
+        service: 'other',
+      });
+      expect(migratedAction).toEqual({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            service: 'other',
+          },
+        },
+      });
+    });
+
+    test('skips migrating .email connectors if service is defined, even if value is nonsense', () => {
+      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const action = getMockDataForEmail({ config: { service: 'gobbledygook' } });
+      const migratedAction = migration716(action, context);
+      expect(migratedAction.attributes.config).toEqual({
+        service: 'gobbledygook',
+      });
+      expect(migratedAction).toEqual(action);
+    });
+  });
+
   describe('8.0.0', () => {
     test('no op migration for rules SO', () => {
       const migration800 = getActionsMigrations(encryptedSavedObjectsSetup)['8.0.0'];

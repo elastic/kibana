@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110902
-/* eslint-disable @kbn/eslint/no_export_all */
+import type { PluginInitializerContext } from 'src/core/public';
 
-import { PluginInitializerContext } from 'src/core/public';
 import { LicensingPlugin } from './plugin';
 
-export * from '../common/types';
-export { LicensingPluginSetup, LicensingPluginStart } from './types';
+export type {
+  LicenseCheckState,
+  LicenseType,
+  LicenseStatus,
+  LicenseFeature,
+  PublicLicense,
+  PublicFeatures,
+  PublicLicenseJSON,
+  LicenseCheck,
+  ILicense,
+} from '../common/types';
+export type { LicensingPluginSetup, LicensingPluginStart } from './types';
 export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);
