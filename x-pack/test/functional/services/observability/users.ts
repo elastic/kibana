@@ -14,6 +14,7 @@ const OBSERVABILITY_TEST_ROLE_NAME = 'observability-functional-test-role';
 
 export function ObservabilityUsersProvider({ getPageObject, getService }: FtrProviderContext) {
   const security = getService('security');
+  const commonPageObject = getPageObject('common');
 
   /**
    * Creates a test role and set it as the test user's role. Performs a page
@@ -22,9 +23,12 @@ export function ObservabilityUsersProvider({ getPageObject, getService }: FtrPro
    * @arg roleDefinition - the privileges of the test role
    */
   const setTestUserRole = async (roleDefinition: CreateRolePayload) => {
+    // return to neutral grounds to avoid running into permission problems on reload
+    await commonPageObject.navigateToActualUrl('kibana');
+
     await security.role.create(OBSERVABILITY_TEST_ROLE_NAME, roleDefinition);
 
-    await security.testUser.setRoles([OBSERVABILITY_TEST_ROLE_NAME]);
+    await security.testUser.setRoles([OBSERVABILITY_TEST_ROLE_NAME]); // performs a page reload
   };
 
   /**

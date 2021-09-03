@@ -96,6 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows observability/cases navlink', async () => {
+        await PageObjects.common.navigateToActualUrl('observability');
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Cases');
       });
