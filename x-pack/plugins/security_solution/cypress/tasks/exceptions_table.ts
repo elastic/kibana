@@ -21,8 +21,8 @@ export const goToExceptionsTable = () => {
 };
 
 export const waitForExceptionsTableToBeLoaded = () => {
-  cy.get(EXCEPTIONS_TABLE).should('exist');
-  cy.get(EXCEPTIONS_TABLE_SEARCH).should('exist');
+  cy.get(EXCEPTIONS_TABLE, { timeout: 120000 });
+  cy.get(EXCEPTIONS_TABLE_SEARCH, { timeout: 120000 });
 };
 
 export const searchForExceptionList = (searchText: string) => {

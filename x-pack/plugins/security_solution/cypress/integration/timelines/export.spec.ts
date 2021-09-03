@@ -18,8 +18,7 @@ describe('Export timelines', () => {
     cleanKibana();
     cy.intercept({
       method: 'POST',
-      path: '*/api/timeline*',
-      query: { file_name: 'timelines_export.ndjson' },
+      path: '/api/timeline/_export?file_name=timelines_export.ndjson',
     }).as('export');
     createTimeline(getTimeline()).then((response) => {
       cy.wrap(response).as('timelineResponse');

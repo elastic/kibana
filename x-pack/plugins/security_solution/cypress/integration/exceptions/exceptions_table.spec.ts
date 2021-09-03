@@ -23,6 +23,7 @@ import {
   waitForPageWithoutDateRange,
 } from '../../tasks/login';
 import {
+  activatesRule,
   addsExceptionFromRuleSettings,
   goBackToAllRulesTable,
   goToExceptionsTab,
@@ -58,13 +59,12 @@ describe('Exceptions Table', () => {
 
     esArchiverLoad('auditbeat_for_exceptions');
 
+    activatesRule();
+
     // Add a detections exception list
     goToExceptionsTab();
     addsExceptionFromRuleSettings(getException());
     waitForTheRuleToBeExecuted();
-
-    // Create exception list not used by any rules
-    createExceptionList(getExceptionList()).as('exceptionListResponse');
 
     goBackToAllRulesTable();
     waitForRulesTableToBeLoaded();
@@ -113,7 +113,10 @@ describe('Exceptions Table', () => {
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 3 lists`);
   });
 
-  it('Exports exception list', async function () {
+  it('Exports exception list', () => {
+    // Create exception list not used by any rules
+    createExceptionList(getExceptionList()).as('exceptionListResponse');
+
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
     waitForPageWithoutDateRange(EXCEPTIONS_URL);
@@ -121,12 +124,15 @@ describe('Exceptions Table', () => {
 
     exportExceptionList();
 
-    cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should(
-        'eql',
-        expectedExportedExceptionList(this.exceptionListResponse)
-      );
-    });
+    cy.wait('@export').then(({ response }) =>
+      cy
+        .get('@exceptionListResponse')
+        .then((exceptionListResponse) =>
+          cy
+            .wrap(response.body!)
+            .should('eql', expectedExportedExceptionList(exceptionListResponse))
+        )
+    );
   });
 
   it('Deletes exception list without rule reference', () => {

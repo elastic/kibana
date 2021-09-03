@@ -36,11 +36,14 @@ Cypress.Commands.add(
   function (stubObject, factoryQueryType, searchStrategyName = 'securitySolutionSearchStrategy') {
     cy.intercept('POST', '/internal/bsearch', (req) => {
       if (searchStrategyName === 'indexFields') {
-        req.reply(stubObject.rawResponse);
+        req.reply(stubObject);
+        return;
       } else if (factoryQueryType === 'overviewHost') {
         req.reply(stubObject.overviewHost);
+        return;
       } else if (factoryQueryType === 'overviewNetwork') {
         req.reply(stubObject.overviewNetwork);
+        return;
       }
       req.reply();
     });
