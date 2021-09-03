@@ -28,6 +28,7 @@ import {
   SIGNALS_TEMPLATE_VERSION,
   SIGNALS_FIELD_ALIASES_VERSION,
   ALIAS_VERSION_FIELD,
+  getBackwardsCompatibilityRuntimeFields,
 } from './get_signals_template';
 import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
@@ -155,29 +156,35 @@ const addFieldAliasesToIndices = async ({
   spaceId: string;
 }) => {
   const { body: indexMappings } = await esClient.indices.get({ index });
+  for (const [indexName, mapping] of Object.entries(indexMappings)) {
+    const currentVersion: number | undefined = get(mapping.mappings?._meta, 'version');
+    const body = createBackwardsCompatibilityMapping(currentVersion);
+    await esClient.indices.putMapping({
+      index: indexName,
+      body,
+      allow_no_indices: true,
+    } as estypes.IndicesPutMappingRequest);
+  }
+};
+
+const createBackwardsCompatibilityMapping = (version: number | undefined) => {
   // Make sure that all signal fields we add aliases for are guaranteed to exist in the mapping for ALL historical
   // signals indices (either by adding them to signalExtraFields or ensuring they exist in the original signals
   // mapping) or else this call will fail and not update ANY signals indices
   const fieldAliases = createSignalsFieldAliases();
-  for (const [indexName, mapping] of Object.entries(indexMappings)) {
-    const currentVersion: number | undefined = get(mapping.mappings?._meta, 'version');
-    const newMapping = {
-      properties: {
-        ...signalExtraFields,
-        ...fieldAliases,
-        // ...getRbacRequiredFields(spaceId),
-      },
-      _meta: {
-        version: currentVersion,
-        [ALIAS_VERSION_FIELD]: SIGNALS_FIELD_ALIASES_VERSION,
-      },
-    };
-    await esClient.indices.putMapping({
-      index: indexName,
-      body: newMapping,
-      allow_no_indices: true,
-    } as estypes.IndicesPutMappingRequest);
-  }
+  const runtimeFields = getBackwardsCompatibilityRuntimeFields();
+  return {
+    runtime: runtimeFields,
+    properties: {
+      ...signalExtraFields,
+      ...fieldAliases,
+      // ...getRbacRequiredFields(spaceId),
+    },
+    _meta: {
+      version,
+      [ALIAS_VERSION_FIELD]: SIGNALS_FIELD_ALIASES_VERSION,
+    },
+  };
 };
 
 // const addIndexAliases = async ({

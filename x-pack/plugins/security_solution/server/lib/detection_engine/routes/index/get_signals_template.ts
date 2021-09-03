@@ -11,6 +11,7 @@ import {
   ALERT_RULE_PRODUCER,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
+import { merge } from 'lodash';
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 import otherMapping from './other_mappings.json';
@@ -34,10 +35,12 @@ export const SIGNALS_TEMPLATE_VERSION = 57;
   @constant
   @type {number}
   @description This value represents the version of the field aliases that map the new field names
-  used for alerts-as-data to the old signal.* field names. If any .siem-signals-<space id> indices
-  have an aliases_version less than this value, the detections UI will call create_index_route and
-  and go through the index update process. Increment this number if making changes to the field
-  aliases we use to make signals forwards-compatible.
+  used for alerts-as-data to the old signal.* field names and any other runtime fields that are added
+  to .siem-signals indices for compatibility reasons (e.g. host.os.name.caseless).
+
+  If any .siem-signals-<space id> indices have an aliases_version less than this value, the detections 
+  UI will call create_index_route and and go through the index update process. Increment this number if 
+  making changes to the field aliases we use to make signals forwards-compatible.
 */
 export const SIGNALS_FIELD_ALIASES_VERSION = 1;
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
@@ -68,13 +71,12 @@ export const getSignalsTemplate = (index: string, spaceId: string, aadIndexAlias
       },
       mappings: {
         dynamic: false,
-        properties: {
-          ...ecsMapping.mappings.properties,
-          ...otherMapping.mappings.properties,
-          ...fieldAliases,
-          // ...getRbacRequiredFields(spaceId),
-          signal: signalsMapping.mappings.properties.signal,
-        },
+        properties: merge(
+          ecsMapping.mappings.properties,
+          otherMapping.mappings.properties,
+          fieldAliases,
+          signalsMapping.mappings.properties
+        ),
         _meta: {
           version: SIGNALS_TEMPLATE_VERSION,
           [ALIAS_VERSION_FIELD]: SIGNALS_FIELD_ALIASES_VERSION,
@@ -117,6 +119,17 @@ export const getRbacRequiredFields = (spaceId: string) => {
     [ALERT_RULE_TYPE_ID]: {
       type: 'constant_keyword',
       value: 'siem.signals',
+    },
+  };
+};
+
+export const getBackwardsCompatibilityRuntimeFields = () => {
+  return {
+    'host.os.name.caseless': {
+      type: 'keyword',
+      script: {
+        source: "emit(doc['host.os.name'].value.toLowerCase())",
+      },
     },
   };
 };
