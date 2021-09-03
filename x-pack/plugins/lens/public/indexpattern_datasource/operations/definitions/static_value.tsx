@@ -105,9 +105,9 @@ export const staticValueOperation: OperationDefinition<
   },
   buildColumn({ previousColumn, layer, indexPattern }, columnParams, operationDefinitionMap) {
     const existingStaticValue =
-      previousColumn?.operationType === 'static_value' &&
-      previousColumn.params &&
-      'value' in previousColumn.params
+      previousColumn?.params &&
+      'value' in previousColumn.params &&
+      isValidNumber(previousColumn.params.value)
         ? previousColumn.params.value
         : undefined;
     const previousParams: StaticValueIndexPatternColumn['params'] = {

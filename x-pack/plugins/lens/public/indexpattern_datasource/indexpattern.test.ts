@@ -1694,7 +1694,7 @@ describe('IndexPattern Data Source', () => {
               newStatic: {
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Static Value: 0',
+                label: 'Static value: 0',
                 operationType: 'static_value',
                 params: { value: 0 },
                 references: [],
