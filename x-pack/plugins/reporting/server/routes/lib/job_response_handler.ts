@@ -60,6 +60,7 @@ export async function downloadJobResponseHandler(
   } catch (err) {
     const { logger } = reporting.getPluginSetupDeps();
     logger.error(err);
+    throw err;
   }
 }
 
