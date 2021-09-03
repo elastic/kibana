@@ -360,10 +360,11 @@ export class TaskClaiming {
 
   private isTaskTypeExcluded(taskType: string) {
     for (const excludedType of this.excludedTaskTypes) {
-      if (minimatch(excludedType, taskType)) {
+      if (minimatch(taskType, excludedType)) {
         return true;
       }
     }
+
     return false;
   }
 
