@@ -28,7 +28,7 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 70,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
+    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipConfigFromGeoJson(
       sourceDataRequest
     );
     expect(areResultsTrimmed).toBe(false);
@@ -47,7 +47,7 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 5000,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
+    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipConfigFromGeoJson(
       sourceDataRequest
     );
     expect(areResultsTrimmed).toBe(true);
@@ -66,7 +66,7 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 70,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
+    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipConfigFromGeoJson(
       sourceDataRequest
     );
     expect(areResultsTrimmed).toBe(true);
@@ -85,7 +85,7 @@ describe('getSourceTooltipContent', () => {
         totalEntities: 5000,
       },
     });
-    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipContent(
+    const { tooltipContent, areResultsTrimmed } = geoLineSource.getSourceTooltipConfigFromGeoJson(
       sourceDataRequest
     );
     expect(areResultsTrimmed).toBe(true);

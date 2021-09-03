@@ -19,11 +19,7 @@ import uuid from 'uuid/v4';
 import { Geometry } from 'geojson';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import {
-  GEO_JSON_TYPE,
-  LON_INDEX,
-  RawValue,
-} from '../../../../common/constants';
+import { GEO_JSON_TYPE, LON_INDEX, RawValue } from '../../../../common/constants';
 import {
   GEOMETRY_FILTER_ACTION,
   TooltipFeature,
@@ -207,7 +203,6 @@ export class TooltipControl extends Component<Props, {}> {
         break;
       }
       const featureId = mbFeature.properties?.[layer.getMbFeatureIdPropertyName()];
-      console.log('fi', featureId);
       const layerId = layer.getId();
       let match = false;
       for (let j = 0; j < uniqueFeatures.length; j++) {
@@ -282,7 +277,6 @@ export class TooltipControl extends Component<Props, {}> {
     }
 
     const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
-    console.log('tooltip', mbFeatures);
     if (!mbFeatures.length) {
       this.props.closeOnHoverTooltip();
       return;

@@ -15,6 +15,7 @@ import {
   ESSearchSourceResponseMeta,
   MapExtent,
   MapQuery,
+  TileMetaFeature,
   Timeslice,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
@@ -68,7 +69,11 @@ export interface IVectorSource extends ISource {
   hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  getSourceTooltipConfigFromTileMeta(
+    tileMetaFeatures: TileMetaFeature[],
+    totalFeaturesCount: number
+  ): SourceTooltipConfig;
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
   getDefaultFields(): Promise<Record<string, Record<string, string>>>;
@@ -165,8 +170,18 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig {
     return { tooltipContent: null, areResultsTrimmed: false };
+  }
+
+  getSourceTooltipConfigFromTileMeta(
+    tileMetaFeatures: TileMetaFeature[],
+    totalFeaturesCount: number
+  ): SourceTooltipConfig {
+    return {
+      tooltipContent: null,
+      areResultsTrimmed: false,
+    };
   }
 
   getSyncMeta(): VectorSourceSyncMeta | null {

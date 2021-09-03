@@ -31,11 +31,14 @@ import {
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
+  DEFAULT_MAX_RESULT_WINDOW,
   ES_GEO_FIELD_TYPE,
   FIELD_ORIGIN,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
   MVT_HITS_SOURCE_LAYER_NAME,
+  MVT_HITS_TOTAL_RELATION,
+  MVT_HITS_TOTAL_VALUE,
   MVT_TOKEN_PARAM_NAME,
   SCALING_TYPES,
   SOURCE_TYPES,
@@ -50,6 +53,7 @@ import { registerSource } from '../source_registry';
 import {
   DataMeta,
   ESSearchSourceDescriptor,
+  TileMetaFeature,
   Timeslice,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
@@ -146,6 +150,40 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       origin: FIELD_ORIGIN.SOURCE,
       canReadFromGeoJson: this._descriptor.scalingType !== SCALING_TYPES.MVT,
     });
+  }
+
+  getSourceTooltipConfigFromTileMeta(
+    tileMetaFeatures: TileMetaFeature[],
+    totalFeaturesCount: number
+  ): SourceTooltipConfig {
+    if (!this.isMvt()) {
+      return super.getSourceTooltipConfigFromTileMeta(tileMetaFeatures, totalFeaturesCount);
+    }
+
+    const isIncomplete: boolean = tileMetaFeatures.some((tileMeta: TileMetaFeature) => {
+      if (tileMeta?.properties?.[MVT_HITS_TOTAL_RELATION] === 'gte') {
+        return tileMeta?.properties?.[MVT_HITS_TOTAL_VALUE] >= DEFAULT_MAX_RESULT_WINDOW;
+      } else {
+        return false;
+      }
+    });
+
+    return {
+      tooltipContent: isIncomplete
+        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
+            defaultMessage: `Results limited to {count} documents.`,
+            values: {
+              count: totalFeaturesCount.toLocaleString(),
+            },
+          })
+        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
+            defaultMessage: `Found {count} documents.`,
+            values: {
+              count: totalFeaturesCount.toLocaleString(),
+            },
+          }),
+      areResultsTrimmed: isIncomplete,
+    };
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
@@ -674,7 +712,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceTooltipConfigFromGeoJson(sourceDataRequest?: DataRequest): SourceTooltipConfig {
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
     if (!meta) {
       // no tooltip content needed when there is no feature collection or meta

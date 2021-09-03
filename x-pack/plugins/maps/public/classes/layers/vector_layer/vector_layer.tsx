@@ -244,7 +244,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       tooltipContent,
       areResultsTrimmed,
       isDeprecated,
-    } = this.getSource().getSourceTooltipContent(sourceDataRequest);
+    } = this.getSource().getSourceTooltipConfigFromGeoJson(sourceDataRequest);
     return {
       icon: isDeprecated ? (
         <EuiIcon type="alert" color="danger" />

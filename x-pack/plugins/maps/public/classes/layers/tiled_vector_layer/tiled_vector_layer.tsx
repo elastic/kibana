@@ -13,12 +13,10 @@ import type {
 import { Feature } from 'geojson';
 import uuid from 'uuid/v4';
 import { parse as parseUrl } from 'url';
-import { i18n } from '@kbn/i18n';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
-  KBN_FEATURE_COUNT,
-  KBN_IS_TILE_COMPLETE,
   LAYER_TYPE,
+  MVT_HITS_TOTAL_VALUE,
   MVT_META_SOURCE_LAYER_NAME,
   SOURCE_DATA_REQUEST_ID,
 } from '../../../../common/constants';
@@ -71,13 +69,22 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
-    const tileMetas = this._getMetaFromTiles();
-    if (!tileMetas.length) {
+    if (!this._source.isESSource()) {
+      // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources
+      return {
+        icon: this.getCurrentStyle().getIcon(),
+        tooltipContent: null,
+        areResultsTrimmed: false,
+      };
+    }
+
+    const tileMetaFeatures = this._getMetaFromTiles();
+    if (!tileMetaFeatures.length) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
-    const totalFeaturesCount: number = tileMetas.reduce((acc: number, tileMeta: Feature) => {
-      const count = tileMeta && tileMeta.properties ? tileMeta.properties[KBN_FEATURE_COUNT] : 0;
+    const totalFeaturesCount: number = tileMetaFeatures.reduce((acc: number, tileMeta: Feature) => {
+      const count = tileMeta && tileMeta.properties ? tileMeta.properties[MVT_HITS_TOTAL_VALUE] : 0;
       return count + acc;
     }, 0);
 
@@ -85,26 +92,13 @@ export class TiledVectorLayer extends VectorLayer {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
-    const isIncomplete: boolean = tileMetas.some((tileMeta: Feature) => {
-      return !tileMeta?.properties?.[KBN_IS_TILE_COMPLETE];
-    });
-
+    const content = this._source.getSourceTooltipConfigFromTileMeta(
+      tileMetaFeatures,
+      totalFeaturesCount
+    );
     return {
       icon: this.getCurrentStyle().getIcon(),
-      tooltipContent: isIncomplete
-        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
-            defaultMessage: `Results limited to {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          })
-        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
-            defaultMessage: `Found {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          }),
-      areResultsTrimmed: isIncomplete,
+      ...content,
     };
   }
 
@@ -289,7 +283,7 @@ export class TiledVectorLayer extends VectorLayer {
       }
     });
 
-    const filtered = metaFeatures.filter(f => f!==null);
+    const filtered = metaFeatures.filter((f) => f !== null);
     return filtered as TileMetaFeature[];
   }
 

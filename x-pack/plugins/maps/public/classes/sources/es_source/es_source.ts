@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter, IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
-import { AbstractVectorSource, BoundsFilters } from '../vector_source';
+import { AbstractVectorSource, BoundsFilters, SourceTooltipConfig } from '../vector_source';
 import {
   getAutocompleteService,
   getIndexPatternService,
@@ -27,6 +27,7 @@ import {
   DynamicStylePropertyOptions,
   MapExtent,
   MapQuery,
+  TileMetaFeature,
   VectorJoinSourceRequestMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';

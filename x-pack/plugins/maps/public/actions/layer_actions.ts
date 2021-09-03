@@ -629,8 +629,6 @@ export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFea
       return;
     }
 
-    console.log('upd', mbMetaFeatures);
-
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: layerId,

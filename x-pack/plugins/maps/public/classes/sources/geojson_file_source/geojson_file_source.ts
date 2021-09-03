@@ -125,7 +125,7 @@ export class GeoJsonFileSource extends AbstractVectorSource {
     return true;
   }
 
-  getSourceTooltipContent() {
+  getSourceTooltipConfigFromGeoJson() {
     return {
       tooltipContent: (this._descriptor as GeojsonFileSourceDescriptor).tooltipContent,
       areResultsTrimmed: (this._descriptor as GeojsonFileSourceDescriptor).areResultsTrimmed,
