@@ -63,13 +63,10 @@ import { WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 import {
-  EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
   SIGNALS_ID,
-  THRESHOLD_RULE_TYPE_ID,
 } from '../../../../common/constants';
 
 interface SortExceptionsReturn {
