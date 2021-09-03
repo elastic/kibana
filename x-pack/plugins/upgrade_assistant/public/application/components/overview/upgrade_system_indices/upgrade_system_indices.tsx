@@ -92,7 +92,7 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
         title={i18nTexts.loadingError}
         color="danger"
         iconType="alert"
-        data-test-subj="systemIndicesErrorCallout"
+        data-test-subj="systemIndicesStatusErrorCallout"
       >
         <p>
           {upgradeStatus.error.statusCode} - {upgradeStatus.error.message}
@@ -101,6 +101,7 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
           color="danger"
           isLoading={upgradeStatus.isLoading}
           onClick={upgradeStatus.resendRequest}
+          data-test-subj="systemIndicesStatusRetryButton"
         >
           {i18nTexts.retryButtonLabel}
         </EuiButton>
@@ -110,7 +111,7 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
 
   if (upgradeStatus.data?.upgrade_status === 'NO_UPGRADE_NEEDED') {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="noUpgradeNeededSection">
         <EuiFlexItem grow={false}>
           <EuiIcon type="check" color="success" />
         </EuiFlexItem>
@@ -137,6 +138,7 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
             title={`${startUpgradeStatus.details!.statusCode} - ${
               startUpgradeStatus.details!.message
             }`}
+            data-test-subj="startSystemIndicesUpgradeCalloutError"
           />
           <EuiSpacer size="m" />
         </>
@@ -148,12 +150,17 @@ const UpgradeSystemIndicesStep: FunctionComponent = () => {
             isLoading={isUpgrading}
             isDisabled={isButtonDisabled}
             onClick={beginSystemIndicesUpgrade}
+            data-test-subj="startSystemIndicesUpgradeButton"
           >
             {isUpgrading ? i18nTexts.inProgressButtonLabel : i18nTexts.startButtonLabel}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={() => setShowFlyout(true)} isDisabled={isButtonDisabled}>
+          <EuiButtonEmpty
+            onClick={() => setShowFlyout(true)}
+            isDisabled={isButtonDisabled}
+            data-test-subj="viewSystemIndicesStateButton"
+          >
             {i18nTexts.viewSystemIndices}
           </EuiButtonEmpty>
         </EuiFlexItem>

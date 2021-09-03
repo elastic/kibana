@@ -108,6 +108,28 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadSystemIndicesUpgradeStatus = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/system_indices_upgrade`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setUpgradeSystemIndicesStatus = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('POST', `${API_BASE_PATH}/system_indices_upgrade`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   return {
     setLoadEsDeprecationsResponse,
     setLoadDeprecationLoggingResponse,
@@ -117,6 +139,8 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setDeleteMlSnapshotResponse,
     setUpgradeMlSnapshotStatusResponse,
     setLoadDeprecationLogsCountResponse,
+    setLoadSystemIndicesUpgradeStatus,
+    setUpgradeSystemIndicesStatus,
   };
 };
 
