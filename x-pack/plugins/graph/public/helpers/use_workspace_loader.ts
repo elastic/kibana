@@ -11,7 +11,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { GraphStore } from '../state_management';
 import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../types';
-import { getSavedWorkspace } from './saved_workspace_utils';
+import { getEmptyWorkspace, getSavedWorkspace } from './saved_workspace_utils';
 
 interface UseWorkspaceLoaderProps {
   store: GraphStore;
@@ -71,8 +71,8 @@ export const useWorkspaceLoader = ({
         .then((response) => response.savedObjects);
     }
 
-    async function fetchSavedWorkspace() {
-      return (id
+    async function fetchSavedWorkspace(): Promise<{ savedObject: GraphWorkspaceSavedObject }> {
+      return id
         ? await getSavedWorkspace(savedObjectsClient, id).catch(function (e) {
             toastNotifications.addError(e, {
               title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
@@ -83,12 +83,12 @@ export const useWorkspaceLoader = ({
             // return promise that never returns to prevent the controller from loading
             return new Promise(() => {});
           })
-        : await getSavedWorkspace(savedObjectsClient)) as GraphWorkspaceSavedObject;
+        : getEmptyWorkspace();
     }
 
     async function initializeWorkspace() {
       const fetchedIndexPatterns = await fetchIndexPatterns();
-      const fetchedSavedWorkspace = await fetchSavedWorkspace();
+      const { savedObject: fetchedSavedWorkspace } = await fetchSavedWorkspace();
 
       /**
        * Deal with situation of request to open saved workspace. Otherwise clean up store,
