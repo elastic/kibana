@@ -10,11 +10,23 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ClassNames } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { VisualizationContainer } from '../../../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
 import { ExpressioTagcloudRendererDependencies } from '../plugin';
 import { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
+
+export const strings = {
+  getDisplayName: () =>
+    i18n.translate('expressionTagcloud.renderer.tagcloud.displayName', {
+      defaultMessage: 'Tag Cloud visualization',
+    }),
+  getHelpDescription: () =>
+    i18n.translate('expressionTagcloud.renderer.tagcloud.helpDescription', {
+      defaultMessage: 'Render a tag cloud',
+    }),
+};
 
 const tagCloudVisClass = {
   height: '100%',
@@ -26,7 +38,8 @@ export const tagcloudRenderer: (
   deps: ExpressioTagcloudRendererDependencies
 ) => ExpressionRenderDefinition<TagcloudRendererConfig> = ({ palettes }) => ({
   name: EXPRESSION_NAME,
-  displayName: 'Tag Cloud visualization',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     handlers.onDestroy(() => {
