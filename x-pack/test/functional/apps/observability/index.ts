@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup6');
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./exploratory_view'));
+    loadTestFile(require.resolve('./alerts'));
   });
 }

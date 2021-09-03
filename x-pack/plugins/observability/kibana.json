@@ -7,7 +7,7 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "observability"],
-  "optionalPlugins": ["home", "discover", "lens", "licensing", "usageCollection"],
+  "optionalPlugins": ["embeddable", "home", "lens", "licensing", "usageCollection"],
   "requiredPlugins": [
     "alerting",
     "cases",
