@@ -55,6 +55,8 @@ async function supertestClient(
   return createApmApiSupertest(supertest(url));
 }
 
+export type CreateTestConfig = ReturnType<typeof createTestConfig>;
+
 export function createTestConfig(config: Config) {
   const { license, name, kibanaConfig } = config;
 
