@@ -65,8 +65,9 @@ interface State {
   zoom: number | string;
   coord: string;
   mgrs: string;
-  utm: { northing: string; easting: string; zoneNumber: any; zoneLetter: any; zone: string };
+  utm: { northing: string; easting: string; zoneNumber: string; zoneLetter: string | undefined; zone: string };
   isCoordPopoverOpen: boolean;
+  prevView: string | undefined;
 }
 
 export class SetViewControl extends Component<Props, State> {
@@ -85,9 +86,10 @@ export class SetViewControl extends Component<Props, State> {
       zone: '',
     },
     isCoordPopoverOpen: false,
+    prevView: '',
   };
 
-  static getDerivedStateFromProps(nextProps: any, prevState: any) {
+  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const nextView = getViewString(
       nextProps.center.lat,
       nextProps.center.lon,
@@ -131,7 +133,7 @@ export class SetViewControl extends Component<Props, State> {
     });
   };
 
-  _onCoordinateSystemChange = (coordId: any) => {
+  _onCoordinateSystemChange = (coordId: string) => {
     this.setState({
       coord: coordId,
     });
@@ -175,7 +177,7 @@ export class SetViewControl extends Component<Props, State> {
 
   _onUTMChange = (name: 'easting' | 'northing' | 'zone', evt: ChangeEvent<HTMLInputElement>) => {
     let value = evt.target.value;
-    const updateObj: { [name: string]: any } = { ...this.state.utm };
+    const updateObj = { ...this.state.utm };
     updateObj[name] = isNull(value) ? '' : value;
     if(name === 'zone' && value.length > 0){
       let zoneLetter = value.substring(value.length - 1);
@@ -324,7 +326,7 @@ export class SetViewControl extends Component<Props, State> {
     label,
     dataTestSubj,
   }: {
-    value: string | number;
+    value: string;
     onChange: (evt: ChangeEvent<HTMLInputElement>) => void;
     label: string;
     dataTestSubj: string;
@@ -665,7 +667,7 @@ export class SetViewControl extends Component<Props, State> {
   }
 }
 
-function convertLatLonToUTM(lat: any, lon: any) {
+function convertLatLonToUTM(lat: string | number, lon: string | number) {
   const utmCoord = converter.LLtoUTM(lat, lon);
 
   let eastwest = 'E';
@@ -689,17 +691,17 @@ function convertLatLonToUTM(lat: any, lon: any) {
   return utmCoord;
 }
 
-function convertLatLonToMGRS(lat: any, lon: any) {
+function convertLatLonToMGRS(lat: string | number, lon: string | number) {
   const mgrsCoord = converter.LLtoMGRS(lat, lon, 5);
   return mgrsCoord;
 }
 
-function getViewString(lat: any, lon: any, zoom: any) {
+function getViewString(lat: number, lon: number, zoom: number) {
   return `${lat},${lon},${zoom}`;
 }
 
-function convertMGRStoUSNG(mgrs: any) {
-  let squareIdEastSpace;
+function convertMGRStoUSNG(mgrs: string) {
+  let squareIdEastSpace = 0;
   for (let i = mgrs.length - 1; i > -1; i--) {
     // check if we have hit letters yet
     if (isNaN(mgrs.substr(i, 1))) {
@@ -721,7 +723,7 @@ function convertMGRStoUSNG(mgrs: any) {
   return rejoinedArray;
 }
 
-function convertMGRStoLL(mgrs: any) {
+function convertMGRStoLL(mgrs: string) {
   return mgrs ? converter.USNGtoLL(convertMGRStoUSNG(mgrs)) : '';
 }
 
