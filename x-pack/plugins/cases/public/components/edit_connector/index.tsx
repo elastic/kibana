@@ -179,7 +179,7 @@ export const EditConnector = React.memo(
      */
     const onChangeConnector = useCallback(
       (newConnectorId) => {
-        // change connect on dropdown action
+        // change connector on dropdown action
         if (currentConnector?.id !== newConnectorId) {
           dispatch({
             type: 'SET_CURRENT_CONNECTOR',
