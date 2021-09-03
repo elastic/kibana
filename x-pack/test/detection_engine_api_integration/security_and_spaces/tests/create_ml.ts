@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
             index: '.ml-anomalies-custom-linux_anomalous_network_activity_ecs',
             depth: 0,
           },
-          reason: `Alert Test ML rule created with a critical severity and risk score of 50 by root on mothra.`,
+          reason: `event with process store, by root on mothra created critical alert Test ML rule.`,
           original_time: '2020-11-16T22:58:08.000Z',
         },
         all_field_values: [

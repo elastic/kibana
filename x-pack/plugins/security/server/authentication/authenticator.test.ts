@@ -55,6 +55,7 @@ function getMockOptions({
     basePath: httpServiceMock.createSetupContract().basePath,
     license: licenseMock.create(),
     loggers: loggingSystemMock.create(),
+    getServerBaseURL: jest.fn(),
     config: createConfig(
       ConfigSchema.validate({ authc: { selector, providers, http } }),
       loggingSystemMock.create().get(),
