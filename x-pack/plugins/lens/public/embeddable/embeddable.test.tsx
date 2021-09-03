@@ -11,6 +11,7 @@ import {
   LensByReferenceInput,
   LensSavedObjectAttributes,
   LensEmbeddableInput,
+  ResolvedLensSavedObjectAttributes,
 } from './embeddable';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
 import { Query, TimeRange, Filter, IndexPatternsContract } from 'src/plugins/data/public';
@@ -23,6 +24,7 @@ import { AttributeService, ViewMode } from '../../../../../src/plugins/embeddabl
 import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public/save_modal';
 import { act } from 'react-dom/test-utils';
+import { inspectorPluginMock } from '../../../../../src/plugins/inspector/public/mocks';
 
 jest.mock('../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -67,12 +69,17 @@ const options = {
 const attributeServiceMockFromSavedVis = (document: Document): LensAttributeService => {
   const core = coreMock.createStart();
   const service = new AttributeService<
-    LensSavedObjectAttributes,
+    ResolvedLensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput
   >('lens', jest.fn(), core.i18n.Context, core.notifications.toasts, options);
   service.unwrapAttributes = jest.fn((input: LensByValueInput | LensByReferenceInput) => {
-    return Promise.resolve({ ...document } as LensSavedObjectAttributes);
+    return Promise.resolve({
+      ...document,
+      sharingSavedObjectProps: {
+        outcome: 'exactMatch',
+      },
+    } as ResolvedLensSavedObjectAttributes);
   });
   service.wrapAttributes = jest.fn();
   return service;
@@ -85,7 +92,7 @@ describe('embeddable', () => {
   let trigger: { exec: jest.Mock };
   let basePath: IBasePath;
   let attributeService: AttributeService<
-    LensSavedObjectAttributes,
+    ResolvedLensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput
   >;
@@ -116,6 +123,7 @@ describe('embeddable', () => {
           canSaveDashboards: true,
           canSaveVisualizations: true,
         },
+        inspector: inspectorPluginMock.createStartContract(),
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
@@ -154,6 +162,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
+        inspector: inspectorPluginMock.createStartContract(),
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
         documentToExpression: () =>
@@ -193,6 +202,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -219,6 +229,50 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(0);
   });
 
+  it('should not render the vis if loaded saved object conflicts', async () => {
+    attributeService.unwrapAttributes = jest.fn(
+      (input: LensByValueInput | LensByReferenceInput) => {
+        return Promise.resolve({
+          ...savedVis,
+          sharingSavedObjectProps: {
+            outcome: 'conflict',
+            errorJSON: '{targetType: "lens", sourceId: "1", targetSpace: "space"}',
+            aliasTargetId: '2',
+          },
+        } as ResolvedLensSavedObjectAttributes);
+      }
+    );
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        inspector: inspectorPluginMock.createStartContract(),
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      {} as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
+    expect(expressionRenderer).toHaveBeenCalledTimes(0);
+  });
+
   it('should initialize output with deduped list of index patterns', async () => {
     attributeService = attributeServiceMockFromSavedVis({
       ...savedVis,
@@ -234,6 +288,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: ({
           get: (id: string) => Promise.resolve({ id }),
         } as unknown) as IndexPatternsContract,
@@ -274,6 +329,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -318,6 +374,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
@@ -363,6 +420,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -409,6 +467,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -462,6 +521,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -515,6 +575,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -567,6 +628,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: ({ get: jest.fn() } as unknown) as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -608,6 +670,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -649,6 +712,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -690,6 +754,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -746,6 +811,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -818,6 +884,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -865,6 +932,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -912,6 +980,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,

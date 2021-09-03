@@ -108,6 +108,7 @@ kibana_vars=(
     map.tilemap.options.subdomains
     map.tilemap.url
     migrations.batchSize
+    migrations.maxBatchSizeBytes
     migrations.enableV2
     migrations.pollInterval
     migrations.retryAttempts
@@ -293,7 +294,6 @@ kibana_vars=(
     xpack.ingestManager.registryUrl
     xpack.license_management.enabled
     xpack.maps.enabled
-    xpack.maps.showMapVisualizationTypes
     xpack.ml.enabled
     xpack.observability.annotations.index
     xpack.observability.unsafe.alertingExperience.enabled
@@ -383,6 +383,7 @@ kibana_vars=(
     xpack.security.session.lifespan
     xpack.security.sessionTimeout
     xpack.securitySolution.alertMergeStrategy
+    xpack.securitySolution.alertIgnoreFields
     xpack.securitySolution.endpointResultListDefaultFirstPageIndex
     xpack.securitySolution.endpointResultListDefaultPageSize
     xpack.securitySolution.maxRuleImportExportSize
