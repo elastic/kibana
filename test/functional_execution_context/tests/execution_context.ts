@@ -15,7 +15,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 const logFilePath = Path.resolve(__dirname, '../kibana.log');
 
 // to avoid splitting log record containing \n symbol
-const endOfLine = /}\s*\n/;
+const endOfLine = /(?<=})\s*\n/;
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home']);
   const retry = getService('retry');
@@ -30,9 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const normalizedRecords = logsStr
         .split(endOfLine)
         .filter(Boolean)
-        .map((s) => JSON.parse(`${s}}`));
+        .map((s) => JSON.parse(s));
 
-      return normalizedRecords.findIndex(predicate) !== -1;
+      return normalizedRecords.some(predicate);
     });
   }
 
