@@ -104,7 +104,7 @@ export const importRulesRoute = (
         }
         const signalsIndex = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
-        if (!indexExists) {
+        if (!isRuleRegistryEnabled && !indexExists) {
           return siemResponse.error({
             statusCode: 400,
             body: `To create a rule, the index must exist first. Index ${signalsIndex} does not exist`,

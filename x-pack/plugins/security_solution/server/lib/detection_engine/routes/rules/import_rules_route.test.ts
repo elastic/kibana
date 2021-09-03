@@ -130,18 +130,20 @@ describe.each([
       transformMock.mockRestore();
     });
 
-    test('returns an error if the index does not exist', async () => {
+    test('returns an error if the index does not exist when rule registry not enabled', async () => {
       clients.appClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
       );
       const response = await server.inject(request, context);
-      expect(response.status).toEqual(400);
-      expect(response.body).toEqual({
-        message:
-          'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
-        status_code: 400,
-      });
+      expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);
+      if (!isRuleRegistryEnabled) {
+        expect(response.body).toEqual({
+          message:
+            'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
+          status_code: 400,
+        });
+      }
     });
 
     test('returns an error when cluster throws error', async () => {

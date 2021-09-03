@@ -68,6 +68,7 @@ import {
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
+  SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '../../../../common/constants';
 
@@ -1012,10 +1013,10 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
  * Maps legacy rule types to RAC rule type IDs.
  */
 export const ruleTypeMappings = {
-  eql: EQL_RULE_TYPE_ID,
+  eql: SIGNALS_ID,
   machine_learning: ML_RULE_TYPE_ID,
   query: QUERY_RULE_TYPE_ID,
-  saved_query: SAVED_QUERY_RULE_TYPE_ID,
+  saved_query: SIGNALS_ID,
   threat_match: INDICATOR_RULE_TYPE_ID,
-  threshold: THRESHOLD_RULE_TYPE_ID,
+  threshold: SIGNALS_ID,
 };

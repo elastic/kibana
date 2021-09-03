@@ -209,12 +209,12 @@ export const notifyWhen = t.union([
 
 export const allRuleTypes = t.union([
   t.literal(SIGNALS_ID),
-  t.literal(EQL_RULE_TYPE_ID),
+  // t.literal(EQL_RULE_TYPE_ID),
   t.literal(ML_RULE_TYPE_ID),
   t.literal(QUERY_RULE_TYPE_ID),
-  t.literal(SAVED_QUERY_RULE_TYPE_ID),
+  // t.literal(SAVED_QUERY_RULE_TYPE_ID),
   t.literal(INDICATOR_RULE_TYPE_ID),
-  t.literal(THRESHOLD_RULE_TYPE_ID),
+  // t.literal(THRESHOLD_RULE_TYPE_ID),
 ]);
 export type AllRuleTypes = t.TypeOf<typeof allRuleTypes>;
 

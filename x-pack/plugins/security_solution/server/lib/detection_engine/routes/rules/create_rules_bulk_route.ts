@@ -99,7 +99,7 @@ export const createRulesBulkRoute = (
               throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
               const finalIndex = internalRule.params.outputIndex;
               const indexExists = await getIndexExists(esClient.asCurrentUser, finalIndex);
-              if (!indexExists) {
+              if (!isRuleRegistryEnabled && !indexExists) {
                 return createBulkErrorObject({
                   ruleId: internalRule.params.ruleId,
                   statusCode: 400,

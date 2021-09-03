@@ -142,7 +142,7 @@ export const createPrepackagedRules = async (
   const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
   const signalsIndex = siemClient.getSignalsIndex();
-  if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
+  if (!isRuleRegistryEnabled && (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0)) {
     const signalsIndexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
     if (!signalsIndexExists) {
       throw new PrepackagedRulesError(

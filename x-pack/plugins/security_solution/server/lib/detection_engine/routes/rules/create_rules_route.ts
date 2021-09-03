@@ -87,7 +87,7 @@ export const createRulesRoute = (
           esClient.asCurrentUser,
           internalRule.params.outputIndex
         );
-        if (!indexExists) {
+        if (!isRuleRegistryEnabled && !indexExists) {
           return siemResponse.error({
             statusCode: 400,
             body: `To create a rule, the index must exist first. Index ${internalRule.params.outputIndex} does not exist`,

@@ -91,22 +91,26 @@ describe.each([
       ]);
     });
 
-    test('returns an error object if the index does not exist', async () => {
+    test('returns an error object if the index does not exist when rule registry not enabled', async () => {
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
       );
       const response = await server.inject(getReadBulkRequest(), context);
 
       expect(response.status).toEqual(200);
-      expect(response.body).toEqual([
-        {
-          error: {
-            message: 'To create a rule, the index must exist first. Index undefined does not exist',
-            status_code: 400,
+
+      if (!isRuleRegistryEnabled) {
+        expect(response.body).toEqual([
+          {
+            error: {
+              message:
+                'To create a rule, the index must exist first. Index undefined does not exist',
+              status_code: 400,
+            },
+            rule_id: 'rule-1',
           },
-          rule_id: 'rule-1',
-        },
-      ]);
+        ]);
+      }
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {

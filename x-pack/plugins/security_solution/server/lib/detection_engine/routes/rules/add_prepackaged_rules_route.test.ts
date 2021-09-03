@@ -81,6 +81,7 @@ describe.each([
   let { clients, context } = requestContextMock.createTools();
   let securitySetup: SecurityPluginSetup;
   let mockExceptionsClient: ExceptionListClient;
+  const testif = isRuleRegistryEnabled ? test.skip : test;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -134,20 +135,22 @@ describe.each([
       });
     });
 
-    test('it returns a 400 if the index does not exist', async () => {
+    test('it returns a 400 if the index does not exist when rule registry not enabled', async () => {
       const request = addPrepackagedRulesRequest();
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
       );
       const response = await server.inject(request, context);
 
-      expect(response.status).toEqual(400);
-      expect(response.body).toEqual({
-        status_code: 400,
-        message: expect.stringContaining(
-          'Pre-packaged rules cannot be installed until the signals index is created'
-        ),
-      });
+      expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);
+      if (!isRuleRegistryEnabled) {
+        expect(response.body).toEqual({
+          status_code: 400,
+          message: expect.stringContaining(
+            'Pre-packaged rules cannot be installed until the signals index is created'
+          ),
+        });
+      }
     });
 
     test('returns 404 if siem client is unavailable', async () => {
@@ -190,16 +193,19 @@ describe.each([
       });
     });
 
-    test('catches errors if payloads cause errors to be thrown', async () => {
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
-      );
-      const request = addPrepackagedRulesRequest();
-      const response = await server.inject(request, context);
+    testif(
+      'catches errors if signals index does not exist when rule registry not enabled',
+      async () => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
+        );
+        const request = addPrepackagedRulesRequest();
+        const response = await server.inject(request, context);
 
-      expect(response.status).toEqual(500);
-      expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
-    });
+        expect(response.status).toEqual(500);
+        expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
+      }
+    );
   });
 
   test('should install prepackaged timelines', async () => {
