@@ -41,6 +41,8 @@ const ConfigSchemaProps = {
   secure: schema.nullable(schema.boolean()),
   from: schema.string(),
   hasAuth: schema.boolean({ defaultValue: true }),
+  authType: schema.nullable(schema.string()),
+  tokenExpirationDate: schema.nullable(schema.number()),
 };
 
 const ConfigSchema = schema.object(ConfigSchemaProps);
@@ -92,6 +94,11 @@ export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const SecretsSchema = schema.object({
   user: schema.nullable(schema.string()),
   password: schema.nullable(schema.string()),
+  clientId: schema.nullable(schema.string()),
+  clientSecret: schema.nullable(schema.string()),
+  accessToken: schema.nullable(schema.string()),
+  refreshToken: schema.nullable(schema.string()),
+  oauthScope: schema.nullable(schema.string()),
 });
 
 // params definition
@@ -194,11 +201,32 @@ async function executor(
 
   const transport: Transport = {};
 
-  if (secrets.user != null) {
-    transport.user = secrets.user;
-  }
-  if (secrets.password != null) {
-    transport.password = secrets.password;
+  if (config.authType === 'oauth2') {
+    if (secrets.accessToken != null) {
+      transport.accessToken = secrets.accessToken;
+    }
+    if (secrets.refreshToken != null) {
+      transport.refreshToken = secrets.refreshToken;
+    }
+    if (secrets.clientId != null) {
+      transport.clientId = secrets.clientId;
+    }
+    if (secrets.clientSecret != null) {
+      transport.clientSecret = secrets.clientSecret;
+    }
+    if (secrets.oauthScope != null) {
+      transport.scope = secrets.oauthScope;
+    }
+    if (config.tokenExpirationDate != null) {
+      transport.expires = config.tokenExpirationDate;
+    }
+  } else {
+    if (secrets.user != null) {
+      transport.user = secrets.user;
+    }
+    if (secrets.password != null) {
+      transport.password = secrets.password;
+    }
   }
 
   if (config.service !== null) {

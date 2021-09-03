@@ -240,10 +240,17 @@ describe('execute()', () => {
     secure: true,
     from: 'bob@example.com',
     hasAuth: true,
+    authType: 'basic',
+    tokenExpirationDate: null,
   };
   const secrets: ActionTypeSecretsType = {
     user: 'bob',
     password: 'supersecret',
+    clientId: null,
+    clientSecret: null,
+    oauthScope: null,
+    refreshToken: null,
+    accessToken: null,
   };
   const params: ActionParamsType = {
     to: ['jim@example.com'],

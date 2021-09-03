@@ -34,13 +34,17 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
     validateConnector: async (
       action: EmailActionConnector
     ): Promise<
-      ConnectorValidationResult<Omit<EmailConfig, 'secure' | 'hasAuth'>, EmailSecrets>
+      ConnectorValidationResult<
+        Omit<EmailConfig, 'secure' | 'hasAuth' | 'authType' | 'tokenExpirationDate'>,
+        Pick<EmailSecrets, 'user' | 'password'>
+      >
     > => {
       const translations = await import('./translations');
       const configErrors = {
         from: new Array<string>(),
         port: new Array<string>(),
         host: new Array<string>(),
+        tokenExpirationDatets: new Array<string>(),
       };
       const secretsErrors = {
         user: new Array<string>(),
