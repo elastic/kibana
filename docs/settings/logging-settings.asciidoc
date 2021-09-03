@@ -48,7 +48,7 @@ logging:
 ===== Log in JSON format
 
 Log the default log format to JSON layout instead of pattern (the default).
-With `json` layout log messages will be formatted as JSON strings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS format] that includes a timestamp, log level, logger, message text and any other metadata that may be associated with the log message itself
+With `json` layout, log messages will be formatted as JSON strings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS format] that includes a timestamp, log level, logger, message text and any other metadata that may be associated with the log message itself.
 
 [source,yaml]
 ----
