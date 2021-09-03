@@ -83,5 +83,5 @@ existed in 82% of the failed transactions.
 image::apm/images/correlations-failed-transactions.png[Failed transaction correlations]
 
 Select the `+` filter to create a new query in the {apm-app} for transactions
-with this attribute. With the "noise" now filtered out, you can begin viewing
-sample traces to continue your investigation.
+with this attribute. You might do his for multiple attributes--each time
+filtering out more and more noise and bringing you closer to a diagnosis.
