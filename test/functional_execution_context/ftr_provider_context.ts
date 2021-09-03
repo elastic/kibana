@@ -6,16 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { KbnClientStatus } from './kbn_client_status';
+import { GenericFtrProviderContext } from '@kbn/test';
+import { pageObjects } from '../functional/page_objects';
+import { services } from './services';
 
-export class KbnClientPlugins {
-  constructor(private readonly status: KbnClientStatus) {}
-  /**
-   * Get a list of plugin ids that are enabled on the server
-   */
-  public async getEnabledIds() {
-    const apiResp = await this.status.get();
-
-    return Object.keys(apiResp.status.plugins);
-  }
-}
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export { pageObjects };
