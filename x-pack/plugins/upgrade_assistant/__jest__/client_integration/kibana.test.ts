@@ -22,6 +22,7 @@ describe('Kibana deprecations', () => {
   describe('With deprecations', () => {
     const kibanaDeprecationsMockResponse: DomainDeprecationDetails[] = [
       {
+        title: 'mock-deprecation-title',
         correctiveActions: {
           manualSteps: ['Step 1', 'Step 2', 'Step 3'],
           api: {
@@ -192,6 +193,7 @@ describe('Kibana deprecations', () => {
       const kibanaDeprecationsMockResponse: DomainDeprecationDetails[] = [
         {
           domainId,
+          title: `Failed to fetch deprecations for ${domainId}`,
           message: `Failed to get deprecations info for plugin "${domainId}".`,
           level: 'fetch_error',
           correctiveActions: {

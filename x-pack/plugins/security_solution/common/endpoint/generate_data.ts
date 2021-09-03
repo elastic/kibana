@@ -678,7 +678,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         action: 'start',
         kind: 'alert',
         category: 'malware',
-        code: isShellcode ? 'malicious_thread' : 'memory_signature',
+        code: isShellcode ? 'shellcode_thread' : 'memory_signature',
         id: this.seededUUIDv4(),
         dataset: 'endpoint',
         module: 'endpoint',
