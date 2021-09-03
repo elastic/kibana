@@ -76,6 +76,7 @@ export interface TGridModel extends TGridModelSettings {
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
   version: string | null;
+  initialized?: boolean;
 }
 
 export type TGridModelForTimeline = Pick<
