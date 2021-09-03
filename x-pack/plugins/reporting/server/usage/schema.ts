@@ -16,6 +16,7 @@ import {
 } from './types';
 
 const appCountsSchema: MakeSchemaFrom<AppCounts> = {
+  search: { type: 'long' },
   'canvas workpad': { type: 'long' },
   dashboard: { type: 'long' },
   visualization: { type: 'long' },
@@ -34,6 +35,17 @@ const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
   deprecated: { type: 'long' },
+  app: {
+    'canvas workpad': { type: 'long' },
+    dashboard: { type: 'long' },
+    visualization: { type: 'long' },
+    search: { type: 'long' },
+  },
+  layout: {
+    canvas: { type: 'long' },
+    print: { type: 'long' },
+    preserve_layout: { type: 'long' },
+  },
 };
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
@@ -41,22 +53,8 @@ const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
   csv_searchsource: availableTotalSchema,
   PNG: availableTotalSchema,
   PNGV2: availableTotalSchema,
-  printable_pdf: {
-    ...availableTotalSchema,
-    app: appCountsSchema,
-    layout: {
-      print: { type: 'long' },
-      preserve_layout: { type: 'long' },
-    },
-  },
-  printable_pdf_v2: {
-    ...availableTotalSchema,
-    app: appCountsSchema,
-    layout: {
-      print: { type: 'long' },
-      preserve_layout: { type: 'long' },
-    },
-  },
+  printable_pdf: availableTotalSchema,
+  printable_pdf_v2: availableTotalSchema,
 };
 
 const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {

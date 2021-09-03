@@ -5,45 +5,39 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
-import {
-  CSV_JOB_TYPE,
-  CSV_JOB_TYPE_DEPRECATED,
-  DEPRECATED_JOB_TYPES,
-  PDF_JOB_TYPE,
-  PNG_JOB_TYPE,
-} from '../../common/constants';
-import { AvailableTotal, ExportType, FeatureAvailabilityMap, RangeStats } from './types';
+import { DEPRECATED_JOB_TYPES } from '../../common/constants';
+import { ExportTypesHandler } from './get_export_type_handler';
+import { AvailableTotal, FeatureAvailabilityMap, RangeStats } from './types';
 
 const jobTypeIsDeprecated = (jobType: string) => DEPRECATED_JOB_TYPES.includes(jobType);
+const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> = {
+  total: 0,
+  deprecated: 0,
+  app: { 'canvas workpad': 0, search: 0, visualization: 0, dashboard: 0 },
+  layout: { canvas: 0, print: 0, preserve_layout: 0 },
+};
 
-function getForFeature(
-  range: Partial<RangeStats>,
-  typeKey: ExportType,
-  featureAvailability: FeatureAvailabilityMap,
-  additional?: any
-): AvailableTotal & typeof additional {
-  const isAvailable = (feature: ExportType) => !!featureAvailability[feature];
-  const jobType = range[typeKey] || { total: 0, ...additional, deprecated: 0 };
+const isAvailable = (featureAvailability: FeatureAvailabilityMap, feature: string) =>
+  !!featureAvailability[feature];
 
-  // merge the additional stats for the jobType
-  type AdditionalType = { [K in keyof typeof additional]: K };
-  const filledAdditional: AdditionalType = {};
-  if (additional) {
-    Object.keys(additional).forEach((k) => {
-      filledAdditional[k] = { ...additional[k], ...jobType[k] };
-    });
-  }
-
+function getAvailableTotalForFeature(
+  jobType: AvailableTotal,
+  typeKey: string,
+  featureAvailability: FeatureAvailabilityMap
+): AvailableTotal {
   // if the type itself is deprecated, all jobs are deprecated, otherwise only some of them might be
   const deprecated = jobTypeIsDeprecated(typeKey) ? jobType.total : jobType.deprecated || 0;
 
-  return {
-    available: isAvailable(typeKey),
+  // merge the additional stats for the jobType
+  const availableTotal = {
+    available: isAvailable(featureAvailability, typeKey),
     total: jobType.total,
     deprecated,
-    ...filledAdditional,
+    app: { ...defaultTotalsForFeature.app, ...jobType.app },
+    layout: { ...defaultTotalsForFeature.layout, ...jobType.layout },
   };
+
+  return availableTotal as AvailableTotal;
 }
 
 /*
@@ -53,44 +47,43 @@ function getForFeature(
  * This function builds the result object for all export types found in the
  * Reporting data, even if the type is unknown to this Kibana instance.
  */
-export const decorateRangeStats = (
-  rangeStats: Partial<RangeStats> = {},
-  featureAvailability: FeatureAvailabilityMap
-): RangeStats => {
+export const getExportStatsByTimerange = (
+  rangeStatsInput: Partial<RangeStats> = {},
+  featureAvailability: FeatureAvailabilityMap,
+  exportTypesHandler: ExportTypesHandler
+) => {
   const {
     _all: rangeAll,
     status: rangeStatus,
     statuses: rangeStatusByApp,
-    [PDF_JOB_TYPE]: rangeStatsPdf,
-    ...rangeStatsBasic
-  } = rangeStats;
+    ...rangeStats
+  } = rangeStatsInput;
 
   // combine the known types with any unknown type found in reporting data
-  const keysBasic = uniq([
-    CSV_JOB_TYPE,
-    CSV_JOB_TYPE_DEPRECATED,
-    PNG_JOB_TYPE,
-    ...Object.keys(rangeStatsBasic),
-  ]) as ExportType[];
-  const rangeBasic = keysBasic.reduce((accum, currentKey) => {
+  const statsForExportType = exportTypesHandler.getJobTypes().reduce((accum, exportType) => {
+    const availableTotal = rangeStats[exportType as keyof typeof rangeStats];
+
+    if (!availableTotal) {
+      return {
+        ...accum,
+        [exportType]: {
+          available: isAvailable(featureAvailability, exportType),
+          ...defaultTotalsForFeature,
+        },
+      };
+    }
+
     return {
       ...accum,
-      [currentKey]: getForFeature(rangeStatsBasic, currentKey, featureAvailability),
+      [exportType]: getAvailableTotalForFeature(availableTotal, exportType, featureAvailability),
     };
-  }, {}) as Partial<RangeStats>;
-  const rangePdf = {
-    [PDF_JOB_TYPE]: getForFeature(rangeStats, PDF_JOB_TYPE, featureAvailability, {
-      app: { dashboard: 0, visualization: 0 },
-      layout: { preserve_layout: 0, print: 0 },
-    }),
-  };
+  }, {});
 
   const resultStats = {
+    ...statsForExportType,
     _all: rangeAll || 0,
     status: { completed: 0, failed: 0, ...rangeStatus },
     statuses: rangeStatusByApp,
-    ...rangePdf,
-    ...rangeBasic,
   } as RangeStats;
 
   return resultStats;
