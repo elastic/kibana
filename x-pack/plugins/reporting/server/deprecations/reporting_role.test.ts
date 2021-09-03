@@ -53,6 +53,7 @@ test('logs a plain message when only a reporting_user role issue is found', asyn
         "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/secure-reporting.html",
         "level": "critical",
         "message": "The deprecated \\"reporting_user\\" role has been found for 1 user(s): \\"reportron\\"",
+        "title": "Found deprecated reporting role",
       },
     ]
   `);
@@ -82,6 +83,7 @@ test('logs multiple entries when multiple reporting_user role issues are found',
         "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/secure-reporting.html",
         "level": "critical",
         "message": "The deprecated \\"reporting_user\\" role has been found for 2 user(s): \\"reportron\\", \\"supercooluser\\"",
+        "title": "Found deprecated reporting role",
       },
     ]
   `);
@@ -112,6 +114,7 @@ test('logs an expanded message when a config issue and a reporting_user role iss
         "documentationUrl": "https://www.elastic.co/guide/en/kibana/current/secure-reporting.html",
         "level": "critical",
         "message": "The deprecated \\"reporting_user\\" role has been found for 1 user(s): \\"reportron\\"",
+        "title": "Found deprecated reporting role",
       },
     ]
   `);
