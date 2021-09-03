@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import {
   ExpressionRendererEvent,
@@ -28,7 +29,6 @@ import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import { EuiLink } from '@elastic/eui';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { ErrorMessage } from '../editor_frame_service/types';
 import { LensInspector } from '../lens_inspector_service';
