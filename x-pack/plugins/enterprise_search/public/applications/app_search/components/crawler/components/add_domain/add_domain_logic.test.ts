@@ -13,8 +13,8 @@ import {
 } from '../../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/engine_logic.mock';
 
-jest.mock('../../crawler_overview_logic', () => ({
-  CrawlerOverviewLogic: {
+jest.mock('../../crawler_logic', () => ({
+  CrawlerLogic: {
     actions: {
       onReceiveCrawlerData: jest.fn(),
     },
@@ -28,7 +28,7 @@ jest.mock('./utils', () => ({
 
 import { nextTick } from '@kbn/test/jest';
 
-import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
+import { CrawlerLogic } from '../../crawler_logic';
 import { CrawlerDomain } from '../../types';
 
 import { AddDomainLogic, AddDomainLogicValues } from './add_domain_logic';
@@ -310,7 +310,7 @@ describe('AddDomainLogic', () => {
           AddDomainLogic.actions.submitNewDomain();
           await nextTick();
 
-          expect(CrawlerOverviewLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith({
+          expect(CrawlerLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith({
             domains: [],
           });
         });

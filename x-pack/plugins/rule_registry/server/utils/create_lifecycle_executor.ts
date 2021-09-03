@@ -22,7 +22,7 @@ import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_
 import {
   ALERT_DURATION,
   ALERT_END,
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
@@ -228,7 +228,7 @@ export const createLifecycleExecutor = (
 
     hits.hits.forEach((hit) => {
       const fields = parseTechnicalFields(hit.fields);
-      const alertId = fields[ALERT_ID];
+      const alertId = fields[ALERT_INSTANCE_ID];
       alertsDataMap[alertId] = {
         ...commonRuleFields,
         ...fields,
@@ -255,7 +255,7 @@ export const createLifecycleExecutor = (
       ...alertData,
       ...commonRuleFields,
       [ALERT_DURATION]: (options.startedAt.getTime() - new Date(started).getTime()) * 1000,
-      [ALERT_ID]: alertId,
+      [ALERT_INSTANCE_ID]: alertId,
       [ALERT_START]: started,
       [ALERT_STATUS]: isActive ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED,
       [ALERT_WORKFLOW_STATUS]: alertData[ALERT_WORKFLOW_STATUS] ?? 'open',
@@ -281,7 +281,7 @@ export const createLifecycleExecutor = (
     eventsToIndex
       .filter((event) => event[ALERT_STATUS] !== 'closed')
       .map((event) => {
-        const alertId = event[ALERT_ID]!;
+        const alertId = event[ALERT_INSTANCE_ID]!;
         const alertUuid = event[ALERT_UUID]!;
         const started = new Date(event[ALERT_START]!).toISOString();
         return [alertId, { alertId, alertUuid, started }];

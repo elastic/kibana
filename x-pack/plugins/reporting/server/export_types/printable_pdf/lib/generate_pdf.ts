@@ -73,8 +73,8 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
             tracker.startAddImage();
             tracker.endAddImage();
             pdfOutput.addImage(screenshot.data, {
-              title: screenshot.title,
-              description: screenshot.description,
+              title: screenshot.title ?? undefined,
+              description: screenshot.description ?? undefined,
             });
           });
         });
