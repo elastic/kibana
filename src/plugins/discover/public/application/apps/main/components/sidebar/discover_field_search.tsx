@@ -53,18 +53,13 @@ export interface Props {
    * types for the type filter
    */
   types: string[];
-
-  /**
-   * use new fields api
-   */
-  useNewFieldsApi?: boolean;
 }
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ onChange, value, types, useNewFieldsApi }: Props) {
+export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
@@ -91,12 +86,6 @@ export function DiscoverFieldSearch({ onChange, value, types, useNewFieldsApi }:
     type: 'any',
     missing: true,
   });
-
-  if (typeof value !== 'string') {
-    // at initial rendering value is undefined (angular related), this catches the warning
-    // should be removed once all is react
-    return null;
-  }
 
   const filterBtnAriaLabel = isPopoverOpen
     ? i18n.translate('discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
