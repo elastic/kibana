@@ -65,6 +65,6 @@ describe('CtiNoEvents', () => {
       </Provider>
     );
 
-    expect(screen.getByTestId('cti-total-event-count')).toHaveTextContent('Showing: 0 indicators');
+    expect(screen.getByText('Showing: 0 indicators')).toBeInTheDocument();
   });
 });

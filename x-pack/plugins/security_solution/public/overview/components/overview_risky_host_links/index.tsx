@@ -18,16 +18,9 @@ const RiskyHostLinksComponent: React.FC<RiskyHostLinksProps> = (props) => {
 
   switch (isModuleEnabled) {
     case true:
-      return (
-        <RiskyHostsEnabledModule
-          to={props.to}
-          from={props.from}
-          listItems={listItems}
-          dataTestSubj="risky-hosts-enabled-module"
-        />
-      );
+      return <RiskyHostsEnabledModule to={props.to} from={props.from} listItems={listItems} />;
     case false:
-      return <RiskyHostsDisabledModule dataTestSubj="risky-hosts-disabled-module" />;
+      return <RiskyHostsDisabledModule />;
     case undefined:
     default:
       return null;

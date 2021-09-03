@@ -11,7 +11,7 @@ import { Link } from './link';
 
 describe('Link', () => {
   it('renders <a> tag when there is a path', () => {
-    render(<Link copy={'test_copy'} path={'/test-path'} />);
+    render(<Link copy="test_copy" path="/test-path" />);
 
     expect(screen.getByRole('link')).toBeInTheDocument();
     expect(screen.getByRole('link')).toHaveAttribute('href', '/test-path');
@@ -19,7 +19,7 @@ describe('Link', () => {
   });
 
   it('does not render <a> tag when there is no path', () => {
-    render(<Link copy={'test_copy'} />);
+    render(<Link copy="test_copy" />);
 
     expect(screen.getByText('test_copy')).toBeInTheDocument();
     expect(screen.queryByRole('link')).toBeNull();
