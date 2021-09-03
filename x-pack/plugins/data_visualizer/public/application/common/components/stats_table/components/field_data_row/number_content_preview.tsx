@@ -16,9 +16,8 @@ import {
 import { FieldVisConfig } from '../../types';
 import { kibanaFieldFormat, formatSingleValue } from '../../../utils';
 
-const METRIC_DISTRIBUTION_CHART_WIDTH = 150;
-// @todo: Re-enable
-// const METRIC_DISTRIBUTION_CHART_HEIGHT = 80;
+const METRIC_DISTRIBUTION_CHART_WIDTH = 120;
+const METRIC_DISTRIBUTION_CHART_HEIGHT = 12;
 
 export interface NumberContentPreviewProps {
   config: FieldVisConfig;
@@ -49,11 +48,9 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
   return (
     <div data-test-subj={dataTestSubj}>
       <div className="dataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
-        {/** @todo: Use euiSizeM, make this small height only for embeddable
-         **/}
         <MetricDistributionChart
           width={METRIC_DISTRIBUTION_CHART_WIDTH}
-          height={12}
+          height={METRIC_DISTRIBUTION_CHART_HEIGHT}
           chartData={distributionChartData}
           fieldFormat={fieldFormat}
           hideXAxis={true}

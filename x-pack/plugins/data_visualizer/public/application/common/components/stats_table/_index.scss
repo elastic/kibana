@@ -16,6 +16,7 @@
 
   .fieldDataCard__codeContent {
     @include euiCodeFont;
+    padding-left: 4px;
   }
 }
 
@@ -25,6 +26,11 @@
     border-top: $euiBorderThin;
 
   }
+
+  .euiTableCellContent {
+    padding: 4px;
+  }
+
   .euiTableRow-isExpandedRow {
 
     .euiTableRowCell {
@@ -48,9 +54,25 @@
   }
   .dataVisualizerSummaryTableWrapper {
     max-width: 300px;
+    max-height: 120px;
   }
   .dataVisualizerMapWrapper {
     min-height: 300px;
     min-width: 600px;
   }
+
+  .dataVisualizerPanelWrapper {
+    border-radius: $euiBorderRadius;
+    border: 1px solid $euiBorderColor;
+    padding: 6px;
+    margin: 3px 12px 12px 0;
+  }
+
+  .dataVisualizerTextContent {
+    min-width: 500px;
+    .euiListGroupItem__text {
+      padding: 0;
+    }
+  }
+
 }

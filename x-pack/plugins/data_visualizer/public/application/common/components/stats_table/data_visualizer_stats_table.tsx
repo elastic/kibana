@@ -181,6 +181,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         sortable: (item: DataVisualizerTableItem) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDocumentsCount',
+        width: '175px',
       },
       {
         field: 'stats.cardinality',
@@ -191,6 +192,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         sortable: true,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistinctValues',
+        width: '175px',
       },
       {
         name: (
@@ -251,7 +253,8 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
           return null;
         },
-        align: LEFT_ALIGNMENT as HorizontalAlignment,
+        width: '150px',
+        align: CENTER_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistribution',
       },
     ];

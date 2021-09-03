@@ -31,11 +31,12 @@ export const DocumentViewModeToggle = ({
   setDiscoverViewMode: (id: string) => void;
 }) => {
   return (
+    // <EuiButtonEmpty size="xs">Table controls</EuiButtonEmpty>
     <EuiButtonGroup
       legend={i18n.translate('discover.viewModes.legend', { defaultMessage: 'Document view mode' })}
-      color={'primary'}
-      style={{ paddingRight: 20 }}
-      buttonSize={'s'}
+      color={'ghost'}
+      // style={{ paddingRight: 20 }}
+      buttonSize={'compressed'}
       options={toggleButtons}
       idSelected={discoverViewMode}
       onChange={(id: string) => setDiscoverViewMode(id)}

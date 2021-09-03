@@ -78,7 +78,7 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <EuiFlexItem
       data-test-subj={'dataVisualizerDocumentStatsContent'}
-      className={'dataVisualizerSummaryTableWrapper'}
+      className={'dataVisualizerSummaryTableWrapper dataVisualizerPanelWrapper'}
     >
       <ExpandedRowFieldHeader>{metaTableTitle}</ExpandedRowFieldHeader>
       <EuiBasicTable

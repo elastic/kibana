@@ -96,6 +96,11 @@ export function DiscoverChart({
               onResetQuery={resetQuery}
             />
           </EuiFlexItem>
+          <DocumentViewModeToggle
+            discoverViewMode={discoverViewMode}
+            setDiscoverViewMode={setDiscoverViewMode}
+          />
+
           {!state.hideChart && (
             <EuiFlexItem className="dscResultCount__actions">
               <TimechartHeaderMemoized
@@ -126,12 +131,9 @@ export function DiscoverChart({
               </EuiButtonEmpty>
             </EuiFlexItem>
           )}
-          <DocumentViewModeToggle
-            discoverViewMode={discoverViewMode}
-            setDiscoverViewMode={setDiscoverViewMode}
-          />
         </EuiFlexGroup>
       </EuiFlexItem>
+
       {timefield && !state.hideChart && (
         <EuiFlexItem grow={false}>
           <section

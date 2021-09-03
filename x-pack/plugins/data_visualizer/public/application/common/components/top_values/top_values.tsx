@@ -49,7 +49,10 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed 
   } = stats;
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
   return (
-    <EuiFlexItem data-test-subj={'dataVisualizerFieldDataTopValues'}>
+    <EuiFlexItem
+      data-test-subj={'dataVisualizerFieldDataTopValues'}
+      className={'dataVisualizerPanelWrapper'}
+    >
       <ExpandedRowFieldHeader>
         <FormattedMessage
           id="xpack.dataVisualizer.dataGrid.field.topValuesLabel"

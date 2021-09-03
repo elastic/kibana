@@ -53,7 +53,7 @@ export const ColumnChart: FC<Props> = ({
   return (
     <div data-test-subj={dataTestSubj}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
-        <div className="dataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
+        <div className="dataGridChart__column-chart" data-test-subj={`${dataTestSubj}-histogram`}>
           <Chart>
             <Settings theme={columnChartTheme} />
             <BarSeries
