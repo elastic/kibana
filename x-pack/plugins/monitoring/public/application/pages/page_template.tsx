@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
