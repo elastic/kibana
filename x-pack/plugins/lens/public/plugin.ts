@@ -69,7 +69,6 @@ import type { FormatFactory } from '../common/types';
 import type { VisualizationType } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
-import { getSearchProvider } from './search_provider';
 
 import type { LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
@@ -83,6 +82,7 @@ import type { SaveModalContainerProps } from './app_plugin/save_modal_container'
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { getTimeZone } from './utils';
 import { setupExpressions } from './expressions';
+import { getSearchProvider } from './search_provider';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
