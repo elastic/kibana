@@ -7,11 +7,11 @@ const { BuildkiteClient } = require('kibana-buildkite-library');
     console.log(status.success ? 'true' : 'false');
     process.exit(0);
   } catch (ex) {
+    console.error('Buildkite API Error', ex.message);
     if (ex.response) {
-      console.error('HTTP Error Response Body', ex.response.data);
       console.error('HTTP Error Response Status', ex.response.status);
+      console.error('HTTP Error Response Body', ex.response.data);
     }
-    console.error(ex);
     process.exit(1);
   }
 })();

@@ -281,7 +281,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The markdown visualization that can be used to place text panels on dashboards.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_metric[visTypeMetric]
+|{kib-repo}blob/{branch}/src/plugins/vis_types/metric[visTypeMetric]
 |WARNING: Missing README.
 
 
@@ -293,7 +293,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Contains the data table visualization, that allows presenting data in a simple table format.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_tagcloud[visTypeTagcloud]
+|{kib-repo}blob/{branch}/src/plugins/vis_types/tagcloud[visTypeTagcloud]
 |WARNING: Missing README.
 
 
@@ -305,7 +305,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_type_vega[visTypeVega]
+|{kib-repo}blob/{branch}/src/plugins/vis_types/vega[visTypeVega]
 |WARNING: Missing README.
 
 

@@ -21,7 +21,7 @@ export interface ScreenshotObservableOpts {
 }
 
 export interface AttributesMap {
-  [key: string]: any;
+  [key: string]: string | null;
 }
 
 export interface ElementPosition {
@@ -45,8 +45,8 @@ export interface ElementsPositionAndAttribute {
 
 export interface Screenshot {
   data: Buffer;
-  title: string;
-  description: string;
+  title: string | null;
+  description: string | null;
 }
 
 export interface ScreenshotResults {
