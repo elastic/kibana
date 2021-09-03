@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).to.be(fakeSessionId);
     });
 
-    it('Saves and restores a session', async () => {
+    it('Saves and restores a session - miaou', async () => {
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.dashboard.waitForRenderComplete();
       await searchSessions.expectState('completed');
@@ -98,15 +98,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Check that session is restored
       await searchSessions.expectState('restored');
       await testSubjects.missingOrFail('embeddableErrorLabel');
-      const xyChartSelector = 'visTypeXyChart';
-      await enableNewChartLibraryDebug();
-      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
-      expect(data.length).to.be(5);
 
       // switching dashboard to edit mode (or any other non-fetch required) state change
       // should leave session state untouched
       await PageObjects.dashboard.switchToEditMode();
       await searchSessions.expectState('restored');
+
+      const xyChartSelector = 'visTypeXyChart';
+      await enableNewChartLibraryDebug();
+      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
+      expect(data.length).to.be(5);
 
       // navigating to a listing page clears the session
       await PageObjects.dashboard.gotoDashboardLandingPage();
