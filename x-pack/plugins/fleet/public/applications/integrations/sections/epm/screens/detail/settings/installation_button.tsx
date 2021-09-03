@@ -77,6 +77,8 @@ type InstallationButtonProps = Pick<PackageInfo, 'assets' | 'name' | 'title' | '
   latestVersion?: string;
   packagePolicyIds?: string[];
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
+  isUpgradingPackagePolicies?: boolean;
+  setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export function InstallationButton(props: InstallationButtonProps) {
   const {
@@ -89,6 +91,8 @@ export function InstallationButton(props: InstallationButtonProps) {
     latestVersion,
     packagePolicyIds = [],
     dryRunData,
+    isUpgradingPackagePolicies = false,
+    setIsUpgradingPackagePolicies = () => {},
   } = props;
   const { notifications } = useStartServices();
   const hasWriteCapabilites = useCapabilities().write;
@@ -108,7 +112,6 @@ export function InstallationButton(props: InstallationButtonProps) {
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false);
   const [upgradePackagePolicies, setUpgradePackagePolicies] = useState<boolean>(true);
   const [agentPolicyData, setAgentPolicyData] = useState<GetAgentPoliciesResponse | null>();
-  const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchAgentPolicyData = async () => {
@@ -199,6 +202,7 @@ export function InstallationButton(props: InstallationButtonProps) {
     navigateToNewSettingsPage,
     notifications.toasts,
     packagePolicyIds,
+    setIsUpgradingPackagePolicies,
   ]);
 
   const handleClickUninstall = useCallback(() => {

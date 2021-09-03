@@ -85,6 +85,7 @@ interface Props {
 export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   const { name, title, removable, latestVersion, version } = packageInfo;
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse | null>();
+  const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { data: packagePoliciesData } = useGetPackagePolicies({
     perPage: 1000,
@@ -181,7 +182,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   </tr>
                 </tbody>
               </table>
-              {updateAvailable && (
+              {(updateAvailable || isUpgradingPackagePolicies) && (
                 <>
                   <UpdatesAvailableMsg latestVersion={latestVersion} />
                   <EuiSpacer size="l" />
@@ -193,6 +194,8 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       isUpdate={true}
                       packagePolicyIds={packagePolicyIds}
                       dryRunData={dryRunData}
+                      isUpgradingPackagePolicies={isUpgradingPackagePolicies}
+                      setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
                     />
                   </p>
                 </>
