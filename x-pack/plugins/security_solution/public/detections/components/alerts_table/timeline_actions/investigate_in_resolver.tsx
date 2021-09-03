@@ -13,6 +13,10 @@ import {
   setActiveTabTimeline,
   updateTimelineGraphEventId,
 } from '../../../../timelines/store/timeline/actions';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../../common/containers/use_full_screen';
 import { TimelineId, TimelineTabs } from '../../../../../common';
 import { ACTION_INVESTIGATE_IN_RESOLVER } from '../../../../timelines/components/timeline/body/translations';
 import { Ecs } from '../../../../../common/ecs';
@@ -35,13 +39,23 @@ export const useInvestigateInResolverContextItem = ({
 }: InvestigateInResolverProps) => {
   const dispatch = useDispatch();
   const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
+  const { setGlobalFullScreen } = useGlobalFullScreen();
+  const { setTimelineFullScreen } = useTimelineFullScreen();
   const handleClick = useCallback(() => {
+    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
     if (timelineId === TimelineId.active) {
+      if (dataGridIsFullScreen) {
+        setTimelineFullScreen(true);
+      }
       dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
+    } else {
+      if (dataGridIsFullScreen) {
+        setGlobalFullScreen(true);
+      }
     }
     onClose();
-  }, [dispatch, ecsData._id, onClose, timelineId]);
+  }, [dispatch, ecsData._id, onClose, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
   return isDisabled
     ? []
     : [
