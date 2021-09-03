@@ -43,6 +43,7 @@ const DocTableInfiniteContent = (props: DocTableRenderProps) => {
       const clientHeight = usedScrollDiv.clientHeight;
       const consumedHeight = scrollTop + clientHeight;
       const remainingHeight = scrollHeight - consumedHeight;
+      // 100px buffer so it starts rendering more documents before the user completely scrolled down
       if (remainingHeight < 100) {
         setLimit((prevLimit) => prevLimit + 50);
       }
