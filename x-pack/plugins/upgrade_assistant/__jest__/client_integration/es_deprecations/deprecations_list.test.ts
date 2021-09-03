@@ -18,7 +18,7 @@ import {
   createEsDeprecationsMockResponse,
 } from './mocked_responses';
 
-describe('Deprecations table', () => {
+describe('ES deprecations table', () => {
   let testBed: ElasticsearchTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
