@@ -43,12 +43,6 @@ import {
  */
 export interface ExpressionsServiceCommon {
   /**
-   * Get a fork instance by name.
-   * @param name A fork name.
-   */
-  getFork(name: string): ExpressionsService;
-
-  /**
    * Get a registered `ExpressionFunction` by its name, which was registered
    * using the `registerFunction` method. The returned `ExpressionFunction`
    * instance is an internal representation of the function in Expressions
@@ -291,15 +285,6 @@ export class ExpressionsService
       throw new Error('The expressions service has not started yet.');
     }
   }
-
-  public getFork: ExpressionsServiceCommon['getFork'] = (name) => {
-    const fork = this.children.get(name);
-    if (!fork) {
-      throw new Error(`Expressions fork '${name}' not found.`);
-    }
-
-    return fork;
-  };
 
   public readonly getFunction: ExpressionsServiceCommon['getFunction'] = (name) =>
     this.executor.getFunction(name);

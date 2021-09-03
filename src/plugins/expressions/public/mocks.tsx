@@ -17,7 +17,6 @@ export type Start = jest.Mocked<ExpressionsStart>;
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     fork: jest.fn(),
-    getFork: jest.fn(),
     getFunction: jest.fn(),
     getFunctions: jest.fn(),
     getRenderer: jest.fn(),
@@ -36,7 +35,6 @@ const createStartContract = (): Start => {
     execute: jest.fn(),
     ExpressionLoader: jest.fn(),
     ExpressionRenderHandler: jest.fn(),
-    getFork: jest.fn(),
     getFunction: jest.fn(),
     getFunctions: jest.fn(),
     getRenderer: jest.fn(),
