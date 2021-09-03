@@ -3221,34 +3221,6 @@
                 }
               }
             },
-            "kbn_region": {
-              "properties": {
-                "min": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "min number of kbn region layers per map"
-                  }
-                },
-                "max": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "max number of kbn region layers per map"
-                  }
-                },
-                "avg": {
-                  "type": "float",
-                  "_meta": {
-                    "description": "avg number of kbn region layers per map"
-                  }
-                },
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "total number of kbn region layers in cluster"
-                  }
-                }
-              }
-            },
             "kbn_tms_raster": {
               "properties": {
                 "min": {
@@ -4107,7 +4079,56 @@
             }
           }
         },
+        "PNGV2": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            }
+          }
+        },
         "printable_pdf": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "app": {
+              "properties": {
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "printable_pdf_v2": {
           "properties": {
             "available": {
               "type": "boolean"
@@ -4208,7 +4229,33 @@
                     }
                   }
                 },
+                "PNGV2": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
                   "properties": {
                     "canvas workpad": {
                       "type": "long"
@@ -4264,7 +4311,33 @@
                     }
                   }
                 },
+                "PNGV2": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
                   "properties": {
                     "canvas workpad": {
                       "type": "long"
@@ -4320,7 +4393,33 @@
                     }
                   }
                 },
+                "PNGV2": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
                   "properties": {
                     "canvas workpad": {
                       "type": "long"
@@ -4376,7 +4475,33 @@
                     }
                   }
                 },
+                "PNGV2": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
                   "properties": {
                     "canvas workpad": {
                       "type": "long"
@@ -4432,7 +4557,33 @@
                     }
                   }
                 },
+                "PNGV2": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "printable_pdf": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "printable_pdf_v2": {
                   "properties": {
                     "canvas workpad": {
                       "type": "long"
@@ -4499,7 +4650,56 @@
                 }
               }
             },
+            "PNGV2": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                }
+              }
+            },
             "printable_pdf": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "app": {
+                  "properties": {
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "printable_pdf_v2": {
               "properties": {
                 "available": {
                   "type": "boolean"
@@ -4600,7 +4800,33 @@
                         }
                       }
                     },
+                    "PNGV2": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
                       "properties": {
                         "canvas workpad": {
                           "type": "long"
@@ -4656,7 +4882,33 @@
                         }
                       }
                     },
+                    "PNGV2": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
                       "properties": {
                         "canvas workpad": {
                           "type": "long"
@@ -4712,7 +4964,33 @@
                         }
                       }
                     },
+                    "PNGV2": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
                       "properties": {
                         "canvas workpad": {
                           "type": "long"
@@ -4768,7 +5046,33 @@
                         }
                       }
                     },
+                    "PNGV2": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
                       "properties": {
                         "canvas workpad": {
                           "type": "long"
@@ -4824,7 +5128,33 @@
                         }
                       }
                     },
+                    "PNGV2": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "printable_pdf": {
+                      "properties": {
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "printable_pdf_v2": {
                       "properties": {
                         "canvas workpad": {
                           "type": "long"
@@ -5483,6 +5813,12 @@
             "description": "Indicates if audit logging is both enabled and supported by the current license."
           }
         },
+        "auditLoggingType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "If auditLoggingEnabled is true, indicates what type is enabled (ECS or legacy)."
+          }
+        },
         "loginSelectorEnabled": {
           "type": "boolean",
           "_meta": {
@@ -5517,6 +5853,24 @@
             "_meta": {
               "description": "The set of enabled http auth schemes. Used for api-based usage, and when credentials are provided via reverse-proxy."
             }
+          }
+        },
+        "sessionIdleTimeoutInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session idle timeout expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionLifespanInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session lifespan expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionCleanupInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
           }
         }
       }

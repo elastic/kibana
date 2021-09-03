@@ -70,36 +70,39 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
     return loadModulesPromise;
   }
 
-  loadModulesPromise = new Promise(async (resolve) => {
-    const {
-      MapEmbeddable,
-      getIndexPatternService,
-      getMapsCapabilities,
-      renderApp,
-      createSecurityLayerDescriptors,
-      registerLayerWizard,
-      registerSource,
-      createTileMapLayerDescriptor,
-      createRegionMapLayerDescriptor,
-      createBasemapLayerDescriptor,
-      createESSearchSourceLayerDescriptor,
-      suggestEMSTermJoinConfig,
-    } = await import('./lazy');
-
-    resolve({
-      MapEmbeddable,
-      getIndexPatternService,
-      getMapsCapabilities,
-      renderApp,
-      createSecurityLayerDescriptors,
-      registerLayerWizard,
-      registerSource,
-      createTileMapLayerDescriptor,
-      createRegionMapLayerDescriptor,
-      createBasemapLayerDescriptor,
-      createESSearchSourceLayerDescriptor,
-      suggestEMSTermJoinConfig,
-    });
+  loadModulesPromise = new Promise(async (resolve, reject) => {
+    try {
+      const {
+        MapEmbeddable,
+        getIndexPatternService,
+        getMapsCapabilities,
+        renderApp,
+        createSecurityLayerDescriptors,
+        registerLayerWizard,
+        registerSource,
+        createTileMapLayerDescriptor,
+        createRegionMapLayerDescriptor,
+        createBasemapLayerDescriptor,
+        createESSearchSourceLayerDescriptor,
+        suggestEMSTermJoinConfig,
+      } = await import('./lazy');
+      resolve({
+        MapEmbeddable,
+        getIndexPatternService,
+        getMapsCapabilities,
+        renderApp,
+        createSecurityLayerDescriptors,
+        registerLayerWizard,
+        registerSource,
+        createTileMapLayerDescriptor,
+        createRegionMapLayerDescriptor,
+        createBasemapLayerDescriptor,
+        createESSearchSourceLayerDescriptor,
+        suggestEMSTermJoinConfig,
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
   return loadModulesPromise;
 }

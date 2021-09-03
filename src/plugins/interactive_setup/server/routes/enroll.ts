@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 
 import { ElasticsearchConnectionStatus } from '../../common';
 import type { EnrollResult } from '../elasticsearch_service';
+import type { WriteConfigParameters } from '../kibana_config_writer';
 import type { RouteDefinitionParams } from './';
 
 /**
@@ -81,9 +82,9 @@ export function defineEnrollRoutes({
           .match(/.{1,2}/g)
           ?.join(':') ?? '';
 
-      let enrollResult: EnrollResult;
+      let configToWrite: WriteConfigParameters & EnrollResult;
       try {
-        enrollResult = await elasticsearch.enroll({
+        configToWrite = await elasticsearch.enroll({
           apiKey: request.body.apiKey,
           hosts: request.body.hosts,
           caFingerprint: colonFormattedCaFingerprint,
@@ -98,7 +99,7 @@ export function defineEnrollRoutes({
       }
 
       try {
-        await kibanaConfigWriter.writeConfig(enrollResult);
+        await kibanaConfigWriter.writeConfig(configToWrite);
       } catch {
         // For security reasons, we shouldn't leak any filesystem related errors.
         return response.customError({
