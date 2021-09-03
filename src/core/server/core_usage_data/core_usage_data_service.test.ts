@@ -150,6 +150,50 @@ describe('CoreUsageDataService', () => {
         expect(usageStatsClient).toBeInstanceOf(CoreUsageStatsClient);
       });
     });
+
+    describe('Usage Counter', () => {
+      it('registers a usage counter and uses it to increment the counters', async () => {
+        const http = httpServiceMock.createInternalSetupContract();
+        const metrics = metricsServiceMock.createInternalSetupContract();
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
+        const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
+        const coreUsageData = service.setup({
+          http,
+          metrics,
+          savedObjectsStartPromise,
+          changedDeprecatedConfigPath$,
+        });
+        const myUsageCounter = { incrementCounter: jest.fn() };
+        coreUsageData.registerUsageCounter(myUsageCounter);
+        coreUsageData.incrementUsageCounter({ counterName: 'test' });
+        expect(myUsageCounter.incrementCounter).toHaveBeenCalledWith({ counterName: 'test' });
+      });
+
+      it('swallows errors when provided increment counter fails', async () => {
+        const http = httpServiceMock.createInternalSetupContract();
+        const metrics = metricsServiceMock.createInternalSetupContract();
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
+        const changedDeprecatedConfigPath$ = configServiceMock.create().getDeprecatedConfigPath$();
+        const coreUsageData = service.setup({
+          http,
+          metrics,
+          savedObjectsStartPromise,
+          changedDeprecatedConfigPath$,
+        });
+        const myUsageCounter = {
+          incrementCounter: jest.fn(() => {
+            throw new Error('Something is really wrong');
+          }),
+        };
+        coreUsageData.registerUsageCounter(myUsageCounter);
+        expect(() => coreUsageData.incrementUsageCounter({ counterName: 'test' })).not.toThrow();
+        expect(myUsageCounter.incrementCounter).toHaveBeenCalledWith({ counterName: 'test' });
+      });
+    });
   });
 
   describe('start', () => {
