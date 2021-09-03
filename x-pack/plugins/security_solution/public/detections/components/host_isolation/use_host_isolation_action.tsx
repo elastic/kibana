@@ -81,7 +81,7 @@ export const useHostIsolationAction = ({
       isEndpointAlert &&
       isolationSupported &&
       isHostIsolationPanelOpen === false &&
-      loadingHostIsolationStatus !== false
+      loadingHostIsolationStatus === false
         ? [
             <EuiContextMenuItem
               key="isolate-host-action-item"
