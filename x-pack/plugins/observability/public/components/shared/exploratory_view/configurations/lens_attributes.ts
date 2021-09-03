@@ -572,11 +572,7 @@ export class LensAttributes {
 
       const { sourceField } = seriesConfig.xAxisColumn;
 
-      let label = timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label;
-
-      if (layerConfig.seriesConfig.reportType !== ReportTypes.CORE_WEB_VITAL && layerConfig.name) {
-        label = layerConfig.name;
-      }
+      const label = timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label;
 
       layers[layerId] = {
         columnOrder: [

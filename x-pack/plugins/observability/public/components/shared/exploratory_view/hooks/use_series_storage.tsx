@@ -59,7 +59,8 @@ export function UrlStorageContextProvider({
     convertAllShortSeries(storage.get(allSeriesKey) ?? [])
   );
 
-  const [autoApply, setAutoApply] = useState<boolean>(() => storage.get(autoApplyKey) ?? true);
+  // Auto apply feature is currently disabled
+  const [autoApply, setAutoApply] = useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = useState<number>(() => Date.now());
 
   const [reportType, setReportType] = useState<string>(

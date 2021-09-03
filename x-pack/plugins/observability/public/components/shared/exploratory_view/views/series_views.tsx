@@ -12,6 +12,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { SeriesEditor } from '../series_editor/series_editor';
 import { SeriesViewer } from '../series_viewer/series_viewer';
+import { AddSeriesButton } from './add_series_button';
 import { PanelId } from '../exploratory_view';
 
 const tabs = [
@@ -80,6 +81,7 @@ export function SeriesViews({
       <EuiTabs size="s">{renderTabs()}</EuiTabs>
       {selectedTabId === 'preview' && <SeriesViewer />}
       {selectedTabId === 'configure' && <SeriesEditor />}
+      <AddSeriesButton />
     </div>
   );
 }
