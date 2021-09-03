@@ -6,15 +6,39 @@
  */
 
 import React, { memo } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import { PolicyDetails } from './view';
-import { MANAGEMENT_ROUTING_POLICY_DETAILS_PATH } from '../../common/constants';
+import { AdministrationSubTab } from '../../types';
+import {
+  MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD,
+} from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 
 export const PolicyContainer = memo(() => {
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_POLICY_DETAILS_PATH} exact component={PolicyDetails} />
+      <Route
+        path={[
+          MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+        ]}
+        exact
+        component={PolicyDetails}
+      />
+      <Route
+        path={MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD}
+        exact
+        render={(props) => (
+          <Redirect
+            to={`${MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH.replace(
+              `:tabName(${AdministrationSubTab.policies})`,
+              props.match.params.tabName
+            ).replace(':policyId', props.match.params.policyId)}`}
+          />
+        )}
+      />
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );

@@ -5,24 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
+import { EuiTabbedContent, EuiSpacer, EuiTabbedContentTab } from '@elastic/eui';
 
-import { PolicyDetailsForm } from '../policy_details_form';
+import { usePolicyDetailsSelector } from '../policy_hooks';
+import {
+  isOnPolicyDetailsPage,
+  isOnPolicyTrustedAppsPage,
+} from '../../store/policy_details/selectors';
+
 import { PolicyTrustedAppsLayout } from '../trusted_apps/layout';
+import { PolicyFormLayout } from '../policy_forms/components';
 
 export const PolicyTabs = React.memo(() => {
+  const history = useHistory();
+  const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyDetailsPage);
+  const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsPage);
+
   const tabs = [
     {
-      id: 'policyForm',
+      id: 'settings',
       name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.policyForm', {
         defaultMessage: 'Policy settings',
       }),
       content: (
         <>
           <EuiSpacer />
-          <PolicyDetailsForm />
+          <PolicyFormLayout />
         </>
       ),
     },
@@ -40,8 +51,31 @@ export const PolicyTabs = React.memo(() => {
     },
   ];
 
+  const getInitialSelectedTab = () => {
+    let initialTab = tabs[0];
+
+    if (isInSettingsTab) initialTab = tabs[0];
+    else if (isInTrustedAppsTab) initialTab = tabs[1];
+    else initialTab = tabs[0];
+
+    return initialTab;
+  };
+
+  const onTabClickHandler = useCallback(
+    (selectedTab: EuiTabbedContentTab) => {
+      history.push(history.location.pathname.replace(/\/([^\/]*)$/, `/${selectedTab.id}`));
+    },
+    [history]
+  );
+
   return (
-    <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" size="l" />
+    <EuiTabbedContent
+      tabs={tabs}
+      initialSelectedTab={getInitialSelectedTab()}
+      autoFocus="selected"
+      size="l"
+      onTabClick={onTabClickHandler}
+    />
   );
 });
 

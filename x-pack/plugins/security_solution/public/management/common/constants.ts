@@ -11,7 +11,9 @@ import { ManagementStoreGlobalNamespace, AdministrationSubTab } from '../types';
 // --[ ROUTING ]---------------------------------------------------------------------------
 export const MANAGEMENT_ROUTING_ENDPOINTS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.endpoints})`;
 export const MANAGEMENT_ROUTING_POLICIES_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})`;
-export const MANAGEMENT_ROUTING_POLICY_DETAILS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId`;
+export const MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/settings`;
+export const MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/trustedApps`;
+export const MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId`;
 export const MANAGEMENT_ROUTING_TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.trustedApps})`;
 export const MANAGEMENT_ROUTING_EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.eventFilters})`;
 

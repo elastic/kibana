@@ -13,6 +13,7 @@ import {
   isOnPolicyDetailsPage,
   policyDetails,
   policyDetailsForUpdate,
+  isOnPolicyTrustedAppsPage,
 } from './selectors';
 import {
   sendGetPackagePolicy,
@@ -31,7 +32,10 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
     next(action);
     const state = getState();
 
-    if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
+    if (
+      action.type === 'userChangedUrl' &&
+      (isOnPolicyDetailsPage(state) || isOnPolicyTrustedAppsPage(state))
+    ) {
       const id = policyIdFromParams(state);
       let policyItem: PolicyData;
 

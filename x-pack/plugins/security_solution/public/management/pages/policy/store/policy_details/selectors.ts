@@ -18,7 +18,10 @@ import {
   UIPolicyConfig,
 } from '../../../../../../common/endpoint/types';
 import { policyFactory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
-import { MANAGEMENT_ROUTING_POLICY_DETAILS_PATH } from '../../../../common/constants';
+import {
+  MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+} from '../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
 
@@ -74,7 +77,17 @@ export const policyDetailsForUpdate: (
 export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
   return (
     matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+      path: MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+      exact: true,
+    }) !== null
+  );
+};
+
+/** Returns a boolean of whether the user is on the policy details page or not */
+export const isOnPolicyTrustedAppsPage = (state: Immutable<PolicyDetailsState>) => {
+  return (
+    matchPath(state.location?.pathname ?? '', {
+      path: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
       exact: true,
     }) !== null
   );
@@ -91,7 +104,10 @@ export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => strin
   (location: PolicyDetailsState['location']) => {
     return (
       matchPath<ManagementRoutePolicyDetailsParams>(location?.pathname ?? '', {
-        path: MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+        path: [
+          MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+        ],
         exact: true,
       })?.params?.policyId ?? ''
     );

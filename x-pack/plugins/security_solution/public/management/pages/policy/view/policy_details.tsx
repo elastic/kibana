@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiConfirmModal,
   EuiCallOut,
   EuiLoadingSpinner,
   EuiBottomBar,
@@ -46,6 +45,7 @@ import { HeaderLinkBack } from '../../../../common/components/header_page';
 import { PolicyDetailsForm } from './policy_details_form';
 import { PolicyTabs } from './tabs';
 import { AdministrationListPage } from '../../../components/administration_list_page';
+import { ConfirmUpdate } from './policy_forms/components/policy_form_confirm_update';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -76,7 +76,7 @@ export const PolicyDetails = React.memo(() => {
 
   // Handle showing update statuses
   useEffect(() => {
-    if (policyUpdateStatus) {
+    if (!isTrustedAppsByPolicyEnabled && policyUpdateStatus) {
       if (policyUpdateStatus.success) {
         toasts.addSuccess({
           title: i18n.translate(
@@ -108,7 +108,14 @@ export const PolicyDetails = React.memo(() => {
         });
       }
     }
-  }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState]);
+  }, [
+    navigateToApp,
+    toasts,
+    policyName,
+    policyUpdateStatus,
+    routeState,
+    isTrustedAppsByPolicyEnabled,
+  ]);
 
   const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
@@ -133,15 +140,15 @@ export const PolicyDetails = React.memo(() => {
   }, []);
 
   useEffect(() => {
-    if (!routeState && locationRouteState) {
+    if (!isTrustedAppsByPolicyEnabled && !routeState && locationRouteState) {
       setRouteState(locationRouteState);
     }
-  }, [locationRouteState, routeState]);
+  }, [locationRouteState, routeState, isTrustedAppsByPolicyEnabled]);
 
   // Before proceeding - check if we have a policy data.
   // If not, and we are still loading, show spinner.
   // Else, if we have an error, then show error on the page.
-  if (!policyItem) {
+  if (!isTrustedAppsByPolicyEnabled && !policyItem) {
     return (
       <SecuritySolutionPageWrapper noTimeline>
         {isPolicyLoading ? (
@@ -179,7 +186,7 @@ export const PolicyDetails = React.memo(() => {
 
   return (
     <>
-      {showConfirm && (
+      {!isTrustedAppsByPolicyEnabled && showConfirm && (
         <ConfirmUpdate
           hostCount={policyAgentStatusSummary?.total ?? 0}
           onCancel={handleSaveCancel}
@@ -195,101 +202,47 @@ export const PolicyDetails = React.memo(() => {
         restrictWidth={true}
         hasBottomBorder={!isTrustedAppsByPolicyEnabled}
       >
-        {isTrustedAppsByPolicyEnabled ? <PolicyTabs /> : <PolicyDetailsForm />}
-
-        <EuiSpacer size="xxl" />
-        <EuiBottomBar paddingSize="s">
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="ghost"
-                onClick={handleCancelOnClick}
-                data-test-subj="policyDetailsCancelButton"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.details.cancel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill={true}
-                iconType="save"
-                data-test-subj="policyDetailsSaveButton"
-                onClick={handleSaveOnClick}
-                isLoading={isPolicyLoading}
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policy.details.save"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiBottomBar>
+        {isTrustedAppsByPolicyEnabled ? (
+          <PolicyTabs />
+        ) : (
+          <>
+            <PolicyDetailsForm />
+            <EuiSpacer size="xxl" />
+            <EuiBottomBar paddingSize="s">
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="ghost"
+                    onClick={handleCancelOnClick}
+                    data-test-subj="policyDetailsCancelButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.policy.details.cancel"
+                      defaultMessage="Cancel"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill={true}
+                    iconType="save"
+                    data-test-subj="policyDetailsSaveButton"
+                    onClick={handleSaveOnClick}
+                    isLoading={isPolicyLoading}
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.policy.details.save"
+                      defaultMessage="Save"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiBottomBar>
+          </>
+        )}
       </AdministrationListPage>
     </>
   );
 });
 
 PolicyDetails.displayName = 'PolicyDetails';
-
-const ConfirmUpdate = React.memo<{
-  hostCount: number;
-  onConfirm: () => void;
-  onCancel: () => void;
-}>(({ hostCount, onCancel, onConfirm }) => {
-  return (
-    <EuiConfirmModal
-      data-test-subj="policyDetailsConfirmModal"
-      title={i18n.translate('xpack.securitySolution.endpoint.policy.details.updateConfirm.title', {
-        defaultMessage: 'Save and deploy changes',
-      })}
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-      confirmButtonText={i18n.translate(
-        'xpack.securitySolution.endpoint.policy.details.updateConfirm.confirmButtonTitle',
-        {
-          defaultMessage: 'Save and deploy changes',
-        }
-      )}
-      cancelButtonText={i18n.translate(
-        'xpack.securitySolution.endpoint.policy.details.updateConfirm.cancelButtonTitle',
-        {
-          defaultMessage: 'Cancel',
-        }
-      )}
-    >
-      {hostCount > 0 && (
-        <>
-          <EuiCallOut
-            data-test-subj="policyDetailsWarningCallout"
-            title={i18n.translate(
-              'xpack.securitySolution.endpoint.policy.details.updateConfirm.warningTitle',
-              {
-                defaultMessage:
-                  'This action will update {hostCount, plural, one {# host} other {# hosts}}',
-                values: { hostCount },
-              }
-            )}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage"
-              defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent policy."
-            />
-          </EuiCallOut>
-          <EuiSpacer size="xl" />
-        </>
-      )}
-      <p>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policy.details.updateConfirm.message"
-          defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
-        />
-      </p>
-    </EuiConfirmModal>
-  );
-});
-
-ConfirmUpdate.displayName = 'ConfirmUpdate';
