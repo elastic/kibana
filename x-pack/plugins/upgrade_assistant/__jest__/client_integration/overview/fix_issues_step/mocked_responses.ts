@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DomainDeprecationDetails } from 'kibana/public';
 import { ESUpgradeStatus } from '../../../../common/types';
 
 export const esDeprecations: ESUpgradeStatus = {
@@ -39,21 +38,3 @@ export const esDeprecationsEmpty: ESUpgradeStatus = {
   totalCriticalDeprecations: 0,
   deprecations: [],
 };
-
-export const kibanaDeprecations: DomainDeprecationDetails[] = [
-  {
-    title: 'mock-deprecation-title',
-    correctiveActions: { manualSteps: ['test-step'] },
-    domainId: 'xpack.spaces',
-    level: 'critical',
-    message:
-      'Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)',
-  },
-  {
-    title: 'mock-deprecation-title',
-    correctiveActions: { manualSteps: ['test-step'] },
-    domainId: 'xpack.spaces',
-    level: 'warning',
-    message: 'Sample warning deprecation',
-  },
-];
