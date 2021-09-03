@@ -56,8 +56,9 @@ import type {
   PieVisualizationPluginSetupPlugins,
 } from './pie_visualization';
 import type { HeatmapVisualization as HeatmapVisualizationType } from './heatmap_visualization';
-import { AppNavLinkStatus } from '../../../../src/core/public';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+
+import { AppNavLinkStatus } from '../../../../src/core/public';
 
 import {
   UiActionsStart,
@@ -80,7 +81,6 @@ import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
-import { getTimeZone } from './utils';
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
 
@@ -222,7 +222,10 @@ export class LensPlugin {
     setupExpressions(
       expressions,
       () => startServices().plugins.fieldFormats.deserialize,
-      () => getTimeZone(core.uiSettings)
+      async () => {
+        const { getTimeZone } = await import('./utils');
+        return getTimeZone(core.uiSettings);
+      }
     );
 
     const getPresentationUtilContext = () =>
