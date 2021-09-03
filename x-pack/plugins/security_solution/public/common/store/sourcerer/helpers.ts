@@ -55,22 +55,6 @@ export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, st
   return newSelectedPatterns;
 };
 
-export const defaultSelectedPatternListByEventType = ({
-  state,
-  eventType,
-}: {
-  state: SourcererModel;
-  eventType?: TimelineEventsType;
-}) => {
-  let defaultIndexPatterns = state.defaultIndexPattern.patternList;
-  if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
-    defaultIndexPatterns = [...defaultIndexPatterns, state.signalIndexName ?? ''];
-  } else if (!isEmpty(state.signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
-    defaultIndexPatterns = [state.signalIndexName ?? ''];
-  }
-  return defaultIndexPatterns;
-};
-
 export const defaultIndexPatternByEventType = ({
   state,
   eventType,

@@ -78,12 +78,16 @@ export const getSelectedKipSelector = () => {
   };
 };
 
-export const getAllExistingIndexNamesSelector = () => {
+// TODO: Steph/sourcerer fuck this
+export const getAllExistingIndexNamesSelector = (id: string) => {
   const getDefaultIndexPatternSelector = defaultIndexPatternSelector();
+  const getKibanaIndexPatternsSelector = kibanaIndexPatternsSelector();
 
   return (state: State): string[] => {
+    const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
     const defaultIndexPattern = getDefaultIndexPatternSelector(state);
-    return defaultIndexPattern.patternList;
+    const dataView = kibanaIndexPatterns.find((kip) => kip.id === id) ?? defaultIndexPattern;
+    return dataView.patternList;
   };
 };
 

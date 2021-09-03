@@ -387,6 +387,16 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   to,
   ruleNote,
 }: UpdateTimeline): (() => void) => () => {
+  console.log('dispatchUpdateTimeline', {
+    duplicate,
+    id,
+    forceNotes,
+    from,
+    notes,
+    timeline,
+    to,
+    ruleNote,
+  });
   if (!isEmpty(timeline.indexNames)) {
     console.log('why do we need eventType in redux?', timeline.eventType);
     dispatch(

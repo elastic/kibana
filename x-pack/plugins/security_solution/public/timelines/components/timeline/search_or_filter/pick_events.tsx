@@ -159,6 +159,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       value: indexName,
     }))
   );
+  const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
   const selectableOptions = useMemo(() => {
     return patternList.map((indexName) => ({
       label: indexName,
@@ -166,34 +167,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       disabled: !selectablePatterns.includes(indexName),
     }));
   }, [selectablePatterns, patternList]);
-
-  const onChangeCombo = useCallback(
-    (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const localSelectedPatterns = newSelectedOptions.map((nso) => nso.label);
-      if (localSelectedPatterns.sort().join() === selectablePatterns.sort().join()) {
-        setFilterEventType('all');
-      } else if (
-        kipId === defaultIndexPattern.id &&
-        localSelectedPatterns.sort().join() ===
-          selectablePatterns
-            .filter((index) => index !== signalIndexName)
-            .sort()
-            .join()
-      ) {
-        setFilterEventType('raw');
-      } else if (
-        kipId === defaultIndexPattern.id &&
-        localSelectedPatterns.sort().join() === signalIndexName
-      ) {
-        setFilterEventType('alert');
-      } else {
-        setFilterEventType('custom');
-      }
-
-      setSelectedOptions(newSelectedOptions);
-    },
-    [defaultIndexPattern.id, kipId, selectablePatterns, signalIndexName]
-  );
 
   const onChangeFilter = useCallback(
     (filter) => {
@@ -226,6 +199,52 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     [selectablePatterns, signalIndexName]
   );
 
+  const onChangeCombo = useCallback(
+    (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      const localSelectedPatterns = newSelectedOptions.map((nso) => nso.label);
+      if (localSelectedPatterns.sort().join() === selectablePatterns.sort().join()) {
+        setFilterEventType('all');
+      } else if (
+        kipId === defaultIndexPattern.id &&
+        localSelectedPatterns.sort().join() ===
+          selectablePatterns
+            .filter((index) => index !== signalIndexName)
+            .sort()
+            .join()
+      ) {
+        setFilterEventType('raw');
+      } else if (
+        kipId === defaultIndexPattern.id &&
+        localSelectedPatterns.sort().join() === signalIndexName
+      ) {
+        setFilterEventType('alert');
+      } else {
+        setFilterEventType('custom');
+      }
+
+      setSelectedOptions(newSelectedOptions);
+    },
+    [defaultIndexPattern.id, kipId, selectablePatterns, signalIndexName]
+  );
+
+  const onChangeSuper = useCallback(
+    (newSelectedOption) => {
+      setFilterEventType('all');
+      setKipId(newSelectedOption);
+      setSelectedOptions(
+        getScopePatternListSelection(
+          kibanaIndexPatterns.find((kip) => kip.id === newSelectedOption),
+          SourcererScopeName.timeline,
+          signalIndexName
+        ).map((indexSelected: string) => ({
+          label: indexSelected,
+          value: indexSelected,
+        }))
+      );
+    },
+    [kibanaIndexPatterns, signalIndexName]
+  );
+
   const togglePopover = useCallback(
     () => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen),
     []
@@ -256,23 +275,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     );
     setFilterEventType(eventType);
   }, [defaultIndexPattern, eventType, signalIndexName]);
-  const onChangeSuper = useCallback(
-    (newSelectedOption) => {
-      setFilterEventType('all');
-      setKipId(newSelectedOption);
-      setSelectedOptions(
-        getScopePatternListSelection(
-          kibanaIndexPatterns.find((kip) => kip.id === newSelectedOption),
-          SourcererScopeName.timeline,
-          signalIndexName
-        ).map((indexSelected: string) => ({
-          label: indexSelected,
-          value: indexSelected,
-        }))
-      );
-    },
-    [kibanaIndexPatterns, signalIndexName]
-  );
 
   const kipSelectOptions = useMemo(
     () =>
@@ -441,6 +443,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
                 <EuiButton
                   onClick={handleSaveIndices}
                   data-test-subj="sourcerer-save"
+                  disabled={isSavingDisabled}
                   fill
                   fullWidth
                   size="s"

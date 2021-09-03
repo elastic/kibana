@@ -32,14 +32,9 @@ export const setSelectedKip = actionCreator<{
   eventType?: TimelineEventsType;
 }>('SET_SELECTED_KIP');
 
-export const setSelectedIndexPatterns = actionCreator<{
-  id: SourcererScopeName;
-  selectedPatterns: string[];
-  eventType?: TimelineEventsType;
-}>('SET_SELECTED_INDEX_PATTERNS');
-
 export const initTimelineIndexPatterns = actionCreator<{
   id: SourcererScopeName;
+  // TODO: Need selectedKipId
   selectedPatterns: string[];
   eventType?: TimelineEventsType;
 }>('INIT_TIMELINE_INDEX_PATTERNS');

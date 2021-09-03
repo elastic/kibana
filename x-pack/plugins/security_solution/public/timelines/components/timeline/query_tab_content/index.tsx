@@ -490,13 +490,18 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateEventTypeAndIndexesName: (newEventType: TimelineEventsType, newIndexNames: string[]) => {
+  updateEventTypeAndIndexesName: (
+    newEventType: TimelineEventsType,
+    newIndexNames: string[],
+    newKipId: string
+  ) => {
     dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
     dispatch(timelineActions.updateIndexNames({ id: timelineId, indexNames: newIndexNames }));
     dispatch(
-      sourcererActions.setSelectedIndexPatterns({
+      sourcererActions.setSelectedKip({
         id: SourcererScopeName.timeline,
         selectedPatterns: newIndexNames,
+        selectedKipId: newKipId,
       })
     );
   },

@@ -11,13 +11,12 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import {
   setSourcererScopeLoading,
   setSelectedKip,
-  setSelectedIndexPatterns,
   setSignalIndexName,
   setSource,
   initTimelineIndexPatterns,
 } from './actions';
 import { initialSourcererState, SourcererModel } from './model';
-import { createDefaultIndexPatterns, defaultIndexPatternByEventType } from './helpers';
+import { defaultIndexPatternByEventType } from './helpers';
 
 export type SourcererState = SourcererModel;
 
@@ -44,25 +43,13 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
-          ...rest, // TODO: Steph/sourcerer createDefaultIndexPatterns({ eventType, id, selectedPatterns, state }),
-        },
-      },
-    };
-  })
-  // TODO: Steph/sourcerer can delete
-  .case(setSelectedIndexPatterns, (state, { id, selectedPatterns, eventType }) => {
-    return {
-      ...state,
-      sourcererScopes: {
-        ...state.sourcererScopes,
-        [id]: {
-          ...state.sourcererScopes[id],
-          selectedPatterns: createDefaultIndexPatterns({ eventType, id, selectedPatterns, state }),
+          ...rest,
         },
       },
     };
   })
   .case(initTimelineIndexPatterns, (state, { id, selectedPatterns, eventType }) => {
+    console.log('initTimelineIndexPatterns', selectedPatterns, eventType);
     return {
       ...state,
       sourcererScopes: {
@@ -70,13 +57,13 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
         [id]: {
           ...state.sourcererScopes[id],
           selectedPatterns: isEmpty(selectedPatterns)
-            ? defaultIndexPatternByEventType({ state, eventType })
+            ? // TODO: Steph/sourcerer replace with createDefaultIndexPatterns
+              defaultIndexPatternByEventType({ state, eventType })
             : selectedPatterns,
         },
       },
     };
   })
-
   .case(setSource, (state, { id, payload }) => {
     return {
       ...state,
