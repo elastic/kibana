@@ -11,6 +11,7 @@ import {
   AvailableTotal,
   ByAppCounts,
   JobTypes,
+  LayoutCounts,
   RangeStats,
   ReportingUsageType,
 } from './types';
@@ -20,6 +21,12 @@ const appCountsSchema: MakeSchemaFrom<AppCounts> = {
   'canvas workpad': { type: 'long' },
   dashboard: { type: 'long' },
   visualization: { type: 'long' },
+};
+
+const layoutCountsSchema: MakeSchemaFrom<LayoutCounts> = {
+  canvas: { type: 'long' },
+  print: { type: 'long' },
+  preserve_layout: { type: 'long' },
 };
 
 const byAppCountsSchema: MakeSchemaFrom<ByAppCounts> = {
@@ -35,17 +42,8 @@ const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
   deprecated: { type: 'long' },
-  app: {
-    'canvas workpad': { type: 'long' },
-    dashboard: { type: 'long' },
-    visualization: { type: 'long' },
-    search: { type: 'long' },
-  },
-  layout: {
-    canvas: { type: 'long' },
-    print: { type: 'long' },
-    preserve_layout: { type: 'long' },
-  },
+  app: appCountsSchema,
+  layout: layoutCountsSchema,
 };
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {

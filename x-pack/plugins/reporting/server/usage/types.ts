@@ -74,6 +74,7 @@ export interface AvailableTotal {
   };
 }
 
+// FIXME: find a way to get this from exportTypesHandler or common/constants
 type BaseJobTypes =
   | 'csv'
   | 'csv_searchsource'
@@ -83,6 +84,7 @@ type BaseJobTypes =
   | 'printable_pdf_v2';
 
 export interface LayoutCounts {
+  canvas: number;
   print: number;
   preserve_layout: number;
 }
