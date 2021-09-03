@@ -21,6 +21,8 @@ import { ImpactBar } from '../ImpactBar';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { ITableColumn, ManagedTable } from '../managed_table';
 import { EmptyMessage } from '../EmptyMessage';
+import { TableFetchWrapper } from '../table_fetch_wrapper';
+import { OverviewTableContainer } from '../overview_table_container';
 
 export type DependenciesItem = Omit<
   ConnectionStatsItemWithComparisonData,
@@ -37,10 +39,19 @@ interface Props {
   title: React.ReactNode;
   nameColumnTitle: React.ReactNode;
   status: FETCH_STATUS;
+  compact?: boolean;
 }
 
 export function DependenciesTable(props: Props) {
-  const { dependencies, link, title, nameColumnTitle, status } = props;
+  const {
+    dependencies,
+    fixedHeight,
+    link,
+    title,
+    nameColumnTitle,
+    status,
+    compact = true,
+  } = props;
 
   const columns: Array<ITableColumn<DependenciesItem>> = [
     {
@@ -147,12 +158,16 @@ export function DependenciesTable(props: Props) {
       impactValue: item.currentStats.impact,
     })) ?? [];
 
-  const noItemsMessage = (
+  const noItemsMessage = !compact ? (
     <EmptyMessage
       heading={i18n.translate('xpack.apm.dependenciesTable.notFoundLabel', {
         defaultMessage: 'No dependencies found',
       })}
     />
+  ) : (
+    i18n.translate('xpack.apm.dependenciesTable.notFoundLabel', {
+      defaultMessage: 'No dependencies found',
+    })
   );
 
   return (
@@ -168,15 +183,25 @@ export function DependenciesTable(props: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ManagedTable
-          isLoading={status === FETCH_STATUS.LOADING}
-          columns={columns}
-          items={items}
-          noItemsMessage={noItemsMessage}
-          initialSortField="impactValue"
-          initialSortDirection="desc"
-          initialPageSize={5}
-        />
+        <TableFetchWrapper status={status}>
+          <OverviewTableContainer
+            fixedHeight={fixedHeight}
+            isEmptyAndNotInitiated={
+              items.length === 0 && status === FETCH_STATUS.NOT_INITIATED
+            }
+          >
+            <ManagedTable
+              isLoading={status === FETCH_STATUS.LOADING}
+              columns={columns}
+              items={items}
+              noItemsMessage={noItemsMessage}
+              initialSortField="impactValue"
+              initialSortDirection="desc"
+              initialPageSize={5}
+              pagination={true}
+            />
+          </OverviewTableContainer>
+        </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
