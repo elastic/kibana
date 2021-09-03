@@ -344,34 +344,7 @@ export class DynamicStyleProperty<T>
   pluckCategoricalStyleMetaFromTileMetaFeatures(
     metaFeatures: TileMetaFeature[]
   ): CategoryFieldMeta | null {
-    const size = this.getNumberOfCategories();
-    if (!this.isCategorical() || size <= 0) {
-      return null;
-    }
-
-    const name = this.getFieldName();
-
-    const counts = new Map<string, number>();
-    for (let i = 0; i < metaFeatures.length; i++) {
-      const fieldMeta = metaFeatures[i].properties.fieldMeta;
-      if (fieldMeta && fieldMeta[name] && fieldMeta[name].categories) {
-        const categoryFieldMeta: CategoryFieldMeta = fieldMeta[name]
-          .categories as CategoryFieldMeta;
-        for (let c = 0; c < categoryFieldMeta.categories.length; c++) {
-          const category: Category = categoryFieldMeta.categories[c];
-          // properties object may be sparse, so need to check if the field is effectively present
-          if (typeof category.key !== undefined) {
-            if (counts.has(category.key)) {
-              counts.set(category.key, (counts.get(category.key) as number) + category.count);
-            } else {
-              counts.set(category.key, category.count);
-            }
-          }
-        }
-      }
-    }
-
-    return trimCategories(counts, size);
+    return null;
   }
 
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null {

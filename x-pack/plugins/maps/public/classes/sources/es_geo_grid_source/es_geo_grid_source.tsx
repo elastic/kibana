@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, {ReactElement} from 'react';
+import React, { ReactElement } from 'react';
 
-import {i18n} from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
-import {Feature} from 'geojson';
+import { Feature } from 'geojson';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   convertCompositeRespToGeoJson,
   convertRegularRespToGeoJson,
   makeESBbox,
 } from '../../../../common/elasticsearch_util';
 // @ts-expect-error
-import {UpdateSourceEditor} from './update_source_editor';
+import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   ES_GEO_FIELD_TYPE,
@@ -31,28 +32,27 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import {getDataSourceLabel} from '../../../../common/i18n_getters';
-import {AbstractESAggSource} from '../es_agg_source';
-import {DataRequestAbortError} from '../../util/data_request';
-import {registerSource} from '../source_registry';
-import {LICENSED_FEATURES} from '../../../licensed_features';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { AbstractESAggSource } from '../es_agg_source';
+import { DataRequestAbortError } from '../../util/data_request';
+import { registerSource } from '../source_registry';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
-import {getHttp} from '../../../kibana_services';
-import {GeoJsonWithMeta} from '../vector_source';
-import {ITiledSingleLayerVectorSource} from '../tiled_single_layer_vector_source';
+import { getHttp } from '../../../kibana_services';
+import { GeoJsonWithMeta } from '../vector_source';
+import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
 import {
   ESGeoGridSourceDescriptor,
   MapExtent,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
-import {ImmutableSourceProperty, SourceEditorArgs} from '../source';
-import {ISearchSource} from '../../../../../../../src/plugins/data/common/search/search_source';
-import {IndexPattern} from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import {Adapters} from '../../../../../../../src/plugins/inspector/common/adapters';
-import {isValidStringConfig} from '../../util/valid_string_config';
-import {ITiledSingleLayerMvtParams} from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
-import type { estypes } from '@elastic/elasticsearch';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { isValidStringConfig } from '../../util/valid_string_config';
+import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -143,6 +143,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   isMvt() {
     return this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE;
+  }
+
+  isPointsOnly(): boolean {
+    return this._descriptor.requestType === RENDER_AS.POINT;
   }
 
   getFieldNames() {

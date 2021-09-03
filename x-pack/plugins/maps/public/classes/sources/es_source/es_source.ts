@@ -97,10 +97,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     this._descriptor = descriptor;
   }
 
-  isMvt(): boolean {
-    return false;
-  }
-
   getId(): string {
     return this._descriptor.id;
   }

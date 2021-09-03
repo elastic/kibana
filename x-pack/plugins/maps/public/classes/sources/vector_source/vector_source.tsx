@@ -8,7 +8,7 @@
 import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { TooltipProperty, ITooltipProperty } from '../../tooltips/tooltip_property';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
@@ -47,6 +47,7 @@ export interface BoundsFilters {
 
 export interface IVectorSource extends ISource {
   isMvt(): boolean;
+  isPointsOnly(): boolean;
   showTooManyFeaturesBounds(): boolean;
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
@@ -90,6 +91,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   isMvt() {
+    return false;
+  }
+
+  isPointsOnly(): boolean {
     return false;
   }
 

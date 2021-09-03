@@ -249,7 +249,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       icon: isDeprecated ? (
         <EuiIcon type="alert" color="danger" />
       ) : (
-        this.getCurrentStyle().getIcon()
+        this.getCurrentStyle().getIcon(this.getSource().isPointsOnly())
       ),
       tooltipContent,
       areResultsTrimmed,

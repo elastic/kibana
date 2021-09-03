@@ -72,7 +72,7 @@ export class TiledVectorLayer extends VectorLayer {
     if (!this._source.isESSource()) {
       // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources
       return {
-        icon: this.getCurrentStyle().getIcon(),
+        icon: this.getCurrentStyle().getIcon(this.getSource().isPointsOnly()),
         tooltipContent: null,
         areResultsTrimmed: false,
       };
@@ -97,7 +97,7 @@ export class TiledVectorLayer extends VectorLayer {
       totalFeaturesCount
     );
     return {
-      icon: this.getCurrentStyle().getIcon(),
+      icon: this.getCurrentStyle().getIcon(this.getSource().isPointsOnly()),
       ...content,
     };
   }
@@ -255,33 +255,34 @@ export class TiledVectorLayer extends VectorLayer {
     // Tile meta will never have duplicated features since by there nature, tile meta is a feature contained within a single tile
     const mbFeatures = mbMap.querySourceFeatures(this._getMbSourceId(), {
       sourceLayer: MVT_META_SOURCE_LAYER_NAME,
-      // filter: ['==', ['get', KBN_METADATA_FEATURE], true],
     });
 
-    const metaFeatures: TileMetaFeature[] = mbFeatures.map((mbFeature: Feature | null) => {
-      const parsedProperties: Record<string, unknown> = {};
-      for (const key in mbFeature.properties) {
-        if (mbFeature.properties.hasOwnProperty(key)) {
-          parsedProperties[key] =
-            typeof mbFeature.properties[key] === 'string' ||
-            typeof mbFeature.properties[key] === 'number' ||
-            typeof mbFeature.properties[key] === 'boolean'
-              ? mbFeature.properties[key]
-              : JSON.parse(mbFeature.properties[key]); // mvt properties cannot be nested geojson
+    const metaFeatures: Array<TileMetaFeature | null> = ((mbFeatures as unknown) as TileMetaFeature[]).map(
+      (mbFeature: TileMetaFeature | null) => {
+        const parsedProperties: Record<string, unknown> = {};
+        for (const key in mbFeature?.properties) {
+          if (mbFeature?.properties.hasOwnProperty(key)) {
+            parsedProperties[key] =
+              typeof mbFeature.properties[key] === 'string' ||
+              typeof mbFeature.properties[key] === 'number' ||
+              typeof mbFeature.properties[key] === 'boolean'
+                ? mbFeature.properties[key]
+                : JSON.parse(mbFeature.properties[key]); // mvt properties cannot be nested geojson
+          }
+        }
+
+        try {
+          return {
+            type: 'Feature',
+            id: mbFeature?.id,
+            geometry: mbFeature?.geometry, // this getter might throw with non-conforming geometries
+            properties: parsedProperties,
+          } as TileMetaFeature;
+        } catch (e) {
+          return null;
         }
       }
-
-      try {
-        return {
-          type: 'Feature',
-          id: mbFeature.id,
-          geometry: mbFeature.geometry, // this getter might throw with non-conforming geometries
-          properties: parsedProperties,
-        } as TileMetaFeature;
-      } catch (e) {
-        return null;
-      }
-    });
+    );
 
     const filtered = metaFeatures.filter((f) => f !== null);
     return filtered as TileMetaFeature[];
