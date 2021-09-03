@@ -5,5 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { SavedVisState } from 'src/plugins/visualizations/common/types';
 
-export { VisualizeConstants, APP_NAME } from '../../common/constants';
+export type PureVisState = SavedVisState;
