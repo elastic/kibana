@@ -6,6 +6,7 @@
  */
 
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
+import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getInitialDatasourceId, getResolvedDateRange } from '../utils';
@@ -301,6 +302,7 @@ export const lensSlice = createSlice({
         initialInput?: LensEmbeddableInput;
         redirectCallback: (savedObjectId?: string) => void;
         emptyState: LensAppState;
+        history: History<unknown>;
       }>
     ) => state,
   },

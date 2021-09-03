@@ -18,6 +18,7 @@ import type {
 } from '../../../../src/plugins/data/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 import type {
   ExpressionsServiceSetup,
   ExpressionsSetup,
@@ -110,6 +111,7 @@ export interface LensPluginStartDependencies {
   presentationUtil: PresentationUtilPluginStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   inspector: InspectorStartContract;
+  spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
 }
 
