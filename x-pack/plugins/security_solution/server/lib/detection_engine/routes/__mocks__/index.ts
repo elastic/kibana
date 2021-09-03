@@ -26,6 +26,7 @@ export const createMockConfig = (): ConfigType => ({
   endpointResultListDefaultPageSize: 10,
   packagerTaskInterval: '60s',
   alertMergeStrategy: 'missingFields',
+  alertIgnoreFields: [],
   prebuiltRulesFromFileSystem: true,
   prebuiltRulesFromSavedObjects: false,
 });

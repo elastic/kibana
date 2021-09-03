@@ -6,7 +6,12 @@
  */
 
 import { BrowserFields, ConfigKeys } from '../types';
-import { Formatter, commonFormatters, arrayToJsonFormatter } from '../common/formatters';
+import {
+  Formatter,
+  commonFormatters,
+  arrayToJsonFormatter,
+  stringToJsonFormatter,
+} from '../common/formatters';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
@@ -15,7 +20,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKeys.SOURCE_ZIP_USERNAME]: null,
   [ConfigKeys.SOURCE_ZIP_PASSWORD]: null,
   [ConfigKeys.SOURCE_ZIP_FOLDER]: null,
-  [ConfigKeys.SOURCE_INLINE]: (fields) => JSON.stringify(fields[ConfigKeys.SOURCE_INLINE]),
+  [ConfigKeys.SOURCE_INLINE]: (fields) => stringToJsonFormatter(fields[ConfigKeys.SOURCE_INLINE]),
   [ConfigKeys.PARAMS]: null,
   [ConfigKeys.SCREENSHOTS]: null,
   [ConfigKeys.SYNTHETICS_ARGS]: (fields) =>
