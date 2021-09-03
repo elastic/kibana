@@ -6,7 +6,7 @@
 
 {kib} relies on three high-level entities to set the logging service: appenders, loggers, and root.
 
-- Appenders define where log messages are displayed (stdout or console) and stored (file on the disk), and their layout.
+- Appenders define where log messages are displayed (stdout or console) and their layout (`pattern` or `json`). They also allow you to specify if you want the logs stored and, if so, where (file on the disk).
 - Loggers define what logging settings, such as the level of verbosity and the appenders, to apply to a particular context. Each log entry context provides information about the service or plugin that emits it and any of its sub-parts, for example, `metrics.ops` or `elasticsearch.query`.
 - Root is a logger that applies to all the log entries in {kib}.
 
