@@ -335,10 +335,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {timelinesUi.getLastUpdated({
-                    updatedAt: updatedAt || Date.now(),
-                    showUpdating,
-                  })}
+                  {updatedAt &&
+                    timelinesUi.getLastUpdated({
+                      updatedAt: updatedAt || Date.now(),
+                      showUpdating,
+                    })}
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
