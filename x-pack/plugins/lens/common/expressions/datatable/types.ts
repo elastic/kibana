@@ -7,7 +7,19 @@
 
 import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions';
 import type { LensMultiTable } from '../../types';
-import type { DatatableArgs, DatatableRender } from './datatable';
+import type { DatatableArgs } from './datatable';
+
+export interface DatatableProps {
+  data: LensMultiTable;
+  untransposedData?: LensMultiTable;
+  args: DatatableArgs;
+}
+
+export interface DatatableRender {
+  type: 'render';
+  as: 'lens_datatable_renderer';
+  value: DatatableProps;
+}
 
 export type DatatableExpressionFunction = ExpressionFunctionDefinition<
   'lens_datatable',

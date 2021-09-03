@@ -7,25 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExecutionContext } from '../../../../../../src/plugins/expressions/common';
-import type { FormatFactory, LensMultiTable } from '../../types';
+import type { FormatFactory } from '../../types';
 import type { ColumnConfigArg } from './datatable_column';
 import type { DatatableExpressionFunction } from './types';
 
 export interface SortingState {
   columnId: string | undefined;
   direction: 'asc' | 'desc' | 'none';
-}
-
-export interface DatatableProps {
-  data: LensMultiTable;
-  untransposedData?: LensMultiTable;
-  args: DatatableArgs;
-}
-
-export interface DatatableRender {
-  type: 'render';
-  as: 'lens_datatable_renderer';
-  value: DatatableProps;
 }
 
 export interface DatatableArgs {

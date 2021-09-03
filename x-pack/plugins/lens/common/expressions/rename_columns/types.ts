@@ -7,19 +7,16 @@
 
 import { Datatable, ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions';
 
-export type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
+export type OriginalColumn = { id: string; label: string } & (
+  | { operationType: 'date_histogram'; sourceField: string }
+  | { operationType: string; sourceField: never }
+);
 
-export interface TimeScaleArgs {
-  dateColumnId: string;
-  inputColumnId: string;
-  outputColumnId: string;
-  targetUnit: TimeScaleUnit;
-  outputColumnName?: string;
-}
-
-export type TimeScaleExpressionFunction = ExpressionFunctionDefinition<
-  'lens_time_scale',
+export type RenameColumnsExpressionFunction = ExpressionFunctionDefinition<
+  'lens_rename_columns',
   Datatable,
-  TimeScaleArgs,
-  Promise<Datatable>
+  {
+    idMap: string;
+  },
+  Datatable | Promise<Datatable>
 >;

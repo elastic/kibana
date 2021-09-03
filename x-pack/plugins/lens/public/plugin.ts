@@ -80,31 +80,9 @@ import {
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
-import {
-  axisTitlesVisibilityConfig,
-  counterRate,
-  datatableColumn,
-  formatColumn,
-  gridlinesConfig,
-  layerConfig,
-  legendConfig,
-  metricChart,
-  pie,
-  renameColumns,
-  tickLabelsConfig,
-  xyChart,
-  yAxisConfig,
-  mergeTables,
-  heatmap,
-  heatmapLegendConfig,
-  heatmapGridConfig,
-  axisExtentConfig,
-  getDatatable,
-  getTimeScale,
-  labelsOrientationConfig,
-} from '../common/expressions';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { getTimeZone } from './utils';
+import { setupExpressions } from './expressions';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -241,29 +219,11 @@ export class LensPlugin {
 
     visualizations.registerAlias(getLensAliasConfig());
 
-    [
-      pie,
-      xyChart,
-      mergeTables,
-      counterRate,
-      metricChart,
-      yAxisConfig,
-      layerConfig,
-      formatColumn,
-      legendConfig,
-      renameColumns,
-      gridlinesConfig,
-      datatableColumn,
-      tickLabelsConfig,
-      axisTitlesVisibilityConfig,
-      heatmap,
-      heatmapLegendConfig,
-      heatmapGridConfig,
-      axisExtentConfig,
-      labelsOrientationConfig,
-      getDatatable(() => startServices().plugins.fieldFormats.deserialize),
-      getTimeScale(() => getTimeZone(core.uiSettings)),
-    ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
+    setupExpressions(
+      expressions,
+      () => startServices().plugins.fieldFormats.deserialize,
+      () => getTimeZone(core.uiSettings)
+    );
 
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
