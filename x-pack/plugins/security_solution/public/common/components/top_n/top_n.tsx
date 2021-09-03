@@ -25,7 +25,7 @@ import { State } from '../../store';
 import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const TopNContainer = styled.div`
-  width: 600px;
+  min-width: 600px;
 `;
 
 const CloseButton = styled(EuiButtonIcon)`
