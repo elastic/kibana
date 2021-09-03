@@ -464,7 +464,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             let isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
             expect(isEnabled).to.be(true);
 
-            await visualBuilder.toggleIndexPatternSelectionModePopover();
             await visualBuilder.switchIndexPatternSelectionMode(true);
             isEnabled = await visualBuilder.checkIndexPatternSelectionModeSwitchIsEnabled();
             expect(isEnabled).to.be(false);

@@ -516,7 +516,9 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async checkIndexPatternSelectionModeSwitchIsEnabled() {
     await this.toggleIndexPatternSelectionModePopover();
-    return await this.testSubjects.isEnabled('switchIndexPatternSelectionMode');
+    const isEnabled = await this.testSubjects.isEnabled('switchIndexPatternSelectionMode');
+    await this.toggleIndexPatternSelectionModePopover();
+    return isEnabled;
   }
 
   public async setIndexPatternValue(value: string, useKibanaIndices?: boolean) {
