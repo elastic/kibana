@@ -36,6 +36,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   } = usePager({
     totalItems: props.rows.length,
   });
+  const showPagination = totalPages !== 0;
 
   const scrollTop = useCallback(() => {
     if (tableWrapperRef.current) {
@@ -128,15 +129,17 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
         <DocTableWrapperMemoized ref={tableWrapperRef} {...props} render={renderDocTable} />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <ToolBarPagination
-          pageSize={pageSize}
-          pageCount={totalPages}
-          activePage={currentPage}
-          onPageClick={onPageChange}
-          onPageSizeChange={onPageSizeChange}
-        />
-      </EuiFlexItem>
+      {showPagination && (
+        <EuiFlexItem grow={false}>
+          <ToolBarPagination
+            pageSize={pageSize}
+            pageCount={totalPages}
+            activePage={currentPage}
+            onPageClick={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
