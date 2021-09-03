@@ -6,7 +6,7 @@
  */
 
 import { getExportTypesRegistry } from '../lib';
-import { getExportStatsByTimerange } from './decorate_range_stats';
+import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import { FeatureAvailabilityMap } from './types';
 
@@ -19,7 +19,7 @@ beforeEach(() => {
 const exportTypesHandler = getExportTypesHandler(getExportTypesRegistry());
 
 test('Model of job status and status-by-pdf-app', () => {
-  const result = getExportStatsByTimerange(
+  const result = getExportStats(
     {
       status: { completed: 0, processing: 1, pending: 2, failed: 3 },
       statuses: {
@@ -65,7 +65,7 @@ test('Model of job status and status-by-pdf-app', () => {
 });
 
 test('Model of jobTypes', () => {
-  const result = getExportStatsByTimerange(
+  const result = getExportStats(
     {
       PNG: { available: true, total: 3 },
       printable_pdf: {
@@ -155,7 +155,7 @@ test('Model of jobTypes', () => {
 });
 
 test('PNG counts, provided count of deprecated jobs explicitly', () => {
-  const result = getExportStatsByTimerange(
+  const result = getExportStats(
     { PNG: { available: true, total: 15, deprecated: 5 } },
     featureMap,
     exportTypesHandler
@@ -181,7 +181,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
 });
 
 test('CSV counts, provides all jobs implicitly deprecated due to jobtype', () => {
-  const result = getExportStatsByTimerange(
+  const result = getExportStats(
     { csv: { available: true, total: 15, deprecated: 0 } },
     featureMap,
     exportTypesHandler

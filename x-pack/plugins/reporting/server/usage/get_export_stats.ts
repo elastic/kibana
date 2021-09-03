@@ -47,7 +47,7 @@ function getAvailableTotalForFeature(
  * This function builds the result object for all export types found in the
  * Reporting data, even if the type is unknown to this Kibana instance.
  */
-export const getExportStatsByTimerange = (
+export const getExportStats = (
   rangeStatsInput: Partial<RangeStats> = {},
   featureAvailability: FeatureAvailabilityMap,
   exportTypesHandler: ExportTypesHandler
