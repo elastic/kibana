@@ -51,7 +51,7 @@ describe('Error handling', () => {
 
     expect(exists('kibanaDeprecationErrors')).toBe(true);
     expect(find('kibanaDeprecationErrors').text()).toContain(
-      'Deprecation warnings may be incomplete'
+      'Deprecation issues may be incomplete'
     );
   });
 
@@ -75,6 +75,8 @@ describe('Error handling', () => {
     component.update();
 
     expect(exists('kibanaRequestError')).toBe(true);
-    expect(find('kibanaRequestError').text()).toContain('Could not retrieve Kibana deprecations');
+    expect(find('kibanaRequestError').text()).toContain(
+      'Could not retrieve Kibana deprecation issues'
+    );
   });
 });
