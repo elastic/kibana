@@ -387,6 +387,7 @@ kibana_vars=(
     xpack.security.sessionTimeout
     xpack.securitySolution.alertMergeStrategy
     xpack.securitySolution.alertResultListDefaultDateRange
+    xpack.securitySolution.alertIgnoreFields
     xpack.securitySolution.endpointResultListDefaultFirstPageIndex
     xpack.securitySolution.endpointResultListDefaultPageSize
     xpack.securitySolution.maxRuleImportExportSize

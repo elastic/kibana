@@ -21,12 +21,61 @@ export const configSchema = schema.object({
   maxRuleImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
   maxTimelineImportExportSize: schema.number({ defaultValue: 10000 }),
   maxTimelineImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
+
+  /**
+   * This is used within the merge strategies:
+   * server/lib/detection_engine/signals/source_fields_merging
+   *
+   * For determining which strategy for merging "fields" and "_source" together to get
+   * runtime fields, constant keywords, etc...
+   *
+   * "missingFields" (default) This will only merge fields that are missing from the _source and exist in the fields.
+   * "noFields" This will turn off all merging of runtime fields, constant keywords from fields.
+   * "allFields" This will merge and overwrite anything found within "fields" into "_source" before indexing the data.
+   */
   alertMergeStrategy: schema.oneOf(
     [schema.literal('allFields'), schema.literal('missingFields'), schema.literal('noFields')],
     {
       defaultValue: 'missingFields',
     }
   ),
+
+  /**
+   * This is used within the merge strategies:
+   * server/lib/detection_engine/signals/source_fields_merging
+   *
+   * For determining if we need to ignore particular "fields" and not merge them with "_source" such as
+   * runtime fields, constant keywords, etc...
+   *
+   * This feature and functionality is mostly as "safety feature" meaning that we have had bugs in the past
+   * where something down the stack unexpectedly ends up in the fields API which causes documents to not
+   * be indexable. Rather than changing alertMergeStrategy to be "noFields", you can use this array to add
+   * any problematic values.
+   *
+   * You can use plain dotted notation strings such as "host.name" or a regular expression such as "/host\..+/"
+   */
+  alertIgnoreFields: schema.arrayOf(schema.string(), {
+    defaultValue: [],
+    validate(ignoreFields) {
+      const errors = ignoreFields.flatMap((ignoreField, index) => {
+        if (ignoreField.startsWith('/') && ignoreField.endsWith('/')) {
+          try {
+            new RegExp(ignoreField.slice(1, -1));
+            return [];
+          } catch (error) {
+            return [`"${error.message}" at array position ${index}`];
+          }
+        } else {
+          return [];
+        }
+      });
+      if (errors.length !== 0) {
+        return errors.join('. ');
+      } else {
+        return undefined;
+      }
+    },
+  }),
   [SIGNALS_INDEX_KEY]: schema.string({ defaultValue: DEFAULT_SIGNALS_INDEX }),
 
   /**

@@ -77,6 +77,7 @@ export const signalRulesAlertType = ({
   ml,
   lists,
   mergeStrategy,
+  ignoreFields,
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
@@ -84,6 +85,7 @@ export const signalRulesAlertType = ({
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  ignoreFields: ConfigType['alertIgnoreFields'];
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -237,12 +239,14 @@ export const signalRulesAlertType = ({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
           mergeStrategy,
+          ignoreFields,
         });
 
         const wrapSequences = wrapSequencesFactory({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
           mergeStrategy,
+          ignoreFields,
         });
 
         if (isMlRule(type)) {
