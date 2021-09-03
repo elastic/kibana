@@ -29,13 +29,6 @@ export type VisualizeLocatorParams = {
   visId?: string;
 
   /**
-   * Type of visualization.
-   *
-   * @note This is required to navigate to "create" page (i.e., when no `visId` has been provided).
-   */
-  type?: string;
-
-  /**
    * Global- and app-level filters to apply to data loaded by visualize.
    */
   filters?: Filter[];
@@ -62,6 +55,8 @@ export type VisualizeLocatorParams = {
 
   /**
    * Serialized visualization.
+   *
+   * @note This is required to navigate to "create" page (i.e., when no `visId` has been provided).
    */
   vis?: PureVisState;
 
@@ -97,7 +92,6 @@ export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLo
     uiState,
     query,
     vis,
-    type,
     savedSearchId,
     indexPattern,
   }: VisualizeLocatorParams) {
@@ -126,7 +120,7 @@ export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLo
 
     path += `?${stringify(url.encodeQuery(urlState), { encode: false, sort: false })}`;
 
-    const otherParams = stringify({ type, savedSearchId, indexPattern });
+    const otherParams = stringify({ type: vis?.type, savedSearchId, indexPattern });
 
     if (otherParams) path += `&${otherParams}`;
 

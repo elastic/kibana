@@ -290,7 +290,6 @@ export const getTopNavConfig = (
             filters: currentState.filters,
             refreshInterval: undefined,
             timeRange: data.query.timefilter.timefilter.getTime(),
-            type: currentState.vis.type,
             uiState: currentState.uiState,
             query: currentState.query,
             vis: currentState.vis,

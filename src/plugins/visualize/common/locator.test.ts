@@ -26,17 +26,32 @@ describe('visualize locator', () => {
   });
 
   it('returns a location for "edit" path', async () => {
-    const location = await definition.getLocation({ visId: 'test', type: 'test' });
+    const location = await definition.getLocation({
+      visId: 'test',
+      vis: {
+        title: 'test',
+        type: 'test',
+        aggs: [],
+        params: {},
+      },
+    });
 
     expect(location.app).toMatchInlineSnapshot(`"visualize"`);
-    expect(location.path).toMatchInlineSnapshot(`"#/edit/test?_g=()&_a=()&type=test"`);
+    expect(location.path).toMatchInlineSnapshot(
+      `"#/edit/test?_g=()&_a=(vis:(aggs:!(),params:(),title:test,type:test))&type=test"`
+    );
     expect(location.state).toMatchInlineSnapshot(`Object {}`);
   });
 
   it('creates a location with query, filters (global and app), refresh interval and time range', async () => {
     const location = await definition.getLocation({
       visId: '123',
-      type: 'test',
+      vis: {
+        title: 'test',
+        type: 'test',
+        aggs: [],
+        params: {},
+      },
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
       refreshInterval: { pause: false, value: 300 },
       filters: [
@@ -69,7 +84,7 @@ describe('visualize locator', () => {
     expect(location.path.match(/refreshInterval:/g)?.length).toBe(1);
     expect(location.path.match(/time:/g)?.length).toBe(1);
     expect(location.path).toMatchInlineSnapshot(
-      `"#/edit/123?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&type=test"`
+      `"#/edit/123?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye),vis:(aggs:!(),params:(),title:test,type:test))&type=test"`
     );
 
     expect(location.state).toMatchInlineSnapshot(`Object {}`);
@@ -80,7 +95,12 @@ describe('visualize locator', () => {
     const savedSearchId = 'savedSearchIdTest';
     const location = await definition.getLocation({
       visId: '123',
-      type: 'test',
+      vis: {
+        title: 'test',
+        type: 'test',
+        aggs: [],
+        params: {},
+      },
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
       refreshInterval: { pause: false, value: 300 },
       filters: [
@@ -99,7 +119,12 @@ describe('visualize locator', () => {
         fakeUIState: 'fakeUIState',
         this: 'value contains a spaces that should be encoded',
       },
-      vis: ({ fakeVis: 'fakeVis' } as unknown) as PureVisState,
+      vis: {
+        title: 'test',
+        type: 'test',
+        aggs: [],
+        params: {},
+      },
       indexPattern,
       savedSearchId,
     });
@@ -108,7 +133,7 @@ describe('visualize locator', () => {
     expect(location.path).toContain(indexPattern);
     expect(location.path).toContain(savedSearchId);
     expect(location.path).toMatchInlineSnapshot(
-      `"#/edit/123?_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),linked:!t,query:(language:kuery,query:bye),uiState:(fakeUIState:fakeUIState,this:'value%20contains%20a%20spaces%20that%20should%20be%20encoded'),vis:(fakeVis:fakeVis))&indexPattern=indexPatternTest&savedSearchId=savedSearchIdTest&type=test"`
+      `"#/edit/123?_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),linked:!t,query:(language:kuery,query:bye),uiState:(fakeUIState:fakeUIState,this:'value%20contains%20a%20spaces%20that%20should%20be%20encoded'),vis:(aggs:!(),params:(),title:test,type:test))&indexPattern=indexPatternTest&savedSearchId=savedSearchIdTest&type=test"`
     );
     expect(location.state).toMatchInlineSnapshot(`Object {}`);
   });
