@@ -165,6 +165,7 @@ export function DiscoverLayout({
           services={services}
           stateContainer={stateContainer}
           updateQuery={onUpdateQuery}
+          onResetQuery={resetQuery}
         />
         <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
           <h1 id="savedSearchTitle" className="euiScreenReaderOnly">

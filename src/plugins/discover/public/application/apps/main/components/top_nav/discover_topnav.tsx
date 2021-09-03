@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
 import { Query, TimeRange } from '../../../../../../../data/common/query';
@@ -21,6 +22,7 @@ export type DiscoverTopNavProps = Pick<
   savedQuery?: string;
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   stateContainer: GetStateReturn;
+  onResetQuery: () => void;
 };
 
 export const DiscoverTopNav = ({
@@ -34,9 +36,20 @@ export const DiscoverTopNav = ({
   navigateTo,
   savedSearch,
   services,
+  onResetQuery,
 }: DiscoverTopNavProps) => {
+  const history = useHistory();
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
   const { TopNavMenu } = services.navigation.ui;
+
+  const onOpenSavedSearch = useCallback(
+    (id: string) => {
+      onResetQuery();
+      history.push(`/view/${encodeURIComponent(id)}`);
+    },
+    [history, onResetQuery]
+  );
+
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
@@ -47,8 +60,18 @@ export const DiscoverTopNav = ({
         state: stateContainer,
         onOpenInspector,
         searchSource,
+        onOpenSavedSearch,
       }),
-    [indexPattern, navigateTo, onOpenInspector, searchSource, stateContainer, savedSearch, services]
+    [
+      indexPattern,
+      navigateTo,
+      savedSearch,
+      services,
+      stateContainer,
+      onOpenInspector,
+      searchSource,
+      onOpenSavedSearch,
+    ]
   );
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
