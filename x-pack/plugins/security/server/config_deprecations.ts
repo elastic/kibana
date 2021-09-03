@@ -122,7 +122,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
         }),
         message: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeMessage', {
           defaultMessage:
-            '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is is no longer used.',
+            '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" is no longer used.',
         }),
         correctiveActions: {
           manualSteps: [
