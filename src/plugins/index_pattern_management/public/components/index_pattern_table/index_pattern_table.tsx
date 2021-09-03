@@ -77,13 +77,13 @@ export const IndexPatternTable = ({
     (async function () {
       const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
         uiSettings.get('defaultIndex'),
-        data.indexPatterns
+        data.dataViews
       );
       setIndexPatterns(gettedIndexPatterns);
       setIsLoadingIndexPatterns(false);
       if (
         gettedIndexPatterns.length === 0 ||
-        !(await data.indexPatterns.hasUserIndexPattern().catch(() => false))
+        !(await data.dataViews.hasUserIndexPattern().catch(() => false))
       ) {
         setShowCreateDialog(true);
       }

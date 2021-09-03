@@ -29,9 +29,9 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
   ];
 
   const discoveredPluginEntries = await globby([
-    normalize(Path.resolve(baseDir, `src/plugins/*/server/index.js`)),
+    normalize(Path.resolve(baseDir, `src/plugins/**/server/index.js`)),
     `!${normalize(Path.resolve(baseDir, `/src/plugins/**/public`))}`,
-    normalize(Path.resolve(baseDir, `x-pack/plugins/*/server/index.js`)),
+    normalize(Path.resolve(baseDir, `x-pack/plugins/**/server/index.js`)),
     `!${normalize(Path.resolve(baseDir, `/x-pack/plugins/**/public`))}`,
   ]);
 

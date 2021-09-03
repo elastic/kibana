@@ -211,7 +211,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   }, [setValue, tableSelectedItems]);
 
   const handlePackUpload = useCallback(
-    (newQueries, packName) => {
+    (parsedContent, packName) => {
       /* Osquery scheduled packs are supported since osquery_manager@0.5.0 */
       const isOsqueryPackSupported = integrationPackageVersion
         ? satisfies(integrationPackageVersion, '>=0.5.0')
@@ -219,14 +219,14 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
 
       setValue(
         produce((draft) => {
-          forEach(newQueries, (newQuery, newQueryId) => {
+          forEach(parsedContent.queries, (newQuery, newQueryId) => {
             draft[0].streams.push(
               getNewStream({
                 id: isOsqueryPackSupported ? newQueryId : `pack_${packName}_${newQueryId}`,
-                interval: newQuery.interval,
+                interval: newQuery.interval ?? parsedContent.interval,
                 query: newQuery.query,
-                version: newQuery.version,
-                platform: getSupportedPlatforms(newQuery.platform),
+                version: newQuery.version ?? parsedContent.version,
+                platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),
                 scheduledQueryGroupId,
               })
             );
