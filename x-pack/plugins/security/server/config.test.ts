@@ -1689,41 +1689,39 @@ describe('createConfig()', () => {
         `);
     });
 
-    it('falls back to the global settings if provider is not known', async () => {
-      expect(
-        createMockConfig({ session: { idleTimeout: 123 } }).session.getExpirationTimeouts({
-          type: 'some type',
-          name: 'some name',
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "idleTimeout": "PT0.123S",
-          "lifespan": "P30D",
-        }
-      `);
+    it('falls back to the global settings if provider is not known or is undefined', async () => {
+      [{ type: 'some type', name: 'some name' }, undefined].forEach((provider) => {
+        expect(
+          createMockConfig({ session: { idleTimeout: 123 } }).session.getExpirationTimeouts(
+            provider
+          )
+        ).toMatchInlineSnapshot(`
+          Object {
+            "idleTimeout": "PT0.123S",
+            "lifespan": "P30D",
+          }
+        `);
 
-      expect(
-        createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts({
-          type: 'some type',
-          name: 'some name',
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "idleTimeout": "PT1H",
-          "lifespan": "PT0.456S",
-        }
-      `);
+        expect(
+          createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts(provider)
+        ).toMatchInlineSnapshot(`
+          Object {
+            "idleTimeout": "PT1H",
+            "lifespan": "PT0.456S",
+          }
+        `);
 
-      expect(
-        createMockConfig({
-          session: { idleTimeout: 123, lifespan: 456 },
-        }).session.getExpirationTimeouts({ type: 'some type', name: 'some name' })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "idleTimeout": "PT0.123S",
-          "lifespan": "PT0.456S",
-        }
-      `);
+        expect(
+          createMockConfig({
+            session: { idleTimeout: 123, lifespan: 456 },
+          }).session.getExpirationTimeouts(provider)
+        ).toMatchInlineSnapshot(`
+          Object {
+            "idleTimeout": "PT0.123S",
+            "lifespan": "PT0.456S",
+          }
+        `);
+      });
     });
 
     it('uses provider overrides if specified (only idle timeout)', async () => {
