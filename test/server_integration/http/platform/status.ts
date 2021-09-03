@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   const getStatus = async (pluginName: string): Promise<ServiceStatusSerialized> => {
-    const resp = await supertest.get('/api/status?v8format=true');
+    const resp = await supertest.get('/api/status');
 
     return resp.body.status.plugins[pluginName];
   };
