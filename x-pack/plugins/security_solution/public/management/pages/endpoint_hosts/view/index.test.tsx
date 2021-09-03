@@ -413,7 +413,7 @@ describe('when on the endpoint list page', () => {
         const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink'))[0];
         expect(firstPolicyName).not.toBeNull();
         expect(firstPolicyName.getAttribute('href')).toEqual(
-          `${APP_PATH}${MANAGEMENT_PATH}/policy/${firstPolicyID}`
+          `${APP_PATH}${MANAGEMENT_PATH}/policy/${firstPolicyID}/settings`
         );
       });
 
@@ -651,7 +651,7 @@ describe('when on the endpoint list page', () => {
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
-        `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}/settings`
       );
     });
 
@@ -673,7 +673,7 @@ describe('when on the endpoint list page', () => {
       });
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.pathname).toEqual(
-        `${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}/settings`
       );
     });
 
