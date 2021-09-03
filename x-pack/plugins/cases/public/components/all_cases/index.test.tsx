@@ -944,7 +944,9 @@ describe('AllCasesGeneric', () => {
     expect(result.current.find((i) => i.name === 'Status')).toBeFalsy();
 
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="case-view-status-dropdown"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="cases-table"]').exists()).toBeTruthy();
     });
+
+    expect(wrapper.find('[data-test-subj="case-view-status-dropdown"]').exists()).toBeFalsy();
   });
 });
