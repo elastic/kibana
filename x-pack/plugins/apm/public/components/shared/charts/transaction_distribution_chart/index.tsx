@@ -38,8 +38,8 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { ChartContainer } from '../chart_container';
 
 interface TransactionDistributionChartProps {
-  field?: string;
-  value?: string;
+  fieldName?: string;
+  fieldValue?: string;
   hasData: boolean;
   histogram?: HistogramItem[];
   markerCurrentTransaction?: number;
@@ -97,8 +97,8 @@ const xAxisTickFormat: TickFormatter<number> = (d) =>
   getDurationFormatter(d, 0.9999)(d).formatted;
 
 export function TransactionDistributionChart({
-  field: fieldName,
-  value: fieldValue,
+  fieldName,
+  fieldValue,
   hasData,
   histogram: originalHistogram,
   markerCurrentTransaction,
