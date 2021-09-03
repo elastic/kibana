@@ -9,13 +9,11 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { PolicyDetails } from './policy_details';
-import '../../../../common/mock/match_media.ts';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getEndpointListPath } from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 
-jest.mock('../../../../common/hooks/use_license');
 jest.mock('./policy_forms/components/policy_form_layout');
 
 describe('Policy Details', () => {
@@ -37,13 +35,6 @@ describe('Policy Details', () => {
     ({ history, coreStart } = appContextMockRenderer);
     render = (ui) => mount(ui, { wrappingComponent: AppWrapper });
     http = coreStart.http;
-  });
-
-  afterEach(() => {
-    if (policyView) {
-      policyView.unmount();
-    }
-    jest.clearAllMocks();
   });
 
   describe('when displayed with invalid id', () => {
