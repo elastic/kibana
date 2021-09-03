@@ -76,7 +76,6 @@ kibana_vars=(
     interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
     kibana.autocompleteTimeout
-    kibana.defaultAppId
     kibana.index
     logging.appenders
     logging.appenders.console
