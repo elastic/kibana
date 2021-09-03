@@ -212,6 +212,7 @@ describe('getAlertInstanceSummary()', () => {
           "sort_order": "desc",
           "start": "2019-02-12T21:00:22.479Z",
         },
+        undefined,
       ]
     `);
     // calculate the expected start/end date for one test
@@ -223,6 +224,38 @@ describe('getAlertInstanceSummary()', () => {
     const expectedDuration = 60 * AlertInstanceSummaryIntervalSeconds * 1000;
     expect(endMillis - startMillis).toBeGreaterThan(expectedDuration - 2);
     expect(endMillis - startMillis).toBeLessThan(expectedDuration + 2);
+  });
+
+  test('calls event log client with legacy ids param', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(
+      getAlertInstanceSummarySavedObject({ legacyId: '99999' })
+    );
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
+      AlertInstanceSummaryFindEventsResult
+    );
+
+    await rulesClient.getAlertInstanceSummary({ id: '1' });
+
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "alert",
+        Array [
+          "1",
+        ],
+        Object {
+          "end": "2019-02-12T21:01:22.479Z",
+          "page": 1,
+          "per_page": 10000,
+          "sort_order": "desc",
+          "start": "2019-02-12T21:00:22.479Z",
+        },
+        Array [
+          "99999",
+        ],
+      ]
+    `);
   });
 
   test('calls event log client with start date', async () => {
