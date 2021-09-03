@@ -101,7 +101,6 @@ describe('transaction_details/distribution', () => {
 
   describe('TransactionDistribution', () => {
     it('shows loading indicator when the service is running and returned no results yet', async () => {
-      const onHasData = jest.fn();
       render(
         <Wrapper
           dataSearchResponse={{
@@ -117,7 +116,7 @@ describe('transaction_details/distribution', () => {
           <TransactionDistribution
             onChartSelection={jest.fn()}
             onClearSelection={jest.fn()}
-            onHasData={onHasData}
+            traceSamples={[]}
           />
         </Wrapper>
       );
@@ -125,12 +124,10 @@ describe('transaction_details/distribution', () => {
       await waitFor(() => {
         expect(screen.getByTestId('apmCorrelationsChart')).toBeInTheDocument();
         expect(screen.getByTestId('loading')).toBeInTheDocument();
-        expect(onHasData).toHaveBeenLastCalledWith(false);
       });
     });
 
     it("doesn't show loading indicator when the service isn't running", async () => {
-      const onHasData = jest.fn();
       render(
         <Wrapper
           dataSearchResponse={{
@@ -146,7 +143,7 @@ describe('transaction_details/distribution', () => {
           <TransactionDistribution
             onChartSelection={jest.fn()}
             onClearSelection={jest.fn()}
-            onHasData={onHasData}
+            traceSamples={[]}
           />
         </Wrapper>
       );
@@ -154,7 +151,6 @@ describe('transaction_details/distribution', () => {
       await waitFor(() => {
         expect(screen.getByTestId('apmCorrelationsChart')).toBeInTheDocument();
         expect(screen.queryByTestId('loading')).toBeNull(); // it doesn't exist
-        expect(onHasData).toHaveBeenLastCalledWith(false);
       });
     });
   });

@@ -48,6 +48,7 @@ import { push } from '../../shared/Links/url_helpers';
 import { CorrelationsTable } from './correlations_table';
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
 import { isErrorMessage } from './utils/is_error_message';
+import { getOverallHistogram } from './utils/get_overall_histogram';
 import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
@@ -74,11 +75,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     latencyCorrelations,
     percentileThresholdValue,
   } = data;
-  const overallHistogram =
-    data.overallHistogram === undefined && !isRunning
-      ? []
-      : data.overallHistogram;
   const progress = loaded / total;
+  const { overallHistogram, hasData, status } = getOverallHistogram(
+    data,
+    isRunning
+  );
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -286,6 +287,8 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         markerValue={percentileThresholdValue ?? 0}
         {...selectedHistogram}
         overallHistogram={overallHistogram}
+        hasData={hasData}
+        status={status}
       />
 
       <EuiSpacer size="s" />

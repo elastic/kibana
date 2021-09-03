@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BrushEndListener, XYBrushArea } from '@elastic/charts';
 import {
   EuiBadge,
@@ -24,12 +24,17 @@ import {
 } from '../../../../../common/search_strategies/constants';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
-import {
-  OnHasData,
-  TransactionDistributionChart,
-} from '../../../shared/charts/transaction_distribution_chart';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+
+import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
 import { useUiTracker } from '../../../../../../observability/public';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
+import { getOverallHistogram } from '../../correlations/utils/get_overall_histogram';
+
+import type { TabContentProps } from '../types';
+import { useWaterfallFetcher } from '../use_waterfall_fetcher';
+import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 // Enforce min height so it's consistent across all tabs on the same level
 // to prevent "flickering" behavior
@@ -50,33 +55,32 @@ export function getFormattedSelection(selection: Selection): string {
 }
 
 interface TransactionDistributionProps {
-  markerCurrentTransaction?: number;
   onChartSelection: BrushEndListener;
   onClearSelection: () => void;
-  onHasData: OnHasData;
   selection?: Selection;
+  traceSamples: TabContentProps['traceSamples'];
 }
 
 export function TransactionDistribution({
-  markerCurrentTransaction,
   onChartSelection,
   onClearSelection,
-  onHasData,
   selection,
+  traceSamples,
 }: TransactionDistributionProps) {
   const {
     core: { notifications },
   } = useApmPluginContext();
 
-  const [showSelection, setShowSelection] = useState(false);
+  const { urlParams } = useUrlParams();
 
-  const onTransactionDistributionHasData: OnHasData = useCallback(
-    (hasData) => {
-      setShowSelection(hasData);
-      onHasData(hasData);
-    },
-    [onHasData]
-  );
+  const {
+    waterfall,
+    exceedsMax,
+    status: waterfallStatus,
+  } = useWaterfallFetcher();
+
+  const markerCurrentTransaction =
+    waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
 
   const emptySelectionText = i18n.translate(
     'xpack.apm.transactionDetails.emptySelectionText',
@@ -101,13 +105,10 @@ export function TransactionDistribution({
   );
   const { error, isRunning } = state;
   const { percentileThresholdValue } = data;
-  // If loading stopped but we didn't receive any histogram data
-  // set it to an empty error so that the chart component finishes
-  // its loading state.
-  const overallHistogram =
-    data.overallHistogram === undefined && !isRunning
-      ? []
-      : data.overallHistogram;
+  const { overallHistogram, hasData, status } = getOverallHistogram(
+    data,
+    isRunning
+  );
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -152,7 +153,7 @@ export function TransactionDistribution({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-        {showSelection && !selection && (
+        {hasData && !selection && (
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               <EuiFlexItem
@@ -170,7 +171,7 @@ export function TransactionDistribution({
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
-        {showSelection && selection && (
+        {hasData && selection && (
           <EuiFlexItem grow={false}>
             <EuiBadge
               iconType="cross"
@@ -203,9 +204,24 @@ export function TransactionDistribution({
         markerValue={percentileThresholdValue ?? 0}
         overallHistogram={overallHistogram}
         onChartSelection={onTrackedChartSelection}
-        onHasData={onTransactionDistributionHasData}
+        hasData={hasData}
         selection={selection}
+        status={status}
       />
+
+      {hasData && (
+        <>
+          <EuiSpacer size="s" />
+
+          <WaterfallWithSummary
+            urlParams={urlParams}
+            waterfall={waterfall}
+            isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+            exceedsMax={exceedsMax}
+            traceSamples={traceSamples}
+          />
+        </>
+      )}
     </div>
   );
 }
