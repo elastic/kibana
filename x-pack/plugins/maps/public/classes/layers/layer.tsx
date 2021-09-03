@@ -99,6 +99,7 @@ export interface ILayer {
   supportsLabelsOnTop: () => boolean;
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
+  getLabelsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
@@ -239,6 +240,10 @@ export class AbstractLayer implements ILayer {
 
   getJoinsDisabledReason() {
     return this.getSource().getJoinsDisabledReason();
+  }
+
+  getLabelsDisabledReason(): string | null {
+    return null;
   }
 
   isPreviewLayer(): boolean {

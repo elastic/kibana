@@ -191,6 +191,16 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     });
   }
 
+  getLabelsDisabledReason() {
+    if (this.getSource().isMvt()) {
+      return i18n.translate('xpack.maps.source.esSearch.joinsDisabledReasonMvt', {
+        defaultMessage: 'Labels are not supported when using Elasticsearch vector tiles',
+      });
+    }
+
+    return null;
+  }
+
   supportsFeatureEditing(): boolean {
     const dataRequest = this.getDataRequest(SUPPORTS_FEATURE_EDITING_REQUEST_ID);
     const data = dataRequest?.getData() as { supportsFeatureEditing: boolean } | undefined;
