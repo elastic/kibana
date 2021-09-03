@@ -145,7 +145,7 @@ export async function loadStatus({
   let response: StatusResponse;
 
   try {
-    response = await http.get('/api/status', { query: { v8format: true } });
+    response = await http.get('/api/status');
   } catch (e) {
     // API returns a 503 response if not all services are available.
     // In this case, we want to treat this as a successful API call, so that we can
