@@ -38,7 +38,7 @@ export const isSimpleField = (format: Aspect['format']) => {
   return simpleFormats.includes(format?.id ?? '');
 };
 
-const applyFormatter = (aspect: Aspect, value: unknown, shouldApply: boolean = false) =>
+export const applyFormatter = (aspect: Aspect, value: unknown, shouldApply: boolean = true) =>
   shouldApply ? aspect.formatter?.(value) ?? value : value;
 
 export const applyFormatterIfSimpleField = (aspect: Aspect, value: unknown) =>

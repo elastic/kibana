@@ -154,6 +154,12 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
           'Flag to indicate old vislib visualizations. Used for backwards compatibility including colors',
       }),
     },
+    enableHistogramMode: {
+      types: ['boolean'],
+      help: i18n.translate('visTypeXy.function.args.enableHistogramMode.help', {
+        defaultMessage: 'Flag to enable histogram mode',
+      }),
+    },
     detailedTooltip: {
       types: ['boolean'],
       help: i18n.translate('visTypeXy.function.args.detailedTooltip.help', {
@@ -276,6 +282,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       },
       fillOpacity: args.fillOpacity,
       fittingFunction: args.fittingFunction,
+      enableHistogramMode: args.enableHistogramMode,
       // @TODO: This part of `VisParams` has special details of esaggs query, but it seems to me,
       // as a chart, it should know nothing from such information in the purpose of the reusability
       // with other functions.

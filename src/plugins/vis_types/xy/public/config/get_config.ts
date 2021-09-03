@@ -43,11 +43,14 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
   } = params;
   const aspects = getAspects(table.columns, params.dimensions);
   const yAxes = params.valueAxes.map((a) =>
-    // uses first y aspect in array for formatting axis
-    getAxis<YScaleType>(a, params.grid, aspects.y[0], params.seriesParams)
+    // shouldApplyFormatter = true, because no formatter was applied to this axis values before
+    // and will be not applied in the future
+    getAxis<YScaleType>(a, params.grid, aspects.y[0], params.seriesParams, false, true)
   );
 
-  const enableHistogramMode = shouldEnableHistogramMode(params.seriesParams, aspects.y, yAxes);
+  const enableHistogramMode =
+    (params.enableHistogramMode ?? false) &&
+    shouldEnableHistogramMode(params.seriesParams, aspects.y, yAxes);
 
   const timeChartFieldTypes: string[] = [KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.DATE_RANGE];
   const isTimeChart = timeChartFieldTypes.includes(aspects.x.format?.id ?? '');

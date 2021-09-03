@@ -17,7 +17,11 @@ import {
 } from '@elastic/charts';
 
 import { Aspects } from '../types';
-import { applyFormatterIfSimpleField, COMPLEX_SPLIT_ACCESSOR } from '../utils/accessors';
+import {
+  applyFormatterIfSimpleField,
+  applyFormatter,
+  COMPLEX_SPLIT_ACCESSOR,
+} from '../utils/accessors';
 
 import './_detailed_tooltip.scss';
 
@@ -47,7 +51,7 @@ export const getTooltipData = (
   if (yAccessor) {
     data.push({
       label: yAccessor.title,
-      value: `${applyFormatterIfSimpleField(yAccessor, value.value)}`,
+      value: `${applyFormatter(yAccessor, value.value)}`,
     });
   }
 

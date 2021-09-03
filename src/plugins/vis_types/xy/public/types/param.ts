@@ -145,6 +145,7 @@ export interface VisParams {
   palette: PaletteOutput;
   fillOpacity?: number;
   fittingFunction?: Exclude<Fit, 'explicit'>;
+  enableHistogramMode?: boolean;
 }
 
 export interface XYVisConfig {
@@ -167,6 +168,7 @@ export interface XYVisConfig {
   thresholdLine: ExpressionValueThresholdLine;
   radiusRatio: number;
   times: ExpressionValueTimeMarker[]; // For compatibility with vislib
+  enableHistogramMode?: boolean;
   /**
    * flag to indicate old vislib visualizations
    * used for backwards compatibility including colors

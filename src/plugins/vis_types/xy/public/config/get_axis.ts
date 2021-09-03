@@ -23,14 +23,15 @@ import {
   YScaleType,
   SeriesParam,
 } from '../types';
-import { isSimpleField } from '../utils/accessors';
+import { applyFormatter, isSimpleField } from '../utils/accessors';
 
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
   { categoryLines, valueAxis }: Grid,
-  { params, format, formatter, title: fallbackTitle = '' }: Aspect,
+  { params, format, formatter, title: fallbackTitle = '', accessor }: Aspect,
   seriesParams: SeriesParam[],
-  isDateHistogram = false
+  isDateHistogram = false,
+  shouldApplyFormatter = false
 ): AxisConfig<S> {
   const isCategoryAxis = type === AxisType.Category;
   // Hide unassigned axis, not supported in elastic charts
@@ -48,7 +49,9 @@ export function getAxis<S extends XScaleType | YScaleType>(
         show: valueAxis === axis.id,
       };
 
-  const tickFormatter = (v: any) => (isSimpleField(format) ? formatter?.(v) ?? v : v);
+  const tickFormatter = (v: any) =>
+    isSimpleField(format) || shouldApplyFormatter ? formatter?.(v) ?? v : v;
+
   const ticks: TickOptions = {
     formatter: tickFormatter,
     labelFormatter: getLabelFormatter(labels.truncate, tickFormatter),

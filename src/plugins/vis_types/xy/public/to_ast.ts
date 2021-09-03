@@ -146,8 +146,12 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   const responseAggs = vis.data.aggs?.getResponseAggs().filter(({ enabled }) => enabled) ?? [];
 
-  if (dimensions.x) {
-    const xAgg = responseAggs[dimensions.x.accessor] as any;
+  const xAgg = dimensions.x ? (responseAggs[dimensions.x?.accessor] as any) : null;
+  const enableHistogramMode = [BUCKET_TYPES.HISTOGRAM, BUCKET_TYPES.DATE_HISTOGRAM].includes(
+    xAgg?.type?.name
+  );
+
+  if (dimensions.x && xAgg) {
     if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
       (dimensions.x.params as DateHistogramParams).date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
@@ -231,6 +235,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     seriesDimension: dimensions.series?.map(prepareXYDimension),
     splitRowDimension: dimensions.splitRow?.map(prepareXYDimension),
     splitColumnDimension: dimensions.splitColumn?.map(prepareXYDimension),
+    enableHistogramMode,
   });
 
   const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);
