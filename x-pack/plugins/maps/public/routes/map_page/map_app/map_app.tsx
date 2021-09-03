@@ -8,8 +8,9 @@
 import React from 'react';
 import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs/operators';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AppLeaveAction, AppMountParameters } from 'kibana/public';
+import { AppLeaveAction, AppMountParameters, HttpStart } from 'kibana/public';
 import { Adapters } from 'src/plugins/embeddable/public';
 import { Subscription } from 'rxjs';
 import {
@@ -54,6 +55,8 @@ import {
   unsavedChangesWarning,
 } from '../saved_map';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
+import { SpacesPluginStart } from '../../../../../spaces/public';
+import { resolveSavedObject } from '../../../map_attribute_service';
 
 interface MapRefreshConfig {
   isPaused: boolean;
@@ -61,6 +64,8 @@ interface MapRefreshConfig {
 }
 
 export interface Props {
+  spacesApi?: SpacesPluginStart;
+  http: HttpStart;
   savedMap: SavedMap;
   // saveCounter used to trigger MapApp render after SaveMap.save
   saveCounter: number;
@@ -97,6 +102,7 @@ export interface State {
   savedQuery?: SavedQuery;
   isRefreshPaused: boolean;
   refreshInterval: number;
+  savedObjectWarning: unknown;
 }
 
 export class MapApp extends React.Component<Props, State> {
@@ -115,6 +121,7 @@ export class MapApp extends React.Component<Props, State> {
       initialized: false,
       isRefreshPaused: true,
       refreshInterval: 0,
+      savedObjectWarning: null,
     };
   }
 
@@ -363,6 +370,7 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     this._initMapAndLayerSettings(this.props.savedMap.getAttributes());
+    await this.getLegacyUrlConflictCallout(savedObjectId);
 
     this.setState({ initialized: true });
   }
@@ -434,6 +442,41 @@ export class MapApp extends React.Component<Props, State> {
     );
   }
 
+  async getLegacyUrlConflictCallout(savedObjectId: string | undefined) {
+    if (!savedObjectId) {
+      return;
+    }
+    await this.props.savedMap.whenReady();
+    const { resolvedSavedObject } = await resolveSavedObject(savedObjectId);
+    // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
+    if (this.props.spacesApi && resolvedSavedObject) {
+      if (resolvedSavedObject.outcome === 'conflict') {
+        // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
+        // callout with a warning for the user, and provide a way for them to navigate to the other object.
+        const currentObjectId = resolvedSavedObject.saved_object.id;
+        const otherObjectId = resolvedSavedObject.alias_target_id!; // This is always defined if outcome === 'conflict'
+        // const otherObjectPath = this.props.http.basePath.prepend(
+        //   `${VIEW_NOTE_PATH}/${otherObjectId}${window.location.hash}`
+        // );
+        const otherObjectPath = window.location.href.replace(currentObjectId, otherObjectId);
+        console.log(this.props.http.basePath);
+        this.setState({
+          savedObjectWarning: (
+            <>
+              {this.props.spacesApi.ui.components.getLegacyUrlConflict({
+                objectNoun: 'Saved map',
+                currentObjectId,
+                otherObjectId,
+                otherObjectPath,
+              })}
+              <EuiSpacer />
+            </>
+          ),
+        });
+      }
+    }
+  }
+
   _addFilter = async (newFilters: Filter[]) => {
     newFilters.forEach((filter) => {
       filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
@@ -451,6 +494,7 @@ export class MapApp extends React.Component<Props, State> {
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">
+          {this.state.savedObjectWarning}
           <MapContainer
             addFilters={this._addFilter}
             title={this.props.savedMap.getAttributes().title}

@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters, HttpStart } from 'kibana/public';
 import { IContainer } from '../../../../../src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import type {
@@ -21,6 +21,7 @@ import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_s
 import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
 import type { CreateTileMapLayerDescriptorParams } from '../classes/layers/create_tile_map_layer_descriptor';
 import type { CreateRegionMapLayerDescriptorParams } from '../classes/layers/create_region_map_layer_descriptor';
+import { SpacesPluginStart } from '../../../spaces/public';
 
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
 
@@ -32,7 +33,12 @@ export interface LazyLoadedMapModules {
   ) => MapEmbeddableType;
   getIndexPatternService: () => IndexPatternsContract;
   getMapsCapabilities: () => any;
-  renderApp: (params: AppMountParameters, AppUsageTracker: React.FC) => Promise<() => void>;
+  renderApp: (
+    params: AppMountParameters,
+    AppUsageTracker: React.FC,
+    http: HttpStart,
+    spacesApi?: SpacesPluginStart
+  ) => Promise<() => void>;
   createSecurityLayerDescriptors: (
     indexPatternId: string,
     indexPatternTitle: string

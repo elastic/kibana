@@ -83,6 +83,7 @@ import {
   tileMapVisType,
 } from './legacy_visualizations';
 import { SecurityPluginStart } from '../../security/public';
+import { SpacesPluginStart } from '../../spaces/public';
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
@@ -112,6 +113,7 @@ export interface MapsPluginStartDependencies {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -179,10 +181,13 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const { http } = coreStart;
+        const { spaces: spacesApi } = pluginsStart as MapsPluginStartDependencies;
         const UsageTracker =
           plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const { renderApp } = await lazyLoadMapModules();
-        return renderApp(params, UsageTracker);
+        return renderApp(params, UsageTracker, http, spacesApi);
       },
     });
 

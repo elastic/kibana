@@ -22,6 +22,7 @@ export interface MapEmbeddableConfig {
 }
 
 interface MapEmbeddableState {
+  savedObjectId?: string;
   isLayerTOCOpen?: boolean;
   openTOCDetails?: string[];
   mapCenter?: MapCenterAndZoom;

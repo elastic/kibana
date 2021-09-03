@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectReference } from 'src/core/types';
+import { ResolvedSimpleSavedObject } from 'kibana/public';
 import { AttributeService } from '../../../../src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
@@ -15,11 +16,38 @@ import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
-type MapDoc = MapSavedObjectAttributes & { references?: SavedObjectReference[] };
+type MapDoc = MapSavedObjectAttributes & {
+  references?: SavedObjectReference[];
+};
 
 export type MapAttributeService = AttributeService<MapDoc, MapByValueInput, MapByReferenceInput>;
 
 let mapAttributeService: MapAttributeService | null = null;
+let resolveResult: ResolvedSimpleSavedObject<MapSavedObjectAttributes> | undefined;
+export async function resolveSavedObject(
+  savedObjectId: string
+): Promise<{
+  mapDoc: MapDoc;
+  resolvedSavedObject: ResolvedSimpleSavedObject<MapSavedObjectAttributes>;
+}> {
+  if (!resolveResult || resolveResult.saved_object.id !== savedObjectId) {
+    resolveResult = await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
+      MAP_SAVED_OBJECT_TYPE,
+      savedObjectId
+    );
+  }
+  const savedObject = resolveResult.saved_object;
+
+  if (savedObject.error) {
+    throw savedObject.error;
+  }
+
+  const { attributes } = injectReferences(savedObject);
+  return {
+    mapDoc: { ...attributes, references: savedObject.references },
+    resolvedSavedObject: resolveResult,
+  };
+}
 
 export function getMapAttributeService(): MapAttributeService {
   if (mapAttributeService) {
@@ -58,17 +86,8 @@ export function getMapAttributeService(): MapAttributeService {
       return { id: savedObject.id };
     },
     unwrapMethod: async (savedObjectId: string): Promise<MapDoc> => {
-      const savedObject = await getSavedObjectsClient().get<MapSavedObjectAttributes>(
-        MAP_SAVED_OBJECT_TYPE,
-        savedObjectId
-      );
-
-      if (savedObject.error) {
-        throw savedObject.error;
-      }
-
-      const { attributes } = injectReferences(savedObject);
-      return { ...attributes, references: savedObject.references };
+      const { mapDoc } = await resolveSavedObject(savedObjectId);
+      return mapDoc;
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
       return checkForDuplicateTitle(

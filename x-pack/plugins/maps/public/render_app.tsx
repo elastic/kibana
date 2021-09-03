@@ -9,7 +9,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters, HttpStart } from 'kibana/public';
 import {
   getCoreChrome,
   getCoreI18n,
@@ -26,6 +26,7 @@ import {
 import { ListPage, MapPage } from './routes';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { APP_ID } from '../common/constants';
+import { SpacesPluginStart } from '../../spaces/public';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -63,7 +64,9 @@ function setAppChrome() {
 
 export async function renderApp(
   { element, history, onAppLeave, setHeaderActionMenu }: AppMountParameters,
-  AppUsageTracker: React.FC
+  AppUsageTracker: React.FC,
+  http: HttpStart,
+  spacesApi?: SpacesPluginStart
 ) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({
@@ -98,6 +101,8 @@ export async function renderApp(
         setHeaderActionMenu={setHeaderActionMenu}
         stateTransfer={stateTransfer}
         originatingApp={originatingApp}
+        spacesApi={spacesApi}
+        http={http}
       />
     );
   }

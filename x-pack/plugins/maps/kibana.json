@@ -29,7 +29,8 @@
     "savedObjectsTagging",
     "charts",
     "security",
-    "usageCollection"
+    "usageCollection",
+    "spaces"
   ],
   "ui": true,
   "server": true,

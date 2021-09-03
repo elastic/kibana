@@ -7,11 +7,13 @@
 
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters, HttpStart } from 'kibana/public';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapApp } from './map_app';
 import { SavedMap, getInitialLayersFromUrlParam } from './saved_map';
 import { MapEmbeddableInput } from '../../embeddable/types';
+import { SpacesPluginStart } from '../../../../spaces/public';
+import { resolveSavedObject } from '../../map_attribute_service';
 
 interface Props {
   mapEmbeddableInput?: MapEmbeddableInput;
@@ -20,6 +22,8 @@ interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
+  spacesApi?: SpacesPluginStart;
+  http: HttpStart;
 }
 
 interface State {
@@ -69,6 +73,8 @@ export class MapPage extends Component<Props, State> {
     return (
       <Provider store={this.state.savedMap.getStore()}>
         <MapApp
+          spacesApi={this.props.spacesApi}
+          http={this.props.http}
           savedMap={this.state.savedMap}
           onAppLeave={this.props.onAppLeave}
           setHeaderActionMenu={this.props.setHeaderActionMenu}
