@@ -1,0 +1,261 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { FieldMigrator } from './migrator';
+
+describe('FieldMigrator', () => {
+  describe('extractFieldsToReferences', () => {
+    it('migrates the hello field to references and removes it from the transformed result', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      const result = migrator.extractFieldsToReferences({ hello: '1', awesome: '2' });
+
+      expect(result.transformedFields).toEqual({
+        awesome: '2',
+      });
+
+      expect(result.references).toEqual([{ id: '1', name: 'name', type: 'type' }]);
+    });
+
+    it('ignores a field that does not exist and returns an empty references result', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      const result = migrator.extractFieldsToReferences({ awesome: '2' });
+
+      expect(result.transformedFields).toEqual({
+        awesome: '2',
+      });
+
+      expect(result.references).toEqual([]);
+    });
+
+    it('ignores a field that does not exist and preserves the original references', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      const result = migrator.extractFieldsToReferences({ awesome: '2' }, [
+        { id: '1', name: 'awesome', type: 'someType' },
+      ]);
+
+      expect(result.transformedFields).toEqual({
+        awesome: '2',
+      });
+
+      expect(result.references).toEqual([{ id: '1', name: 'awesome', type: 'someType' }]);
+    });
+
+    it('migrates multiple fields', () => {
+      const migrator = new FieldMigrator([
+        { path: 'hello', type: 'type', name: 'name' },
+        { path: 'a', type: 'aType', name: 'aName' },
+      ]);
+
+      const result = migrator.extractFieldsToReferences({ hello: '1', awesome: '2', a: 'aId' });
+
+      expect(result.transformedFields).toEqual({
+        awesome: '2',
+      });
+
+      expect(result.references).toEqual([
+        { id: '1', name: 'name', type: 'type' },
+        { id: 'aId', name: 'aName', type: 'aType' },
+      ]);
+    });
+
+    it('migrates a nested field', () => {
+      const migrator = new FieldMigrator([{ path: 'a.hello', type: 'type', name: 'name' }]);
+
+      const result = migrator.extractFieldsToReferences({
+        outerHello: '1',
+        awesome: '2',
+        a: { hello: '1' },
+      });
+
+      expect(result.transformedFields).toEqual({
+        outerHello: '1',
+        awesome: '2',
+        a: {},
+      });
+
+      expect(result.references).toEqual([{ id: '1', name: 'name', type: 'type' }]);
+    });
+
+    it('removes a field set to undefined and excludes it from the references', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      const result = migrator.extractFieldsToReferences({
+        awesome: '2',
+        hello: undefined,
+      });
+
+      expect(result.transformedFields).toEqual({
+        awesome: '2',
+      });
+
+      expect(result.references).toEqual([]);
+    });
+
+    it("preserves the reference for a field when it isn't in the object", () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      const result = migrator.extractFieldsToReferences(
+        {
+          awesome: '2',
+        },
+        [{ id: '1', name: 'name', type: 'type' }]
+      );
+
+      expect(result.transformedFields).toEqual({
+        awesome: '2',
+      });
+
+      expect(result.references).toEqual([{ id: '1', name: 'name', type: 'type' }]);
+    });
+  });
+
+  describe('populateFieldsFromReferencesForPatch', () => {
+    it('sets the hello field from references', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(
+        migrator.populateFieldsFromReferencesForPatch({
+          dataBeforeRequest: { hello: '1' },
+          dataReturnedFromRequest: {},
+          savedObjectReferences: [{ id: '1', name: 'name', type: 'type' }],
+        })
+      ).toEqual({
+        hello: '1',
+      });
+    });
+
+    it('sets the hello field to null when it was null before request', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(
+        migrator.populateFieldsFromReferencesForPatch({
+          dataReturnedFromRequest: {},
+          dataBeforeRequest: { hello: null },
+        })
+      ).toEqual({
+        hello: null,
+      });
+    });
+
+    it('sets the hello field to undefined when it was undefined before request', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(
+        migrator.populateFieldsFromReferencesForPatch({
+          dataReturnedFromRequest: {},
+          dataBeforeRequest: { hello: undefined },
+        })
+      ).toEqual({});
+    });
+
+    it('sets the hello field to 1 when it exists in references', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(
+        migrator.populateFieldsFromReferencesForPatch({
+          dataReturnedFromRequest: { awesome: '5' },
+          dataBeforeRequest: { awesome: '5', hello: '1' },
+          savedObjectReferences: [{ id: '1', name: 'name', type: 'type' }],
+        })
+      ).toEqual({
+        awesome: '5',
+        hello: '1',
+      });
+    });
+
+    it('sets the hello field to 1 when it exists in the data before the request but not the references', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(
+        migrator.populateFieldsFromReferencesForPatch({
+          dataReturnedFromRequest: { awesome: '5' },
+          dataBeforeRequest: { awesome: '5', hello: '1' },
+          savedObjectReferences: [],
+        })
+      ).toEqual({
+        awesome: '5',
+        hello: '1',
+      });
+    });
+
+    it('does not set hello field when it is not in the data before the request even when it is in the references', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(
+        migrator.populateFieldsFromReferencesForPatch({
+          dataReturnedFromRequest: { awesome: '5' },
+          dataBeforeRequest: { awesome: '5' },
+          savedObjectReferences: [{ id: '1', name: 'name', type: 'type' }],
+        })
+      ).toEqual({
+        awesome: '5',
+      });
+    });
+  });
+
+  describe('populateFieldsFromReferences', () => {
+    it('sets hello to 1 when it is in the references', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(
+        migrator.populateFieldsFromReferences({
+          dataReturnedFromRequest: {},
+          savedObjectReferences: [{ id: '1', name: 'name', type: 'type' }],
+        })
+      ).toEqual({
+        hello: '1',
+      });
+    });
+
+    it('sets hello to 1 when it is in the references and preserves existing values', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(
+        migrator.populateFieldsFromReferences({
+          dataReturnedFromRequest: { bananas: 'awesome' },
+          savedObjectReferences: [{ id: '1', name: 'name', type: 'type' }],
+        })
+      ).toEqual({
+        bananas: 'awesome',
+        hello: '1',
+      });
+    });
+
+    it('sets hello to null when it is not in the references', () => {
+      const migrator = new FieldMigrator([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(
+        migrator.populateFieldsFromReferences({
+          dataReturnedFromRequest: {},
+          savedObjectReferences: [],
+        })
+      ).toEqual({
+        hello: null,
+      });
+    });
+
+    it('sets hello to null and hi to null when it is not in the references', () => {
+      const migrator = new FieldMigrator([
+        { path: 'hello', type: 'type', name: 'name' },
+        { path: 'hi', type: 'hiType', name: 'hiName' },
+      ]);
+
+      expect(
+        migrator.populateFieldsFromReferences({
+          dataReturnedFromRequest: {},
+          savedObjectReferences: [],
+        })
+      ).toEqual({
+        hello: null,
+        hi: null,
+      });
+    });
+  });
+});
