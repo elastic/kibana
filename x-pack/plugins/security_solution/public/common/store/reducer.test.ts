@@ -7,7 +7,7 @@
 
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { createInitialState } from './reducer';
-import { DEFAULT_INDEX_PATTERN_ID } from '../../../common/constants';
+import { DEFAULT_INDEX_PATTERN, DEFAULT_INDEX_PATTERN_ID } from '../../../common/constants';
 
 jest.mock('../lib/kibana', () => ({
   KibanaServices: {
@@ -20,10 +20,17 @@ describe('createInitialState', () => {
     const defaultState = {
       defaultIndexPattern: {
         id: DEFAULT_INDEX_PATTERN_ID,
-        title: `mock-${DEFAULT_INDEX_PATTERN_ID}}`,
+        title: DEFAULT_INDEX_PATTERN.join(','),
+        patternList: DEFAULT_INDEX_PATTERN,
       },
       enableExperimental: parseExperimentalConfigValue([]),
-      kibanaIndexPatterns: [{ id: '1234567890987654321', title: 'mock-kibana' }],
+      kibanaIndexPatterns: [
+        {
+          id: DEFAULT_INDEX_PATTERN_ID,
+          title: DEFAULT_INDEX_PATTERN.join(','),
+          patternList: DEFAULT_INDEX_PATTERN,
+        },
+      ],
       signalIndexName: 'siem-signals-default',
     };
     test('indicesExist should be TRUE if configIndexPatterns is NOT empty', () => {
@@ -37,7 +44,7 @@ describe('createInitialState', () => {
         {},
         {
           ...defaultState,
-          defaultIndexPattern: { id: '', title: '' },
+          defaultIndexPattern: { id: '', title: '', patternList: [] },
         }
       );
 

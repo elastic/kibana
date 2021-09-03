@@ -16,7 +16,7 @@ let defaultArgs: Args = {
     ...initialSourcererState,
     kibanaIndexPatterns: [
       initialSourcererState.defaultIndexPattern,
-      { id: '123', title: 'journalbeat-*' },
+      { id: '123', title: 'journalbeat-*', patternList: ['journalbeat-*'] },
     ],
     signalIndexName: 'signals-*',
   },
