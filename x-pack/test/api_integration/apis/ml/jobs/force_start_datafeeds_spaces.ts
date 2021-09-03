@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
     datafeedIds: string[],
     start: number,
     end: number
-  ) {
+  ): Promise<Record<string, { started: boolean; error?: string }>> {
     const { body } = await supertest
       .post(`/s/${space}/api/ml/jobs/force_start_datafeeds`)
       .auth(
@@ -84,6 +84,8 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await ml.api.closeAnomalyDetectionJob(jobIdSpace1);
       await ml.api.closeAnomalyDetectionJob(jobIdSpace2);
+      await ml.api.deleteAnomalyDetectionJobES(jobIdSpace1);
+      await ml.api.deleteAnomalyDetectionJobES(jobIdSpace2);
       await ml.api.cleanMlIndices();
       await ml.testResources.cleanMLSavedObjects();
     });
@@ -96,13 +98,13 @@ export default ({ getService }: FtrProviderContext) => {
     it('should start single datafeed from same space', async () => {
       const body = await runRequest(idSpace1, 200, [datafeedIdSpace1], startMs, endMs);
       expect(body).to.eql({ [datafeedIdSpace1]: { started: true } });
-      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED, 4 * 60 * 1000);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
     });
 
     it('should not start single datafeed from different space', async () => {
       const body = await runRequest(idSpace2, 200, [datafeedIdSpace1], startMs, endMs);
       expect(body).to.eql({ [datafeedIdSpace1]: { error: 'Job has no datafeed', started: false } });
-      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED, 4 * 60 * 1000);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
     });
 
     it('should only start datafeed from same space when called with a list of datafeeds', async () => {
@@ -117,8 +119,8 @@ export default ({ getService }: FtrProviderContext) => {
         [datafeedIdSpace1]: { started: true },
         [datafeedIdSpace2]: { error: 'Job has no datafeed', started: false },
       });
-      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED, 4 * 60 * 1000);
-      await ml.api.waitForDatafeedState(datafeedIdSpace2, DATAFEED_STATE.STOPPED, 4 * 60 * 1000);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
+      await ml.api.waitForDatafeedState(datafeedIdSpace2, DATAFEED_STATE.STOPPED);
     });
   });
 };

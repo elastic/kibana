@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER,
     requestBody: object,
     expectedResponsecode: number
-  ): Promise<any> {
+  ): Promise<Record<string, { started: boolean; error?: string }>> {
     const { body } = await supertest
       .post('/api/ml/jobs/force_start_datafeeds')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
@@ -115,13 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
-    });
 
-    after(async () => {
-      await ml.api.cleanMlIndices();
-    });
-
-    it('sets up jobs', async () => {
       for (const job of testSetupJobConfigs) {
         const datafeedId = `datafeed-${job.job_id}`;
         await ml.api.createAnomalyDetectionJob(job);
@@ -131,6 +125,13 @@ export default ({ getService }: FtrProviderContext) => {
           job_id: job.job_id,
         });
       }
+    });
+
+    after(async () => {
+      for (const job of testSetupJobConfigs) {
+        await ml.api.deleteAnomalyDetectionJobES(job.job_id);
+      }
+      await ml.api.cleanMlIndices();
     });
 
     describe('rejects requests for unauthorized users', function () {
@@ -184,7 +185,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // check datafeeds have started
           for (const id of testData.requestBody.datafeedIds) {
-            await ml.api.waitForDatafeedState(id, DATAFEED_STATE.STARTED, 4 * 60 * 1000);
+            await ml.api.waitForDatafeedState(id, DATAFEED_STATE.STARTED);
           }
         });
       }
@@ -215,7 +216,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // check datafeeds are still started
           for (const id of testData.requestBody.datafeedIds) {
-            await ml.api.waitForDatafeedState(id, DATAFEED_STATE.STARTED, 4 * 60 * 1000);
+            await ml.api.waitForDatafeedState(id, DATAFEED_STATE.STARTED);
           }
         });
       }

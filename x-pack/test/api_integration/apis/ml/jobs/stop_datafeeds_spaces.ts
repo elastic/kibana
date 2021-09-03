@@ -25,7 +25,11 @@ export default ({ getService }: FtrProviderContext) => {
   const datafeedIdSpace1 = `datafeed-${jobIdSpace1}`;
   const datafeedIdSpace2 = `datafeed-${jobIdSpace2}`;
 
-  async function runRequest(space: string, expectedStatusCode: number, datafeedIds: string[]) {
+  async function runRequest(
+    space: string,
+    expectedStatusCode: number,
+    datafeedIds: string[]
+  ): Promise<Record<string, { stopped: boolean; error?: string }>> {
     const { body } = await supertest
       .post(`/s/${space}/api/ml/jobs/stop_datafeeds`)
       .auth(
@@ -83,6 +87,8 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await ml.api.closeAnomalyDetectionJob(jobIdSpace1);
       await ml.api.closeAnomalyDetectionJob(jobIdSpace2);
+      await ml.api.deleteAnomalyDetectionJobES(jobIdSpace1);
+      await ml.api.deleteAnomalyDetectionJobES(jobIdSpace2);
       await ml.api.cleanMlIndices();
       await ml.testResources.cleanMLSavedObjects();
     });
@@ -95,13 +101,13 @@ export default ({ getService }: FtrProviderContext) => {
     it('should stop single datafeed from same space', async () => {
       const body = await runRequest(idSpace1, 200, [datafeedIdSpace1]);
       expect(body).to.eql({ [datafeedIdSpace1]: { stopped: true } });
-      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED, 4 * 60 * 1000);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
     });
 
     it('should not stop single datafeed from different space', async () => {
       const body = await runRequest(idSpace2, 200, [datafeedIdSpace1]);
       expect(body).to.eql({ [datafeedIdSpace1]: { stopped: false } });
-      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED, 4 * 60 * 1000);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
     });
 
     it('should only stop datafeed from same space when called with a list of datafeeds', async () => {
@@ -110,8 +116,8 @@ export default ({ getService }: FtrProviderContext) => {
         [datafeedIdSpace1]: { stopped: true },
         [datafeedIdSpace2]: { stopped: false },
       });
-      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED, 4 * 60 * 1000);
-      await ml.api.waitForDatafeedState(datafeedIdSpace2, DATAFEED_STATE.STARTED, 4 * 60 * 1000);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
+      await ml.api.waitForDatafeedState(datafeedIdSpace2, DATAFEED_STATE.STARTED);
     });
   });
 };

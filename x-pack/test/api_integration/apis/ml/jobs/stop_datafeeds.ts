@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER,
     requestBody: object,
     expectedResponsecode: number
-  ): Promise<any> {
+  ): Promise<Record<string, { stopped: boolean; error?: string }>> {
     const { body } = await supertest
       .post('/api/ml/jobs/stop_datafeeds')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
@@ -109,13 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
-    });
 
-    after(async () => {
-      await ml.api.cleanMlIndices();
-    });
-
-    it('sets up jobs', async () => {
       for (const job of testSetupJobConfigs) {
         const datafeedId = `datafeed-${job.job_id}`;
         await ml.api.createAnomalyDetectionJob(job);
@@ -128,6 +122,13 @@ export default ({ getService }: FtrProviderContext) => {
         await ml.api.startDatafeed(datafeedId, { start: '0' });
         await ml.api.waitForDatafeedState(datafeedId, DATAFEED_STATE.STARTED);
       }
+    });
+
+    after(async () => {
+      for (const job of testSetupJobConfigs) {
+        await ml.api.deleteAnomalyDetectionJobES(job.job_id);
+      }
+      await ml.api.cleanMlIndices();
     });
 
     describe('rejects requests for unauthorized users', function () {
