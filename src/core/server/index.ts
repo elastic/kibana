@@ -55,7 +55,7 @@ import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
-import { CoreUsageDataStart } from './core_usage_data';
+import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { DeprecationsServiceSetup, DeprecationsClient } from './deprecations';
 // Because of #79265 we need to explicitly import, then export these types for
@@ -410,7 +410,13 @@ export type {
 export { ServiceStatusLevels } from './status';
 export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
 
-export type { CoreUsageDataStart } from './core_usage_data';
+export type {
+  CoreUsageDataSetup,
+  CoreUsageDataStart,
+  CoreUsageCounter,
+  CoreIncrementUsageCounter,
+  CoreIncrementCounterParams,
+} from './core_usage_data';
 
 /**
  * Plugin specific context passed to a route handler.
@@ -500,6 +506,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   deprecations: DeprecationsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+  /** @internal {@link CoreUsageDataSetup} */
+  coreUsageData: CoreUsageDataSetup;
 }
 
 /**
