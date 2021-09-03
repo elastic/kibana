@@ -58,7 +58,7 @@ export const NotFoundErrors = ({ type }: NotFoundErrors) => {
       <div>
         <FormattedMessage
           id="savedObjectsManagement.view.howToFixErrorDescription"
-          defaultMessage="If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above."
+          defaultMessage="If you know what this error means, you can use the saved objects api to fix it &mdash; otherwise click the delete button above."
         />
       </div>
     </EuiCallOut>

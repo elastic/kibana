@@ -8,7 +8,9 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { get } from 'lodash';
+import { KibanaContextProvider } from '../../../../kibana_react/public';
 import {
   Capabilities,
   SavedObjectsClientContract,
@@ -16,27 +18,25 @@ import {
   NotificationsStart,
   ScopedHistory,
   HttpSetup,
+  IUiSettingsClient,
 } from '../../../../../core/public';
-import { ISavedObjectsManagementServiceRegistry } from '../../services';
-import { Header, NotFoundErrors, Intro, Form } from './components';
-import { canViewInApp, bulkGetObjects } from '../../lib';
-import { SubmittedFormData } from '../types';
+import { Header, Inspect, NotFoundErrors } from './components';
+import { bulkGetObjects } from '../../lib/bulk_get_objects';
 import { SavedObjectWithMetadata } from '../../types';
 
-interface SavedObjectEditionProps {
+export interface SavedObjectEditionProps {
   id: string;
+  savedObjectType: string;
   http: HttpSetup;
-  serviceName: string;
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
   capabilities: Capabilities;
   overlays: OverlayStart;
   notifications: NotificationsStart;
   notFoundType?: string;
   savedObjectsClient: SavedObjectsClientContract;
   history: ScopedHistory;
+  uiSettings: IUiSettingsClient;
 }
-
-interface SavedObjectEditionState {
+export interface SavedObjectEditionState {
   type: string;
   object?: SavedObjectWithMetadata<any>;
 }
@@ -45,7 +45,6 @@ const unableFindSavedObjectNotificationMessage = i18n.translate(
   'savedObjectsManagement.objectView.unableFindSavedObjectNotificationMessage',
   { defaultMessage: 'Unable to find saved object' }
 );
-
 export class SavedObjectEdition extends Component<
   SavedObjectEditionProps,
   SavedObjectEditionState
@@ -53,8 +52,7 @@ export class SavedObjectEdition extends Component<
   constructor(props: SavedObjectEditionProps) {
     super(props);
 
-    const { serviceRegistry, serviceName } = props;
-    const type = serviceRegistry.get(serviceName)!.service.type;
+    const { savedObjectType: type } = props;
 
     this.state = {
       object: undefined,
@@ -85,60 +83,45 @@ export class SavedObjectEdition extends Component<
       });
   }
 
-  render() {
-    const {
-      capabilities,
-      notFoundType,
-      serviceRegistry,
-      http,
-      serviceName,
-      savedObjectsClient,
-    } = this.props;
-    const { type } = this.state;
-    const { object } = this.state;
-    const { edit: canEdit, delete: canDelete } = capabilities.savedObjectsManagement as Record<
-      string,
-      boolean
-    >;
-    const canView = canViewInApp(capabilities, type) && Boolean(object?.meta.inAppUrl?.path);
-    const service = serviceRegistry.get(serviceName)!.service;
+  canViewInApp = (capabilities: Capabilities, obj?: SavedObjectWithMetadata<any>) => {
+    return obj && obj.meta.inAppUrl
+      ? get(capabilities, obj?.meta.inAppUrl?.uiCapabilitiesPath, false) &&
+          Boolean(obj?.meta.inAppUrl?.path)
+      : false;
+  };
 
+  render() {
+    const { capabilities, notFoundType, http, uiSettings } = this.props;
+    const { object } = this.state;
+    const { delete: canDelete } = capabilities.savedObjectsManagement as Record<string, boolean>;
+    const canView = this.canViewInApp(capabilities, object);
     return (
-      <div data-test-subj="savedObjectsEdit">
-        <Header
-          canEdit={canEdit}
-          canDelete={canDelete && !object?.meta.hiddenType}
-          canViewInApp={canView}
-          type={type}
-          onDeleteClick={() => this.delete()}
-          viewUrl={http.basePath.prepend(object?.meta.inAppUrl?.path || '')}
-        />
-        <EuiSpacer size="l" />
-        {notFoundType && (
-          <>
-            <EuiSpacer size="s" />
-            <NotFoundErrors type={notFoundType} />
-          </>
-        )}
-        {canEdit && (
-          <>
-            <EuiSpacer size="s" />
-            <Intro />
-          </>
-        )}
-        {object && (
-          <>
-            <EuiSpacer size="m" />
-            <Form
-              object={object}
-              savedObjectsClient={savedObjectsClient}
-              service={service}
-              editionEnabled={canEdit}
-              onSave={this.saveChanges}
+      <KibanaContextProvider services={{ uiSettings }}>
+        <EuiFlexGroup
+          direction="column"
+          data-test-subject="savedObjectsEdit"
+          style={{ height: '100%' }}
+        >
+          <EuiFlexItem grow={false}>
+            <Header
+              canDelete={canDelete && !object?.meta.hiddenType}
+              canViewInApp={canView}
+              onDeleteClick={() => this.delete()}
+              viewUrl={http.basePath.prepend(object?.meta.inAppUrl?.path || '')}
             />
-          </>
-        )}
-      </div>
+          </EuiFlexItem>
+          {notFoundType && (
+            <EuiFlexItem grow={false}>
+              <NotFoundErrors type={notFoundType} />
+            </EuiFlexItem>
+          )}
+          {object && (
+            <EuiFlexItem grow={true}>
+              <Inspect object={object} data-test-subject="savedObjects-objectView-inspect" />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </KibanaContextProvider>
     );
   }
 
@@ -172,15 +155,6 @@ export class SavedObjectEdition extends Component<
       this.redirectToListing();
     }
   }
-
-  saveChanges = async ({ attributes, references }: SubmittedFormData) => {
-    const { savedObjectsClient, notifications } = this.props;
-    const { object, type } = this.state;
-
-    await savedObjectsClient.update(object!.type, object!.id, attributes, { references });
-    notifications.toasts.addSuccess(`Updated '${attributes.title}' ${type} object`);
-    this.redirectToListing();
-  };
 
   redirectToListing() {
     this.props.history.push('/');

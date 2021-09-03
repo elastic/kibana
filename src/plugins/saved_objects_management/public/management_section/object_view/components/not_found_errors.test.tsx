@@ -23,7 +23,7 @@ describe('NotFoundErrors component', () => {
     const mounted = mountError('search');
     expect(mounted).toMatchSnapshot();
     expect(mounted.text()).toMatchInlineSnapshot(
-      `"There is a problem with this saved objectThe saved search associated with this object no longer exists.If you know what this error means, go ahead and fix it — otherwise click the delete button above."`
+      `"There is a problem with this saved objectThe saved search associated with this object no longer exists.If you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above."`
     );
   });
 
@@ -31,7 +31,7 @@ describe('NotFoundErrors component', () => {
     const mounted = mountError('index-pattern');
     expect(mounted).toMatchSnapshot();
     expect(mounted.text()).toMatchInlineSnapshot(
-      `"There is a problem with this saved objectThe index pattern associated with this object no longer exists.If you know what this error means, go ahead and fix it — otherwise click the delete button above."`
+      `"There is a problem with this saved objectThe index pattern associated with this object no longer exists.If you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above."`
     );
   });
 
@@ -39,7 +39,7 @@ describe('NotFoundErrors component', () => {
     const mounted = mountError('index-pattern-field');
     expect(mounted).toMatchSnapshot();
     expect(mounted.text()).toMatchInlineSnapshot(
-      `"There is a problem with this saved objectA field associated with this object no longer exists in the index pattern.If you know what this error means, go ahead and fix it — otherwise click the delete button above."`
+      `"There is a problem with this saved objectA field associated with this object no longer exists in the index pattern.If you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above."`
     );
   });
 
@@ -47,7 +47,7 @@ describe('NotFoundErrors component', () => {
     const mounted = mountError('unknown');
     expect(mounted).toMatchSnapshot();
     expect(mounted.text()).toMatchInlineSnapshot(
-      `"There is a problem with this saved objectIf you know what this error means, go ahead and fix it — otherwise click the delete button above."`
+      `"There is a problem with this saved objectIf you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above."`
     );
   });
 });

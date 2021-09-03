@@ -47,13 +47,13 @@ describe('Intro component', () => {
       ...defaultProps,
       canEdit: true,
     });
-    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Edit search"`);
+    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect saved object"`);
 
     mounted = mountHeader({
       ...defaultProps,
       canEdit: false,
     });
-    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"View search"`);
+    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect saved object"`);
   });
 
   it('displays correct title depending on type', () => {
@@ -61,13 +61,13 @@ describe('Intro component', () => {
       ...defaultProps,
       type: 'some-type',
     });
-    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Edit some-type"`);
+    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect saved object"`);
 
     mounted = mountHeader({
       ...defaultProps,
       type: 'another-type',
     });
-    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Edit another-type"`);
+    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect saved object"`);
   });
 
   it('only displays delete button if canDelete is true', () => {

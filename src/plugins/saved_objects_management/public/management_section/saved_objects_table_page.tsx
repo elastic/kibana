@@ -94,12 +94,11 @@ const SavedObjectsTablePage = ({
         applications={coreStart.application}
         perPageConfig={itemsPerPage}
         goInspectObject={(savedObject) => {
-          const { editUrl } = savedObject.meta;
-          if (editUrl) {
-            return coreStart.application.navigateToUrl(
-              coreStart.http.basePath.prepend(`/app${editUrl}`)
-            );
-          }
+          coreStart.application.navigateToUrl(
+            coreStart.http.basePath.prepend(
+              `/app/management/kibana/objects/${savedObject.type}/${savedObject.id}`
+            )
+          );
         }}
         canGoInApp={(savedObject) => {
           const { inAppUrl } = savedObject.meta;

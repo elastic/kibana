@@ -18,34 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const find = getService('find');
 
-  const setFieldValue = async (fieldName: string, value: string) => {
-    return testSubjects.setValue(`savedObjects-editField-${fieldName}`, value);
-  };
-
-  const getFieldValue = async (fieldName: string) => {
-    return testSubjects.getAttribute(`savedObjects-editField-${fieldName}`, 'value');
-  };
-
-  const setAceEditorFieldValue = async (fieldName: string, fieldValue: string) => {
-    const editorId = `savedObjects-editField-${fieldName}-aceEditor`;
-    await find.clickByCssSelector(`#${editorId}`);
-    return browser.execute(
-      (editor: string, value: string) => {
-        return (window as any).ace.edit(editor).setValue(value);
-      },
-      editorId,
-      fieldValue
-    );
-  };
-
-  const getAceEditorFieldValue = async (fieldName: string) => {
-    const editorId = `savedObjects-editField-${fieldName}-aceEditor`;
-    await find.clickByCssSelector(`#${editorId}`);
-    return browser.execute((editor: string) => {
-      return (window as any).ace.edit(editor).getValue() as string;
-    }, editorId);
-  };
-
   const focusAndClickButton = async (buttonSubject: string) => {
     const button = await testSubjects.find(buttonSubject);
     await button.scrollIntoViewIfNecessary();
@@ -70,113 +42,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     });
 
-    it('allows to update the saved object when submitting', async () => {
+    it('allows to view the saved object', async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
-
-      let objects = await PageObjects.savedObjects.getRowTitles();
+      const objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Dashboard')).to.be(true);
-
-      await PageObjects.common.navigateToUrl(
-        'management',
-        'kibana/objects/savedDashboards/i-exist',
-        {
-          shouldUseHashForSubUrl: false,
-        }
-      );
-
-      await testSubjects.existOrFail('savedObjectEditSave');
-
-      expect(await getFieldValue('title')).to.eql('A Dashboard');
-
-      await setFieldValue('title', 'Edited Dashboard');
-      await setFieldValue('description', 'Some description');
-
-      await focusAndClickButton('savedObjectEditSave');
-
-      objects = await PageObjects.savedObjects.getRowTitles();
-      expect(objects.includes('A Dashboard')).to.be(false);
-      expect(objects.includes('Edited Dashboard')).to.be(true);
-
-      await PageObjects.common.navigateToUrl(
-        'management',
-        'kibana/objects/savedDashboards/i-exist',
-        {
-          shouldUseHashForSubUrl: false,
-        }
-      );
-
-      expect(await getFieldValue('title')).to.eql('Edited Dashboard');
-      expect(await getFieldValue('description')).to.eql('Some description');
+      await PageObjects.common.navigateToUrl('management', 'kibana/objects/dashboard/i-exist', {
+        shouldUseHashForSubUrl: false,
+      });
+      const inspectContainer = await find.byClassName('kibanaCodeEditor');
+      const visibleContainerText = await inspectContainer.getVisibleText();
+      // ensure that something renders visibly
+      expect(visibleContainerText.includes('A Dashboard'));
     });
 
     it('allows to delete a saved object', async () => {
-      await PageObjects.common.navigateToUrl(
-        'management',
-        'kibana/objects/savedDashboards/i-exist',
-        {
-          shouldUseHashForSubUrl: false,
-        }
-      );
-
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSavedObjects();
+      let objects = await PageObjects.savedObjects.getRowTitles();
+      expect(objects.includes('A Dashboard')).to.be(true);
+      await PageObjects.savedObjects.clickInspectByTitle('A Dashboard');
+      await PageObjects.common.navigateToUrl('management', 'kibana/objects/dashboard/i-exist', {
+        shouldUseHashForSubUrl: false,
+      });
       await focusAndClickButton('savedObjectEditDelete');
       await PageObjects.common.clickConfirmOnModal();
 
-      const objects = await PageObjects.savedObjects.getRowTitles();
+      objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Dashboard')).to.be(false);
-    });
-
-    it('preserves the object references when saving', async () => {
-      const testVisualizationUrl =
-        'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed';
-      const visualizationRefs = [
-        {
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-          type: 'index-pattern',
-          id: 'logstash-*',
-        },
-      ];
-
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSavedObjects();
-
-      const objects = await PageObjects.savedObjects.getRowTitles();
-      expect(objects.includes('A Pie')).to.be(true);
-
-      await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
-        shouldUseHashForSubUrl: false,
-      });
-
-      await testSubjects.existOrFail('savedObjectEditSave');
-
-      let displayedReferencesValue = await getAceEditorFieldValue('references');
-
-      expect(JSON.parse(displayedReferencesValue)).to.eql(visualizationRefs);
-
-      await focusAndClickButton('savedObjectEditSave');
-
-      await PageObjects.savedObjects.getRowTitles();
-
-      await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
-        shouldUseHashForSubUrl: false,
-      });
-
-      // Parsing to avoid random keys ordering issues in raw string comparison
-      expect(JSON.parse(await getAceEditorFieldValue('references'))).to.eql(visualizationRefs);
-
-      await setAceEditorFieldValue('references', JSON.stringify([], undefined, 2));
-
-      await focusAndClickButton('savedObjectEditSave');
-
-      await PageObjects.savedObjects.getRowTitles();
-
-      await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
-        shouldUseHashForSubUrl: false,
-      });
-
-      displayedReferencesValue = await getAceEditorFieldValue('references');
-
-      expect(JSON.parse(displayedReferencesValue)).to.eql([]);
     });
   });
 }

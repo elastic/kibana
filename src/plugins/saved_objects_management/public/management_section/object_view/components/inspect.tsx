@@ -1,0 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import { XJsonLang } from '@kbn/monaco';
+import { omit } from 'lodash';
+import { CodeEditor } from '../../../../../kibana_react/public';
+import { SavedObjectWithMetadata } from '../../../../common';
+
+export interface InspectProps {
+  object: SavedObjectWithMetadata<any>;
+}
+
+export const Inspect: FC<InspectProps> = ({ object }) => {
+  const objectAsJsonString = JSON.stringify(omit(object, 'meta'), null, 2);
+  return (
+    <CodeEditor
+      languageId={XJsonLang.ID}
+      value={objectAsJsonString}
+      onChange={() => {}}
+      aria-label={i18n.translate('savedObjectsManagement.view.inspectCodeEditorAriaLabel', {
+        defaultMessage: 'inspect { title } object',
+        values: {
+          title: object.meta.title,
+        },
+      })}
+      height={'100%'}
+      options={{
+        automaticLayout: false,
+        fontSize: 12,
+        lineNumbers: 'on',
+        minimap: {
+          enabled: false,
+        },
+        overviewRulerBorder: false,
+        readOnly: true,
+        scrollbar: {
+          alwaysConsumeMouseWheel: false,
+        },
+        scrollBeyondLastLine: false,
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
+      }}
+    />
+  );
+};

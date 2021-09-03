@@ -74,11 +74,11 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
               </div>
               <div>
                 <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+                  defaultMessage="If you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above."
                   id="savedObjectsManagement.view.howToFixErrorDescription"
                   values={Object {}}
                 >
-                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+                  If you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above.
                 </FormattedMessage>
               </div>
             </div>
@@ -164,11 +164,11 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
               </div>
               <div>
                 <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+                  defaultMessage="If you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above."
                   id="savedObjectsManagement.view.howToFixErrorDescription"
                   values={Object {}}
                 >
-                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+                  If you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above.
                 </FormattedMessage>
               </div>
             </div>
@@ -254,11 +254,11 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
               </div>
               <div>
                 <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+                  defaultMessage="If you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above."
                   id="savedObjectsManagement.view.howToFixErrorDescription"
                   values={Object {}}
                 >
-                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+                  If you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above.
                 </FormattedMessage>
               </div>
             </div>
@@ -336,11 +336,11 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
               <div />
               <div>
                 <FormattedMessage
-                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+                  defaultMessage="If you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above."
                   id="savedObjectsManagement.view.howToFixErrorDescription"
                   values={Object {}}
                 >
-                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+                  If you know what this error means, you can use the saved objects api to fix it — otherwise click the delete button above.
                 </FormattedMessage>
               </div>
             </div>
