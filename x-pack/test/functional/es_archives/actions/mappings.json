@@ -571,6 +571,9 @@
             }
           }
         },
+        "coreMigrationVersion": {
+          "type": "keyword"
+        },
         "dashboard": {
           "properties": {
             "description": {

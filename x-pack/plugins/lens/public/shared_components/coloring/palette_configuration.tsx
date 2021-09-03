@@ -108,15 +108,20 @@ export function CustomizablePalette({
                 colorStops: undefined,
               };
 
+              const newColorStops = getColorStops(palettes, [], activePalette, dataBounds);
               if (isNewPaletteCustom) {
-                newParams.colorStops = getColorStops(palettes, [], activePalette, dataBounds);
+                newParams.colorStops = newColorStops;
               }
 
               newParams.stops = getPaletteStops(palettes, newParams, {
                 prevPalette:
                   isNewPaletteCustom || isCurrentPaletteCustom ? undefined : newPalette.name,
                 dataBounds,
+                mapFromMinValue: true,
               });
+
+              newParams.rangeMin = newColorStops[0].stop;
+              newParams.rangeMax = newColorStops[newColorStops.length - 1].stop;
 
               setPalette({
                 ...newPalette,
@@ -266,18 +271,18 @@ export function CustomizablePalette({
               ) as RequiredPaletteParamTypes['rangeType'];
 
               const params: CustomPaletteParams = { rangeType: newRangeType };
+              const { min: newMin, max: newMax } = getDataMinMax(newRangeType, dataBounds);
+              const { min: oldMin, max: oldMax } = getDataMinMax(
+                activePalette.params?.rangeType,
+                dataBounds
+              );
+              const newColorStops = remapStopsByNewInterval(colorStopsToShow, {
+                oldInterval: oldMax - oldMin,
+                newInterval: newMax - newMin,
+                newMin,
+                oldMin,
+              });
               if (isCurrentPaletteCustom) {
-                const { min: newMin, max: newMax } = getDataMinMax(newRangeType, dataBounds);
-                const { min: oldMin, max: oldMax } = getDataMinMax(
-                  activePalette.params?.rangeType,
-                  dataBounds
-                );
-                const newColorStops = remapStopsByNewInterval(colorStopsToShow, {
-                  oldInterval: oldMax - oldMin,
-                  newInterval: newMax - newMin,
-                  newMin,
-                  oldMin,
-                });
                 const stops = getPaletteStops(
                   palettes,
                   { ...activePalette.params, colorStops: newColorStops, ...params },
@@ -285,8 +290,6 @@ export function CustomizablePalette({
                 );
                 params.colorStops = newColorStops;
                 params.stops = stops;
-                params.rangeMin = newColorStops[0].stop;
-                params.rangeMax = newColorStops[newColorStops.length - 1].stop;
               } else {
                 params.stops = getPaletteStops(
                   palettes,
@@ -294,6 +297,11 @@ export function CustomizablePalette({
                   { prevPalette: activePalette.name, dataBounds }
                 );
               }
+              // why not use newMin/newMax here?
+              // That's because there's the concept of continuity to accomodate, where in some scenarios it has to
+              // take into account the stop value rather than the data value
+              params.rangeMin = newColorStops[0].stop;
+              params.rangeMax = newColorStops[newColorStops.length - 1].stop;
               setPalette(mergePaletteParams(activePalette, params));
             }}
           />
