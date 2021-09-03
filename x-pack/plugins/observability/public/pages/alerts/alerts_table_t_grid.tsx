@@ -46,7 +46,12 @@ import {
   getAlertsPermissions,
   useGetUserAlertsPermissions,
 } from '../../hooks/use_alert_permission';
-import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
+import type {
+  TimelinesUIStart,
+  GetTGridProps,
+  TGridType,
+  SortDirection,
+} from '../../../../timelines/public';
 import { useStatusBulkActionItems } from '../../../../timelines/public';
 import type { TopAlert } from './';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -401,7 +406,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           values: { totalAlerts },
           defaultMessage: '{totalAlerts, plural, =1 {alert} other {alerts}}',
         }),
-    };
+    } as GetTGridProps<typeof type>;
   }, [
     casePermissions,
     addToQuery,
