@@ -78,7 +78,7 @@ export class QueryService {
       }),
       filterManager: this.filterManager,
       queryString: this.queryStringManager,
-      savedQueries: createSavedQueryService(savedObjectsClient),
+      savedQueries: createSavedQueryService(savedObjectsClient, this.filterManager),
       state$: this.state$,
       timefilter: this.timefilter,
       getEsQuery: (indexPattern: IndexPattern, timeRange?: TimeRange) => {

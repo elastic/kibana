@@ -10,6 +10,7 @@ import uuid from 'uuid';
 import { Filter } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '../../../../core/types';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../constants';
 
 export const extract = (filters: Filter[]) => {
   const references: SavedObjectReference[] = [];
@@ -17,7 +18,7 @@ export const extract = (filters: Filter[]) => {
     if (filter.meta?.index) {
       const id = uuid();
       references.push({
-        type: 'index_pattern',
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
         name: id,
         id: filter.meta.index,
       });

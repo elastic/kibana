@@ -9,6 +9,7 @@
 import { createSavedQueryService } from './saved_query_service';
 import { FilterStateStore } from '../../../common';
 import { SavedQueryAttributes } from './types';
+import { FilterManager } from '../filter_manager';
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
@@ -34,6 +35,7 @@ const savedQueryAttributesWithFilters: SavedQueryAttributes = {
       query: { match_all: {} },
       $state: { store: FilterStateStore.APP_STATE },
       meta: {
+        index: 'my-index',
         disabled: false,
         negate: false,
         alias: null,
@@ -58,6 +60,11 @@ const mockSavedObjectsClient = {
   delete: jest.fn(),
 };
 
+const mockFilterManager = {
+  extract: jest.fn().mockImplementation((state: unknown) => ({ state, references: [] })),
+  inject: jest.fn().mockImplementation((state: unknown) => state),
+} as FilterManager;
+
 const {
   deleteSavedQuery,
   getSavedQuery,
@@ -67,7 +74,8 @@ const {
   getSavedQueryCount,
 } = createSavedQueryService(
   // @ts-ignore
-  mockSavedObjectsClient
+  mockSavedObjectsClient,
+  mockFilterManager
 );
 
 describe('saved query service', () => {
@@ -76,6 +84,8 @@ describe('saved query service', () => {
     mockSavedObjectsClient.find.mockReset();
     mockSavedObjectsClient.get.mockReset();
     mockSavedObjectsClient.delete.mockReset();
+    mockFilterManager.extract.mockClear();
+    mockFilterManager.inject.mockClear();
   });
 
   describe('saveQuery', function () {
@@ -88,6 +98,7 @@ describe('saved query service', () => {
       const response = await saveQuery(savedQueryAttributes);
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('query', savedQueryAttributes, {
         id: 'foo',
+        references: [],
       });
       expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributes });
     });
@@ -101,6 +112,7 @@ describe('saved query service', () => {
       const response = await saveQuery(savedQueryAttributes, { overwrite: true });
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('query', savedQueryAttributes, {
         id: 'foo',
+        references: [],
         overwrite: true,
       });
       expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributes });
@@ -123,7 +135,7 @@ describe('saved query service', () => {
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'query',
         serializedSavedQueryAttributesWithFilters,
-        { id: 'foo' }
+        { id: 'foo', references: [] }
       );
       expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributesWithFilters });
     });
@@ -144,6 +156,7 @@ describe('saved query service', () => {
       }
       expect(error).not.toBe(null);
     });
+
     it('should throw an error if the saved query does not have a title', async () => {
       let error = null;
       try {
@@ -152,6 +165,18 @@ describe('saved query service', () => {
         error = e;
       }
       expect(error).not.toBe(null);
+    });
+
+    it('should extract references from filters', async () => {
+      mockSavedObjectsClient.create.mockReturnValue({
+        id: 'foo',
+        attributes: savedQueryAttributesWithFilters,
+      });
+
+      await saveQuery(savedQueryAttributesWithFilters);
+      expect(mockFilterManager.extract).toHaveBeenCalledWith(
+        savedQueryAttributesWithFilters.filters
+      );
     });
   });
   describe('findSavedQueries', function () {
@@ -345,6 +370,16 @@ describe('saved query service', () => {
 
       const response = await getSavedQuery('food');
       expect(response.attributes.query.query).toEqual('"Bob"');
+    });
+
+    it('should inject references', async () => {
+      mockSavedObjectsClient.get.mockReturnValue({
+        id: 'food',
+        attributes: savedQueryAttributesWithFilters,
+      });
+
+      await getSavedQuery('food');
+      expect(mockFilterManager.inject).toHaveBeenCalled();
     });
   });
 

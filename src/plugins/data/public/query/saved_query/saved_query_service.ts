@@ -7,8 +7,13 @@
  */
 
 import { isObject } from 'lodash';
-import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
+import {
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  SavedObjectReference,
+} from 'src/core/public';
 import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
+import { FilterManager } from '../filter_manager';
 
 type SerializedSavedQueryAttributes = SavedObjectAttributes &
   SavedQueryAttributes & {
@@ -19,7 +24,8 @@ type SerializedSavedQueryAttributes = SavedObjectAttributes &
   };
 
 export const createSavedQueryService = (
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  filterManager: FilterManager
 ): SavedQueryService => {
   const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
     if (!attributes.title.length) {
@@ -41,8 +47,11 @@ export const createSavedQueryService = (
       query,
     };
 
+    let references = [];
     if (attributes.filters) {
-      queryObject.filters = attributes.filters;
+      const extracted = filterManager.extract(attributes.filters);
+      queryObject.filters = extracted.state;
+      references = extracted.references;
     }
 
     if (attributes.timefilter) {
@@ -53,10 +62,12 @@ export const createSavedQueryService = (
     if (!overwrite) {
       rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
         id: attributes.title,
+        references,
       });
     } else {
       rawQueryResponse = await savedObjectsClient.create('query', queryObject, {
         id: attributes.title,
+        references,
         overwrite: true,
       });
     }
@@ -75,10 +86,7 @@ export const createSavedQueryService = (
       perPage: count,
       page: 1,
     });
-    return response.savedObjects.map(
-      (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
-        parseSavedQueryObject(savedObject)
-    );
+    return response.savedObjects.map((savedObject) => parseSavedQueryObject(savedObject));
   };
   // findSavedQueries will do a 'match_all' if no search string is passed in
   const findSavedQueries = async (
@@ -97,10 +105,7 @@ export const createSavedQueryService = (
 
     return {
       total: response.total,
-      queries: response.savedObjects.map(
-        (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
-          parseSavedQueryObject(savedObject)
-      ),
+      queries: response.savedObjects.map((savedObject) => parseSavedQueryObject(savedObject)),
     };
   };
 
@@ -119,6 +124,7 @@ export const createSavedQueryService = (
   const parseSavedQueryObject = (savedQuery: {
     id: string;
     attributes: SerializedSavedQueryAttributes;
+    references: SavedObjectReference[];
   }) => {
     let queryString: string | object = savedQuery.attributes.query.query;
 
@@ -138,7 +144,10 @@ export const createSavedQueryService = (
       },
     };
     if (savedQuery.attributes.filters) {
-      savedQueryItems.filters = savedQuery.attributes.filters;
+      savedQueryItems.filters = filterManager.inject(
+        savedQuery.attributes.filters,
+        savedQuery.references
+      );
     }
     if (savedQuery.attributes.timefilter) {
       savedQueryItems.timefilter = savedQuery.attributes.timefilter;
