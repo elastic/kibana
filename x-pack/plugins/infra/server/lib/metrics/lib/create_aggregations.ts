@@ -25,6 +25,11 @@ export const createAggregations = (options: MetricsAPIRequest) => {
       },
       aggregations: createMetricsAggregations(options),
     },
+    metricsets: {
+      terms: {
+        field: 'metricset.name',
+      },
+    },
   };
 
   if (Array.isArray(options.groupBy) && options.groupBy.length) {
