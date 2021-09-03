@@ -35,11 +35,15 @@ const DocTableInfiniteContent = (props: DocTableRenderProps) => {
     const scheduleCheck = debounce(() => {
       const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
       const usedScrollDiv = isMobileView ? scrollMobileElem : scrollDiv;
-      const scrollusedHeight = usedScrollDiv.scrollHeight;
-      const scrollTop = Math.abs(usedScrollDiv.scrollTop);
+      // the height of the scrolling div, including content not visible on the screen due to overflow.
+      const scrollHeight = usedScrollDiv.scrollHeight;
+      // the number of pixels that the div is is scrolled vertically
+      const scrollTop = usedScrollDiv.scrollTop;
+      // the inner height of the scrolling div
       const clientHeight = usedScrollDiv.clientHeight;
-      const availableHeight = scrollTop + clientHeight;
-      if (availableHeight <= scrollusedHeight + 50) {
+      const consumedHeight = scrollTop + clientHeight;
+      const remainingHeight = scrollHeight - consumedHeight;
+      if (remainingHeight < 100) {
         setLimit((prevLimit) => prevLimit + 50);
       }
     }, 50);
