@@ -17,7 +17,10 @@ import {
 } from '@elastic/eui';
 
 import { useEndpointSelector } from '../../../hooks';
-import { getActivityLogDataPaging } from '../../../../store/selectors';
+import {
+  getActivityLogDataPaging,
+  getActivityLogRequestLoading,
+} from '../../../../store/selectors';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../../../common/constants';
 import { useUiSetting$ } from '../../../../../../../common/lib/kibana';
 
@@ -29,7 +32,7 @@ interface Range {
 
 const DatePickerWrapper = styled.div`
   width: ${(props) => props.theme.eui.fractions.single.percentage};
-  max-width: 250px;
+  max-width: 350px;
 `;
 const StickyFlexItem = styled(EuiFlexItem)`
   background: ${(props) => `${props.theme.eui.euiHeaderBackgroundColor}`};
@@ -49,6 +52,8 @@ export const DateRangePicker = memo(() => {
     autoRefreshOptions,
     recentlyUsedDateRanges,
   } = useEndpointSelector(getActivityLogDataPaging);
+
+  const activityLogLoading = useEndpointSelector(getActivityLogRequestLoading);
 
   const dispatchActionUpdateActivityLogPaging = useCallback(
     async ({ start, end }) => {
@@ -127,6 +132,7 @@ export const DateRangePicker = memo(() => {
         <DatePickerWrapper data-test-subj="activityLogSuperDatePicker">
           <EuiFlexItem>
             <EuiSuperDatePicker
+              isLoading={activityLogLoading}
               commonlyUsedRanges={commonlyUsedRanges}
               end={dateMath.parse(endDate)?.toISOString()}
               isPaused={!autoRefreshOptions.enabled}
@@ -136,7 +142,6 @@ export const DateRangePicker = memo(() => {
               onRefresh={onRefresh}
               recentlyUsedRanges={recentlyUsedDateRanges as EuiSuperDatePickerRecentRange[]}
               start={dateMath.parse(startDate)?.toISOString()}
-              showUpdateButton={false}
             />
           </EuiFlexItem>
         </DatePickerWrapper>
