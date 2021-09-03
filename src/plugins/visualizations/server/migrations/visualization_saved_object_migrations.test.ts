@@ -2340,10 +2340,10 @@ describe('migration visualization', () => {
 
     it('should remove markdown_less and id from markdown_css', () => {
       const migratedTestDoc = migrate(getTestDoc());
-      const { markdown_css, mardwon_less } = JSON.parse(migratedTestDoc.attributes.visState).params;
+      const params = JSON.parse(migratedTestDoc.attributes.visState).params;
 
-      expect(mardwon_less).toBeUndefined();
-      expect(markdown_css).toEqual('test { color: red }');
+      expect(params.mardwon_less).toBeUndefined();
+      expect(params.markdown_css).toEqual('test { color: red }');
     });
   });
 });
