@@ -55,7 +55,6 @@ describe.each([
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
       context.alerting!.getRulesClient = jest.fn();
       const response = await server.inject(getReadBulkRequest(), context);
       expect(response.status).toEqual(404);
@@ -63,7 +62,6 @@ describe.each([
     });
 
     test('returns 404 if siem client is unavailable', async () => {
-      createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
       const { securitySolution, ...contextWithoutSecuritySolution } = context;
       // @ts-expect-error
       const response = await server.inject(getReadBulkRequest(), contextWithoutSecuritySolution);
@@ -74,7 +72,6 @@ describe.each([
 
   describe('unhappy paths', () => {
     test('returns a 403 error object if ML Authz fails', async () => {
-      createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
       (buildMlAuthz as jest.Mock).mockReturnValueOnce({
         validateRuleType: jest
           .fn()
@@ -95,7 +92,6 @@ describe.each([
     });
 
     test('returns an error object if the index does not exist', async () => {
-      createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
       );
@@ -114,7 +110,6 @@ describe.each([
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
-      createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
       clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
       const response = await server.inject(getReadBulkRequest(), context);
 
@@ -130,7 +125,6 @@ describe.each([
     });
 
     test('catches error if creation throws', async () => {
-      createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
       clients.rulesClient.create.mockImplementation(async () => {
         throw new Error('Test error');
       });
@@ -148,7 +142,6 @@ describe.each([
     });
 
     test('returns an error object if duplicate rule_ids found in request payload', async () => {
-      createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
@@ -170,7 +163,6 @@ describe.each([
 
   describe('request validation', () => {
     test('allows rule type of query', async () => {
-      createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
@@ -182,7 +174,6 @@ describe.each([
     });
 
     test('allows rule type of query and custom from and interval', async () => {
-      createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
@@ -194,7 +185,6 @@ describe.each([
     });
 
     test('disallows unknown rule type', async () => {
-      createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
@@ -206,7 +196,6 @@ describe.each([
     });
 
     test('disallows invalid "from" param on rule', async () => {
-      createRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
