@@ -193,7 +193,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   getLabelsDisabledReason() {
     if (this.getSource().isMvt()) {
-      return i18n.translate('xpack.maps.source.esSearch.joinsDisabledReasonMvt', {
+      return i18n.translate('xpack.maps.vectorlayer.labelsDisabledReasonMvt', {
         defaultMessage: 'Labels are not supported when using Elasticsearch vector tiles',
       });
     }
