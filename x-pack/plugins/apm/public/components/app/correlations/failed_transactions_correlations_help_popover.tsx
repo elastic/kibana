@@ -36,7 +36,7 @@ export function FailedTransactionsCorrelationsHelpPopover() {
       <p>
         <FormattedMessage
           id="xpack.apm.correlations.failedTransactions.helpPopover.basicExplanation"
-          defaultMessage="Correlations help you discover which attributes are contributing to failed transactions. Transactions are considered a failure when it returns a status code >= 5xx."
+          defaultMessage="Correlations help you discover which attributes are most influential in distinguishing between transaction failures and successes. Transactions are considered a failure when their `event.outcome` value is `failure`."
         />
       </p>
       <p>
