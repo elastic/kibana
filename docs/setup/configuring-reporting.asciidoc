@@ -41,11 +41,16 @@ To troubleshoot the problem, start the {kib} server with environment variables t
 [float]
 [[grant-user-access]]
 === Grant users access to reporting
+When security is enabled, you grant users access to generate reports with <<kibana-privileges, {kib} application privileges>>, which allow you to create custom roles that control the spaces and applications where users generate reports.
 
-When security is enabled, access to the {report-features} is controlled by roles and <<kibana-privileges, privileges>>. With privileges, you can define custom roles that grant *Reporting* privileges as sub-features of {kib} applications. To grant users permission to generate reports and view their reports in *Reporting*, create and assign the reporting role.
-
-[[reporting-app-users]]
-NOTE: In 7.12.0 and earlier, you grant access to the {report-features} by assigning users the `reporting_user` role in {es}. 
+. Enable application privileges in Reporting. To enable, turn off the default user access control features in `kibana.yml`:
++
+[source,yaml]
+------------------------------------
+xpack.reporting.roles.enabled: false
+------------------------------------
++
+NOTE: If you use the default settings, you can still create a custom role that grants reporting privileges. The default role is `reporting_user`. This behavior is being deprecated and does not allow application-level access controls for {report-features}, and does not allow API keys or authentication tokens to authorize report generation. Refer to <<reporting-advanced-settings, reporting security settings>> for information and caveats about the deprecated access control features.
 
 . Create the reporting role. 
 
@@ -90,10 +95,12 @@ If the *Reporting* option is unavailable, contact your administrator, or <<repor
 
 .. Click *Update user*.
 
+Granting the privilege to generate reports also grants the user the privilege to view their reports in *Stack Management > Reporting*. Users can only access their own reports.
+
 [float]
 [[reporting-roles-user-api]]
 ==== Grant access with the role API
-You can also use the {ref}/security-api-put-role.html[role API] to grant access to the reporting features. Grant the reporting role to users in combination with other roles that grant read access to the data in {es}, and at least read access in the applications where users can generate reports.
+With <<grant-user-access, {kib} application privileges>> enabled in Reporting, you can also use the {ref}/security-api-put-role.html[role API] to grant access to the {report-features}. Grant custom reporting roles to users in combination with other roles that grant read access to the data in {es}, and at least read access in the applications where users can generate reports.
 
 [source, sh]
 ---------------------------------------------------------------

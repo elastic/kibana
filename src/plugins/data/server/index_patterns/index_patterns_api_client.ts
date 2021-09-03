@@ -12,7 +12,7 @@ import {
   IIndexPatternsApiClient,
   GetFieldsOptionsTimePattern,
 } from '../../common/index_patterns/types';
-import { IndexPatternMissingIndices } from '../../common/index_patterns/lib';
+import { DataViewMissingIndices } from '../../common/index_patterns/lib';
 import { IndexPatternsFetcher } from './fetcher';
 import { hasUserIndexPattern } from './has_user_index_pattern';
 
@@ -44,7 +44,7 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
           err.output.payload.statusCode === 404 &&
           err.output.payload.code === 'no_matching_indices'
         ) {
-          throw new IndexPatternMissingIndices(pattern);
+          throw new DataViewMissingIndices(pattern);
         } else {
           throw err;
         }

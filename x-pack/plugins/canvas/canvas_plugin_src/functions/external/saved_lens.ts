@@ -7,9 +7,10 @@
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import { TimeRange, Filter as DataFilter } from 'src/plugins/data/public';
-import { EmbeddableInput } from 'src/plugins/embeddable/public';
-import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
+import { Filter as DataFilter } from '@kbn/es-query';
+import { TimeRange } from 'src/plugins/data/common';
+import { EmbeddableInput } from 'src/plugins/embeddable/common';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, TimeRange as TimeRangeArg } from '../../../types';
 import {
   EmbeddableTypes,
@@ -18,7 +19,6 @@ import {
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 import { SavedObjectReference } from '../../../../../../src/core/types';
-
 interface Arguments {
   id: string;
   title: string | null;

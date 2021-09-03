@@ -446,78 +446,33 @@ describe('OptimizerConfig::create()', () => {
       }
     `);
 
-    expect(findKibanaPlatformPlugins.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Symbol(parsed plugin scan dirs),
-            Symbol(parsed plugin paths),
-          ],
+    expect(findKibanaPlatformPlugins.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Symbol(parsed plugin scan dirs),
+          Symbol(parsed plugin paths),
         ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          25,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Symbol(new platform plugins),
-          },
-        ],
-      }
+      ]
     `);
 
-    expect(filterById.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Array [],
-            Symbol(focused bundles),
-          ],
+    expect(filterById.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [],
+          Symbol(focused bundles),
         ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          28,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Symbol(filtered bundles),
-          },
-        ],
-      }
+      ]
     `);
 
-    expect(getPluginBundles.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Symbol(new platform plugins),
-            Symbol(parsed repo root),
-            Symbol(parsed output root),
-            Symbol(limits),
-          ],
+    expect(getPluginBundles.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Symbol(new platform plugins),
+          Symbol(parsed repo root),
+          Symbol(parsed output root),
+          Symbol(limits),
         ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          26,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Array [
-              Symbol(bundle1),
-              Symbol(bundle2),
-            ],
-          },
-        ],
-      }
+      ]
     `);
   });
 });

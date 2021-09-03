@@ -10,6 +10,8 @@ import * as reactTestingLibrary from '@testing-library/react';
 import { EndpointList } from './index';
 import '../../../../common/mock/match_media';
 
+import { createUseUiSetting$Mock } from '../../../../../public/common/lib/kibana/kibana_react.mock';
+
 import {
   mockEndpointDetailsApiResult,
   mockEndpointResultList,
@@ -28,7 +30,7 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import { getEndpointDetailsPath } from '../../../common/routing';
-import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kibana';
+import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../../../common/lib/kibana';
 import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
 import {
   createFailedResourceState,
@@ -40,7 +42,11 @@ import {
 import { getCurrentIsolationRequestState } from '../store/selectors';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
-import { APP_PATH, MANAGEMENT_PATH } from '../../../../../common/constants';
+import {
+  APP_PATH,
+  MANAGEMENT_PATH,
+  DEFAULT_TIMEPICKER_QUICK_RANGES,
+} from '../../../../../common/constants';
 import { TransformStats, TRANSFORM_STATE } from '../types';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
 
@@ -63,6 +69,59 @@ jest.mock('../../policy/store/services/ingest', () => {
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   };
 });
+const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
+const timepickerRanges = [
+  {
+    from: 'now/d',
+    to: 'now/d',
+    display: 'Today',
+  },
+  {
+    from: 'now/w',
+    to: 'now/w',
+    display: 'This week',
+  },
+  {
+    from: 'now-15m',
+    to: 'now',
+    display: 'Last 15 minutes',
+  },
+  {
+    from: 'now-30m',
+    to: 'now',
+    display: 'Last 30 minutes',
+  },
+  {
+    from: 'now-1h',
+    to: 'now',
+    display: 'Last 1 hour',
+  },
+  {
+    from: 'now-24h',
+    to: 'now',
+    display: 'Last 24 hours',
+  },
+  {
+    from: 'now-7d',
+    to: 'now',
+    display: 'Last 7 days',
+  },
+  {
+    from: 'now-30d',
+    to: 'now',
+    display: 'Last 30 days',
+  },
+  {
+    from: 'now-90d',
+    to: 'now',
+    display: 'Last 90 days',
+  },
+  {
+    from: 'now-1y',
+    to: 'now',
+    display: 'Last 1 year',
+  },
+];
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_license');
@@ -759,6 +818,14 @@ describe('when on the endpoint list page', () => {
           disconnect: jest.fn(),
         }));
 
+        mockUseUiSetting$.mockImplementation((key, defaultValue) => {
+          const useUiSetting$Mock = createUseUiSetting$Mock();
+
+          return key === DEFAULT_TIMEPICKER_QUICK_RANGES
+            ? [timepickerRanges, jest.fn()]
+            : useUiSetting$Mock(key, defaultValue);
+        });
+
         const fleetActionGenerator = new FleetActionGenerator('seed');
         const responseData = fleetActionGenerator.generateResponse({
           agent_id: agentId,
@@ -766,9 +833,12 @@ describe('when on the endpoint list page', () => {
         const actionData = fleetActionGenerator.generate({
           agents: [agentId],
         });
+
         getMockData = () => ({
           page: 1,
           pageSize: 50,
+          startDate: 'now-1d',
+          endDate: 'now',
           data: [
             {
               type: 'response',
@@ -838,7 +908,7 @@ describe('when on the endpoint list page', () => {
         expect(emptyState).not.toBe(null);
       });
 
-      it('should display empty state when no log data', async () => {
+      it('should not display empty state when no log data', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
         reactTestingLibrary.act(() => {
           reactTestingLibrary.fireEvent.click(activityLogTab);
@@ -848,33 +918,17 @@ describe('when on the endpoint list page', () => {
           dispatchEndpointDetailsActivityLogChanged('success', {
             page: 1,
             pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
             data: [],
           });
         });
 
         const emptyState = await renderResult.queryByTestId('activityLogEmpty');
-        expect(emptyState).not.toBe(null);
-      });
-
-      it('should not display empty state with no log data while date range filter is active', async () => {
-        const activityLogTab = await renderResult.findByTestId('activity_log');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(activityLogTab);
-        });
-        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
-        reactTestingLibrary.act(() => {
-          dispatchEndpointDetailsActivityLogChanged('success', {
-            page: 1,
-            pageSize: 50,
-            startDate: new Date().toISOString(),
-            data: [],
-          });
-        });
-
-        const emptyState = await renderResult.queryByTestId('activityLogEmpty');
-        const dateRangePicker = await renderResult.queryByTestId('activityLogDateRangePicker');
         expect(emptyState).toBe(null);
-        expect(dateRangePicker).not.toBe(null);
+
+        const superDatePicker = await renderResult.queryByTestId('activityLogSuperDatePicker');
+        expect(superDatePicker).not.toBe(null);
       });
 
       it('should display activity log when tab is loaded using the URL', async () => {
@@ -894,6 +948,32 @@ describe('when on the endpoint list page', () => {
         });
         const logEntries = await renderResult.queryAllByTestId('timelineEntry');
         expect(logEntries.length).toEqual(2);
+      });
+
+      it('should display a callout message if no log data', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
+            data: [],
+          });
+        });
+
+        const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
+        expect(activityLogCallout).not.toBeNull();
       });
     });
 

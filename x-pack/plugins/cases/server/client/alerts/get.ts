@@ -12,11 +12,19 @@ export const get = async (
   { alertsInfo }: AlertGet,
   clientArgs: CasesClientArgs
 ): Promise<CasesClientGetAlertsResponse> => {
-  const { alertsService, logger } = clientArgs;
+  const { alertsService, scopedClusterClient, logger } = clientArgs;
   if (alertsInfo.length === 0) {
     return [];
   }
 
-  const alerts = await alertsService.getAlerts({ alertsInfo, logger });
-  return alerts ?? [];
+  const alerts = await alertsService.getAlerts({ alertsInfo, scopedClusterClient, logger });
+  if (!alerts) {
+    return [];
+  }
+
+  return alerts.docs.map((alert) => ({
+    id: alert._id,
+    index: alert._index,
+    ...alert._source,
+  }));
 };
