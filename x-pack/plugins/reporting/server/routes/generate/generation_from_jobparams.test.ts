@@ -12,15 +12,15 @@ import { of } from 'rxjs';
 import { ElasticsearchClient } from 'kibana/server';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
-import { ReportingCore } from '..';
-import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { createMockLevelLogger, createMockReportingCore } from '../test_helpers';
+import { ReportingCore } from '../..';
+import { ExportTypesRegistry } from '../../lib/export_types_registry';
+import { createMockLevelLogger, createMockReportingCore } from '../../test_helpers';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
-} from '../test_helpers/create_mock_reportingplugin';
-import { registerJobGenerationRoutes } from './generation';
-import type { ReportingRequestHandlerContext } from '../types';
+} from '../../test_helpers/create_mock_reportingplugin';
+import type { ReportingRequestHandlerContext } from '../../types';
+import { registerJobGenerationRoutes } from './generate_from_jobparams';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
