@@ -96,7 +96,6 @@ export const TrustedAppsPage = memo(() => {
 
   const addButton = (
     <EuiButton
-      fill
       iconType="plusInCircle"
       isDisabled={showCreateFlyout}
       onClick={handleAddButtonClick}

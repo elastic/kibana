@@ -199,7 +199,6 @@ export const EventFiltersListPage = memo(() => {
       actions={
         doesDataExist && (
           <EuiButton
-            fill
             iconType="plusInCircle"
             isDisabled={showFlyout}
             onClick={handleAddButtonClick}
