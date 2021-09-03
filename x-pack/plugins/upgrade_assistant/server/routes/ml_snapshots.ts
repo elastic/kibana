@@ -11,7 +11,6 @@ import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server'
 import { API_BASE_PATH } from '../../common/constants';
 import { MlOperation, ML_UPGRADE_OP_TYPE } from '../../common/types';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { handleEsError } from '../shared_imports';
 import { RouteDependencies } from '../types';
 
 const findMlOperation = async (
@@ -99,7 +98,7 @@ const verifySnapshotUpgrade = async (
   }
 };
 
-export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
+export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: RouteDependencies) {
   // Upgrade ML model snapshot
   router.post(
     {
@@ -147,8 +146,8 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
               status: body.completed === true ? 'complete' : 'in_progress',
             },
           });
-        } catch (e) {
-          return handleEsError({ error: e, response });
+        } catch (error) {
+          return handleEsError({ error, response });
         }
       }
     )

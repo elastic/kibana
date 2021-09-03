@@ -11,9 +11,8 @@ import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { getKibanaUpgradeStatus } from '../lib/kibana_status';
 import { RouteDependencies } from '../types';
-import { handleEsError } from '../shared_imports';
 
-export function registerUpgradeStatusRoute({ router }: RouteDependencies) {
+export function registerUpgradeStatusRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/status`,
@@ -63,8 +62,8 @@ export function registerUpgradeStatusRoute({ router }: RouteDependencies) {
               details: getStatusMessage(),
             },
           });
-        } catch (e) {
-          return handleEsError({ error: e, response });
+        } catch (error) {
+          return handleEsError({ error, response });
         }
       }
     )
