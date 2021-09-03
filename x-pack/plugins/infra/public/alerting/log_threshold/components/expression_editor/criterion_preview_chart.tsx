@@ -246,7 +246,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             }}
             color={!isGrouped ? colorTransformer(Color.color0) : undefined}
           />
-          {showThreshold && threshold && threshold.value ? (
+          {showThreshold && threshold ? (
             <LineAnnotation
               id={`threshold-line`}
               domainType={AnnotationDomainType.YDomain}
@@ -260,7 +260,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               }}
             />
           ) : null}
-          {showThreshold && threshold && threshold.value && isBelow ? (
+          {showThreshold && threshold && isBelow ? (
             <RectAnnotation
               id="below-threshold"
               style={{
@@ -279,7 +279,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               ]}
             />
           ) : null}
-          {showThreshold && threshold && threshold.value && isAbove ? (
+          {showThreshold && threshold && isAbove ? (
             <RectAnnotation
               id="above-threshold"
               style={{
