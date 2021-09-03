@@ -23,7 +23,7 @@ import {
   YScaleType,
   SeriesParam,
 } from '../types';
-import { applyFormatter, isSimpleField } from '../utils/accessors';
+import { isSimpleField } from '../utils/accessors';
 
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
