@@ -8,6 +8,7 @@
 
 import type { RequestHandler, RouteMethod, RequestHandlerContext } from 'src/core/server';
 import { ErrorIndexPatternNotFound } from '../../error';
+import { SavedObjectNotFound } from '../../../../../kibana_utils/common';
 
 interface ErrorResponseBody {
   message: string;
@@ -51,7 +52,9 @@ export const handleErrors = <
       }
 
       const is404 =
-        (error as ErrorIndexPatternNotFound).is404 || (error as any)?.output?.statusCode === 404;
+        (error as ErrorIndexPatternNotFound).is404 ||
+        (error as any)?.output?.statusCode === 404 ||
+        error instanceof SavedObjectNotFound;
 
       if (is404) {
         return response.notFound({

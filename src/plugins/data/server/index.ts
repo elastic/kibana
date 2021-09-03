@@ -53,6 +53,7 @@ export {
   IndexPattern,
   IndexPatternsService,
   IndexPatternsService as IndexPatternsCommonService,
+  DataView,
 } from '../common';
 
 /**
