@@ -507,6 +507,8 @@ export class CoreUsageDataService
           this.incrementUsageCounter(params);
         } catch (e) {
           // Self-defense mechanism since the handler is externally registered
+          this.logger.debug('Failed to increase the usage counter');
+          this.logger.debug(e);
         }
       },
     };
