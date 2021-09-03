@@ -135,5 +135,15 @@ image::images/connectors-with-missing-secrets.png[Connectors with missing secret
 For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure connectors>>
 before {kib} starts.
 
+[float]
+[[montoring-connectors]]
+=== Monitoring
+
+The <<task-manager-health-monitoring,Task Manager health API>> is useful to understand the performance of all tasks in your environment.
+However, if connectors fail to execute for any reason, they will report as successful to Task Manager. This means the failure stats will not
+accurately depict the performance of connectors.
+
+To get a better sense of connector failures, please refer to the <<event-log-index,Event log index>>
+for more accurate context into failures and successes.
 
 include::connectors/index.asciidoc[]

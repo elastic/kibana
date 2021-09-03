@@ -639,7 +639,7 @@ test(`treats errors as errors if the task is retryable`, async () => {
   expect(err.data).toEqual({ foo: true });
   expect(err.retry).toEqual(false);
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-    `Action '2' failed: Error message`
+    `Action '2' failed and will not retry: Error message`
   );
 });
 
@@ -683,7 +683,7 @@ test(`treats errors as successes if the task is not retryable`, async () => {
   }
   expect(err).toBeUndefined();
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-    `Action '2' failed: Error message`
+    `Action '2' failed and will not retry: Error message`
   );
 });
 
@@ -724,6 +724,6 @@ test('treats errors as errors if the error is thrown instead of returned', async
   expect(err.data).toEqual({});
   expect(err.retry).toEqual(true);
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
-    `Action '2' failed: undefined`
+    `Action '2' failed and will retry: undefined`
   );
 });

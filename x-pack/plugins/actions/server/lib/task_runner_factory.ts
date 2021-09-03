@@ -123,6 +123,8 @@ export class TaskRunnerFactory {
         // TM will treat a task as a failure if `attempts >= maxAttempts`
         // so we need to handle that here to avoid TM persisting the failed task
         const isRetryableBasedOnAttempts = taskInfo.attempts < (maxAttempts ?? 1);
+        const willRetryMessage = `and will retry`;
+        const willNotRetryMessage = `and will not retry`;
 
         let executorResult: ActionTypeExecutorResult<unknown> | undefined;
         try {
@@ -136,7 +138,11 @@ export class TaskRunnerFactory {
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
-          logger.error(`Action '${actionId}' failed: ${e.message}`);
+          logger.error(
+            `Action '${actionId}' failed ${
+              isRetryableBasedOnAttempts ? willRetryMessage : willNotRetryMessage
+            }: ${e.message}`
+          );
           if (isRetryableBasedOnAttempts) {
             // In order for retry to work, we need to indicate to task manager this task
             // failed
@@ -150,7 +156,11 @@ export class TaskRunnerFactory {
           executorResult?.retry !== undefined &&
           isRetryableBasedOnAttempts
         ) {
-          logger.error(`Action '${actionId}' failed: ${executorResult.message}`);
+          logger.error(
+            `Action '${actionId}' failed ${
+              !!executorResult.retry ? willRetryMessage : willNotRetryMessage
+            }: ${executorResult.message}`
+          );
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
           throw new ExecutorError(
@@ -159,7 +169,9 @@ export class TaskRunnerFactory {
             executorResult.retry as boolean | Date
           );
         } else if (executorResult && executorResult?.status === 'error') {
-          logger.error(`Action '${actionId}' failed: ${executorResult.message}`);
+          logger.error(
+            `Action '${actionId}' failed ${willNotRetryMessage}: ${executorResult.message}`
+          );
         }
 
         // Cleanup action_task_params object now that we're done with it
