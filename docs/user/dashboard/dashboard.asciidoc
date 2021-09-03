@@ -84,23 +84,31 @@ Create and add panels of your data to the dashboard, or add existing panels from
 [[create-panels-with-lens]]
 === Create panels
 
-You create panels using the editors, which you access from the dashboard toolbar. 
+You create panels using the editors, which you can access from the dashboard toolbar or the *Visualize Library*.  
 
-On the dashboard, choose one of the following options:
+To create panels from the dashboard toolbar, use one of the following options:
 
-* *Create visualization* &mdash; Opens the drag-and-drop editor, the recommended way to create visualizations of your data.
+* *Create visualization* &mdash; Opens the drag-and-drop editor, which is the recommended way to create visualization panels.
 
-* *All types* &mdash; Opens the menu for the advanced editors, *Machine Learning* panels, and *Log stream* panel. 
+* *All types* &mdash; Opens the menu for all of the editors and panel types. 
+
+To create panels from the *Visualize Library*:
+
+. Open the main menu, then click *Visualize Library*.
+
+. Click *Create visualization*, then select an editor. 
 
 [float]
 [[add-existing-panels]]
 === Add existing panels
 
+Add panels that are saved in the *Visualize Library* or search results that you saved in <<save-your-search,*Discover*>>.
+
+In the dashboard toolbar, click *Add from library*.
+
 * *Add from library* &mdash; Add panels from the *Visualize Library*, including search results from <<save-your-search,*Discover*>>. The search results from *Discover* are not aggregated.
 +
 When a panel contains a saved query, both queries are applied.
-
-* Add ML and logs...
 
 [[tsvb]]
 
