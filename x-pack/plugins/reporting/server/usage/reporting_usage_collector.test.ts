@@ -20,7 +20,7 @@ import {
 } from './reporting_usage_collector';
 import { ReportingUsageType, SearchResponse } from './types';
 
-const mockExportTypesRegistry = getExportTypesRegistry();
+const exportTypesRegistry = getExportTypesRegistry();
 
 function getMockUsageCollection() {
   class MockUsageCollector {
@@ -77,7 +77,7 @@ describe('license checks', () => {
         mockCore,
         plugins.usageCollection,
         getLicenseMock('basic'),
-        mockExportTypesRegistry,
+        exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
         }
@@ -106,7 +106,7 @@ describe('license checks', () => {
         mockCore,
         plugins.usageCollection,
         getLicenseMock('none'),
-        mockExportTypesRegistry,
+        exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
         }
@@ -135,7 +135,7 @@ describe('license checks', () => {
         mockCore,
         plugins.usageCollection,
         getLicenseMock('platinum'),
-        mockExportTypesRegistry,
+        exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
         }
@@ -164,7 +164,7 @@ describe('license checks', () => {
         mockCore,
         plugins.usageCollection,
         getLicenseMock('basic'),
-        mockExportTypesRegistry,
+        exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);
         }
@@ -194,7 +194,7 @@ describe('data modeling', () => {
       mockCore,
       plugins.usageCollection,
       getLicenseMock(),
-      mockExportTypesRegistry,
+      exportTypesRegistry,
       function isReady() {
         return Promise.resolve(true);
       }
@@ -244,7 +244,7 @@ describe('data modeling', () => {
       mockCore,
       plugins.usageCollection,
       getLicenseMock(),
-      mockExportTypesRegistry,
+      exportTypesRegistry,
       function isReady() {
         return Promise.resolve(true);
       }
@@ -385,7 +385,7 @@ describe('data modeling', () => {
       mockCore,
       plugins.usageCollection,
       getLicenseMock(),
-      mockExportTypesRegistry,
+      exportTypesRegistry,
       function isReady() {
         return Promise.resolve(true);
       }
@@ -435,7 +435,7 @@ describe('data modeling', () => {
       mockCore,
       plugins.usageCollection,
       getLicenseMock(),
-      mockExportTypesRegistry,
+      exportTypesRegistry,
       function isReady() {
         return Promise.resolve(true);
       }
