@@ -52,7 +52,7 @@
 
     // Prevents banners from covering full screen data grids
     .euiDataGrid--fullScreen {
-      height: auto;
+      height: calc(100vh - #{$kbnHeaderBannerHeight});
       top: $kbnHeaderBannerHeight;
     }
   }
