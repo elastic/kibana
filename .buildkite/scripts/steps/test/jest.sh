@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-export DISABLE_BOOTSTRAP_VALIDATION=true
-
 .buildkite/scripts/bootstrap.sh
 
 echo '--- Jest'
