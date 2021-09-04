@@ -18,18 +18,16 @@ import {
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { migrateArtifactsToFleet } from './migrate_artifacts_to_fleet';
 import { createEndpointArtifactClientMock } from '../../services/artifacts/mocks';
-import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 import { InternalArtifactCompleteSchema } from '../../schemas';
-import {
-  generateArtifactEsGetSingleHitMock,
-  generateEsApiResponseMock,
-} from '../../../../../fleet/server/services/artifacts/mocks';
-import { relativeDownloadUrlFromArtifact } from '../../../../../fleet/server';
+import { generateArtifactEsGetSingleHitMock } from '../../../../../fleet/server/services/artifacts/mocks';
+import { NewArtifact } from '../../../../../fleet/server/services';
+import { CreateRequest } from '@elastic/elasticsearch/api/types';
 
 describe('When migrating artifacts to fleet', () => {
   let soClient: jest.Mocked<SavedObjectsClient>;
   let logger: jest.Mocked<Logger>;
   let artifactClient: ReturnType<typeof createEndpointArtifactClientMock>;
+  /** An artifact that was created prior to 7.14 */
   let soArtifactEntry: InternalArtifactCompleteSchema;
 
   const createSoFindResult = (
@@ -49,16 +47,40 @@ describe('When migrating artifacts to fleet', () => {
     soClient = savedObjectsClientMock.create() as jest.Mocked<SavedObjectsClient>;
     logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
     artifactClient = createEndpointArtifactClientMock();
-    soArtifactEntry = await getInternalArtifactMock('windows', 'v1');
+    // pre-v7.14 artifact, which is compressed
+    soArtifactEntry = {
+      identifier: 'endpoint-exceptionlist-macos-v1',
+      compressionAlgorithm: 'zlib',
+      encryptionAlgorithm: 'none',
+      decodedSha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+      encodedSha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+      decodedSize: 14,
+      encodedSize: 22,
+      body: 'eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==',
+    };
 
-    artifactClient._esClient.create.mockImplementation(() => {
-      return elasticsearchServiceMock.createSuccessTransportRequestPromise(
-        generateArtifactEsGetSingleHitMock({
-          ...soArtifactEntry,
-          packageName: 'endpoint',
-          relative_url: relativeDownloadUrlFromArtifact(soArtifactEntry),
-        })
-      );
+    // Mock the esClient create response to include the artifact properties that were provide
+    // to it by fleet artifact client
+    artifactClient._esClient.create.mockImplementation(<T>(props: CreateRequest<T>) => {
+      return elasticsearchServiceMock.createSuccessTransportRequestPromise({
+        ...generateArtifactEsGetSingleHitMock({
+          ...((props?.body ?? {}) as NewArtifact),
+        }),
+        _index: '.fleet-artifacts-7',
+        _id: `endpoint:endpoint-exceptionlist-macos-v1-${
+          // @ts-ignore
+          props?.body?.decodedSha256 ?? 'UNKNOWN?'
+        }`,
+        _version: 1,
+        result: 'created',
+        _shards: {
+          total: 1,
+          successful: 1,
+          failed: 0,
+        },
+        _seq_no: 0,
+        _primary_term: 1,
+      });
     });
 
     soClient.find.mockResolvedValue(createSoFindResult([], 0)).mockResolvedValueOnce(
@@ -89,18 +111,15 @@ describe('When migrating artifacts to fleet', () => {
     expect(soClient.delete).toHaveBeenCalled();
   });
 
-  it('should create artifct in fleet with attributes that match the SO one', async () => {
+  it('should create artifact in fleet with attributes that match the SO version', async () => {
     await migrateArtifactsToFleet(soClient, artifactClient, logger);
 
-    expect(artifactClient.createArtifact.mock.results[0].value).resolves.toEqual(
+    await expect(artifactClient.createArtifact.mock.results[0].value).resolves.toEqual(
       expect.objectContaining({
         ...soArtifactEntry,
         compressionAlgorithm: 'zlib',
       })
     );
-
-    // expect(artifactClient.createArtifact).toHaveBeenCalled();
-    // expect(soClient.delete).toHaveBeenCalled();
   });
 
   it('should ignore 404 responses for SO delete (multi-node kibana setup)', async () => {
