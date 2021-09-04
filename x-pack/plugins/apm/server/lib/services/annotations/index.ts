@@ -28,6 +28,8 @@ export async function getServiceAnnotations({
   client: ElasticsearchClient;
   logger: Logger;
 }) {
+  const serviceVersionPerServiceNode =
+    setup.config['xpack.apm.serviceVersionPerServiceNode'];
   // start fetching derived annotations (based on transactions), but don't wait on it
   // it will likely be significantly slower than the stored annotations
   const derivedAnnotationsPromise = getDerivedServiceAnnotations({
@@ -35,6 +37,7 @@ export async function getServiceAnnotations({
     serviceName,
     environment,
     searchAggregatedTransactions,
+    serviceVersionPerServiceNode,
   });
 
   const storedAnnotations = annotationsClient

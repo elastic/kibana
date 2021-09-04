@@ -25,11 +25,13 @@ export async function getDerivedServiceAnnotations({
   serviceName,
   environment,
   searchAggregatedTransactions,
+  serviceVersionPerServiceNode,
 }: {
   serviceName: string;
   environment: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
+  serviceVersionPerServiceNode: boolean;
 }) {
   const { start, end, apmEventClient } = setup;
 
@@ -73,52 +75,140 @@ export async function getDerivedServiceAnnotations({
     return [];
   }
   const annotations = await Promise.all(
-    versions.map(async (version) => {
-      const response = await apmEventClient.search(
-        'get_first_seen_of_version',
-        {
-          apm: {
-            events: [
-              getProcessorEventForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
-            ],
+    versions.map((version) =>
+      serviceVersionPerServiceNode
+        ? getFirstSeenVersionByServiceNode(
+            version,
+            apmEventClient,
+            start,
+            end,
+            filter,
+            searchAggregatedTransactions
+          )
+        : getFirstSeenVersion(
+            version,
+            apmEventClient,
+            start,
+            end,
+            filter,
+            searchAggregatedTransactions
+          )
+    )
+  );
+  return annotations.flat().filter(Boolean) as Annotation[];
+}
+
+async function getFirstSeenVersion(
+  version: string,
+  apmEventClient,
+  start: number,
+  end: number,
+  filter: ESFilter[],
+  searchAggregatedTransactions: boolean
+) {
+  const response = await apmEventClient.search('get_first_seen_of_version', {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
+    body: {
+      size: 1,
+      query: {
+        bool: {
+          filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
+        },
+      },
+      sort: {
+        '@timestamp': 'asc',
+      },
+    },
+  });
+
+  const firstSeen = new Date(
+    response.hits.hits[0]._source['@timestamp']
+  ).getTime();
+
+  if (!isFiniteNumber(firstSeen)) {
+    throw new Error(
+      'First seen for version was unexpectedly undefined or null.'
+    );
+  }
+
+  if (firstSeen < start || firstSeen > end) {
+    return [];
+  }
+
+  return [
+    {
+      type: AnnotationType.VERSION,
+      id: version,
+      '@timestamp': firstSeen,
+      text: version,
+    },
+  ];
+}
+
+async function getFirstSeenVersionByServiceNode(
+  version: string,
+  apmEventClient,
+  start: number,
+  end: number,
+  filter: ESFilter[],
+  searchAggregatedTransactions: boolean
+) {
+  const response = await apmEventClient.search('get_first_seen_of_version', {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
+        },
+      },
+      aggs: {
+        nodes: {
+          terms: {
+            field: 'service.node.name',
           },
-          body: {
-            size: 1,
-            query: {
-              bool: {
-                filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
+          aggs: {
+            first_seen: {
+              min: {
+                field: '@timestamp',
               },
             },
-            sort: {
-              '@timestamp': 'asc',
-            },
           },
-        }
+        },
+      },
+    },
+  });
+
+  return response.aggregations?.nodes.buckets.map((bucket) => {
+    const firstSeen = bucket.first_seen.value;
+
+    if (!isFiniteNumber(firstSeen)) {
+      throw new Error(
+        'First seen for version was unexpectedly undefined or null.'
       );
+    }
 
-      const firstSeen = new Date(
-        response.hits.hits[0]._source['@timestamp']
-      ).getTime();
+    if (firstSeen < start || firstSeen > end) {
+      return null;
+    }
 
-      if (!isFiniteNumber(firstSeen)) {
-        throw new Error(
-          'First seen for version was unexpectedly undefined or null.'
-        );
-      }
-
-      if (firstSeen < start || firstSeen > end) {
-        return null;
-      }
-
-      return {
-        type: AnnotationType.VERSION,
-        id: version,
-        '@timestamp': firstSeen,
-        text: version,
-      };
-    })
-  );
-  return annotations.filter(Boolean) as Annotation[];
+    return {
+      type: AnnotationType.VERSION,
+      id: version + '_' + bucket.key,
+      '@timestamp': firstSeen,
+      text: version + ' (' + bucket.key + ')',
+    };
+  });
 }

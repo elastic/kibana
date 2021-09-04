@@ -52,6 +52,7 @@ export const config = {
         enabled: schema.boolean({ defaultValue: false }),
       }),
     }),
+    serviceVersionPerServiceNode: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -98,6 +99,8 @@ export function mergeConfigs(
       apmConfig.searchAggregatedTransactions,
     'xpack.apm.metricsInterval': apmConfig.metricsInterval,
     'xpack.apm.agent.migrations.enabled': apmConfig.agent.migrations.enabled,
+    'xpack.apm.serviceVersionPerServiceNode':
+      apmConfig.serviceVersionPerServiceNode,
   };
 
   // Add data stream indices to list of configured values
