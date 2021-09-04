@@ -8,49 +8,42 @@
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton } from '@elastic/eui';
-import { Redirect } from 'react-router-dom';
 
 import { KibanaPageTemplate } from '../../../../../src/plugins/kibana_react/public';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../fleet/common';
 import { pagePathGetters } from '../../../fleet/public';
 import { isModifiedEvent, isLeftClickEvent, useKibana } from '../common/lib/kibana';
-import { useOsqueryIntegrationStatus } from '../common/hooks';
 import { OsqueryIcon } from './osquery_icon';
+import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 const OsqueryAppEmptyStateComponent = () => {
+  useBreadcrumbs('base');
+
   const {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
-  const { data: osqueryIntegration } = useOsqueryIntegrationStatus();
 
   const integrationHref = useMemo(() => {
-    if (osqueryIntegration) {
-      return getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
-        path:
-          '#' +
-          pagePathGetters.integration_details_policies({
-            pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
-          })[1],
-      });
-    }
-  }, [getUrlForApp, osqueryIntegration]);
+    return getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
+      path: pagePathGetters.integration_details_overview({
+        pkgkey: OSQUERY_INTEGRATION_NAME,
+      })[1],
+    });
+  }, [getUrlForApp]);
 
   const integrationClick = useCallback(
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
-        if (osqueryIntegration) {
-          return navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-            path:
-              '#' +
-              pagePathGetters.integration_details_policies({
-                pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
-              })[1],
-          });
-        }
+        return navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+          path: pagePathGetters.integration_details_overview({
+            pkgkey: OSQUERY_INTEGRATION_NAME,
+          })[1],
+        });
       }
     },
-    [navigateToApp, osqueryIntegration]
+    [navigateToApp]
   );
 
   const pageHeader = useMemo(
@@ -87,12 +80,7 @@ const OsqueryAppEmptyStateComponent = () => {
     [integrationClick, integrationHref]
   );
 
-  return (
-    <>
-      <KibanaPageTemplate isEmptyState={true} pageHeader={pageHeader} />
-      <Redirect to="/" />
-    </>
-  );
+  return <KibanaPageTemplate isEmptyState={true} pageHeader={pageHeader} />;
 };
 
 export const OsqueryAppEmptyState = React.memo(OsqueryAppEmptyStateComponent);
