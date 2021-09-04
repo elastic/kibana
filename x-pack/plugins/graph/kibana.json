@@ -9,7 +9,7 @@
   "configPath": ["xpack", "graph"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "home"],
   "owner": {
-    "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "name": "Data Discovery",
+    "githubTeam": "kibana-data-discovery"
   }
 }
