@@ -1495,6 +1495,11 @@ Object {
                 },
                 "name": Object {
                   "fields": Object {
+                    "caseless": Object {
+                      "ignore_above": 1024,
+                      "normalizer": "lowercase",
+                      "type": "keyword",
+                    },
                     "text": Object {
                       "norms": false,
                       "type": "text",

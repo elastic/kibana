@@ -17,6 +17,7 @@ import { getSignalStatus, createSignalsIndex, deleteSignalsIndex } from '../../u
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('query_signals_route and find_alerts_route', () => {
     describe('validation checks', () => {
@@ -58,6 +59,49 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         await deleteSignalsIndex(supertest);
+      });
+    });
+
+    describe('backwards compatibility', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+        await createSignalsIndex(supertest);
+      });
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+        await deleteSignalsIndex(supertest);
+      });
+
+      it('should be able to filter old signals on host.os.name.caseless using runtime field', async () => {
+        const query = {
+          query: {
+            bool: {
+              should: [{ match_phrase: { 'host.os.name.caseless': 'windows' } }],
+            },
+          },
+        };
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(query)
+          .expect(200);
+        expect(body.hits.total.value).to.eql(3);
+      });
+
+      it('should be able to filter old signals using field aliases', async () => {
+        const query = {
+          query: {
+            bool: {
+              should: [{ match_phrase: { 'kibana.alert.workflow_status': 'open' } }],
+            },
+          },
+        };
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(query)
+          .expect(200);
+        expect(body.hits.total.value).to.eql(3);
       });
     });
 
