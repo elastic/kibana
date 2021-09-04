@@ -115,12 +115,19 @@ export const WorkspaceRoute = ({
     })
   );
 
-  const { savedWorkspace, indexPatterns, sharingSavedObjectProps } = useWorkspaceLoader({
+  const loaded = useWorkspaceLoader({
     workspaceRef,
     store,
     savedObjectsClient,
-    toastNotifications,
+    spaces,
+    coreStart,
   });
+
+  if (!loaded) {
+    return null;
+  }
+
+  const { savedWorkspace, indexPatterns, sharingSavedObjectProps } = loaded;
 
   if (!savedWorkspace || !indexPatterns) {
     return null;

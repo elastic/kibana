@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, ToastsStart } from 'kibana/public';
+import { SavedObjectsClientContract } from 'kibana/public';
 import { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { CoreStart } from 'kibana/public';
 import { GraphStore } from '../state_management';
 import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../types';
 import { getEmptyWorkspace, getSavedWorkspace } from './saved_workspace_utils';
-
-interface UseWorkspaceLoaderProps {
+import { getEditUrl } from '../services/url';
+import { SpacesApi } from '../../../spaces/public';
+export interface UseWorkspaceLoaderProps {
   store: GraphStore;
   workspaceRef: React.MutableRefObject<Workspace | undefined>;
   savedObjectsClient: SavedObjectsClientContract;
-  toastNotifications: ToastsStart;
+  spaces: SpacesApi;
+  coreStart: CoreStart;
 }
 
 interface WorkspaceUrlParams {
@@ -29,10 +32,11 @@ export interface SharingSavedObjectProps {
 }
 
 export const useWorkspaceLoader = ({
+  coreStart,
+  spaces,
   workspaceRef,
   store,
   savedObjectsClient,
-  toastNotifications,
 }: UseWorkspaceLoaderProps) => {
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>();
   const [savedWorkspace, setSavedWorkspace] = useState<GraphWorkspaceSavedObject>();
@@ -82,7 +86,7 @@ export const useWorkspaceLoader = ({
     }> {
       return id
         ? await getSavedWorkspace(savedObjectsClient, id).catch(function (e) {
-            toastNotifications.addError(e, {
+            coreStart.notifications.toasts.addError(e, {
               title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
                 defaultMessage: "Couldn't load graph with ID",
               }),
@@ -100,6 +104,19 @@ export const useWorkspaceLoader = ({
         savedObject: fetchedSavedWorkspace,
         sharingSavedObjectProps: fetchedSharingSavedObjectProps,
       } = await fetchSavedWorkspace();
+
+      if (spaces && fetchedSharingSavedObjectProps?.outcome === 'aliasMatch') {
+        // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+        const newObjectId = fetchedSharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
+        const newPath = getEditUrl(coreStart.http.basePath.prepend, { id: newObjectId });
+        spaces.ui.redirectLegacyUrl(
+          newPath,
+          i18n.translate('xpack.graph.legacyUrlConflict.objectNoun', {
+            defaultMessage: 'Graph',
+          })
+        );
+        return null;
+      }
 
       /**
        * Deal with situation of request to open saved workspace. Otherwise clean up store,
@@ -124,8 +141,9 @@ export const useWorkspaceLoader = ({
     history,
     savedObjectsClient,
     setSavedWorkspace,
-    toastNotifications,
+    coreStart,
     workspaceRef,
+    spaces,
   ]);
 
   return { savedWorkspace, indexPatterns, sharingSavedObjectProps };

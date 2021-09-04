@@ -52,17 +52,4 @@ describe('workspace_layout', () => {
       otherObjectPath: '#/workspace/conflictId',
     });
   });
-
-  it('should redirect if outcome is aliasMatch', () => {
-    shallow(
-      <WorkspaceLayoutComponent
-        {...defaultProps}
-        sharingSavedObjectProps={{ outcome: 'aliasMatch', aliasTargetId: 'aliasMatchId' }}
-      />
-    );
-    expect(defaultProps.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      '#/workspace/aliasMatchId',
-      'Graph'
-    );
-  });
 });

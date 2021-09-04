@@ -180,19 +180,6 @@ export const WorkspaceLayoutComponent = ({
     return null;
   }, [savedWorkspace.id, sharingSavedObjectProps, spaces, coreStart.http]);
 
-  if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch') {
-    // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
-    const newObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
-    const newPath = getEditUrl(coreStart.http.basePath.prepend, { id: newObjectId });
-    spaces.ui.redirectLegacyUrl(
-      newPath,
-      i18n.translate('xpack.graph.legacyUrlConflict.objectNoun', {
-        defaultMessage: 'Graph',
-      })
-    );
-    return null;
-  }
-
   return (
     <Fragment>
       <WorkspaceTopNavMenu
