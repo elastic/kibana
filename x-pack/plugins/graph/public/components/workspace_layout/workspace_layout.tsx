@@ -9,7 +9,6 @@ import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
-import { SpacesApi } from '../../../../spaces/public';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
@@ -54,6 +53,7 @@ type WorkspaceLayoutProps = Pick<
   | 'coreStart'
   | 'canEditDrillDownUrls'
   | 'overlays'
+  | 'spaces'
 > & {
   renderCounter: number;
   workspace?: Workspace;
@@ -63,7 +63,6 @@ type WorkspaceLayoutProps = Pick<
   indexPatternProvider: IndexPatternProvider;
   urlQuery: string | null;
   sharingSavedObjectProps?: SharingSavedObjectProps;
-  spaces: SpacesApi;
 };
 
 interface WorkspaceLayoutStateProps {
@@ -71,7 +70,7 @@ interface WorkspaceLayoutStateProps {
   hasFields: boolean;
 }
 
-const WorkspaceLayoutComponent = ({
+export const WorkspaceLayoutComponent = ({
   renderCounter,
   workspace,
   loading,
@@ -191,6 +190,7 @@ const WorkspaceLayoutComponent = ({
         defaultMessage: 'Graph',
       })
     );
+    return null;
   }
 
   return (
