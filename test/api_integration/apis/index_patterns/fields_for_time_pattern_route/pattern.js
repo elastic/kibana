@@ -80,6 +80,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
+                metadata_field: false,
               },
               {
                 name: 'Jan02',
@@ -88,6 +89,7 @@ export default function ({ getService }) {
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
+                metadata_field: false,
               },
             ],
           });
