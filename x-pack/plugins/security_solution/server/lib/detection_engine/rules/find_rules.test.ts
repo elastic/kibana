@@ -16,12 +16,9 @@ import {
   THRESHOLD_RULE_TYPE_ID,
 } from '../../../../common/constants';
 
-const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
- OR alert.attributes.alertTypeId: ${ML_RULE_TYPE_ID}
+const allAlertTypeIds = `(alert.attributes.alertTypeId: ${ML_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${QUERY_RULE_TYPE_ID}
- OR alert.attributes.alertTypeId: ${SAVED_QUERY_RULE_TYPE_ID}
- OR alert.attributes.alertTypeId: ${INDICATOR_RULE_TYPE_ID}
- OR alert.attributes.alertTypeId: ${THRESHOLD_RULE_TYPE_ID})`.replace(/[\n\r]/g, '');
+ OR alert.attributes.alertTypeId: ${INDICATOR_RULE_TYPE_ID})`.replace(/[\n\r]/g, '');
 
 describe('find_rules', () => {
   const fullFilterTestCases: Array<[boolean, string]> = [
