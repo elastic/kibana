@@ -34,7 +34,6 @@ export async function getFieldCapabilities(
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
-    .filter((name) => !name.startsWith('_'))
     .concat(metaFields)
     .reduce<{ names: string[]; hash: Record<string, string> }>(
       (agg, value) => {
