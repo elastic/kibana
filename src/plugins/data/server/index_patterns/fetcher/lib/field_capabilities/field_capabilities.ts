@@ -34,14 +34,12 @@ export async function getFieldCapabilities(
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
-    .filter((name) => {
-      const fieldInfo = fieldsFromFieldCapsByName[name];
-      const metadata = fieldInfo.metadata_field;
-      return !metadata || metaFields.includes(name);
-    })
+    // not all meta fields are provided, so remove and manually add
+    .filter((name) => !fieldsFromFieldCapsByName[name].metadata_field)
+    .concat(metaFields)
     .reduce<{ names: string[]; map: Map<string, string> }>(
       (agg, value) => {
-        // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
+        // This is intentionally using a Map to be highly optimized with very large indexes AND be safe for user provided data
         if (agg.map.get(value) != null) {
           return agg;
         } else {
