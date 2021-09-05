@@ -42,7 +42,7 @@ export class UpgradeAssistantUIPlugin
       title: pluginName,
       order: 1,
       async mount(params) {
-        const [coreStart, { discover, data }] = await coreSetup.getStartServices();
+        const [coreStart, { data }] = await coreSetup.getStartServices();
 
         const {
           chrome: { docTitle },
@@ -61,7 +61,6 @@ export class UpgradeAssistantUIPlugin
             core: coreStart,
             data,
             history: params.history,
-            discover,
             api: apiService,
             breadcrumbs: breadcrumbService,
           },

@@ -12,10 +12,7 @@ import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react'
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButton, EuiLoadingContent } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
-import { Storage } from '../../../../../shared_imports';
-
-const LS_SETTING_ID = 'kibana.upgradeAssistant.lastCheckpoint';
-const localStorage = new Storage(window.localStorage);
+import { getLastCheckpointFromLS, setLastCheckpointToLS } from '../../../../lib/utils';
 
 const i18nTexts = {
   calloutTitle: (warningsCount: number, previousCheck: string) => (
@@ -51,24 +48,11 @@ const i18nTexts = {
   ),
 };
 
-const getPreviousCheckpointDate = () => {
-  const storedValue = moment(localStorage.get(LS_SETTING_ID));
-
-  if (storedValue.isValid()) {
-    return storedValue.toISOString();
-  }
-
-  const now = moment().toISOString();
-  localStorage.set(LS_SETTING_ID, now);
-
-  return now;
-};
-
 export const DeprecationsCountCheckpoint: FunctionComponent = () => {
   const {
     services: { api },
   } = useAppContext();
-  const [previousCheck, setPreviousCheck] = useState(getPreviousCheckpointDate());
+  const [previousCheck, setPreviousCheck] = useState(getLastCheckpointFromLS());
   const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
     previousCheck
   );
@@ -82,7 +66,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent = () => {
     const now = moment().toISOString();
 
     setPreviousCheck(now);
-    localStorage.set(LS_SETTING_ID, now);
+    setLastCheckpointToLS(now);
   };
 
   if (isInitialRequest && isLoading) {

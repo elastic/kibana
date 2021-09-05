@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { encode } from 'rison-node';
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 
+import { getLastCheckpointFromLS } from '../../../lib/utils';
 import { useAppContext } from '../../../app_context';
 import { DataPublicPluginStart } from '../../../../shared_imports';
 import {
@@ -18,7 +20,7 @@ import {
 } from '../../../../../common/constants';
 
 const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) => {
-  const { indexPatterns: indexPatternService } = dataService;
+  const { dataViews: indexPatternService } = dataService;
 
   const results = await indexPatternService.find(DEPRECATION_LOGS_INDEX_PATTERN);
   // Since the find might return also results with wildcard matchers we need to find the
@@ -55,7 +57,14 @@ const DiscoverAppLink: FunctionComponent = () => {
         return;
       }
 
-      const url = await locator.getUrl({ indexPatternId });
+      const url = await locator.getUrl({
+        indexPatternId,
+        query: {
+          language: 'kuery',
+          query: `@timestamp > "${getLastCheckpointFromLS()}"`,
+        },
+      });
+
       setDiscoveryUrl(url);
     };
 
@@ -78,8 +87,9 @@ const ObservabilityAppLink: FunctionComponent = () => {
       core: { http },
     },
   } = useAppContext();
+  const start = encode(getLastCheckpointFromLS());
   const logStreamUrl = http?.basePath?.prepend(
-    `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}`
+    `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}&logPosition=(end:now,start:${start})`
   );
 
   return (
