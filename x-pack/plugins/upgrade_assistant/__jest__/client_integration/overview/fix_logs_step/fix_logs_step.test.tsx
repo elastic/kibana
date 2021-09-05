@@ -7,6 +7,17 @@
 
 import { act } from 'react-dom/test-utils';
 
+const MOCKED_TIME = '2021-09-05T10:49:01.805Z';
+jest.mock('../../../../public/application/lib/utils', () => {
+  const originalModule = jest.requireActual('../../../../public/application/lib/utils');
+
+  return {
+    __esModule: true,
+    ...originalModule,
+    getLastCheckpointFromLS: jest.fn().mockReturnValue('2021-09-05T10:49:01.805Z'),
+  };
+});
+
 import { DeprecationLoggingStatus } from '../../../../common/types';
 import { DEPRECATION_LOGS_SOURCE_ID } from '../../../../common/constants';
 import { setupEnvironment } from '../../helpers';
@@ -145,7 +156,7 @@ describe('Overview - Fix deprecation logs step', () => {
 
       expect(exists('viewObserveLogs')).toBe(true);
       expect(find('viewObserveLogs').props().href).toBe(
-        `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}`
+        `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}&logPosition=(end:now,start:'${MOCKED_TIME}')`
       );
     });
 
