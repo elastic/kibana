@@ -25,7 +25,7 @@ export interface FieldDescriptor {
   type: string;
   esTypes: string[];
   subType?: FieldSubType;
-  metadata_field: boolean;
+  metadata_field?: boolean;
 }
 
 interface FieldSubType {
