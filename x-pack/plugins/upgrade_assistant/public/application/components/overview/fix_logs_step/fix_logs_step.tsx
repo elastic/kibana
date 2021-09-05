@@ -122,7 +122,11 @@ const FixLogsStep: FunctionComponent = () => {
           </EuiText>
           <EuiSpacer size="m" />
           <EuiText>
-            <p>{i18nTexts.apiCompatibilityNoteBody(docLinks.links.elasticsearch.docsBase)}</p>
+            <p>
+              {i18nTexts.apiCompatibilityNoteBody(
+                docLinks.links.elasticsearch.apiCompatibilityHeader
+              )}
+            </p>
           </EuiText>
         </>
       )}
