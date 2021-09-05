@@ -54,7 +54,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Cloud backup status', () => {
     describe('get', () => {
       describe('with backups present', () => {
-        let mostRecentSnapshot;
+        // Needs SnapshotInfo type https://github.com/elastic/elasticsearch-specification/issues/685
+        let mostRecentSnapshot: any;
 
         before(async () => {
           await createCloudRepository();
