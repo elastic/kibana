@@ -29,11 +29,9 @@ import {
   isLoading,
   apiError,
 } from '../../../store/policy_details/selectors';
-import {
-  useKibana,
-  toMountPoint,
-} from '../../../../../../../../../../src/plugins/kibana_react/public';
-import { useToasts } from '../../../../../../common/lib/kibana';
+
+import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { useToasts, useKibana } from '../../../../../../common/lib/kibana';
 import { AppAction } from '../../../../../../common/store/actions';
 import { SpyRoute } from '../../../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../../../app/types';
@@ -51,7 +49,7 @@ export const PolicyFormLayout = React.memo(() => {
     services: {
       application: { navigateToApp },
     },
-  } = useKibana<{ application: ApplicationStart }>();
+  } = useKibana();
   const toasts = useToasts();
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
 

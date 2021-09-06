@@ -8,13 +8,13 @@
 import React, { memo } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import { PolicyDetails } from './view';
-import { AdministrationSubTab } from '../../types';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD,
 } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
+import { getPolicyDetailPath } from '../../common/routing';
 
 export const PolicyContainer = memo(() => {
   return (
@@ -30,14 +30,7 @@ export const PolicyContainer = memo(() => {
       <Route
         path={MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD}
         exact
-        render={(props) => (
-          <Redirect
-            to={`${MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH.replace(
-              `:tabName(${AdministrationSubTab.policies})`,
-              props.match.params.tabName
-            ).replace(':policyId', props.match.params.policyId)}`}
-          />
-        )}
+        render={(props) => <Redirect to={getPolicyDetailPath(props.match.params.policyId)} />}
       />
       <Route path="*" component={NotFoundPage} />
     </Switch>
