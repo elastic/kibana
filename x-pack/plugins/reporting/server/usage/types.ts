@@ -63,7 +63,13 @@ export interface AvailableTotal {
   deprecated?: number;
 }
 
-type BaseJobTypes = 'csv' | 'csv_searchsource' | 'PNG' | 'printable_pdf';
+type BaseJobTypes =
+  | 'csv'
+  | 'csv_searchsource'
+  | 'PNG'
+  | 'PNGV2'
+  | 'printable_pdf'
+  | 'printable_pdf_v2';
 
 export interface LayoutCounts {
   print: number;
@@ -77,6 +83,11 @@ export type AppCounts = {
 
 export type JobTypes = { [K in BaseJobTypes]: AvailableTotal } & {
   printable_pdf: AvailableTotal & {
+    app: AppCounts;
+    layout: LayoutCounts;
+  };
+} & {
+  printable_pdf_v2: AvailableTotal & {
     app: AppCounts;
     layout: LayoutCounts;
   };
