@@ -61,7 +61,7 @@ export function savedObjectsRoutes(
    * @apiName SyncJobSavedObjects
    * @apiDescription Synchronizes saved objects for jobs. Saved objects will be created for jobs which are missing them,
    *                 and saved objects will be deleted for jobs which no longer exist.
-   *                 Updated missing datafeed IDs in saved objects for datafeeds which exist, and
+   *                 Updates missing datafeed IDs in saved objects for datafeeds which exist, and
    *                 removes datafeed IDs for datafeeds which no longer exist.
    *
    */

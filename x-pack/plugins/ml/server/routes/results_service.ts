@@ -329,7 +329,7 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
   /**
    * @apiGroup ResultsService
    *
-   * @api {get} /api/ml/results/category_stopped_partitions Get partitions that have stopped being categorized
+   * @api {post} /api/ml/results/category_stopped_partitions Get partitions that have stopped being categorized
    * @apiName GetCategoryStoppedPartitions
    * @apiDescription Returns information on the partitions that have stopped being categorized due to the categorization status changing from ok to warn. Can return either the list of stopped partitions for each job, or just the list of job IDs.
    * @apiSchema (body) getCategorizerStoppedPartitionsSchema
