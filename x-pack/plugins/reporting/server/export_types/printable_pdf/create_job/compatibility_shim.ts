@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { url as urlUtils } from '../../../../../../../src/plugins/kibana_utils/server';
 import type { LevelLogger } from '../../../lib';
 import type { CreateJobFn, ReportingRequestHandlerContext } from '../../../types';
@@ -20,9 +20,9 @@ function isLegacyJob(
 const getSavedObjectTitle = async (
   objectType: string,
   savedObjectId: string,
-  savedObjectsClient: any
+  savedObjectsClient: SavedObjectsClientContract
 ) => {
-  const savedObject = await savedObjectsClient.get(objectType, savedObjectId);
+  const savedObject = await savedObjectsClient.get<{ title: string }>(objectType, savedObjectId);
   return savedObject.attributes.title;
 };
 

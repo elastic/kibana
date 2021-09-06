@@ -24,7 +24,7 @@ export const createDefaultAlertExecutorOptions = <
   InstanceContext extends AlertInstanceContext = {},
   ActionGroupIds extends string = ''
 >({
-  alertId = 'ALERT_ID',
+  alertId = 'ALERT_INSTANCE_ID',
   ruleName = 'ALERT_RULE_NAME',
   params,
   state,

@@ -26,7 +26,7 @@ export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
         // prevent the anchor to reload the page on click
         event.preventDefault();
         // The destinationId prop cannot be leveraged here as the table needs
-        // to be updated first (angular logic)
+        // to be updated firsts
         onClick();
       }}
       className="dscSkipButton"

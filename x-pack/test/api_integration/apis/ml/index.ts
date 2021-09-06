@@ -77,6 +77,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./filters'));
     loadTestFile(require.resolve('./indices'));
     loadTestFile(require.resolve('./job_validation'));
+    loadTestFile(require.resolve('./job_audit_messages'));
     loadTestFile(require.resolve('./jobs'));
     loadTestFile(require.resolve('./modules'));
     loadTestFile(require.resolve('./results'));
