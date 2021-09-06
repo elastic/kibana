@@ -35,7 +35,7 @@ const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
         setFieldValue('title', draftComment.caseTitle);
       }
 
-      if (draftComment.caseTags) {
+      if (draftComment.caseTags && draftComment.caseTags.length > 0) {
         setFieldValue('tags', draftComment.caseTags);
       }
 
@@ -45,15 +45,7 @@ const DescriptionComponent: React.FC<Props> = ({ isLoading }) => {
         clearDraftComment();
       }
     }
-  }, [
-    clearDraftComment,
-    draftComment,
-    hasIncomingLensState,
-    openLensModal,
-    setFieldValue,
-    tags?.length,
-    title,
-  ]);
+  }, [clearDraftComment, draftComment, hasIncomingLensState, openLensModal, setFieldValue]);
 
   return (
     <UseField
