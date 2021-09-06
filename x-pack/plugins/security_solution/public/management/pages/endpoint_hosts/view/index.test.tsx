@@ -909,7 +909,7 @@ describe('when on the endpoint list page', () => {
           dispatchEndpointDetailsActivityLogChanged('success', getMockData());
         });
         const logEntries = await renderResult.queryAllByTestId('timelineEntry');
-        expect(logEntries.length).toEqual(2);
+        expect(logEntries.length).toEqual(3);
       });
 
       it('should correctly display non-empty comments only for actions', async () => {
