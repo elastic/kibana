@@ -8,7 +8,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { RuntimeField } from 'src/plugins/data/common';
-import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSpecSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../../core/server';
