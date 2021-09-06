@@ -51,7 +51,11 @@ import {
   UPDATE_MAP_SETTING,
   UPDATE_EDIT_STATE,
 } from './map_action_constants';
-import { autoFitToBounds, syncDataForAllLayers, syncDataForLayer } from './data_request_actions';
+import {
+  autoFitToBounds,
+  syncDataForAllLayers,
+  syncDataForLayerDueToDrawing,
+} from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import { DrawState, MapCenterAndZoom, MapExtent, Timeslice } from '../../common/descriptor_types';
@@ -359,7 +363,7 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
 
     try {
       await layer.addFeature(geometry);
-      await dispatch(syncDataForLayer(layer, true, false));
+      await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
       getToasts().addError(e, {
         title: i18n.translate('xpack.maps.mapActions.addFeatureError', {
@@ -386,7 +390,7 @@ export function deleteFeatureFromIndex(featureId: string) {
     }
     try {
       await layer.deleteFeature(featureId);
-      await dispatch(syncDataForLayer(layer, true, false));
+      await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
       getToasts().addError(e, {
         title: i18n.translate('xpack.maps.mapActions.removeFeatureError', {
