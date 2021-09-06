@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
@@ -36,34 +36,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 
   return (
     <div className="app-container">
-      <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween" responsive>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            gutterSize="none"
-            justifyContent="spaceEvenly"
-            direction="column"
-            responsive
-          >
-            <EuiFlexItem>
-              <div id="setupModeNav">{/* HERE GOES THE SETUP BUTTON */}</div>
-            </EuiFlexItem>
-            <EuiFlexItem className="monTopNavSecondItem">
-              {pageTitle && (
-                <div data-test-subj="monitoringPageTitle">
-                  <EuiTitle size="xs">
-                    <h1>{pageTitle}</h1>
-                  </EuiTitle>
-                </div>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <MonitoringToolbar getData={getData} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
+      <MonitoringToolbar pageTitle={pageTitle} />
       {tabs && (
         <EuiTabs>
           {tabs.map((item, idx) => {

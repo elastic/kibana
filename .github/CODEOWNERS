@@ -16,22 +16,23 @@
 /src/plugins/discover/ @elastic/kibana-data-discovery
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-data-discovery
 /test/functional/apps/discover/ @elastic/kibana-data-discovery
+/x-pack/plugins/graph/ @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/graph @elastic/kibana-data-discovery
 
 # Vis Editors
 /x-pack/plugins/lens/ @elastic/kibana-vis-editors
-/x-pack/plugins/graph/ @elastic/kibana-vis-editors
 /src/plugins/advanced_settings/ @elastic/kibana-vis-editors
 /src/plugins/charts/ @elastic/kibana-vis-editors
 /src/plugins/management/ @elastic/kibana-vis-editors
 /src/plugins/kibana_legacy/ @elastic/kibana-vis-editors
 /src/plugins/timelion/ @elastic/kibana-vis-editors
 /src/plugins/vis_default_editor/ @elastic/kibana-vis-editors
-/src/plugins/vis_type_metric/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/metric/ @elastic/kibana-vis-editors
 /src/plugins/vis_type_table/ @elastic/kibana-vis-editors
-/src/plugins/vis_type_tagcloud/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/tagcloud/ @elastic/kibana-vis-editors
 /src/plugins/vis_type_timelion/ @elastic/kibana-vis-editors
 /src/plugins/vis_type_timeseries/ @elastic/kibana-vis-editors
-/src/plugins/vis_type_vega/ @elastic/kibana-vis-editors
+/src/plugins/vis_types/vega/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/vislib/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/xy/ @elastic/kibana-vis-editors
 /src/plugins/vis_types/pie/ @elastic/kibana-vis-editors
