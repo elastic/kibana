@@ -10,4 +10,9 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/vis_type_markdown'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_type_markdown',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/plugins/vis_type_markdown/{public,server}/**/*.{ts,tsx}'
+  ],
 };

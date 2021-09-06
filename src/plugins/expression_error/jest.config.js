@@ -10,4 +10,9 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/expression_error'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/expression_error',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/plugins/expression_error/{common,public}/**/*.{ts,tsx}'
+  ],
 };
