@@ -65,7 +65,6 @@ export interface FlyoutProps {
 }
 
 export interface FlyoutState {
-  conflictedSearchDocs?: any[]; // potentially unused
   unmatchedReferences?: ProcessedImportResponse['unmatchedReferences'];
   unmatchedReferencesTablePagination: { pageIndex: number; pageSize: number };
   failedImports?: ProcessedImportResponse['failedImports'];
