@@ -15,7 +15,7 @@ import type {
   APIClientRequestParamsOf,
 } from '../../../plugins/apm/public/services/rest/createCallApmApi';
 
-export function createApmApiSupertest(st: supertest.SuperTest<supertest.Test>) {
+export function createSupertestClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       endpoint: TEndpoint;
@@ -41,7 +41,7 @@ export function createApmApiSupertest(st: supertest.SuperTest<supertest.Test>) {
   };
 }
 
-export type ApmApiSupertest = ReturnType<typeof createApmApiSupertest>;
+export type ApmApiSupertest = ReturnType<typeof createSupertestClient>;
 
 export class ApmApiError extends Error {
   res: request.Response;

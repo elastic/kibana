@@ -11,15 +11,15 @@ import { registry } from '../../../common/registry';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
-  const { writeUserClient } = getService('supertestClients');
+  const supertestClients = getService('supertestClients');
   const legacyWriteUserClient = getService('legacySupertestAsApmWriteUser');
 
   function getJobs() {
-    return writeUserClient({ endpoint: `GET /api/apm/settings/anomaly-detection/jobs` });
+    return supertestClients.writeUser({ endpoint: `GET /api/apm/settings/anomaly-detection/jobs` });
   }
 
   function createJobs(environments: string[]) {
-    return writeUserClient({
+    return supertestClients.writeUser({
       endpoint: `POST /api/apm/settings/anomaly-detection/jobs`,
       params: {
         body: { environments },

@@ -12,8 +12,8 @@ import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_c
 import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 import { APMFtrConfigName } from '../configs';
+import { createSupertestClient } from './apm_api_supertest';
 import { registry } from './registry';
-import { createApmApiSupertest } from './apm_api_supertest';
 
 interface Config {
   name: APMFtrConfigName;
@@ -21,23 +21,23 @@ interface Config {
   kibanaConfig?: Record<string, string | string[]>;
 }
 
-const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async (
-  context: InheritedFtrProviderContext
-) => {
-  const security = context.getService('security');
-  await security.init();
+function getLegacySupertestClient(kibanaServer: UrlObject, apmUser: ApmUser) {
+  return async (context: InheritedFtrProviderContext) => {
+    const security = context.getService('security');
+    await security.init();
 
-  await createApmUser(security, apmUser);
+    await createApmUser(security, apmUser);
 
-  const url = format({
-    ...kibanaServer,
-    auth: `${apmUser}:${APM_TEST_PASSWORD}`,
-  });
+    const url = format({
+      ...kibanaServer,
+      auth: `${apmUser}:${APM_TEST_PASSWORD}`,
+    });
 
-  return supertest(url);
-};
+    return supertest(url);
+  };
+}
 
-async function supertestClient(
+async function getSupertestClient(
   kibanaServer: UrlObject,
   context: InheritedFtrProviderContext,
   apmUser: ApmUser
@@ -52,7 +52,7 @@ async function supertestClient(
     auth: `${apmUser}:${APM_TEST_PASSWORD}`,
   });
 
-  return createApmApiSupertest(supertest(url));
+  return createSupertestClient(supertest(url));
 }
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
@@ -67,6 +67,7 @@ export function createTestConfig(config: Config) {
 
     const services = xPackAPITestsConfig.get('services') as InheritedServices;
     const servers = xPackAPITestsConfig.get('servers');
+    const kibanaServer = servers.kibana;
 
     registry.init(config.name);
 
@@ -78,19 +79,15 @@ export function createTestConfig(config: Config) {
 
         supertestClients: async (context: InheritedFtrProviderContext) => {
           return {
-            noAccessUserClient: await supertestClient(
-              servers.kibana,
-              context,
-              ApmUser.noAccessUser
-            ),
-            readUserClient: await supertestClient(servers.kibana, context, ApmUser.apmReadUser),
-            writeUserClient: await supertestClient(servers.kibana, context, ApmUser.apmWriteUser),
-            annotationWriterUserClient: await supertestClient(
+            noAccessUser: await getSupertestClient(servers.kibana, context, ApmUser.noAccessUser),
+            readUser: await getSupertestClient(servers.kibana, context, ApmUser.apmReadUser),
+            writeUser: await getSupertestClient(servers.kibana, context, ApmUser.apmWriteUser),
+            annotationWriterUser: await getSupertestClient(
               servers.kibana,
               context,
               ApmUser.apmAnnotationsWriteUser
             ),
-            noMlAccessUserClient: await supertestClient(
+            noMlAccessUser: await getSupertestClient(
               servers.kibana,
               context,
               ApmUser.apmReadUserWithoutMlAccess
@@ -99,15 +96,15 @@ export function createTestConfig(config: Config) {
         },
 
         // legacy clients
-        legacySupertestAsNoAccessUser: supertestAsApmUser(servers.kibana, ApmUser.noAccessUser),
-        legacySupertestAsApmReadUser: supertestAsApmUser(servers.kibana, ApmUser.apmReadUser),
-        legacySupertestAsApmWriteUser: supertestAsApmUser(servers.kibana, ApmUser.apmWriteUser),
-        legacySupertestAsApmAnnotationsWriteUser: supertestAsApmUser(
-          servers.kibana,
+        legacySupertestAsNoAccessUser: getLegacySupertestClient(kibanaServer, ApmUser.noAccessUser),
+        legacySupertestAsApmReadUser: getLegacySupertestClient(kibanaServer, ApmUser.apmReadUser),
+        legacySupertestAsApmWriteUser: getLegacySupertestClient(kibanaServer, ApmUser.apmWriteUser),
+        legacySupertestAsApmAnnotationsWriteUser: getLegacySupertestClient(
+          kibanaServer,
           ApmUser.apmAnnotationsWriteUser
         ),
-        legacySupertestAsApmReadUserWithoutMlAccess: supertestAsApmUser(
-          servers.kibana,
+        legacySupertestAsApmReadUserWithoutMlAccess: getLegacySupertestClient(
+          kibanaServer,
           ApmUser.apmReadUserWithoutMlAccess
         ),
       },
