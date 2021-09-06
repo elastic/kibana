@@ -8,10 +8,10 @@
 
 import { SavedObject } from '../../../plugins/saved_objects/public';
 import {
-  AggConfigOptions,
   IAggConfigs,
   SearchSourceFields,
   TimefilterContract,
+  AggConfigSerialized,
 } from '../../../plugins/data/public';
 import { ExpressionAstExpression } from '../../expressions/public';
 
@@ -24,7 +24,7 @@ export interface SavedVisState {
   title: string;
   type: string;
   params: VisParams;
-  aggs: AggConfigOptions[];
+  aggs: AggConfigSerialized[];
 }
 
 export interface ISavedVis {
