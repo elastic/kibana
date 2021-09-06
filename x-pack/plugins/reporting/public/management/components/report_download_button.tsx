@@ -8,9 +8,9 @@
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
 import React, { FunctionComponent } from 'react';
-import { JOB_STATUSES } from '../../common/constants';
-import { Job as ListingJob } from '../lib/job';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { JOB_STATUSES } from '../../../common/constants';
+import { Job as ListingJob } from '../../lib/job';
+import { ReportingAPIClient } from '../../lib/reporting_api_client';
 
 interface Props {
   intl: InjectedIntl;

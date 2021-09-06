@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { Job } from '../lib/job';
+import { coreMock } from '../../../../../../src/core/public/mocks';
+import { Job } from '../../lib/job';
 import { ReportInfoButton } from './report_info_button';
 
-jest.mock('../lib/reporting_api_client');
+jest.mock('../../lib/reporting_api_client');
 
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingAPIClient } from '../../lib/reporting_api_client';
 
 const coreSetup = coreMock.createSetup();
 const apiClient = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0');

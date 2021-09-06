@@ -13,9 +13,9 @@ import { EuiCallOut, EuiButton, EuiCode } from '@elastic/eui';
 
 import type { NotificationsSetup } from 'src/core/public';
 
-import { ILM_POLICY_NAME } from '../../../common/constants';
+import { ILM_POLICY_NAME } from '../../../../common/constants';
 
-import { useInternalApiClient } from '../../lib/reporting_api_client';
+import { useInternalApiClient } from '../../../lib/reporting_api_client';
 
 const i18nTexts = {
   title: i18n.translate('xpack.reporting.listing.ilmPolicyCallout.migrationNeededTitle', {

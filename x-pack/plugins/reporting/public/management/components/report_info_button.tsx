@@ -19,10 +19,10 @@ import {
 } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
-import { Job } from '../lib/job';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { ListingProps } from '.';
+import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
+import { Job } from '../../lib/job';
+import { ReportingAPIClient } from '../../lib/reporting_api_client';
+import type { ListingProps } from '../';
 
 interface Props extends Pick<ListingProps, 'apiClient' | 'intl'> {
   apiClient: ReportingAPIClient;

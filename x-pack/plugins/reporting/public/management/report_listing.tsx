@@ -28,13 +28,15 @@ import { Job } from '../lib/job';
 import { checkLicense } from '../lib/license_check';
 import { useInternalApiClient } from '../lib/reporting_api_client';
 import { useKibana } from '../shared_imports';
-import { IlmPolicyLink } from './ilm_policy_link';
-import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
-import { ReportDeleteButton } from './report_delete_button';
-import { ReportDiagnostic } from './report_diagnostic';
-import { ReportDownloadButton } from './report_download_button';
-import { ReportInfoButton } from './report_info_button';
 import { ListingProps as Props } from './';
+import {
+  IlmPolicyLink,
+  MigrateIlmPolicyCallOut,
+  ReportDeleteButton,
+  ReportDiagnostic,
+  ReportDownloadButton,
+  ReportInfoButton,
+} from './components';
 
 interface State {
   page: number;
