@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import type {
+  FieldValuePair,
   ResponseHit,
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
@@ -37,8 +38,8 @@ export const getTransactionDurationCorrelationRequest = (
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
   totalDocCount: number,
-  fieldName?: string,
-  fieldValue?: string
+  fieldName?: FieldValuePair['fieldName'],
+  fieldValue?: FieldValuePair['fieldValue']
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({ params, fieldName, fieldValue });
 
@@ -92,8 +93,8 @@ export const fetchTransactionDurationCorrelation = async (
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
   totalDocCount: number,
-  fieldName?: string,
-  fieldValue?: string
+  fieldName?: FieldValuePair['fieldName'],
+  fieldValue?: FieldValuePair['fieldValue']
 ): Promise<{
   ranges: unknown[];
   correlation: number | null;

@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import type {
+  FieldValuePair,
   HistogramItem,
   ResponseHit,
   SearchStrategyParams,
@@ -22,8 +23,8 @@ import { getRequestBase } from './get_request_base';
 export const getTransactionDurationHistogramRequest = (
   params: SearchStrategyParams,
   interval: number,
-  fieldName?: string,
-  fieldValue?: string
+  fieldName?: FieldValuePair['fieldName'],
+  fieldValue?: FieldValuePair['fieldValue']
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
   body: {
@@ -41,8 +42,8 @@ export const fetchTransactionDurationHistogram = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   interval: number,
-  fieldName?: string,
-  fieldValue?: string
+  fieldName?: FieldValuePair['fieldName'],
+  fieldValue?: FieldValuePair['fieldValue']
 ): Promise<HistogramItem[]> => {
   const resp = await esClient.search<ResponseHit>(
     getTransactionDurationHistogramRequest(

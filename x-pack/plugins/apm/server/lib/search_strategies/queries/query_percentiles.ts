@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import type {
+  FieldValuePair,
   ResponseHit,
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
@@ -22,8 +23,8 @@ import { SIGNIFICANT_VALUE_DIGITS } from '../constants';
 export const getTransactionDurationPercentilesRequest = (
   params: SearchStrategyParams,
   percents?: number[],
-  fieldName?: string,
-  fieldValue?: string
+  fieldName?: FieldValuePair['fieldName'],
+  fieldValue?: FieldValuePair['fieldValue']
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({ params, fieldName, fieldValue });
 
@@ -52,8 +53,8 @@ export const fetchTransactionDurationPercentiles = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   percents?: number[],
-  fieldName?: string,
-  fieldValue?: string
+  fieldName?: FieldValuePair['fieldName'],
+  fieldValue?: FieldValuePair['fieldValue']
 ): Promise<{ totalDocs: number; percentiles: Record<string, number> }> => {
   const resp = await esClient.search<ResponseHit>(
     getTransactionDurationPercentilesRequest(

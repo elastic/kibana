@@ -10,22 +10,25 @@ import { getOrElse } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
-import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
+import type {
+  FieldValuePair,
+  SearchStrategyParams,
+} from '../../../../common/search_strategies/types';
 import { rangeRt } from '../../../routes/default_api_types';
 import { getCorrelationsFilters } from '../../correlations/get_filters';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export const getTermsQuery = (
-  fieldName: string | undefined,
-  fieldValue: string | undefined
+  fieldName: FieldValuePair['fieldName'] | undefined,
+  fieldValue: FieldValuePair['fieldValue'] | undefined
 ) => {
   return fieldName && fieldValue ? [{ term: { [fieldName]: fieldValue } }] : [];
 };
 
 interface QueryParams {
   params: SearchStrategyParams;
-  fieldName?: string;
-  fieldValue?: string;
+  fieldName?: FieldValuePair['fieldName'];
+  fieldValue?: FieldValuePair['fieldValue'];
 }
 export const getQueryWithParams = ({
   params,

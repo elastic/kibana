@@ -36,6 +36,7 @@ import {
   FailedTransactionsCorrelation,
 } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
+import { FieldValuePair } from '../../../../common/search_strategies/types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -224,7 +225,8 @@ export function FailedTransactionsCorrelations({
           'xpack.apm.correlations.failedTransactions.correlationsTable.fieldValueLabel',
           { defaultMessage: 'Field value' }
         ),
-        render: (fieldValue: string) => String(fieldValue).slice(0, 50),
+        render: (fieldValue: FieldValuePair['fieldValue']) =>
+          String(fieldValue).slice(0, 50),
         sortable: true,
       },
       ...percentageColumns,

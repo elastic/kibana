@@ -33,6 +33,7 @@ import {
   APM_SEARCH_STRATEGIES,
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../common/search_strategies/constants';
+import { FieldValuePair } from '../../../../common/search_strategies/types';
 import {
   isLatencyCorrelations,
   LatencyCorrelation,
@@ -173,7 +174,8 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldValueLabel',
           { defaultMessage: 'Field value' }
         ),
-        render: (fieldValue: string) => String(fieldValue).slice(0, 50),
+        render: (fieldValue: FieldValuePair['fieldValue']) =>
+          String(fieldValue).slice(0, 50),
         sortable: true,
       },
       {

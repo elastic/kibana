@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from 'src/core/server';
 
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import type {
+  FieldValuePair,
   ResponseHit,
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
@@ -21,8 +22,8 @@ import { getRequestBase } from './get_request_base';
 export const getTransactionDurationRangesRequest = (
   params: SearchStrategyParams,
   rangesSteps: number[],
-  fieldName?: string,
-  fieldValue?: string
+  fieldName?: FieldValuePair['fieldName'],
+  fieldValue?: FieldValuePair['fieldValue']
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({ params, fieldName, fieldValue });
 
@@ -59,8 +60,8 @@ export const fetchTransactionDurationRanges = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   rangesSteps: number[],
-  fieldName?: string,
-  fieldValue?: string
+  fieldName?: FieldValuePair['fieldName'],
+  fieldValue?: FieldValuePair['fieldValue']
 ): Promise<Array<{ key: number; doc_count: number }>> => {
   const resp = await esClient.search<ResponseHit>(
     getTransactionDurationRangesRequest(
