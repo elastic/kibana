@@ -89,7 +89,7 @@ export class KibanaConfigWriter {
         )}].`
       );
 
-      const existingCommentedConfig = KibanaConfigWriter.backupKibanaConfig(existingConfig.raw);
+      const existingCommentedConfig = KibanaConfigWriter.commentOutKibanaConfig(existingConfig.raw);
       configToWrite = `${existingCommentedConfig}\n\n# This section was automatically generated during setup.\n${yaml.safeDump(
         { ...existingConfig.parsed, ...config },
         { flowLevel: 1 }
@@ -157,7 +157,7 @@ export class KibanaConfigWriter {
    * Comments out all non-commented entries in the Kibana configuration file.
    * @param rawConfig Content of the Kibana configuration file.
    */
-  private static backupKibanaConfig(rawConfig: string) {
+  private static commentOutKibanaConfig(rawConfig: string) {
     const backupTimestamp = new Date().toISOString();
     const commentedRawConfigLines = [
       `### >>>>>>> BACKUP START: Kibana interactive setup (${backupTimestamp})\n`,
