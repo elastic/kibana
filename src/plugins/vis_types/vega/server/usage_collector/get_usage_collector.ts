@@ -78,7 +78,7 @@ export const getStats = async (
 
   const doTelemetry = ({ params }: SavedVisState) => {
     try {
-      const spec = parse(params.spec, { legacyRoot: false });
+      const spec = parse(params.spec as string, { legacyRoot: false });
 
       if (spec) {
         shouldPublishTelemetry = true;

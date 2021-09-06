@@ -178,6 +178,44 @@ describe('SearchService', () => {
         });
       });
 
+      it('catches errors from providers', async () => {
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+          basePath,
+        });
+
+        getTestScheduler().run(({ expectObservable, hot }) => {
+          registerResultProvider(
+            createProvider('A', {
+              source: hot('a---c-|', {
+                a: [result('A1'), result('A2')],
+                c: [result('A3')],
+              }),
+            })
+          );
+          registerResultProvider(
+            createProvider('B', {
+              source: hot(
+                '-b-#  ',
+                {
+                  b: [result('B1')],
+                },
+                new Error('something went bad')
+              ),
+            })
+          );
+
+          const { find } = service.start({ core: coreStart, licenseChecker });
+          const results = find({ term: 'foobar' }, {}, request);
+
+          expectObservable(results).toBe('ab--c-|', {
+            a: expectedBatch('A1', 'A2'),
+            b: expectedBatch('B1'),
+            c: expectedBatch('A3'),
+          });
+        });
+      });
+
       it('handles the `aborted$` option', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
