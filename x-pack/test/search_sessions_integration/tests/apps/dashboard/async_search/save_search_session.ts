@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).to.be(fakeSessionId);
     });
 
-    it('Saves and restores a session - miaou', async () => {
+    it('Saves and restores a session', async () => {
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.dashboard.waitForRenderComplete();
       await searchSessions.expectState('completed');
