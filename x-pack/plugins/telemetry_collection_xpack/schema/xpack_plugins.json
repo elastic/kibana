@@ -4124,6 +4124,48 @@
             }
           }
         },
+        "csv_searchsource_immediate": {
+          "properties": {
+            "available": {
+              "type": "boolean"
+            },
+            "total": {
+              "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
+            },
+            "app": {
+              "properties": {
+                "search": {
+                  "type": "long"
+                },
+                "canvas workpad": {
+                  "type": "long"
+                },
+                "dashboard": {
+                  "type": "long"
+                },
+                "visualization": {
+                  "type": "long"
+                }
+              }
+            },
+            "layout": {
+              "properties": {
+                "canvas": {
+                  "type": "long"
+                },
+                "print": {
+                  "type": "long"
+                },
+                "preserve_layout": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
         "PNG": {
           "properties": {
             "available": {
@@ -4350,6 +4392,22 @@
                     }
                   }
                 },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -4435,6 +4493,22 @@
                   }
                 },
                 "csv_searchsource": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
                   "properties": {
                     "search": {
                       "type": "long"
@@ -4550,6 +4624,22 @@
                     }
                   }
                 },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -4650,6 +4740,22 @@
                     }
                   }
                 },
+                "csv_searchsource_immediate": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "PNG": {
                   "properties": {
                     "search": {
@@ -4735,6 +4841,22 @@
                   }
                 },
                 "csv_searchsource": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "csv_searchsource_immediate": {
                   "properties": {
                     "search": {
                       "type": "long"
@@ -4872,6 +4994,48 @@
               }
             },
             "csv_searchsource": {
+              "properties": {
+                "available": {
+                  "type": "boolean"
+                },
+                "total": {
+                  "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
+                },
+                "app": {
+                  "properties": {
+                    "search": {
+                      "type": "long"
+                    },
+                    "canvas workpad": {
+                      "type": "long"
+                    },
+                    "dashboard": {
+                      "type": "long"
+                    },
+                    "visualization": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "layout": {
+                  "properties": {
+                    "canvas": {
+                      "type": "long"
+                    },
+                    "print": {
+                      "type": "long"
+                    },
+                    "preserve_layout": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "csv_searchsource_immediate": {
               "properties": {
                 "available": {
                   "type": "boolean"
@@ -5139,6 +5303,22 @@
                         }
                       }
                     },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -5224,6 +5404,22 @@
                       }
                     },
                     "csv_searchsource": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
                       "properties": {
                         "search": {
                           "type": "long"
@@ -5339,6 +5535,22 @@
                         }
                       }
                     },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -5439,6 +5651,22 @@
                         }
                       }
                     },
+                    "csv_searchsource_immediate": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
                     "PNG": {
                       "properties": {
                         "search": {
@@ -5524,6 +5752,22 @@
                       }
                     },
                     "csv_searchsource": {
+                      "properties": {
+                        "search": {
+                          "type": "long"
+                        },
+                        "canvas workpad": {
+                          "type": "long"
+                        },
+                        "dashboard": {
+                          "type": "long"
+                        },
+                        "visualization": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "csv_searchsource_immediate": {
                       "properties": {
                         "search": {
                           "type": "long"
