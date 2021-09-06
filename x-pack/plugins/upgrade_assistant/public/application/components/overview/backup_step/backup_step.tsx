@@ -30,7 +30,7 @@ export const getBackupStep = ({ cloud, cloudBackupStatusResponse }: Props): EuiS
       children: (
         <CloudBackup
           cloudBackupStatusResponse={cloudBackupStatusResponse!}
-          cloudSnapshotsUrl={`${cloud!.deploymentUrl}/elasticsearch/snapshots`}
+          cloudSnapshotsUrl={cloud!.snapshotsUrl!}
         />
       ),
     };
