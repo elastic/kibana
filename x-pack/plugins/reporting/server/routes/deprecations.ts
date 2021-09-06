@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
+import { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/api/types';
 import { RequestHandler } from 'src/core/server';
 import {
   API_MIGRATE_ILM_POLICY_URL,
@@ -36,10 +37,11 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         const { body } = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
           body: {
             index: [
-              {
+              ({
                 privileges: ['manage'], // required to do anything with the reporting indices
                 names: [store.getReportingIndexPattern()],
-              },
+                allow_restricted_indices: true,
+              } as unknown) as SecurityHasPrivilegesIndexPrivilegesCheck, // TODO: Needed until `allow_restricted_indices` is added to the types.
             ],
           },
         });
