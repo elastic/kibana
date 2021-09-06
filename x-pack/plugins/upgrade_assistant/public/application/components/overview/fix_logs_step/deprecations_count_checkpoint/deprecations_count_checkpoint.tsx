@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButton, EuiLoadingContent } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
-import { getLastCheckpointFromLS, setLastCheckpointToLS } from '../../../../lib/utils';
 
 const i18nTexts = {
   calloutTitle: (warningsCount: number, previousCheck: string) => (
@@ -48,13 +47,20 @@ const i18nTexts = {
   ),
 };
 
-export const DeprecationsCountCheckpoint: FunctionComponent = () => {
+interface Props {
+  lastCheckpoint: string;
+  resetLastCheckpoint: (value: string) => void;
+}
+
+export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
+  lastCheckpoint,
+  resetLastCheckpoint,
+}) => {
   const {
     services: { api },
   } = useAppContext();
-  const [previousCheck, setPreviousCheck] = useState(getLastCheckpointFromLS());
   const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
-    previousCheck
+    lastCheckpoint
   );
 
   const warningsCount = data?.count || 0;
@@ -64,9 +70,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent = () => {
 
   const onResetClick = () => {
     const now = moment().toISOString();
-
-    setPreviousCheck(now);
-    setLastCheckpointToLS(now);
+    resetLastCheckpoint(now);
   };
 
   if (isInitialRequest && isLoading) {
@@ -93,7 +97,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent = () => {
 
   return (
     <EuiCallOut
-      title={i18nTexts.calloutTitle(warningsCount, previousCheck)}
+      title={i18nTexts.calloutTitle(warningsCount, lastCheckpoint)}
       color={calloutTint}
       iconType={calloutIcon}
       data-test-subj={calloutTestId}

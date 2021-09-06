@@ -11,13 +11,16 @@ import React, { FunctionComponent, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 
-import { getLastCheckpointFromLS } from '../../../lib/utils';
 import { useAppContext } from '../../../app_context';
 import { DataPublicPluginStart } from '../../../../shared_imports';
 import {
   DEPRECATION_LOGS_INDEX_PATTERN,
   DEPRECATION_LOGS_SOURCE_ID,
 } from '../../../../../common/constants';
+
+interface Props {
+  lastCheckpoint: string;
+}
 
 const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) => {
   const results = await dataService.dataViews.find(DEPRECATION_LOGS_INDEX_PATTERN);
@@ -38,7 +41,7 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
   }
 };
 
-const DiscoverAppLink: FunctionComponent = () => {
+const DiscoverAppLink: FunctionComponent<Props> = ({ lastCheckpoint }) => {
   const {
     services: { data: dataService },
     plugins: { share },
@@ -59,7 +62,7 @@ const DiscoverAppLink: FunctionComponent = () => {
         indexPatternId,
         query: {
           language: 'kuery',
-          query: `@timestamp > "${getLastCheckpointFromLS()}"`,
+          query: `@timestamp > "${lastCheckpoint}"`,
         },
       });
 
@@ -67,7 +70,7 @@ const DiscoverAppLink: FunctionComponent = () => {
     };
 
     getDiscoveryUrl();
-  }, [dataService, share.url.locators]);
+  }, [dataService, lastCheckpoint, share.url.locators]);
 
   return (
     <EuiLink href={discoveryUrl} data-test-subj="viewDiscoverLogs">
@@ -79,15 +82,16 @@ const DiscoverAppLink: FunctionComponent = () => {
   );
 };
 
-const ObservabilityAppLink: FunctionComponent = () => {
+const ObservabilityAppLink: FunctionComponent<Props> = ({ lastCheckpoint }) => {
   const {
     services: {
       core: { http },
     },
   } = useAppContext();
-  const start = encode(getLastCheckpointFromLS());
   const logStreamUrl = http?.basePath?.prepend(
-    `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}&logPosition=(end:now,start:${start})`
+    `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}&logPosition=(end:now,start:${encode(
+      lastCheckpoint
+    )})`
   );
 
   return (
@@ -100,7 +104,7 @@ const ObservabilityAppLink: FunctionComponent = () => {
   );
 };
 
-export const ExternalLinks: FunctionComponent = () => {
+export const ExternalLinks: FunctionComponent<Props> = ({ lastCheckpoint }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -114,7 +118,7 @@ export const ExternalLinks: FunctionComponent = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <ObservabilityAppLink />
+          <ObservabilityAppLink lastCheckpoint={lastCheckpoint} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -128,7 +132,7 @@ export const ExternalLinks: FunctionComponent = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <DiscoverAppLink />
+          <DiscoverAppLink lastCheckpoint={lastCheckpoint} />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

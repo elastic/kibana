@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiSpacer, EuiPanel, EuiCallOut } from '@elastic/eui';
@@ -15,6 +15,7 @@ import { ExternalLinks } from './external_links';
 import { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
 import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
+import { getLastCheckpointFromLS, setLastCheckpointToLS } from '../../../lib/utils';
 
 const i18nTexts = {
   identifyStepTitle: i18n.translate('xpack.upgradeAssistant.overview.identifyStepTitle', {
@@ -49,6 +50,12 @@ const i18nTexts = {
 
 const FixLogsStep: FunctionComponent = () => {
   const state = useDeprecationLogging();
+  const [lastCheckpoint, setLastCheckpoint] = useState(getLastCheckpointFromLS());
+
+  const resetLastCheckpoint = useCallback((newValue: string) => {
+    setLastCheckpoint(newValue);
+    setLastCheckpointToLS(newValue);
+  }, []);
 
   return (
     <>
@@ -57,7 +64,7 @@ const FixLogsStep: FunctionComponent = () => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel>
-        <DeprecationLoggingToggle {...state} />
+        <DeprecationLoggingToggle {...state} />{' '}
       </EuiPanel>
 
       {state.onlyDeprecationLogWritingEnabled && (
@@ -81,14 +88,17 @@ const FixLogsStep: FunctionComponent = () => {
             <h4>{i18nTexts.analyzeTitle}</h4>
           </EuiText>
           <EuiSpacer size="m" />
-          <ExternalLinks />
+          <ExternalLinks lastCheckpoint={lastCheckpoint} />
 
           <EuiSpacer size="xl" />
           <EuiText data-test-subj="deprecationsCountTitle">
             <h4>{i18nTexts.deprecationsCountCheckpointTitle}</h4>
           </EuiText>
           <EuiSpacer size="m" />
-          <DeprecationsCountCheckpoint />
+          <DeprecationsCountCheckpoint
+            lastCheckpoint={lastCheckpoint}
+            resetLastCheckpoint={resetLastCheckpoint}
+          />
         </>
       )}
     </>
