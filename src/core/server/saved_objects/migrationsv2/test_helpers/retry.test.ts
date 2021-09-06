@@ -8,7 +8,8 @@
 
 import { retryAsync } from './retry_async';
 
-describe('retry', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/110970
+describe.skip('retry', () => {
   it('retries throwing functions until they succeed', async () => {
     let i = 0;
     await expect(
