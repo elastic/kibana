@@ -1,0 +1,41 @@
+{
+  "type": "index",
+  "value": {
+    "index": "ignore_fields",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "testing_ignored": {
+          "properties": {
+            "constant": {
+              "type": "constant_keyword",
+              "value": "constant_value"
+            }
+          }
+        },
+        "testing_regex": {
+          "type": "constant_keyword",
+          "value": "constant_value"
+        },
+        "normal_constant": {
+          "type": "constant_keyword",
+          "value": "constant_value"
+        },
+        "small_field": {
+          "type": "keyword",
+          "ignore_above": 10
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "refresh_interval": "1s",
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

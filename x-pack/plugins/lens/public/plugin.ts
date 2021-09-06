@@ -9,6 +9,7 @@ import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { UsageCollectionSetup, UsageCollectionStart } from 'src/plugins/usage_collection/public';
+import { SpacesPluginStart } from '../../spaces/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
@@ -100,6 +101,7 @@ export interface LensPluginStartDependencies {
   presentationUtil: PresentationUtilPluginStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
   inspector: InspectorStartContract;
+  spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
 }
 
