@@ -992,7 +992,7 @@ describe('when on the endpoint list page', () => {
         expect(activityLogCallout).not.toBeNull();
       });
 
-      it('should correctly display non-empty comments for actions', async () => {
+      it('should correctly display non-empty comments only for actions', async () => {
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
           history.push(
@@ -1010,6 +1010,9 @@ describe('when on the endpoint list page', () => {
         const commentTexts = await renderResult.queryAllByTestId('activityLogCommentText');
         expect(commentTexts.length).toEqual(1);
         expect(commentTexts[0].textContent).toEqual('some comment');
+        expect(commentTexts[0].parentElement?.parentElement?.className).toContain(
+          'euiCommentEvent--regular'
+        );
       });
     });
 
