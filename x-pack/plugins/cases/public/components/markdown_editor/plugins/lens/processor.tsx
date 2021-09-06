@@ -48,7 +48,7 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
         style={{ height: LENS_VISUALIZATION_HEIGHT }}
         timeRange={timeRange}
         attributes={attributes}
-        renderMode="display"
+        renderMode="view"
       />
       <LensChartTooltipFix />
     </Container>
