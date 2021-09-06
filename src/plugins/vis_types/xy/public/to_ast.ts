@@ -12,7 +12,6 @@ import {
   VisToExpressionAst,
   getVisSchemas,
   DateHistogramParams,
-  HistogramParams,
 } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 import { BUCKET_TYPES } from '../../../data/public';
@@ -29,9 +28,10 @@ import {
   Scale,
   TimeMarker,
   AxisMode,
+  XDomainArguments,
 } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
-import { XyVisType } from '../common';
+import { ChartType, XyVisType } from '../common';
 import { getEsaggsFn } from './to_ast_esaggs';
 import { TimeRangeBounds } from '../../../data/common';
 
@@ -132,6 +132,17 @@ const prepareXYDimension = (data: Dimension) => {
   return buildExpression([xyDimension]);
 };
 
+const prepareXDomain = (data: XDomainArguments) => {
+  const column = buildExpressionFunction('visdimension', { accessor: data.column?.accessor });
+
+  const xDomain = buildExpressionFunction('x_domain', {
+    ...data,
+    column,
+  });
+
+  return buildExpression([xDomain]);
+};
+
 export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
   const dimensions: Dimensions = {
@@ -151,23 +162,22 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     xAgg?.type?.name
   );
 
+  const xDomain: XDomainArguments = {};
   if (dimensions.x && xAgg) {
     if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
       (dimensions.x.params as DateHistogramParams).date = true;
-      const { esUnit, esValue } = xAgg.buckets.getInterval();
-      (dimensions.x.params as DateHistogramParams).intervalESUnit = esUnit;
-      (dimensions.x.params as DateHistogramParams).intervalESValue = esValue;
-      (dimensions.x.params as DateHistogramParams).interval = moment
-        .duration(esValue, esUnit)
-        .asMilliseconds();
       (dimensions.x.params as DateHistogramParams).format = xAgg.buckets.getScaledDateFormat();
-      const bounds = xAgg.buckets.getBounds() as TimeRangeBounds | undefined;
 
+      const { esUnit, esValue } = xAgg.buckets.getInterval();
+
+      xDomain.intervalValue = esValue;
+      xDomain.intervalUnit = esUnit;
+      xDomain.minInterval = moment.duration(esValue, esUnit).asMilliseconds();
+
+      const bounds = xAgg.buckets.getBounds() as TimeRangeBounds | undefined;
       if (bounds && bounds?.min && bounds?.max) {
-        (dimensions.x.params as DateHistogramParams).bounds = {
-          min: bounds.min.valueOf(),
-          max: bounds.max.valueOf(),
-        };
+        xDomain.min = bounds.min.valueOf();
+        xDomain.max = bounds.max.valueOf();
       }
     } else if (xAgg.type.name === BUCKET_TYPES.HISTOGRAM) {
       const intervalParam = xAgg.type.paramByName('interval');
@@ -176,7 +186,8 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
         abortSignal: params.abortSignal,
       });
       intervalParam.write(xAgg, output);
-      (dimensions.x.params as HistogramParams).interval = output.params.interval;
+
+      xDomain.minInterval = output.params.interval;
     }
   }
 
@@ -203,6 +214,11 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
       yDimension.params.integersOnly = true;
     }
   });
+
+  const considerInterval =
+    vis.params.seriesParams.filter((sp) => sp.type === ChartType.Histogram).length > 0;
+
+  xDomain.considerInterval = considerInterval;
 
   const visTypeXy = buildExpressionFunction<VisTypeXyExpressionFunctionDefinition>(visName, {
     type: vis.type.name as XyVisType,
@@ -236,6 +252,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitRowDimension: dimensions.splitRow?.map(prepareXYDimension),
     splitColumnDimension: dimensions.splitColumn?.map(prepareXYDimension),
     enableHistogramMode,
+    xDomain: prepareXDomain(xDomain),
   });
 
   const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);

@@ -239,6 +239,12 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       }),
       multi: true,
     },
+    xDomain: {
+      types: ['x_domain'],
+      help: i18n.translate('visTypeXy.function.args.xDomain.help', {
+        defaultMessage: 'x_domains',
+      }),
+    },
   },
   fn(context, args, handlers) {
     const visType = args.chartType;
@@ -297,6 +303,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
         splitRow: args.splitRowDimension,
         splitColumn: args.splitColumnDimension,
       },
+      xDomain: args.xDomain,
       // ------------------------------------------------------------------------------------------------------------------
     } as VisParams; /* @TODO: rewrite this `as VisParams` to real `VisParams` via changing accessor 
                       to vis_dimension accessor (accepting string, not only number) */

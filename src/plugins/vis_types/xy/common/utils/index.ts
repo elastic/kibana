@@ -6,20 +6,4 @@
  * Side Public License, v 1.
  */
 
-/**
- * Type of charts able to render
- */
-export enum ChartType {
-  Line = 'line',
-  Area = 'area',
-  Histogram = 'histogram',
-}
-
-/**
- * Type of xy visualizations
- */
-export type XyVisType = ChartType | 'horizontal_bar';
-
-export const LEGACY_CHARTS_LIBRARY = 'visualization:visualize:legacyChartsLibrary';
-
-export { getAdjustedInterval } from './utils';
+export { getAdjustedInterval } from './intervals';

@@ -33,6 +33,7 @@ import type {
   ScaleType,
   ThresholdLineStyle,
 } from './constants';
+import { ExpressionValueXDomain, XDomainOutput } from './expression_functions';
 
 export interface Scale {
   boundsMargin?: number | '';
@@ -146,6 +147,7 @@ export interface VisParams {
   fillOpacity?: number;
   fittingFunction?: Exclude<Fit, 'explicit'>;
   enableHistogramMode?: boolean;
+  xDomain?: XDomainOutput;
 }
 
 export interface XYVisConfig {
@@ -187,4 +189,5 @@ export interface XYVisConfig {
   seriesDimension?: ExpressionValueXYDimension[];
   splitRowDimension?: ExpressionValueXYDimension[];
   splitColumnDimension?: ExpressionValueXYDimension[];
+  xDomain?: ExpressionValueXDomain;
 }

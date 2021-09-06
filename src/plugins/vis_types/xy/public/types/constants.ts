@@ -46,3 +46,9 @@ export enum ColorMode {
   Labels = 'Labels',
   None = 'None',
 }
+
+export enum LogBase {
+  Common = 'common',
+  Binary = 'binary',
+  Natural = 'natural',
+}

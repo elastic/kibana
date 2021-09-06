@@ -10,3 +10,4 @@ export * from './constants';
 export * from './config';
 export * from './param';
 export type { VisTypeNames, XyVisTypeDefinition } from './vis_type';
+export * from './expression_functions';
