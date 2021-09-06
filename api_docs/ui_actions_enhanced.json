@@ -1562,13 +1562,7 @@
                 "text": "SerializedAction"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">, triggers: string[]) => Promise<void>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1592,13 +1586,7 @@
                     "text": "SerializedAction"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1643,13 +1631,7 @@
                 "text": "SerializedAction"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">, triggers: string[]) => Promise<void>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1689,13 +1671,7 @@
                     "text": "SerializedAction"
                   },
                   "<",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
+                  "SerializableRecord",
                   ">"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
@@ -1876,13 +1852,7 @@
                 "text": "SerializedAction"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ">; }[]>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
@@ -3128,13 +3098,7 @@
                 "text": "ActionFactory"
               },
               "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ", object, ",
               {
                 "pluginId": "uiActionsEnhanced",
@@ -3279,15 +3243,7 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          "{ [key: string]: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
-          "; }"
+          "SerializableRecord"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -3362,13 +3318,7 @@
             "text": "SerializedAction"
           },
           "<",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           ">; }"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -3862,15 +3812,7 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          "{ [key: string]: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
-          "; }"
+          "SerializableRecord"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -3931,13 +3873,7 @@
             "text": "SerializedAction"
           },
           "<",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           ">; }"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
@@ -4051,15 +3987,7 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          "{ [key: string]: ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
-          "; }"
+          "SerializableRecord"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -4120,13 +4048,7 @@
             "text": "SerializedAction"
           },
           "<",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           ">; }"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",

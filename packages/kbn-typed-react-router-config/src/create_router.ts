@@ -9,6 +9,7 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { Location } from 'history';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import {
+  MatchedRoute,
   matchRoutes as matchRoutesConfig,
   RouteConfig as ReactRouterConfig,
 } from 'react-router-config';
@@ -49,33 +50,44 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
   }
 
   const matchRoutes = (...args: any[]) => {
-    let path: string = args[0];
-    let location: Location = args[1];
-    let optional: boolean = args[2];
+    let optional: boolean = false;
 
-    if (args.length === 1) {
-      location = args[0] as Location;
-      path = location.pathname;
-      optional = args[1];
+    if (typeof args[args.length - 1] === 'boolean') {
+      optional = args[args.length - 1];
+      args.pop();
     }
 
-    const greedy = path.endsWith('/*') || args.length === 1;
+    const location: Location = args[args.length - 1];
+    args.pop();
 
-    if (!path) {
-      path = '/';
+    let paths: string[] = args;
+
+    if (paths.length === 0) {
+      paths = [location.pathname || '/'];
     }
 
-    const matches = matchRoutesConfig(reactRouterConfigs, location.pathname);
+    let matches: Array<MatchedRoute<{}, ReactRouterConfig>> = [];
+    let matchIndex: number = -1;
 
-    const matchIndex = greedy
-      ? matches.length - 1
-      : findLastIndex(matches, (match) => match.route.path === path);
+    for (const path of paths) {
+      const greedy = path.endsWith('/*') || args.length === 0;
+      matches = matchRoutesConfig(reactRouterConfigs, location.pathname);
+
+      matchIndex = greedy
+        ? matches.length - 1
+        : findLastIndex(matches, (match) => match.route.path === path);
+
+      if (matchIndex !== -1) {
+        break;
+      }
+      matchIndex = -1;
+    }
 
     if (matchIndex === -1) {
       if (optional) {
         return [];
       }
-      throw new Error(`No matching route found for ${path}`);
+      throw new Error(`No matching route found for ${paths}`);
     }
 
     return matches.slice(0, matchIndex + 1).map((matchedRoute) => {

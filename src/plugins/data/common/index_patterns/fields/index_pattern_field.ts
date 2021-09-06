@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable max-classes-per-file */
+
+import { KbnFieldType, getKbnFieldType, castEsToKbnFieldTypeName } from '@kbn/field-types';
 import type { RuntimeField } from '../types';
-import { KbnFieldType, getKbnFieldType, castEsToKbnFieldTypeName } from '../../kbn_field_types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import type { IFieldType } from './types';
-import { FieldSpec, IndexPattern } from '../..';
+import { FieldSpec, DataView } from '../..';
 import { shortenDottedString } from '../../utils';
 
 /** @public */
-export class IndexPatternField implements IFieldType {
+export class DataViewField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized
   private readonly kbnFieldType: KbnFieldType;
@@ -182,7 +184,7 @@ export class IndexPatternField implements IFieldType {
   public toSpec({
     getFormatterForField,
   }: {
-    getFormatterForField?: IndexPattern['getFormatterForField'];
+    getFormatterForField?: DataView['getFormatterForField'];
   } = {}): FieldSpec {
     return {
       count: this.count,
@@ -205,3 +207,8 @@ export class IndexPatternField implements IFieldType {
     };
   }
 }
+
+/**
+ * @deprecated Use DataViewField instead. All index pattern interfaces were renamed.
+ */
+export class IndexPatternField extends DataViewField {}
