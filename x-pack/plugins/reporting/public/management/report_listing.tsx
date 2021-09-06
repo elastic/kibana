@@ -274,8 +274,9 @@ class ReportListingUi extends Component<Props, State> {
   private readonly tableColumnWidths = {
     title: '40%',
     status: '20%',
-    createdAt: '20%',
-    createdBy: '20%',
+    createdAt: '15%',
+    createdBy: '15%',
+    actions: '15%',
   };
 
   private renderTable() {
