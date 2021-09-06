@@ -22,6 +22,7 @@ import { rangeQuery } from '../../../../observability/server';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],
@@ -71,22 +72,20 @@ export async function getServiceAnomalies({
           services: {
             composite: {
               size: 5000,
-              sources: [
+              sources: asMutableArray([
                 { serviceName: { terms: { field: 'partition_field_value' } } },
                 { jobId: { terms: { field: 'job_id' } } },
-              ] as Array<
-                Record<string, estypes.AggregationsCompositeAggregationSource>
-              >,
+              ] as const),
             },
             aggs: {
               metrics: {
                 top_metrics: {
-                  metrics: [
+                  metrics: asMutableArray([
                     { field: 'actual' },
                     { field: 'by_field_value' },
                     { field: 'result_type' },
                     { field: 'record_score' },
-                  ],
+                  ] as const),
                   sort: {
                     record_score: 'desc' as const,
                   },
@@ -112,8 +111,20 @@ export async function getServiceAnomalies({
       typeof params
     > = anomalyResponse as any;
 
-    const serviceBuckets =
-      typedAnomalyResponse.aggregations?.services.buckets ?? [];
+    const serviceBuckets: Array<{
+      key: {
+        jobId: string | number | null;
+        serviceName: string | number | null;
+      };
+      metrics: {
+        top: Array<{
+          metrics: Record<
+            'result_type' | 'record_score' | 'by_field_value' | 'actual',
+            unknown
+          >;
+        }>;
+      };
+    }> = typedAnomalyResponse.aggregations?.services.buckets ?? [];
 
     const relevantBuckets = uniqBy(
       sortBy(

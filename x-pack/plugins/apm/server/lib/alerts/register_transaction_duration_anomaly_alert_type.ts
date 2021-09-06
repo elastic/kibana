@@ -212,8 +212,9 @@ export function registerTransactionDurationAnomalyAlertType({
         > = (await mlAnomalySearch(anomalySearchParams, [])) as any;
 
         const anomalies =
-          response.aggregations?.anomaly_groups.buckets
-            .map((bucket) => {
+          // @ts-expect-error
+          response
+            .aggregations!.anomaly_groups.buckets.map((bucket) => {
               const latest = bucket.latest_score.top[0].metrics;
 
               const job = mlJobs.find((j) => j.job_id === latest.job_id);

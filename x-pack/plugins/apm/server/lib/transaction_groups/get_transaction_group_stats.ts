@@ -7,10 +7,15 @@
 
 import { merge } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
-import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
+import {
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
 import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 
 interface MetricParams {
   request: TransactionGroupRequestBase;
@@ -18,7 +23,7 @@ interface MetricParams {
   searchAggregatedTransactions: boolean;
 }
 
-type BucketKey = Record<string, string>;
+type BucketKey = Record<typeof TRANSACTION_NAME | typeof SERVICE_NAME, string>;
 
 function mergeRequestWithAggs<
   TRequestBase extends TransactionGroupRequestBase,
@@ -75,11 +80,11 @@ export async function getCounts({ request, setup }: MetricParams) {
         sort: {
           '@timestamp': 'desc' as const,
         },
-        metrics: [
+        metrics: asMutableArray([
           {
             field: TRANSACTION_TYPE,
-          } as const,
-        ],
+          },
+        ] as const),
       },
     },
   });

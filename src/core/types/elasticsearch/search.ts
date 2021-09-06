@@ -21,11 +21,15 @@ type KeyOfSource<T> = Record<
   (T extends Record<string, { terms: { missing_bucket: true } }> ? null : never) | string | number
 >;
 
-type KeysOfSources<T extends any[]> = T extends [infer U, ...infer V]
-  ? KeyOfSource<U> & KeysOfSources<V>
-  : T extends Array<infer U>
-  ? KeyOfSource<U>
-  : {};
+type KeysOfSources<T extends any[]> = T extends [any]
+  ? KeyOfSource<T[0]>
+  : T extends [any, any]
+  ? KeyOfSource<T[0]> & KeyOfSource<T[1]>
+  : T extends [any, any, any]
+  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]>
+  : T extends [any, any, any, any]
+  ? KeyOfSource<T[0]> & KeyOfSource<T[1]> & KeyOfSource<T[2]> & KeyOfSource<T[3]>
+  : Record<string, null | string | number>;
 
 type CompositeKeysOf<
   TAggregationContainer extends estypes.AggregationsAggregationContainer
@@ -33,7 +37,15 @@ type CompositeKeysOf<
   composite: { sources: [...infer TSource] };
 }
   ? KeysOfSources<TSource>
-  : unknown;
+  : never;
+
+type TopMetricKeysOf<
+  TAggregationContainer extends estypes.AggregationsAggregationContainer
+> = TAggregationContainer extends { top_metrics: { metrics: { field: infer TField } } }
+  ? TField
+  : TAggregationContainer extends { top_metrics: { metrics: Array<{ field: infer TField }> } }
+  ? TField
+  : string;
 
 type Source = estypes.SearchSourceFilter | boolean | estypes.Fields;
 
@@ -534,12 +546,7 @@ export type AggregateOf<
   top_metrics: {
     top: Array<{
       sort: number[] | string[];
-      metrics: Record<
-        TAggregationContainer extends Record<string, { metrics: Array<{ field: infer TKeys }> }>
-          ? TKeys
-          : string,
-        string | number | null
-      >;
+      metrics: Record<TopMetricKeysOf<TAggregationContainer>, string | number | null>;
     }>;
   };
   weighted_avg: { value: number | null };
