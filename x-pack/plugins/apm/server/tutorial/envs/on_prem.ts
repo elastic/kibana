@@ -37,7 +37,13 @@ export function onPremInstructions({
   apmConfig,
   isFleetPluginEnabled,
 }: {
-  apmConfig: APMConfig;
+  apmConfig: Pick<
+    APMConfig,
+    | 'apm_oss.errorIndices'
+    | 'apm_oss.transactionIndices'
+    | 'apm_oss.metricsIndices'
+    | 'apm_oss.onboardingIndices'
+  >;
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema {
   const EDIT_CONFIG = createEditConfig();
@@ -234,19 +240,13 @@ export function onPremInstructions({
               apmConfig['apm_oss.errorIndices'],
               apmConfig['apm_oss.transactionIndices'],
               apmConfig['apm_oss.metricsIndices'],
-              apmConfig['apm_oss.sourcemapIndices'],
             ],
             query: {
               bool: {
                 filter: [
                   {
                     terms: {
-                      'processor.event': [
-                        'error',
-                        'transaction',
-                        'metric',
-                        'sourcemap',
-                      ],
+                      'processor.event': ['error', 'transaction', 'metric'],
                     },
                   },
                   { range: { 'observer.version_major': { gte: 7 } } },
