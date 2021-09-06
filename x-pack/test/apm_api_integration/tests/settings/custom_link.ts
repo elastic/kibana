@@ -12,7 +12,7 @@ import { registry } from '../../common/registry';
 import { ApmApiError } from '../../common/apm_api_supertest';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
-  const supertestClients = getService('supertestClients');
+  const apmApiClients = getService('apmApiClients');
   const log = getService('log');
 
   const archiveName = 'apm_8.0.0';
@@ -125,7 +125,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
       });
 
       it('fetches a transaction sample', async () => {
-        const response = await supertestClients.readUser({
+        const response = await apmApiClients.readUser({
           endpoint: 'GET /api/apm/settings/custom_links/transaction',
           params: {
             query: {
@@ -140,7 +140,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   );
 
   function searchCustomLinks(filters?: any) {
-    return supertestClients.readUser({
+    return apmApiClients.readUser({
       endpoint: 'GET /api/apm/settings/custom_links',
       params: {
         query: filters,
@@ -151,7 +151,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   async function createCustomLink(customLink: CustomLink) {
     log.debug('creating configuration', customLink);
 
-    return supertestClients.writeUser({
+    return apmApiClients.writeUser({
       endpoint: 'POST /api/apm/settings/custom_links',
       params: {
         body: customLink,
@@ -162,7 +162,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   async function updateCustomLink(id: string, customLink: CustomLink) {
     log.debug('updating configuration', id, customLink);
 
-    return supertestClients.writeUser({
+    return apmApiClients.writeUser({
       endpoint: 'PUT /api/apm/settings/custom_links/{id}',
       params: {
         path: { id },
@@ -174,7 +174,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   async function deleteCustomLink(id: string) {
     log.debug('deleting configuration', id);
 
-    return supertestClients.writeUser({
+    return apmApiClients.writeUser({
       endpoint: 'DELETE /api/apm/settings/custom_links/{id}',
       params: { path: { id } },
     });

@@ -17,14 +17,14 @@ import { registry } from '../../common/registry';
 type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertestClients = getService('supertestClients');
+  const apmApiClients = getService('apmApiClients');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
 
   registry.when('Throughput when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
-      const response = await supertestClients.readUser({
+      const response = await apmApiClients.readUser({
         endpoint: 'GET /api/apm/services/{serviceName}/throughput',
         params: {
           path: {
@@ -53,7 +53,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when querying without kql filter', () => {
         before(async () => {
-          const response = await supertestClients.readUser({
+          const response = await apmApiClients.readUser({
             endpoint: 'GET /api/apm/services/{serviceName}/throughput',
             params: {
               path: {
@@ -107,7 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with kql filter to force transaction-based UI', () => {
         before(async () => {
-          const response = await supertestClients.readUser({
+          const response = await apmApiClients.readUser({
             endpoint: 'GET /api/apm/services/{serviceName}/throughput',
             params: {
               path: {
@@ -143,7 +143,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       before(async () => {
-        const response = await supertestClients.readUser({
+        const response = await apmApiClients.readUser({
           endpoint: 'GET /api/apm/services/{serviceName}/throughput',
           params: {
             path: {

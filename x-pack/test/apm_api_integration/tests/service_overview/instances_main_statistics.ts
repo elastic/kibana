@@ -17,7 +17,7 @@ import { registry } from '../../common/registry';
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertestClients = getService('supertestClients');
+  const apmApiClients = getService('apmApiClients');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
-          const response = await supertestClients.readUser({
+          const response = await apmApiClients.readUser({
             endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
@@ -62,7 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         beforeEach(async () => {
-          response = await supertestClients.readUser({
+          response = await apmApiClients.readUser({
             endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
@@ -133,7 +133,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         beforeEach(async () => {
-          response = await supertestClients.readUser({
+          response = await apmApiClients.readUser({
             endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-ruby' },
@@ -201,7 +201,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         beforeEach(async () => {
-          response = await supertestClients.readUser({
+          response = await apmApiClients.readUser({
             endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },

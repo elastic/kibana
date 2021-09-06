@@ -37,7 +37,7 @@ function getLegacySupertestClient(kibanaServer: UrlObject, apmUser: ApmUser) {
   };
 }
 
-async function getSupertestClient(
+async function getApmApiClient(
   kibanaServer: UrlObject,
   context: InheritedFtrProviderContext,
   apmUser: ApmUser
@@ -77,17 +77,17 @@ export function createTestConfig(config: Config) {
       services: {
         ...services,
 
-        supertestClients: async (context: InheritedFtrProviderContext) => {
+        apmApiClients: async (context: InheritedFtrProviderContext) => {
           return {
-            noAccessUser: await getSupertestClient(servers.kibana, context, ApmUser.noAccessUser),
-            readUser: await getSupertestClient(servers.kibana, context, ApmUser.apmReadUser),
-            writeUser: await getSupertestClient(servers.kibana, context, ApmUser.apmWriteUser),
-            annotationWriterUser: await getSupertestClient(
+            noAccessUser: await getApmApiClient(servers.kibana, context, ApmUser.noAccessUser),
+            readUser: await getApmApiClient(servers.kibana, context, ApmUser.apmReadUser),
+            writeUser: await getApmApiClient(servers.kibana, context, ApmUser.apmWriteUser),
+            annotationWriterUser: await getApmApiClient(
               servers.kibana,
               context,
               ApmUser.apmAnnotationsWriteUser
             ),
-            noMlAccessUser: await getSupertestClient(
+            noMlAccessUser: await getApmApiClient(
               servers.kibana,
               context,
               ApmUser.apmReadUserWithoutMlAccess
