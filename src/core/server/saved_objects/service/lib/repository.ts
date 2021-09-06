@@ -92,6 +92,7 @@ import {
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
 } from './update_objects_spaces';
+import { getIndexForType } from './get_index_for_type';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -2099,16 +2100,13 @@ export class SavedObjectsRepository {
    * @param type - the type
    */
   private getIndexForType(type: string) {
-    // TODO migrationsV2: Remove once we remove migrations v1
-    //   This is a hacky, but it required the least amount of changes to
-    //   existing code to support a migrations v2 index. Long term we would
-    //   want to always use the type registry to resolve a type's index
-    //   (including the default index).
-    if (this._migrator.soMigrationsConfig.enableV2) {
-      return `${this._registry.getIndex(type) || this._index}_${this._migrator.kibanaVersion}`;
-    } else {
-      return this._registry.getIndex(type) || this._index;
-    }
+    return getIndexForType({
+      type,
+      defaultIndex: this._index,
+      typeRegistry: this._registry,
+      kibanaVersion: this._migrator.kibanaVersion,
+      migV2Enabled: this._migrator.soMigrationsConfig.enableV2,
+    });
   }
 
   /**

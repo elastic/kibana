@@ -1,0 +1,95 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { estypes } from '@elastic/elasticsearch';
+import { i18n } from '@kbn/i18n';
+import type { DeprecationsDetails } from '../../deprecations';
+import { IScopedClusterClient } from '../../elasticsearch';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { SavedObjectsRawDocSource } from '../serialization';
+import type { KibanaConfigType } from '../../kibana_config';
+import type { SavedObjectConfig } from '../saved_objects_config';
+import { getIndexForType } from '../service/lib';
+
+interface UnknownTypesDeprecationOptions {
+  typeRegistry: ISavedObjectTypeRegistry;
+  esClient: IScopedClusterClient;
+  kibanaConfig: KibanaConfigType;
+  savedObjectsConfig: SavedObjectConfig;
+  kibanaVersion: string;
+}
+
+export const hasUnknownObjectTypes = async ({
+  typeRegistry,
+  esClient,
+  kibanaConfig,
+  savedObjectsConfig,
+  kibanaVersion,
+}: UnknownTypesDeprecationOptions) => {
+  const knownTypes = typeRegistry.getAllTypes().map((type) => type.name);
+  const targetIndices = [
+    ...new Set(
+      knownTypes.map((type) =>
+        getIndexForType({
+          type,
+          typeRegistry,
+          migV2Enabled: savedObjectsConfig.migration.enableV2,
+          kibanaVersion,
+          defaultIndex: kibanaConfig.index,
+        })
+      )
+    ),
+  ];
+
+  const query: estypes.QueryDslQueryContainer = {
+    bool: {
+      must_not: knownTypes.map((type) => ({
+        term: { type },
+      })),
+    },
+  };
+
+  const { body } = await esClient.asInternalUser.search<SavedObjectsRawDocSource>({
+    index: targetIndices,
+    body: {
+      size: 10000,
+      query,
+    },
+  });
+  const { hits: unknownDocs } = body.hits;
+
+  return unknownDocs.length > 0;
+};
+
+export const getUnknownTypesDeprecations = async (
+  options: UnknownTypesDeprecationOptions
+): Promise<DeprecationsDetails[]> => {
+  const deprecations: DeprecationsDetails[] = [];
+  if (await hasUnknownObjectTypes(options)) {
+    deprecations.push({
+      title: i18n.translate('core.savedObjects.deprecations.unknownTypes.title', {
+        defaultMessage: 'Saved objects with unknown types are present in Kibana system indices',
+      }),
+      message: i18n.translate('core.savedObjects.deprecations.unknownTypes.message', {
+        defaultMessage: '',
+      }),
+      level: 'critical',
+      requireRestart: false,
+      deprecationType: undefined, // not config nor feature...
+      correctiveActions: {
+        manualSteps: [], // TODO
+        api: {
+          path: '/internal/saved_objects/deprecations/_delete_unknown_types',
+          method: 'POST',
+          body: {},
+        },
+      },
+    });
+  }
+  return deprecations;
+};
