@@ -274,9 +274,9 @@ class ReportListingUi extends Component<Props, State> {
   private readonly tableColumnWidths = {
     title: '40%',
     status: '20%',
-    createdAt: '15%',
-    createdBy: '15%',
-    actions: '15%',
+    createdAt: '20%',
+    createdBy: '10%',
+    actions: '10%',
   };
 
   private renderTable() {
@@ -356,6 +356,7 @@ class ReportListingUi extends Component<Props, State> {
         name: i18n.translate('xpack.reporting.listing.tableColumns.actionsTitle', {
           defaultMessage: 'Actions',
         }),
+        width: tableColumnWidths.actions,
         actions: [
           {
             render: (job) => {
