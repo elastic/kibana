@@ -20,5 +20,4 @@ All base visualizations extend from `visualizations/_chart`
 
 `visualizations/point_series` takes care of drawing the point series chart (no axes or titles, just the chart itself). It creates all the series defined and calls render method on them.
 
-currently there are 3 series types available (line, area, bars), they all extend from `visualizations/point_series/_point_series`.
-
+Vislib supports the heatmap and gauge/goal charts from the aggregtio-based visualizations. It also contains the legacy implemementation of the pie chart (enabled by the visualization:visualize:legacyPieChartsLibrary advanced setting.
