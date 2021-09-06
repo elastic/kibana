@@ -8,7 +8,6 @@
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
-import { number, string } from '../../../../security_solution/public/resolver/models/schema';
 
 export interface IField {
   getName(): string;

@@ -325,7 +325,9 @@ export class TiledVectorLayer extends VectorLayer {
       // but the programmable JS-object uses camelcase `sourceLayer`
       if (
         mbLayer &&
+        // @ts-expect-error
         mbLayer.sourceLayer !== tiledSourceMeta.layerName &&
+        // @ts-expect-error
         mbLayer.sourceLayer !== MVT_META_SOURCE_LAYER_NAME
       ) {
         // If the source-pointer of one of the layers is stale, they will all be stale.
