@@ -17,9 +17,10 @@ import { MonitoringTimeContainer } from '../../application/pages/use_monitoring_
 
 interface MonitoringToolbarProps {
   pageTitle?: string;
+  onRefresh?: () => void;
 }
 
-export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle }) => {
+export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle, onRefresh }) => {
   const {
     currentTimerange,
     handleTimeChange,
@@ -72,7 +73,7 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle 
             start={currentTimerange.from}
             end={currentTimerange.to}
             onTimeChange={onTimeChange}
-            onRefresh={() => {}}
+            onRefresh={onRefresh}
             isPaused={isPaused}
             refreshInterval={refreshInterval}
             onRefreshChange={onRefreshChange}
