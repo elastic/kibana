@@ -211,6 +211,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
+    coreUsageData: {
+      registerUsageCounter: deps.coreUsageData.registerUsageCounter,
+    },
   };
 }
 

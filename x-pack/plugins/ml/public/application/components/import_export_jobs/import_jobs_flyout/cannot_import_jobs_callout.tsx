@@ -30,6 +30,7 @@ export const CannotImportJobsCallout: FC<Props> = ({ jobs, autoExpand = false })
           values: { num: jobs.length },
         })}
         color="warning"
+        data-test-subj="mlJobMgmtImportJobsCannotBeImportedCallout"
       >
         {autoExpand ? (
           <SkippedJobList jobs={jobs} />

@@ -16,7 +16,7 @@ import {
 } from './';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
-import { CoreUsageDataSetup } from '../core_usage_data';
+import { InternalCoreUsageDataSetup } from '../core_usage_data';
 import {
   ElasticsearchClient,
   InternalElasticsearchServiceSetup,
@@ -250,7 +250,7 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsSetupDeps {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  coreUsageData: CoreUsageDataSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
 }
 
 interface WrappedClientFactoryWrapper {
