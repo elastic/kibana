@@ -50,8 +50,7 @@ export class AggNotSupportedInMode extends UIError {
   constructor(metricType: string, timeRangeMode: string) {
     super(
       i18n.translate('visTypeTimeseries.wrongAggregationErrorMessage', {
-        defaultMessage:
-          'The aggregation {metricType} is not supported in {timeRangeMode} mode',
+        defaultMessage: 'The aggregation {metricType} is not supported in {timeRangeMode} mode',
         values: { metricType, timeRangeMode },
       })
     );
