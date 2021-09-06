@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { hasUnknownObjectTypes } from './unknown_object_types';
 export { getSavedObjectsDeprecationsProvider } from './deprecation_factory';
