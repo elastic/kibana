@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datatable, ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions';
+import type { Datatable, ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions';
 
 export type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
 
