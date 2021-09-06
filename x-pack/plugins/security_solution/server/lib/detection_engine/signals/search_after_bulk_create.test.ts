@@ -74,6 +74,7 @@ describe('searchAfterAndBulkCreate', () => {
       ruleSO,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       mergeStrategy: 'missingFields',
+      ignoreFields: [],
     });
   });
 
