@@ -7,11 +7,11 @@
 
 import type { HistogramItem } from '../../../../common/search_strategies/types';
 import type {
-  AsyncSearchProviderProgress,
+  LatencyCorrelationSearchServiceProgress,
   LatencyCorrelation,
 } from '../../../../common/search_strategies/latency_correlations/types';
 
-export const asyncSearchServiceStateProvider = () => {
+export const latencyCorrelationsSearchServiceStateProvider = () => {
   let ccsWarning = false;
   function setCcsWarning(d: boolean) {
     ccsWarning = d;
@@ -45,7 +45,7 @@ export const asyncSearchServiceStateProvider = () => {
     percentileThresholdValue = d;
   }
 
-  let progress: AsyncSearchProviderProgress = {
+  let progress: LatencyCorrelationSearchServiceProgress = {
     started: Date.now(),
     loadedHistogramStepsize: 0,
     loadedOverallHistogram: 0,
@@ -63,7 +63,7 @@ export const asyncSearchServiceStateProvider = () => {
     );
   }
   function setProgress(
-    d: Partial<Omit<AsyncSearchProviderProgress, 'started'>>
+    d: Partial<Omit<LatencyCorrelationSearchServiceProgress, 'started'>>
   ) {
     progress = {
       ...progress,
@@ -109,6 +109,6 @@ export const asyncSearchServiceStateProvider = () => {
   };
 };
 
-export type AsyncSearchServiceState = ReturnType<
-  typeof asyncSearchServiceStateProvider
+export type LatencyCorrelationsSearchServiceState = ReturnType<
+  typeof latencyCorrelationsSearchServiceStateProvider
 >;

@@ -39,7 +39,7 @@ export function isLatencyCorrelations(
   );
 }
 
-export interface AsyncSearchProviderProgress {
+export interface LatencyCorrelationSearchServiceProgress {
   started: number;
   loadedHistogramStepsize: number;
   loadedOverallHistogram: number;

@@ -21,15 +21,15 @@ import type { RawResponseBase } from '../../../common/search_strategies/types';
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 import type {
-  LatencyCorrelationsAsyncSearchServiceProvider,
+  LatencyCorrelationsSearchServiceProvider,
   LatencyCorrelationsSearchStrategy,
 } from './latency_correlations';
 import type {
-  FailedTransactionsCorrelationsAsyncSearchServiceProvider,
+  FailedTransactionsCorrelationsSearchServiceProvider,
   FailedTransactionsCorrelationsSearchStrategy,
 } from './failed_transactions_correlations';
 
-interface AsyncSearchServiceState<TRawResponse extends RawResponseBase> {
+interface SearchServiceState<TRawResponse extends RawResponseBase> {
   cancel: () => void;
   error: Error;
   meta: {
@@ -41,11 +41,11 @@ interface AsyncSearchServiceState<TRawResponse extends RawResponseBase> {
   rawResponse: TRawResponse;
 }
 
-type GetAsyncSearchServiceState<
+type GetSearchServiceState<
   TRawResponse extends RawResponseBase
-> = () => AsyncSearchServiceState<TRawResponse>;
+> = () => SearchServiceState<TRawResponse>;
 
-export type AsyncSearchServiceProvider<
+export type SearchServiceProvider<
   TSearchStrategyClientParams extends SearchStrategyClientParams,
   TRawResponse extends RawResponseBase
 > = (
@@ -53,18 +53,18 @@ export type AsyncSearchServiceProvider<
   getApmIndices: () => Promise<ApmIndicesConfig>,
   searchServiceParams: TSearchStrategyClientParams,
   includeFrozen: boolean
-) => GetAsyncSearchServiceState<TRawResponse>;
+) => GetSearchServiceState<TRawResponse>;
 
 // Failed Transactions Correlations function overload
 export function searchStrategyProvider(
-  asyncSearchServiceProvider: FailedTransactionsCorrelationsAsyncSearchServiceProvider,
+  searchServiceProvider: FailedTransactionsCorrelationsSearchServiceProvider,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   includeFrozen: boolean
 ): FailedTransactionsCorrelationsSearchStrategy;
 
 // Latency Correlations function overload
 export function searchStrategyProvider(
-  asyncSearchServiceProvider: LatencyCorrelationsAsyncSearchServiceProvider,
+  searchServiceProvider: LatencyCorrelationsSearchServiceProvider,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   includeFrozen: boolean
 ): LatencyCorrelationsSearchStrategy;
@@ -73,7 +73,7 @@ export function searchStrategyProvider<
   TSearchStrategyClientParams extends SearchStrategyClientParams,
   TRawResponse extends RawResponseBase
 >(
-  asyncSearchServiceProvider: AsyncSearchServiceProvider<
+  searchServiceProvider: SearchServiceProvider<
     TSearchStrategyClientParams,
     TRawResponse
   >,
@@ -83,9 +83,9 @@ export function searchStrategyProvider<
   IKibanaSearchRequest<TSearchStrategyClientParams>,
   IKibanaSearchResponse<TRawResponse>
 > {
-  const asyncSearchServiceMap = new Map<
+  const searchServiceMap = new Map<
     string,
-    GetAsyncSearchServiceState<TRawResponse>
+    GetSearchServiceState<TRawResponse>
   >();
 
   return {
@@ -94,27 +94,25 @@ export function searchStrategyProvider<
         throw new Error('Invalid request parameters.');
       }
 
-      // The function to fetch the current state of the async search service.
+      // The function to fetch the current state of the search service.
       // This will be either an existing service for a follow up fetch or a new one for new requests.
-      let getAsyncSearchServiceState: GetAsyncSearchServiceState<TRawResponse>;
+      let getSearchServiceState: GetSearchServiceState<TRawResponse>;
 
-      // If the request includes an ID, we require that the async search service already exists
+      // If the request includes an ID, we require that the search service already exists
       // otherwise we throw an error. The client should never poll a service that's been cancelled or finished.
-      // This also avoids instantiating async search services when the service gets called with random IDs.
+      // This also avoids instantiating search services when the service gets called with random IDs.
       if (typeof request.id === 'string') {
-        const existingGetAsyncSearchServiceState = asyncSearchServiceMap.get(
-          request.id
-        );
+        const existingGetSearchServiceState = searchServiceMap.get(request.id);
 
-        if (typeof existingGetAsyncSearchServiceState === 'undefined') {
+        if (typeof existingGetSearchServiceState === 'undefined') {
           throw new Error(
-            `AsyncSearchService with ID '${request.id}' does not exist.`
+            `SearchService with ID '${request.id}' does not exist.`
           );
         }
 
-        getAsyncSearchServiceState = existingGetAsyncSearchServiceState;
+        getSearchServiceState = existingGetSearchServiceState;
       } else {
-        getAsyncSearchServiceState = asyncSearchServiceProvider(
+        getSearchServiceState = searchServiceProvider(
           deps.esClient.asCurrentUser,
           getApmIndices,
           request.params as TSearchStrategyClientParams,
@@ -125,15 +123,15 @@ export function searchStrategyProvider<
       // Reuse the request's id or create a new one.
       const id = request.id ?? uuid();
 
-      const { error, meta, rawResponse } = getAsyncSearchServiceState();
+      const { error, meta, rawResponse } = getSearchServiceState();
 
       if (error instanceof Error) {
-        asyncSearchServiceMap.delete(id);
+        searchServiceMap.delete(id);
         throw error;
       } else if (meta.isRunning) {
-        asyncSearchServiceMap.set(id, getAsyncSearchServiceState);
+        searchServiceMap.set(id, getSearchServiceState);
       } else {
-        asyncSearchServiceMap.delete(id);
+        searchServiceMap.delete(id);
       }
 
       return of({
@@ -143,10 +141,10 @@ export function searchStrategyProvider<
       });
     },
     cancel: async (id, options, deps) => {
-      const getAsyncSearchServiceState = asyncSearchServiceMap.get(id);
-      if (getAsyncSearchServiceState !== undefined) {
-        getAsyncSearchServiceState().cancel();
-        asyncSearchServiceMap.delete(id);
+      const getSearchServiceState = searchServiceMap.get(id);
+      if (getSearchServiceState !== undefined) {
+        getSearchServiceState().cancel();
+        searchServiceMap.delete(id);
       }
     },
   };

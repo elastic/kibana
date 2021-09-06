@@ -6,11 +6,11 @@
  */
 
 import {
-  asyncSearchServiceLogProvider,
+  searchServiceLogProvider,
   currentTimeAsString,
-} from './async_search_service_log';
+} from './search_service_log';
 
-describe('async search service', () => {
+describe('search service', () => {
   describe('currentTimeAsString', () => {
     it('returns the current time as a string', () => {
       const mockDate = new Date(1392202800000);
@@ -25,9 +25,9 @@ describe('async search service', () => {
     });
   });
 
-  describe('asyncSearchServiceLogProvider', () => {
+  describe('searchServiceLogProvider', () => {
     it('adds and retrieves messages from the log', async () => {
-      const { addLogMessage, getLogMessages } = asyncSearchServiceLogProvider();
+      const { addLogMessage, getLogMessages } = searchServiceLogProvider();
 
       const mockDate = new Date(1392202800000);
       // @ts-ignore ignore the mockImplementation callback error

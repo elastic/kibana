@@ -14,8 +14,8 @@ import type {
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
 
-import type { AsyncSearchServiceLog } from '../async_search_service_log';
-import type { AsyncSearchServiceState } from '../latency_correlations/async_search_service_state';
+import type { SearchServiceLog } from '../search_service_log';
+import type { LatencyCorrelationsSearchServiceState } from '../latency_correlations/latency_correlations_search_service_state';
 import { TERMS_SIZE } from '../constants';
 
 import { getQueryWithParams } from './get_query_with_params';
@@ -44,7 +44,7 @@ const fetchTransactionDurationFieldTerms = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   fieldName: string,
-  addLogMessage: AsyncSearchServiceLog['addLogMessage']
+  addLogMessage: SearchServiceLog['addLogMessage']
 ): Promise<FieldValuePair[]> => {
   try {
     const resp = await esClient.search(getTermsAggRequest(params, fieldName));
@@ -93,8 +93,8 @@ export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
   params: SearchStrategyParams,
   fieldCandidates: string[],
-  state: AsyncSearchServiceState,
-  addLogMessage: AsyncSearchServiceLog['addLogMessage']
+  state: LatencyCorrelationsSearchServiceState,
+  addLogMessage: SearchServiceLog['addLogMessage']
 ): Promise<FieldValuePair[]> => {
   let fieldValuePairsProgress = 1;
 

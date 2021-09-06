@@ -6,7 +6,7 @@
  */
 
 export {
-  latencyCorrelationsAsyncSearchServiceProvider,
-  LatencyCorrelationsAsyncSearchServiceProvider,
+  latencyCorrelationsSearchServiceProvider,
+  LatencyCorrelationsSearchServiceProvider,
   LatencyCorrelationsSearchStrategy,
-} from './async_search_service';
+} from './latency_correlations_search_service';

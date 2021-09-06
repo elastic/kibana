@@ -14,8 +14,8 @@ import type {
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
 
-import type { AsyncSearchServiceLog } from '../async_search_service_log';
-import type { AsyncSearchServiceState } from '../latency_correlations/async_search_service_state';
+import type { SearchServiceLog } from '../search_service_log';
+import type { LatencyCorrelationsSearchServiceState } from '../latency_correlations/latency_correlations_search_service_state';
 import { CORRELATION_THRESHOLD, KS_TEST_THRESHOLD } from '../constants';
 
 import { getPrioritizedFieldValuePairs } from './get_prioritized_field_value_pairs';
@@ -24,9 +24,9 @@ import { fetchTransactionDurationRanges } from './query_ranges';
 
 export async function* fetchTransactionDurationHistograms(
   esClient: ElasticsearchClient,
-  addLogMessage: AsyncSearchServiceLog['addLogMessage'],
+  addLogMessage: SearchServiceLog['addLogMessage'],
   params: SearchStrategyParams,
-  state: AsyncSearchServiceState,
+  state: LatencyCorrelationsSearchServiceState,
   expectations: number[],
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],

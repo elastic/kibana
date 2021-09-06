@@ -11,8 +11,8 @@ import { APM_SEARCH_STRATEGIES } from '../../../common/search_strategies/constan
 
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
-import { failedTransactionsCorrelationsAsyncSearchServiceProvider } from './failed_transactions_correlations';
-import { latencyCorrelationsAsyncSearchServiceProvider } from './latency_correlations';
+import { failedTransactionsCorrelationsSearchServiceProvider } from './failed_transactions_correlations';
+import { latencyCorrelationsSearchServiceProvider } from './latency_correlations';
 import { searchStrategyProvider } from './search_strategy_provider';
 
 export const registerSearchStrategies = (
@@ -23,7 +23,7 @@ export const registerSearchStrategies = (
   registerSearchStrategy(
     APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
     searchStrategyProvider(
-      latencyCorrelationsAsyncSearchServiceProvider,
+      latencyCorrelationsSearchServiceProvider,
       getApmIndices,
       includeFrozen
     )
@@ -32,7 +32,7 @@ export const registerSearchStrategies = (
   registerSearchStrategy(
     APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS,
     searchStrategyProvider(
-      failedTransactionsCorrelationsAsyncSearchServiceProvider,
+      failedTransactionsCorrelationsSearchServiceProvider,
       getApmIndices,
       includeFrozen
     )

@@ -10,8 +10,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
-import { asyncSearchServiceLogProvider } from '../async_search_service_log';
-import { asyncSearchServiceStateProvider } from '../latency_correlations/async_search_service_state';
+import { searchServiceLogProvider } from '../search_service_log';
+import { latencyCorrelationsSearchServiceStateProvider } from '../latency_correlations/latency_correlations_search_service_state';
 
 import { fetchTransactionDurationHistograms } from './query_histograms_generator';
 
@@ -50,8 +50,8 @@ describe('query_histograms_generator', () => {
         search: esClientSearchMock,
       } as unknown) as ElasticsearchClient;
 
-      const state = asyncSearchServiceStateProvider();
-      const { addLogMessage, getLogMessages } = asyncSearchServiceLogProvider();
+      const state = latencyCorrelationsSearchServiceStateProvider();
+      const { addLogMessage, getLogMessages } = searchServiceLogProvider();
 
       let loadedHistograms = 0;
       const items = [];
@@ -104,8 +104,8 @@ describe('query_histograms_generator', () => {
         search: esClientSearchMock,
       } as unknown) as ElasticsearchClient;
 
-      const state = asyncSearchServiceStateProvider();
-      const { addLogMessage, getLogMessages } = asyncSearchServiceLogProvider();
+      const state = latencyCorrelationsSearchServiceStateProvider();
+      const { addLogMessage, getLogMessages } = searchServiceLogProvider();
 
       let loadedHistograms = 0;
       const items = [];

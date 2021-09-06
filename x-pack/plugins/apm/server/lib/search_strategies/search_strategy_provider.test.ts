@@ -16,7 +16,7 @@ import type { LatencyCorrelationsParams } from '../../../common/search_strategie
 
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
-import { latencyCorrelationsAsyncSearchServiceProvider } from './latency_correlations';
+import { latencyCorrelationsSearchServiceProvider } from './latency_correlations';
 import { searchStrategyProvider } from './search_strategy_provider';
 
 // helper to trigger promises in the async search service
@@ -109,7 +109,7 @@ describe('APM Correlations search strategy', () => {
   describe('strategy interface', () => {
     it('returns a custom search strategy with a `search` and `cancel` function', async () => {
       const searchStrategy = await searchStrategyProvider(
-        latencyCorrelationsAsyncSearchServiceProvider,
+        latencyCorrelationsSearchServiceProvider,
         getApmIndicesMock,
         false
       );
@@ -153,7 +153,7 @@ describe('APM Correlations search strategy', () => {
       describe('when no params are provided', () => {
         it('throws an error', async () => {
           const searchStrategy = await searchStrategyProvider(
-            latencyCorrelationsAsyncSearchServiceProvider,
+            latencyCorrelationsSearchServiceProvider,
             mockGetApmIndicesMock,
             false
           );
@@ -169,7 +169,7 @@ describe('APM Correlations search strategy', () => {
       describe('when no ID is provided', () => {
         it('performs a client search with params', async () => {
           const searchStrategy = await searchStrategyProvider(
-            latencyCorrelationsAsyncSearchServiceProvider,
+            latencyCorrelationsSearchServiceProvider,
             mockGetApmIndicesMock,
             false
           );
@@ -217,7 +217,7 @@ describe('APM Correlations search strategy', () => {
       describe('when an ID with params is provided', () => {
         it('retrieves the current request', async () => {
           const searchStrategy = await searchStrategyProvider(
-            latencyCorrelationsAsyncSearchServiceProvider,
+            latencyCorrelationsSearchServiceProvider,
             mockGetApmIndicesMock,
             false
           );
@@ -244,7 +244,7 @@ describe('APM Correlations search strategy', () => {
             .mockReset()
             .mockRejectedValueOnce(new Error('client error'));
           const searchStrategy = await searchStrategyProvider(
-            latencyCorrelationsAsyncSearchServiceProvider,
+            latencyCorrelationsSearchServiceProvider,
             mockGetApmIndicesMock,
             false
           );
@@ -263,7 +263,7 @@ describe('APM Correlations search strategy', () => {
       it('triggers the subscription only once', async () => {
         expect.assertions(2);
         const searchStrategy = await searchStrategyProvider(
-          latencyCorrelationsAsyncSearchServiceProvider,
+          latencyCorrelationsSearchServiceProvider,
           mockGetApmIndicesMock,
           false
         );
@@ -281,7 +281,7 @@ describe('APM Correlations search strategy', () => {
     describe('response', () => {
       it('sends an updated response on consecutive search calls', async () => {
         const searchStrategy = await searchStrategyProvider(
-          latencyCorrelationsAsyncSearchServiceProvider,
+          latencyCorrelationsSearchServiceProvider,
           mockGetApmIndicesMock,
           false
         );

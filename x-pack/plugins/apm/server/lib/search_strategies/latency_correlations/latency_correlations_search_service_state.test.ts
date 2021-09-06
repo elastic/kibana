@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { asyncSearchServiceStateProvider } from './async_search_service_state';
+import { latencyCorrelationsSearchServiceStateProvider } from './latency_correlations_search_service_state';
 
-describe('async search service', () => {
-  describe('asyncSearchServiceStateProvider', () => {
+describe('search service', () => {
+  describe('latencyCorrelationsSearchServiceStateProvider', () => {
     it('initializes with default state', () => {
-      const state = asyncSearchServiceStateProvider();
+      const state = latencyCorrelationsSearchServiceStateProvider();
       const defaultState = state.getState();
       const defaultProgress = state.getOverallProgress();
 
@@ -30,7 +30,7 @@ describe('async search service', () => {
     });
 
     it('returns updated state', () => {
-      const state = asyncSearchServiceStateProvider();
+      const state = latencyCorrelationsSearchServiceStateProvider();
 
       state.setCcsWarning(true);
       state.setError(new Error('the-error-message'));

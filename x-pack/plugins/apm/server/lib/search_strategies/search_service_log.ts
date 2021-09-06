@@ -13,7 +13,7 @@ interface LogMessage {
 
 export const currentTimeAsString = () => new Date().toISOString();
 
-export const asyncSearchServiceLogProvider = () => {
+export const searchServiceLogProvider = () => {
   const log: LogMessage[] = [];
 
   function addLogMessage(message: string, error?: string) {
@@ -31,6 +31,4 @@ export const asyncSearchServiceLogProvider = () => {
   return { addLogMessage, getLogMessages };
 };
 
-export type AsyncSearchServiceLog = ReturnType<
-  typeof asyncSearchServiceLogProvider
->;
+export type SearchServiceLog = ReturnType<typeof searchServiceLogProvider>;

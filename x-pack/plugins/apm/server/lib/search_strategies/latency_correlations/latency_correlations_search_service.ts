@@ -32,12 +32,12 @@ import {
   fetchTransactionDurationRanges,
 } from '../queries';
 import { computeExpectationsAndRanges } from '../utils';
-import { asyncSearchServiceLogProvider } from '../async_search_service_log';
-import type { AsyncSearchServiceProvider } from '../search_strategy_provider';
+import { searchServiceLogProvider } from '../search_service_log';
+import type { SearchServiceProvider } from '../search_strategy_provider';
 
-import { asyncSearchServiceStateProvider } from './async_search_service_state';
+import { latencyCorrelationsSearchServiceStateProvider } from './latency_correlations_search_service_state';
 
-export type LatencyCorrelationsAsyncSearchServiceProvider = AsyncSearchServiceProvider<
+export type LatencyCorrelationsSearchServiceProvider = SearchServiceProvider<
   LatencyCorrelationsParams,
   LatencyCorrelationsRawResponse
 >;
@@ -47,15 +47,15 @@ export type LatencyCorrelationsSearchStrategy = ISearchStrategy<
   IKibanaSearchResponse<LatencyCorrelationsRawResponse>
 >;
 
-export const latencyCorrelationsAsyncSearchServiceProvider: LatencyCorrelationsAsyncSearchServiceProvider = (
+export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearchServiceProvider = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   searchServiceParams: LatencyCorrelationsParams,
   includeFrozen: boolean
 ) => {
-  const { addLogMessage, getLogMessages } = asyncSearchServiceLogProvider();
+  const { addLogMessage, getLogMessages } = searchServiceLogProvider();
 
-  const state = asyncSearchServiceStateProvider();
+  const state = latencyCorrelationsSearchServiceStateProvider();
 
   async function fetchCorrelations() {
     let params:

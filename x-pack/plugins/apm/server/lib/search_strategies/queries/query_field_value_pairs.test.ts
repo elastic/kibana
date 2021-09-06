@@ -10,8 +10,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from 'src/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
-import { asyncSearchServiceLogProvider } from '../async_search_service_log';
-import { asyncSearchServiceStateProvider } from '../latency_correlations/async_search_service_state';
+import { searchServiceLogProvider } from '../search_service_log';
+import { latencyCorrelationsSearchServiceStateProvider } from '../latency_correlations/latency_correlations_search_service_state';
 
 import {
   fetchTransactionDurationFieldValuePairs,
@@ -62,8 +62,8 @@ describe('query_field_value_pairs', () => {
         search: esClientSearchMock,
       } as unknown) as ElasticsearchClient;
 
-      const { addLogMessage, getLogMessages } = asyncSearchServiceLogProvider();
-      const state = asyncSearchServiceStateProvider();
+      const { addLogMessage, getLogMessages } = searchServiceLogProvider();
+      const state = latencyCorrelationsSearchServiceStateProvider();
 
       const resp = await fetchTransactionDurationFieldValuePairs(
         esClientMock,

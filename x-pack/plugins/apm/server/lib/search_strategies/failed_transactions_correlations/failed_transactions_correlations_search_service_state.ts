@@ -12,7 +12,7 @@ interface Progress {
   loadedFieldCandidates: number;
   loadedFailedTransactionsCorrelations: number;
 }
-export const asyncFailedTransactionsCorrelationsSearchServiceStateProvider = () => {
+export const failedTransactionsCorrelationsSearchServiceStateProvider = () => {
   let ccsWarning = false;
   function setCcsWarning(d: boolean) {
     ccsWarning = d;
@@ -90,6 +90,6 @@ export const asyncFailedTransactionsCorrelationsSearchServiceStateProvider = () 
   };
 };
 
-export type AsyncSearchServiceState = ReturnType<
-  typeof asyncFailedTransactionsCorrelationsSearchServiceStateProvider
+export type FailedTransactionsCorrelationsSearchServiceState = ReturnType<
+  typeof failedTransactionsCorrelationsSearchServiceStateProvider
 >;

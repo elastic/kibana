@@ -22,18 +22,18 @@ import type {
   FailedTransactionsCorrelationsRawResponse,
 } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
-import { asyncSearchServiceLogProvider } from '../async_search_service_log';
+import { searchServiceLogProvider } from '../search_service_log';
 import {
   fetchFailedTransactionsCorrelationPValues,
   fetchTransactionDurationFieldCandidates,
 } from '../queries';
-import type { AsyncSearchServiceProvider } from '../search_strategy_provider';
+import type { SearchServiceProvider } from '../search_strategy_provider';
 
-import { asyncFailedTransactionsCorrelationsSearchServiceStateProvider } from './async_search_service_state';
+import { failedTransactionsCorrelationsSearchServiceStateProvider } from './failed_transactions_correlations_search_service_state';
 
 import { ERROR_CORRELATION_THRESHOLD } from '../constants';
 
-export type FailedTransactionsCorrelationsAsyncSearchServiceProvider = AsyncSearchServiceProvider<
+export type FailedTransactionsCorrelationsSearchServiceProvider = SearchServiceProvider<
   FailedTransactionsCorrelationsParams,
   FailedTransactionsCorrelationsRawResponse
 >;
@@ -43,15 +43,15 @@ export type FailedTransactionsCorrelationsSearchStrategy = ISearchStrategy<
   IKibanaSearchResponse<FailedTransactionsCorrelationsRawResponse>
 >;
 
-export const failedTransactionsCorrelationsAsyncSearchServiceProvider: FailedTransactionsCorrelationsAsyncSearchServiceProvider = (
+export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransactionsCorrelationsSearchServiceProvider = (
   esClient: ElasticsearchClient,
   getApmIndices: () => Promise<ApmIndicesConfig>,
   searchServiceParams: FailedTransactionsCorrelationsParams,
   includeFrozen: boolean
 ) => {
-  const { addLogMessage, getLogMessages } = asyncSearchServiceLogProvider();
+  const { addLogMessage, getLogMessages } = searchServiceLogProvider();
 
-  const state = asyncFailedTransactionsCorrelationsSearchServiceStateProvider();
+  const state = failedTransactionsCorrelationsSearchServiceStateProvider();
 
   async function fetchErrorCorrelations() {
     try {
