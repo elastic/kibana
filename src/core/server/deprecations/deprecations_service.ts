@@ -37,7 +37,48 @@ import { SavedObjectsClientContract } from '../saved_objects/types';
  *
  * async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
  *   const deprecations: DeprecationsDetails[] = [];
- *
+ *   const count = await getFooCount(savedObjectsClient);
+ *   if (count > 0) {
+ *     // Example of a manual correctiveAction
+ *     deprecations.push({
+ *       title: i18n.translate('xpack.foo.deprecations.title', {
+ *         defaultMessage: `Foo's are deprecated`
+ *       }),
+ *       message: i18n.translate('xpack.foo.deprecations.message', {
+ *         defaultMessage: `You have {count} Foo's. Migrate your Foo's to a dashboard to continue using them.`,
+ *         values: { count },
+ *       }),
+ *       documentationUrl:
+ *         'https://www.elastic.co/guide/en/kibana/current/foo.html',
+ *       level: 'warning',
+ *       correctiveActions: {
+ *         manualSteps: [
+ *            i18n.translate('xpack.foo.deprecations.manualStepOneMessage', {
+ *              defaultMessage: 'Navigate to the Kibana Dashboard and click "Create dashboard".',
+ *            }),
+ *            i18n.translate('xpack.foo.deprecations.manualStepTwoMessage', {
+ *              defaultMessage: 'Select Foo from the "New Visualization" window.',
+ *            }),
+ *         ],
+ *         api: {
+ *           path: '/internal/security/users/test_dashboard_user',
+ *           method: 'POST',
+ *           body: {
+ *             username: 'test_dashboard_user',
+ *             roles: [
+ *               "machine_learning_user",
+ *               "enrich_user",
+ *               "kibana_admin"
+ *             ],
+ *             full_name: "Alison Goryachev",
+ *             email: "alisongoryachev@gmail.com",
+ *             metadata: {},
+ *             enabled: true
+ *           }
+ *         },
+ *       },
+ *     });
+ *   }
  *   return deprecations;
  * }
  *
