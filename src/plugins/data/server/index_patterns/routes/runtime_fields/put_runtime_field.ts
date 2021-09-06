@@ -55,11 +55,9 @@ export const registerPutRuntimeFieldRoute = (
 
       const oldRuntimeFieldObject = indexPattern.getRuntimeField(name);
 
-      if (!oldRuntimeFieldObject) {
-        throw new ErrorIndexPatternFieldNotFound(id, name);
+      if (oldRuntimeFieldObject) {
+        indexPattern.removeRuntimeField(name);
       }
-
-      indexPattern.removeRuntimeField(name);
 
       const createdFields = indexPattern.addRuntimeField(name, runtimeField);
 
