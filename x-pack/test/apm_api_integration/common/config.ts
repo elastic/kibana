@@ -77,7 +77,7 @@ export function createTestConfig(config: Config) {
       services: {
         ...services,
 
-        apmApiClients: async (context: InheritedFtrProviderContext) => {
+        apmApiClient: async (context: InheritedFtrProviderContext) => {
           return {
             noAccessUser: await getApmApiClient(servers.kibana, context, ApmUser.noAccessUser),
             readUser: await getApmApiClient(servers.kibana, context, ApmUser.apmReadUser),

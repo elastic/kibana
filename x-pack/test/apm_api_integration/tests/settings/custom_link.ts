@@ -12,7 +12,7 @@ import { registry } from '../../common/registry';
 import { ApmApiError } from '../../common/apm_api_supertest';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
-  const apmApiClients = getService('apmApiClients');
+  const apmApiClient = getService('apmApiClient');
   const log = getService('log');
 
   const archiveName = 'apm_8.0.0';
@@ -125,7 +125,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
       });
 
       it('fetches a transaction sample', async () => {
-        const response = await apmApiClients.readUser({
+        const response = await apmApiClient.readUser({
           endpoint: 'GET /api/apm/settings/custom_links/transaction',
           params: {
             query: {
@@ -140,7 +140,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   );
 
   function searchCustomLinks(filters?: any) {
-    return apmApiClients.readUser({
+    return apmApiClient.readUser({
       endpoint: 'GET /api/apm/settings/custom_links',
       params: {
         query: filters,
@@ -151,7 +151,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   async function createCustomLink(customLink: CustomLink) {
     log.debug('creating configuration', customLink);
 
-    return apmApiClients.writeUser({
+    return apmApiClient.writeUser({
       endpoint: 'POST /api/apm/settings/custom_links',
       params: {
         body: customLink,
@@ -162,7 +162,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   async function updateCustomLink(id: string, customLink: CustomLink) {
     log.debug('updating configuration', id, customLink);
 
-    return apmApiClients.writeUser({
+    return apmApiClient.writeUser({
       endpoint: 'PUT /api/apm/settings/custom_links/{id}',
       params: {
         path: { id },
@@ -174,7 +174,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
   async function deleteCustomLink(id: string) {
     log.debug('deleting configuration', id);
 
-    return apmApiClients.writeUser({
+    return apmApiClient.writeUser({
       endpoint: 'DELETE /api/apm/settings/custom_links/{id}',
       params: { path: { id } },
     });

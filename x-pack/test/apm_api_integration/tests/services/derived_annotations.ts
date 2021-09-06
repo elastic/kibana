@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function annotationApiTests({ getService }: FtrProviderContext) {
-  const apmApiClients = getService('apmApiClients');
+  const apmApiClient = getService('apmApiClient');
   const es = getService('es');
 
   const dates = [
@@ -128,7 +128,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           });
 
           response = (
-            await apmApiClients.readUser({
+            await apmApiClient.readUser({
               endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
               params: {
                 path: {

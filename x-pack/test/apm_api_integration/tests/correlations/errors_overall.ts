@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiClients = getService('apmApiClients');
+  const apmApiClient = getService('apmApiClient');
   const archiveName = 'apm_8.0.0';
   const range = archives_metadata[archiveName];
 
@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'trial', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await apmApiClients.readUser(urlConfig);
+        const response = await apmApiClient.readUser(urlConfig);
 
         expect(response.status).to.be(200);
         expect(response.body.overall).to.be(null);
@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let response: SupertestReturnType<'GET /api/apm/correlations/errors/overall_timeseries'>;
 
       before(async () => {
-        response = await apmApiClients.readUser(urlConfig);
+        response = await apmApiClient.readUser(urlConfig);
       });
 
       it('returns successfully', () => {
