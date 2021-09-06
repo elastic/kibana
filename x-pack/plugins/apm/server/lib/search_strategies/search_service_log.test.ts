@@ -15,7 +15,7 @@ describe('search service', () => {
     it('returns the current time as a string', () => {
       const mockDate = new Date(1392202800000);
       // @ts-ignore ignore the mockImplementation callback error
-      const spy = jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+      const spy = jest.spyOn(global, 'Date').mockReturnValue(mockDate);
 
       const timeString = currentTimeAsString();
 
@@ -31,7 +31,7 @@ describe('search service', () => {
 
       const mockDate = new Date(1392202800000);
       // @ts-ignore ignore the mockImplementation callback error
-      const spy = jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+      const spy = jest.spyOn(global, 'Date').mockReturnValue(mockDate);
 
       addLogMessage('the first message');
       addLogMessage('the second message');
