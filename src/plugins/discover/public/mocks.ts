@@ -17,6 +17,7 @@ const createSetupContract = (): Setup => {
       addDocView: jest.fn(),
     },
     locator: {
+      id: 'TEST_LOCATOR',
       getLocation: jest.fn(),
       getUrl: jest.fn(),
       useUrl: jest.fn(),
@@ -37,6 +38,7 @@ const createStartContract = (): Start => {
       createUrl: jest.fn(),
     } as unknown) as DiscoverStart['urlGenerator'],
     locator: {
+      id: 'TEST_LOCATOR',
       getLocation: jest.fn(),
       getUrl: jest.fn(),
       useUrl: jest.fn(),

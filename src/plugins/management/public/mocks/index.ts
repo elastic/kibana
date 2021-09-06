@@ -31,6 +31,7 @@ const createSetupContract = (): ManagementSetup => ({
     } as unknown) as DefinedSections,
   },
   locator: {
+    id: 'TEST_LOCATOR',
     getLocation: jest.fn(async () => ({
       app: 'MANAGEMENT',
       path: '',

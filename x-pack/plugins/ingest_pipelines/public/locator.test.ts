@@ -13,6 +13,7 @@ describe('Ingest pipeline locator', () => {
     const managementDefinition = new ManagementAppLocatorDefinition();
     const definition = new IngestPipelinesLocatorDefinition({
       managementAppLocator: {
+        id: 'INGEST_PIPELINE_TEST_LOCATOR',
         getLocation: (params) => managementDefinition.getLocation(params),
         getUrl: async () => {
           throw new Error('not implemented');

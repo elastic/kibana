@@ -43,6 +43,7 @@ const setup = (
 ) => {
   const core = coreMock.createStart();
   const locator: DiscoverAppLocator = {
+    id: 'DISCOVER_TEST_LOCATOR',
     getLocation: jest.fn(() =>
       Promise.resolve({
         app: 'discover',

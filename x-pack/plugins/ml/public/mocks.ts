@@ -9,6 +9,7 @@ import { MlPluginSetup, MlPluginStart } from './plugin';
 const createSetupContract = (): jest.Mocked<MlPluginSetup> => {
   return {
     locator: {
+      id: 'TEST_LOCATOR',
       getLocation: jest.fn(),
       getUrl: jest.fn(),
       useUrl: jest.fn(),
@@ -24,6 +25,7 @@ const createSetupContract = (): jest.Mocked<MlPluginSetup> => {
 const createStartContract = (): jest.Mocked<MlPluginStart> => {
   return {
     locator: {
+      id: 'TEST_LOCATOR',
       getLocation: jest.fn(),
       getUrl: jest.fn(),
       useUrl: jest.fn(),
