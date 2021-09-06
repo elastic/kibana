@@ -7,7 +7,7 @@
  */
 
 import { InternalHttpServiceSetup } from '../../http';
-import { CoreUsageDataSetup } from '../../core_usage_data';
+import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { Logger } from '../../logging';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { IKibanaMigrator } from '../migrations';
@@ -34,7 +34,7 @@ export function registerRoutes({
   migratorPromise,
 }: {
   http: InternalHttpServiceSetup;
-  coreUsageData: CoreUsageDataSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   config: SavedObjectConfig;
   migratorPromise: Promise<IKibanaMigrator>;
