@@ -9,11 +9,13 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 import {
+  EuiCallOut,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
   EuiEmptyPrompt,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { LogEntry } from './components/log_entry';
@@ -114,6 +116,17 @@ export const EndpointActivityLog = memo(
             <>
               <DateRangePicker />
               <EuiFlexItem grow={true}>
+                {!isPagingDisabled && activityLogLoaded && !activityLogData.length && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiCallOut
+                      data-test-subj="activityLogNoDataCallout"
+                      size="s"
+                      title={i18.ACTIVITY_LOG.LogEntry.dateRangeMessage}
+                      iconType="alert"
+                    />
+                  </>
+                )}
                 {activityLogLoaded &&
                   activityLogData.map((logEntry) => (
                     <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />

@@ -13,9 +13,11 @@ interface GlobalStateProviderProps {
   toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts'];
 }
 
-interface State {
+export interface State {
   cluster_uuid?: string;
   ccs?: any;
+  inSetupMode?: boolean;
+  save?: () => void;
 }
 
 export const GlobalStateContext = createContext({} as State);
