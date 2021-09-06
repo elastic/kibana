@@ -121,7 +121,7 @@ export class HeadlessChromiumDriver {
         (key: string, value: unknown) => {
           Object.defineProperty(window, key, {
             configurable: false,
-            writable: false,
+            writable: true,
             enumerable: true,
             value,
           });
