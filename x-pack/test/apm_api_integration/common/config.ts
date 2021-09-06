@@ -8,6 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
+import { SecurityServiceProvider } from 'test/common/services/security';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
@@ -20,6 +21,8 @@ interface Config {
   license: 'basic' | 'trial';
   kibanaConfig?: Record<string, string | string[]>;
 }
+
+type SecurityService = PromiseReturnType<typeof SecurityServiceProvider>;
 
 function getLegacySupertestClient(kibanaServer: UrlObject, apmUser: ApmUser) {
   return async (context: InheritedFtrProviderContext) => {
@@ -39,12 +42,9 @@ function getLegacySupertestClient(kibanaServer: UrlObject, apmUser: ApmUser) {
 
 async function getApmApiClient(
   kibanaServer: UrlObject,
-  context: InheritedFtrProviderContext,
+  security: SecurityService,
   apmUser: ApmUser
 ) {
-  const security = context.getService('security');
-  await security.init();
-
   await createApmUser(security, apmUser);
 
   const url = format({
@@ -78,18 +78,21 @@ export function createTestConfig(config: Config) {
         ...services,
 
         apmApiClient: async (context: InheritedFtrProviderContext) => {
+          const security = context.getService('security');
+          await security.init();
+
           return {
-            noAccessUser: await getApmApiClient(servers.kibana, context, ApmUser.noAccessUser),
-            readUser: await getApmApiClient(servers.kibana, context, ApmUser.apmReadUser),
-            writeUser: await getApmApiClient(servers.kibana, context, ApmUser.apmWriteUser),
+            noAccessUser: await getApmApiClient(servers.kibana, security, ApmUser.noAccessUser),
+            readUser: await getApmApiClient(servers.kibana, security, ApmUser.apmReadUser),
+            writeUser: await getApmApiClient(servers.kibana, security, ApmUser.apmWriteUser),
             annotationWriterUser: await getApmApiClient(
               servers.kibana,
-              context,
+              security,
               ApmUser.apmAnnotationsWriteUser
             ),
             noMlAccessUser: await getApmApiClient(
               servers.kibana,
-              context,
+              security,
               ApmUser.apmReadUserWithoutMlAccess
             ),
           };
