@@ -481,7 +481,7 @@ describe('xy_expression', () => {
       defaultProps = {
         formatFactory: getFormatSpy,
         timeZone: 'UTC',
-        renderMode: 'display',
+        renderMode: 'view',
         chartsThemeService,
         chartsActiveCursorService,
         paletteService,
@@ -1065,11 +1065,11 @@ describe('xy_expression', () => {
       });
     });
 
-    test('onBrushEnd is not set on noInteractivity mode', () => {
+    test('onBrushEnd is not set on non-interactive mode', () => {
       const { args, data } = sampleArgs();
 
       const wrapper = mountWithIntl(
-        <XYChart {...defaultProps} data={data} args={args} renderMode="noInteractivity" />
+        <XYChart {...defaultProps} data={data} args={args} interactive={false} />
       );
 
       expect(wrapper.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
@@ -1335,11 +1335,11 @@ describe('xy_expression', () => {
       });
     });
 
-    test('onElementClick is not triggering event on noInteractivity mode', () => {
+    test('onElementClick is not triggering event on non-interactive mode', () => {
       const { args, data } = sampleArgs();
 
       const wrapper = mountWithIntl(
-        <XYChart {...defaultProps} data={data} args={args} renderMode="noInteractivity" />
+        <XYChart {...defaultProps} data={data} args={args} interactive={false} />
       );
 
       expect(wrapper.find(Settings).first().prop('onElementClick')).toBeUndefined();

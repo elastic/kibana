@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export const SAVED_QUERIES_ID = 'savedQueryList';
-export const SAVED_QUERY_ID = 'savedQuery';
+import { ExceptionListInfo } from './use_all_exception_lists';
+
+export interface ExceptionsTableItem extends ExceptionListInfo {
+  isDeleting: boolean;
+  isExporting: boolean;
+}
