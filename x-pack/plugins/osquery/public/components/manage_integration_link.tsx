@@ -24,11 +24,9 @@ const ManageIntegrationLinkComponent = () => {
   const integrationHref = useMemo(() => {
     if (osqueryIntegration) {
       return getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
-        path:
-          '#' +
-          pagePathGetters.integration_details_policies({
-            pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
-          })[1],
+        path: pagePathGetters.integration_details_policies({
+          pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
+        })[1],
       });
     }
   }, [getUrlForApp, osqueryIntegration]);
@@ -39,11 +37,9 @@ const ManageIntegrationLinkComponent = () => {
         event.preventDefault();
         if (osqueryIntegration) {
           return navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-            path:
-              '#' +
-              pagePathGetters.integration_details_policies({
-                pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
-              })[1],
+            path: pagePathGetters.integration_details_policies({
+              pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
+            })[1],
           });
         }
       }
