@@ -37,7 +37,7 @@ function filterByPanelType(panelType: string) {
     panelType === 'table' ? agg.value !== TSVB_METRIC_TYPES.SERIES_AGG : true;
 }
 
-export function isMetricAviableForPanel(aggId: string, panelType: string, timeRangeMode?: string) {
+export function isMetricAvailableForPanel(aggId: string, panelType: string, timeRangeMode?: string) {
   if (
     panelType !== PANEL_TYPES.TIMESERIES &&
     timeRangeMode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
@@ -89,7 +89,7 @@ export function AggSelect(props: AggSelectUiProps) {
       disabled:
         !enablePipelines ||
         !isMetricEnabled(agg.value, uiRestrictions) ||
-        !isMetricAviableForPanel(agg.value as string, panelType, panelModel?.time_range_mode),
+        !isMetricAvailableForPanel(agg.value as string, panelType, panelModel?.time_range_mode),
     });
 
     options = [

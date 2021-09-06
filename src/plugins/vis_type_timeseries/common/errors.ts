@@ -51,7 +51,7 @@ export class AggNotSupportedInMode extends UIError {
     super(
       i18n.translate('visTypeTimeseries.wrongAggregationErrorMessage', {
         defaultMessage:
-          'The pipeline aggregation {metricType} is not longer supported in {timeRangeMode} mode',
+          'The aggregation {metricType} is not supported in {timeRangeMode} mode',
         values: { metricType, timeRangeMode },
       })
     );
