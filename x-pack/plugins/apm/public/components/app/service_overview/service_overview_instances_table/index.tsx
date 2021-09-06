@@ -159,7 +159,7 @@ export function ServiceOverviewInstancesTable({
               noItemsMessage={
                 isLoading
                   ? i18n.translate('xpack.apm.serviceOverview.loadingText', {
-                      defaultMessage: 'Loading...',
+                      defaultMessage: 'Loading…',
                     })
                   : i18n.translate('xpack.apm.serviceOverview.noResultsText', {
                       defaultMessage: 'No instances found',

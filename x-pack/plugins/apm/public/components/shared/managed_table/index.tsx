@@ -129,8 +129,8 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
 
   const showNoItemsMessage = useMemo(() => {
     return isLoading
-      ? i18n.translate('xpack.apm.managedTable.loading', {
-          defaultMessage: 'Loading...',
+      ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
+          defaultMessage: 'Loading…',
         })
       : noItemsMessage;
   }, [isLoading, noItemsMessage]);
