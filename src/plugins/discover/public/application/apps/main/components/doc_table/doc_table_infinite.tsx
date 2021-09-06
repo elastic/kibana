@@ -13,6 +13,7 @@ import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SkipBottomButton } from '../skip_bottom_button';
+import { shouldLoadNextDocPatch } from './lib/should_load_next_doc_patch';
 
 const FOOTER_PADDING = { padding: 0 };
 
@@ -35,16 +36,7 @@ const DocTableInfiniteContent = (props: DocTableRenderProps) => {
     const scheduleCheck = debounce(() => {
       const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
       const usedScrollDiv = isMobileView ? scrollMobileElem : scrollDiv;
-      // the height of the scrolling div, including content not visible on the screen due to overflow.
-      const scrollHeight = usedScrollDiv.scrollHeight;
-      // the number of pixels that the div is is scrolled vertically
-      const scrollTop = usedScrollDiv.scrollTop;
-      // the inner height of the scrolling div
-      const clientHeight = usedScrollDiv.clientHeight;
-      const consumedHeight = scrollTop + clientHeight;
-      const remainingHeight = scrollHeight - consumedHeight;
-      // 100px buffer so it starts rendering more documents before the user completely scrolled down
-      if (remainingHeight < 100) {
+      if (shouldLoadNextDocPatch(usedScrollDiv)) {
         setLimit((prevLimit) => prevLimit + 50);
       }
     }, 50);
