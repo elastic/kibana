@@ -27,8 +27,6 @@ export interface DynamicPagePathValues {
   [key: string]: string;
 }
 
-export const BASE_PATH = '/app/fleet';
-
 // If routing paths are changed here, please also check to see if
 // `pagePathGetters()`, below, needs any modifications
 export const PAGE_ROUTING_PATHS = {
