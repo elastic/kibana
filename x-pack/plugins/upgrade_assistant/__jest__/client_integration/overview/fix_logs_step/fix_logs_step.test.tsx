@@ -170,7 +170,12 @@ describe('Overview - Fix deprecation logs step', () => {
       component.update();
 
       expect(exists('viewDiscoverLogs')).toBe(true);
-      expect(find('viewDiscoverLogs').props().href).toBe('discoverUrl');
+
+      const decodedUrl = decodeURIComponent(find('viewDiscoverLogs').props().href);
+      expect(decodedUrl).toContain('discoverUrl');
+      ['"language":"kuery"', '"query":"@timestamp+>'].forEach((param) => {
+        expect(decodedUrl).toContain(param);
+      });
     });
   });
 
