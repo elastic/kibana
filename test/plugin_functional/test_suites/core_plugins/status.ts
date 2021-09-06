@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
   const getStatus = async (pluginName?: string) => {
-    const resp = await supertest.get('/api/status?v8format=true');
+    const resp = await supertest.get('/api/status');
 
     if (pluginName) {
       return resp.body.status.plugins[pluginName];
