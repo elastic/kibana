@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -23,19 +23,35 @@ import {
 import { CloudBackupStatus } from '../../../../../common/types';
 import { UseRequestResponse } from '../../../../shared_imports';
 import { ResponseError } from '../../../lib/api';
+import { useAppContext } from '../../../app_context';
 
 export type CloudBackupStatusResponse = UseRequestResponse<CloudBackupStatus, ResponseError>;
 
 interface Props {
-  cloudBackupStatusResponse: UseRequestResponse<CloudBackupStatus, ResponseError>;
   cloudSnapshotsUrl: string;
+  setIsComplete: (isComplete: boolean) => void;
 }
 
 export const CloudBackup: React.FunctionComponent<Props> = ({
-  cloudBackupStatusResponse,
   cloudSnapshotsUrl,
+  setIsComplete,
 }) => {
-  const { isInitialRequest, isLoading, error, data, resendRequest } = cloudBackupStatusResponse;
+  const {
+    services: { api },
+  } = useAppContext();
+
+  const {
+    isInitialRequest,
+    isLoading,
+    error,
+    data,
+    resendRequest,
+  } = api.useLoadCloudBackupStatus();
+
+  // Tell overview whether the step is complete or not.
+  useEffect(() => {
+    setIsComplete(data?.isBackedUp ?? false);
+  }, [data, setIsComplete]);
 
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent lines={3} />;

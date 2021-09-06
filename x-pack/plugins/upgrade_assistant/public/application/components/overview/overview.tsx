@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 
 import {
   EuiSteps,
@@ -25,6 +25,8 @@ import { getBackupStep } from './backup_step';
 import { getFixIssuesStep } from './fix_issues_step';
 import { getFixLogsStep } from './fix_logs_step';
 import { getUpgradeStep } from './upgrade_step';
+
+type OverviewStep = 'backup' | 'fix_issues' | 'fix_logs';
 
 export const Overview: FunctionComponent = () => {
   const {
@@ -51,11 +53,19 @@ export const Overview: FunctionComponent = () => {
     breadcrumbs.setBreadcrumbs('overview');
   }, [breadcrumbs]);
 
-  let cloudBackupStatusResponse;
+  const [completedStepsMap, setCompletedStepsMap] = useState({
+    backup: false,
+    fix_issues: false,
+    fix_logs: false,
+  });
 
-  if (cloud?.isCloudEnabled) {
-    cloudBackupStatusResponse = api.useLoadCloudBackupStatus();
-  }
+  const isStepComplete = (step: OverviewStep) => completedStepsMap[step];
+  const setCompletedStep = (step: OverviewStep, isCompleted: boolean) => {
+    setCompletedStepsMap({
+      ...completedStepsMap,
+      [step]: isCompleted,
+    });
+  };
 
   return (
     <EuiPageBody restrictWidth={true} data-test-subj="overview">
@@ -97,7 +107,11 @@ export const Overview: FunctionComponent = () => {
 
         <EuiSteps
           steps={[
-            getBackupStep({ cloud, cloudBackupStatusResponse }),
+            getBackupStep({
+              cloud,
+              isComplete: isStepComplete('backup'),
+              setIsComplete: setCompletedStep.bind(null, 'backup'),
+            }),
             getFixIssuesStep({ nextMajor }),
             getFixLogsStep(),
             getUpgradeStep({ docLinks, nextMajor }),

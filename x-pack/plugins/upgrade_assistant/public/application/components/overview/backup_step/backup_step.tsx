@@ -18,19 +18,26 @@ const title = i18n.translate('xpack.upgradeAssistant.overview.backupStepTitle', 
 });
 
 interface Props {
+  isComplete: boolean;
+  setIsComplete: (isComplete: boolean) => void;
   cloud?: CloudSetup;
   cloudBackupStatusResponse?: CloudBackupStatusResponse;
 }
 
-export const getBackupStep = ({ cloud, cloudBackupStatusResponse }: Props): EuiStepProps => {
+export const getBackupStep = ({
+  cloud,
+  cloudBackupStatusResponse,
+  isComplete,
+  setIsComplete,
+}: Props): EuiStepProps => {
   if (cloud?.isCloudEnabled) {
     return {
       title,
-      status: cloudBackupStatusResponse!.data?.isBackedUp ? 'complete' : 'incomplete',
+      status: isComplete ? 'complete' : 'incomplete',
       children: (
         <CloudBackup
-          cloudBackupStatusResponse={cloudBackupStatusResponse!}
           cloudSnapshotsUrl={`${cloud!.deploymentUrl}/elasticsearch/snapshots`}
+          setIsComplete={setIsComplete!}
         />
       ),
     };
