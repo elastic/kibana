@@ -13,7 +13,7 @@ export const mapMissing = (filter: Filter) => {
     return {
       type: FILTERS.MISSING,
       value: FILTERS.MISSING,
-      key: filter.missing.field,
+      key: filter.query.missing.field,
     };
   }
 

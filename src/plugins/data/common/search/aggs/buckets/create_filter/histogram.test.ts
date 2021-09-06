@@ -19,9 +19,9 @@ function validateFilter(filter: RangeFilter) {
   expect(filter).toHaveProperty('meta');
   expect(filter.meta).toHaveProperty('index', '1234');
   expect(filter).toHaveProperty('range');
-  expect(filter.range).toHaveProperty('bytes');
-  expect(filter.range.bytes).toHaveProperty('gte', 2048);
-  expect(filter.range.bytes).toHaveProperty('lt', 3072);
+  expect(filter.query.range).toHaveProperty('bytes');
+  expect(filter.query.range.bytes).toHaveProperty('gte', 2048);
+  expect(filter.query.range.bytes).toHaveProperty('lt', 3072);
   expect(filter.meta).toHaveProperty('formattedValue');
 }
 

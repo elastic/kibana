@@ -75,8 +75,6 @@ export type Filter = {
     store: FilterStateStore;
   };
   meta: FilterMeta;
-
-  // TODO: research me! This is being extracted into the top level by translateToQuery. Maybe we can simplify.
   query?: DslQuery;
 };
 

@@ -12,8 +12,10 @@ describe('missing filter', function () {
   describe('getMissingFilterField', function () {
     it('should return the name of the field an missing query is targeting', () => {
       const filter = {
-        missing: {
-          field: 'extension',
+        query: {
+          missing: {
+            field: 'extension',
+          },
         },
         meta: {
           disabled: false,

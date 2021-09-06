@@ -59,9 +59,9 @@ describe('AggConfig Filters', () => {
       expect(filter).toHaveProperty('range');
       expect(filter).toHaveProperty('meta');
       expect(filter.meta).toHaveProperty('index', '1234');
-      expect(filter.range).toHaveProperty('ip');
-      expect(filter.range.ip).toHaveProperty('gte', '0.0.0.0');
-      expect(filter.range.ip).toHaveProperty('lte', '1.1.1.1');
+      expect(filter.query.range).toHaveProperty('ip');
+      expect(filter.query.range.ip).toHaveProperty('gte', '0.0.0.0');
+      expect(filter.query.range.ip).toHaveProperty('lte', '1.1.1.1');
     });
 
     test('should return a range filter for ip_range agg using a CIDR mask', () => {
@@ -87,9 +87,9 @@ describe('AggConfig Filters', () => {
       expect(filter).toHaveProperty('range');
       expect(filter).toHaveProperty('meta');
       expect(filter.meta).toHaveProperty('index', '1234');
-      expect(filter.range).toHaveProperty('ip');
-      expect(filter.range.ip).toHaveProperty('gte', '67.129.65.192');
-      expect(filter.range.ip).toHaveProperty('lte', '67.129.65.223');
+      expect(filter.query.range).toHaveProperty('ip');
+      expect(filter.query.range.ip).toHaveProperty('gte', '67.129.65.192');
+      expect(filter.query.range.ip).toHaveProperty('lte', '67.129.65.223');
     });
   });
 });

@@ -50,7 +50,7 @@ describe('migrateFilter', function () {
 
   it('should return the original filter if no migration is necessary', function () {
     const originalFilter = {
-      match_all: {},
+      query: { match_all: {} },
     } as MatchAllFilter;
     const migratedFilter = migrateFilter(originalFilter, undefined);
 

@@ -13,8 +13,10 @@ export type MissingFilterMeta = FilterMeta;
 
 export type MissingFilter = Filter & {
   meta: MissingFilterMeta;
-  missing: {
-    field: string;
+  query: {
+    missing: {
+      field: string;
+    };
   };
 };
 
@@ -24,11 +26,12 @@ export type MissingFilter = Filter & {
  *
  * @public
  */
-export const isMissingFilter = (filter: Filter): filter is MissingFilter => has(filter, 'missing');
+export const isMissingFilter = (filter: Filter): filter is MissingFilter =>
+  has(filter, 'query.missing');
 
 /**
  * @internal
  */
 export const getMissingFilterField = (filter: MissingFilter) => {
-  return filter.missing && filter.missing.field;
+  return filter.query.missing && filter.query.missing.field;
 };

@@ -13,7 +13,7 @@ describe('filter manager utilities', () => {
   describe('mapMissing()', () => {
     test('should return the key and value for matching filters', async () => {
       const filter: MissingFilter = {
-        missing: { field: '_type' },
+        query: { missing: { field: '_type' } },
         ...buildEmptyFilter(true),
       };
       const result = mapMissing(filter);

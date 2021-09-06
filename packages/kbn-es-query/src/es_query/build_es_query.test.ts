@@ -118,7 +118,7 @@ describe('build query', () => {
     it('should remove match_all clauses', () => {
       const filters = [
         {
-          match_all: {},
+          query: { match_all: {} },
           meta: { type: 'match_all' },
         } as MatchAllFilter,
         {
@@ -163,7 +163,7 @@ describe('build query', () => {
         { query: '@timestamp:"2019-03-23T13:18:00"', language: 'kuery' },
         { query: '@timestamp:"2019-03-23T13:18:00"', language: 'lucene' },
       ] as Query[];
-      const filters = [{ match_all: {}, meta: { type: 'match_all' } } as MatchAllFilter];
+      const filters = [{ query: { match_all: {} }, meta: { type: 'match_all' } } as MatchAllFilter];
       const config = {
         allowLeadingWildcards: true,
         queryStringOptions: {},

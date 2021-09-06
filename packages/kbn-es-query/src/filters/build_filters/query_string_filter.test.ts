@@ -14,7 +14,7 @@ describe('Query string filter builder', () => {
   });
 
   it('should return a query filter when passed a standard field', () => {
-    expect(buildQueryFilter({ foo: 'bar' }, 'index', '')).toEqual({
+    expect(buildQueryFilter({ query_string: { query: 'bar' } }, 'index', '')).toEqual({
       meta: {
         alias: '',
         index: 'index',
