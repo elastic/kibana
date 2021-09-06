@@ -8,10 +8,17 @@
 
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
-import { exportDashboards } from '../lib';
+import { InternalCoreUsageDataSetup } from 'src/core/server/core_usage_data';
+import { IRouter } from '../../..';
+import { exportDashboards } from './lib';
 
-export const registerExportRoute = (router: IRouter, kibanaVersion: string) => {
+export const registerLegacyExportRoute = (
+  router: IRouter,
+  {
+    kibanaVersion,
+    coreUsageData,
+  }: { kibanaVersion: string; coreUsageData: InternalCoreUsageDataSetup }
+) => {
   router.get(
     {
       path: '/api/kibana/dashboards/export',
@@ -27,6 +34,9 @@ export const registerExportRoute = (router: IRouter, kibanaVersion: string) => {
     async (ctx, req, res) => {
       const ids = Array.isArray(req.query.dashboard) ? req.query.dashboard : [req.query.dashboard];
       const { client } = ctx.core.savedObjects;
+
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient.incrementLegacyDashboardsExport({ request: req }).catch(() => {});
 
       const exported = await exportDashboards(ids, client, kibanaVersion);
       const filename = `kibana-dashboards.${moment.utc().format('YYYY-MM-DD-HH-mm-ss')}.json`;

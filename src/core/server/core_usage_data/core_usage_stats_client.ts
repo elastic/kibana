@@ -45,6 +45,9 @@ export const UPDATE_STATS_PREFIX = 'apiCalls.savedObjectsUpdate';
 export const IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsImport';
 export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportErrors';
 export const EXPORT_STATS_PREFIX = 'apiCalls.savedObjectsExport';
+export const LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX = 'apiCalls.legacyDashboardImport';
+export const LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX = 'apiCalls.legacyDashboardExport';
+
 export const REPOSITORY_RESOLVE_OUTCOME_STATS = {
   EXACT_MATCH: 'savedObjectsRepository.resolvedOutcome.exactMatch',
   ALIAS_MATCH: 'savedObjectsRepository.resolvedOutcome.aliasMatch',
@@ -168,6 +171,14 @@ export class CoreUsageStatsClient {
     const isAllTypesSelected = !!types && supportedTypes.every((x) => types.includes(x));
     const counterFieldNames = [`allTypesSelected.${isAllTypesSelected ? 'yes' : 'no'}`];
     await this.updateUsageStats(counterFieldNames, EXPORT_STATS_PREFIX, options);
+  }
+
+  public async incrementLegacyDashboardsImport(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX, options);
+  }
+
+  public async incrementLegacyDashboardsExport(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX, options);
   }
 
   private async updateUsageStats(

@@ -7,10 +7,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, SavedObject } from 'src/core/server';
-import { importDashboards } from '../lib';
+import { IRouter, SavedObject } from '../../..';
+import { InternalCoreUsageDataSetup } from '../../../core_usage_data';
+import { importDashboards } from './lib';
 
-export const registerImportRoute = (router: IRouter, maxImportPayloadBytes: number) => {
+export const registerLegacyImportRoute = (
+  router: IRouter,
+  {
+    maxImportPayloadBytes,
+    coreUsageData,
+  }: { maxImportPayloadBytes: number; coreUsageData: InternalCoreUsageDataSetup }
+) => {
   router.post(
     {
       path: '/api/kibana/dashboards/import',
@@ -37,6 +44,10 @@ export const registerImportRoute = (router: IRouter, maxImportPayloadBytes: numb
       const { client } = ctx.core.savedObjects;
       const objects = req.body.objects as SavedObject[];
       const { force, exclude } = req.query;
+
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient.incrementLegacyDashboardsImport({ request: req }).catch(() => {});
+
       const result = await importDashboards(client, objects, {
         overwrite: force,
         exclude: Array.isArray(exclude) ? exclude : [exclude],
