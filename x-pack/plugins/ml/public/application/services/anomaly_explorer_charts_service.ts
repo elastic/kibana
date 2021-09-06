@@ -590,7 +590,7 @@ export class AnomalyExplorerChartsService {
         return mlResultsService
           .getMetricData(
             Array.isArray(config.datafeedConfig.indices)
-              ? config.datafeedConfig.indices[0]
+              ? config.datafeedConfig.indices.join()
               : config.datafeedConfig.indices,
             entityFields,
             datafeedQuery,
@@ -777,7 +777,7 @@ export class AnomalyExplorerChartsService {
       return mlResultsService
         .getEventDistributionData(
           Array.isArray(config.datafeedConfig.indices)
-            ? config.datafeedConfig.indices[0]
+            ? config.datafeedConfig.indices.join()
             : config.datafeedConfig.indices,
           splitField,
           filterField,

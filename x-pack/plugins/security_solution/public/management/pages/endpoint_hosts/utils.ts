@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import { HostInfo, HostMetadata } from '../../../../common/endpoint/types';
 
@@ -29,12 +30,12 @@ export const getIsInvalidDateRange = ({
   startDate,
   endDate,
 }: {
-  startDate?: string;
-  endDate?: string;
+  startDate: string;
+  endDate: string;
 }) => {
-  if (startDate && endDate) {
-    const start = moment(startDate);
-    const end = moment(endDate);
+  const start = moment(dateMath.parse(startDate));
+  const end = moment(dateMath.parse(endDate));
+  if (start.isValid() && end.isValid()) {
     return start.isAfter(end);
   }
   return false;
