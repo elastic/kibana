@@ -12,6 +12,7 @@ import { PhraseFilter } from './phrase_filter';
 import { RangeFilter } from './range_filter';
 import { MatchAllFilter } from './match_all_filter';
 import { MissingFilter } from './missing_filter';
+import { DslQuery } from '../..';
 
 /**
  * A common type for filters supported by this package
@@ -76,7 +77,7 @@ export type Filter = {
   meta: FilterMeta;
 
   // TODO: research me! This is being extracted into the top level by translateToQuery. Maybe we can simplify.
-  query?: Record<string, any>;
+  query?: DslQuery;
 };
 
 // eslint-disable-next-line
