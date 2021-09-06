@@ -24,6 +24,7 @@ export class DocLinksService {
     const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
     const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
     const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
+    const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
@@ -33,6 +34,9 @@ export class DocLinksService {
         apm: {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
+          droppedTransactionSpans: `${APM_DOCS}get-started/${DOC_LINK_VERSION}/transaction-spans.html#dropped-spans`,
+          upgrading: `${APM_DOCS}server/${DOC_LINK_VERSION}/upgrading.html`,
+          metaData: `${APM_DOCS}get-started/${DOC_LINK_VERSION}/metadata.html`,
         },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
@@ -458,6 +462,9 @@ export interface DocLinksStart {
     readonly apm: {
       readonly kibanaSettings: string;
       readonly supportedServiceMaps: string;
+      readonly droppedTransactionSpans: string;
+      readonly upgrading: string;
+      readonly metaData: string;
     };
     readonly canvas: {
       readonly guide: string;
