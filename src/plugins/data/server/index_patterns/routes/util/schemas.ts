@@ -72,6 +72,21 @@ export const runtimeFieldSpec = {
       source: schema.string(),
     })
   ),
+  fields: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.object({
+        type: runtimeFieldSpecTypeSchema,
+        format: schema.maybe(serializedFieldFormatSchema),
+        customLabel: schema.maybe(schema.string()),
+        popularity: schema.maybe(
+          schema.number({
+            min: 0,
+          })
+        ),
+      })
+    )
+  ),
   format: schema.maybe(serializedFieldFormatSchema),
   customLabel: schema.maybe(schema.string()),
   popularity: schema.maybe(
@@ -80,11 +95,5 @@ export const runtimeFieldSpec = {
     })
   ),
 };
-export const runtimeFieldSpecSchema = schema.object(runtimeFieldSpec);
 
-export const runtimeCompositeSpec = {
-  name: schema.string(),
-  script: runtimeFieldSpec.script,
-  fields: schema.arrayOf(schema.string()),
-};
-export const runtimeCompositeSpecSchema = schema.object(runtimeCompositeSpec);
+export const runtimeFieldSpecSchema = schema.object(runtimeFieldSpec);

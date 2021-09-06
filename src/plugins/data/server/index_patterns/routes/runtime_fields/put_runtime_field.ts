@@ -7,7 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { EnhancedRuntimeField } from 'src/plugins/data/common';
+import { RuntimeField } from 'src/plugins/data/common';
+import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSpecSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../../core/server';
@@ -47,31 +48,31 @@ export const registerPutRuntimeFieldRoute = (
       const id = req.params.id;
       const { name, runtimeField } = req.body as {
         name: string;
-        runtimeField: EnhancedRuntimeField;
+        runtimeField: RuntimeField;
       };
 
       const indexPattern = await indexPatternsService.get(id);
 
-      const oldFieldObject = indexPattern.fields.getByName(name);
+      const oldRuntimeFieldObject = indexPattern.getRuntimeField(name);
 
-      if (oldFieldObject && !oldFieldObject.runtimeField) {
-        throw new Error('Only runtime fields can be updated');
+      if (!oldRuntimeFieldObject) {
+        throw new ErrorIndexPatternFieldNotFound(id, name);
       }
 
-      if (oldFieldObject) {
-        indexPattern.removeRuntimeField(name);
-      }
+      indexPattern.removeRuntimeField(name);
 
-      indexPattern.addRuntimeField(name, runtimeField);
+      const createdFields = indexPattern.addRuntimeField(name, runtimeField);
 
       await indexPatternsService.updateSavedObject(indexPattern);
 
-      const fieldObject = indexPattern.fields.getByName(name);
-      if (!fieldObject) throw new Error(`Could not create a field [name = ${name}].`);
-
       return res.ok({
         body: {
-          field: fieldObject.toSpec(),
+          // New API for 7.16 & 8.x. Return an Array of DataViewFields created
+          fields: createdFields.map((f) => f.toSpec()),
+          // @deprecated
+          // To avoid creating a breaking change in 7.16 we continue to support
+          // the old "field" in the response
+          field: createdFields[0].toSpec(),
           index_pattern: indexPattern.toSpec(),
         },
       });

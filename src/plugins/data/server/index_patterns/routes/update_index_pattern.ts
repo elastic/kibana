@@ -14,6 +14,7 @@ import {
   serializedFieldFormatSchema,
 } from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
+import { RuntimeField } from '../../../common';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
 const indexPatternUpdateSchema = schema.object({
@@ -139,7 +140,7 @@ export const registerUpdateIndexPatternRoute = (
 
         if (runtimeFieldMap !== undefined) {
           changeCount++;
-          indexPattern.replaceAllRuntimeFields(runtimeFieldMap);
+          indexPattern.replaceAllRuntimeFields(runtimeFieldMap as Record<string, RuntimeField>);
         }
 
         if (changeCount < 1) {
