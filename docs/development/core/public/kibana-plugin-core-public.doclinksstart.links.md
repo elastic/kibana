@@ -12,6 +12,8 @@ readonly links: {
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
+            readonly upgrading: string;
+            readonly metaData: string;
         };
         readonly canvas: {
             readonly guide: string;

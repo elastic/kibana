@@ -31,6 +31,7 @@ export {
   UrlGeneratorsService,
 } from './url_generators';
 
+export { RedirectOptions } from './url_service';
 export { useLocatorUrl } from '../common/url_service/locators/use_locator_url';
 
 import { SharePlugin } from './plugin';
