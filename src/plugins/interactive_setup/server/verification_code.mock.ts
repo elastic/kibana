@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type { InteractiveSetupViewState, EnrollmentToken, Certificate, PingResult } from './types';
-export { ElasticsearchConnectionStatus } from './elasticsearch_connection_status';
-export { VERIFICATION_CODE_LENGTH } from './constants';
+import type { PublicContract } from '@kbn/utility-types';
+
+import type { VerificationCode } from './verification_code';
+
+export const verificationCodeMock = {
+  create: (): jest.Mocked<PublicContract<VerificationCode>> => ({
+    code: '123456',
+    remainingAttempts: 5,
+    verify: jest.fn().mockReturnValue(true),
+  }),
+};
