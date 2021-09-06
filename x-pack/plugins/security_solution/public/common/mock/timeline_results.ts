@@ -1979,6 +1979,7 @@ export const mockTimelineModel: TimelineModel = {
   },
   deletedEventIds: [],
   description: 'This is a sample rule description',
+  documentType: '',
   eqlOptions: {
     eventCategoryField: 'event.category',
     tiebreakerField: 'event.sequence',
@@ -2017,6 +2018,7 @@ export const mockTimelineModel: TimelineModel = {
   kqlQuery: {
     filterQuery: null,
   },
+  queryFields: [],
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
   loadingEventIds: [],
@@ -2024,6 +2026,7 @@ export const mockTimelineModel: TimelineModel = {
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   savedObjectId: 'ef579e40-jibber-jabber',
+  selectAll: false,
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
@@ -2110,6 +2113,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     dateRange: { end: '2018-11-05T19:03:25.937Z', start: '2018-11-05T18:58:25.937Z' },
     deletedEventIds: [],
     description: '',
+    documentType: '',
     eqlOptions: {
       eventCategoryField: 'event.category',
       query: '',
@@ -2141,7 +2145,9 @@ export const defaultTimelineProps: CreateTimelineProps = {
     noteIds: [],
     pinnedEventIds: {},
     pinnedEventsSaveObject: {},
+    queryFields: [],
     savedObjectId: null,
+    selectAll: false,
     selectedEventIds: {},
     show: false,
     showCheckboxes: false,

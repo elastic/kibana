@@ -1,0 +1,151 @@
+[[plugin-api-changes]]
+== Plugin API changes in {minor-version}
+++++
+<titleabbrev>Plugin API changes</titleabbrev>
+++++
+
+This page discusses the plugin API changes that you need to be aware of when migrating
+your application to {kib} {minor-version}.
+
+Other versions: {kibana-ref-all}/7.14/plugin-api-changes.html[7.14] |
+{kibana-ref-all}/7.13/plugin-api-changes.html[7.13] |
+{kibana-ref-all}/7.12/plugin-api-changes.html[7.12] |
+{kibana-ref-all}/7.11/plugin-api-changes-7-11.html[7.11] |
+{kibana-ref-all}/7.10/breaking-changes-7.10.html#general-plugin-API-changes-7-10[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html#general-plugin-API-changes-79[7.9] |
+{kibana-ref-all}/7.8/breaking-changes-7.8.html#general-plugin-API-changes-78[7.8]
+
+[[breaking_plugin_v7.15.0_107173]]
+.`fieldFormats` extracted from `data` plugin
+[%collapsible]
+====
+
+`fieldFormats` were extracted from the `data` plugin into a separate plugin.
+For an example on how to use them, check `examples/field_formats_example`.
+
+Refer to https://github.com/elastic/kibana/pull/107173[#107173].
+
+====
+
+[[breaking_plugin_v7.15.0_106973]]
+.@kbn/field-types extracted to a package
+[%collapsible]
+====
+
+`kbn_field_types` were extracted from the `data` plugin into a separate `@kbn/field-types` package.
+
+*via https://github.com/elastic/kibana/pull/106973[#106973]*
+
+====
+
+[[breaking_plugin_v7.15.0_106828]]
+.Start contract for field formatters fixed
+[%collapsible]
+====
+
+Previously, the field formatter start contract exposed the `register` method.
+Now, it is available only on the setup contract.
+
+Refer to https://github.com/elastic/kibana/pull/106828[#106828].
+
+====
+
+[[breaking_plugin_v7.15.0_103744]]
+.Warnings handled inside of headers
+[%collapsible]
+====
+
+The `data.search` service now returns a `warning` property that
+includes any warnings returned from {es} in the headers.
+
+Refer to https://github.com/elastic/kibana/pull/103744[#103744].
+
+====
+
+[[breaking_plugin_v7.15.0_103727]]
+.Scoring support added to KQL
+[%collapsible]
+====
+
+`buildEsQuery` (and in turn, `fromKuery`) now support an additional option,
+`filtersInMustClause`, which will generate KQL queries in the
+`must` clause rather than the `filter` clause.
+This change supports use cases such as sorting by `_score`.
+
+`SearchSource` now automatically sets `filtersInMustClause` to `true` when
+`_score` is included in the `sort` clause.
+
+Refer to https://github.com/elastic/kibana/pull/103727[#103727].
+
+====
+
+[[breaking_plugin_v7.15.0_103530]]
+.Key types and functions related to query generation moved to a package
+[%collapsible]
+====
+
+Import the following types and functions from `@kbn/es-query`.
+Importing them from the `data` plugin is deprecated and support will be removed in `v8.0`.
+
+ * *Index Pattern base types* (New types, not re-exported from the `data` plugin)
+    ** `IndexPatternBase`
+    ** `IndexPatternFieldBase`
+    ** `IFieldSubType`
+ * *Filter Types*
+    ** `RangeFilter`
+    ** `RangeFilterMeta`
+    ** `RangeFilterParams`
+    ** `ExistsFilter`
+    ** `PhrasesFilter`
+    ** `PhraseFilter`
+    ** `CustomFilter`
+    ** `MatchAllFilter`
+ * *Filter type guards*
+    ** `isExistsFilter`
+    ** `isFilterPinned`
+    ** `isMatchAllFilter`
+    ** `isMissingFilter`
+    ** `isPhraseFilter`
+    ** `isPhrasesFilter`
+    ** `isQueryStringFilter`
+    ** `isRangeFilter`
+ * *Filter generators*
+    ** `buildEmptyFilter`
+    ** `buildExistsFilter`
+    ** `buildPhraseFilter`
+    ** `buildPhrasesFilter`
+    ** `buildQueryFilter`
+    ** `buildRangeFilter`
+ * *Filter utilities*
+    ** `getPhraseFilterField`
+    ** `getPhraseFilterValue`
+    ** `toggleFilterNegated`
+    ** `disableFilter`
+ * *KQL helpers*
+    ** `KueryNode`
+    ** `fromKueryExpression`
+    ** `toElasticsearchQuery`
+    ** `nodeTypes`
+    ** `buildEsQuery`
+    ** `buildQueryFromFilters`
+    ** `luceneStringToDsl`
+    ** `decorateQuery`
+    ** `EsQueryConfig`
+
+Refer to https://github.com/elastic/kibana/pull/103530[#103530].
+
+====
+
+[[breaking_plugin_v7.15.0_103494]]
+.Expression functions that generate an aggregation configuration were updated
+[%collapsible]
+====
+
+These expression no longer take
+JSON blobs as arguments. Corresponding expression functions
+were added to generate any complex argument types. Update
+your expressions if you use aggregation functions.
+
+Refer to https://github.com/elastic/kibana/pull/103494[#103494].
+
+====
