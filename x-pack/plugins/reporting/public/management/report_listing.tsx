@@ -14,13 +14,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ILicense } from '../../../licensing/public';
-import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
+import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID, JOB_STATUSES } from '../../common/constants';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
 import { useIlmPolicyStatus } from '../lib/ilm_policy_status_context';
@@ -34,9 +35,12 @@ import {
   MigrateIlmPolicyCallOut,
   ReportDeleteButton,
   ReportDiagnostic,
-  ReportDownloadButton,
+  ReportDownloadLink,
   ReportInfoButton,
+  ReportStatusIndicator,
 } from './components';
+
+type TableColumn = EuiBasicTableColumn<Job>;
 
 interface State {
   page: number;
@@ -177,23 +181,19 @@ class ReportListingUi extends Component<Props, State> {
           await this.props.apiClient.deleteReport(job.id);
           this.removeJob(job);
           this.props.toasts.addSuccess(
-            this.props.intl.formatMessage(
-              {
-                id: 'xpack.reporting.listing.table.deleteConfim',
-                defaultMessage: `The {reportTitle} report was deleted`,
+            i18n.translate('xpack.reporting.listing.table.deleteConfim', {
+              defaultMessage: `The {reportTitle} report was deleted`,
+              values: {
+                reportTitle: job.title,
               },
-              { reportTitle: job.title }
-            )
+            })
           );
         } catch (error) {
           this.props.toasts.addDanger(
-            this.props.intl.formatMessage(
-              {
-                id: 'xpack.reporting.listing.table.deleteFailedErrorMessage',
-                defaultMessage: `The report was not deleted: {error}`,
-              },
-              { error }
-            )
+            i18n.translate('xpack.reporting.listing.table.deleteFailedErrorMessage', {
+              defaultMessage: `The report was not deleted: {error}`,
+              values: { error },
+            })
           );
           throw error;
         }
@@ -240,8 +240,7 @@ class ReportListingUi extends Component<Props, State> {
       if (fetchError.message === 'Failed to fetch') {
         this.props.toasts.addDanger(
           fetchError.message ||
-            this.props.intl.formatMessage({
-              id: 'xpack.reporting.listing.table.requestFailedErrorMessage',
+            i18n.translate('xpack.reporting.listing.table.requestFailedErrorMessage', {
               defaultMessage: 'Request failed',
             })
         );
@@ -266,57 +265,83 @@ class ReportListingUi extends Component<Props, State> {
   };
 
   private renderTable() {
-    const { intl } = this.props;
-
-    const tableColumns = [
+    const tableColumns: TableColumn[] = [
       {
         field: 'title',
-        name: intl.formatMessage({
-          id: 'xpack.reporting.listing.tableColumns.reportTitle',
+        name: i18n.translate('xpack.reporting.listing.tableColumns.reportTitle', {
           defaultMessage: 'Report',
         }),
-        render: (objectTitle: string, job: Job) => {
+        width: '40%',
+        render: (objectTitle: string, job) => {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
-              <div>{objectTitle}</div>
+              <div>
+                <ReportDownloadLink
+                  disabled={
+                    job.status !== JOB_STATUSES.COMPLETED && job.status !== JOB_STATUSES.WARNINGS
+                  }
+                  objectTitle={objectTitle}
+                  job={job}
+                />
+              </div>
               <EuiText size="s">
                 <EuiTextColor color="subdued">{job.objectType}</EuiTextColor>
               </EuiText>
             </div>
           );
         },
-      },
-      {
-        field: 'created_at',
-        name: intl.formatMessage({
-          id: 'xpack.reporting.listing.tableColumns.createdAtTitle',
-          defaultMessage: 'Created at',
-        }),
-        render: (_createdAt: string, job: Job) => (
-          <div data-test-subj="reportJobCreatedAt">{job.getCreatedAtLabel()}</div>
-        ),
+        mobileOptions: ({
+          header: false,
+          width: '100%', // This is not recognized by EUI types but has an effect, leaving for now
+        } as unknown) as { header: boolean },
       },
       {
         field: 'status',
-        name: intl.formatMessage({
-          id: 'xpack.reporting.listing.tableColumns.statusTitle',
+        name: i18n.translate('xpack.reporting.listing.tableColumns.statusTitle', {
           defaultMessage: 'Status',
         }),
-        render: (_status: string, job: Job) => (
-          <div data-test-subj="reportJobStatus">{job.getStatusLabel()}</div>
+        render: (_status: string, job) => (
+          <div data-test-subj="reportJobStatus">
+            <ReportStatusIndicator job={job} />
+          </div>
         ),
+        mobileOptions: {
+          show: false,
+        },
       },
       {
-        name: intl.formatMessage({
-          id: 'xpack.reporting.listing.tableColumns.actionsTitle',
+        field: 'created_at',
+        name: i18n.translate('xpack.reporting.listing.tableColumns.createdAtTitle', {
+          defaultMessage: 'Created at',
+        }),
+        render: (_createdAt: string, job) => (
+          <div data-test-subj="reportJobCreatedAt">{job.getCreatedAtDate()}</div>
+        ),
+        mobileOptions: {
+          show: false,
+        },
+      },
+      {
+        field: 'created_by',
+        name: i18n.translate('xpack.reporting.listing.tableColumns.createdByTitle', {
+          defaultMessage: 'Created by',
+        }),
+        render: (_createdBy: string, job) => (
+          <div data-test-subj="reportJobCreatedAt">{job.getCreatedBy()}</div>
+        ),
+        mobileOptions: {
+          show: false,
+        },
+      },
+      {
+        name: i18n.translate('xpack.reporting.listing.tableColumns.actionsTitle', {
           defaultMessage: 'Actions',
         }),
         actions: [
           {
-            render: (job: Job) => {
+            render: (job) => {
               return (
                 <div data-test-subj="reportJobActions">
-                  <ReportDownloadButton {...this.props} job={job} />
                   <ReportInfoButton {...this.props} job={job} />
                 </div>
               );
@@ -358,12 +383,10 @@ class ReportListingUi extends Component<Props, State> {
           columns={tableColumns}
           noItemsMessage={
             this.state.isLoading
-              ? intl.formatMessage({
-                  id: 'xpack.reporting.listing.table.loadingReportsDescription',
+              ? i18n.translate('xpack.reporting.listing.table.loadingReportsDescription', {
                   defaultMessage: 'Loading reports',
                 })
-              : intl.formatMessage({
-                  id: 'xpack.reporting.listing.table.noCreatedReportsDescription',
+              : i18n.translate('xpack.reporting.listing.table.noCreatedReportsDescription', {
                   defaultMessage: 'No reports have been created',
                 })
           }
@@ -379,8 +402,6 @@ class ReportListingUi extends Component<Props, State> {
   }
 }
 
-const PrivateReportListing = injectI18n(ReportListingUi);
-
 export const ReportListing = (
   props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities'>
 ) => {
@@ -392,7 +413,7 @@ export const ReportListing = (
     },
   } = useKibana();
   return (
-    <PrivateReportListing
+    <ReportListingUi
       {...props}
       apiClient={apiClient}
       capabilities={capabilities}

@@ -17,14 +17,14 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
 import { Job } from '../../lib/job';
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import type { ListingProps } from '../';
 
-interface Props extends Pick<ListingProps, 'apiClient' | 'intl'> {
+interface Props extends Pick<ListingProps, 'apiClient'> {
   apiClient: ReportingAPIClient;
   job: Job;
 }
@@ -49,7 +49,7 @@ const getDimensions = (info: Job): string => {
   return UNKNOWN;
 };
 
-class ReportInfoButtonUi extends Component<Props, State> {
+export class ReportInfoButton extends Component<Props, State> {
   private mounted?: boolean;
 
   constructor(props: Props) {
@@ -58,8 +58,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
     this.state = {
       isLoading: false,
       isFlyoutVisible: false,
-      calloutTitle: props.intl.formatMessage({
-        id: 'xpack.reporting.listing.table.reportCalloutTitle',
+      calloutTitle: i18n.translate('xpack.reporting.listing.table.reportCalloutTitle', {
         defaultMessage: 'Report info',
       }),
       info: null,
@@ -83,29 +82,25 @@ class ReportInfoButtonUi extends Component<Props, State> {
 
     const jobInfo = [
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.titleInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.titleInfo', {
           defaultMessage: 'Title',
         }),
         description: info.title || NA,
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.createdAtInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.createdAtInfo', {
           defaultMessage: 'Created at',
         }),
         description: info.getCreatedAtLabel(),
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.statusInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.statusInfo', {
           defaultMessage: 'Status',
         }),
         description: info.getStatus(),
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.tzInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.tzInfo', {
           defaultMessage: 'Time zone',
         }),
         description: info.browserTimezone || NA,
@@ -114,75 +109,63 @@ class ReportInfoButtonUi extends Component<Props, State> {
 
     const processingInfo = [
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.startedAtInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.startedAtInfo', {
           defaultMessage: 'Started at',
         }),
         description: info.started_at || NA,
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.completedAtInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.completedAtInfo', {
           defaultMessage: 'Completed at',
         }),
         description: info.completed_at || NA,
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.processedByInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.processedByInfo', {
           defaultMessage: 'Processed by',
         }),
         description:
           info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : NA,
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.contentTypeInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.contentTypeInfo', {
           defaultMessage: 'Content type',
         }),
         description: info.content_type || NA,
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.sizeInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.sizeInfo', {
           defaultMessage: 'Size in bytes',
         }),
         description: info.size?.toString() || NA,
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.attemptsInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.attemptsInfo', {
           defaultMessage: 'Attempts',
         }),
         description: info.attempts.toString(),
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.maxAttemptsInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.maxAttemptsInfo', {
           defaultMessage: 'Max attempts',
         }),
         description: info.max_attempts?.toString() || NA,
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.timeoutInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.timeoutInfo', {
           defaultMessage: 'Timeout',
         }),
         description: timeout,
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.exportTypeInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.exportTypeInfo', {
           defaultMessage: 'Export type',
         }),
         description: info.isDeprecated
-          ? this.props.intl.formatMessage(
-              {
-                id: 'xpack.reporting.listing.table.reportCalloutExportTypeDeprecated',
-                defaultMessage: '{jobtype} (DEPRECATED)',
-              },
-              { jobtype: info.jobtype }
-            )
+          ? i18n.translate('xpack.reporting.listing.table.reportCalloutExportTypeDeprecated', {
+              defaultMessage: '{jobtype} (DEPRECATED)',
+              values: { jobtype: info.jobtype },
+            })
           : info.jobtype,
       },
 
@@ -191,22 +174,19 @@ class ReportInfoButtonUi extends Component<Props, State> {
 
     const jobScreenshot = [
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.dimensionsInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfo', {
           defaultMessage: 'Dimensions',
         }),
         description: getDimensions(info),
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.layoutInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.layoutInfo', {
           defaultMessage: 'Layout',
         }),
         description: info.layout?.id || UNKNOWN,
       },
       {
-        title: this.props.intl.formatMessage({
-          id: 'xpack.reporting.listing.infoPanel.browserTypeInfo',
+        title: i18n.translate('xpack.reporting.listing.infoPanel.browserTypeInfo', {
           defaultMessage: 'Browser type',
         }),
         description: info.browser_type || NA,
@@ -291,18 +271,15 @@ class ReportInfoButtonUi extends Component<Props, State> {
       );
     }
 
-    let message = this.props.intl.formatMessage({
-      id: 'xpack.reporting.listing.table.reportInfoButtonTooltip',
+    let message = i18n.translate('xpack.reporting.listing.table.reportInfoButtonTooltip', {
       defaultMessage: 'See report info.',
     });
     if (job.getError()) {
-      message = this.props.intl.formatMessage({
-        id: 'xpack.reporting.listing.table.reportInfoAndErrorButtonTooltip',
+      message = i18n.translate('xpack.reporting.listing.table.reportInfoAndErrorButtonTooltip', {
         defaultMessage: 'See report info and error message.',
       });
     } else if (job.getWarnings()) {
-      message = this.props.intl.formatMessage({
-        id: 'xpack.reporting.listing.table.reportInfoAndWarningsButtonTooltip',
+      message = i18n.translate('xpack.reporting.listing.table.reportInfoAndWarningsButtonTooltip', {
         defaultMessage: 'See report info and warnings.',
       });
     }
@@ -325,8 +302,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
             iconType={buttonIconType}
             color={buttonColor}
             data-test-subj="reportInfoButton"
-            aria-label={this.props.intl.formatMessage({
-              id: 'xpack.reporting.listing.table.showReportInfoAriaLabel',
+            aria-label={i18n.translate('xpack.reporting.listing.table.showReportInfoAriaLabel', {
               defaultMessage: 'Show report info',
             })}
           />
@@ -347,8 +323,7 @@ class ReportInfoButtonUi extends Component<Props, State> {
       if (this.mounted) {
         this.setState({
           isLoading: false,
-          calloutTitle: this.props.intl.formatMessage({
-            id: 'xpack.reporting.listing.table.reportInfoUnableToFetch',
+          calloutTitle: i18n.translate('xpack.reporting.listing.table.reportInfoUnableToFetch', {
             defaultMessage: 'Unable to fetch report info.',
           }),
           info: null,
@@ -373,5 +348,3 @@ class ReportInfoButtonUi extends Component<Props, State> {
     }
   };
 }
-
-export const ReportInfoButton = injectI18n(ReportInfoButtonUi);

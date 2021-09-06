@@ -9,5 +9,6 @@ export { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
 export { IlmPolicyLink } from './ilm_policy_link';
 export { ReportDeleteButton } from './report_delete_button';
 export { ReportDiagnostic } from './report_diagnostic';
-export { ReportDownloadButton } from './report_download_button';
+export { ReportDownloadLink } from './report_download_link';
 export { ReportInfoButton } from './report_info_button';
+export { ReportStatusIndicator } from './report_status_indicator';
