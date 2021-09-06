@@ -35,6 +35,8 @@ export class DocLinksService {
           kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
           supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
           droppedTransactionSpans: `${APM_DOCS}get-started/${DOC_LINK_VERSION}/transaction-spans.html#dropped-spans`,
+          upgrading: `${APM_DOCS}server/${DOC_LINK_VERSION}/upgrading.html`,
+          metaData: `${APM_DOCS}get-started/${DOC_LINK_VERSION}/metadata.html`,
         },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
@@ -461,6 +463,8 @@ export interface DocLinksStart {
       readonly kibanaSettings: string;
       readonly supportedServiceMaps: string;
       readonly droppedTransactionSpans: string;
+      readonly upgrading: string;
+      readonly metaData: string;
     };
     readonly canvas: {
       readonly guide: string;
