@@ -64,7 +64,7 @@ const FixLogsStep: FunctionComponent = () => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel>
-        <DeprecationLoggingToggle {...state} />{' '}
+        <DeprecationLoggingToggle {...state} />
       </EuiPanel>
 
       {state.onlyDeprecationLogWritingEnabled && (
