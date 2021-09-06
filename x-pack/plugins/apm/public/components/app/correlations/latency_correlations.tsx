@@ -34,10 +34,7 @@ import {
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../common/search_strategies/constants';
 import { FieldValuePair } from '../../../../common/search_strategies/types';
-import {
-  isLatencyCorrelations,
-  LatencyCorrelation,
-} from '../../../../common/search_strategies/latency_correlations/types';
+import { LatencyCorrelation } from '../../../../common/search_strategies/latency_correlations/types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -62,28 +59,21 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const { state, data, startFetch, cancelFetch } = useSearchStrategy(
+  const { progress, response, startFetch, cancelFetch } = useSearchStrategy(
     APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
     {
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
       analyzeCorrelations: true,
     }
   );
-  const { error, isRunning, loaded, total } = state;
-  const {
-    ccsWarning,
-    log,
-    latencyCorrelations,
-    percentileThresholdValue,
-  } = data;
-  const progress = loaded / total;
+  const progressNormalized = progress.loaded / progress.total;
   const { overallHistogram, hasData, status } = getOverallHistogram(
-    data,
-    isRunning
+    response,
+    progress.isRunning
   );
 
   useEffect(() => {
-    if (isErrorMessage(error)) {
+    if (isErrorMessage(progress.error)) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.correlations.latencyCorrelations.errorTitle',
@@ -91,10 +81,10 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             defaultMessage: 'An error occurred fetching correlations',
           }
         ),
-        text: error.toString(),
+        text: progress.error.toString(),
       });
     }
-  }, [error, notifications.toasts]);
+  }, [progress.error, notifications.toasts]);
 
   const [
     selectedSignificantTerm,
@@ -102,22 +92,24 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   ] = useState<LatencyCorrelation | null>(null);
 
   const selectedHistogram = useMemo(() => {
-    let selected = isLatencyCorrelations(latencyCorrelations)
-      ? latencyCorrelations[0]
-      : undefined;
+    let selected =
+      Array.isArray(response.latencyCorrelations) &&
+      response.latencyCorrelations.length > 0
+        ? response.latencyCorrelations[0]
+        : undefined;
 
     if (
-      isLatencyCorrelations(latencyCorrelations) &&
+      Array.isArray(response.latencyCorrelations) &&
       selectedSignificantTerm !== null
     ) {
-      selected = latencyCorrelations.find(
+      selected = response.latencyCorrelations.find(
         (h) =>
           h.fieldName === selectedSignificantTerm.fieldName &&
           h.fieldValue === selectedSignificantTerm.fieldValue
       );
     }
     return selected;
-  }, [latencyCorrelations, selectedSignificantTerm]);
+  }, [response.latencyCorrelations, selectedSignificantTerm]);
 
   const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
@@ -246,10 +238,14 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   }, []);
 
   const { histogramTerms, sorting } = useMemo(() => {
-    if (!isLatencyCorrelations(latencyCorrelations)) {
+    if (!response.latencyCorrelations) {
       return { histogramTerms: [], sorting: undefined };
     }
-    const orderedTerms = orderBy(latencyCorrelations, sortField, sortDirection);
+    const orderedTerms = orderBy(
+      response.latencyCorrelations,
+      sortField,
+      sortDirection
+    );
 
     return {
       histogramTerms: orderedTerms,
@@ -260,7 +256,12 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         },
       } as EuiTableSortingType<LatencyCorrelation>,
     };
-  }, [latencyCorrelations, sortField, sortDirection]);
+  }, [response.latencyCorrelations, sortField, sortDirection]);
+
+  const showCorrelationsTable = progress.isRunning || histogramTerms.length > 0;
+  const showCorrelationsEmptyStatePrompt =
+    histogramTerms.length < 1 &&
+    (progressNormalized === 1 || !progress.isRunning);
 
   return (
     <div data-test-subj="apmLatencyCorrelationsTabContent">
@@ -286,7 +287,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
       <TransactionDistributionChart
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-        markerValue={percentileThresholdValue ?? 0}
+        markerValue={response.percentileThresholdValue ?? 0}
         {...selectedHistogram}
         overallHistogram={overallHistogram}
         hasData={hasData}
@@ -309,13 +310,13 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       <EuiSpacer size="s" />
 
       <CorrelationsProgressControls
-        progress={progress}
-        isRunning={isRunning}
+        progress={progressNormalized}
+        isRunning={progress.isRunning}
         onRefresh={startFetch}
         onCancel={cancelFetch}
       />
 
-      {ccsWarning && (
+      {response.ccsWarning && (
         <>
           <EuiSpacer size="m" />
           <CrossClusterSearchCompatibilityWarning version="7.14" />
@@ -325,11 +326,13 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       <EuiSpacer size="m" />
 
       <div data-test-subj="apmCorrelationsTable">
-        {(isRunning || histogramTerms.length > 0) && (
+        {showCorrelationsTable && (
           <CorrelationsTable<LatencyCorrelation>
             columns={mlCorrelationColumns}
             significantTerms={histogramTerms}
-            status={isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
+            status={
+              progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS
+            }
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             selectedTerm={
               selectedHistogram !== undefined
@@ -343,11 +346,9 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             sorting={sorting}
           />
         )}
-        {histogramTerms.length < 1 && (progress === 1 || !isRunning) && (
-          <CorrelationsEmptyStatePrompt />
-        )}
+        {showCorrelationsEmptyStatePrompt && <CorrelationsEmptyStatePrompt />}
       </div>
-      {displayLog && <CorrelationsLog logMessages={log ?? []} />}
+      {displayLog && <CorrelationsLog logMessages={response.log ?? []} />}
     </div>
   );
 }

@@ -32,7 +32,7 @@ import { ApmPluginStartDeps } from '../plugin';
 import { useApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
 
-interface SearchStrategyFetcherState {
+interface SearchStrategyProgress {
   error?: Error;
   isRunning: boolean;
   loaded: number;
@@ -47,7 +47,7 @@ const getInitialRawResponse = <
     took: 0,
   } as TRawResponse);
 
-const getInitialFetchState = (): SearchStrategyFetcherState => ({
+const getInitialProgress = (): SearchStrategyProgress => ({
   isRunning: false,
   loaded: 0,
   total: 100,
@@ -59,7 +59,7 @@ const getReducer = <T>() => (prev: T, update: Partial<T>): T => ({
 });
 
 interface SearchStrategyReturnBase {
-  state: SearchStrategyFetcherState;
+  progress: SearchStrategyProgress;
   startFetch: () => void;
   cancelFetch: () => void;
 }
@@ -72,14 +72,14 @@ export function useSearchStrategy(
     analyzeCorrelations: boolean;
   }
 ): {
-  data: LatencyCorrelationsRawResponse;
+  response: LatencyCorrelationsRawResponse;
 } & SearchStrategyReturnBase;
 
 // Function overload for Failed Transactions Correlations
 export function useSearchStrategy(
   searchStrategyName: typeof APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS
 ): {
-  data: FailedTransactionsCorrelationsRawResponse;
+  response: FailedTransactionsCorrelationsRawResponse;
 } & SearchStrategyReturnBase;
 
 export function useSearchStrategy<
@@ -104,8 +104,8 @@ export function useSearchStrategy<
   );
 
   const [fetchState, setFetchState] = useReducer(
-    getReducer<SearchStrategyFetcherState>(),
-    getInitialFetchState()
+    getReducer<SearchStrategyProgress>(),
+    getInitialProgress()
   );
 
   const abortCtrl = useRef(new AbortController());
@@ -117,7 +117,7 @@ export function useSearchStrategy<
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
     setFetchState({
-      ...getInitialFetchState(),
+      ...getInitialProgress(),
       error: undefined,
     });
 
@@ -200,8 +200,8 @@ export function useSearchStrategy<
   }, [startFetch, cancelFetch]);
 
   return {
-    state: fetchState,
-    data: rawResponse,
+    progress: fetchState,
+    response: rawResponse,
     startFetch,
     cancelFetch,
   };

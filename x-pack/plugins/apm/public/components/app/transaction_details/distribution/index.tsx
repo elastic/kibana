@@ -96,22 +96,20 @@ export function TransactionDistribution({
     }
   );
 
-  const { state, data } = useSearchStrategy(
+  const { progress, response } = useSearchStrategy(
     APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
     {
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
       analyzeCorrelations: false,
     }
   );
-  const { error, isRunning } = state;
-  const { percentileThresholdValue } = data;
   const { overallHistogram, hasData, status } = getOverallHistogram(
-    data,
-    isRunning
+    response,
+    progress.isRunning
   );
 
   useEffect(() => {
-    if (isErrorMessage(error)) {
+    if (isErrorMessage(progress.error)) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.transactionDetails.distribution.errorTitle',
@@ -119,10 +117,10 @@ export function TransactionDistribution({
             defaultMessage: 'An error occurred fetching the distribution',
           }
         ),
-        text: error.toString(),
+        text: progress.error.toString(),
       });
     }
-  }, [error, notifications.toasts]);
+  }, [progress.error, notifications.toasts]);
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
@@ -201,7 +199,7 @@ export function TransactionDistribution({
       <TransactionDistributionChart
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-        markerValue={percentileThresholdValue ?? 0}
+        markerValue={response.percentileThresholdValue ?? 0}
         overallHistogram={overallHistogram}
         onChartSelection={onTrackedChartSelection}
         hasData={hasData}

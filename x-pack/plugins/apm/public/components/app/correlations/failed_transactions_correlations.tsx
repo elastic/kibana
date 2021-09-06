@@ -31,10 +31,7 @@ import {
 } from '../../../../../observability/public';
 
 import { asPercent } from '../../../../common/utils/formatters';
-import {
-  isFailedTransactionsCorrelations,
-  FailedTransactionsCorrelation,
-} from '../../../../common/search_strategies/failed_transactions_correlations/types';
+import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
 import { FieldValuePair } from '../../../../common/search_strategies/types';
 
@@ -67,15 +64,10 @@ export function FailedTransactionsCorrelations({
 
   const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const {
-    state: { error, isRunning, loaded, total },
-    data: { ccsWarning, log, failedTransactionsCorrelations },
-    startFetch,
-    cancelFetch,
-  } = useSearchStrategy(
+  const { progress, response, startFetch, cancelFetch } = useSearchStrategy(
     APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS
   );
-  const progress = loaded / total;
+  const progressNormalized = progress.loaded / progress.total;
 
   const [
     selectedSignificantTerm,
@@ -84,10 +76,11 @@ export function FailedTransactionsCorrelations({
 
   const selectedTerm = useMemo(() => {
     if (selectedSignificantTerm) return selectedSignificantTerm;
-    return isFailedTransactionsCorrelations(failedTransactionsCorrelations)
-      ? failedTransactionsCorrelations[0]
+    return Array.isArray(response.failedTransactionsCorrelations) &&
+      response.failedTransactionsCorrelations.length > 0
+      ? response.failedTransactionsCorrelations[0]
       : undefined;
-  }, [selectedSignificantTerm, failedTransactionsCorrelations]);
+  }, [selectedSignificantTerm, response.failedTransactionsCorrelations]);
 
   const history = useHistory();
 
@@ -310,7 +303,7 @@ export function FailedTransactionsCorrelations({
   }, [history, onFilter, trackApmEvent, inspectEnabled]);
 
   useEffect(() => {
-    if (isErrorMessage(error)) {
+    if (isErrorMessage(progress.error)) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.correlations.failedTransactions.errorTitle',
@@ -319,10 +312,10 @@ export function FailedTransactionsCorrelations({
               'An error occurred performing correlations on failed transactions',
           }
         ),
-        text: error.toString(),
+        text: progress.error.toString(),
       });
     }
-  }, [error, notifications.toasts]);
+  }, [progress.error, notifications.toasts]);
 
   const [sortField, setSortField] = useState<
     keyof FailedTransactionsCorrelation
@@ -337,11 +330,8 @@ export function FailedTransactionsCorrelations({
   }, []);
 
   const { sorting, correlationTerms } = useMemo(() => {
-    if (!isFailedTransactionsCorrelations(failedTransactionsCorrelations)) {
-      return { correlationTerms: [], sorting: undefined };
-    }
     const orderedTerms = orderBy(
-      failedTransactionsCorrelations,
+      response.failedTransactionsCorrelations,
       // The smaller the p value the higher the impact
       // So we want to sort by the normalized score here
       // which goes from 0 -> 1
@@ -357,7 +347,17 @@ export function FailedTransactionsCorrelations({
         },
       } as EuiTableSortingType<FailedTransactionsCorrelation>,
     };
-  }, [failedTransactionsCorrelations, sortField, sortDirection]);
+  }, [response.failedTransactionsCorrelations, sortField, sortDirection]);
+
+  const showCorrelationsTable =
+    progress.isRunning || correlationTerms.length > 0;
+
+  const showCorrelationsEmptyStatePrompt =
+    correlationTerms.length < 1 &&
+    (progressNormalized === 1 || !progress.isRunning);
+
+  const showSummaryBadge =
+    inspectEnabled && (progress.isRunning || correlationTerms.length > 0);
 
   return (
     <div data-test-subj="apmFailedTransactionsCorrelationsTabContent">
@@ -425,54 +425,54 @@ export function FailedTransactionsCorrelations({
       <EuiSpacer size="s" />
 
       <CorrelationsProgressControls
-        progress={progress}
-        isRunning={isRunning}
+        progress={progressNormalized}
+        isRunning={progress.isRunning}
         onRefresh={startFetch}
         onCancel={cancelFetch}
       />
 
-      {ccsWarning && (
+      {response.ccsWarning && (
         <>
           <EuiSpacer size="m" />
           <CrossClusterSearchCompatibilityWarning version="7.15" />
         </>
       )}
 
-      {inspectEnabled &&
-      selectedTerm?.pValue != null &&
-      (isRunning || correlationTerms.length > 0) ? (
-        <>
-          <EuiSpacer size="m" />
-          <Summary
-            items={[
-              <EuiBadge color="hollow">
-                {`${selectedTerm.fieldName}: ${selectedTerm.fieldValue}`}
-              </EuiBadge>,
-              <>{`p-value: ${selectedTerm.pValue.toPrecision(3)}`}</>,
-            ]}
-          />
-        </>
-      ) : null}
+      {showSummaryBadge &&
+        selectedTerm !== undefined &&
+        selectedTerm.pValue !== null && (
+          <>
+            <EuiSpacer size="m" />
+            <Summary
+              items={[
+                <EuiBadge color="hollow">
+                  {`${selectedTerm.fieldName}: ${selectedTerm.fieldValue}`}
+                </EuiBadge>,
+                <>{`p-value: ${selectedTerm.pValue.toPrecision(3)}`}</>,
+              ]}
+            />
+          </>
+        )}
 
       <EuiSpacer size="m" />
 
       <div data-test-subj="apmCorrelationsTable">
-        {(isRunning || correlationTerms.length > 0) && (
+        {showCorrelationsTable && (
           <CorrelationsTable<FailedTransactionsCorrelation>
             columns={failedTransactionsCorrelationsColumns}
             significantTerms={correlationTerms}
-            status={isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
+            status={
+              progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS
+            }
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             selectedTerm={selectedTerm}
             onTableChange={onTableChange}
             sorting={sorting}
           />
         )}
-        {correlationTerms.length < 1 && (progress === 1 || !isRunning) && (
-          <CorrelationsEmptyStatePrompt />
-        )}
+        {showCorrelationsEmptyStatePrompt && <CorrelationsEmptyStatePrompt />}
       </div>
-      {inspectEnabled && <CorrelationsLog logMessages={log ?? []} />}
+      {inspectEnabled && <CorrelationsLog logMessages={response.log ?? []} />}
     </div>
   );
 }
