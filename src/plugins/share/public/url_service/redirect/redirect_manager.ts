@@ -15,7 +15,15 @@ import type { UrlService } from '../../../common/url_service';
 import { render } from './render';
 import { parseSearchParams } from './util/parse_search_params';
 
-export interface RedirectOptions {
+/**
+ * @public
+ * Serializable locator parameters that can be used by the redirect service to navigate to a location
+ * in Kibana.
+ *
+ * When passed to the public {@link SharePluginSetup['navigate']} function, locator params will also be
+ * migrated.
+ */
+export interface RedirectOptions<P extends SerializableRecord = unknown & SerializableRecord> {
   /** Locator ID. */
   id: string;
 
@@ -23,7 +31,7 @@ export interface RedirectOptions {
   version: string;
 
   /** Locator params. */
-  params: unknown & SerializableRecord;
+  params: P;
 }
 
 export interface RedirectManagerDependencies {
