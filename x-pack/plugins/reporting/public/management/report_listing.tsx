@@ -264,14 +264,29 @@ class ReportListingUi extends Component<Props, State> {
     return this.state.showLinks && this.state.enableLinks;
   };
 
+  /**
+   * Widths like this are not the best, but the auto-layout does not play well with text in links. We can update
+   * this with something that works better on all screen sizes. This works for desktop, mobile fallback is provided on a
+   * per column basis.
+   *
+   * Should total 100%.
+   */
+  private readonly tableColumnWidths = {
+    title: '40%',
+    status: '20%',
+    createdAt: '20%',
+    createdBy: '20%',
+  };
+
   private renderTable() {
+    const { tableColumnWidths } = this;
     const tableColumns: TableColumn[] = [
       {
         field: 'title',
         name: i18n.translate('xpack.reporting.listing.tableColumns.reportTitle', {
           defaultMessage: 'Report',
         }),
-        width: '40%',
+        width: tableColumnWidths.title,
         render: (objectTitle: string, job) => {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
@@ -297,6 +312,7 @@ class ReportListingUi extends Component<Props, State> {
       },
       {
         field: 'status',
+        width: tableColumnWidths.status,
         name: i18n.translate('xpack.reporting.listing.tableColumns.statusTitle', {
           defaultMessage: 'Status',
         }),
@@ -311,6 +327,7 @@ class ReportListingUi extends Component<Props, State> {
       },
       {
         field: 'created_at',
+        width: tableColumnWidths.createdAt,
         name: i18n.translate('xpack.reporting.listing.tableColumns.createdAtTitle', {
           defaultMessage: 'Created at',
         }),
@@ -323,6 +340,7 @@ class ReportListingUi extends Component<Props, State> {
       },
       {
         field: 'created_by',
+        width: tableColumnWidths.createdBy,
         name: i18n.translate('xpack.reporting.listing.tableColumns.createdByTitle', {
           defaultMessage: 'Created by',
         }),
