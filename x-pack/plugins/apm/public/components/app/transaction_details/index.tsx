@@ -14,6 +14,8 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/Links/url_helpers';
 import { TransactionDetailsTabs } from './transaction_details_tabs';
@@ -47,8 +49,14 @@ export function TransactionDetails() {
     }),
   });
 
+  const { kuery } = query;
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
+
   return (
     <>
+      {fallbackToTransactions && <AggregatedTransactionsBadge />}
       <EuiSpacer size="s" />
 
       <EuiTitle>
@@ -63,6 +71,7 @@ export function TransactionDetails() {
           environment={query.environment}
           start={start}
           end={end}
+          transactionName={transactionName}
         />
       </ChartPointerEventContextProvider>
 

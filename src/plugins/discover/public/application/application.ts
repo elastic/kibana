@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import './index.scss';
 import { renderApp as renderReactApp } from './index';
 
 /**
- * Here's where Discover's inner angular is mounted and rendered
+ * Here's where Discover is mounted and rendered
  */
 export async function renderApp(moduleName: string, element: HTMLElement) {
   const app = mountDiscoverApp(moduleName, element);
