@@ -105,6 +105,7 @@ export class CanvasPlugin
       mount: async (params: AppMountParameters) => {
         const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin');
         const srcPlugin = new CanvasSrcPlugin();
+
         srcPlugin.setup(coreSetup, { canvas: canvasApi });
         setupExpressions({ coreSetup, setupPlugins });
 
