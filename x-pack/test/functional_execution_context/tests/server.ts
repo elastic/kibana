@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { assertLogContains, isExecutionContextLog, ANY, logFilePath } from '../test_utils';
+import { assertLogContains, isExecutionContextLog, ANY } from '../test_utils';
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
           enabled: true,
           name: 'abc',
           tags: ['foo'],
-          rule_type_id: 'test.longRunning',
+          rule_type_id: 'test.executionContext',
           consumer: 'alertsFixture',
           schedule: { interval: '3s' },
           throttle: '20s',
@@ -67,22 +67,26 @@ export default function ({ getService }: FtrProviderContext) {
       await waitForStatus(alertId, new Set(['ok']), 90_000);
 
       await assertLogContains({
-        description: 'execution context propagates to Elasticsearch via "x-opaque-id" header1',
+        description:
+          'task manager execution context propagates to Elasticsearch via "x-opaque-id" header',
         predicate: (record) =>
           Boolean(
             // exclude part with taskId
-            record.http?.request?.id?.includes(`kibana:task manager:run alerting:test.longRunning:`)
+            record.http?.request?.id?.includes(
+              `kibana:task manager:run alerting:test.executionContext:`
+            )
           ),
         retry,
-        path: logFilePath,
       });
 
       await assertLogContains({
-        description: 'execution context propagates to Elasticsearch via "x-opaque-id" header1',
+        description:
+          'alerting execution context propagates to Elasticsearch via "x-opaque-id" header',
         predicate: (record) =>
-          Boolean(record.http?.request?.id?.includes(`alert:execute test.longRunning:${alertId}`)),
+          Boolean(
+            record.http?.request?.id?.includes(`alert:execute test.executionContext:${alertId}`)
+          ),
         retry,
-        path: logFilePath,
       });
 
       await assertLogContains({
@@ -91,18 +95,17 @@ export default function ({ getService }: FtrProviderContext) {
           isExecutionContextLog(record?.message, {
             parent: {
               type: 'task manager',
-              name: 'run alerting:test.longRunning',
+              name: 'run alerting:test.executionContext',
               // @ts-expect-error. it accepts strings only
               id: ANY,
               description: 'run task',
             },
             type: 'alert',
-            name: 'execute test.longRunning',
+            name: 'execute test.executionContext',
             id: alertId,
-            description: 'execute [test.longRunning] with name [abc] in [default] namespace',
+            description: 'execute [test.executionContext] with name [abc] in [default] namespace',
           }),
         retry,
-        path: logFilePath,
       });
     });
   });

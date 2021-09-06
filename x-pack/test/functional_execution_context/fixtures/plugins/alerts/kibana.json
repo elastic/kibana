@@ -7,8 +7,7 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],
-  "requiredPlugins": ["taskManager", "features", "actions", "alerting"],
-  "optionalPlugins": ["security", "spaces"],
+  "requiredPlugins": ["features", "alerting"],
   "server": true,
   "ui": false
 }

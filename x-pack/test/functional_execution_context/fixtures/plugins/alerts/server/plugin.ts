@@ -32,7 +32,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'Alerts',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
-      alerting: ['test.longRunning'],
+      alerting: ['test.executionContext'],
       privileges: {
         all: {
           app: ['alerts', 'kibana'],
@@ -42,7 +42,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              all: ['test.longRunning'],
+              all: ['test.executionContext'],
             },
           },
           ui: [],
@@ -55,7 +55,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              read: ['test.longRunning'],
+              read: ['test.executionContext'],
             },
           },
           ui: [],
@@ -64,7 +64,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     });
 
     alerting.registerType({
-      id: 'test.longRunning',
+      id: 'test.executionContext',
       name: 'Test: Query Elasticsearch server',
       actionGroups: [
         {

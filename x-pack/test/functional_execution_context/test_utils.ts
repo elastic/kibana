@@ -12,6 +12,7 @@ import type { RetryService } from '../../../test/common/services/retry';
 
 export const logFilePath = Path.resolve(__dirname, './kibana.log');
 export const ANY = Symbol('any');
+
 export function isExecutionContextLog(
   record: string | undefined,
   executionContext: KibanaExecutionContext
@@ -33,16 +34,14 @@ export async function assertLogContains({
   description,
   predicate,
   retry,
-  path,
 }: {
   description: string;
   predicate: (record: Ecs) => boolean;
-  path: string;
   retry: RetryService;
 }): Promise<void> {
   // logs are written to disk asynchronously. I sacrificed performance to reduce flakiness.
   await retry.waitFor(description, async () => {
-    const logsStr = await Fs.readFile(path, 'utf-8');
+    const logsStr = await Fs.readFile(logFilePath, 'utf-8');
     const normalizedRecords = logsStr
       .split(endOfLine)
       .filter(Boolean)
