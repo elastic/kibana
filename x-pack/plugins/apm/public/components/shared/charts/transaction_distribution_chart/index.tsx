@@ -30,7 +30,10 @@ import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import type { HistogramItem } from '../../../../../common/search_strategies/types';
+import type {
+  FieldValuePair,
+  HistogramItem,
+} from '../../../../../common/search_strategies/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -38,8 +41,8 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { ChartContainer } from '../chart_container';
 
 interface TransactionDistributionChartProps {
-  fieldName?: string;
-  fieldValue?: string;
+  fieldName?: FieldValuePair['fieldName'];
+  fieldValue?: FieldValuePair['fieldValue'];
   hasData: boolean;
   histogram?: HistogramItem[];
   markerCurrentTransaction?: number;

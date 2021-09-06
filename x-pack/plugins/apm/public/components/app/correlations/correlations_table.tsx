@@ -18,17 +18,12 @@ import type { FieldValuePair } from '../../../../common/search_strategies/types'
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 
-export type SelectedCorrelationTerm<T extends FieldValuePair> = Pick<
-  T,
-  'fieldName' | 'fieldValue'
->;
-
-interface Props<T> {
+interface CorrelationsTableProps<T extends FieldValuePair> {
   significantTerms?: T[];
   status: FETCH_STATUS;
   percentageColumnName?: string;
   setSelectedSignificantTerm: (term: T | null) => void;
-  selectedTerm?: { fieldName: string; fieldValue: string };
+  selectedTerm?: FieldValuePair;
   onFilter?: () => void;
   columns: Array<EuiBasicTableColumn<T>>;
   onTableChange: (c: Criteria<T>) => void;
@@ -43,7 +38,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
   selectedTerm,
   onTableChange,
   sorting,
-}: Props<T>) {
+}: CorrelationsTableProps<T>) {
   const euiTheme = useTheme();
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const trackSelectSignificantCorrelationTerm = useCallback(

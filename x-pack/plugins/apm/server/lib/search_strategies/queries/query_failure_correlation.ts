@@ -74,26 +74,26 @@ export const fetchFailedTransactionsCorrelationPValues = async (
 
   const overallResult = resp.body.aggregations
     .failure_p_value as estypes.AggregationsSignificantTermsAggregate<{
-    key: string;
+    key: string | number;
     doc_count: number;
     bg_count: number;
     score: number;
   }>;
   const result = overallResult.buckets.map((bucket) => {
-    const score = bucket.score;
-
     // Scale the score into a value from 0 - 1
     // using a concave piecewise linear function in -log(p-value)
     const normalizedScore =
-      0.5 * Math.min(Math.max((score - 3.912) / 2.995, 0), 1) +
-      0.25 * Math.min(Math.max((score - 6.908) / 6.908, 0), 1) +
-      0.25 * Math.min(Math.max((score - 13.816) / 101.314, 0), 1);
+      0.5 * Math.min(Math.max((bucket.score - 3.912) / 2.995, 0), 1) +
+      0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
+      0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
 
     return {
-      ...bucket,
       fieldName,
       fieldValue: bucket.key,
-      pValue: Math.exp(-score),
+      doc_count: bucket.doc_count,
+      bg_count: bucket.doc_count,
+      score: bucket.score,
+      pValue: Math.exp(-bucket.score),
       normalizedScore,
       // Percentage of time the term appears in failed transactions
       failurePercentage: bucket.doc_count / overallResult.doc_count,

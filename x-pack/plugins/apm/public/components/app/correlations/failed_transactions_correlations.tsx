@@ -219,7 +219,7 @@ export function FailedTransactionsCorrelations({
         sortable: true,
       },
       {
-        field: 'key',
+        field: 'fieldValue',
         name: i18n.translate(
           'xpack.apm.correlations.failedTransactions.correlationsTable.fieldValueLabel',
           { defaultMessage: 'Field value' }
@@ -444,7 +444,7 @@ export function FailedTransactionsCorrelations({
           <Summary
             items={[
               <EuiBadge color="hollow">
-                {`${selectedTerm.fieldName}: ${selectedTerm.key}`}
+                {`${selectedTerm.fieldName}: ${selectedTerm.fieldValue}`}
               </EuiBadge>,
               <>{`p-value: ${selectedTerm.pValue.toPrecision(3)}`}</>,
             ]}

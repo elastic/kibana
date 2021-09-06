@@ -6,24 +6,37 @@
  */
 
 import {
+  FieldValuePair,
   HistogramItem,
   RawResponseBase,
   SearchStrategyClientParams,
 } from '../types';
 
-export interface LatencyCorrelation {
+export interface LatencyCorrelation extends FieldValuePair {
   correlation: number;
-  fieldName: string;
-  fieldValue: string;
   histogram: HistogramItem[];
   ksTest: number;
 }
 
-// Basic type guard for array of LatencyCorrelation
+// Type guard for populated array of LatencyCorrelation
 export function isLatencyCorrelations(
   arg: unknown
 ): arg is LatencyCorrelation[] {
-  return Array.isArray(arg) && arg.length > 0;
+  return (
+    Array.isArray(arg) &&
+    arg.length > 0 &&
+    arg.every(
+      (d) =>
+        typeof d === 'object' &&
+        d !== null &&
+        Object.keys(d).length === 5 &&
+        typeof d.correlation === 'number' &&
+        typeof d.fieldName === 'string' &&
+        typeof d.fieldValue === 'string' &&
+        Array.isArray(d.histogram) &&
+        typeof d.ksTest === 'number'
+    )
+  );
 }
 
 export interface AsyncSearchProviderProgress {
