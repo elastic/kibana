@@ -26,10 +26,6 @@ import React from 'react';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
 
-interface Item {
-  id?: string;
-}
-
 export interface TableListViewProps<V> {
   createItem?(): void;
   deleteItems?(items: V[]): Promise<void>;
@@ -81,7 +77,7 @@ export interface TableListViewState<V> {
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
-class TableListView<V extends {}> extends React.Component<
+class TableListView<V extends Record<string, unknown>> extends React.Component<
   TableListViewProps<V>,
   TableListViewState<V>
 > {
@@ -407,11 +403,11 @@ class TableListView<V extends {}> extends React.Component<
 
     const selection = this.props.deleteItems
       ? {
-          onSelectionChange: (obj: Item[]) => {
+          onSelectionChange: (obj: V[]) => {
             this.setState({
               selectedIds: obj
-                .map((item) => item.id)
-                .filter((id: undefined | string): id is string => Boolean(id)),
+                .map((item) => (item as Record<string, undefined | string>)?.id)
+                .filter((id): id is string => Boolean(id)),
             });
           },
         }
