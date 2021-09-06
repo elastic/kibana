@@ -20,9 +20,7 @@ import {
 } from '../../../../../common/constants';
 
 const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) => {
-  const { dataViews: indexPatternService } = dataService;
-
-  const results = await indexPatternService.find(DEPRECATION_LOGS_INDEX_PATTERN);
+  const results = await dataService.dataViews.find(DEPRECATION_LOGS_INDEX_PATTERN);
   // Since the find might return also results with wildcard matchers we need to find the
   // index pattern that has an exact match with our title.
   const deprecationIndexPattern = results.find(
@@ -32,7 +30,7 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
   if (deprecationIndexPattern) {
     return deprecationIndexPattern.id;
   } else {
-    const newIndexPattern = await indexPatternService.createAndSave({
+    const newIndexPattern = await dataService.dataViews.createAndSave({
       title: DEPRECATION_LOGS_INDEX_PATTERN,
       allowNoIndex: true,
     });
