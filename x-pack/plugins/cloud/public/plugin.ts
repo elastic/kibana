@@ -20,7 +20,7 @@ import type {
   SecurityPluginStart,
 } from '../../security/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
-import { ELASTIC_SUPPORT_LINK } from '../common/constants';
+import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
@@ -54,6 +54,7 @@ export interface CloudSetup {
   deploymentUrl?: string;
   profileUrl?: string;
   organizationUrl?: string;
+  snapshotsUrl?: string;
   isCloudEnabled: boolean;
 }
 
@@ -80,6 +81,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       deployment_url: deploymentUrl,
       base_url: baseUrl,
     } = this.config;
+
     this.isCloudEnabled = getIsCloudEnabled(id);
 
     if (home) {
@@ -89,13 +91,19 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       }
     }
 
+    const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
+    const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl);
+    const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl);
+    const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
+
     return {
       cloudId: id,
       cname,
       baseUrl,
-      deploymentUrl: getFullCloudUrl(baseUrl, deploymentUrl),
-      profileUrl: getFullCloudUrl(baseUrl, profileUrl),
-      organizationUrl: getFullCloudUrl(baseUrl, organizationUrl),
+      deploymentUrl: fullCloudDeploymentUrl,
+      profileUrl: fullCloudProfileUrl,
+      organizationUrl: fullCloudOrganizationUrl,
+      snapshotsUrl: fullCloudSnapshotsUrl,
       isCloudEnabled: this.isCloudEnabled,
     };
   }

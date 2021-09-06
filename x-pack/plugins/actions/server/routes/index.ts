@@ -15,6 +15,7 @@ import { getActionRoute } from './get';
 import { getAllActionRoute } from './get_all';
 import { connectorTypesRoute } from './connector_types';
 import { updateActionRoute } from './update';
+import { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
 import { defineLegacyRoutes } from './legacy';
 
 export function defineRoutes(
@@ -30,4 +31,6 @@ export function defineRoutes(
   updateActionRoute(router, licenseState);
   connectorTypesRoute(router, licenseState);
   executeActionRoute(router, licenseState);
+
+  getWellKnownEmailServiceRoute(router, licenseState);
 }

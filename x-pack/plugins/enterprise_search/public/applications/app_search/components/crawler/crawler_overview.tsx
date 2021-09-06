@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
@@ -26,17 +26,10 @@ import { CrawlerStatusIndicator } from './components/crawler_status_indicator/cr
 import { DomainsTable } from './components/domains_table';
 import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
 import { CRAWLER_TITLE } from './constants';
-import { CrawlerOverviewLogic } from './crawler_overview_logic';
+import { CrawlerLogic } from './crawler_logic';
 
 export const CrawlerOverview: React.FC = () => {
-  const { crawlRequests, dataLoading, domains } = useValues(CrawlerOverviewLogic);
-
-  const { fetchCrawlerData, getLatestCrawlRequests } = useActions(CrawlerOverviewLogic);
-
-  useEffect(() => {
-    fetchCrawlerData();
-    getLatestCrawlRequests(false);
-  }, []);
+  const { crawlRequests, dataLoading, domains } = useValues(CrawlerLogic);
 
   return (
     <AppSearchPageTemplate
