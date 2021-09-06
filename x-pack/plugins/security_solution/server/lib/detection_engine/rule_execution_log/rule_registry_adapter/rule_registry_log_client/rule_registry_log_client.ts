@@ -142,76 +142,78 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
     invariant(result.aggregations, 'Search response should contain aggregations');
 
     return Object.fromEntries(
-      result.aggregations.rules.buckets.map((bucket) => [
-        bucket.key,
-        bucket.most_recent_logs.hits.hits.map<IRuleStatusSOAttributes>((event) => {
-          const logEntry = parseRuleExecutionLog(event._source);
-          invariant(
-            logEntry[ALERT_RULE_UUID] ?? '',
-            'Malformed execution log entry: rule.id field not found'
-          );
+      result.aggregations.rules.buckets.map<[ruleId: string, logs: IRuleStatusSOAttributes[]]>(
+        (bucket) => [
+          bucket.key as string,
+          bucket.most_recent_logs.hits.hits.map<IRuleStatusSOAttributes>((event) => {
+            const logEntry = parseRuleExecutionLog(event._source);
+            invariant(
+              logEntry[ALERT_RULE_UUID] ?? '',
+              'Malformed execution log entry: rule.id field not found'
+            );
 
-          const lastFailure = bucket.last_failure.event.hits.hits[0]
-            ? parseRuleExecutionLog(bucket.last_failure.event.hits.hits[0]._source)
-            : undefined;
+            const lastFailure = bucket.last_failure.event.hits.hits[0]
+              ? parseRuleExecutionLog(bucket.last_failure.event.hits.hits[0]._source)
+              : undefined;
 
-          const lastSuccess = bucket.last_success.event.hits.hits[0]
-            ? parseRuleExecutionLog(bucket.last_success.event.hits.hits[0]._source)
-            : undefined;
+            const lastSuccess = bucket.last_success.event.hits.hits[0]
+              ? parseRuleExecutionLog(bucket.last_success.event.hits.hits[0]._source)
+              : undefined;
 
-          const lookBack = bucket.indexing_lookback.event.hits.hits[0]
-            ? parseRuleExecutionLog(bucket.indexing_lookback.event.hits.hits[0]._source)
-            : undefined;
+            const lookBack = bucket.indexing_lookback.event.hits.hits[0]
+              ? parseRuleExecutionLog(bucket.indexing_lookback.event.hits.hits[0]._source)
+              : undefined;
 
-          const executionGap = bucket.execution_gap.event.hits.hits[0]
-            ? parseRuleExecutionLog(bucket.execution_gap.event.hits.hits[0]._source)[
-                getMetricField(ExecutionMetric.executionGap)
-              ]
-            : undefined;
+            const executionGap = bucket.execution_gap.event.hits.hits[0]
+              ? parseRuleExecutionLog(bucket.execution_gap.event.hits.hits[0]._source)[
+                  getMetricField(ExecutionMetric.executionGap)
+                ]
+              : undefined;
 
-          const searchDuration = bucket.search_duration_max.event.hits.hits[0]
-            ? parseRuleExecutionLog(bucket.search_duration_max.event.hits.hits[0]._source)[
-                getMetricField(ExecutionMetric.searchDurationMax)
-              ]
-            : undefined;
+            const searchDuration = bucket.search_duration_max.event.hits.hits[0]
+              ? parseRuleExecutionLog(bucket.search_duration_max.event.hits.hits[0]._source)[
+                  getMetricField(ExecutionMetric.searchDurationMax)
+                ]
+              : undefined;
 
-          const indexingDuration = bucket.indexing_duration_max.event.hits.hits[0]
-            ? parseRuleExecutionLog(bucket.indexing_duration_max.event.hits.hits[0]._source)[
-                getMetricField(ExecutionMetric.indexingDurationMax)
-              ]
-            : undefined;
+            const indexingDuration = bucket.indexing_duration_max.event.hits.hits[0]
+              ? parseRuleExecutionLog(bucket.indexing_duration_max.event.hits.hits[0]._source)[
+                  getMetricField(ExecutionMetric.indexingDurationMax)
+                ]
+              : undefined;
 
-          const alertId = logEntry[ALERT_RULE_UUID] ?? '';
-          const statusDate = logEntry[TIMESTAMP];
-          const lastFailureAt = lastFailure?.[TIMESTAMP];
-          const lastFailureMessage = lastFailure?.[MESSAGE];
-          const lastSuccessAt = lastSuccess?.[TIMESTAMP];
-          const lastSuccessMessage = lastSuccess?.[MESSAGE];
-          const status = (logEntry[RULE_STATUS] as RuleExecutionStatus) || null;
-          const lastLookBackDate = lookBack?.[getMetricField(ExecutionMetric.indexingLookback)];
-          const gap = executionGap ? moment.duration(executionGap).humanize() : null;
-          const bulkCreateTimeDurations = indexingDuration
-            ? [makeFloatString(indexingDuration)]
-            : null;
-          const searchAfterTimeDurations = searchDuration
-            ? [makeFloatString(searchDuration)]
-            : null;
+            const alertId = logEntry[ALERT_RULE_UUID] ?? '';
+            const statusDate = logEntry[TIMESTAMP];
+            const lastFailureAt = lastFailure?.[TIMESTAMP];
+            const lastFailureMessage = lastFailure?.[MESSAGE];
+            const lastSuccessAt = lastSuccess?.[TIMESTAMP];
+            const lastSuccessMessage = lastSuccess?.[MESSAGE];
+            const status = (logEntry[RULE_STATUS] as RuleExecutionStatus) || null;
+            const lastLookBackDate = lookBack?.[getMetricField(ExecutionMetric.indexingLookback)];
+            const gap = executionGap ? moment.duration(executionGap).humanize() : null;
+            const bulkCreateTimeDurations = indexingDuration
+              ? [makeFloatString(indexingDuration)]
+              : null;
+            const searchAfterTimeDurations = searchDuration
+              ? [makeFloatString(searchDuration)]
+              : null;
 
-          return {
-            alertId,
-            statusDate,
-            lastFailureAt,
-            lastFailureMessage,
-            lastSuccessAt,
-            lastSuccessMessage,
-            status,
-            lastLookBackDate,
-            gap,
-            bulkCreateTimeDurations,
-            searchAfterTimeDurations,
-          };
-        }),
-      ])
+            return {
+              alertId,
+              statusDate,
+              lastFailureAt,
+              lastFailureMessage,
+              lastSuccessAt,
+              lastSuccessMessage,
+              status,
+              lastLookBackDate,
+              gap,
+              bulkCreateTimeDurations,
+              searchAfterTimeDurations,
+            };
+          }),
+        ]
+      )
     );
   }
 
