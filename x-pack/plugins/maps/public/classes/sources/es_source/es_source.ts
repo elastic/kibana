@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter, IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
 import type { Query } from 'src/plugins/data/common';
-import { Filter, IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
