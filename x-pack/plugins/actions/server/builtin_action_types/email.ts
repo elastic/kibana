@@ -9,6 +9,7 @@ import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
+import SMTPConnection from 'nodemailer/lib/smtp-connection';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
@@ -32,10 +33,29 @@ export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
+// supported values for `service` in addition to nodemailer's list of well-known services
+export enum AdditionalEmailServices {
+  ELASTIC_CLOUD = 'elastic_cloud',
+  EXCHANGE = 'exchange_server',
+  OTHER = 'other',
+}
+
+// these values for `service` require users to fill in host/port/secure
+export const CUSTOM_CONFIG_SERVICES: string[] = [
+  AdditionalEmailServices.EXCHANGE,
+  AdditionalEmailServices.OTHER,
+];
+
+export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
+  host: 'dockerhost',
+  port: 10025,
+  secure: false,
+};
+
 const EMAIL_FOOTER_DIVIDER = '\n\n--\n\n';
 
 const ConfigSchemaProps = {
-  service: schema.nullable(schema.string()),
+  service: schema.string({ defaultValue: 'other' }),
   host: schema.nullable(schema.string()),
   port: schema.nullable(portSchema()),
   secure: schema.nullable(schema.boolean()),
@@ -58,7 +78,8 @@ function validateConfig(
   // translate messages.
   if (config.service === JSON_TRANSPORT_SERVICE) {
     return;
-  } else if (config.service == null) {
+  } else if (CUSTOM_CONFIG_SERVICES.indexOf(config.service) >= 0) {
+    // If configured `service` requires custom host/port/secure settings, validate that they are set
     if (config.host == null && config.port == null) {
       return 'either [service] or [host]/[port] is required';
     }
@@ -75,6 +96,7 @@ function validateConfig(
       return `[host] value '${config.host}' is not in the allowedHosts configuration`;
     }
   } else {
+    // Check configured `service` against nodemailer list of well known services + any custom ones allowed by Kibana
     const host = getServiceNameHost(config.service);
     if (host == null) {
       return `[service] value '${config.service}' is not valid`;
@@ -201,13 +223,20 @@ async function executor(
     transport.password = secrets.password;
   }
 
-  if (config.service !== null) {
-    transport.service = config.service;
-  } else {
+  if (CUSTOM_CONFIG_SERVICES.indexOf(config.service) >= 0) {
+    // use configured host/port/secure values
     // already validated service or host/port is not null ...
     transport.host = config.host!;
     transport.port = config.port!;
     transport.secure = getSecureValue(config.secure, config.port);
+  } else if (config.service === AdditionalEmailServices.ELASTIC_CLOUD) {
+    // use custom elastic cloud settings
+    transport.host = ELASTIC_CLOUD_SERVICE.host!;
+    transport.port = ELASTIC_CLOUD_SERVICE.port!;
+    transport.secure = ELASTIC_CLOUD_SERVICE.secure!;
+  } else {
+    // use nodemailer's well known service config
+    transport.service = config.service;
   }
 
   const footerMessage = getFooterMessage({
@@ -253,6 +282,10 @@ async function executor(
 // utilities
 
 function getServiceNameHost(service: string): string | null {
+  if (service === AdditionalEmailServices.ELASTIC_CLOUD) {
+    return ELASTIC_CLOUD_SERVICE.host!;
+  }
+
   const serviceEntry = nodemailerGetService(service);
   if (serviceEntry === false) return null;
 

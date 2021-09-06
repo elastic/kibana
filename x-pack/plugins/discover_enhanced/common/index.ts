@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110900
-/* eslint-disable @kbn/eslint/no_export_all */
-
-export * from './config';
+export type { Config } from './config';
