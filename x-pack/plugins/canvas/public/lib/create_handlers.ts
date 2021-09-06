@@ -26,8 +26,9 @@ export const createBaseHandlers = (): IInterpreterRenderHandlers => ({
   update() {},
   event() {},
   onDestroy() {},
-  getRenderMode: () => 'display',
+  getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isInteractive: () => true,
 });
 
 export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHandlers => ({
