@@ -113,7 +113,20 @@ export const FormContext: React.FC<Props> = ({
         : null,
     [children, connectors, isLoadingConnectors]
   );
-  return <Form form={form}>{childrenWithExtraProp}</Form>;
+  return (
+    <Form
+      onKeyDown={(e: KeyboardEvent) => {
+        // It avoids the focus scaping from the flyout when enter is pressed.
+        // https://github.com/elastic/kibana/issues/111120
+        if (e.key === 'Enter') {
+          e.stopPropagation();
+        }
+      }}
+      form={form}
+    >
+      {childrenWithExtraProp}
+    </Form>
+  );
 };
 
 FormContext.displayName = 'FormContext';
