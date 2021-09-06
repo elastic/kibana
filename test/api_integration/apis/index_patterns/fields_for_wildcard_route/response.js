@@ -25,6 +25,7 @@ export default function ({ getService }) {
       aggregatable: true,
       name: 'bar',
       readFromDocValues: true,
+      metadata_field: false,
     },
     {
       type: 'string',
@@ -33,6 +34,7 @@ export default function ({ getService }) {
       aggregatable: false,
       name: 'baz',
       readFromDocValues: false,
+      metadata_field: false,
     },
     {
       type: 'string',
@@ -42,6 +44,7 @@ export default function ({ getService }) {
       name: 'baz.keyword',
       readFromDocValues: true,
       subType: { multi: { parent: 'baz' } },
+      metadata_field: false,
     },
     {
       type: 'number',
@@ -50,6 +53,7 @@ export default function ({ getService }) {
       aggregatable: true,
       name: 'foo',
       readFromDocValues: true,
+      metadata_field: false,
     },
     {
       aggregatable: true,
@@ -63,6 +67,7 @@ export default function ({ getService }) {
         },
       },
       type: 'string',
+      metadata_field: false,
     },
   ];
 
