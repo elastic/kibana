@@ -664,7 +664,6 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
       ],
       "originalSavedObjectBody": Object {},
       "resetOriginalSavedObjectBody": [Function],
-      "runtimeCompositeMap": Object {},
       "runtimeFieldMap": Object {},
       "setFieldFormat": [Function],
       "shortDotsEnable": false,
