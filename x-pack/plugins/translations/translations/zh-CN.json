@@ -299,7 +299,6 @@
     "core.euiColumnSorting.emptySorting": "当前未排序任何字段",
     "core.euiColumnSorting.pickFields": "选取排序依据的字段",
     "core.euiColumnSorting.sortFieldAriaLabel": "排序依据：",
-    "core.euiColumnSortingDraggable.activeSortLabel": "{display} 正在排序此数据网格",
     "core.euiColumnSortingDraggable.defaultSortAsc": "A-Z",
     "core.euiColumnSortingDraggable.defaultSortDesc": "Z-A",
     "core.euiColumnSortingDraggable.removeSortLabel": "从数据网格排序中移除：",
