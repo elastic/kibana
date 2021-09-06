@@ -95,7 +95,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
         state.setProgress({
           loadedHistogramStepsize: 1,
           loadedOverallHistogram: 1,
-          loadedFieldCanditates: 1,
+          loadedFieldCandidates: 1,
           loadedFieldValuePairs: 1,
           loadedHistograms: 1,
         });
@@ -139,7 +139,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
         state.setProgress({
           loadedHistogramStepsize: 1,
           loadedOverallHistogram: 1,
-          loadedFieldCanditates: 1,
+          loadedFieldCandidates: 1,
           loadedFieldValuePairs: 1,
           loadedHistograms: 1,
         });
@@ -172,7 +172,7 @@ export const latencyCorrelationsSearchServiceProvider: LatencyCorrelationsSearch
 
       addLogMessage(`Identified ${fieldCandidates.length} fieldCandidates.`);
 
-      state.setProgress({ loadedFieldCanditates: 1 });
+      state.setProgress({ loadedFieldCandidates: 1 });
 
       const fieldValuePairs = await fetchTransactionDurationFieldValuePairs(
         esClient,

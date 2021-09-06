@@ -49,7 +49,7 @@ export const latencyCorrelationsSearchServiceStateProvider = () => {
     started: Date.now(),
     loadedHistogramStepsize: 0,
     loadedOverallHistogram: 0,
-    loadedFieldCanditates: 0,
+    loadedFieldCandidates: 0,
     loadedFieldValuePairs: 0,
     loadedHistograms: 0,
   };
@@ -57,7 +57,7 @@ export const latencyCorrelationsSearchServiceStateProvider = () => {
     return (
       progress.loadedHistogramStepsize * 0.025 +
       progress.loadedOverallHistogram * 0.025 +
-      progress.loadedFieldCanditates * 0.025 +
+      progress.loadedFieldCandidates * 0.025 +
       progress.loadedFieldValuePairs * 0.025 +
       progress.loadedHistograms * 0.9
     );

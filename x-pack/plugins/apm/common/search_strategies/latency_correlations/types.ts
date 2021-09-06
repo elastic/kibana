@@ -43,7 +43,7 @@ export interface LatencyCorrelationSearchServiceProgress {
   started: number;
   loadedHistogramStepsize: number;
   loadedOverallHistogram: number;
-  loadedFieldCanditates: number;
+  loadedFieldCandidates: number;
   loadedFieldValuePairs: number;
   loadedHistograms: number;
 }

@@ -19,7 +19,7 @@ describe('search service', () => {
       expect(defaultState.isCancelled).toBe(false);
       expect(defaultState.isRunning).toBe(true);
       expect(defaultState.overallHistogram).toBe(undefined);
-      expect(defaultState.progress.loadedFieldCanditates).toBe(0);
+      expect(defaultState.progress.loadedFieldCandidates).toBe(0);
       expect(defaultState.progress.loadedFieldValuePairs).toBe(0);
       expect(defaultState.progress.loadedHistogramStepsize).toBe(0);
       expect(defaultState.progress.loadedHistograms).toBe(0);
@@ -49,7 +49,7 @@ describe('search service', () => {
       expect(updatedState.overallHistogram).toEqual([
         { key: 1392202800000, doc_count: 1234 },
       ]);
-      expect(updatedState.progress.loadedFieldCanditates).toBe(0);
+      expect(updatedState.progress.loadedFieldCandidates).toBe(0);
       expect(updatedState.progress.loadedFieldValuePairs).toBe(0);
       expect(updatedState.progress.loadedHistogramStepsize).toBe(0);
       expect(updatedState.progress.loadedHistograms).toBe(0.5);
