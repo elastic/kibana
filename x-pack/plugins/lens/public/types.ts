@@ -260,7 +260,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) =>
     | Array<{
         shortMessage: string;
-        longMessage: string;
+        longMessage: React.ReactNode;
         fixAction?: { label: string; newState: () => Promise<T> };
       }>
     | undefined;
@@ -734,7 +734,7 @@ export interface Visualization<T = unknown> {
   ) =>
     | Array<{
         shortMessage: string;
-        longMessage: string;
+        longMessage: React.ReactNode;
       }>
     | undefined;
 
@@ -817,4 +817,10 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
   ) => void;
+}
+
+export interface SharingSavedObjectProps {
+  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
+  aliasTargetId?: string;
+  errorJSON?: string;
 }
