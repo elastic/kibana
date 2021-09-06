@@ -57,7 +57,7 @@ export function AlertingFlyout(props: Props) {
         metadata: {
           environment,
           serviceName,
-          transactionType,
+          ...(alertType === AlertType.ErrorCount ? {} : { transactionType }),
           start,
           end,
         } as AlertMetadata,
