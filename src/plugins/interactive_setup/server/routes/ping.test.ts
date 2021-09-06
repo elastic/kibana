@@ -14,7 +14,6 @@ import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
 import { interactiveSetupMock } from '../mocks';
-import type { RouteDefinitionParams } from './';
 import { routeDefinitionParamsMock } from './index.mock';
 import { definePingRoute } from './ping';
 
@@ -28,7 +27,7 @@ describe('Configure routes', () => {
 
     mockContext = ({} as unknown) as RequestHandlerContext;
 
-    definePingRoute((mockRouteParams as unknown) as RouteDefinitionParams);
+    definePingRoute(mockRouteParams);
   });
 
   describe('#ping', () => {

@@ -27,7 +27,7 @@ export function defineVerifyRoute({ router, verificationCode }: RouteDefinitionP
           body: {
             message: verificationCode.remainingAttempts
               ? 'Invalid verification code.'
-              : 'Maximum number of attempts exceeded.',
+              : 'Maximum number of attempts exceeded. Restart Kibana to generate a new code and retry.',
             attributes: {
               remainingAttempts: verificationCode.remainingAttempts,
             },

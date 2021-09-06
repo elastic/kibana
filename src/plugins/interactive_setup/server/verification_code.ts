@@ -66,6 +66,12 @@ Your verification code is: ${highlightedCode}
     return true;
   }
 
+  /**
+   * Returns a cryptographically secure and random 6-digit code.
+   *
+   * Implementation notes: `secureRandomNumber` returns a random number like `0.05505769583xxxx`. To
+   * turn that into a 6 digit code we multiply it by `10^6` and result is `055057`.
+   */
   private static generate(length: number) {
     return Math.floor(secureRandomNumber() * Math.pow(10, length))
       .toString()
@@ -73,6 +79,9 @@ Your verification code is: ${highlightedCode}
   }
 }
 
+/**
+ * Cryptographically secure equivalent of `Math.random()`.
+ */
 function secureRandomNumber() {
   return crypto.randomBytes(4).readUInt32LE() / 0x100000000;
 }

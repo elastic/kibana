@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicContract } from '@kbn/utility-types';
 
 import type { VerificationCode } from './verification_code';
 
 export const verificationCodeMock = {
-  create: (): jest.Mocked<PublicMethodsOf<VerificationCode>> => ({
+  create: (): jest.Mocked<PublicContract<VerificationCode>> => ({
+    code: '123456',
+    remainingAttempts: 5,
     verify: jest.fn().mockReturnValue(true),
   }),
 };

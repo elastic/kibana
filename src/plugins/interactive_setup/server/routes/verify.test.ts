@@ -11,7 +11,6 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import type { RouteDefinitionParams } from './';
 import { routeDefinitionParamsMock } from './index.mock';
 import { defineVerifyRoute } from './verify';
 
@@ -25,7 +24,7 @@ describe('Configure routes', () => {
 
     mockContext = ({} as unknown) as RequestHandlerContext;
 
-    defineVerifyRoute((mockRouteParams as unknown) as RouteDefinitionParams);
+    defineVerifyRoute(mockRouteParams);
   });
 
   describe('#verify', () => {

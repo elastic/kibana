@@ -33,6 +33,7 @@ export const SingleCharsField: FunctionComponent<SingleCharsFieldProps> = ({
   isInvalid,
   autoFocus = false,
 }) => {
+  // Strip any invalid characters from input or clipboard and restrict length.
   const sanitize = (str: string) => {
     return str
       .split('')

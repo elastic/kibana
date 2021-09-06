@@ -15,7 +15,6 @@ import { httpServerMock } from 'src/core/server/mocks';
 
 import { ElasticsearchConnectionStatus } from '../../common';
 import { interactiveSetupMock } from '../mocks';
-import type { RouteDefinitionParams } from './';
 import { defineEnrollRoutes } from './enroll';
 import { routeDefinitionParamsMock } from './index.mock';
 
@@ -29,7 +28,7 @@ describe('Enroll routes', () => {
 
     mockContext = ({} as unknown) as RequestHandlerContext;
 
-    defineEnrollRoutes((mockRouteParams as unknown) as RouteDefinitionParams);
+    defineEnrollRoutes(mockRouteParams);
   });
 
   describe('#enroll', () => {

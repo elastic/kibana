@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 import type { IBasePath, IRouter, Logger, PrebootServicePreboot } from 'src/core/server';
 
 import type { ConfigType } from '../config';
@@ -30,7 +30,7 @@ export interface RouteDefinitionParams {
   };
   readonly kibanaConfigWriter: PublicMethodsOf<KibanaConfigWriter>;
   readonly elasticsearch: ElasticsearchServiceSetup;
-  readonly verificationCode: VerificationCode;
+  readonly verificationCode: PublicContract<VerificationCode>;
   readonly getConfig: () => ConfigType;
 }
 
