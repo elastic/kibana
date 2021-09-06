@@ -30,3 +30,5 @@ export const secondsToCronFormatter = (value: string = '') => (value ? `${value}
 
 export const objectToJsonFormatter = (value: Record<string, string> = {}) =>
   Object.keys(value).length ? JSON.stringify(value) : null;
+
+export const stringToJsonFormatter = (value: string = '') => (value ? JSON.stringify(value) : null);
