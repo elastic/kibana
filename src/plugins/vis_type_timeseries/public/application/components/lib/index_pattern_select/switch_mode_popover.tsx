@@ -48,14 +48,17 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
             }
           )}
           onClick={onButtonClick}
-          data-test-subj="switchIndexPatternSelectionModePopover"
+          data-test-subj="switchIndexPatternSelectionModePopoverButton"
         />
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       style={{ height: 'auto' }}
     >
-      <div style={{ width: '360px' }}>
+      <div
+        style={{ width: '360px' }}
+        data-test-subj="switchIndexPatternSelectionModePopoverContent"
+      >
         <EuiPopoverTitle>
           {i18n.translate('visTypeTimeseries.indexPatternSelect.switchModePopover.title', {
             defaultMessage: 'Index pattern selection mode',

@@ -502,22 +502,31 @@ export class VisualBuilderPageObject extends FtrService {
     return await annotationTooltipDetails.getVisibleText();
   }
 
-  public async toggleIndexPatternSelectionModePopover() {
-    await this.testSubjects.click('switchIndexPatternSelectionModePopover');
+  public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
+    const isPopoverOpened = await this.testSubjects.exists(
+      'switchIndexPatternSelectionModePopoverContent'
+    );
+    if ((shouldOpen && !isPopoverOpened) || (!shouldOpen && isPopoverOpened)) {
+      await this.testSubjects.click('switchIndexPatternSelectionModePopoverButton');
+    }
   }
 
   public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
-    await this.toggleIndexPatternSelectionModePopover();
+    await this.toggleIndexPatternSelectionModePopover(true);
     await this.testSubjects.setEuiSwitch(
       'switchIndexPatternSelectionMode',
       useKibanaIndices ? 'check' : 'uncheck'
     );
+    await this.toggleIndexPatternSelectionModePopover(false);
   }
 
   public async checkIndexPatternSelectionModeSwitchIsEnabled() {
-    await this.toggleIndexPatternSelectionModePopover();
-    const isEnabled = await this.testSubjects.isEnabled('switchIndexPatternSelectionMode');
-    await this.toggleIndexPatternSelectionModePopover();
+    await this.toggleIndexPatternSelectionModePopover(true);
+    let isEnabled;
+    await this.testSubjects.retry.tryForTime(2000, async () => {
+      isEnabled = await this.testSubjects.isEnabled('switchIndexPatternSelectionMode');
+    });
+    await this.toggleIndexPatternSelectionModePopover(false);
     return isEnabled;
   }
 
