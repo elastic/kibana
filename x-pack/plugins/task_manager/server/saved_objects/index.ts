@@ -8,7 +8,7 @@
 import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 import mappings from './mappings.json';
-import { migrations } from './migrations';
+import { getMigrations } from './migrations';
 import { TaskManagerConfig } from '../config.js';
 import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 
@@ -22,7 +22,7 @@ export function setupSavedObjects(
     hidden: true,
     convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id; ctx._source.remove("kibana")`,
     mappings: mappings.task as SavedObjectsTypeMappingDefinition,
-    migrations,
+    migrations: getMigrations(),
     indexPattern: config.index,
     excludeOnUpgrade: async ({ readonlyEsClient }) => {
       const oldestNeededActionParams = await getOldestIdleActionTask(
