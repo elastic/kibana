@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, OnRefreshChangeProps } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+  EuiTitle,
+  OnRefreshChangeProps,
+} from '@elastic/eui';
 import React, { useContext, useCallback } from 'react';
 import { MonitoringTimeContainer } from '../../application/pages/use_monitoring_time';
 
-export const MonitoringToolbar = () => {
+interface MonitoringToolbarProps {
+  pageTitle?: string;
+}
+
+export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle }) => {
   const {
     currentTimerange,
     handleTimeChange,
@@ -38,18 +48,36 @@ export const MonitoringToolbar = () => {
   );
 
   return (
-    <EuiFlexGroup gutterSize={'xl'} justifyContent={'spaceBetween'}>
-      <EuiFlexItem>Setup Button</EuiFlexItem>
+    <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween" responsive>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" justifyContent="spaceEvenly" direction="column" responsive>
+          <EuiFlexItem>
+            <div id="setupModeNav">{/* HERE GOES THE SETUP BUTTON */}</div>
+          </EuiFlexItem>
+          <EuiFlexItem className="monTopNavSecondItem">
+            {pageTitle && (
+              <div data-test-subj="monitoringPageTitle">
+                <EuiTitle size="xs">
+                  <h1>{pageTitle}</h1>
+                </EuiTitle>
+              </div>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          start={currentTimerange.from}
-          end={currentTimerange.to}
-          onTimeChange={onTimeChange}
-          onRefresh={() => {}}
-          isPaused={isPaused}
-          refreshInterval={refreshInterval}
-          onRefreshChange={onRefreshChange}
-        />
+        <div style={{ padding: 8 }}>
+          <EuiSuperDatePicker
+            start={currentTimerange.from}
+            end={currentTimerange.to}
+            onTimeChange={onTimeChange}
+            onRefresh={() => {}}
+            isPaused={isPaused}
+            refreshInterval={refreshInterval}
+            onRefreshChange={onRefreshChange}
+          />
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
