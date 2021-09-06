@@ -40,6 +40,8 @@ const getIcon = (type: DatatableColumnType | null) => {
 
 const getColumnName = (col: DatatableColumn) => (typeof col === 'string' ? col : col.name);
 
+const getColumnId = (col: DatatableColumn) => (typeof col === 'string' ? col : col.id);
+
 const getColumnType = (col: DatatableColumn) => col.meta?.type || null;
 
 const getFormattedValue = (val: any, type: any) => {
@@ -85,7 +87,7 @@ export const Datatable: FC<Props> = ({
                 <tr key={i} className="canvasDataTable__tr">
                   {datatable.columns.map((col) => (
                     <td key={`row-${i}-${getColumnName(col)}`} className="canvasDataTable__td">
-                      {getFormattedValue(row[getColumnName(col)], getColumnType(col))}
+                      {getFormattedValue(row[getColumnId(col)], getColumnType(col))}
                     </td>
                   ))}
                 </tr>
