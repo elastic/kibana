@@ -63,8 +63,9 @@ export function registerRoutes({
   registerLegacyImportRoute(legacyRouter, {
     maxImportPayloadBytes: config.maxImportPayloadBytes,
     coreUsageData,
+    logger,
   });
-  registerLegacyExportRoute(legacyRouter, { kibanaVersion, coreUsageData });
+  registerLegacyExportRoute(legacyRouter, { kibanaVersion, coreUsageData, logger });
 
   const internalRouter = http.createRouter('/internal/saved_objects/');
 

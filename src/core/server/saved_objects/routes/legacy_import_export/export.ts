@@ -9,7 +9,7 @@
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { InternalCoreUsageDataSetup } from 'src/core/server/core_usage_data';
-import { IRouter } from '../../..';
+import { IRouter, Logger } from '../../..';
 import { exportDashboards } from './lib';
 
 export const registerLegacyExportRoute = (
@@ -17,7 +17,8 @@ export const registerLegacyExportRoute = (
   {
     kibanaVersion,
     coreUsageData,
-  }: { kibanaVersion: string; coreUsageData: InternalCoreUsageDataSetup }
+    logger,
+  }: { kibanaVersion: string; coreUsageData: InternalCoreUsageDataSetup; logger: Logger }
 ) => {
   router.get(
     {
@@ -32,6 +33,10 @@ export const registerLegacyExportRoute = (
       },
     },
     async (ctx, req, res) => {
+      logger.warn(
+        "The export dashboard API '/api/kibana/dashboards/export' is deprecated. Use the saved objects import objects API '/api/saved_objects/_export' instead."
+      );
+
       const ids = Array.isArray(req.query.dashboard) ? req.query.dashboard : [req.query.dashboard];
       const { client } = ctx.core.savedObjects;
 
