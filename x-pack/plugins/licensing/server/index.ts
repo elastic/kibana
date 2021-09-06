@@ -5,16 +5,35 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110902
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { PluginInitializerContext } from 'src/core/server';
 import { LicensingPlugin } from './plugin';
 
 export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);
 
-export * from '../common/types';
-export { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
-export * from './types';
+export type {
+  LicenseCheckState,
+  LicenseType,
+  LicenseStatus,
+  LicenseFeature,
+  PublicLicense,
+  PublicFeatures,
+  PublicLicenseJSON,
+  LicenseCheck,
+  ILicense,
+} from '../common/types';
+
+export { LICENSE_TYPE } from '../common/types';
+
+export type { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
+
+export type {
+  ElasticsearchError,
+  LicensingApiRequestHandlerContext,
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from './types';
+
 export { config } from './licensing_config';
-export { CheckLicense, wrapRouteWithLicenseCheck } from './wrap_route_with_license_check';
+
+export type { CheckLicense } from './wrap_route_with_license_check';
+export { wrapRouteWithLicenseCheck } from './wrap_route_with_license_check';
