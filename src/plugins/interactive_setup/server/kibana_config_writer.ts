@@ -75,7 +75,7 @@ export class KibanaConfigWriter {
       }
     }
 
-    const config: Record<string, any> = { 'elasticsearch.hosts': [params.host] };
+    const config: Record<string, string | string[]> = { 'elasticsearch.hosts': [params.host] };
     if ('serviceAccountToken' in params) {
       config['elasticsearch.serviceAccountToken'] = params.serviceAccountToken.value;
     } else if ('username' in params) {

@@ -6,10 +6,16 @@
  */
 
 import expect from '@kbn/expect';
+import { REPO_ROOT } from '@kbn/utils';
+import fs from 'fs';
+import path from 'path';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlADJobTable } from './job_table';
-import { MlDFAJobTable } from './data_frame_analytics_table';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlADJobTable } from './job_table';
+import type { MlDFAJobTable } from './data_frame_analytics_table';
+import type { JobType } from '../../../../plugins/ml/common/types/saved_objects';
+import type { Job, Datafeed } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import type { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 type SyncFlyoutObjectType =
   | 'MissingObjects'
@@ -18,7 +24,7 @@ type SyncFlyoutObjectType =
   | 'ObjectsUnmatchedDatafeed';
 
 export function MachineLearningStackManagementJobsProvider(
-  { getService }: FtrProviderContext,
+  { getService, getPageObjects }: FtrProviderContext,
   mlADJobTable: MlADJobTable,
   mlDFAJobTable: MlDFAJobTable
 ) {
@@ -26,6 +32,9 @@ export function MachineLearningStackManagementJobsProvider(
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
+  const log = getService('log');
+
+  const PageObjects = getPageObjects(['common']);
 
   return {
     async openSyncFlyout() {
@@ -193,6 +202,213 @@ export function MachineLearningStackManagementJobsProvider(
         await testSubjects.click(`sts-space-selector-row-${spaceId}`, 1000);
       }
       await this.assertSpaceSelectionRowSelected(spaceId, shouldSelect);
+    },
+
+    async openImportFlyout() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('mlJobsImportButton', 1000);
+        await testSubjects.existOrFail('mlJobMgmtImportJobsFlyout');
+      });
+    },
+
+    async openExportFlyout() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('mlJobsExportButton', 1000);
+        await testSubjects.existOrFail('mlJobMgmtExportJobsFlyout');
+      });
+    },
+
+    async selectFileToImport(filePath: string, expectError: boolean = false) {
+      log.debug(`Importing file '${filePath}' ...`);
+      await PageObjects.common.setFileInputPath(filePath);
+
+      if (expectError) {
+        await testSubjects.existOrFail('~mlJobMgmtImportJobsFileReadErrorCallout');
+      } else {
+        await testSubjects.missingOrFail('~mlJobMgmtImportJobsFileReadErrorCallout');
+        await testSubjects.existOrFail('mlJobMgmtImportJobsFileRead');
+      }
+    },
+
+    async assertJobIdsExist(expectedJobIds: string[]) {
+      const inputs = await testSubjects.findAll('mlJobMgmtImportJobIdInput');
+      const actualJobIds = await Promise.all(inputs.map((i) => i.getAttribute('value')));
+
+      expect(actualJobIds.sort()).to.eql(
+        expectedJobIds.sort(),
+        `Expected job ids to be '${JSON.stringify(expectedJobIds)}' (got '${JSON.stringify(
+          actualJobIds
+        )}')`
+      );
+    },
+
+    async assertCorrectTitle(jobCount: number, jobType: JobType) {
+      const dataTestSubj =
+        jobType === 'anomaly-detector'
+          ? 'mlJobMgmtImportJobsADTitle'
+          : 'mlJobMgmtImportJobsDFATitle';
+      const subj = await testSubjects.find(dataTestSubj);
+      const title = (await subj.parseDomContent()).html();
+
+      const jobTypeString =
+        jobType === 'anomaly-detector' ? 'anomaly detection' : 'data frame analytics';
+
+      const results = title.match(
+        /(\d) (anomaly detection|data frame analytics) job[s]? read from file$/
+      );
+      expect(results).to.not.eql(null, `Expected regex results to not be null`);
+      const foundCount = results![1];
+      const foundJobTypeString = results![2];
+      expect(foundCount).to.eql(
+        jobCount,
+        `Expected job count to be '${jobCount}' (got '${foundCount}')`
+      );
+      expect(foundJobTypeString).to.eql(
+        jobTypeString,
+        `Expected job count to be '${jobTypeString}' (got '${foundJobTypeString}')`
+      );
+    },
+
+    async assertJobIdsSkipped(expectedJobIds: string[]) {
+      const subj = await testSubjects.find('mlJobMgmtImportJobsCannotBeImportedCallout');
+      const skippedJobTitles = await subj.findAllByTagName('h5');
+      const actualJobIds = (
+        await Promise.all(skippedJobTitles.map((i) => i.parseDomContent()))
+      ).map((t) => t.html());
+
+      expect(actualJobIds.sort()).to.eql(
+        expectedJobIds.sort(),
+        `Expected job ids to be '${JSON.stringify(expectedJobIds)}' (got '${JSON.stringify(
+          actualJobIds
+        )}')`
+      );
+    },
+
+    async importJobs() {
+      await testSubjects.click('mlJobMgmtImportImportButton', 1000);
+      await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout', { timeout: 60 * 1000 });
+    },
+
+    async assertReadErrorCalloutExists() {
+      await testSubjects.existOrFail('~mlJobMgmtImportJobsFileReadErrorCallout');
+    },
+
+    async selectExportJobType(jobType: JobType) {
+      if (jobType === 'anomaly-detector') {
+        await testSubjects.click('mlJobMgmtExportJobsADTab');
+        await testSubjects.existOrFail('mlJobMgmtExportJobsADJobList');
+      } else {
+        await testSubjects.click('mlJobMgmtExportJobsDFATab');
+        await testSubjects.existOrFail('mlJobMgmtExportJobsDFAJobList');
+      }
+    },
+
+    async selectExportJobSelectAll(jobType: JobType) {
+      await testSubjects.click('mlJobMgmtExportJobsSelectAllButton');
+      const subjLabel =
+        jobType === 'anomaly-detector'
+          ? 'mlJobMgmtExportJobsADJobList'
+          : 'mlJobMgmtExportJobsDFAJobList';
+      const subj = await testSubjects.find(subjLabel);
+      const inputs = await subj.findAllByTagName('input');
+      const allInputValues = await Promise.all(inputs.map((input) => input.getAttribute('value')));
+      expect(allInputValues.every((i) => i === 'on')).to.eql(
+        true,
+        `Expected all inputs to be checked`
+      );
+    },
+
+    async getDownload(filePath: string) {
+      return retry.tryForTime(5000, async () => {
+        expect(fs.existsSync(filePath)).to.be(true);
+        return fs.readFileSync(filePath).toString();
+      });
+    },
+
+    getExportedFile(fileName: string) {
+      return path.resolve(REPO_ROOT, `target/functional-tests/downloads/${fileName}.json`);
+    },
+
+    deleteExportedFiles(fileNames: string[]) {
+      fileNames.forEach((file) => {
+        try {
+          fs.unlinkSync(this.getExportedFile(file));
+        } catch (e) {
+          // it might not have been there to begin with
+        }
+      });
+    },
+
+    async selectExportJobs() {
+      await testSubjects.click('mlJobMgmtExportExportButton');
+      await testSubjects.missingOrFail('mlJobMgmtExportJobsFlyout', { timeout: 60 * 1000 });
+    },
+
+    async assertExportedADJobsAreCorrect(expectedJobs: Array<{ job: Job; datafeed: Datafeed }>) {
+      const file = JSON.parse(
+        await this.getDownload(this.getExportedFile('anomaly_detection_jobs'))
+      );
+      const loadedFile = Array.isArray(file) ? file : [file];
+      const sortedActualJobs = loadedFile.sort((a, b) => a.job.job_id.localeCompare(b.job.job_id));
+
+      const sortedExpectedJobs = expectedJobs.sort((a, b) =>
+        a.job.job_id.localeCompare(b.job.job_id)
+      );
+      expect(sortedActualJobs.length).to.eql(
+        sortedExpectedJobs.length,
+        `Expected length of exported jobs to be '${sortedExpectedJobs.length}' (got '${sortedActualJobs.length}')`
+      );
+
+      sortedExpectedJobs.forEach((expectedJob, i) => {
+        expect(sortedActualJobs[i].job.job_id).to.eql(
+          expectedJob.job.job_id,
+          `Expected job id to be '${expectedJob.job.job_id}' (got '${sortedActualJobs[i].job.job_id}')`
+        );
+        expect(sortedActualJobs[i].job.analysis_config.detectors.length).to.eql(
+          expectedJob.job.analysis_config.detectors.length,
+          `Expected detectors length to be '${expectedJob.job.analysis_config.detectors.length}' (got '${sortedActualJobs[i].job.analysis_config.detectors.length}')`
+        );
+        expect(sortedActualJobs[i].job.analysis_config.detectors[0].function).to.eql(
+          expectedJob.job.analysis_config.detectors[0].function,
+          `Expected first detector function to be '${expectedJob.job.analysis_config.detectors[0].function}' (got '${sortedActualJobs[i].job.analysis_config.detectors[0].function}')`
+        );
+        expect(sortedActualJobs[i].datafeed.datafeed_id).to.eql(
+          expectedJob.datafeed.datafeed_id,
+          `Expected job id to be '${expectedJob.datafeed.datafeed_id}' (got '${sortedActualJobs[i].datafeed.datafeed_id}')`
+        );
+      });
+    },
+
+    async assertExportedDFAJobsAreCorrect(expectedJobs: DataFrameAnalyticsConfig[]) {
+      const file = JSON.parse(
+        await this.getDownload(this.getExportedFile('data_frame_analytics_jobs'))
+      );
+      const loadedFile = Array.isArray(file) ? file : [file];
+      const sortedActualJobs = loadedFile.sort((a, b) => a.id.localeCompare(b.id));
+
+      const sortedExpectedJobs = expectedJobs.sort((a, b) => a.id.localeCompare(b.id));
+
+      expect(sortedActualJobs.length).to.eql(
+        sortedExpectedJobs.length,
+        `Expected length of exported jobs to be '${sortedExpectedJobs.length}' (got '${sortedActualJobs.length}')`
+      );
+
+      sortedExpectedJobs.forEach((expectedJob, i) => {
+        expect(sortedActualJobs[i].id).to.eql(
+          expectedJob.id,
+          `Expected job id to be '${expectedJob.id}' (got '${sortedActualJobs[i].id}')`
+        );
+        const expectedType = Object.keys(expectedJob.analysis)[0];
+        const actualType = Object.keys(sortedActualJobs[i].analysis)[0];
+        expect(actualType).to.eql(
+          expectedType,
+          `Expected job type to be '${expectedType}' (got '${actualType}')`
+        );
+        expect(sortedActualJobs[i].dest.index).to.eql(
+          expectedJob.dest.index,
+          `Expected destination index to be '${expectedJob.dest.index}' (got '${sortedActualJobs[i].dest.index}')`
+        );
+      });
     },
   };
 }
