@@ -63,10 +63,10 @@ The total schema for actions is represented by the `FleetServerAgentAction` type
 ## Saved Object types
 
 The Fleet plugin leverages several Saved Object types to track metadata on install packages, agent policies, and more.
-This document is intended to outline what each type is for, the primary places it accessed from in the codebase, and
+This document is intended to outline what each type is for, the primary places it's accessed from in the codebase, and
 any caveats regarding the history of that saved object type.
 
-At this point in time, all times are currently:
+At this point in time, all types are currently:
 - `hidden: false`
 - `namespaceType: agnostic`
 - `management.importableAndExportable: false`
