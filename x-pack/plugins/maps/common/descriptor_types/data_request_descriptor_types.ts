@@ -73,9 +73,7 @@ export type VectorSourceRequestMeta = DataFilters & {
   isForceRefresh: boolean;
 };
 
-export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'> & {
-  sourceQuery?: Query;
-};
+export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'>;
 
 export type VectorStyleRequestMeta = DataFilters & {
   dynamicStyleFields: string[];

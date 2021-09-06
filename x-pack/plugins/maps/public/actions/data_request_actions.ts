@@ -65,8 +65,8 @@ export type DataRequestContext = {
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
   dataFilters: DataFilters;
-  forceRefreshDueToDrawing: boolean;
-  isForceRefresh: boolean;
+  forceRefreshDueToDrawing: boolean; // Boolean signaling data request triggered by a user updating layer features via drawing tools. When true, layer will re-load regardless of "source.applyForceRefresh" flag.
+  isForceRefresh: boolean; // Boolean signaling data request triggered by auto-refresh timer or user clicking refresh button. When true, layer will re-load only when "source.applyForceRefresh" flag is set to true.
 };
 
 export function clearDataRequests(layer: ILayer) {

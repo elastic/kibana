@@ -78,19 +78,15 @@ export async function syncVectorSource({
   const dataRequestId = SOURCE_DATA_REQUEST_ID;
   const requestToken = Symbol(`${layerId}-${dataRequestId}`);
 
-  let canSkipFetch = false;
-
-  if (syncContext.forceRefreshDueToDrawing) {
-    canSkipFetch = false;
-  } else {
-    canSkipFetch = await canSkipSourceUpdate({
-      source,
-      prevDataRequest,
-      nextRequestMeta: requestMeta,
-      extentAware: source.isFilterByMapBounds(),
-      getUpdateDueToTimeslice,
-    });
-  }
+  const canSkipFetch = syncContext.forceRefreshDueToDrawing
+    ? false
+    : await canSkipSourceUpdate({
+        source,
+        prevDataRequest,
+        nextRequestMeta: requestMeta,
+        extentAware: source.isFilterByMapBounds(),
+        getUpdateDueToTimeslice,
+      });
 
   if (canSkipFetch) {
     return {

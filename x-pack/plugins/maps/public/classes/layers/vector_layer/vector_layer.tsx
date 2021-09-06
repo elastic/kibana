@@ -55,6 +55,7 @@ import {
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
+  VectorJoinSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { ISource } from '../../sources/source';
 import { IVectorSource } from '../../sources/vector_source';
@@ -338,13 +339,13 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
 
-    const joinRequestMeta = buildVectorRequestMeta(
+    const joinRequestMeta: VectorJoinSourceRequestMeta = buildVectorRequestMeta(
       joinSource,
       joinSource.getFieldNames(),
       dataFilters,
       joinSource.getWhereQuery(),
       isForceRefresh
-    );
+    ) as VectorJoinSourceRequestMeta;
 
     const prevDataRequest = this.getDataRequest(sourceDataId);
     const canSkipFetch = joinRequestMeta.isForceRefresh
