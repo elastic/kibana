@@ -21,12 +21,18 @@ import {
 import { INITIAL_LOCATION } from '../../../common/constants';
 import { Filter, TimeRange } from '../../../../../../src/plugins/data/public';
 
-export type MapContext = {
-  zoom?: number;
-  center?: MapCenter;
+export interface MapExtentState {
+  zoom: number;
+  extent: MapExtent;
+  center: MapCenter;
+}
+
+export type MapViewContext = MapExtentState & {
+  buffer: MapExtent;
+};
+
+export type MapContext = Partial<MapViewContext> & {
   scrollZoom: boolean;
-  buffer?: MapExtent;
-  extent?: MapExtent;
   mouseCoordinates?: {
     lat: number;
     lon: number;

@@ -15,6 +15,7 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 import { functions } from './functions/browser';
 import { typeFunctions } from './expression_types';
 import { renderFunctions, renderFunctionFactories } from './renderers';
+
 interface SetupDeps {
   canvas: CanvasSetup;
 }
