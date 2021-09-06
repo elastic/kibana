@@ -8,11 +8,7 @@
 
 import { FunctionComponent } from 'react';
 
-import {
-  DataPublicPluginStart,
-  UsageCollectionStart,
-  EnhancedRuntimeField,
-} from './shared_imports';
+import { DataPublicPluginStart, UsageCollectionStart, RuntimeField } from './shared_imports';
 import { OpenFieldEditorOptions } from './open_editor';
 import { OpenFieldDeleteModalOptions } from './open_delete_modal';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
@@ -42,7 +38,7 @@ export interface StartPlugins {
 
 export type InternalFieldType = 'concrete' | 'runtime';
 
-export interface Field extends EnhancedRuntimeField {
+export interface Field extends RuntimeField {
   name: string;
 }
 

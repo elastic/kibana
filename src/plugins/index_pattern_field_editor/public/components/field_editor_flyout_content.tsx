@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -23,11 +24,7 @@ import {
 import type { Field } from '../types';
 import { RuntimeFieldPainlessError } from '../lib';
 import { euiFlyoutClassname } from '../constants';
-import type {
-  RuntimeField,
-  EnhancedRuntimeField,
-  RuntimeCompositeWithSubFields,
-} from '../shared_imports';
+import type { RuntimeFieldSubField } from '../shared_imports';
 import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
@@ -55,13 +52,15 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (field: Field | RuntimeCompositeWithSubFields) => void;
+  onSave: (field: Field) => void;
   /**
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
   /** Handler to validate the script  */
-  runtimeFieldValidator: (field: RuntimeField) => Promise<RuntimeFieldPainlessError | null>;
+  runtimeFieldValidator: (
+    field: estypes.MappingRuntimeField
+  ) => Promise<RuntimeFieldPainlessError | null>;
   /** Optional field to process */
   field?: Field;
   isSavingField: boolean;
@@ -126,24 +125,31 @@ const FieldEditorFlyoutContentComponent = ({
   }, [isFormModified]);
 
   const addSubfieldsToField = useCallback(
-    (_field: Field): Field | RuntimeCompositeWithSubFields => {
-      if (_field.type === 'composite' && fieldsInScript.length > 0) {
-        const subFields = fieldsInScript.reduce((acc, subFieldName) => {
-          const subField: EnhancedRuntimeField = {
-            // We hardcode "keyword" and "format" for now until the UI
-            // lets us define them for each of the sub fields
-            type: 'keyword' as const,
-            format: _field.format,
-          };
+    (_field: Field): Field => {
+      const { name, type, script, format } = _field;
 
-          acc[subFieldName] = subField;
-          return acc;
-        }, {} as Record<string, EnhancedRuntimeField>);
+      // This is a **temporary hack** to create the subfields.
+      // It will be replaced by a UI where the user will set the type and format
+      // of each subField.
+      if (type === 'composite' && fieldsInScript.length > 0) {
+        const fields = fieldsInScript.reduce<Record<string, RuntimeFieldSubField>>(
+          (acc, subFieldName) => {
+            const subField: RuntimeFieldSubField = {
+              type: 'keyword' as const,
+              format,
+            };
 
-        const updatedField: RuntimeCompositeWithSubFields = {
-          name: _field.name,
-          script: _field.script!,
-          subFields,
+            acc[subFieldName] = subField;
+            return acc;
+          },
+          {}
+        );
+
+        const updatedField: Field = {
+          name,
+          type,
+          script,
+          fields,
         };
 
         return updatedField;
@@ -164,6 +170,7 @@ const FieldEditorFlyoutContentComponent = ({
         setIsValidating(true);
 
         const error = await runtimeFieldValidator({
+          // @ts-expect-error @elastic/elasticsearch does not support "composite" type yet
           type: updatedField.type,
           script: updatedField.script,
         });

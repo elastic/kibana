@@ -13,10 +13,10 @@ export { UsageCollectionStart } from '../../usage_collection/public';
 export {
   RuntimeType,
   RuntimeField,
+  RuntimeFieldSpec,
+  RuntimeFieldSubField,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
-  EnhancedRuntimeField,
-  RuntimeCompositeWithSubFields,
 } from '../../data/common';
 
 export type { SerializedFieldFormat } from '../../expressions/public';

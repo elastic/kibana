@@ -14,7 +14,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, SavedObjectsClientCommon } from '../..';
 
 import { createDataViewCache } from '.';
-import type { RuntimeField, RuntimeComposite } from '../types';
+import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
 import { DataView } from './index_pattern';
 import { createEnsureDefaultDataView, EnsureDefaultDataView } from './ensure_default_index_pattern';
 import {
@@ -382,7 +382,6 @@ export class DataViewsService {
         sourceFilters,
         fieldFormatMap,
         runtimeFieldMap,
-        runtimeCompositeMap,
         typeMeta,
         type,
         fieldAttrs,
@@ -397,9 +396,6 @@ export class DataViewsService {
     const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
     const parsedRuntimeFieldMap: Record<string, RuntimeField> = runtimeFieldMap
       ? JSON.parse(runtimeFieldMap)
-      : {};
-    const parsedRuntimeCompositeMap: Record<string, RuntimeComposite> = runtimeCompositeMap
-      ? JSON.parse(runtimeCompositeMap)
       : {};
 
     return {
@@ -416,7 +412,6 @@ export class DataViewsService {
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
-      runtimeCompositeMap: parsedRuntimeCompositeMap,
     };
   };
 
@@ -461,20 +456,35 @@ export class DataViewsService {
         spec.fieldAttrs
       );
 
+      const addRuntimeFieldToSpecFields = (
+        name: string,
+        fieldType: RuntimeType,
+        runtimeField: RuntimeFieldSpec
+      ) => {
+        spec.fields![name] = {
+          name,
+          type: castEsToKbnFieldTypeName(fieldType),
+          runtimeField,
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+          customLabel: spec.fieldAttrs?.[name]?.customLabel,
+          count: spec.fieldAttrs?.[name]?.count,
+        };
+      };
+
       // CREATE RUNTIME FIELDS
-      for (const [key, value] of Object.entries(runtimeFieldMap || {})) {
+      for (const [name, runtimeField] of Object.entries(runtimeFieldMap || {})) {
         // do not create runtime field if mapped field exists
-        if (!spec.fields[key]) {
-          spec.fields[key] = {
-            name: key,
-            type: castEsToKbnFieldTypeName(value.type),
-            runtimeField: value,
-            aggregatable: true,
-            searchable: true,
-            readFromDocValues: false,
-            customLabel: spec.fieldAttrs?.[key]?.customLabel,
-            count: spec.fieldAttrs?.[key]?.count,
-          };
+        if (!spec.fields[name]) {
+          // For composite runtime field we add the subFields, **not** the composite
+          if (runtimeField.type === 'composite') {
+            Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
+              addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField);
+            });
+          } else {
+            addRuntimeFieldToSpecFields(name, runtimeField.type, runtimeField);
+          }
         }
       }
     } catch (err) {
@@ -496,10 +506,6 @@ export class DataViewsService {
 
     spec.fieldFormats = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
-      : {};
-
-    spec.runtimeCompositeMap = savedObject.attributes.runtimeCompositeMap
-      ? JSON.parse(savedObject.attributes.runtimeCompositeMap)
       : {};
 
     const indexPattern = await this.create(spec, true);

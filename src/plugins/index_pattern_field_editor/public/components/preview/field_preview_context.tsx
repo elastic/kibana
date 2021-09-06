@@ -22,7 +22,7 @@ import { get } from 'lodash';
 
 import type { FieldPreviewContext } from '../../types';
 import { parseEsError } from '../../lib/runtime_field_validation';
-import { RuntimeType, RuntimeField, SerializedFieldFormat } from '../../shared_imports';
+import { RuntimeType, SerializedFieldFormat } from '../../shared_imports';
 import { useFieldEditorContext } from '../field_editor_context';
 
 type From = 'cluster' | 'custom';
@@ -46,7 +46,7 @@ interface Params {
   name: string | null;
   index: string | null;
   type: RuntimeType | null;
-  script: Required<RuntimeField>['script'] | null;
+  script: { source: string } | null;
   format: SerializedFieldFormat | null;
   document: EsDocument | null;
 }

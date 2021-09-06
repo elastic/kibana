@@ -17,9 +17,10 @@ import {
   DataPublicPluginStart,
   IndexPattern,
   UsageCollectionStart,
+  RuntimeType,
 } from './shared_imports';
 
-import type { PluginStart, InternalFieldType, CloseEditor } from './types';
+import type { PluginStart, InternalFieldType, CloseEditor, Field } from './types';
 import type { ApiService } from './lib/api';
 import { euiFlyoutClassname } from './constants';
 import { FieldEditorLoader } from './components/field_editor_loader';
@@ -88,9 +89,9 @@ export const getFieldEditorOpener = ({
       }
     };
 
-    const field = fieldName ? indexPattern.getFieldByName(fieldName) : undefined;
+    const dataViewField = fieldName ? indexPattern.getFieldByName(fieldName) : undefined;
 
-    if (fieldName && !field) {
+    if (fieldName && !dataViewField) {
       const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
         defaultMessage: "Field named '{fieldName}' not found on index pattern",
         values: { fieldName },
@@ -100,15 +101,37 @@ export const getFieldEditorOpener = ({
     }
 
     const isNewRuntimeField = !fieldName;
-    const isExistingRuntimeField = field && field.runtimeField && !field.isMapped;
+    const isExistingRuntimeField =
+      dataViewField && dataViewField.runtimeField && !dataViewField.isMapped;
     const fieldTypeToProcess: InternalFieldType =
       isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 
-    if (field?.runtimeField?.parentComposite !== undefined) {
-      console.log( // eslint-disable-line
-        'TODO: display a modal to indicate that this field needs to be edited through its parent.'
-      );
-      return closeEditor;
+    let field: Field | undefined;
+    if (dataViewField) {
+      if (isExistingRuntimeField && dataViewField.runtimeField!.type === 'composite') {
+        // We are editing a composite runtime **subField**.
+        // We need to access the parent composite.
+        const [compositeName] = fieldName!.split('.');
+        field = {
+          name: compositeName,
+          ...indexPattern.getRuntimeField(compositeName)!,
+        };
+      } else if (isExistingRuntimeField) {
+        // Runtime field
+        field = {
+          name: fieldName!,
+          ...indexPattern.getRuntimeField(fieldName!)!,
+        };
+      } else {
+        // Concrete field
+        field = {
+          name: fieldName!,
+          type: (dataViewField?.esTypes ? dataViewField.esTypes[0] : 'keyword') as RuntimeType,
+          customLabel: dataViewField.customLabel,
+          popularity: dataViewField.count,
+          format: indexPattern.getFormatterForFieldNoDefault(fieldName!)?.toJSON(),
+        };
+      }
     }
 
     overlayRef = overlays.openFlyout(

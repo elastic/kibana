@@ -20,29 +20,32 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
-/**
- * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
- */
-export interface ESRuntimeField {
+export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
+
+export interface RuntimeFieldBase {
   type: RuntimeType;
   script?: {
     source: string;
   };
+}
+
+/**
+ * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
+ */
+export interface RuntimeFieldSpec extends RuntimeFieldBase {
   fields?: Record<
     string,
     {
       // It is not recursive, we can't create a composite inside a composite.
-      type: Omit<RuntimeType, 'composite'>;
+      type: RuntimeTypeExceptComposite;
     }
   >;
 }
 
-/**
- * The RuntimeField which is saved in the Data View saved object. We extend it to
- * keep a reference to a possible parent composite object.
- */
-export interface RuntimeField extends ESRuntimeField {
-  parentComposite?: string;
+export interface FieldConfiguration {
+  format?: SerializedFieldFormat | null;
+  customLabel?: string;
+  popularity?: number;
 }
 
 /**
@@ -51,36 +54,13 @@ export interface RuntimeField extends ESRuntimeField {
  *
  * @see {@link RuntimeField}
  */
-export interface EnhancedRuntimeField extends RuntimeField {
-  format?: SerializedFieldFormat;
-  customLabel?: string;
-  popularity?: number;
+export interface RuntimeField extends RuntimeFieldBase, FieldConfiguration {
+  fields?: Record<string, RuntimeFieldSubField>;
 }
 
-/**
- * When we add a runtime field of "composite" type we are actually adding a _holder_
- * object with runtime fields inside of it.
- * The RuntimeComposite interface is this holder of fields.
- * It has a name, a script and an array references to the runtime fields it holds.
- */
-export interface RuntimeComposite {
-  name: string;
-  script: {
-    source: string;
-  };
-  subFields: string[];
+export interface RuntimeFieldSubField extends FieldConfiguration {
+  type: RuntimeTypeExceptComposite;
 }
-
-/**
- * This is the same as the RuntimeComposite interface but instead of
- * returning an array of references to the subFields we return a **map** of subfields
- * with their possible format, custom label and popularity.
- *
- * @see {@link RuntimeComposite}
- */
-export type RuntimeCompositeWithSubFields = Omit<RuntimeComposite, 'subFields'> & {
-  subFields: Record<string, EnhancedRuntimeField>;
-};
 
 /**
  * @deprecated
@@ -117,7 +97,6 @@ export interface DataViewAttributes {
   fieldFormatMap?: string;
   fieldAttrs?: string;
   runtimeFieldMap?: string;
-  runtimeCompositeMap?: string;
   /**
    * prevents errors when index pattern exists before indices
    */
@@ -275,11 +254,10 @@ export interface FieldSpec extends DataViewFieldBase {
   readFromDocValues?: boolean;
   indexed?: boolean;
   customLabel?: string;
-  runtimeField?: RuntimeField;
+  runtimeField?: RuntimeFieldSpec;
   // not persisted
   shortDotsEnable?: boolean;
   isMapped?: boolean;
-  parent?: string;
 }
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
@@ -314,8 +292,7 @@ export interface DataViewSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
-  runtimeFieldMap?: Record<string, RuntimeField>;
-  runtimeCompositeMap?: Record<string, RuntimeComposite>;
+  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
 }

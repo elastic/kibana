@@ -16,11 +16,10 @@ import {
   IndexPattern,
   DataPublicPluginStart,
   UsageCollectionStart,
-  RuntimeCompositeWithSubFields,
 } from '../shared_imports';
 import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
-import { deserializeField, getRuntimeFieldValidator, getLinks, ApiService } from '../lib';
+import { getRuntimeFieldValidator, getLinks, ApiService } from '../lib';
 import {
   FieldEditorFlyoutContent,
   Props as FieldEditorFlyoutContentProps,
@@ -41,7 +40,7 @@ export interface Props {
   /** The Kibana field type of the field to create or edit (default: "runtime") */
   fieldTypeToProcess: InternalFieldType;
   /** Optional field to edit */
-  field?: IndexPatternField;
+  field?: Field;
   /** Services */
   indexPatternService: DataPublicPluginStart['indexPatterns'];
   notifications: NotificationsStart;
@@ -78,14 +77,15 @@ export const FieldEditorFlyoutContentContainer = ({
   fieldFormats,
   uiSettings,
 }: Props) => {
-  const fieldToEdit = deserializeField(indexPattern, field);
   const [isSaving, setIsSaving] = useState(false);
 
   const { fields } = indexPattern;
 
   const namesNotAllowed = useMemo(() => {
     const fieldNames = indexPattern.fields.map((fld) => fld.name);
-    const runtimeCompositeNames = Object.keys(indexPattern.getAllRuntimeComposites());
+    const runtimeCompositeNames = Object.entries(indexPattern.getAllRuntimeFields())
+      .filter(([, _runtimeField]) => _runtimeField.type === 'composite')
+      .map(([_runtimeFieldName]) => _runtimeFieldName);
     return {
       fields: fieldNames,
       runtimeComposites: runtimeCompositeNames,
@@ -124,50 +124,22 @@ export const FieldEditorFlyoutContentContainer = ({
     [apiService, search, notifications]
   );
 
-  const saveCompositeRuntime = useCallback(
-    (updatedField: RuntimeCompositeWithSubFields): IndexPatternField[] => {
-      if (field?.type !== undefined && field?.type !== 'composite') {
-        // A previous runtime field is now a runtime composite
-        indexPattern.removeRuntimeField(field.name);
-      } else if (field?.name && field.name !== updatedField.name) {
-        // rename an existing runtime composite
-        indexPattern.removeRuntimeComposite(field.name);
-      }
-
-      const { name, script, subFields } = updatedField;
-
-      return indexPattern.addRuntimeComposite(name, {
-        name,
-        script: script!,
-        subFields,
-      });
-    },
-    [field?.name, field?.type, indexPattern]
-  );
-
-  const saveRuntimeField = useCallback(
-    (updatedField: Field): [IndexPatternField] => {
-      if (field?.type !== undefined && field?.type === 'composite') {
-        // A previous runtime composite is now a runtime field
-        indexPattern.removeRuntimeComposite(field.name);
-      } else if (field?.name && field.name !== updatedField.name) {
-        // rename an existing runtime field
-        indexPattern.removeRuntimeField(field.name);
-      }
-
-      const fieldCreated = indexPattern.addRuntimeField(updatedField.name, updatedField);
-      return [fieldCreated];
-    },
-    [field?.name, field?.type, indexPattern]
-  );
-
   const updateRuntimeField = useCallback(
-    (updatedField: Field | RuntimeCompositeWithSubFields): IndexPatternField[] => {
-      return (updatedField as RuntimeCompositeWithSubFields).subFields !== undefined
-        ? saveCompositeRuntime(updatedField as RuntimeCompositeWithSubFields)
-        : saveRuntimeField(updatedField as Field);
+    (updatedField: Field): IndexPatternField[] => {
+      const nameHasChanged = Boolean(field) && field!.name !== updatedField.name;
+      const typeHasChanged = Boolean(field) && field!.type !== updatedField.type;
+      const hasChangeToOrFromComposite =
+        typeHasChanged && (field!.type === 'composite' || updatedField.type === 'composite');
+
+      if (nameHasChanged || hasChangeToOrFromComposite) {
+        // Rename an existing runtime field or the type has changed from being a "composite"
+        // to any other type or from any other type to "composite"
+        indexPattern.removeRuntimeField(field!.name);
+      }
+
+      return indexPattern.addRuntimeField(updatedField.name, updatedField);
     },
-    [saveCompositeRuntime, saveRuntimeField]
+    [field, indexPattern]
   );
 
   const updateConcreteField = useCallback(
@@ -196,7 +168,7 @@ export const FieldEditorFlyoutContentContainer = ({
   );
 
   const saveField = useCallback(
-    async (updatedField: Field | RuntimeCompositeWithSubFields) => {
+    async (updatedField: Field) => {
       try {
         usageCollection.reportUiCounter(
           pluginName,
@@ -261,7 +233,7 @@ export const FieldEditorFlyoutContentContainer = ({
           onSave={saveField}
           onCancel={onCancel}
           onMounted={onMounted}
-          field={fieldToEdit}
+          field={field}
           runtimeFieldValidator={validateRuntimeField}
           isSavingField={isSaving}
         />
