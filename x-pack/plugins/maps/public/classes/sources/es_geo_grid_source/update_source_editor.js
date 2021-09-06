@@ -96,6 +96,12 @@ export class UpdateSourceEditor extends Component {
             return isMetricCountable(metric.value);
           }
         : null;
+
+    const isMetricDisabledDueToMvt = (metric) => {
+      console.log('is disabled', metric);
+      return false;
+    };
+
     const allowMultipleMetrics = this.props.currentLayerType !== LAYER_TYPE.HEATMAP;
     return (
       <EuiPanel>
@@ -108,6 +114,7 @@ export class UpdateSourceEditor extends Component {
         <MetricsEditor
           allowMultipleMetrics={allowMultipleMetrics}
           metricsFilter={metricsFilter}
+          metricsDisabledDueToMvt={isMetricDisabledDueToMvt}
           fields={this.state.fields}
           metrics={this.props.metrics}
           onChange={this._onMetricsChange}

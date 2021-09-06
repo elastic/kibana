@@ -65,9 +65,16 @@ type Props = Omit<EuiComboBoxProps<AGG_TYPE>, 'onChange'> & {
   value: AGG_TYPE;
   onChange: (aggType: AGG_TYPE) => void;
   metricsFilter?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
+  metricsDisabledDueToMvt?: (metricOption: EuiComboBoxOptionOption<AGG_TYPE>) => boolean;
 };
 
-export function MetricSelect({ value, onChange, metricsFilter, ...rest }: Props) {
+export function MetricSelect({
+  value,
+  onChange,
+  metricsFilter,
+  metricsDisabledDueToMvt,
+  ...rest
+}: Props) {
   function onAggChange(selectedOptions: Array<EuiComboBoxOptionOption<AGG_TYPE>>) {
     if (selectedOptions.length === 0) {
       return;
@@ -78,6 +85,12 @@ export function MetricSelect({ value, onChange, metricsFilter, ...rest }: Props)
   }
 
   const options = metricsFilter ? AGG_OPTIONS.filter(metricsFilter) : AGG_OPTIONS;
+  const enabledOptions = options.map((metricOption) => {
+    return {
+      disabled: metricsDisabledDueToMvt ? metricsDisabledDueToMvt(metricOption) : false,
+      ...metricOption,
+    };
+  });
 
   return (
     <EuiComboBox
@@ -86,7 +99,7 @@ export function MetricSelect({ value, onChange, metricsFilter, ...rest }: Props)
       })}
       singleSelection={true}
       isClearable={false}
-      options={options}
+      options={enabledOptions}
       selectedOptions={AGG_OPTIONS.filter((option) => {
         return value === option.value;
       })}
