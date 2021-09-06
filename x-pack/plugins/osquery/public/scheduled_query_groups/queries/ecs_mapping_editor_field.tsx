@@ -342,7 +342,8 @@ const getEcsFieldValidator = (editForm: boolean) => (
     )
   )(args);
 
-  if (fieldRequiredError && (!!(!editForm && args.formData.value?.field.length) || editForm)) {
+  // @ts-expect-error update types
+  if (fieldRequiredError && ((!editForm && args.formData['value.field'].length) || editForm)) {
     return fieldRequiredError;
   }
 
