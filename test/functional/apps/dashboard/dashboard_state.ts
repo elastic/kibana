@@ -68,8 +68,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const visName = AREA_CHART_VIS_NAME;
       await dashboardAddPanel.addVisualization(visName);
-      const dashboarName = 'Overridden colors - new charts library';
-      await PageObjects.dashboard.saveDashboard(dashboarName);
+      const dashboardName = 'Overridden colors - new charts library';
+      await PageObjects.dashboard.saveDashboard(dashboardName);
 
       await PageObjects.dashboard.switchToEditMode();
       await queryBar.clickQuerySubmitButton();
@@ -78,10 +78,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const overwriteColor = '#d36086';
       await PageObjects.visChart.selectNewLegendColorChoice(overwriteColor);
 
-      await PageObjects.dashboard.saveDashboard(dashboarName);
+      await PageObjects.dashboard.saveDashboard(dashboardName);
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.loadSavedDashboard(dashboarName);
+      await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
       await enableNewChartLibraryDebug(true);
 
