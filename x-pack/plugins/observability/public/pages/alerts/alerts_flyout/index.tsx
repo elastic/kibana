@@ -127,9 +127,9 @@ export function AlertsFlyout({
   ];
 
   return (
-    <EuiFlyout onClose={onClose} size="s">
+    <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader>
-        <EuiTitle size="m">
+        <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
           <h2>{alertData.fields[ALERT_RULE_NAME]}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -141,13 +141,23 @@ export function AlertsFlyout({
           compressed={true}
           type="responsiveColumn"
           listItems={overviewListItems}
+          titleProps={{
+            'data-test-subj': 'alertsFlyoutDescriptionListTitle',
+          }}
+          descriptionProps={{
+            'data-test-subj': 'alertsFlyoutDescriptionListDescription',
+          }}
         />
       </EuiFlyoutBody>
       {alertData.link && !isInApp && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton href={prepend && prepend(alertData.link)} fill>
+              <EuiButton
+                href={prepend && prepend(alertData.link)}
+                data-test-subj="alertsFlyoutViewInAppButton"
+                fill
+              >
                 View in app
               </EuiButton>
             </EuiFlexItem>
