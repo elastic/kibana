@@ -476,6 +476,8 @@ export interface DocLinksStart {
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
+            readonly upgrading: string;
+            readonly metaData: string;
         };
         readonly canvas: {
             readonly guide: string;
