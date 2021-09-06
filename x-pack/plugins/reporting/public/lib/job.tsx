@@ -167,6 +167,25 @@ export class Job {
     );
   }
 
+  /**
+   * Returns a user friendly version of the report job creation date
+   */
+  getCreatedAtDate(): string {
+    return this.formatDate(this.created_at);
+  }
+
+  /**
+   * Returns a user friendly version of the user that created the report job
+   */
+  getCreatedBy(): string {
+    return (
+      this.created_by ||
+      i18n.translate('xpack.reporting.jobCreatedBy.unknownUserPlaceholderText', {
+        defaultMessage: 'Unknown',
+      })
+    );
+  }
+
   getCreatedAtLabel() {
     if (this.created_by) {
       return (
