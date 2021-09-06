@@ -112,7 +112,7 @@ describe('<FieldEditor />', () => {
     expect(lastState.submit).toBeDefined();
 
     const { data: formData } = await submitFormAndGetData(lastState);
-    expect(formData).toEqual(field);
+    expect(formData).toEqual({ ...field, format: null });
 
     // Make sure that both isValid and isSubmitted state are now "true"
     lastState = getLastStateUpdate();
