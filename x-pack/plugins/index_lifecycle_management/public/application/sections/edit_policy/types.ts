@@ -22,7 +22,11 @@ export interface ForcemergeFields {
   bestCompression: boolean;
 }
 
-interface HotPhaseMetaFields extends ForcemergeFields {
+interface ShrinkFields {
+  useShardCount: boolean;
+}
+
+interface HotPhaseMetaFields extends ForcemergeFields, ShrinkFields {
   /**
    * By default rollover is enabled with set values for max age, max size and max docs. In this policy form
    * opting in to default rollover overrides custom rollover values.
@@ -47,7 +51,11 @@ interface HotPhaseMetaFields extends ForcemergeFields {
   };
 }
 
-interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, ForcemergeFields {
+interface WarmPhaseMetaFields
+  extends DataAllocationMetaFields,
+    MinAgeField,
+    ForcemergeFields,
+    ShrinkFields {
   enabled: boolean;
   warmPhaseOnRollover: boolean;
   readonlyEnabled: boolean;

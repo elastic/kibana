@@ -6,13 +6,14 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTextColor } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import { EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
+import React, { FunctionComponent, useCallback } from 'react';
 
-import { NumericField } from '../../../../../../shared_imports';
+import { get } from 'lodash';
+import { NumericField, useFormData } from '../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
-import { UseField } from '../../../form';
+import { UseField, useGlobalFields } from '../../../form';
 import { i18nTexts } from '../../../i18n_texts';
 
 import { LearnMoreLink, DescribedFormRow } from '../../';
@@ -22,8 +23,22 @@ interface Props {
 }
 
 export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
-  const path = `phases.${phase}.actions.shrink.number_of_shards`;
+  const [formData] = useFormData({
+    watch: `_meta.${phase}.useShardCount`,
+  });
+  const useShardCount = get(formData, `_meta.${phase}.useShardCount`);
+  const path = `phases.${phase}.actions.shrink.${
+    useShardCount ? 'number_of_shards' : 'max_primary_shard_size'
+  }`;
   const { policy } = useEditPolicyContext();
+  const globalFields = useGlobalFields();
+  const { setValue: setUseShardCount } = globalFields[
+    `${phase}UseShardCount` as 'hotUseShardCount'
+  ];
+  const toggleUseShardCount = useCallback(() => {
+    setUseShardCount((prev) => !prev);
+  }, [setUseShardCount]);
+
   return (
     <DescribedFormRow
       title={
@@ -51,22 +66,27 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
       }}
       fullWidth
     >
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <UseField
-            path={path}
-            component={NumericField}
-            componentProps={{
-              fullWidth: false,
-              euiFieldProps: {
-                'data-test-subj': `${phase}-primaryShardCount`,
-                min: 1,
-              },
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
+      <UseField
+        path={path}
+        component={NumericField}
+        componentProps={{
+          fullWidth: false,
+          euiFieldProps: {
+            'data-test-subj': `${phase}-primaryShard${useShardCount ? 'Count' : 'Size'}`,
+            min: 1,
+          },
+          labelAppend: (
+            <EuiText size="xs">
+              <EuiLink onClick={toggleUseShardCount} data-test-subj="toggleUseShardCount">
+                <FormattedMessage
+                  id="xpack.ingestPipelines.pipelineEditor.useCopyFromLabel"
+                  defaultMessage={`Configure shard ${useShardCount ? 'size' : 'count'}`}
+                />
+              </EuiLink>
+            </EuiText>
+          ),
+        }}
+      />
     </DescribedFormRow>
   );
 };

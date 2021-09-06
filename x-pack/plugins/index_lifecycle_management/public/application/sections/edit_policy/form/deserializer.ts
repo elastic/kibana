@@ -39,6 +39,7 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
       },
       bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
       readonlyEnabled: Boolean(hot?.actions?.readonly),
+      useShardCount: Boolean(hot?.actions.shrink?.number_of_shards),
     },
     warm: {
       enabled: Boolean(warm),
@@ -47,6 +48,7 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
       dataTierAllocationType: determineDataTierAllocationType(warm?.actions),
       readonlyEnabled: Boolean(warm?.actions?.readonly),
       minAgeToMilliSeconds: -1,
+      useShardCount: Boolean(warm?.actions.shrink?.number_of_shards),
     },
     cold: {
       enabled: Boolean(cold),
