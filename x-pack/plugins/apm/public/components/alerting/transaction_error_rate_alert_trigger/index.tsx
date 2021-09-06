@@ -23,7 +23,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 interface AlertParams {
@@ -77,10 +77,11 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
           params: {
             query: {
-              ...getAbsoluteTimeRange(params.windowSize, params.windowUnit),
               environment: params.environment,
               serviceName: params.serviceName,
               transactionType: params.transactionType,
+              windowSize: params.windowSize,
+              windowUnit: params.windowUnit,
             },
           },
         });

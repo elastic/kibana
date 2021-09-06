@@ -14,22 +14,33 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { getBucketSize } from '../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
+import { getIntervalAndTimeRange } from './helper';
 
 export async function getTransactionErrorRateChartPreview({
   setup,
   alertParams,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   alertParams: AlertParams;
 }) {
-  const { apmEventClient, start, end } = setup;
-  const { serviceName, environment, transactionType } = alertParams;
+  const { apmEventClient } = setup;
+  const {
+    serviceName,
+    environment,
+    transactionType,
+    windowSize,
+    windowUnit,
+  } = alertParams;
+
+  const { interval, start, end } = getIntervalAndTimeRange({
+    windowSize,
+    windowUnit,
+  });
 
   const query = {
     bool: {
@@ -47,14 +58,16 @@ export async function getTransactionErrorRateChartPreview({
 
   const outcomes = getOutcomeAggregation();
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
-
   const aggs = {
     outcomes,
     timeseries: {
       date_histogram: {
         field: '@timestamp',
-        fixed_interval: intervalString,
+        fixed_interval: interval,
+        extended_bounds: {
+          min: start,
+          max: end,
+        },
       },
       aggs: { outcomes },
     },

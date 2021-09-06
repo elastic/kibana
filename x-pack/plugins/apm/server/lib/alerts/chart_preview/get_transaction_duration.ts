@@ -16,23 +16,30 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { getBucketSize } from '../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
+import { getIntervalAndTimeRange } from './helper';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
   setup,
 }: {
   alertParams: AlertParams;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
 }) {
-  const { apmEventClient, start, end } = setup;
+  const { apmEventClient } = setup;
   const {
     aggregationType,
     environment,
     serviceName,
     transactionType,
+    windowSize,
+    windowUnit,
   } = alertParams;
+
+  const { interval, start, end } = getIntervalAndTimeRange({
+    windowSize,
+    windowUnit,
+  });
 
   const query = {
     bool: {
@@ -48,13 +55,16 @@ export async function getTransactionDurationChartPreview({
     },
   };
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
-
   const aggs = {
     timeseries: {
       date_histogram: {
         field: '@timestamp',
-        fixed_interval: intervalString,
+        fixed_interval: interval,
+        min_doc_count: 0,
+        extended_bounds: {
+          min: start,
+          max: end,
+        },
       },
       aggs: {
         agg:

@@ -29,7 +29,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 
@@ -109,11 +109,12 @@ export function TransactionDurationAlertTrigger(props: Props) {
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
           params: {
             query: {
-              ...getAbsoluteTimeRange(params.windowSize, params.windowUnit),
               aggregationType: params.aggregationType,
               environment: params.environment,
               serviceName: params.serviceName,
               transactionType: params.transactionType,
+              windowSize: params.windowSize,
+              windowUnit: params.windowUnit,
             },
           },
         });

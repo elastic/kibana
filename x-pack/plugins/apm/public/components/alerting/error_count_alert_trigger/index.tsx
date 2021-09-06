@@ -15,7 +15,7 @@ import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher'
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
 export interface AlertParams {
@@ -59,9 +59,10 @@ export function ErrorCountAlertTrigger(props: Props) {
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
           params: {
             query: {
-              ...getAbsoluteTimeRange(params.windowSize, params.windowUnit),
               environment: params.environment,
               serviceName: params.serviceName,
+              windowSize: params.windowSize,
+              windowUnit: params.windowUnit,
             },
           },
         });

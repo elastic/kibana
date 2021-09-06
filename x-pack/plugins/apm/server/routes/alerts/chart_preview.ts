@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { getTransactionDurationChartPreview } from '../../lib/alerts/chart_preview/get_transaction_duration';
 import { getTransactionErrorCountChartPreview } from '../../lib/alerts/chart_preview/get_transaction_error_count';
@@ -12,7 +13,7 @@ import { getTransactionErrorRateChartPreview } from '../../lib/alerts/chart_prev
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../create_apm_server_route';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
-import { environmentRt, rangeRt } from '../default_api_types';
+import { environmentRt } from '../default_api_types';
 
 const alertParamsRt = t.intersection([
   t.partial({
@@ -25,7 +26,10 @@ const alertParamsRt = t.intersection([
     transactionType: t.string,
   }),
   environmentRt,
-  rangeRt,
+  t.type({
+    windowSize: toNumberRt,
+    windowUnit: t.string,
+  }),
 ]);
 
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;
