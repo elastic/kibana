@@ -60,5 +60,5 @@ Body: ${JSON.stringify(res.body)}`
 
 export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
   status: number;
-  body: NonNullable<APIReturnType<TEndpoint>>;
+  body: APIReturnType<TEndpoint>;
 }
