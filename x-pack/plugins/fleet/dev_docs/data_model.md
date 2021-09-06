@@ -1,10 +1,70 @@
-# Saved Object types
+# Fleet Data Model
+
+The Fleet plugin has 3 sources of data that it reads and writes to, these large categories are:
+- **Package Registry**: read-only data source for retrieving packages published by Elastic
+- **`.fleet-*` Indices**: read & write data source for interacting with Elastic Agent policies, actions, and enrollment tokens
+- **Saved Objects**: read & write data source for storing installed packages, configured policies, outputs, and other settings
+
+## Package Registry
+
+The package registry hosts all of the packages available for installation by Fleet. The Fleet plugin in Kibana interacts
+with the registry exclusively through read-only JSON APIs for listing, searching, and download packages. Read more about
+the available APIs in the [package-registry repository](https://github.com/elastic/package-registry).
+
+By default, the Fleet plugin will use Elastic's nightly 'snapshot' registry on the `master` branch, the 'staging'
+registry on Kibana nightly snapshot builds, and the 'prod' registry for release builds. The registry that will be used
+can be configured by setting the `xpack.fleet.registryUrl` in the `kibana.yml` file.
+
+The code that integrates with this registry API is contained in the
+[`x-pack/plugins/fleet/server/services/epm/registry`](../server/services/epm/registry) directory.
+
+## `.fleet-*` Indices
+
+For any data that needs to be accessible by Fleet Service instances to push updates to, we write and read data
+directly to a handful of `.fleet-` Elasticsearch indices. Fleet Server instances are configured with an API key that
+has access only to these indices.
+
+In prior alpha versions of Fleet, this data was also stored in Saved Objects because Elastic Agent instances were
+communicating directly with Kibana for policy updates. Once Fleet Server was introduced, that data was migrated to these
+Elasticsearch indices to be readable by Fleet Server.
+
+### `.fleet-agents` index
+
+Each document in this index tracks an individual Elastic Agent's enrollment in the Fleet, which policy it is current
+assigned to, its check in status, which packages are currently installed, and other metadata about the Agent.
+
+All of the code that interacts with this index is currently located in
+[`x-pack/plugins/fleet/server/services/agents/crud.ts`](../server/services/agents/crud.ts) and the schema of these
+documents is maintained by the `FleetServerAgent` TypeScript interface.
+
+Prior to Fleet Server, this data was stored in the `fleet-agents` Saved Object type which is now obsolete.
+
+### `.fleet-actions` index
+
+Each document in this index represents an action that was initiated by a user and needs to be processed by Fleet Server
+and sent to any agents that it applies to. Actions can apply to one or more agents. There are different types of actions
+that can be created such as policy changes, unenrollments, upgrades, etc. See the `AgentActionType` type for a complete
+list.
+
+The total schema for actions is represented by the `FleetServerAgentAction` type.
+
+### `.fleet-actions-results`
+
+### `.fleet-servers`
+
+### `.fleet-artifacts`
+
+### `.fleet-entrollment-api-keys`
+
+### `.fleet-policies`
+
+### `.fleet-policies-leader`
+
+## Saved Object types
 
 The Fleet plugin leverages several Saved Object types to track metadata on install packages, agent policies, and more.
 This document is intended to outline what each type is for, the primary places it accessed from in the codebase, and
 any caveats regarding the history of that saved object type.
-
-## Types
 
 At this point in time, all times are currently:
 - `hidden: false`
@@ -23,35 +83,6 @@ Tracks the Fleet server host addresses and whether or not the cluster has been s
 
 Can be accessed via the APIs exposed in the [server's settings service](../server/services/settings.ts).
 
-### `fleet-agents`
-
-- Constant in code: `AGENT_SAVED_OBJECT_TYPE`
-- Introduced in ?
-- [Code Link](../server/saved_objects/index.ts#76)
-- Migrations: 7.10.0, 7.12.0
-- References to other objects:
-  - `policy_id` - ID that points to the policy (`ingest-agent-policies`) this agent is assigned to.
-  - `access_api_key_id`
-  - `default_api_key_id`
-
-Tracks an individual Elastic Agent's enrollment in the Fleet, which policy it is current assigned to, its check in
-status, which packages are currently installed, and other metadata about the Agent.
-
-Can be accessed via:
-- APIs exposed in the [server's agent service](../server/services/agents)
-- REST APIs available under `/api/fleet/agents`
-
-### `fleet-agent-actions`
-
-- Constant in code: `AGENT_ACTION_SAVED_OBJECT_TYPE`
-- Introduced in ?
-- [Code Link](../server/saved_objects/index.ts#113)
-- Migrations: 7.10.0
-- References to other objects:
-  - `agent_id` - ID that points to the agent for this action (`fleet-agents`)
-  - `policy_id`- ID that points to the policy for this action (`ingest-agent-policies`)
-
-Not sure what this does yet. Endpoint actions?
 
 ### `ingest-agent-policies`
 
@@ -76,18 +107,6 @@ enrolled agents.
   - `output_id` - ID that points to an output (`ingest-outputs`)
 
 Contains the configuration for a specific instance of a package integration as configured for an agent policy.
-
-### `fleet-enrollment-api-keys`
-
-- Constant in code: `ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE`
-- Introduced in ?
-- [Code Link](../server/saved_objects/index.ts#166)
-- Migrations: 7.10.0
-- References to other objects:
-  - `api_key_id`
-  - `policy_id` - ID that points to an agent policy (`ingest-agent-policies`)
-
-Contains an enrollment key that can be used to enroll a new agent in a specific agent policy.
 
 ### `ingest-outputs`
 
@@ -148,3 +167,46 @@ represents the relative file path of the file from the package contents
 
 Used as "tombstone record" to indicate that a package that was installed by default through preconfiguration was
 explicitly deleted by user. Used to avoid recreating a preconfiguration policy that a user explicitly does not want.
+
+### `fleet-agents` 
+
+**DEPRECATED in favor of `.fleet-agents` index.**
+
+- Constant in code: `AGENT_SAVED_OBJECT_TYPE`
+- Introduced in ?
+- [Code Link](../server/saved_objects/index.ts#76)
+- Migrations: 7.10.0, 7.12.0
+- References to other objects:
+  - `policy_id` - ID that points to the policy (`ingest-agent-policies`) this agent is assigned to.
+  - `access_api_key_id`
+  - `default_api_key_id`
+
+Tracks an individual Elastic Agent's enrollment in the Fleet, which policy it is current assigned to, its check in
+status, which packages are currently installed, and other metadata about the Agent.
+
+### `fleet-agent-actions`
+
+**DEPRECATED in favor of `.fleet-agent-actions` index.**
+
+- Constant in code: `AGENT_ACTION_SAVED_OBJECT_TYPE`
+- Introduced in ?
+- [Code Link](../server/saved_objects/index.ts#113)
+- Migrations: 7.10.0
+- References to other objects:
+  - `agent_id` - ID that points to the agent for this action (`fleet-agents`)
+  - `policy_id`- ID that points to the policy for this action (`ingest-agent-policies`)
+
+
+### `fleet-enrollment-api-keys`
+
+**DEPRECATED in favor of `.fleet-enrollment-api-keys` index.**
+
+- Constant in code: `ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE`
+- Introduced in ?
+- [Code Link](../server/saved_objects/index.ts#166)
+- Migrations: 7.10.0
+- References to other objects:
+  - `api_key_id`
+  - `policy_id` - ID that points to an agent policy (`ingest-agent-policies`)
+
+Contains an enrollment key that can be used to enroll a new agent in a specific agent policy.
