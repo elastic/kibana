@@ -62,10 +62,12 @@ export const getDomainWithProtocol = async (domain: string) => {
 
 export const domainValidationStateToPanelColor = (
   state: CrawlerDomainValidationStepState
-): 'success' | 'danger' | 'subdued' => {
+): 'success' | 'warning' | 'danger' | 'subdued' => {
   switch (state) {
     case 'valid':
       return 'success';
+    case 'warning':
+      return 'warning';
     case 'invalid':
       return 'danger';
     default:
