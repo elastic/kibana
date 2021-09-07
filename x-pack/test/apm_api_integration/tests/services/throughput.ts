@@ -13,19 +13,18 @@ import { APIReturnType } from '../../../../plugins/apm/public/services/rest/crea
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
 
 type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiSupertest = createApmApiSupertest(getService('supertest'));
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
 
   registry.when('Throughput when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
-      const response = await apmApiSupertest({
+      const response = await apmApiClient.readUser({
         endpoint: 'GET /api/apm/services/{serviceName}/throughput',
         params: {
           path: {
@@ -54,7 +53,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when querying without kql filter', () => {
         before(async () => {
-          const response = await apmApiSupertest({
+          const response = await apmApiClient.readUser({
             endpoint: 'GET /api/apm/services/{serviceName}/throughput',
             params: {
               path: {
@@ -108,7 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with kql filter to force transaction-based UI', () => {
         before(async () => {
-          const response = await apmApiSupertest({
+          const response = await apmApiClient.readUser({
             endpoint: 'GET /api/apm/services/{serviceName}/throughput',
             params: {
               path: {
@@ -144,7 +143,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       before(async () => {
-        const response = await apmApiSupertest({
+        const response = await apmApiClient.readUser({
           endpoint: 'GET /api/apm/services/{serviceName}/throughput',
           params: {
             path: {
