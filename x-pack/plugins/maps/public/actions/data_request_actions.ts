@@ -160,7 +160,7 @@ export function syncDataForAllLayers(isForceRefresh: boolean) {
   };
 }
 
-function syncDataForAllJoinLayers(isForceRefresh: boolean) {
+function syncDataForAllJoinLayers() {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -170,7 +170,7 @@ function syncDataForAllJoinLayers(isForceRefresh: boolean) {
         return 'hasJoins' in layer ? (layer as IVectorLayer).hasJoins() : false;
       })
       .map((layer) => {
-        return dispatch(syncDataForLayer(layer, isForceRefresh));
+        return dispatch(syncDataForLayer(layer, false));
       });
     await Promise.all(syncPromises);
   };
@@ -467,14 +467,14 @@ export function autoFitToBounds() {
     // Joins are performed on the client.
     // As a result, bounds for join layers must also be performed on the client.
     // Therefore join layers need to fetch data prior to auto fitting bounds.
-    await dispatch(syncDataForAllJoinLayers(true));
+    await dispatch(syncDataForAllJoinLayers());
 
     if (localSetQueryCallId === lastSetQueryCallId) {
       // In cases where there are no bounds, such as no matching documents, fitToDataBounds does not trigger setGotoWithBounds.
       // Ensure layer syncing occurs when setGotoWithBounds is not triggered.
       function onNoBounds() {
         if (localSetQueryCallId === lastSetQueryCallId) {
-          dispatch(syncDataForAllLayers(true));
+          dispatch(syncDataForAllLayers(false));
         }
       }
       dispatch(fitToDataBounds(onNoBounds));
