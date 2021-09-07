@@ -40,9 +40,6 @@ const DEFAULT_IGNORE_ABOVE = 1024;
 const DEFAULT_TEMPLATE_PRIORITY = 200;
 const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
 
-const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text'];
-const QUERY_DEFAULT_FIELD_LIMIT = 1024;
-
 const META_PROP_KEYS = ['metric_type', 'unit'];
 
 /**
@@ -59,7 +56,6 @@ export function getTemplate({
   packageName,
   composedOfTemplates,
   templatePriority,
-  ilmPolicy,
   hidden,
 }: {
   type: string;
@@ -70,7 +66,6 @@ export function getTemplate({
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
-  ilmPolicy?: string | undefined;
   hidden?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate(
@@ -81,7 +76,6 @@ export function getTemplate({
     packageName,
     composedOfTemplates,
     templatePriority,
-    ilmPolicy,
     hidden
   );
   if (pipelineName) {
@@ -277,7 +271,7 @@ function generateTextMapping(field: Field): IndexTemplateMapping {
 function getDefaultProperties(field: Field): Properties {
   const properties: Properties = {};
 
-  if (field.index) {
+  if (field.index !== undefined) {
     properties.index = field.index;
   }
   if (field.doc_values) {
@@ -370,11 +364,8 @@ function getBaseTemplate(
   packageName: string,
   composedOfTemplates: string[],
   templatePriority: number,
-  ilmPolicy?: string | undefined,
   hidden?: boolean
 ): IndexTemplate {
-  const logger = appContextService.getLogger();
-
   // Meta information to identify Ingest Manager's managed templates and indices
   const _meta = {
     package: {
@@ -384,57 +375,13 @@ function getBaseTemplate(
     managed: true,
   };
 
-  // Find all field names to set `index.query.default_field` to, which will be
-  // the first 1024 keyword or text fields
-  const defaultFields = flattenFieldsToNameAndType(fields).filter(
-    (field) => field.type && QUERY_DEFAULT_FIELD_TYPES.includes(field.type)
-  );
-  if (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT) {
-    logger.warn(
-      `large amount of default fields detected for index template ${templateIndexPattern} in package ${packageName}, applying the first ${QUERY_DEFAULT_FIELD_LIMIT} fields`
-    );
-  }
-  const defaultFieldNames = (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT
-    ? defaultFields.slice(0, QUERY_DEFAULT_FIELD_LIMIT)
-    : defaultFields
-  ).map((field) => field.name);
-
   return {
     priority: templatePriority,
     // To be completed with the correct index patterns
     index_patterns: [templateIndexPattern],
     template: {
       settings: {
-        index: {
-          // ILM Policy must be added here, for now point to the default global ILM policy name
-          lifecycle: {
-            name: ilmPolicy ? ilmPolicy : type,
-          },
-          // What should be our default for the compression?
-          codec: 'best_compression',
-          // W
-          mapping: {
-            total_fields: {
-              limit: '10000',
-            },
-          },
-          // This is the default from Beats? So far seems to be a good value
-          refresh_interval: '5s',
-          // Default in the stack now, still good to have it in
-          number_of_shards: '1',
-          // We are setting 30 because it can be devided by several numbers. Useful when shrinking.
-          number_of_routing_shards: '30',
-          // All the default fields which should be queried have to be added here.
-          // So far we add all keyword and text fields here if there are any, otherwise
-          // this setting is skipped.
-          ...(defaultFieldNames.length
-            ? {
-                query: {
-                  default_field: defaultFieldNames,
-                },
-              }
-            : {}),
-        },
+        index: {},
       },
       mappings: {
         // All the dynamic field mappings

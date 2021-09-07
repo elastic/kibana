@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { find, get } from 'lodash/fp';
+import { find, get, isEmpty } from 'lodash/fp';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../common';
 import { useExceptionModal } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_modal';
@@ -16,8 +16,8 @@ import { EventFiltersModal } from '../../../../management/pages/event_filters/vi
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { useFetchEcsAlertsData } from '../../../../detections/containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 import { Ecs } from '../../../../../common/ecs';
+import { useFetchEcsAlertsData } from '../../../../detections/containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -73,7 +73,10 @@ export const EventDetailsFooter = React.memo(
       [detailsData]
     );
 
-    const eventIds = useMemo(() => [expandedEvent?.eventId], [expandedEvent?.eventId]);
+    const eventIds = useMemo(
+      () => (isEmpty(expandedEvent?.eventId) ? null : [expandedEvent?.eventId]),
+      [expandedEvent?.eventId]
+    );
 
     const {
       exceptionModalType,
@@ -97,25 +100,27 @@ export const EventDetailsFooter = React.memo(
       skip: expandedEvent?.eventId == null,
     });
 
-    const ecsData = get(0, alertsEcsData);
+    const ecsData = expandedEvent.ecsData ?? get(0, alertsEcsData);
     return (
       <>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <TakeActionDropdown
-                detailsData={detailsData}
-                ecsData={ecsData}
-                handleOnEventClosed={handleOnEventClosed}
-                isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-                loadingEventDetails={loadingEventDetails}
-                onAddEventFilterClick={onAddEventFilterClick}
-                onAddExceptionTypeClick={onAddExceptionTypeClick}
-                onAddIsolationStatusClick={onAddIsolationStatusClick}
-                refetch={expandedEvent?.refetch}
-                indexName={expandedEvent.indexName}
-                timelineId={timelineId}
-              />
+              {ecsData && (
+                <TakeActionDropdown
+                  detailsData={detailsData}
+                  ecsData={ecsData}
+                  handleOnEventClosed={handleOnEventClosed}
+                  isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+                  loadingEventDetails={loadingEventDetails}
+                  onAddEventFilterClick={onAddEventFilterClick}
+                  onAddExceptionTypeClick={onAddExceptionTypeClick}
+                  onAddIsolationStatusClick={onAddIsolationStatusClick}
+                  refetch={expandedEvent?.refetch}
+                  indexName={expandedEvent.indexName}
+                  timelineId={timelineId}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>

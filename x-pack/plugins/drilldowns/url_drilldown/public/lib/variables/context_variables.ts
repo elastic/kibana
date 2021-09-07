@@ -54,7 +54,7 @@ export interface ContextValues {
   panel: PanelValues;
 }
 
-function hasSavedObjectId(obj: Record<string, any>): obj is { savedObjectId: string } {
+function hasSavedObjectId(obj: Record<string, unknown>): obj is { savedObjectId: string } {
   return 'savedObjectId' in obj && typeof obj.savedObjectId === 'string';
 }
 
@@ -64,12 +64,13 @@ function hasSavedObjectId(obj: Record<string, any>): obj is { savedObjectId: str
  */
 function getIndexPatternIds(output: EmbeddableOutput): string[] {
   function hasIndexPatterns(
-    _output: Record<string, any>
+    _output: unknown
   ): _output is { indexPatterns: Array<{ id?: string }> } {
     return (
-      'indexPatterns' in _output &&
-      Array.isArray(_output.indexPatterns) &&
-      _output.indexPatterns.length > 0
+      typeof _output === 'object' &&
+      !!_output &&
+      Array.isArray((_output as { indexPatterns: unknown[] }).indexPatterns) &&
+      (_output as { indexPatterns: Array<{ id?: string }> }).indexPatterns.length > 0
     );
   }
   return hasIndexPatterns(output)
