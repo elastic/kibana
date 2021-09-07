@@ -351,7 +351,9 @@ describe('static_value', () => {
 
       instance.update();
 
-      expect(updateLayerSpy).toHaveBeenCalledWith({
+      expect(updateLayerSpy.mock.calls[0]).toEqual([expect.any(Function)]);
+      // check that the result of the setter call is correct
+      expect(updateLayerSpy.mock.calls[0][0](layer)).toEqual({
         ...layer,
         columns: {
           ...layer.columns,

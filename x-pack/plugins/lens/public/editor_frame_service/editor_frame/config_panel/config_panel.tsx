@@ -184,23 +184,25 @@ export function LayerPanels(
                 activeDatasourceId != null &&
                 datasourceMap[activeDatasourceId]?.initializeDimension
               ) {
-                updateState({
-                  subType: 'LAYER_DEFAULT_DIMENSION',
-                  updater: (state) =>
-                    addInitialValueIfAvailable({
-                      ...props,
-                      state,
-                      activeDatasourceId,
-                      layerId,
-                      layerType: getLayerType(
-                        activeVisualization,
-                        state.visualization.state,
-                        layerId
-                      ),
-                      columnId,
-                      groupId,
-                    }),
-                });
+                dispatchLens(
+                  updateState({
+                    subType: 'LAYER_DEFAULT_DIMENSION',
+                    updater: (state) =>
+                      addInitialValueIfAvailable({
+                        ...props,
+                        state,
+                        activeDatasourceId,
+                        layerId,
+                        layerType: getLayerType(
+                          activeVisualization,
+                          state.visualization.state,
+                          layerId
+                        ),
+                        columnId,
+                        groupId,
+                      }),
+                  })
+                );
               }
             }}
             onRemoveLayer={() => {
@@ -314,6 +316,7 @@ function addInitialValueIfAvailable({
       ? layerInfo.initialDimensions.find(({ groupId: id }) => id === groupId)
       : // pick the first available one if not passed
         layerInfo.initialDimensions[0];
+
     if (info) {
       return {
         ...state,

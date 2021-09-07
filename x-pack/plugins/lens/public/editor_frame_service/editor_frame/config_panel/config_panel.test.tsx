@@ -358,22 +358,37 @@ describe('ConfigPanel', () => {
       await clickToAddLayer(instance);
 
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+      expect(mockDatasource.initializeDimension).not.toHaveBeenCalled();
     });
 
-    it('should not add an initial dimension when datasource does not support it', async () => {
+    it('should not add an initial dimension when initialDimensions are not available for the given layer type', async () => {
       const props = getDefaultProps();
       props.activeVisualization.getSupportedLayers = jest.fn(() => [
-        { type: layerTypes.DATA, label: 'Data Layer' },
+        {
+          type: layerTypes.DATA,
+          label: 'Data Layer',
+          initialDimensions: [
+            {
+              groupId: 'testGroup',
+              columnId: 'myColumn',
+              dataType: 'number',
+              label: 'Initial value',
+              staticValue: 100,
+            },
+          ],
+        },
         {
           type: layerTypes.THRESHOLD,
           label: 'Threshold layer',
         },
       ]);
+      mockDatasource.initializeDimension = jest.fn();
 
       const { instance, lensStore } = await prepareAndMountComponent(props);
       await clickToAddLayer(instance);
 
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+      expect(mockDatasource.initializeDimension).not.toHaveBeenCalled();
     });
 
     it('should use group initial dimension value when adding a new layer if available', async () => {
@@ -399,7 +414,14 @@ describe('ConfigPanel', () => {
       const { instance, lensStore } = await prepareAndMountComponent(props);
       await clickToAddLayer(instance);
 
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
+      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+      expect(mockDatasource.initializeDimension).toHaveBeenCalledWith(undefined, 'newId', {
+        columnId: 'myColumn',
+        dataType: 'number',
+        groupId: 'testGroup',
+        label: 'Initial value',
+        staticValue: 100,
+      });
     });
 
     it('should add an initial dimension value when clicking on the empty dimension button', async () => {
@@ -411,7 +433,7 @@ describe('ConfigPanel', () => {
           initialDimensions: [
             {
               groupId: 'a',
-              columnId: 'myColumn',
+              columnId: 'newId',
               dataType: 'number',
               label: 'Initial value',
               staticValue: 100,
@@ -425,6 +447,14 @@ describe('ConfigPanel', () => {
 
       await clickToAddDimension(instance);
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+
+      expect(mockDatasource.initializeDimension).toHaveBeenCalledWith('state', 'first', {
+        groupId: 'a',
+        columnId: 'newId',
+        dataType: 'number',
+        label: 'Initial value',
+        staticValue: 100,
+      });
     });
   });
 });

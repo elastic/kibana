@@ -151,6 +151,8 @@ export const staticValueOperation: OperationDefinition<
         if (currentColumn.params.value === newValue) {
           return;
         }
+        // Because of upstream specific UX flows, we need fresh layer state here
+        // so need to use the updater pattern
         updateLayer((newLayer) => {
           const newColumn = newLayer.columns[columnId] as StaticValueIndexPatternColumn;
           return {
