@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import { EuiTab, EuiTabs } from '@elastic/eui';
+import React, { useContext, useState, useEffect } from 'react';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
+import { MonitoringTimeContainer } from './use_monitoring_time';
+import { PageLoading } from '../../components';
 
 export interface TabMenuItem {
   id: string;
@@ -22,41 +24,40 @@ interface PageTemplateProps {
   title: string;
   pageTitle?: string;
   tabs?: TabMenuItem[];
+  getPageData?: () => Promise<void>;
 }
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({ title, pageTitle, tabs, children }) => {
+export const PageTemplate: React.FC<PageTemplateProps> = ({
+  title,
+  pageTitle,
+  tabs,
+  getPageData,
+  children,
+}) => {
   useTitle('', title);
+
+  const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    getPageData?.()
+      .catch((err) => {
+        // TODO: handle errors
+      })
+      .finally(() => {
+        setLoaded(true);
+      });
+  }, [getPageData, currentTimerange]);
+
+  const onRefresh = () => {
+    getPageData?.().catch((err) => {
+      // TODO: handle errors
+    });
+  };
 
   return (
     <div className="app-container">
-      <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween" responsive>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            gutterSize="none"
-            justifyContent="spaceEvenly"
-            direction="column"
-            responsive
-          >
-            <EuiFlexItem>
-              <div id="setupModeNav">{/* HERE GOES THE SETUP BUTTON */}</div>
-            </EuiFlexItem>
-            <EuiFlexItem className="monTopNavSecondItem">
-              {pageTitle && (
-                <div data-test-subj="monitoringPageTitle">
-                  <EuiTitle size="xs">
-                    <h1>{pageTitle}</h1>
-                  </EuiTitle>
-                </div>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <MonitoringToolbar />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
+      <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
       {tabs && (
         <EuiTabs>
           {tabs.map((item, idx) => {
@@ -74,7 +75,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({ title, pageTitle, ta
           })}
         </EuiTabs>
       )}
-      <div>{children}</div>
+      <div>{!getPageData ? children : loaded ? children : <PageLoading />}</div>
     </div>
   );
 };

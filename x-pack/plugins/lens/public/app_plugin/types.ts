@@ -7,6 +7,7 @@
 
 import type { History } from 'history';
 import type { OnSaveProps } from 'src/plugins/saved_objects/public';
+import { SpacesApi } from '../../../spaces/public';
 import type {
   ApplicationStart,
   AppMountParameters,
@@ -116,6 +117,8 @@ export interface LensAppServices {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
   presentationUtil: PresentationUtilPluginStart;
+  spaces: SpacesApi;
+
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
 }
