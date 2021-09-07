@@ -298,9 +298,18 @@ export const getXyVisualization = ({
     const isDataLayer = !layer.layerType || layer.layerType === layerTypes.DATA;
 
     if (!isDataLayer) {
-      const { bottom, left, right } = groupBy(layer.yConfig || [], ({ axisMode }) => {
-        return axisMode;
-      });
+      const idToIndex = sortedAccessors.reduce<Record<string, number>>((memo, id, index) => {
+        memo[id] = index;
+        return memo;
+      }, {});
+      const { bottom, left, right } = groupBy(
+        [...(layer.yConfig || [])].sort(
+          ({ forAccessor: forA }, { forAccessor: forB }) => idToIndex[forB] - idToIndex[forA]
+        ),
+        ({ axisMode }) => {
+          return axisMode;
+        }
+      );
       const groupsToShow = getGroupsToShow(
         [
           // When a threshold layer panel is added, a static threshold should automatically be included by default
