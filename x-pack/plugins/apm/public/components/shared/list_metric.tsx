@@ -13,24 +13,12 @@ interface ListMetricProps extends ComponentProps<typeof SparkPlot> {
   hideSeries?: boolean;
 }
 
-export function ListMetric({
-  color,
-  compact,
-  series,
-  valueLabel,
-  comparisonSeries,
-  hideSeries = false,
-}: ListMetricProps) {
+export function ListMetric(props: ListMetricProps) {
+  const { hideSeries, ...sparkPlotProps } = props;
+  const { valueLabel } = sparkPlotProps;
+
   if (!hideSeries) {
-    return (
-      <SparkPlot
-        compact={compact}
-        valueLabel={valueLabel}
-        series={series}
-        color={color}
-        comparisonSeries={comparisonSeries}
-      />
-    );
+    return <SparkPlot {...sparkPlotProps} />;
   }
 
   return (
