@@ -43,6 +43,7 @@ export async function reportFailuresToEs(failures: TestFailure[]) {
       },
     },
     {
+      '@timestamp': new Date(),
       failure,
       build: {
         id: process.env.BUILDKITE_BUILD_ID,
