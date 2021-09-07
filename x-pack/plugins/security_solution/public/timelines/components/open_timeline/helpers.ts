@@ -388,7 +388,6 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   ruleNote,
 }: UpdateTimeline): (() => void) => () => {
   if (!isEmpty(timeline.indexNames)) {
-    console.log('why do we need eventType in redux?', timeline);
     dispatch(
       sourcererActions.setSelectedKip({
         id: SourcererScopeName.timeline,
