@@ -9,7 +9,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
 interface MetaParams {
-  totalItems: number;
   totalPages: number;
   startIndex: number;
   hasNextPage: boolean;
@@ -26,7 +25,6 @@ export const usePager = ({ totalItems }: { totalItems: number }) => {
     return {
       totalPages,
       startIndex: pageSize * currentPage,
-      totalItems: Math.ceil(totalItems / INITIAL_PAGE_SIZE),
       hasNextPage: currentPage + 1 < totalPages,
     };
   }, [currentPage, pageSize, totalItems]);

@@ -75,8 +75,10 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     }
   }, [currentPage, totalPages, onPageChange]);
 
-  const shouldShowLimitedResultsWarning = () =>
-    !hasNextPage && props.rows.length < props.totalHitCount;
+  const shouldShowLimitedResultsWarning = useMemo(
+    () => !hasNextPage && props.rows.length < props.totalHitCount,
+    [hasNextPage, props.rows.length, props.totalHitCount]
+  );
 
   const sampleSize = useMemo(() => {
     return getServices().uiSettings.get(SAMPLE_SIZE_SETTING, 500);
@@ -106,7 +108,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
           responsive={false}
           wrap={true}
         >
-          {shouldShowLimitedResultsWarning() && (
+          {shouldShowLimitedResultsWarning && (
             <EuiFlexItem grow={false}>
               <EuiText grow={false} size="s" color="subdued">
                 <FormattedMessage
