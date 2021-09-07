@@ -56,7 +56,7 @@ describe('From alert', () => {
     refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
+    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alert`);
   });
 
   afterEach(() => {
@@ -64,8 +64,7 @@ describe('From alert', () => {
     esArchiverUnload('auditbeat_for_exceptions2');
   });
 
-  // TODO: Unskip the test when `https://github.com/elastic/kibana/issues/108244` it is fixed
-  it.skip('Creates an exception and deletes it', () => {
+  it('Creates an exception and deletes it', () => {
     addExceptionFromFirstAlert();
     addsException(getException());
     esArchiverLoad('auditbeat_for_exceptions2');
