@@ -89,7 +89,7 @@ const FixLogsStep: FunctionComponent<Partial<OverviewStepsProps>> = ({ setIsComp
             <h4>{i18nTexts.deprecationsCountCheckpointTitle}</h4>
           </EuiText>
           <EuiSpacer size="m" />
-          <DeprecationsCountCheckpoint setIsComplete={setIsComplete!} />
+          <DeprecationsCountCheckpoint setHasNoDeprecationLogs={setIsComplete!} />
         </>
       )}
     </>

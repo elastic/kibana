@@ -65,10 +65,12 @@ const getPreviousCheckpointDate = () => {
 };
 
 interface Props {
-  setIsComplete: (isComplete: boolean) => void;
+  setHasNoDeprecationLogs: (hasNoLogs: boolean) => void;
 }
 
-export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({ setIsComplete }) => {
+export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
+  setHasNoDeprecationLogs,
+}) => {
   const {
     services: { api },
   } = useAppContext();
@@ -90,9 +92,12 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({ setIsCom
   };
 
   useEffect(() => {
-    if (!isLoading && !error) {
-      setIsComplete(warningsCount === 0);
+    // Loading shouldn't invalidate the previous state.
+    if (!isLoading) {
+      // An error should invalidate the previous state.
+      setHasNoDeprecationLogs(!error && warningsCount === 0);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, isLoading, warningsCount]);
 
