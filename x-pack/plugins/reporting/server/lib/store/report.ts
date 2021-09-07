@@ -9,13 +9,13 @@ import { omit } from 'lodash';
 import moment from 'moment';
 import Puid from 'puid';
 import { JOB_STATUSES } from '../../../common/constants';
-import {
+import type {
   ReportApiJSON,
   ReportDocument,
   ReportDocumentHead,
   ReportSource,
 } from '../../../common/types';
-import { ReportTaskParams } from '../tasks';
+import type { ReportTaskParams } from '../tasks';
 
 export { ReportDocument };
 export { ReportApiJSON, ReportSource };
@@ -67,7 +67,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
 
     this.migration_version = MIGRATION_VERSION;
 
-    // see enqueue_job for all the fields that are expected to exist when adding a report
+    // see RequestHandler.enqueue_job for all the fields that are expected to exist when adding a report
     if (opts.jobtype == null) {
       throw new Error(`jobtype is expected!`);
     }
