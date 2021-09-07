@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import { stringify } from 'query-string';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import { getRedirectAppPath } from '../../../common/constants';
@@ -22,7 +22,7 @@ interface Props {
 
 const i18nTexts = {
   label: i18n.translate('xpack.reporting.listing.table.viewInAppLinkIconLabel', {
-    defaultMessage: 'View Kibana app that generated this report.',
+    defaultMessage: 'Open this report in the Kibana app that requested it.',
   }),
 };
 
@@ -40,5 +40,9 @@ export const ViewInAppLink: FunctionComponent<Props> = ({ job }) => {
   });
   const href = `${path}?${searchParams}`;
 
-  return <EuiButtonIcon target="_blank" aria-label={i18nTexts.label} iconType="eye" href={href} />;
+  return (
+    <EuiToolTip content={i18nTexts.label}>
+      <EuiButtonIcon target="_blank" aria-label={i18nTexts.label} iconType="eye" href={href} />
+    </EuiToolTip>
+  );
 };
