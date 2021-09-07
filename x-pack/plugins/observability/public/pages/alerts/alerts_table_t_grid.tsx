@@ -375,6 +375,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       filters: [],
       hasAlertsCrudPermissions,
       indexNames,
+      // Limited to 10 to work around performance issues as described in
+      // https://github.com/elastic/kibana/issues/110758
       itemsPerPage: 10,
       itemsPerPageOptions: [],
       loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
