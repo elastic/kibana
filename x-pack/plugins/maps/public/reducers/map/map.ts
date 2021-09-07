@@ -75,7 +75,6 @@ export const DEFAULT_MAP_STATE: MapState = {
     timeslice: undefined,
     query: undefined,
     filters: [],
-    refreshTimerLastTriggeredAt: undefined,
     drawState: undefined,
     editState: undefined,
   },

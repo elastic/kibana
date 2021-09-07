@@ -73,19 +73,11 @@ export async function canSkipSourceUpdate({
   }
 
   const timeAware = await source.isTimeAware();
-  const refreshTimerAware = await source.isRefreshTimerAware();
   const isFieldAware = source.isFieldAware();
   const isQueryAware = source.isQueryAware();
   const isGeoGridPrecisionAware = source.isGeoGridPrecisionAware();
 
-  if (
-    !timeAware &&
-    !refreshTimerAware &&
-    !extentAware &&
-    !isFieldAware &&
-    !isQueryAware &&
-    !isGeoGridPrecisionAware
-  ) {
+  if (!timeAware && !extentAware && !isFieldAware && !isQueryAware && !isGeoGridPrecisionAware) {
     return !!prevDataRequest && prevDataRequest.hasDataOrRequestInProgress();
   }
 
@@ -108,14 +100,6 @@ export async function canSkipSourceUpdate({
         updateDueToTimeslice = getUpdateDueToTimeslice(nextRequestMeta.timeslice);
       }
     }
-  }
-
-  let updateDueToRefreshTimer = false;
-  if (refreshTimerAware && nextRequestMeta.refreshTimerLastTriggeredAt) {
-    updateDueToRefreshTimer = !_.isEqual(
-      prevMeta.refreshTimerLastTriggeredAt,
-      nextRequestMeta.refreshTimerLastTriggeredAt
-    );
   }
 
   let updateDueToFields = false;

@@ -201,9 +201,6 @@ export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
 export const getEditState = ({ map }: MapStoreState): EditState | undefined =>
   map.mapState.editState;
 
-export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string | undefined =>
-  map.mapState.refreshTimerLastTriggeredAt;
-
 function getLayerDescriptor(state: MapStoreState, layerId: string) {
   const layerListRaw = getLayerListRaw(state);
   return layerListRaw.find((layer) => layer.id === layerId);
@@ -225,7 +222,6 @@ export const getDataFilters = createSelector(
   getMapZoom,
   getTimeFilters,
   getTimeslice,
-  getRefreshTimerLastTriggeredAt,
   getQuery,
   getFilters,
   getSearchSessionId,
@@ -237,7 +233,6 @@ export const getDataFilters = createSelector(
     mapZoom,
     timeFilters,
     timeslice,
-    refreshTimerLastTriggeredAt,
     query,
     filters,
     searchSessionId,
@@ -250,7 +245,6 @@ export const getDataFilters = createSelector(
       zoom: mapZoom,
       timeFilters,
       timeslice,
-      refreshTimerLastTriggeredAt,
       query,
       filters,
       searchSessionId,

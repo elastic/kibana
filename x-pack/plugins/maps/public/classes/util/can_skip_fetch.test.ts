@@ -93,9 +93,6 @@ describe('canSkipSourceUpdate', () => {
       isTimeAware: () => {
         return false;
       },
-      isRefreshTimerAware: () => {
-        return false;
-      },
       isFilterByMapBounds: () => {
         return false;
       },
@@ -304,9 +301,6 @@ describe('canSkipSourceUpdate', () => {
       return {
         isTimeAware: () => {
           return true;
-        },
-        isRefreshTimerAware: () => {
-          return false;
         },
         isFilterByMapBounds: () => {
           return false;

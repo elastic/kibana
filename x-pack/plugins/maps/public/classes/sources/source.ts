@@ -47,7 +47,6 @@ export interface ISource {
   isFilterByMapBounds(): boolean;
   isGeoGridPrecisionAware(): boolean;
   isQueryAware(): boolean;
-  isRefreshTimerAware(): boolean;
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributionProvider(): (() => Promise<Attribution[]>) | null;
@@ -113,10 +112,6 @@ export class AbstractSource implements ISource {
   }
 
   isFieldAware(): boolean {
-    return false;
-  }
-
-  isRefreshTimerAware(): boolean {
     return false;
   }
 

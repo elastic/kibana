@@ -118,10 +118,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return true;
   }
 
-  isRefreshTimerAware(): boolean {
-    return true;
-  }
-
   isQueryAware(): boolean {
     return true;
   }

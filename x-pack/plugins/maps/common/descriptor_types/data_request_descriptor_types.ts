@@ -24,7 +24,6 @@ export type DataFilters = {
   extent?: MapExtent; // map viewport
   filters: Filter[];
   query?: Query;
-  refreshTimerLastTriggeredAt?: string;
   searchSessionId?: string;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
