@@ -8,8 +8,12 @@
 import { CoreSetup } from 'kibana/public';
 import { EmbeddableSetup } from '../../../../../../../src/plugins/embeddable/public';
 import { DataVisualizerGridEmbeddableFactory } from './grid_embeddable/grid_embeddable_factory';
+import { DataVisualizerPluginStart, DataVisualizerStartDependencies } from '../../../plugin';
 
-export function registerEmbeddables(embeddable: EmbeddableSetup, core: CoreSetup) {
+export function registerEmbeddables(
+  embeddable: EmbeddableSetup,
+  core: CoreSetup<DataVisualizerStartDependencies, DataVisualizerPluginStart>
+) {
   const dataVisualizerGridEmbeddableFactory = new DataVisualizerGridEmbeddableFactory(
     core.getStartServices
   );
