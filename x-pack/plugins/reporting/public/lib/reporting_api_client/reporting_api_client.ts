@@ -24,6 +24,7 @@ import {
   JobId,
   ManagementLinkFn,
   ReportApiJSON,
+  ReportSource,
 } from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 import { Job } from '../job';
@@ -132,6 +133,16 @@ export class ReportingAPIClient implements IReportingAPI {
       asSystemRequest: true,
     });
     return new Job(report);
+  }
+
+  public async getPayload(jobId: string) {
+    const payload: ReportSource['payload'] = await this.http.get(
+      `${API_LIST_URL}/payload/${jobId}`,
+      {
+        asSystemRequest: true,
+      }
+    );
+    return payload;
   }
 
   public async findForJobIds(jobIds: JobId[]) {

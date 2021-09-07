@@ -47,7 +47,7 @@ interface JobsQueryFactory {
     jobIds: string[] | null
   ): Promise<ReportApiJSON[]>;
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
-  get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
+  get(user: ReportingUser, id: string): Promise<Report | undefined>;
   getError(id: string): Promise<string>;
   delete(deleteIndex: string, id: string): Promise<ApiResponse<DeleteResponse>>;
 }
@@ -166,8 +166,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
         return;
       }
 
-      const report = new Report({ ...result, ...result._source });
-      return report.toApiJSON();
+      return new Report({ ...result, ...result._source });
     },
 
     async getError(id) {

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { FunctionComponent } from 'react';
+import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 

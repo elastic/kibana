@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
+import { pipe } from 'fp-ts/lib/function';
+import * as E from 'fp-ts/lib/Either';
+import * as TE from 'fp-ts/lib/TaskEither';
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { ReportingCore } from '../../';
 import { ROUTE_TAG_CAN_REDIRECT } from '../../../../security/server';
 import { API_BASE_URL } from '../../../common/constants';
+import { Report } from '../../lib/store';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { jobsQueryFactory } from '../lib/jobs_query';
 import { deleteJobResponseHandler, downloadJobResponseHandler } from '../lib/job_response_handler';
@@ -85,6 +89,29 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
     })
   );
 
+  const getJobOrUnauthorizedResponse = (job: Report) => async () => {
+    const { jobtype: jobType } = job;
+    const {
+      management: { jobTypes = [] },
+    } = await reporting.getLicenseInfo();
+
+    if (!jobTypes.includes(jobType)) {
+      return E.left(
+        kibanaResponseFactory.unauthorized({
+          body: `Sorry, you are not authorized to view ${jobType} info`,
+        })
+      );
+    }
+    return E.right(job);
+  };
+
+  const validateJobTypeAvailable = (maybeJob?: Report) =>
+    pipe(
+      maybeJob ? E.right(maybeJob) : E.left(kibanaResponseFactory.notFound()),
+      TE.fromEither,
+      TE.chain(getJobOrUnauthorizedResponse)
+    )();
+
   // return some info about the job
   router.get(
     {
@@ -102,28 +129,51 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       }
 
       const { docId } = req.params;
-      const {
-        management: { jobTypes = [] },
-      } = await reporting.getLicenseInfo();
 
       const result = await jobsQuery.get(user, docId);
 
-      if (!result) {
-        return res.notFound();
+      return validateJobTypeAvailable(result).then((checkedResult) =>
+        E.isLeft(checkedResult)
+          ? checkedResult.left
+          : res.ok({
+              body: checkedResult.right.toApiJSON(),
+              headers: {
+                'content-type': 'application/json',
+              },
+            })
+      );
+    })
+  );
+
+  router.get(
+    {
+      path: `${MAIN_ENTRY}/payload/{docId}`,
+      validate: {
+        params: schema.object({
+          docId: schema.string({ minLength: 2 }),
+        }),
+      },
+    },
+    authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+      // ensure the async dependencies are loaded
+      if (!context.reporting) {
+        return res.custom({ statusCode: 503 });
       }
 
-      const { jobtype: jobType } = result;
+      const { docId } = req.params;
 
-      if (!jobTypes.includes(jobType)) {
-        throw Boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
-      }
+      const result = await jobsQuery.get(user, docId);
 
-      return res.ok({
-        body: result,
-        headers: {
-          'content-type': 'application/json',
-        },
-      });
+      return validateJobTypeAvailable(result).then((checkedResult) =>
+        E.isLeft(checkedResult)
+          ? checkedResult.left
+          : res.ok({
+              body: checkedResult.right.payload,
+              headers: {
+                'content-type': 'application/json',
+              },
+            })
+      );
     })
   );
 
