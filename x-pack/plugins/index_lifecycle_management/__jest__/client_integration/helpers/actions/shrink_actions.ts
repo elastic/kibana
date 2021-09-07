@@ -7,17 +7,36 @@
 
 import { TestBed } from '@kbn/test/jest';
 import { Phase } from '../../../../common/types';
-import { createFormToggleAndSetValueAction } from './form_toggle_and_set_value_action';
+import { createFormSetValueAction } from './form_set_value_action';
 
 export const createShrinkActions = (testBed: TestBed, phase: Phase) => {
-  const { exists } = testBed;
-  const toggleSelector = `${phase}-shrinkSwitch`;
+  const { exists, form } = testBed;
+  const toggleShrinkSelector = `${phase}-shrinkSwitch`;
+  const shrinkSizeSelector = `${phase}-primaryShardSize`;
+  const shrinkCountSelector = `${phase}-primaryShardCount`;
+
+  const toggleIsUsingShardCount = async () =>
+    await testBed.find(`${phase}-toggleIsUsingShardCount`).simulate('click');
   return {
-    shrinkExists: () => exists(toggleSelector),
-    setShrink: createFormToggleAndSetValueAction(
-      testBed,
-      toggleSelector,
-      `${phase}-primaryShardCount`
-    ),
+    shrinkExists: () => exists(toggleShrinkSelector),
+    setShrinkCount: async (value: string) => {
+      if (!exists(shrinkCountSelector) && !exists(shrinkSizeSelector)) {
+        await form.toggleEuiSwitch(toggleShrinkSelector);
+      }
+      if (!exists(shrinkCountSelector)) {
+        await toggleIsUsingShardCount();
+      }
+      await createFormSetValueAction(testBed, shrinkCountSelector)(value);
+    },
+    setShrinkSize: async (value: string) => {
+      if (!exists(shrinkCountSelector) && !exists(shrinkSizeSelector)) {
+        await form.toggleEuiSwitch(toggleShrinkSelector);
+      }
+      if (!exists(shrinkSizeSelector)) {
+        await toggleIsUsingShardCount();
+      }
+      await createFormSetValueAction(testBed, shrinkSizeSelector)(value);
+    },
+    toggleIsUsingShardCount,
   };
 };

@@ -90,7 +90,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
               <EuiText size="xs">
                 <EuiLink
                   onClick={() => toggleIsUsingShardCount()}
-                  data-test-subj="toggleIsUsingShardCount"
+                  data-test-subj={`${phase}-toggleIsUsingShardCount`}
                 >
                   <FormattedMessage
                     id="xpack.ingestPipelines.pipelineEditor.useCopyFromLabel"
