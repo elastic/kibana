@@ -62,7 +62,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiColumnSorting.emptySorting": "Currently no fields are sorted",
           "euiColumnSorting.pickFields": "Pick fields to sort by",
           "euiColumnSorting.sortFieldAriaLabel": "Sort by:",
-          "euiColumnSortingDraggable.activeSortLabel": "is sorting this data grid",
+          "euiColumnSortingDraggable.activeSortLabel": [Function],
           "euiColumnSortingDraggable.defaultSortAsc": "A-Z",
           "euiColumnSortingDraggable.defaultSortDesc": "Z-A",
           "euiColumnSortingDraggable.removeSortLabel": "Remove from data grid sort:",
