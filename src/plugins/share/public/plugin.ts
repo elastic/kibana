@@ -8,7 +8,7 @@
 
 import './index.scss';
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import type { SecurityOssPluginSetup, SecurityOssPluginStart } from '../../security_oss/public';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
@@ -80,6 +80,8 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private redirectManager?: RedirectManager;
   private url?: UrlService;
 
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
   public setup(core: CoreSetup, plugins: ShareSetupDependencies): SharePluginSetup {
     const { application, http } = core;
     const { basePath } = http;
@@ -88,6 +90,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 
     this.url = new UrlService({
       baseUrl: basePath.publicBaseUrl || basePath.serverBasePath,
+      version: this.initializerContext.env.packageInfo.version,
       navigate: async ({ app, path, state }, { replace = false } = {}) => {
         const [start] = await core.getStartServices();
         await start.application.navigateToApp(app, {

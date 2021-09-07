@@ -21,7 +21,15 @@ import type {
 import { formatSearchParams, FormatSearchParamsOptions, RedirectOptions } from './redirect';
 
 export interface LocatorDependencies {
+  /**
+   * Public URL of the Kibana server.
+   */
   baseUrl?: string;
+
+  /**
+   * Current version of Kibana, e.g. `7.0.0`.
+   */
+  version?: string;
 
   /**
    * Navigate without reloading the page to a KibanaLocation.
@@ -80,10 +88,10 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
   }
 
   public getRedirectUrl(params: P, options: FormatSearchParamsOptions): string {
-    const { baseUrl = '' } = this.deps;
+    const { baseUrl = '', version = '0.0.0' } = this.deps;
     const opts: RedirectOptions = {
       id: this.definition.id,
-      version: '0.0.0',
+      version,
       params,
     };
     const search = formatSearchParams(opts, options).toString();
