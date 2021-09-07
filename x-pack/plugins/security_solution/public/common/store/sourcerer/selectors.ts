@@ -78,19 +78,6 @@ export const getSelectedKipSelector = () => {
   };
 };
 
-// TODO: Steph/sourcerer fuck this
-export const getAllExistingIndexNamesSelector = (id: string) => {
-  const getDefaultIndexPatternSelector = defaultIndexPatternSelector();
-  const getKibanaIndexPatternsSelector = kibanaIndexPatternsSelector();
-
-  return (state: State): string[] => {
-    const kibanaIndexPatterns = getKibanaIndexPatternsSelector(state);
-    const defaultIndexPattern = getDefaultIndexPatternSelector(state);
-    const dataView = kibanaIndexPatterns.find((kip) => kip.id === id) ?? defaultIndexPattern;
-    return dataView.patternList;
-  };
-};
-
 const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
 
 export const getSourcererScopeSelector = () => {

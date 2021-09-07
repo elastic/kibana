@@ -40,6 +40,7 @@ import { DetailsPanel } from '../../side_panel';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { defaultControlColumn } from '../body/control_columns';
+import { SelectedKip } from '../../../../common/store/sourcerer/selectors';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -120,11 +121,10 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   );
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
+  const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
+  const { selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
+    getSelectedKip(state, SourcererScopeName.timeline)
   );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -188,7 +188,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     docValueFields,
     endDate: '',
     id: `pinned-${timelineId}`,
-    indexNames: existingIndexNames,
+    indexNames: selectedPatterns,
     fields: timelineQueryFields,
     limit: itemsPerPage,
     filterQuery,

@@ -21,6 +21,8 @@ import { hostToCriteria } from '../../../../common/components/ml/criteria/host_t
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { useHostDetails, ID } from '../../../../hosts/containers/hosts/details';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { SelectedKip } from '../../../../common/store/sourcerer/selectors';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 interface ExpandableHostProps {
   hostName: string;
@@ -66,15 +68,15 @@ export const ExpandableHostDetails = ({
     Otherwise, an empty array is defaulted for the `indexNames` in the query which leads to inconsistencies in the data returned
     (i.e. extraneous endpoint data is retrieved from the backend leading to endpoint data not being returned)
   */
-  const allExistingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
+  const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
+  const { selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
+    getSelectedKip(state, SourcererScopeName.default)
   );
-  const allPatterns = useDeepEqualSelector<string[]>(allExistingIndexNamesSelector);
+
   const [loading, { hostDetails: hostOverview }] = useHostDetails({
     endDate: to,
     hostName,
-    indexNames: allPatterns,
+    indexNames: selectedPatterns,
     startDate: from,
   });
   return (
@@ -93,7 +95,7 @@ export const ExpandableHostDetails = ({
           data={hostOverview as HostItem}
           anomaliesData={anomaliesData}
           isLoadingAnomaliesData={isLoadingAnomaliesData}
-          indexNames={allPatterns}
+          indexNames={selectedPatterns}
           loading={loading}
           startDate={from}
           endDate={to}

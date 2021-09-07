@@ -50,6 +50,7 @@ export interface TimelinePersistInput {
   columns: ColumnHeaderOptions[];
   defaultColumns?: ColumnHeaderOptions[];
   itemsPerPage?: number;
+  kipId: string;
   indexNames: string[];
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;

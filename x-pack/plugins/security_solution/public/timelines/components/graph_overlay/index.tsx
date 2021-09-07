@@ -39,6 +39,8 @@ import {
   endSelector,
 } from '../../../common/components/super_date_picker/selectors';
 import * as i18n from './translations';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SelectedKip } from '../../../common/store/sourcerer/selectors';
 
 const OverlayContainer = styled.div`
   display: flex;
@@ -180,11 +182,11 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
     globalFullScreen,
   ]);
 
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
+  const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
+  const { selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
+    getSelectedKip(state, SourcererScopeName.timeline)
   );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+
   if (fullScreen && !isInTimeline) {
     return (
       <FullScreenOverlayContainer data-test-subj="overlayContainer">
@@ -206,7 +208,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
           <StyledResolver
             databaseDocumentID={graphEventId}
             resolverComponentInstanceID={timelineId}
-            indices={existingIndexNames}
+            indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}
           />
@@ -238,7 +240,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
           <StyledResolver
             databaseDocumentID={graphEventId}
             resolverComponentInstanceID={timelineId}
-            indices={existingIndexNames}
+            indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}
           />

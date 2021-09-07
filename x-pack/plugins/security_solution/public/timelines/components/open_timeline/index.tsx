@@ -46,6 +46,8 @@ import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
 import { Direction } from '../../../../common/search_strategy';
+import { SelectedKip } from '../../../common/store/sourcerer/selectors';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -108,11 +110,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const existingIndexNamesSelector = useMemo(
-      () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-      []
+    const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
+    const { kipId, selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
+      getSelectedKip(state, SourcererScopeName.timeline)
     );
-    const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
 
     const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
     const updateIsLoading = useCallback((payload) => dispatch(dispatchUpdateIsLoading(payload)), [
@@ -206,7 +207,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
               columns: defaultHeaders,
-              indexNames: existingIndexNames,
+              kipId,
+              indexNames: selectedPatterns,
               show: false,
             })
           );
@@ -215,7 +217,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         await deleteTimelinesByIds(timelineIds);
         refetch();
       },
-      [dispatch, existingIndexNames, refetch, timelineSavedObjectId]
+      [timelineSavedObjectId, refetch, dispatch, kipId, selectedPatterns]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(

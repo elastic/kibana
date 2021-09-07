@@ -28,6 +28,8 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { sourcererSelectors } from '../../../../common/store';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
+import { SelectedKip } from '../../../../common/store/sourcerer/selectors';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -45,11 +47,10 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   timelineId,
 }) => {
   const dispatch = useDispatch();
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
+  const getSelectedKip = useMemo(() => sourcererSelectors.getSelectedKipSelector(), []);
+  const { selectedPatterns } = useDeepEqualSelector<SelectedKip>((state) =>
+    getSelectedKip(state, SourcererScopeName.timeline)
   );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
 
   const handleClick = useCallback(() => {
     dispatch(
@@ -59,11 +60,11 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
         timelineId,
         params: {
           eventId,
-          indexName: existingIndexNames.join(','),
+          indexName: selectedPatterns.join(','),
         },
       })
     );
-  }, [dispatch, eventId, existingIndexNames, timelineId]);
+  }, [dispatch, eventId, selectedPatterns, timelineId]);
 
   return (
     <EuiButtonIcon
