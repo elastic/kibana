@@ -15,6 +15,8 @@ import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
 import { performance } from 'perf_hooks';
 import { identity, defaults, flow } from 'lodash';
+import { Observable, Subscription, timer } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import {
   Logger,
   SavedObjectsErrorHelpers,
@@ -248,6 +250,9 @@ export class TaskManagerRunner implements TaskRunner {
    * @returns {Promise<Result<SuccessfulRunResult, FailedRunResult>>}
    */
   public async run(): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    // if (this.instance.task.taskType.startsWith(`alerting:`)) {
+    //   console.log(`running task`);
+    // }
     if (!isReadyToRun(this.instance)) {
       throw new Error(
         `Running task ${this} failed as it ${
@@ -261,8 +266,26 @@ export class TaskManagerRunner implements TaskRunner {
       childOf: this.instance.task.traceparent,
     });
 
+    const heartbeat = new Observable((subscriber) => {
+      const subscription: Subscription = timer(0, 10000)
+        .pipe(
+          tap(() => console.log('heartbeat received')),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          catchError((err: Error, source$: Observable<any>) => {
+            // onError(err);
+            // return source, which will allow our observable to recover from this error and
+            // keep pulling values out of it
+            return source$;
+          })
+        )
+        .subscribe(subscriber);
+      return () => {
+        subscription.unsubscribe();
+      };
+    });
     const modifiedContext = await this.beforeRun({
       taskInstance: this.instance.task,
+      heartbeat,
     });
 
     const stopTaskTimer = startTaskTimer();

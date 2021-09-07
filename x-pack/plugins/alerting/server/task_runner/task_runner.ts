@@ -8,6 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
+import { Observable } from 'rxjs';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -90,6 +91,8 @@ export class TaskRunner<
     RecoveryActionGroupId
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private heartbeat: Observable<any> | undefined;
 
   constructor(
     alertType: NormalizedAlertType<
@@ -102,13 +105,16 @@ export class TaskRunner<
       RecoveryActionGroupId
     >,
     taskInstance: ConcreteTaskInstance,
-    context: TaskRunnerContext
+    context: TaskRunnerContext,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    heartbeat?: Observable<any>
   ) {
     this.context = context;
     this.logger = context.logger;
     this.alertType = alertType;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
+    this.heartbeat = heartbeat;
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -509,6 +515,8 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    const heartbeatSubscription = this.heartbeat ? this.heartbeat.subscribe() : null;
+
     const runDate = new Date();
     const runDateString = runDate.toISOString();
     this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDateString}`);
@@ -616,6 +624,9 @@ export class TaskRunner<
       );
     }
 
+    if (heartbeatSubscription) {
+      heartbeatSubscription.unsubscribe();
+    }
     return {
       state: map<AlertTaskState, ElasticsearchError, AlertTaskState>(
         state,

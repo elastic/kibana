@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { Observable } from 'rxjs';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { isErr, tryAsResult } from './lib/result_type';
 
@@ -35,6 +36,9 @@ export interface RunContext {
    * The document describing the task instance, its params, state, id, etc.
    */
   taskInstance: ConcreteTaskInstance;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  heartbeat?: Observable<any>;
 }
 
 /**
@@ -116,7 +120,7 @@ export const taskDefinitionSchema = schema.object(
      * the task will be re-attempted.
      */
     timeout: schema.string({
-      defaultValue: '5m',
+      defaultValue: '2m',
     }),
     /**
      * Up to how many times the task should retry when it fails to run. This will

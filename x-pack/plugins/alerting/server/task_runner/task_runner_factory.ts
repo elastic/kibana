@@ -77,7 +77,7 @@ export class TaskRunnerFactory {
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    { taskInstance }: RunContext
+    { taskInstance, heartbeat }: RunContext
   ) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
@@ -91,6 +91,6 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(alertType, taskInstance, this.taskRunnerContext!);
+    >(alertType, taskInstance, this.taskRunnerContext!, heartbeat);
   }
 }
