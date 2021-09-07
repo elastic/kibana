@@ -173,6 +173,12 @@ describe('Constants: Messages parseMessages()', () => {
         text:
           'A job configured with a datafeed with aggregations must set summary_count_field_name; use doc_count or suitable alternative.',
       },
+      {
+        id: 'datafeed_preview_failed',
+        status: 'error',
+        text:
+          'The datafeed preview failed. This may be due to an error in the job or datafeed configurations.',
+      },
     ]);
   });
 });
