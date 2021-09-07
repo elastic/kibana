@@ -18,8 +18,11 @@ import type {
   LocatorNavigationParams,
   LocatorGetUrlParams,
 } from './types';
+import { formatSearchParams, FormatSearchParamsOptions, RedirectOptions } from './redirect';
 
 export interface LocatorDependencies {
+  baseUrl?: string;
+
   /**
    * Navigate without reloading the page to a KibanaLocation.
    */
@@ -74,6 +77,18 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     const url = this.deps.getUrl(location, { absolute });
 
     return url;
+  }
+
+  public getRedirectUrl(params: P, options: FormatSearchParamsOptions): string {
+    const { baseUrl = '' } = this.deps;
+    const opts: RedirectOptions = {
+      id: this.definition.id,
+      version: '0.0.0',
+      params,
+    };
+    const search = formatSearchParams(opts, options).toString();
+
+    return baseUrl + '/app/r?' + search;
   }
 
   public async navigate(

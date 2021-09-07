@@ -9,7 +9,7 @@
 import { compressToBase64 } from 'lz-string';
 import { RedirectOptions } from './types';
 
-interface FormatSearchParamsOptions {
+export interface FormatSearchParamsOptions {
   lzCompress?: boolean;
 }
 

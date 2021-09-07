@@ -9,6 +9,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { DependencyList } from 'react';
 import { PersistableState } from 'src/plugins/kibana_utils/common';
+import type { FormatSearchParamsOptions } from './redirect';
 
 /**
  * URL locator registry.
@@ -66,6 +67,15 @@ export interface LocatorPublic<P extends SerializableRecord> extends Persistable
    * @param getUrlParams URL construction parameters.
    */
   getUrl(params: P, getUrlParams?: LocatorGetUrlParams): Promise<string>;
+
+  /**
+   * Returns a URL to the redirect endpoint, which will redirect the user to
+   * the final destination.
+   *
+   * @param params URL locator parameters.
+   * @param options URL serialization options.
+   */
+  getRedirectUrl(params: P, options: FormatSearchParamsOptions): string;
 
   /**
    * Navigate using the `core.application.navigateToApp()` method to a Kibana
