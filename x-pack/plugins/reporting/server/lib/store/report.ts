@@ -67,7 +67,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
 
     this.migration_version = MIGRATION_VERSION;
 
-    // see RequestHandler.enqueue_job for all the fields that are expected to exist when adding a report
+    // see RequestHandler.enqueueJob for all the fields that are expected to exist when adding a report
     if (opts.jobtype == null) {
       throw new Error(`jobtype is expected!`);
     }
