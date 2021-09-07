@@ -26,6 +26,7 @@ describe('Event correlation alerts', () => {
       experimentalFeatures: allowedExperimentalValues,
       lists: dependencies.lists,
       logger: dependencies.logger,
+      ignoreFields: [],
       mergeStrategy: 'allFields',
       ruleDataClient: dependencies.ruleDataClient,
       ruleDataService: dependencies.ruleDataService,

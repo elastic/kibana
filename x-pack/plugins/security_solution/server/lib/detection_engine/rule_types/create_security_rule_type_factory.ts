@@ -218,6 +218,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
 
         const wrapSequences = wrapSequencesFactory({
           logger,
+          ignoreFields,
           mergeStrategy,
           ruleSO,
           spaceId,

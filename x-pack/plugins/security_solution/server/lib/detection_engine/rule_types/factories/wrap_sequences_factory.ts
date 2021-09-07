@@ -15,11 +15,13 @@ import { WrappedRACAlert } from '../types';
 export const wrapSequencesFactory = ({
   logger,
   ruleSO,
+  ignoreFields,
   mergeStrategy,
   spaceId,
 }: {
   logger: Logger;
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
+  ignoreFields: ConfigType['alertIgnoreFields'];
   mergeStrategy: ConfigType['alertMergeStrategy'];
   spaceId: string | null | undefined;
 }): WrapSequences => (sequences, buildReasonMessage) =>

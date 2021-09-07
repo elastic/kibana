@@ -49,7 +49,7 @@ export const buildAlertGroupFromSequence = (
   let buildingBlocks: RACAlert[] = [];
   try {
     buildingBlocks = sequence.events.map((event) => ({
-      ...buildBulkBody(spaceId, ruleSO, event, mergeStrategy, false, buildReasonMessage),
+      ...buildBulkBody(spaceId, ruleSO, event, mergeStrategy, [], false, buildReasonMessage),
       [ALERT_BUILDING_BLOCK_TYPE]: 'default',
     }));
   } catch (error) {
