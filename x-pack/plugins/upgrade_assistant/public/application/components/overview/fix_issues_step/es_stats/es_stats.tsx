@@ -61,10 +61,10 @@ const i18nTexts = {
 };
 
 interface Props {
-  setCriticalIssuesCount: (count: number) => void;
+  setIsFixed: (isFixed: boolean) => void;
 }
 
-export const ESDeprecationStats: FunctionComponent<Props> = ({ setCriticalIssuesCount }) => {
+export const ESDeprecationStats: FunctionComponent<Props> = ({ setIsFixed }) => {
   const history = useHistory();
   const {
     services: { api },
@@ -84,7 +84,7 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ setCriticalIssues
 
   useEffect(() => {
     if (!isLoading && !error) {
-      setCriticalIssuesCount(criticalDeprecations.length);
+      setIsFixed(criticalDeprecations.length === 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [criticalDeprecations, isLoading, error]);

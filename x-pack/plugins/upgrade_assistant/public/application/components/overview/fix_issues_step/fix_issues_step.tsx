@@ -27,35 +27,23 @@ interface Props extends OverviewStepsProps {
   nextMajor: number;
 }
 
-const initialIssuesMap = {
-  kibana: null,
-  es: null,
-};
-
 const FixIssuesStep: FunctionComponent<OverviewStepsProps> = ({ setIsComplete }) => {
-  const [criticalIssuesCount, setCriticalIssuesCount] = useState(initialIssuesMap);
-  const setCriticalIssuesCountFor = (key: keyof typeof initialIssuesMap, count: number) => {
-    setCriticalIssuesCount({
-      ...criticalIssuesCount,
-      [key]: count,
-    });
-  };
+  const [isEsFixed, setIsEsFixed] = useState(false);
+  const [isKibanaFixed, setIsKibanaFixed] = useState(false);
 
   useEffect(() => {
-    setIsComplete(criticalIssuesCount.es === 0 && criticalIssuesCount.kibana === 0);
+    setIsComplete(isEsFixed && isKibanaFixed);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [criticalIssuesCount]);
+  }, [isEsFixed, isKibanaFixed]);
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <ESDeprecationStats setCriticalIssuesCount={setCriticalIssuesCountFor.bind(null, 'es')} />
+        <ESDeprecationStats setIsFixed={setIsEsFixed} />
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <KibanaDeprecationStats
-          setCriticalIssuesCount={setCriticalIssuesCountFor.bind(null, 'kibana')}
-        />
+        <KibanaDeprecationStats setIsFixed={setIsKibanaFixed} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -69,10 +69,10 @@ const i18nTexts = {
 };
 
 interface Props {
-  setCriticalIssuesCount: (count: number) => void;
+  setIsFixed: (isFixed: boolean) => void;
 }
 
-export const KibanaDeprecationStats: FunctionComponent<Props> = ({ setCriticalIssuesCount }) => {
+export const KibanaDeprecationStats: FunctionComponent<Props> = ({ setIsFixed }) => {
   const history = useHistory();
   const {
     services: {
@@ -110,7 +110,7 @@ export const KibanaDeprecationStats: FunctionComponent<Props> = ({ setCriticalIs
 
   useEffect(() => {
     if (!isLoading && !error) {
-      setCriticalIssuesCount(criticalDeprecationsCount);
+      setIsFixed(criticalDeprecationsCount === 0);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
