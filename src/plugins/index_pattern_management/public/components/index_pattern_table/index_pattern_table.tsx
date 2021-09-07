@@ -135,7 +135,7 @@ export const IndexPatternTable = ({
     >
       <FormattedMessage
         id="indexPatternManagement.indexPatternTable.createBtn"
-        defaultMessage="Create data view"
+        defaultMessage="Create index pattern"
       />
     </EuiButton>
   ) : (

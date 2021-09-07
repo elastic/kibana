@@ -611,7 +611,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           >
             <EuiFlexItem grow={true} className="lnsInnerIndexPatternDataPanel__switcher">
               <ChangeIndexPattern
-                data-test-subj="sourcerer-combo-box"
+                data-test-subj="indexPattern-switcher"
                 trigger={{
                   label: currentIndexPattern.title,
                   title: currentIndexPattern.title,
