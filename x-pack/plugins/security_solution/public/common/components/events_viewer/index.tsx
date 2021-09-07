@@ -116,6 +116,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     docValueFields,
     indexPattern,
     selectedPatterns,
+    selectedKipId,
     loading: isLoadingIndexPattern,
   } = useSourcererScope(scopeId);
   const { globalFullScreen } = useGlobalFullScreen();
@@ -127,14 +128,15 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   useEffect(() => {
     if (createTimeline != null) {
       createTimeline({
-        id,
         columns,
+        dataViewId: selectedKipId,
         defaultColumns,
         excludedRowRendererIds,
+        id,
         indexNames: selectedPatterns,
-        sort,
         itemsPerPage,
         showCheckboxes,
+        sort,
       });
     }
     return () => {

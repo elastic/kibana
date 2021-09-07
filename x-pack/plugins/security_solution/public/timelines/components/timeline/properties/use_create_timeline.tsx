@@ -53,11 +53,12 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
       );
       dispatch(
         timelineActions.createTimeline({
-          id,
           columns: defaultHeaders,
+          dataViewId: kipId,
+          id,
+          indexNames: selectedPatterns,
           show,
           timelineType,
-          indexNames: selectedPatterns,
         })
       );
       dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));

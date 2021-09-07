@@ -90,6 +90,7 @@ describe('Epic Timeline', () => {
             ],
           },
         ],
+        dataViewId: '',
         deletedEventIds: [],
         description: '',
         documentType: '',
@@ -240,6 +241,7 @@ describe('Epic Timeline', () => {
             },
           },
         ],
+        dataViewId: '',
         dateRange: {
           end: '2019-10-31T21:06:27.644Z',
           start: '2019-10-30T21:06:27.644Z',

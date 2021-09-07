@@ -398,7 +398,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     ruleNote,
   });
   if (!isEmpty(timeline.indexNames)) {
-    console.log('why do we need eventType in redux?', timeline.eventType);
+    console.log('why do we need eventType in redux?', timeline);
     dispatch(
       sourcererActions.initTimelineIndexPatterns({
         id: SourcererScopeName.timeline,

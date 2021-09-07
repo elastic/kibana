@@ -207,7 +207,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
               columns: defaultHeaders,
-              kipId,
+              dataViewId: kipId,
               indexNames: selectedPatterns,
               show: false,
             })

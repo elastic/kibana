@@ -26,6 +26,7 @@ import {
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_INDEX_PATTERN,
+  DEFAULT_INDEX_PATTERN_ID,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
 import { uebaModel } from '../../ueba/store';
@@ -241,6 +242,7 @@ export const mockGlobalState: State = {
       test: {
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.notes,
+        dataViewId: DEFAULT_INDEX_PATTERN_ID,
         deletedEventIds: [],
         documentType: '',
         queryFields: [],

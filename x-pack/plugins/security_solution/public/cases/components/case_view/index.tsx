@@ -146,6 +146,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
       timelineActions.createTimeline({
         id: TimelineId.casePage,
         columns: [],
+        dataViewId: '',
         indexNames: [],
         expandedDetail: {},
         show: false,
