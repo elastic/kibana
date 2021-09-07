@@ -18,6 +18,7 @@ export const createEqlAlertType = (createOptions: CreateRuleOptions) => {
     experimentalFeatures,
     lists,
     logger,
+    ignoreFields,
     mergeStrategy,
     ruleDataClient,
     version,
@@ -26,6 +27,7 @@ export const createEqlAlertType = (createOptions: CreateRuleOptions) => {
   const createSecurityRuleType = createSecurityRuleTypeFactory({
     lists,
     logger,
+    ignoreFields,
     mergeStrategy,
     ruleDataClient,
     ruleDataService,
