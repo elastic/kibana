@@ -8,11 +8,11 @@
 import React, { Suspense, useEffect, useState } from 'react';
 
 import { EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
-import { CoreStart } from 'kibana/public';
+import type { CoreStart } from 'kibana/public';
 import type { SaveModalContainerProps } from '../save_modal_container';
-import type { LensAttributeService } from '../../lens_attribute_service';
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { LensAppServices } from '../types';
+
 const SaveModal = React.lazy(() => import('../save_modal_container'));
 
 function LoadingSpinnerWithOverlay() {
@@ -33,16 +33,20 @@ const LensSavedModalLazy = (props: SaveModalContainerProps) => {
 
 export function getSaveModalComponent(
   coreStart: CoreStart,
-  startDependencies: LensPluginStartDependencies,
-  attributeService: () => Promise<LensAttributeService>
+  startDependencies: LensPluginStartDependencies
 ) {
   return (props: Omit<SaveModalContainerProps, 'lensServices'>) => {
     const [lensServices, setLensServices] = useState<LensAppServices>();
 
     useEffect(() => {
       async function loadLensService() {
-        const { getLensServices } = await import('../../async_services');
-        const lensServicesT = await getLensServices(coreStart, startDependencies, attributeService);
+        const { getLensServices, getLensAttributeService } = await import('../../async_services');
+
+        const lensServicesT = await getLensServices(
+          coreStart,
+          startDependencies,
+          getLensAttributeService(coreStart, startDependencies)
+        );
 
         setLensServices(lensServicesT);
       }
