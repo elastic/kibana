@@ -140,7 +140,7 @@ before {kib} starts.
 === Monitoring connectors
 
 The <<task-manager-health-monitoring,Task Manager health API>> is useful to understand the performance of all tasks in your environment.
-However, if connectors fail to execute for any reason, they will report as successful to Task Manager. This means the failure stats will not
+However, if connectors fail to execute, they will report as successful to Task Manager. The failure stats will not
 accurately depict the performance of connectors.
 
 To get a better sense of connector failures, please refer to the <<event-log-index,Event log index>>
