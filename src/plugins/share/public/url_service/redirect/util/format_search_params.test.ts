@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { decompressFromBase64 } from 'lz-string';
 import { formatSearchParams } from './format_search_params';
 import { parseSearchParams } from './parse_search_params';
 
@@ -37,6 +38,26 @@ test('can format and then parse redirect options', () => {
     },
   };
   const formatted = formatSearchParams(options);
+  const parsed = parseSearchParams(formatted.toString());
+
+  expect(parsed).toEqual(options);
+});
+
+test('compresses params using lz-string when { lzCompress: true } provided', () => {
+  const options = {
+    id: 'LOCATOR_ID',
+    version: '7.21.3',
+    params: {
+      dashboardId: '123',
+      mode: 'edit',
+    },
+  };
+  const formatted = formatSearchParams(options, { lzCompress: true });
+  const search = new URLSearchParams(formatted);
+  const paramsJson = decompressFromBase64(search.get('lz')!)!;
+
+  expect(JSON.parse(paramsJson)).toEqual(options.params);
+
   const parsed = parseSearchParams(formatted.toString());
 
   expect(parsed).toEqual(options);

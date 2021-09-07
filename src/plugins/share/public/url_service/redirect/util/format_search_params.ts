@@ -6,14 +6,30 @@
  * Side Public License, v 1.
  */
 
+import { compressToBase64 } from 'lz-string';
 import { RedirectOptions } from '../redirect_manager';
 
-export function formatSearchParams(opts: RedirectOptions): URLSearchParams {
+interface FormatSearchParamsOptions {
+  lzCompress?: boolean;
+}
+
+export function formatSearchParams(
+  opts: RedirectOptions,
+  { lzCompress }: FormatSearchParamsOptions = {}
+): URLSearchParams {
   const searchParams = new URLSearchParams();
 
   searchParams.set('l', opts.id);
   searchParams.set('v', opts.version);
-  searchParams.set('p', JSON.stringify(opts.params));
+
+  const json = JSON.stringify(opts.params);
+
+  if (lzCompress) {
+    const compressed = compressToBase64(json);
+    searchParams.set('lz', compressed);
+  } else {
+    searchParams.set('p', JSON.stringify(opts.params));
+  }
 
   return searchParams;
 }
