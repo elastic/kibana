@@ -38,7 +38,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import * as columnActions from '../apps/main/components/doc_table/actions/columns';
-import { handleSourceColumnState } from '../angular/helpers';
+import { handleSourceColumnState } from '../helpers/state_helpers';
 import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapper';
@@ -195,9 +195,11 @@ export class SavedSearchEmbeddable
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
-      this.updateOutput({ loading: false, error });
+      if (!this.destroyed) {
+        this.updateOutput({ loading: false, error });
 
-      this.searchProps!.isLoading = false;
+        this.searchProps!.isLoading = false;
+      }
     }
   };
 

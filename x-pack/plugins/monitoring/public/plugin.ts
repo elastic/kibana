@@ -14,6 +14,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { Legacy } from './legacy_shims';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import {
   FeatureCatalogueCategory,
@@ -35,6 +36,7 @@ import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_reject
 import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 import { createCCRReadExceptionsAlertType } from './alerts/ccr_read_exceptions_alert';
 import { createLargeShardSizeAlertType } from './alerts/large_shard_size_alert';
+import { setConfig } from './external_config';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -109,10 +111,25 @@ export class MonitoringPlugin
           appMountParameters: params,
         };
 
+        Legacy.init({
+          core: deps.core,
+          element: deps.element,
+          data: deps.data,
+          navigation: deps.navigation,
+          isCloud: deps.isCloud,
+          pluginInitializerContext: deps.pluginInitializerContext,
+          externalConfig: deps.externalConfig,
+          kibanaLegacy: deps.kibanaLegacy,
+          triggersActionsUi: deps.triggersActionsUi,
+          usageCollection: deps.usageCollection,
+          appMountParameters: deps.appMountParameters,
+        });
+
         const config = Object.fromEntries(externalConfig);
+        setConfig(config);
         if (config.renderReactApp) {
           const { renderApp } = await import('./application');
-          return renderApp(coreStart, pluginsStart, params);
+          return renderApp(coreStart, pluginsStart, params, config);
         } else {
           const monitoringApp = new AngularApp(deps);
           const removeHistoryListener = params.history.listen((location) => {

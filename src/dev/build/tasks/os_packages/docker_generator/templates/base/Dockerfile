@@ -101,6 +101,7 @@ COPY --from=builder --chown=0:0 /opt /opt
 WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
 
+{{! Please notify @elastic/kibana-security if you want to remove or change this environment variable. }}
 ENV ELASTIC_CONTAINER true
 ENV PATH=/usr/share/kibana/bin:$PATH
 

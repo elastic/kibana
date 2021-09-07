@@ -13,7 +13,7 @@ import { parseBfetchResponse } from '../../common/utils/parse_b_fetch';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const retry = getService('retry');
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const getRequestBody = () => {
     const partialSearchRequest: PartialSearchRequest = {
@@ -124,7 +124,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when('on trial license with data', { config: 'trial', archives: ['8.0.0'] }, () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/109703
+  registry.when.skip('on trial license with data', { config: 'trial', archives: ['8.0.0'] }, () => {
     it('queries the search strategy and returns results', async () => {
       const intialResponse = await supertest
         .post(`/internal/bsearch`)

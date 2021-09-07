@@ -18,6 +18,7 @@ function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
   return kbnTestServer.createRoot({
     migrations: { skip: true }, // otherwise stuck in polling ES
     plugins: { initialize: false },
+    elasticsearch: { skipStartupConnectionCheck: true },
     logging: {
       // legacy platform config
       silent: false,

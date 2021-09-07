@@ -328,9 +328,11 @@ export class ManageSpacePage extends Component<Props, State> {
             ...space,
             avatarType: space.imageUrl ? 'image' : 'initials',
             initials: space.initials || getSpaceInitials(space),
+            color: space.color || getSpaceColor(space),
             customIdentifier: false,
-            customAvatarInitials: getSpaceInitials({ name: space.name }) !== space.initials,
-            customAvatarColor: getSpaceColor({ name: space.name }) !== space.color,
+            customAvatarInitials:
+              !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
+            customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
           },
           features,
           originalSpace: space,
