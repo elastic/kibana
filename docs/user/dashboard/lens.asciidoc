@@ -186,7 +186,39 @@ image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels
 [[filter-the-data]]
 ==== Filter the data
 
-Apply filters to visualizations directly from the values in the legend. Only *Bar*, *Line and area*, and *Proportion* visualizations support legend filters.
+You can use the <<semi-structured-search, KQL query bar>> to focus on a known set of data for the entire visualization, or use the filter options from the layer pane or legend.
+
+[float]
+[[filter-with-the-function]]
+===== Apply multiple KQL filters
+
+With the *Filters* function, you can apply more than one KQL filter, and apply a KQL filter to a single layer so you can visualize filtered and unfiltered data at the same time.
+
+. In the layer pane, click a field.
+
+. Click the *Filters* function.
+
+. Click *Add a filter*, then enter the KQL filter you want to apply.
++
+To try the *Filters* function on your own, refer to <<custom-ranges,Compare a subset of documents to all documents>>.
+
+[float]
+[[filter-with-the-advanced-option]]
+===== Apply a single KQL filter
+
+With the *Filter by* advanced option, you can assign a color to each filter group in *Bar* and *Line and area* visualizations, and build complex tables. For example, to display failure rate and the overall data.
+
+. In the layer pane, click a field.
+
+. Click *Add advanced options*, then select *Filter by*.
+
+. Enter the KQL filter you want to apply.
+
+[float]
+[[filter-with-legend-filters]]
+===== Apply legend filters
+
+Legend filters allow you to apply filters directly from the values in the legend. Only *Bar*, *Line and area*, and *Proportion* visualizations support legend filters. 
 
 . In the legend, click the field.
 
@@ -197,30 +229,38 @@ Apply filters to visualizations directly from the values in the legend. Only *Ba
 * *Filter out value* &mdash; Applies a filter that removes the field data from the visualization.
 
 [float]
+[[save-the-lens-panel]]
+===== Save and add the panel
+
+Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
+
+To save the panel to the *Visualize Library*:
+
+. Click *Save to library*.
+
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+
+. Make sure that *Add to Dashboard after saving* is selected.
+
+. Click *Save and return*.
+
+To add the panel without saving:
+
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Customize panel* window, select *Show panel title*.
+
+.. Enter the *Panel title*, then click *Save*.
+
+[float]
 [[lens-faq]]
-==== Frequently asked questions
+=== Frequently asked questions
 
 For answers to common *Lens* questions, review the following. 
-
-[discrete]
-[[kql]]
-.*When should I use KQL filters, the Filters function, or the Filter by option?*
-[%collapsible]
-====
-Use the <<semi-structured-search, KQL *Search*>> field to focus on a known set of data for the entire visualization. You can combine KQL filters with other filters using AND logic.
-
-Use the *Filters* function to apply:
-
-* More than one KQL filter.
-
-* The KQL filter to a single layer, which allows you to visualize filtered and unfiltered data.
-
-Use the *Filter by* advanced option to:
-
-* Assign a custom color to each filter group in a bar, line, or area chart.
-
-* Build a complex table. For example, to display the failure rate and overall data.
-====
 
 [discrete]
 [[when-should-i-normalize-the-data-by-unit-or-use-a-custom-interval]]
@@ -287,7 +327,7 @@ Use formulas to compare multiple {es} aggregations that can be filtered or shift
 
 [discrete]
 [[is-it-possible-to-have-more-than-one-Y-axis-scale]]
-.*Can I add more than one y-axis scale to a visualization?*
+.*Can I add more than one y-axis scale?*
 [%collapsible]
 ====
 For each y-axis, you can select *Left* and *Right*, and configure a different scale.
@@ -327,12 +367,12 @@ refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 .*Why is my field missing from the fields list?*
 [%collapsible]
 ====
-Fields do not appear in the *Available fields* in the following scenarios:
+The following field types do not appear in the *Available fields* list:
 
-* The field is a full-text field.
-* The field is a `geo_point` field
-* The field is a `flattened` field.
-* The field is a `object` field.
+* Full-text
+* geo_point
+* flattened
+* object
 
 Verify if the field appears in the *Empty fields* list. *Lens* uses heuristics to determine if the fields contain values. For sparse data sets, the heuristics are less precise.
 ====

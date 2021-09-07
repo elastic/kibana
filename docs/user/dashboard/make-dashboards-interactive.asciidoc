@@ -1,4 +1,4 @@
-[[role="xpack"]]
+[role="xpack"]
 [[drilldowns]]
 == Make dashboards interactive
 
@@ -42,18 +42,53 @@ min and max aggregation. For example, use the range slider when you want to filt
 [role="screenshot"]
 image::images/dashboard-controls.png[]
 
+To create *Controls* panels:
+
 . On the dashboard, click *All types*, then select *Controls*.
 
-. Click *Options*, then configure the following options:
+. Select the control panel type from the dropdown, then click *Add*.
 
-* *Update {kib} filters on each change* &mdash; When selected, all interactive inputs create filters that refresh the dashboard. When unselected,
- {kib} filters are created only when you click *Apply changes*.
+. Enter the *Control Label*, then select the *{Data-Source}* and *Field*.
+
+. If you are adding a *Range slider*, enter the *Step Size* and *Decimal Places*.
+
+. Click *Options*, then configure the following:
+
+* *Update {kib} filters on each change* &mdash; When selected, all interactive inputs create filters that refresh the dashboard. When unselected, {kib} filters are created only when you click *Apply changes*.
 
 * *Use time filter* &mdash; When selected, the aggregations that generate the options list and time range are connected to the <<set-time-filter,time filter>>.
 
 * *Pin filters for all applications* &mdash; When selected, all filters created by interacting with the inputs are automatically pinned.
 
-. Click *Update*
+. Click *Update*.
+
+[float]
+[[save-the-controls-panel]]
+==== Save and add the panel
+
+Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
+
+To save the panel to the *Visualize Library*:
+
+. Click *Save to library*.
+
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+
+. Make sure that *Add to Dashboard after saving* is selected.
+
+. Click *Save and return*.
+
+To add the panel without saving:
+
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Customize panel* window, select *Show panel title*.
+
+.. Enter the *Panel title*, then click *Save*.
 
 [float]
 [[explore-the-underlying-documents]]
