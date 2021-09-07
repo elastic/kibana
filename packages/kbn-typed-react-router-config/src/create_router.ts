@@ -31,16 +31,14 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
 
   const reactRouterConfigs = routes.map((route) => toReactRouterConfigRoute(route));
 
-  function toReactRouterConfigRoute(route: Route, prefix: string = ''): ReactRouterConfig {
-    const path = `${prefix}${route.path}`.replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
+  function toReactRouterConfigRoute(route: Route): ReactRouterConfig {
     const reactRouterConfig: ReactRouterConfig = {
       component: () => route.element,
       routes:
-        (route.children as Route[] | undefined)?.map((child) =>
-          toReactRouterConfigRoute(child, path)
-        ) ?? [],
+        (route.children as Route[] | undefined)?.map((child) => toReactRouterConfigRoute(child)) ??
+        [],
       exact: !route.children?.length,
-      path,
+      path: route.path,
     };
 
     routesByReactRouterConfig.set(reactRouterConfig, route);

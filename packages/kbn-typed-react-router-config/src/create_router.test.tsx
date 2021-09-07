@@ -43,17 +43,23 @@ describe('createRouter', () => {
               }),
             },
             {
-              path: '/services/:serviceName',
+              path: '/services',
               element: <></>,
-              params: t.type({
-                path: t.type({
-                  serviceName: t.string,
-                }),
-                query: t.type({
-                  transactionType: t.string,
-                  environment: t.string,
-                }),
-              }),
+              children: [
+                {
+                  element: <></>,
+                  path: '/services/:serviceName',
+                  params: t.type({
+                    path: t.type({
+                      serviceName: t.string,
+                    }),
+                    query: t.type({
+                      transactionType: t.string,
+                      environment: t.string,
+                    }),
+                  }),
+                },
+              ],
             },
             {
               path: '/traces',

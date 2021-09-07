@@ -13,7 +13,97 @@ import { RequiredKeys, ValuesType } from 'utility-types';
 // import { unconst } from '../unconst';
 import { NormalizePath } from './utils';
 
-export type PathsOf<TRoutes extends Route[]> = keyof MapRoutes<TRoutes> & string;
+type PathsOfRoute<TRoute extends Route> =
+  | TRoute['path']
+  | (TRoute extends { children: Route[] }
+      ? AppendPath<TRoute['path'], '/*'> | PathsOf<TRoute['children']>
+      : never);
+
+export type PathsOf<TRoutes extends Route[]> = TRoutes extends []
+  ? never
+  : TRoutes extends [Route]
+  ? PathsOfRoute<TRoutes[0]>
+  : TRoutes extends [Route, Route]
+  ? PathsOfRoute<TRoutes[0]> | PathsOfRoute<TRoutes[1]>
+  : TRoutes extends [Route, Route, Route]
+  ? PathsOfRoute<TRoutes[0]> | PathsOfRoute<TRoutes[1]> | PathsOfRoute<TRoutes[2]>
+  : TRoutes extends [Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+  : TRoutes extends [Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+      | PathsOfRoute<TRoutes[6]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+      | PathsOfRoute<TRoutes[6]>
+      | PathsOfRoute<TRoutes[7]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+      | PathsOfRoute<TRoutes[6]>
+      | PathsOfRoute<TRoutes[7]>
+      | PathsOfRoute<TRoutes[8]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+      | PathsOfRoute<TRoutes[6]>
+      | PathsOfRoute<TRoutes[7]>
+      | PathsOfRoute<TRoutes[8]>
+      | PathsOfRoute<TRoutes[9]>
+  : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route, Route, Route]
+  ?
+      | PathsOfRoute<TRoutes[0]>
+      | PathsOfRoute<TRoutes[1]>
+      | PathsOfRoute<TRoutes[2]>
+      | PathsOfRoute<TRoutes[3]>
+      | PathsOfRoute<TRoutes[4]>
+      | PathsOfRoute<TRoutes[5]>
+      | PathsOfRoute<TRoutes[6]>
+      | PathsOfRoute<TRoutes[7]>
+      | PathsOfRoute<TRoutes[8]>
+      | PathsOfRoute<TRoutes[9]>
+      | PathsOfRoute<TRoutes[10]>
+  : string;
 
 export interface RouteMatch<TRoute extends Route = Route> {
   route: TRoute;
@@ -279,20 +369,11 @@ type MapRoutes<
 //         element,
 //         children: [
 //           {
-//             path: '/agent-configuration',
+//             path: '/settings/agent-configuration',
 //             element,
 //           },
 //           {
-//             path: '/agent-configuration/create',
-//             element,
-//             params: t.partial({
-//               query: t.partial({
-//                 pageStep: t.string,
-//               }),
-//             }),
-//           },
-//           {
-//             path: '/agent-configuration/edit',
+//             path: '/settings/agent-configuration/create',
 //             element,
 //             params: t.partial({
 //               query: t.partial({
@@ -301,23 +382,32 @@ type MapRoutes<
 //             }),
 //           },
 //           {
-//             path: '/apm-indices',
+//             path: '/settings/agent-configuration/edit',
+//             element,
+//             params: t.partial({
+//               query: t.partial({
+//                 pageStep: t.string,
+//               }),
+//             }),
+//           },
+//           {
+//             path: '/settings/apm-indices',
 //             element,
 //           },
 //           {
-//             path: '/customize-ui',
+//             path: '/settings/customize-ui',
 //             element,
 //           },
 //           {
-//             path: '/schema',
+//             path: '/settings/schema',
 //             element,
 //           },
 //           {
-//             path: '/anomaly-detection',
+//             path: '/settings/anomaly-detection',
 //             element,
 //           },
 //           {
-//             path: '/',
+//             path: '/settings',
 //             element,
 //           },
 //         ],
@@ -346,15 +436,15 @@ type MapRoutes<
 //         ]),
 //         children: [
 //           {
-//             path: '/overview',
+//             path: '/services/:serviceName/overview',
 //             element,
 //           },
 //           {
-//             path: '/transactions',
+//             path: '/services/:serviceName/transactions',
 //             element,
 //           },
 //           {
-//             path: '/errors',
+//             path: '/services/:serviceName/errors',
 //             element,
 //             children: [
 //               {
@@ -367,7 +457,7 @@ type MapRoutes<
 //                 }),
 //               },
 //               {
-//                 path: '/',
+//                 path: '/services/:serviceName',
 //                 element,
 //                 params: t.partial({
 //                   query: t.partial({
@@ -381,19 +471,19 @@ type MapRoutes<
 //             ],
 //           },
 //           {
-//             path: '/foo',
+//             path: '/services/:serviceName/foo',
 //             element,
 //           },
 //           {
-//             path: '/bar',
+//             path: '/services/:serviceName/bar',
 //             element,
 //           },
 //           {
-//             path: '/baz',
+//             path: '/services/:serviceName/baz',
 //             element,
 //           },
 //           {
-//             path: '/',
+//             path: '/services/:serviceName',
 //             element,
 //           },
 //         ],
@@ -436,6 +526,7 @@ type MapRoutes<
 
 // type Bar = ValuesType<Match<Routes, '/*'>>['route']['path'];
 // type Foo = OutputOf<Routes, '/*'>;
+// type Baz = OutputOf<Routes, '/services/:serviceName'>;
 
 // const { path }: Foo = {} as any;
 
