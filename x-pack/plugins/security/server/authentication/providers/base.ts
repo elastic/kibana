@@ -26,6 +26,7 @@ import type { Tokens } from '../tokens';
  */
 export interface AuthenticationProviderOptions {
   name: string;
+  getServerBaseURL: () => string;
   basePath: HttpServiceSetup['basePath'];
   getRequestOriginalURL: (
     request: KibanaRequest,

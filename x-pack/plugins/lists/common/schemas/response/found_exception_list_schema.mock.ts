@@ -12,6 +12,6 @@ import { getExceptionListSchemaMock } from './exception_list_schema.mock';
 export const getFoundExceptionListSchemaMock = (): FoundExceptionListSchema => ({
   data: [getExceptionListSchemaMock()],
   page: 1,
-  per_page: 1,
+  per_page: 20,
   total: 1,
 });

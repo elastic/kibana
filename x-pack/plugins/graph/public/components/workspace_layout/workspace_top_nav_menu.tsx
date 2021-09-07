@@ -39,8 +39,6 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const store = useStore();
   const location = useLocation();
   const history = useHistory();
-
-  // register things for legacy angular UI
   const allSavingDisabled = props.graphSavePolicy === 'none';
 
   // ===== Menubar configuration =========

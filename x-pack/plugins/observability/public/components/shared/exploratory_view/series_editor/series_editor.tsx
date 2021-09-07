@@ -336,7 +336,6 @@ export const SeriesEditor = React.memo(function () {
 });
 
 const Wrapper = euiStyled.div`
-  max-height: 50vh;
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
     width: ${({ theme }) => theme.eui.euiScrollBar};
