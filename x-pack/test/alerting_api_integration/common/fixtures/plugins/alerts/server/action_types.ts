@@ -38,6 +38,7 @@ export function defineActionTypes(
   actions.registerType(getFailingActionType());
   actions.registerType(getRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
+  actions.registerType(getExcludedActionType());
 }
 
 function getIndexRecordActionType() {
@@ -265,6 +266,18 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
         actionId,
         status: 'ok',
       };
+    },
+  };
+  return result;
+}
+
+function getExcludedActionType() {
+  const result: ActionType<{}, {}, {}, void> = {
+    id: 'test.excluded',
+    name: 'Test: Excluded',
+    minimumLicenseRequired: 'gold',
+    async executor({ actionId }) {
+      return { status: 'ok', actionId };
     },
   };
   return result;
