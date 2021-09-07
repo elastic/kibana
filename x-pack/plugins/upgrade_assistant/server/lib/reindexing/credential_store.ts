@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
+import { SecurityPluginStart } from '../../../../security/server';
 import { ReindexSavedObject } from '../../../common/types';
 
 export type Credential = Record<string, any>;
@@ -20,7 +21,7 @@ export type Credential = Record<string, any>;
  */
 export interface CredentialStore {
   get(reindexOp: ReindexSavedObject): Credential | undefined;
-  set(reindexOp: ReindexSavedObject, credential: Credential): void;
+  set(reindexOp: ReindexSavedObject, security: SecurityPluginStart, credential: Credential): void;
   clear(): void;
 }
 
@@ -38,7 +39,12 @@ export const credentialStoreFactory = (): CredentialStore => {
       return credMap.get(getHash(reindexOp));
     },
 
-    set(reindexOp: ReindexSavedObject, credential: Credential) {
+    async set(
+      reindexOp: ReindexSavedObject,
+      security: SecurityPluginStart,
+      credential: Credential
+    ) {
+      // const areApiKeysEnabled = (await security?.authc.apiKeys.areAPIKeysEnabled()) ?? false;
       credMap.set(getHash(reindexOp), credential);
     },
 

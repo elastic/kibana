@@ -83,7 +83,7 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
 };
 
 export function registerReindexIndicesRoutes(
-  { credentialStore, router, licensing, log }: RouteDependencies,
+  { credentialStore, router, licensing, log, getSecurityPlugin }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
   const BASE_PATH = `${API_BASE_PATH}/reindex`;
@@ -119,6 +119,7 @@ export function registerReindexIndicesRoutes(
             licensing,
             headers: request.headers,
             credentialStore,
+            security: getSecurityPlugin(),
           });
 
           // Kick the worker on this node to immediately pickup the new reindex operation.
@@ -207,6 +208,7 @@ export function registerReindexIndicesRoutes(
               reindexOptions: {
                 enqueue: true,
               },
+              security: getSecurityPlugin(),
             });
             results.enqueued.push(result);
           } catch (e) {

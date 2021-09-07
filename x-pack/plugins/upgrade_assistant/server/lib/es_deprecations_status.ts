@@ -66,7 +66,22 @@ export async function getESUpgradeStatus(
 
   return {
     totalCriticalDeprecations: criticalWarnings.length,
-    deprecations: combinedDeprecations,
+    // TODO temp for testing purposes
+    deprecations: [
+      {
+        details: 'This index was created using version: 6.8.16',
+        message: 'Index created before 7.0',
+        url:
+          'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
+        index: 'foobar',
+        type: 'index_settings',
+        isCritical: true,
+        correctiveAction: {
+          type: 'reindex',
+        },
+        resolveDuringUpgrade: false,
+      },
+    ],
   };
 }
 

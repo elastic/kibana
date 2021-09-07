@@ -6,7 +6,6 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-
 import {
   Plugin,
   CoreSetup,
@@ -16,6 +15,7 @@ import {
   SavedObjectsClient,
   SavedObjectsServiceStart,
 } from '../../../../src/core/server';
+import { SecurityPluginStart } from '../../security/server';
 import { InfraPluginSetup } from '../../infra/server';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -44,6 +44,10 @@ interface PluginsSetup {
   infra: InfraPluginSetup;
 }
 
+interface PluginsStart {
+  security: SecurityPluginStart;
+}
+
 export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly credentialStore: CredentialStore;
@@ -54,6 +58,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   // Properties set at start
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
+  private securityPluginStart?: SecurityPluginStart;
   private worker?: ReindexWorker;
 
   constructor({ logger, env }: PluginInitializerContext) {
@@ -120,6 +125,12 @@ export class UpgradeAssistantServerPlugin implements Plugin {
         }
         return this.savedObjectsServiceStart;
       },
+      getSecurityPlugin: () => {
+        if (!this.securityPluginStart) {
+          throw new Error('Security start plugin not available');
+        }
+        return this.securityPluginStart;
+      },
       lib: {
         handleEsError,
       },
@@ -141,8 +152,9 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     }
   }
 
-  start({ savedObjects, elasticsearch }: CoreStart) {
+  start({ savedObjects, elasticsearch }: CoreStart, { security }: PluginsStart) {
     this.savedObjectsServiceStart = savedObjects;
+    this.securityPluginStart = security;
 
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
     // for a given reindex. We cannot currently store these in an the .kibana index b/c we do not

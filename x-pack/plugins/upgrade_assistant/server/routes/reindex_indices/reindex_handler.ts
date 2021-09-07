@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
+import { SecurityPluginStart } from '../../../../security/server';
 
 import { ReindexOperation, ReindexStatus } from '../../../common/types';
 
@@ -28,6 +29,7 @@ interface ReindexHandlerArgs {
   reindexOptions?: {
     enqueue?: boolean;
   };
+  security: SecurityPluginStart;
 }
 
 export const reindexHandler = async ({
@@ -39,6 +41,7 @@ export const reindexHandler = async ({
   log,
   savedObjects,
   reindexOptions,
+  security,
 }: ReindexHandlerArgs): Promise<ReindexOperation> => {
   const callAsCurrentUser = dataClient.asCurrentUser;
   const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser);
@@ -62,7 +65,7 @@ export const reindexHandler = async ({
       : await reindexService.createReindexOperation(indexName, reindexOptions);
 
   // Add users credentials for the worker to use
-  credentialStore.set(reindexOp, headers);
+  await credentialStore.set(reindexOp, security, headers);
 
   return reindexOp.attributes;
 };
