@@ -25,7 +25,7 @@ export function GlobalTimeCheckbox({ applyGlobalTime, label, setApplyGlobalTime 
         position="top"
         content={i18n.translate('xpack.maps.filterEditor.applyGlobalTimeHelp', {
           defaultMessage:
-            'Whether the time selection from the global query bar should be applied to the layer.',
+            'When enabled, time filter from global search bar is applied to this layer"',
         })}
       >
         <EuiSwitch

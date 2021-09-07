@@ -25,8 +25,7 @@ export function GlobalFilterCheckbox({ applyGlobalQuery, label, setApplyGlobalQu
       <EuiToolTip
         position="top"
         content={i18n.translate('xpack.maps.filterEditor.applyGlobalFilterHelp', {
-          defaultMessage:
-            'Whether the query and filters from the global query bar should be applied to the layer.',
+          defaultMessage: 'When enabled, the query the global search bar is applied to this layer"',
         })}
       >
         <EuiSwitch

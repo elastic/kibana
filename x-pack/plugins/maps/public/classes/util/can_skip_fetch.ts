@@ -63,10 +63,7 @@ export async function canSkipSourceUpdate({
   extentAware: boolean;
   getUpdateDueToTimeslice: (timeslice?: Timeslice) => boolean;
 }): Promise<boolean> {
-  const mustForceRefresh =
-    nextRequestMeta.isForceRefresh &&
-    nextRequestMeta.applyForceRefresh &&
-    (nextRequestMeta.applyGlobalQuery || nextRequestMeta.applyGlobalTime);
+  const mustForceRefresh = nextRequestMeta.isForceRefresh && nextRequestMeta.applyForceRefresh;
   if (mustForceRefresh) {
     // Cannot skip
     return false;

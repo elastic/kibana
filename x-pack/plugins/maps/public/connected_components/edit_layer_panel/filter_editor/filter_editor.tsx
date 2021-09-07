@@ -249,13 +249,7 @@ export class FilterEditor extends Component<Props, State> {
         {globalTimeCheckbox}
         <ForceRefreshCheckbox
           applyForceRefresh={this.props.layer.getSource().getApplyForceRefresh()}
-          setRespondToForceRefresh={this._onRespondToForceRefreshChange}
-          isDisabled={
-            !this.props.layer.getSource().getApplyGlobalQuery() &&
-            (this.state.isSourceTimeAware
-              ? !this.props.layer.getSource().getApplyGlobalTime()
-              : true)
-          }
+          setApplyForceRefresh={this._onRespondToForceRefreshChange}
         />
       </Fragment>
     );
