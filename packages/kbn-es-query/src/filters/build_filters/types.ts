@@ -11,7 +11,6 @@ import { PhrasesFilter } from './phrases_filter';
 import { PhraseFilter } from './phrase_filter';
 import { RangeFilter } from './range_filter';
 import { MatchAllFilter } from './match_all_filter';
-import { MissingFilter } from './missing_filter';
 import { DslQuery } from '../..';
 
 /**
@@ -23,8 +22,7 @@ export type FieldFilter =
   | PhraseFilter
   | PhrasesFilter
   | RangeFilter
-  | MatchAllFilter
-  | MissingFilter;
+  | MatchAllFilter;
 
 /**
  * An enum of all types of filters supported by this package
@@ -36,7 +34,6 @@ export enum FILTERS {
   PHRASE = 'phrase',
   EXISTS = 'exists',
   MATCH_ALL = 'match_all',
-  MISSING = 'missing',
   QUERY_STRING = 'query_string',
   RANGE = 'range',
   RANGE_FROM_VALUE = 'range_from_value',
