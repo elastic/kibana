@@ -12,6 +12,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiWindowEvent,
   EuiHorizontalRule,
@@ -267,6 +268,17 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     }),
     [docLinks]
   );
+
+  if (loading) {
+    return (
+      <SecuritySolutionPageWrapper>
+        <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} isLoading={loading} />
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexGroup>
+      </SecuritySolutionPageWrapper>
+    );
+  }
 
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
