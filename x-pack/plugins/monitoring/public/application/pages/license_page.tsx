@@ -69,8 +69,6 @@ export const LicensePage: React.FC<{}> = () => {
     }
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
 
-  // TODO Time picker should be locked to 10 second refresh with no time select on this page
-  // but still need a way to set it.
   return (
     <PageTemplate title={title} pageTitle="" getPageData={getPageData}>
       {licenseComponent(clusters, timezone, uploadLicensePath)}
