@@ -7,12 +7,76 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiSelectOption } from '@elastic/eui';
 import {
   ActionTypeModel,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../../types';
 import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
+
+const emailServices: EuiSelectOption[] = [
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.gmailServerTypeLabel',
+      {
+        defaultMessage: 'Gmail',
+      }
+    ),
+    value: 'gmail',
+  },
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.outlookServerTypeLabel',
+      {
+        defaultMessage: 'Outlook',
+      }
+    ),
+    value: 'outlook365',
+  },
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.amazonSesServerTypeLabel',
+      {
+        defaultMessage: 'Amazon SES',
+      }
+    ),
+    value: 'ses',
+  },
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.elasticCloudServerTypeLabel',
+      {
+        defaultMessage: 'Elastic Cloud',
+      }
+    ),
+    value: 'elastic_cloud',
+  },
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.exchangeServerTypeLabel',
+      {
+        defaultMessage: 'MS Exchange Server',
+      }
+    ),
+    value: 'exchange_server',
+  },
+  {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.otherServerTypeLabel',
+      {
+        defaultMessage: 'Other',
+      }
+    ),
+    value: 'other',
+  },
+];
+
+export function getEmailServices(isCloudEnabled: boolean) {
+  return isCloudEnabled
+    ? emailServices
+    : emailServices.filter((service) => service.value !== 'elastic_cloud');
+}
 
 export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
@@ -41,6 +105,7 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         from: new Array<string>(),
         port: new Array<string>(),
         host: new Array<string>(),
+        service: new Array<string>(),
       };
       const secretsErrors = {
         user: new Array<string>(),
@@ -68,6 +133,9 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
       }
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
         secretsErrors.password.push(translations.PASSWORD_REQUIRED);
+      }
+      if (!action.config.service) {
+        configErrors.service.push(translations.SERVICE_REQUIRED);
       }
       if (action.secrets.user && !action.secrets.password) {
         secretsErrors.password.push(translations.PASSWORD_REQUIRED_FOR_USER_USED);

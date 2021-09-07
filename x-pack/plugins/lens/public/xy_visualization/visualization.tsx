@@ -383,7 +383,7 @@ export const getXyVisualization = ({
 
     const errors: Array<{
       shortMessage: string;
-      longMessage: string;
+      longMessage: React.ReactNode;
     }> = [];
 
     // check if the layers in the state are compatible with this type of chart
@@ -488,7 +488,7 @@ function validateLayersForDimension(
   | { valid: true }
   | {
       valid: false;
-      payload: { shortMessage: string; longMessage: string };
+      payload: { shortMessage: string; longMessage: React.ReactNode };
     } {
   // Multiple layers must be consistent:
   // * either a dimension is missing in ALL of them
