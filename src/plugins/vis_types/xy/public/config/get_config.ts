@@ -11,7 +11,6 @@ import { ScaleContinuousType } from '@elastic/charts';
 import { Datatable } from '../../../../expressions/public';
 import { KBN_FIELD_TYPES } from '../../../../data/public';
 import {
-  Aspect,
   AxisConfig,
   AxisMode,
   ChartMode,
@@ -49,8 +48,7 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
   );
 
   const enableHistogramMode =
-    (params.enableHistogramMode ?? false) &&
-    shouldEnableHistogramMode(params.seriesParams, aspects.y, yAxes);
+    (params.enableHistogramMode ?? false) && shouldEnableHistogramMode(params.seriesParams, yAxes);
 
   const timeChartFieldTypes: string[] = [KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.DATE_RANGE];
   const isTimeChart = timeChartFieldTypes.includes(aspects.x.format?.id ?? '');
@@ -96,11 +94,9 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
  */
 const shouldEnableHistogramMode = (
   seriesParams: SeriesParam[],
-  yAspects: Aspect[],
   yAxes: Array<AxisConfig<ScaleContinuousType>>
 ): boolean => {
   const bars = seriesParams.filter(({ type }) => type === ChartType.Histogram);
-
   const groupIds = [
     ...bars.reduce<Set<string>>((acc, { valueAxis: groupId, mode }) => {
       acc.add(groupId);
@@ -114,7 +110,6 @@ const shouldEnableHistogramMode = (
 
   return bars.every(({ valueAxis: groupId, mode }) => {
     const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
-
     return mode === ChartMode.Stacked || yAxisScale?.mode === AxisMode.Percentage;
   });
 };

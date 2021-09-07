@@ -24,6 +24,7 @@ import {
   SeriesParam,
 } from '../types';
 import { isSimpleField } from '../utils/accessors';
+import { ChartType } from '../../common';
 
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
@@ -61,7 +62,10 @@ export function getAxis<S extends XScaleType | YScaleType>(
     showDuplicates: !labels.filter,
   };
 
-  const scale = getScale<S>(axisScale, params, format, isCategoryAxis);
+  const isHistogram = seriesParams.filter((sp) => sp.type === ChartType.Histogram).length > 0;
+
+  const scale = getScale<S>(axisScale, params, format, isCategoryAxis, isHistogram);
+
   const title = axisTitle.text || fallbackTitle;
   const fallbackRotation =
     isCategoryAxis && isDateHistogram ? LabelRotation.Horizontal : LabelRotation.Vertical;
@@ -124,14 +128,15 @@ function getScale<S extends XScaleType | YScaleType>(
   scale: Scale,
   params: Aspect['params'],
   format: Aspect['format'],
-  isCategoryAxis: boolean
+  isCategoryAxis: boolean,
+  isHistogram: boolean = false
 ): ScaleConfig<S> {
   const type = (isCategoryAxis
     ? getScaleType(
         scale,
         format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
         'date' in params,
-        'interval' in params
+        isHistogram
       )
     : getScaleType(scale, true)) as S;
 

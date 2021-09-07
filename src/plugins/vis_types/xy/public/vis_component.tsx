@@ -367,7 +367,7 @@ const VisComponent = (props: VisComponentProps) => {
             splitSeriesAccessors,
             splitChartColumnAccessor ?? splitChartRowAccessor
           )}
-          onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}
+          onBrushEnd={handleBrush(visData, xAccessor, visParams.xDomain?.minInterval !== undefined)}
           onRenderChange={onRenderChange}
           legendAction={
             config.aspects.series && (config.aspects.series?.length ?? 0) > 0
