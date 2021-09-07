@@ -7,13 +7,10 @@
 
 import { getFilter } from './find_rules';
 import {
-  EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
   SIGNALS_ID,
-  THRESHOLD_RULE_TYPE_ID,
 } from '../../../../common/constants';
 
 const allAlertTypeIds = `(alert.attributes.alertTypeId: ${ML_RULE_TYPE_ID}
