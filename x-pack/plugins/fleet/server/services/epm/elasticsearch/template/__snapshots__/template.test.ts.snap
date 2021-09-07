@@ -8,11 +8,7 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
   ],
   "template": {
     "settings": {
-      "index": {
-        "lifecycle": {
-          "name": "logs"
-        }
-      }
+      "index": {}
     },
     "mappings": {
       "dynamic_templates": [
@@ -109,11 +105,7 @@ exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
   ],
   "template": {
     "settings": {
-      "index": {
-        "lifecycle": {
-          "name": "logs"
-        }
-      }
+      "index": {}
     },
     "mappings": {
       "dynamic_templates": [
@@ -206,11 +198,7 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
   ],
   "template": {
     "settings": {
-      "index": {
-        "lifecycle": {
-          "name": "metrics"
-        }
-      }
+      "index": {}
     },
     "mappings": {
       "dynamic_templates": [

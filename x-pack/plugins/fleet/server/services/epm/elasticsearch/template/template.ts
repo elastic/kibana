@@ -56,7 +56,6 @@ export function getTemplate({
   packageName,
   composedOfTemplates,
   templatePriority,
-  ilmPolicy,
   hidden,
 }: {
   type: string;
@@ -67,7 +66,6 @@ export function getTemplate({
   packageName: string;
   composedOfTemplates: string[];
   templatePriority: number;
-  ilmPolicy?: string | undefined;
   hidden?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate(
@@ -78,7 +76,6 @@ export function getTemplate({
     packageName,
     composedOfTemplates,
     templatePriority,
-    ilmPolicy,
     hidden
   );
   if (pipelineName) {
@@ -367,7 +364,6 @@ function getBaseTemplate(
   packageName: string,
   composedOfTemplates: string[],
   templatePriority: number,
-  ilmPolicy?: string | undefined,
   hidden?: boolean
 ): IndexTemplate {
   // Meta information to identify Ingest Manager's managed templates and indices
@@ -385,12 +381,7 @@ function getBaseTemplate(
     index_patterns: [templateIndexPattern],
     template: {
       settings: {
-        index: {
-          // ILM Policy must be added here, for now point to the default global ILM policy name
-          lifecycle: {
-            name: ilmPolicy ? ilmPolicy : type,
-          },
-        },
+        index: {},
       },
       mappings: {
         // All the dynamic field mappings

@@ -33,9 +33,13 @@ export function buildDefaultSettings({
   templateName,
   packageName,
   fields,
+  ilmPolicy,
+  type,
 }: {
+  type: string;
   templateName: string;
   packageName: string;
+  ilmPolicy?: string | undefined;
   fields: Field[];
 }) {
   const logger = appContextService.getLogger();
@@ -56,6 +60,10 @@ export function buildDefaultSettings({
 
   return {
     index: {
+      // ILM Policy must be added here, for now point to the default global ILM policy name
+      lifecycle: {
+        name: ilmPolicy ? ilmPolicy : type,
+      },
       // What should be our default for the compression?
       codec: 'best_compression',
       mapping: {

@@ -374,6 +374,8 @@ export async function installTemplate({
     templateName,
     packageName,
     fields,
+    type: dataStream.type,
+    ilmPolicy: dataStream.ilm_policy,
   });
 
   const composedOfTemplates = await installDataStreamComponentTemplates({
@@ -393,7 +395,6 @@ export async function installTemplate({
     packageName,
     composedOfTemplates,
     templatePriority,
-    ilmPolicy: dataStream.ilm_policy,
     hidden: dataStream.hidden,
   });
 

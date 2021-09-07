@@ -26,6 +26,7 @@ describe('buildDefaultSettings', () => {
     const settings = buildDefaultSettings({
       templateName: 'test_template',
       packageName: 'test_package',
+      type: 'logs',
       fields: [
         {
           name: 'field1Keyword',
@@ -42,6 +43,9 @@ describe('buildDefaultSettings', () => {
       Object {
         "index": Object {
           "codec": "best_compression",
+          "lifecycle": Object {
+            "name": "logs",
+          },
           "mapping": Object {
             "total_fields": Object {
               "limit": "10000",
@@ -66,6 +70,7 @@ describe('buildDefaultSettings', () => {
       fields.push({ name: `field${i}`, type: 'keyword' });
     }
     buildDefaultSettings({
+      type: 'logs',
       templateName: 'test_template',
       packageName: 'test_package',
       fields,
