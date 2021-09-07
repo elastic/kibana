@@ -434,6 +434,7 @@ export function FailedTransactionsCorrelations({
       {response.ccsWarning && (
         <>
           <EuiSpacer size="m" />
+          {/* Failed transactions correlations uses ES aggs that are available since 7.15 */}
           <CrossClusterSearchCompatibilityWarning version="7.15" />
         </>
       )}

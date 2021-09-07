@@ -319,6 +319,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       {response.ccsWarning && (
         <>
           <EuiSpacer size="m" />
+          {/* Latency correlations uses ES aggs that are available since 7.14 */}
           <CrossClusterSearchCompatibilityWarning version="7.14" />
         </>
       )}
