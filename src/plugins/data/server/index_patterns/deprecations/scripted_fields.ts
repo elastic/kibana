@@ -12,6 +12,7 @@ import {
   GetDeprecationsContext,
   RegisterDeprecationsConfig,
 } from 'kibana/server';
+import { i18n } from '@kbn/i18n';
 import { IndexPatternAttributes } from '../../../common';
 
 type IndexPatternAttributesWithFields = Pick<IndexPatternAttributes, 'title' | 'fields'>;
@@ -38,19 +39,35 @@ export const createScriptedFieldsDeprecationsConfig: (
     if (indexPatternsWithScriptedFields.length > 0) {
       const PREVIEW_LIMIT = 3;
       const indexPatternTitles = indexPatternsWithScriptedFields.map((ip) => ip.title);
-      const titlesPreview = indexPatternTitles.slice(0, PREVIEW_LIMIT).join('; ');
-      const allTitles = indexPatternTitles.join('; ');
 
       return [
         {
-          message: `You have ${indexPatternsWithScriptedFields.length} index patterns (${titlesPreview}...) that use scripted fields. Scripted fields are deprecated and will be removed in future. Use runtime fields instead.`,
+          title: i18n.translate('data.deprecations.scriptedFieldsTitle', {
+            defaultMessage: 'Found index patterns using scripted fields',
+          }),
+          message: i18n.translate('data.deprecations.scriptedFieldsMessage', {
+            defaultMessage: `You have {numberOfIndexPatternsWithScriptedFields} index patterns ({titlesPreview}...) that use scripted fields. Scripted fields are deprecated and will be removed in future. Use runtime fields instead.`,
+            values: {
+              titlesPreview: indexPatternTitles.slice(0, PREVIEW_LIMIT).join('; '),
+              numberOfIndexPatternsWithScriptedFields: indexPatternsWithScriptedFields.length,
+            },
+          }),
           documentationUrl:
             'https://www.elastic.co/guide/en/elasticsearch/reference/7.x/runtime.html', // TODO: documentation service is not available serverside https://github.com/elastic/kibana/issues/95389
           level: 'warning', // warning because it is not set in stone WHEN we remove scripted fields, hence this deprecation is not a blocker for 8.0 upgrade
           correctiveActions: {
             manualSteps: [
-              'Navigate to Stack Management > Kibana > Index Patterns.',
-              `Update ${indexPatternsWithScriptedFields.length} index patterns that have scripted fields to use runtime fields instead. In most cases, to migrate existing scripts, you'll need to change "return <value>;" to "emit(<value>);". Index patterns with at least one scripted field: ${allTitles}`,
+              i18n.translate('data.deprecations.scriptedFields.manualStepOneMessage', {
+                defaultMessage: 'Navigate to Stack Management > Kibana > Index Patterns.',
+              }),
+              i18n.translate('data.deprecations.scriptedFields.manualStepTwoMessage', {
+                defaultMessage:
+                  'Update {numberOfIndexPatternsWithScriptedFields} index patterns that have scripted fields to use runtime fields instead. In most cases, to migrate existing scripts, you will need to change "return <value>;" to "emit(<value>);". Index patterns with at least one scripted field: {allTitles}',
+                values: {
+                  allTitles: indexPatternTitles.join('; '),
+                  numberOfIndexPatternsWithScriptedFields: indexPatternsWithScriptedFields.length,
+                },
+              }),
             ],
           },
         },

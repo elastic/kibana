@@ -18,7 +18,6 @@ import { truncate, unit } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
-import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 
 type TraceGroup = APIReturnType<'GET /api/apm/traces'>['items'][0];
@@ -127,14 +126,14 @@ const noItemsMessage = (
 );
 
 export function TraceList({ items = [], isLoading }: Props) {
-  const noItems = isLoading ? <LoadingStatePrompt /> : noItemsMessage;
   return (
     <ManagedTable
+      isLoading={isLoading}
       columns={traceListColumns}
       items={items}
       initialSortField="impact"
       initialSortDirection="desc"
-      noItemsMessage={noItems}
+      noItemsMessage={noItemsMessage}
       initialPageSize={25}
     />
   );
