@@ -12,6 +12,7 @@ import {
   VisToExpressionAst,
   getVisSchemas,
   DateHistogramParams,
+  ExpressionValueVisDimension,
 } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 import { BUCKET_TYPES } from '../../../data/public';
@@ -34,6 +35,7 @@ import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_fun
 import { ChartType, XyVisType } from '../common';
 import { getEsaggsFn } from './to_ast_esaggs';
 import { TimeRangeBounds } from '../../../data/common';
+import { getTimeZone } from './utils';
 
 const prepareLabel = (data: Labels) => {
   const label = buildExpressionFunction('label', {
@@ -133,8 +135,9 @@ const prepareXYDimension = (data: Dimension) => {
 };
 
 const prepareXDomain = (data: XDomainArguments) => {
-  const column = buildExpressionFunction('visdimension', { accessor: data.column?.accessor });
-
+  const column = data.column
+    ? prepareVisDimension((data.column as unknown) as Dimension)
+    : undefined;
   const xDomain = buildExpressionFunction('x_domain', {
     ...data,
     column,
@@ -165,15 +168,19 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
   const xDomain: XDomainArguments = {};
   if (dimensions.x && xAgg) {
     if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
+      const timeZone = getTimeZone();
+
       (dimensions.x.params as DateHistogramParams).date = true;
       (dimensions.x.params as DateHistogramParams).format = xAgg.buckets.getScaledDateFormat();
 
       const { esUnit, esValue } = xAgg.buckets.getInterval();
 
+      xDomain.timezone = timeZone;
       xDomain.intervalValue = esValue;
       xDomain.intervalUnit = esUnit;
       xDomain.minInterval = moment.duration(esValue, esUnit).asMilliseconds();
-
+      // @TODO: rewrite x from Dimension to ExpressionValueVisDimension
+      xDomain.column = (dimensions.x as unknown) as ExpressionValueVisDimension;
       const bounds = xAgg.buckets.getBounds() as TimeRangeBounds | undefined;
       if (bounds && bounds?.min && bounds?.max) {
         xDomain.min = bounds.min.valueOf();
@@ -215,8 +222,8 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     }
   });
 
-  const considerInterval =
-    vis.params.seriesParams.filter((sp) => sp.type === ChartType.Histogram).length > 0;
+  const considerInterval = !vis.params.seriesParams.filter((sp) => sp.type === ChartType.Histogram)
+    .length;
 
   xDomain.considerInterval = considerInterval;
 

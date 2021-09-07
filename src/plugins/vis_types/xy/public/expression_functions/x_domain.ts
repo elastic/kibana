@@ -27,9 +27,15 @@ export const getAdjustedDomain = (
   timezone?: string,
   considerInterval?: boolean
 ) => {
-  const accessor = typeof column.accessor === 'number' ? column.accessor : column.accessor.id;
-  const values = uniq(data.map((d) => d[accessor]).sort());
+  const accessor = column.accessor;
+  const mapData = (d: Datatable['rows'][0]) => {
+    if (typeof accessor === 'number') {
+      return Object.values(d)[accessor];
+    }
+    return d[accessor.id];
+  };
 
+  const values = uniq(data.map(mapData).sort());
   const [first] = values;
   const last = values[values.length - 1];
   const domainMin = Math.min(first, domain.min);
@@ -163,7 +169,6 @@ export const xDomain = (): ExpressionFunctionDefinition<
         ...domain,
       };
     }
-
     const adjusted = getAdjustedDomain(
       context?.rows,
       column,
