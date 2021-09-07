@@ -24,13 +24,13 @@ import {
   bulkCreateThresholdSignals,
   findThresholdSignals,
   getThresholdBucketFilters,
+  getThresholdSignalHistory,
 } from '../threshold';
 import {
   AlertAttributes,
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
-  SignalSource,
   ThresholdAlertState,
   WrapHits,
 } from '../types';
@@ -73,9 +73,33 @@ export const thresholdExecutor = async ({
   let result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
 
-  const { signalHistory: thresholdSignalHistory } = state;
-  // TODO: clean up any signal history that has fallen outside the window
-  // TODO: handle case where we have no signal history? (upgrades)
+  // Get state or build initial state (on upgrade)
+  const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
+    ? { signalHistory: state.signalHistory, searchErrors: [] }
+    : await getThresholdSignalHistory({
+        indexPattern: ['*'], // TODO: get outputIndex?
+        from: tuple.from.toISOString(),
+        to: tuple.to.toISOString(),
+        services,
+        logger,
+        ruleId: ruleParams.ruleId,
+        bucketByFields: ruleParams.threshold.field,
+        timestampOverride: ruleParams.timestampOverride,
+        buildRuleMessage,
+      });
+
+  if (!state.initialized) {
+    // Clean up any signal history that has fallen outside the window
+    const toDelete: string[] = [];
+    for (const [hash, entry] of Object.entries(signalHistory)) {
+      if (entry.lastSignalTimestamp < tuple.from.valueOf()) {
+        toDelete.push(hash);
+      }
+    }
+    for (const hash of toDelete) {
+      delete signalHistory[hash];
+    }
+  }
 
   if (hasLargeValueItem(exceptionItems)) {
     result.warningMessages.push(
@@ -83,6 +107,7 @@ export const thresholdExecutor = async ({
     );
     result.warning = true;
   }
+
   const inputIndex = await getInputIndex({
     experimentalFeatures,
     services,
@@ -91,7 +116,7 @@ export const thresholdExecutor = async ({
   });
 
   const bucketFilters = await getThresholdBucketFilters({
-    thresholdSignalHistory,
+    signalHistory,
     timestampOverride: ruleParams.timestampOverride,
   });
 
@@ -138,7 +163,7 @@ export const thresholdExecutor = async ({
     signalsIndex: ruleParams.outputIndex,
     startedAt,
     from: tuple.from.toDate(),
-    thresholdSignalHistory,
+    signalHistory,
     bulkCreate,
     wrapHits,
   });
@@ -151,7 +176,7 @@ export const thresholdExecutor = async ({
     }),
     createSearchAfterReturnType({
       success,
-      errors: [...errors, ...searchErrors],
+      errors: [...errors, ...previousSearchErrors, ...searchErrors],
       createdSignalsCount: createdItemsCount,
       createdSignals: createdItems,
       bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
@@ -159,14 +184,19 @@ export const thresholdExecutor = async ({
     }),
   ]);
 
+  const newSignalHistory = await buildThresholdSignalHistory({
+    alerts: result.createdSignals as Array<SearchHit<unknown>>,
+  });
+
   return {
     ...result,
     state: {
       ...state,
-      signalHistory: await buildThresholdSignalHistory({
-        alerts: result.createdSignals as Array<SearchHit<SignalSource>>,
-        bucketByFields: ruleParams.threshold.field,
-      }),
+      initialized: true,
+      signalHistory: {
+        ...signalHistory,
+        ...newSignalHistory,
+      },
     },
   };
 };

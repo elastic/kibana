@@ -7,45 +7,52 @@
 
 import { SearchHit } from '@elastic/elasticsearch/api/types';
 
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { SignalSource, ThresholdSignalHistory } from '../types';
-import { getThresholdTermsHash } from '../utils';
+import { SimpleHit, ThresholdSignalHistory } from '../types';
+import { getThresholdTermsHash, isWrappedRACAlert, isWrappedSignalHit } from '../utils';
 
 interface GetThresholdSignalHistoryParams {
-  alerts: Array<SearchHit<SignalSource>>;
-  bucketByFields: string[];
+  alerts: Array<SearchHit<unknown>>;
 }
+
+const getTerms = (alert: SimpleHit) => {
+  if (isWrappedRACAlert(alert)) {
+    return (alert._source['kibana.alert.threshold.field'] as string[]).map((field) => ({
+      field,
+      value: alert._source[field] as string,
+    }));
+  } else if (isWrappedSignalHit(alert)) {
+    return alert._source.signal?.threshold_result?.terms ?? [];
+  } else {
+    // We shouldn't be here
+    return [];
+  }
+};
+
+const getOriginalTime = (alert: SimpleHit) => {
+  if (isWrappedRACAlert(alert)) {
+    const originalTime = alert._source['kibana.alert.original_time'];
+    return originalTime != null ? new Date(originalTime as string).getTime() : undefined;
+  } else if (isWrappedSignalHit(alert)) {
+    const originalTime = alert._source.signal?.original_time;
+    return originalTime != null ? new Date(originalTime).getTime() : undefined;
+  } else {
+    // We shouldn't be here
+    return undefined;
+  }
+};
 
 export const buildThresholdSignalHistory = async ({
   alerts,
-  bucketByFields,
 }: GetThresholdSignalHistoryParams): Promise<ThresholdSignalHistory> => {
-  const thresholdSignalHistory = alerts.reduce<ThresholdSignalHistory>((acc, hit) => {
-    if (!hit._source) {
+  const signalHistory = alerts.reduce<ThresholdSignalHistory>((acc, alert) => {
+    if (!alert._source) {
       return acc;
     }
 
-    // TODO: get all values from `bucketByFields` on source. Store in terms.
-    const terms =
-      hit._source.signal?.threshold_result?.terms != null
-        ? hit._source.signal.threshold_result.terms
-        : [
-            // Pre-7.12 signals
-            {
-              field:
-                (((hit._source.signal?.rule as RulesSchema).threshold as unknown) as {
-                  field: string;
-                }).field ?? '',
-              value: ((hit._source.signal?.threshold_result as unknown) as { value: string }).value,
-            },
-          ];
-
+    const terms = getTerms(alert as SimpleHit);
     const hash = getThresholdTermsHash(terms);
     const existing = acc[hash];
-    const originalTime =
-      hit._source.signal?.original_time != null
-        ? new Date(hit._source.signal?.original_time).getTime()
-        : undefined;
+    const originalTime = getOriginalTime(alert as SimpleHit);
 
     if (existing != null) {
       if (originalTime && originalTime > existing.lastSignalTimestamp) {
@@ -60,5 +67,5 @@ export const buildThresholdSignalHistory = async ({
     return acc;
   }, {});
 
-  return thresholdSignalHistory;
+  return signalHistory;
 };
