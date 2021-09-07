@@ -62,9 +62,8 @@ export { BaseParams, BasePayload };
 // default fn type for CreateJobFnFactory
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
-  context: ReportingRequestHandlerContext,
-  request: KibanaRequest
-) => Promise<JobPayloadType>;
+  context: ReportingRequestHandlerContext
+) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 
 // default fn type for RunTaskFnFactory
 export type RunTaskFn<TaskPayloadType = BasePayload> = (

@@ -15,15 +15,11 @@ import {
 
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsDeprecatedCSV, TaskPayloadDeprecatedCSV>
-> = function createJobFactoryFn(reporting, logger) {
-  const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
-
-  return async function createJob(jobParams, context, request) {
+> = function createJobFactoryFn(_reporting, logger) {
+  return async function createJob(jobParams, context) {
     logger.warn(
       `The "/generate/csv" endpoint is deprecated and will be removed in Kibana 8.0. Please recreate the POST URL used to automate this CSV export.`
     );
-    const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
 
     const savedObjectsClient = context.core.savedObjects.client;
     const indexPatternSavedObject = ((await savedObjectsClient.get(
@@ -33,8 +29,6 @@ export const createJobFnFactory: CreateJobFnFactory<
 
     return {
       isDeprecated: true,
-      headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(request, logger),
       indexPatternSavedObject,
       ...jobParams,
     };
