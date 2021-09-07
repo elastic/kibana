@@ -348,17 +348,15 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     ) as VectorJoinSourceRequestMeta;
 
     const prevDataRequest = this.getDataRequest(sourceDataId);
-    const canSkipFetch = joinRequestMeta.isForceRefresh
-      ? false
-      : await canSkipSourceUpdate({
-          source: joinSource,
-          prevDataRequest,
-          nextRequestMeta: joinRequestMeta,
-          extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
-          getUpdateDueToTimeslice: () => {
-            return true;
-          },
-        });
+    const canSkipFetch = await canSkipSourceUpdate({
+      source: joinSource,
+      prevDataRequest,
+      nextRequestMeta: joinRequestMeta,
+      extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
+      getUpdateDueToTimeslice: () => {
+        return true;
+      },
+    });
 
     if (canSkipFetch) {
       return {
