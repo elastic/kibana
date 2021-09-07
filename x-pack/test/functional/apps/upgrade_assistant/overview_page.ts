@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IndicesCreateRequest } from '@elastic/elasticsearch/api/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function upgradeAssistantOverviewPageFunctionalTests({
@@ -17,7 +16,6 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
-  const log = getService('log');
 
   describe('Overview Page', function () {
     this.tags('skipFirefox');
