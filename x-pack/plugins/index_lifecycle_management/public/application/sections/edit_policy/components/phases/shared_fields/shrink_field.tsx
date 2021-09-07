@@ -92,10 +92,17 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
                   onClick={() => toggleIsUsingShardCount()}
                   data-test-subj={`${phase}-toggleIsUsingShardCount`}
                 >
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.pipelineEditor.useCopyFromLabel"
-                    defaultMessage={`Configure shard ${isUsingShardCount ? 'size' : 'count'}`}
-                  />
+                  {isUsingShardCount ? (
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardSizeLabel"
+                      defaultMessage="Configure shard size"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.shrink.configureShardCountLabel"
+                      defaultMessage="Configure shard count"
+                    />
+                  )}
                 </EuiLink>
               </EuiText>
             ),

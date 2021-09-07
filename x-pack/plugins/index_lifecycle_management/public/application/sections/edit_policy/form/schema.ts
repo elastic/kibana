@@ -107,7 +107,7 @@ const numberOfShardsField = {
   serializer: serializers.stringToNumber,
 };
 const shardSizeField = {
-  label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
+  label: i18n.translate('xpack.indexLifecycleMgmt.shrink.primaryShardSizeLabel', {
     defaultMessage: 'Maximum primary shard size',
   }),
   validations: [
