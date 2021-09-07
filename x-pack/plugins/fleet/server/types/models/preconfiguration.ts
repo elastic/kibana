@@ -80,6 +80,11 @@ export const PreconfiguredOutputsSchema = schema.arrayOf(
     hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] })),
     ca_sha256: schema.maybe(schema.string()),
     config: schema.maybe(schema.any()),
+    fleet_server: schema.maybe(
+      schema.object({
+        service_token: schema.maybe(schema.string()),
+      })
+    ),
   }),
   {
     defaultValue: [],

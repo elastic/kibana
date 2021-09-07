@@ -766,13 +766,14 @@ class AgentPolicyService {
       outputs: {
         ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          const { config_yaml, name, type, hosts, ca_sha256, api_key } = output;
+          const { config_yaml, name, type, hosts, ca_sha256, api_key, fleet_server } = output;
           const configJs = config_yaml ? safeLoad(config_yaml) : {};
           acc[getOutputIdForAgentPolicy(output)] = {
             type,
             hosts,
             ca_sha256,
             api_key,
+            fleet_server,
             ...configJs,
           };
 

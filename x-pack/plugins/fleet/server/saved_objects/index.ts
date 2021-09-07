@@ -206,7 +206,13 @@ const getSavedObjectTypes = (
         config: { type: 'flattened', index: false },
         config_yaml: { type: 'text', index: false },
         is_preconfigured: { type: 'boolean' },
-        fleet_server_service_token: { type: 'text', index: false },
+        fleet_server: {
+          type: 'nested',
+          enabled: false,
+          properties: {
+            service_token: { type: 'text', index: false },
+          },
+        },
       },
     },
     migrations: {
