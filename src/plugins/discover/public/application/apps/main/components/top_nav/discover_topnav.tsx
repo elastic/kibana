@@ -22,7 +22,7 @@ export type DiscoverTopNavProps = Pick<
   savedQuery?: string;
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   stateContainer: GetStateReturn;
-  onResetQuery: () => void;
+  resetSavedSearch: () => void;
 };
 
 export const DiscoverTopNav = ({
@@ -36,18 +36,20 @@ export const DiscoverTopNav = ({
   navigateTo,
   savedSearch,
   services,
-  onResetQuery,
+  resetSavedSearch,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
   const { TopNavMenu } = services.navigation.ui;
 
   const onOpenSavedSearch = useCallback(
-    (id: string) => {
-      onResetQuery();
-      history.push(`/view/${encodeURIComponent(id)}`);
+    (newSavedSearchId: string) => {
+      if (savedSearch.id && savedSearch.id === newSavedSearchId) {
+        resetSavedSearch();
+      }
+      history.replace(`/view/${encodeURIComponent(newSavedSearchId)}`);
     },
-    [history, onResetQuery]
+    [history, resetSavedSearch, savedSearch.id]
   );
 
   const topNavMenu = useMemo(

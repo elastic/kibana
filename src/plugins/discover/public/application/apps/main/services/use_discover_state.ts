@@ -40,7 +40,7 @@ export function useDiscoverState({
 
   const indexPattern = savedSearch.searchSource.getField('index')!;
   // Only needs for resetting dirty state of current saved search
-  const savedSearchStartIp = useRef(indexPattern);
+  const savedSearchDefaultIp = useRef(indexPattern);
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
@@ -150,7 +150,7 @@ export function useDiscoverState({
   const resetSavedSearch = useCallback(
     async (id?: string) => {
       const newSavedSearch = await services.getSavedSearchById(id);
-      newSavedSearch.searchSource.setField('index', savedSearchStartIp.current);
+      newSavedSearch.searchSource.setField('index', savedSearchDefaultIp.current);
       const newAppState = getStateDefaults({
         config,
         data,
@@ -159,7 +159,7 @@ export function useDiscoverState({
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
-    [services, savedSearchStartIp, config, data, stateContainer]
+    [services, config, data, stateContainer]
   );
 
   /**
