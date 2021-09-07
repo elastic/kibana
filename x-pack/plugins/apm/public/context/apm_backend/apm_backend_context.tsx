@@ -30,7 +30,7 @@ export function ApmBackendContextProvider({
   const {
     path: { backendName },
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/backends/:backendName/overview');
+  } = useApmParams('/backends/{backendName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

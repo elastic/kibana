@@ -27,7 +27,7 @@ export function ErrorGroupOverview() {
 
   const {
     query: { environment, kuery, sortField, sortDirection, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/errors');
+  } = useApmParams('/services/{serviceName}/errors');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

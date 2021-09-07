@@ -72,7 +72,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/overview');
+  } = useApmParams('/services/{serviceName}/overview');
 
   const {
     urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },

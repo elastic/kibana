@@ -83,7 +83,7 @@ export function ServiceMapHome() {
 export function ServiceMapServiceDetail() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/service-map');
+  } = useApmParams('/services/{serviceName}/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   return (
     <ServiceMap

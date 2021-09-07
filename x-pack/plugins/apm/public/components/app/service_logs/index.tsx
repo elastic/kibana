@@ -27,7 +27,7 @@ export function ServiceLogs() {
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/logs');
+  } = useApmParams('/services/{serviceName}/logs');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

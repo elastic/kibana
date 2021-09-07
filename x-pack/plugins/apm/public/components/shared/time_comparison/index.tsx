@@ -120,7 +120,7 @@ export function TimeComparison() {
   const { isSmall } = useBreakPoints();
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services', '/backends/*', '/services/:serviceName');
+  } = useApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const { exactStart, exactEnd } = useTimeRange({
     rangeFrom,

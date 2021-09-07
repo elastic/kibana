@@ -61,7 +61,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const {
     query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/transactions/view');
+  } = useApmParams('/services/{serviceName}/transactions/view');
 
   const { urlParams } = useUrlParams();
 

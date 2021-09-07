@@ -24,7 +24,7 @@ export function useWaterfallFetcher() {
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/transactions/view');
+  } = useApmParams('/services/{serviceName}/transactions/view');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

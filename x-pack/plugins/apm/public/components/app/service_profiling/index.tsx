@@ -26,7 +26,7 @@ export function ServiceProfiling() {
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/profiling');
+  } = useApmParams('/services/{serviceName}/profiling');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

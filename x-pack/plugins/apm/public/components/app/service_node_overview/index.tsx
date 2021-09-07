@@ -36,7 +36,7 @@ const ServiceNodeName = euiStyled.div`
 function ServiceNodeOverview() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/nodes');
+  } = useApmParams('/services/{serviceName}/nodes');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

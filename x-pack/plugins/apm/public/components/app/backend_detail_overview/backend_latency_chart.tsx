@@ -27,7 +27,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
 
   const {
     query: { rangeFrom, rangeTo, kuery, environment },
-  } = useApmParams('/backends/:backendName/overview');
+  } = useApmParams('/backends/{backendName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

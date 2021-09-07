@@ -27,7 +27,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
   const {
     urlParams: { latencyAggregationType },
   } = useUrlParams();
-  const { query } = useApmParams('/services/:serviceName/transactions/view');
+  const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
   if (!transaction) {
     return null;

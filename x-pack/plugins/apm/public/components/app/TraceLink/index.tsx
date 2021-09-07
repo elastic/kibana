@@ -23,7 +23,7 @@ export function TraceLink() {
   const {
     path: { traceId },
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/link-to/trace/:traceId');
+  } = useApmParams('/link-to/trace/{traceId}');
 
   const { data = { transaction: null }, status } = useFetcher(
     (callApmApi) => {

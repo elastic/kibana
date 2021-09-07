@@ -54,7 +54,7 @@ export function ServiceNodeMetrics() {
   const {
     path: { serviceNodeName },
     query,
-  } = useApmParams('/services/:serviceName/nodes/:serviceNodeName/metrics');
+  } = useApmParams('/services/{serviceName}/nodes/{serviceNodeName}/metrics');
 
   const { environment, kuery, rangeFrom, rangeTo } = query;
 
@@ -63,7 +63,7 @@ export function ServiceNodeMetrics() {
   useBreadcrumb({
     title: getServiceNodeName(serviceNodeName),
     href: apmRouter.link(
-      '/services/:serviceName/nodes/:serviceNodeName/metrics',
+      '/services/{serviceName}/nodes/{serviceNodeName}/metrics',
       {
         path: {
           serviceName,

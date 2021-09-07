@@ -60,7 +60,7 @@ export function FailedTransactionsCorrelations({
 
   const {
     query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName');
+  } = useApmParams('/services/{serviceName}');
 
   const { urlParams } = useUrlParams();
   const { transactionName } = urlParams;

@@ -31,7 +31,7 @@ export function BackendFailedTransactionRateChart({
 
   const {
     query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/backends/:backendName/overview');
+  } = useApmParams('/backends/{backendName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

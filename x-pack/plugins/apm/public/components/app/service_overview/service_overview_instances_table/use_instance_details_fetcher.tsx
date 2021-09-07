@@ -17,7 +17,7 @@ export function useInstanceDetailsFetcher({
 }) {
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/overview');
+  } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

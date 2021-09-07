@@ -48,7 +48,7 @@ describe('createRouter', () => {
               children: [
                 {
                   element: <></>,
-                  path: '/services/:serviceName',
+                  path: '/services/{serviceName}',
                   params: t.type({
                     path: t.type({
                       serviceName: t.string,
@@ -137,7 +137,7 @@ describe('createRouter', () => {
         '/services/opbeans-java?rangeFrom=now-15m&rangeTo=now&environment=production&transactionType=request'
       );
 
-      const serviceOverviewParams = router.getParams('/services/:serviceName', history.location);
+      const serviceOverviewParams = router.getParams('/services/{serviceName}', history.location);
 
       expect(serviceOverviewParams).toEqual({
         path: {
@@ -256,7 +256,7 @@ describe('createRouter', () => {
 
   describe('link', () => {
     it('returns a link for the given route', () => {
-      const serviceOverviewLink = router.link('/services/:serviceName', {
+      const serviceOverviewLink = router.link('/services/{serviceName}', {
         path: { serviceName: 'opbeans-java' },
         query: {
           rangeFrom: 'now-15m',

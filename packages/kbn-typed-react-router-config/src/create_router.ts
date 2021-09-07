@@ -25,6 +25,10 @@ import { Route, Router } from './types';
 const deepExactRt: typeof deepExactRtTyped = deepExactRtNonTyped;
 const mergeRt: typeof mergeRtTyped = mergeRtNonTyped;
 
+function toReactRouterPath(path: string) {
+  return path.replace(/(?:{([^\/]+)})/, ':$1');
+}
+
 export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes> {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
   const reactRouterConfigsByRoute = new Map<Route, ReactRouterConfig>();
@@ -38,7 +42,7 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
         (route.children as Route[] | undefined)?.map((child) => toReactRouterConfigRoute(child)) ??
         [],
       exact: !route.children?.length,
-      path: route.path,
+      path: toReactRouterPath(route.path),
     };
 
     routesByReactRouterConfig.set(reactRouterConfig, route);
@@ -69,11 +73,11 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
 
     for (const path of paths) {
       const greedy = path.endsWith('/*') || args.length === 0;
-      matches = matchRoutesConfig(reactRouterConfigs, location.pathname);
+      matches = matchRoutesConfig(reactRouterConfigs, toReactRouterPath(location.pathname));
 
       matchIndex = greedy
         ? matches.length - 1
-        : findLastIndex(matches, (match) => match.route.path === path);
+        : findLastIndex(matches, (match) => match.route.path === toReactRouterPath(path));
 
       if (matchIndex !== -1) {
         break;
@@ -133,11 +137,12 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     path = path
       .split('/')
       .map((part) => {
-        return part.startsWith(':') ? paramsWithBuiltInDefaults.path[part.split(':')[1]] : part;
+        const match = part.match(/(?:{([a-zA-Z]+)})/);
+        return match ? paramsWithBuiltInDefaults.path[match[1]] : part;
       })
       .join('/');
 
-    const matches = matchRoutesConfig(reactRouterConfigs, path);
+    const matches = matchRoutesConfig(reactRouterConfigs, toReactRouterPath(path));
 
     if (!matches.length) {
       throw new Error(`No matching route found for ${path}`);
