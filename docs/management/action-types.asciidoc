@@ -137,7 +137,7 @@ before {kib} starts.
 
 [float]
 [[montoring-connectors]]
-=== Monitoring
+=== Monitoring connectors
 
 The <<task-manager-health-monitoring,Task Manager health API>> is useful to understand the performance of all tasks in your environment.
 However, if connectors fail to execute for any reason, they will report as successful to Task Manager. This means the failure stats will not
