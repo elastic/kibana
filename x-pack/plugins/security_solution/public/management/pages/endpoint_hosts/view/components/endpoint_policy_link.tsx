@@ -45,7 +45,7 @@ export const EndpointPolicyLink = memo<
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink
-      style={{ overflowWrap: 'anywhere' }}
+      className={'eui-textBreakWord'}
       href={toRouteUrl}
       onClick={clickHandler}
       {...otherProps}
