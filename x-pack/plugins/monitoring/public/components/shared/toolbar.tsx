@@ -14,6 +14,8 @@ import {
 } from '@elastic/eui';
 import React, { useContext, useCallback } from 'react';
 import { MonitoringTimeContainer } from '../../application/pages/use_monitoring_time';
+import { GlobalStateContext } from '../../application/global_state_context';
+import { Legacy } from '../../legacy_shims';
 
 interface MonitoringToolbarProps {
   pageTitle?: string;
@@ -29,6 +31,7 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
     setIsPaused,
     isPaused,
   } = useContext(MonitoringTimeContainer.Context);
+  const state = useContext(GlobalStateContext);
 
   const onTimeChange = useCallback(
     (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
@@ -36,16 +39,28 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
         return;
       }
       handleTimeChange(selectedTime.start, selectedTime.end);
+      state.time = {
+        from: selectedTime.start,
+        to: selectedTime.end,
+      };
+      Legacy.shims.timefilter.setTime(state.time);
+      state.save?.();
     },
-    [handleTimeChange]
+    [handleTimeChange, state]
   );
 
   const onRefreshChange = useCallback(
     ({ refreshInterval: ri, isPaused: isP }: OnRefreshChangeProps) => {
       setRefreshInterval(ri);
       setIsPaused(isP);
+      state.refreshInterval = {
+        pause: isP,
+        value: ri,
+      };
+      Legacy.shims.timefilter.setRefreshInterval(state.refreshInterval);
+      state.save?.();
     },
-    [setRefreshInterval, setIsPaused]
+    [setRefreshInterval, setIsPaused, state]
   );
 
   return (
