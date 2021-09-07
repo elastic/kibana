@@ -20,7 +20,11 @@ import { ClusterConfigurationForm } from './cluster_configuration_form';
 import { EnrollmentTokenForm } from './enrollment_token_form';
 import { ProgressIndicator } from './progress_indicator';
 
-export const App: FunctionComponent = () => {
+export interface AppProps {
+  onSuccess?(): void;
+}
+
+export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
   const [page, setPage] = useState<'token' | 'manual' | 'success'>('token');
   const [cluster, setCluster] = useState<
     Omit<ClusterConfigurationFormProps, 'onCancel' | 'onSuccess'>
@@ -71,9 +75,7 @@ export const App: FunctionComponent = () => {
               />
             )}
           </div>
-          {page === 'success' && (
-            <ProgressIndicator onSuccess={() => window.location.replace(window.location.href)} />
-          )}
+          {page === 'success' && <ProgressIndicator onSuccess={onSuccess} />}
         </EuiPanel>
       </div>
     </div>
