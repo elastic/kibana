@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React from 'react';
 import { flatten } from 'lodash';
 
 import {
@@ -32,19 +32,12 @@ import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
+import type { HistogramItem } from '../../../../../common/search_strategies/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
-import { ChartContainer, ChartContainerProps } from '../chart_container';
-
-export type TransactionDistributionChartLoadingState = Pick<
-  ChartContainerProps,
-  'hasData' | 'status'
->;
-
-export type OnHasData = (hasData: boolean) => void;
+import { ChartContainer } from '../chart_container';
 
 export interface TransactionDistributionChartData {
   id: string;
@@ -53,12 +46,13 @@ export interface TransactionDistributionChartData {
 
 interface TransactionDistributionChartProps {
   data: TransactionDistributionChartData[];
+  hasData: boolean;
   markerCurrentTransaction?: number;
   markerValue: number;
   markerPercentile: number;
   onChartSelection?: BrushEndListener;
-  onHasData?: OnHasData;
   selection?: [number, number];
+  status: FETCH_STATUS;
 }
 
 const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
@@ -107,12 +101,13 @@ const xAxisTickFormat: TickFormatter<number> = (d) =>
 
 export function TransactionDistributionChart({
   data,
+  hasData,
   markerCurrentTransaction,
   markerValue,
   markerPercentile,
   onChartSelection,
-  onHasData,
   selection,
+  status,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
@@ -164,30 +159,12 @@ export function TransactionDistributionChart({
         ]
       : undefined;
 
-  const chartLoadingState: TransactionDistributionChartLoadingState = useMemo(
-    () => ({
-      hasData: Array.isArray(data) && data.length > 0,
-      status: Array.isArray(data) ? FETCH_STATUS.SUCCESS : FETCH_STATUS.LOADING,
-    }),
-    [data]
-  );
-
-  useEffect(() => {
-    if (onHasData) {
-      onHasData(chartLoadingState.hasData);
-    }
-  }, [chartLoadingState, onHasData]);
-
   return (
     <div
       data-test-subj="apmCorrelationsChart"
       style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
     >
-      <ChartContainer
-        height={250}
-        hasData={chartLoadingState.hasData}
-        status={chartLoadingState.status}
-      >
+      <ChartContainer height={250} hasData={hasData} status={status}>
         <Chart>
           <Settings
             rotation={0}
