@@ -64,7 +64,8 @@ The correlations on the *Failed transaction correlations* tab help you discover
 which attributes are most influential in distinguishing between transaction
 failures and successes. In this context, the success or failure of a transaction
 is determined by its {ecs-ref}/ecs-event.html#field-event-outcome[event.outcome]
-value.
+value. For example, APM agents set the `event.outcome` to `failure` when an HTTP
+transaction returns a `5xx` status code.
 
 The chart highlights the failed transactions in the overall latency distribution
 for the transaction group. If there are attributes that have a statistically
