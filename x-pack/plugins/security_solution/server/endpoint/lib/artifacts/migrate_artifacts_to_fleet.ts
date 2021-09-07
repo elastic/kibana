@@ -66,9 +66,12 @@ export const migrateArtifactsToFleet = async (
 
       for (const artifact of artifactList) {
         if (isCompressed(artifact.attributes)) {
-          artifact.attributes.body = (
-            await inflateAsync(Buffer.from(artifact.attributes.body, 'base64'))
-          ).toString('base64');
+          artifact.attributes = {
+            ...artifact.attributes,
+            body: (await inflateAsync(Buffer.from(artifact.attributes.body, 'base64'))).toString(
+              'base64'
+            ),
+          };
         }
 
         // Create new artifact in fleet index

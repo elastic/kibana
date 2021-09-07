@@ -118,7 +118,6 @@ describe('When migrating artifacts to fleet', () => {
       expect.objectContaining({
         ...soArtifactEntry,
         compressionAlgorithm: 'zlib',
-        body: 'eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==',
       })
     );
   });
