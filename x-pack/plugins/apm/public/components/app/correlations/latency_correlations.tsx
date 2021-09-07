@@ -91,25 +91,15 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     setSelectedSignificantTerm,
   ] = useState<LatencyCorrelation | null>(null);
 
-  const selectedHistogram = useMemo(() => {
-    let selected =
-      Array.isArray(response.latencyCorrelations) &&
-      response.latencyCorrelations.length > 0
-        ? response.latencyCorrelations[0]
-        : undefined;
-
-    if (
-      Array.isArray(response.latencyCorrelations) &&
-      selectedSignificantTerm !== null
-    ) {
-      selected = response.latencyCorrelations.find(
+  const selectedHistogram = useMemo(
+    () =>
+      response.latencyCorrelations?.find(
         (h) =>
-          h.fieldName === selectedSignificantTerm.fieldName &&
-          h.fieldValue === selectedSignificantTerm.fieldValue
-      );
-    }
-    return selected;
-  }, [response.latencyCorrelations, selectedSignificantTerm]);
+          h.fieldName === selectedSignificantTerm?.fieldName &&
+          h.fieldValue === selectedSignificantTerm?.fieldValue
+      ) ?? response.latencyCorrelations?.[0],
+    [response.latencyCorrelations, selectedSignificantTerm]
+  );
 
   const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
