@@ -78,6 +78,7 @@ export interface AvailableTotal {
 type BaseJobTypes =
   | 'csv'
   | 'csv_searchsource'
+  | 'csv_searchsource_immediate'
   | 'PNG'
   | 'PNGV2'
   | 'printable_pdf'
