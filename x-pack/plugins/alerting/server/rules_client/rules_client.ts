@@ -679,7 +679,7 @@ export class RulesClient {
     );
   }
 
-  public async deleteWithOCC({ id }: { id: string }) {
+  private async deleteWithOCC({ id }: { id: string }) {
     let taskIdToRemove: string | undefined | null;
     let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
