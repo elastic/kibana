@@ -15,8 +15,15 @@ import { TabMenuItem } from '../page_template';
 import { PageLoading } from '../../../components';
 import { Overview } from '../../../components/cluster/overview';
 import { ExternalConfigContext } from '../../external_config_context';
+import { SetupModeRenderer } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 
 const CODE_PATHS = [CODE_PATH_ALL];
+interface SetupModeProps {
+  setupMode: any;
+  flyoutComponent: any;
+  bottomBarComponent: any;
+}
 
 export const ClusterOverview: React.FC<{}> = () => {
   // TODO: check how many requests with useClusters
@@ -49,11 +56,20 @@ export const ClusterOverview: React.FC<{}> = () => {
   return (
     <PageTemplate title={title} pageTitle={pageTitle} tabs={tabs}>
       {loaded ? (
-        <Overview
-          cluster={clusters[0]}
-          alerts={[]}
-          setupMode={{}}
-          showLicenseExpiration={externalConfig.showLicenseExpiration}
+        <SetupModeRenderer
+          render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
+            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+              {flyoutComponent}
+              <Overview
+                cluster={clusters[0]}
+                alerts={[]}
+                setupMode={setupMode}
+                showLicenseExpiration={externalConfig.showLicenseExpiration}
+              />
+              {/* <EnableAlertsModal alerts={this.alerts} /> */}
+              {bottomBarComponent}
+            </SetupModeContext.Provider>
+          )}
         />
       ) : (
         <PageLoading />
