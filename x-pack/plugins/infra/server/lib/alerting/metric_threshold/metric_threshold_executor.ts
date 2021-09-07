@@ -29,7 +29,7 @@ import { AlertStates, Comparator } from './types';
 import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
 
 export type MetricThresholdAlertTypeParams = Record<string, any>;
-export type MetricThresholdAlertTypeState = AlertTypeState; // no specific state used
+export type MetricThresholdAlertTypeState = AlertTypeState & { groups: string[] }; // no specific state used
 export type MetricThresholdAlertInstanceState = AlertInstanceState; // no specific instace state used
 export type MetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instace state used
 
@@ -58,7 +58,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     MetricThresholdAlertInstanceContext,
     MetricThresholdAllowedActionGroups
   >(async function (options) {
-    const { services, params } = options;
+    const { services, params, state } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
@@ -80,14 +80,22 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       sourceId || 'default'
     );
     const config = source.configuration;
+
+    const prevGroups = state.groups ?? [];
+
     const alertResults = await evaluateAlert(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedAlertParams,
-      config
+      config,
+      prevGroups
     );
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.
-    const groups = Object.keys(first(alertResults)!);
+    const resultGroups = Object.keys(first(alertResults)!);
+    // Merge the list of currently fetched groups and previous groups, and uniquify them. This is necessary for reporting
+    // no data results on groups that get removed
+    const groups = [...new Set([...prevGroups, ...resultGroups])];
+
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
@@ -169,6 +177,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         });
       }
     }
+
+    return { groups };
   });
 
 export const FIRED_ACTIONS = {
