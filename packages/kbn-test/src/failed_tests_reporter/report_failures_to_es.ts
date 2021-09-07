@@ -39,7 +39,7 @@ export async function reportFailuresToEs(failures: TestFailure[]) {
   const body = failures.flatMap((failure) => [
     {
       index: {
-        _index: 'kibana_test_failures',
+        _index: 'test-failures',
       },
     },
     {
