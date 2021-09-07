@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PageTemplate } from './page_template';
 import { License } from '../../components';
 import { GlobalStateContext } from '../global_state_context';
-import { CODE_PATH_ALL, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import moment from 'moment-timezone';
+import { MonitoringTimeContainer } from './use_monitoring_time';
 
-const CODE_PATHS = [CODE_PATH_ALL];
+const CODE_PATHS = [CODE_PATH_LICENSE];
 
 export const LicensePage: React.FC<{}> = () => {
   const title = i18n.translate('xpack.monitoring.license.licenseRouteTitle', {
@@ -22,6 +23,15 @@ export const LicensePage: React.FC<{}> = () => {
   });
 
   const state = useContext(GlobalStateContext);
+  const { setIsDisabled } = useContext(MonitoringTimeContainer.Context);
+
+  useEffect(() => {
+    setIsDisabled(true);
+    return () => {
+      setIsDisabled(false);
+    };
+  }, []);
+
   const clusterUuid = state.cluster_uuid;
   const ccs = state.ccs;
   const { services } = useKibana<{ data: any }>();
