@@ -15,7 +15,7 @@ describe('Kibana deprecation details flyout', () => {
   let testBed: KibanaTestBed;
   const { server } = setupEnvironment();
   const {
-    defaultMockedResponses: { allKibanaDeprecations: mockedKibanaDeprecations },
+    defaultMockedResponses: { mockedKibanaDeprecations },
   } = kibanaDeprecationsServiceHelpers;
   const deprecationService = deprecationsServiceMock.createStartContract();
 

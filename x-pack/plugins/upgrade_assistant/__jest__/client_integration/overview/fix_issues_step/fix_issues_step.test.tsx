@@ -16,8 +16,8 @@ describe('Overview - Fix deprecation issues step', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   const {
-    criticalDeprecations: mockedCriticalKibanaDeprecations,
-    warningDeprecations: mockedWarningKibanaDeprecations,
+    mockedCriticalKibanaDeprecations,
+    mockedWarningKibanaDeprecations,
   } = kibanaDeprecationsServiceHelpers.defaultMockedResponses;
 
   beforeEach(async () => {
@@ -190,7 +190,9 @@ describe('Overview - Fix deprecation issues step', () => {
         });
       });
 
-      const { exists } = testBed;
+      const { exists, component } = testBed;
+
+      component.update();
 
       expect(exists('noDeprecationsLabel')).toBe(true);
       expect(exists('kibanaStatsPanel.warningDeprecations')).toBe(false);

@@ -25,7 +25,7 @@ describe('Error handling', () => {
       kibanaDeprecationsServiceHelpers.setLoadDeprecations({
         deprecationService,
         response: [
-          ...kibanaDeprecationsServiceHelpers.defaultMockedResponses.allKibanaDeprecations,
+          ...kibanaDeprecationsServiceHelpers.defaultMockedResponses.mockedKibanaDeprecations,
           {
             domainId: 'failed_plugin_id',
             title: 'Failed to fetch deprecations for "failed_plugin_id"',

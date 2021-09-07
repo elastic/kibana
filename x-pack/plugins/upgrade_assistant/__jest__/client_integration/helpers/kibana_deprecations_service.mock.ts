@@ -80,14 +80,14 @@ export const kibanaDeprecationsServiceHelpers = {
   setLoadDeprecations,
   setResolveDeprecations,
   defaultMockedResponses: {
-    allKibanaDeprecations: kibanaDeprecations,
-    criticalDeprecations: kibanaDeprecations.filter(
+    mockedKibanaDeprecations: kibanaDeprecations,
+    mockedCriticalKibanaDeprecations: kibanaDeprecations.filter(
       (deprecation) => deprecation.level === 'critical'
     ),
-    warningDeprecations: kibanaDeprecations.filter(
+    mockedWarningKibanaDeprecations: kibanaDeprecations.filter(
       (deprecation) => deprecation.level === 'warning'
     ),
-    configDeprecations: kibanaDeprecations.filter(
+    mockedConfigKibanaDeprecations: kibanaDeprecations.filter(
       (deprecation) => deprecation.deprecationType === 'config'
     ),
   },

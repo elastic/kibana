@@ -18,10 +18,10 @@ describe('Kibana deprecations table', () => {
 
   const { server } = setupEnvironment();
   const {
-    allKibanaDeprecations: mockedKibanaDeprecations,
-    criticalDeprecations: mockedCriticalKibanaDeprecations,
-    warningDeprecations: mockedWarningKibanaDeprecations,
-    configDeprecations: mockedConfigKibanaDeprecations,
+    mockedKibanaDeprecations,
+    mockedCriticalKibanaDeprecations,
+    mockedWarningKibanaDeprecations,
+    mockedConfigKibanaDeprecations,
   } = kibanaDeprecationsServiceHelpers.defaultMockedResponses;
 
   afterAll(() => {
