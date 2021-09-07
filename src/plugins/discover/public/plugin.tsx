@@ -320,8 +320,8 @@ export class DiscoverPlugin
         // make sure the index pattern list is up to date
         await depsStart.data.indexPatterns.clearCache();
 
-        const { renderApp } = await import('./application/application');
-        const unmount = await renderApp('discover', params.element);
+        const { renderApp } = await import('./application');
+        const unmount = await renderApp(params.element);
         return () => {
           params.element.classList.remove('dscAppWrapper');
           unlistenParentHistory();
