@@ -15,6 +15,7 @@
     "../../../typings/**/*"
   ],
   "references": [
+    { "path": "../spaces/tsconfig.json" },
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../task_manager/tsconfig.json" },
     { "path": "../global_search/tsconfig.json"},

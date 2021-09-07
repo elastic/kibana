@@ -17,9 +17,9 @@ import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { GlobalFlyout } from '../../../public/shared_imports';
+import { AppDependencies } from '../../../public/types';
 import { getAppContextMock } from './app_context.mock';
 import { init as initHttpRequests } from './http_requests';
-import { AppDependencies } from '../../../public/types';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
@@ -43,10 +43,11 @@ export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown
 };
 
 export const setupEnvironment = () => {
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
+  const { server, setServerAsync, httpRequestsMockHelpers } = initHttpRequests();
 
   return {
     server,
+    setServerAsync,
     httpRequestsMockHelpers,
   };
 };
