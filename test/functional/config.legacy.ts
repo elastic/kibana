@@ -19,10 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...defaultConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...defaultConfig.get('kbnTestServer.serverArgs'),
-        '--vis_type_table.legacyVisEnabled=true',
-      ],
+      serverArgs: [...defaultConfig.get('kbnTestServer.serverArgs')],
     },
   };
 }

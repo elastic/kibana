@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup } from 'kibana/public';
-
+import { CoreSetup } from 'kibana/public';
 import { TablePluginSetupDependencies, TablePluginStartDependencies } from './plugin';
 import { createTableVisFn } from './table_vis_fn';
 import { getTableVisRenderer } from './table_vis_renderer';
@@ -15,8 +14,7 @@ import { tableVisTypeDefinition } from './table_vis_type';
 
 export const registerTableVis = async (
   core: CoreSetup<TablePluginStartDependencies>,
-  { expressions, visualizations }: TablePluginSetupDependencies,
-  context: PluginInitializerContext
+  { expressions, visualizations }: TablePluginSetupDependencies
 ) => {
   const [coreStart] = await core.getStartServices();
   expressions.registerFunction(createTableVisFn);

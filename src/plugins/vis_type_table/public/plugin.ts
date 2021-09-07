@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, AsyncPlugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 
 import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService } from './services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
-
-interface ClientConfigType {
-  legacyVisEnabled: boolean;
-}
+import { registerTableVis } from './register_vis';
 
 /** @internal */
 export interface TablePluginSetupDependencies {
@@ -29,31 +25,13 @@ export interface TablePluginSetupDependencies {
 /** @internal */
 export interface TablePluginStartDependencies {
   data: DataPublicPluginStart;
-  kibanaLegacy: KibanaLegacyStart;
 }
 
 /** @internal */
 export class TableVisPlugin
-  implements AsyncPlugin<void, void, TablePluginSetupDependencies, TablePluginStartDependencies> {
-  initializerContext: PluginInitializerContext<ClientConfigType>;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.initializerContext = initializerContext;
-  }
-
-  public async setup(
-    core: CoreSetup<TablePluginStartDependencies>,
-    deps: TablePluginSetupDependencies
-  ) {
-    const { legacyVisEnabled } = this.initializerContext.config.get();
-
-    if (legacyVisEnabled) {
-      const { registerLegacyVis } = await import('./legacy');
-      registerLegacyVis(core, deps, this.initializerContext);
-    } else {
-      const { registerTableVis } = await import('./register_vis');
-      registerTableVis(core, deps, this.initializerContext);
-    }
+  implements Plugin<void, void, TablePluginSetupDependencies, TablePluginStartDependencies> {
+  public setup(core: CoreSetup<TablePluginStartDependencies>, deps: TablePluginSetupDependencies) {
+    registerTableVis(core, deps);
   }
 
   public start(core: CoreStart, { data }: TablePluginStartDependencies) {
