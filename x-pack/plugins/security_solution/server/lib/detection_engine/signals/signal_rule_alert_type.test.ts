@@ -195,6 +195,7 @@ describe('signal_rule_alert_type', () => {
       ml: mlMock,
       lists: listMock.createSetup(),
       mergeStrategy: 'missingFields',
+      ignoreFields: [],
       ruleDataService,
     });
 
