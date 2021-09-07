@@ -143,7 +143,7 @@ The <<task-manager-health-monitoring,Task Manager health API>> is useful to unde
 However, if connectors fail to execute, they will report as successful to Task Manager. The failure stats will not
 accurately depict the performance of connectors.
 
-To get a better sense of connector failures, please refer to the <<event-log-index,Event log index>>
+For more information on connector successes and failures, refer to the <<event-log-index,Event log index>>.
 for more accurate context into failures and successes.
 
 include::connectors/index.asciidoc[]
