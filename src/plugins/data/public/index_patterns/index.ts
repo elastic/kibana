@@ -11,7 +11,7 @@ export {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  validateIndexPattern,
+  validateDataView,
   isDefault,
 } from '../../common/index_patterns/lib';
 export {
@@ -28,6 +28,9 @@ export {
   IndexPatternsContract,
   IndexPattern,
   IndexPatternsApiClient,
+  DataViewsService,
+  DataViewsContract,
+  DataView,
 } from './index_patterns';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';

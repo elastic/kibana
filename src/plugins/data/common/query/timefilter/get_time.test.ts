@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { RangeFilter } from '@kbn/es-query';
 import moment from 'moment';
 import sinon from 'sinon';
 import { getTime, getAbsoluteTimeRange } from './get_time';
@@ -32,8 +33,8 @@ describe('get_time', () => {
           ],
         } as any,
         { from: 'now-60y', to: 'now' }
-      );
-      expect(filter!.range.date).toEqual({
+      ) as RangeFilter;
+      expect(filter.range.date).toEqual({
         gte: '1940-02-01T00:00:00.000Z',
         lte: '2000-02-01T00:00:00.000Z',
         format: 'strict_date_optional_time',
@@ -70,8 +71,8 @@ describe('get_time', () => {
         } as any,
         { from: 'now-60y', to: 'now' },
         { fieldName: 'myCustomDate' }
-      );
-      expect(filter!.range.myCustomDate).toEqual({
+      ) as RangeFilter;
+      expect(filter.range.myCustomDate).toEqual({
         gte: '1940-02-01T00:00:00.000Z',
         lte: '2000-02-01T00:00:00.000Z',
         format: 'strict_date_optional_time',

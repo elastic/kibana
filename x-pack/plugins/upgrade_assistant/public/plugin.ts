@@ -9,13 +9,15 @@ import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { SetupDependencies, StartDependencies, AppServicesContext } from './types';
+import { apiService } from './application/lib/api';
+import { breadcrumbService } from './application/lib/breadcrumbs';
+import { SetupDependencies, StartDependencies, AppDependencies } from './types';
 import { Config } from '../common/config';
 
 export class UpgradeAssistantUIPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
   constructor(private ctx: PluginInitializerContext) {}
-  setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies) {
+  setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud, share }: SetupDependencies) {
     const { enabled, readonly } = this.ctx.config.get<Config>();
 
     if (!enabled) {
@@ -32,8 +34,7 @@ export class UpgradeAssistantUIPlugin
     };
 
     const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {
-      defaultMessage: '{version} Upgrade Assistant',
-      values: { version: `${kibanaVersionInfo.nextMajor}.0` },
+      defaultMessage: 'Upgrade Assistant',
     });
 
     appRegistrar.registerApp({
@@ -42,7 +43,6 @@ export class UpgradeAssistantUIPlugin
       order: 1,
       async mount(params) {
         const [coreStart, { discover, data }] = await coreSetup.getStartServices();
-        const services: AppServicesContext = { discover, data, cloud };
 
         const {
           chrome: { docTitle },
@@ -50,14 +50,25 @@ export class UpgradeAssistantUIPlugin
 
         docTitle.change(pluginName);
 
-        const { mountManagementSection } = await import('./application/mount_management_section');
-        const unmountAppCallback = await mountManagementSection(
-          coreSetup,
-          params,
+        const appDependencies: AppDependencies = {
           kibanaVersionInfo,
-          readonly,
-          services
-        );
+          isReadOnlyMode: readonly,
+          plugins: {
+            cloud,
+            share,
+          },
+          services: {
+            core: coreStart,
+            data,
+            history: params.history,
+            discover,
+            api: apiService,
+            breadcrumbs: breadcrumbService,
+          },
+        };
+
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        const unmountAppCallback = mountManagementSection(params, appDependencies);
 
         return () => {
           docTitle.reset();

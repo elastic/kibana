@@ -92,7 +92,9 @@ import {
   EMAIL_CONNECTOR_PORT_INPUT,
   EMAIL_CONNECTOR_USER_INPUT,
   EMAIL_CONNECTOR_PASSWORD_INPUT,
+  EMAIL_CONNECTOR_SERVICE_SELECTOR,
 } from '../screens/create_new_rule';
+import { LOADING_INDICATOR } from '../screens/security_header';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
@@ -293,7 +295,8 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
 
-  const typeThresholdField = ($el: Cypress.ObjectLike) => cy.wrap($el).type(rule.thresholdField);
+  const typeThresholdField = ($el: Cypress.ObjectLike) =>
+    cy.wrap($el).type(rule.thresholdField, { delay: 35 });
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timeline.id!)).click();
@@ -301,6 +304,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
+      cy.wrap(inputs[thresholdField]).click();
       cy.wrap(inputs[thresholdField]).pipe(typeThresholdField);
       cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
       cy.wrap(inputs[threshold]).clear().type(rule.threshold);
@@ -399,6 +403,7 @@ export const fillIndexAndIndicatorIndexPattern = (
 
 export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {
   cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
+  cy.get(EMAIL_CONNECTOR_SERVICE_SELECTOR).select(connector.service);
   cy.get(EMAIL_CONNECTOR_FROM_INPUT).type(connector.from);
   cy.get(EMAIL_CONNECTOR_HOST_INPUT).type(connector.host);
   cy.get(EMAIL_CONNECTOR_PORT_INPUT).type(connector.port);
@@ -529,6 +534,7 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
       refreshPage();
+      cy.get(LOADING_INDICATOR).should('not.exist');
       return cy
         .get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')

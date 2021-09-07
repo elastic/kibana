@@ -26,6 +26,7 @@ import {
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
@@ -51,6 +52,7 @@ interface Props {
   }) => void;
   detailedStatsData?: ServiceInstanceDetailedStatistics;
   isLoading: boolean;
+  isNotInitiated: boolean;
 }
 export function ServiceOverviewInstancesTable({
   mainStatsItems = [],
@@ -61,8 +63,14 @@ export function ServiceOverviewInstancesTable({
   onChangeTableOptions,
   detailedStatsData: detailedStatsData,
   isLoading,
+  isNotInitiated,
 }: Props) {
   const { agentName } = useApmServiceContext();
+
+  const {
+    query: { kuery },
+  } = useApmParams('/services/:serviceName');
+
   const {
     urlParams: { latencyAggregationType, comparisonEnabled },
   } = useUrlParams();
@@ -103,6 +111,7 @@ export function ServiceOverviewInstancesTable({
         <InstanceDetails
           serviceNodeName={selectedServiceNodeName}
           serviceName={serviceName}
+          kuery={kuery}
         />
       );
     }
@@ -112,6 +121,7 @@ export function ServiceOverviewInstancesTable({
   const columns = getColumns({
     agentName,
     serviceName,
+    kuery,
     latencyAggregationType,
     detailedStatsData,
     comparisonEnabled,
@@ -143,13 +153,13 @@ export function ServiceOverviewInstancesTable({
         <TableFetchWrapper status={status}>
           <OverviewTableContainer
             fixedHeight={true}
-            isEmptyAndLoading={mainStatsItemCount === 0 && isLoading}
+            isEmptyAndNotInitiated={mainStatsItemCount === 0 && isNotInitiated}
           >
             <EuiBasicTable
               noItemsMessage={
                 isLoading
                   ? i18n.translate('xpack.apm.serviceOverview.loadingText', {
-                      defaultMessage: 'No instances found',
+                      defaultMessage: 'Loading…',
                     })
                   : i18n.translate('xpack.apm.serviceOverview.noResultsText', {
                       defaultMessage: 'No instances found',

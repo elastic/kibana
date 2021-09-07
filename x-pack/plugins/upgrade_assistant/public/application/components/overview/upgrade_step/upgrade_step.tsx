@@ -18,17 +18,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { DocLinksStart } from 'src/core/public';
-import { useKibana } from '../../../../shared_imports';
+import { useAppContext } from '../../../app_context';
 
 const i18nTexts = {
-  upgradeStepTitle: (currentMajor: number) =>
+  upgradeStepTitle: (nextMajor: number) =>
     i18n.translate('xpack.upgradeAssistant.overview.upgradeStepTitle', {
-      defaultMessage: 'Install {currentMajor}.0',
-      values: { currentMajor },
+      defaultMessage: 'Install {nextMajor}.0',
+      values: { nextMajor },
     }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage:
-      "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack.",
+      "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack. Be sure to back up your data again before upgrading.",
   }),
   upgradeStepDescriptionForCloud: i18n.translate(
     'xpack.upgradeAssistant.overview.upgradeStepDescriptionForCloud',
@@ -49,11 +49,10 @@ const i18nTexts = {
 };
 
 const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
-  const { cloud } = useKibana().services;
-
+  const {
+    plugins: { cloud },
+  } = useAppContext();
   const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
-  const cloudDeploymentUrl: string = `${cloud?.baseUrl ?? ''}/deployments/${cloud?.cloudId ?? ''}`;
-
   let callToAction;
 
   if (isCloudEnabled) {
@@ -61,7 +60,7 @@ const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
-            href={cloudDeploymentUrl}
+            href={cloud!.deploymentUrl}
             target="_blank"
             data-test-subj="upgradeSetupCloudLink"
             iconSide="right"
@@ -117,12 +116,12 @@ const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
 
 interface Props {
   docLinks: DocLinksStart;
-  currentMajor: number;
+  nextMajor: number;
 }
 
-export const getUpgradeStep = ({ docLinks, currentMajor }: Props): EuiStepProps => {
+export const getUpgradeStep = ({ docLinks, nextMajor }: Props): EuiStepProps => {
   return {
-    title: i18nTexts.upgradeStepTitle(currentMajor),
+    title: i18nTexts.upgradeStepTitle(nextMajor),
     status: 'incomplete',
     children: <UpgradeStep docLinks={docLinks} />,
   };

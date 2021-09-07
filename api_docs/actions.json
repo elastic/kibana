@@ -653,7 +653,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly to: string[]; readonly message: string; readonly cc: string[]; readonly bcc: string[]; readonly subject: string; readonly kibanaFooterLink: Readonly<{} & { text: string; path: string; }>; }"
+          "{ readonly to: string[]; readonly message: string; readonly cc: string[]; readonly bcc: string[]; readonly subject: string; readonly kibanaFooterLink: Readonly<{} & { path: string; text: string; }>; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
         "deprecated": false,
@@ -875,7 +875,7 @@
             "section": "def-common.ActionType",
             "text": "ActionType"
           },
-          "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; }"
+          "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; }"
         ],
         "path": "x-pack/plugins/actions/server/index.ts",
         "deprecated": false,
@@ -1091,6 +1091,36 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.isPreconfiguredConnector",
+          "type": "Function",
+          "tags": [],
+          "label": "isPreconfiguredConnector",
+          "description": [],
+          "signature": [
+            "(connectorId: string) => boolean"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.isPreconfiguredConnector.$1",
+              "type": "string",
+              "tags": [],
+              "label": "connectorId",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1248,7 +1278,7 @@
               "section": "def-server.ActionsClient",
               "text": "ActionsClient"
             },
-            ", \"get\" | \"delete\" | \"create\" | \"update\" | \"execute\" | \"getAll\" | \"getBulk\" | \"enqueueExecution\" | \"ephemeralEnqueuedExecution\" | \"listTypes\" | \"isActionTypeEnabled\">>"
+            ", \"get\" | \"delete\" | \"create\" | \"update\" | \"execute\" | \"getAll\" | \"getBulk\" | \"enqueueExecution\" | \"ephemeralEnqueuedExecution\" | \"listTypes\" | \"isActionTypeEnabled\" | \"isPreconfigured\">>"
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,

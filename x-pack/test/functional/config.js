@@ -59,7 +59,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
       resolve(__dirname, './apps/reporting'),
-      resolve(__dirname, './apps/observability'),
 
       //This upgrade assistant file needs to be run after the rest of the jobs because of
       //it being destructive.
@@ -98,6 +97,8 @@ export default async function ({ readConfigFile }) {
         '--timelion.ui.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
         '--xpack.observability.unsafe.cases.enabled=true',
+        '--xpack.siem.enabled=true', // Used to trigger Kibana deprecation warning in UA (renamed config)
+        '--xpack.observability.unsafe.alertingExperience.enabled=true', // NOTE: Can be removed once enabled by default
       ],
     },
     uiSettings: {
@@ -210,6 +211,9 @@ export default async function ({ readConfigFile }) {
       },
       securitySolution: {
         pathname: '/app/security',
+      },
+      observability: {
+        pathname: '/app/observability',
       },
     },
 
@@ -448,6 +452,12 @@ export default async function ({ readConfigFile }) {
         global_upgrade_assistant_role: {
           elasticsearch: {
             cluster: ['manage'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['view_index_metadata'],
+              },
+            ],
           },
           kibana: [
             {

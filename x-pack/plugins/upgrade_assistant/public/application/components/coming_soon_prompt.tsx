@@ -11,7 +11,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppContext } from '../app_context';
 
 export const ComingSoonPrompt: React.FunctionComponent = () => {
-  const { kibanaVersionInfo, docLinks } = useAppContext();
+  const {
+    kibanaVersionInfo,
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
+
   const { nextMajor, currentMajor } = kibanaVersionInfo;
   const { ELASTIC_WEBSITE_URL } = docLinks;
 

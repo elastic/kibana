@@ -29,7 +29,7 @@ import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DocumentationLinksService } from '../../lib';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { useSpaces } from '../../spaces_context';
-import type { ShareToSpaceTarget } from '../../types';
+import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
 import { NoSpacesAvailable } from './no_spaces_available';
 
@@ -39,7 +39,7 @@ const LazySpaceAvatar = lazy(() =>
 );
 
 interface Props {
-  spaces: ShareToSpaceTarget[];
+  spaces: SpacesDataEntry[];
   shareOptions: ShareOptions;
   onChange: (selectedSpaceIds: string[]) => void;
   enableCreateNewSpaceLink: boolean;
@@ -248,7 +248,7 @@ export const SelectableSpacesControl = (props: Props) => {
  * Gets additional props for the selection option.
  */
 function getAdditionalProps(
-  space: ShareToSpaceTarget,
+  space: SpacesDataEntry,
   activeSpaceId: string | false,
   checked: boolean
 ) {
@@ -259,7 +259,7 @@ function getAdditionalProps(
       checked: 'on' as 'on',
     };
   }
-  if (space.cannotShareToSpace) {
+  if (!space.isAuthorizedForPurpose('shareSavedObjectsIntoSpace')) {
     return {
       append: (
         <>
@@ -280,11 +280,11 @@ function getAdditionalProps(
 }
 
 /**
- * Given the active space, create a comparator to sort a ShareToSpaceTarget array so that the active space is at the beginning, and space(s) for
+ * Given the active space, create a comparator to sort a SpacesDataEntry array so that the active space is at the beginning, and space(s) for
  * which the current feature is disabled are all at the end.
  */
 function createSpacesComparator(activeSpaceId: string | false) {
-  return (a: ShareToSpaceTarget, b: ShareToSpaceTarget) => {
+  return (a: SpacesDataEntry, b: SpacesDataEntry) => {
     if (a.id === activeSpaceId) {
       return -1;
     }

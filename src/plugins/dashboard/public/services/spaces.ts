@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { SpacesOssPluginStart } from '../../../spaces_oss/public';
+export { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';

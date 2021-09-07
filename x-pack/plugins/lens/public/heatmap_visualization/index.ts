@@ -20,27 +20,14 @@ export interface HeatmapVisualizationPluginSetupPlugins {
 }
 
 export class HeatmapVisualization {
-  constructor() {}
-
   setup(
     core: CoreSetup,
     { expressions, formatFactory, editorFrame, charts }: HeatmapVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
       const timeZone = getTimeZone(core.uiSettings);
-
-      const {
-        getHeatmapVisualization,
-        heatmap,
-        heatmapLegendConfig,
-        heatmapGridConfig,
-        getHeatmapRenderer,
-      } = await import('../async_services');
+      const { getHeatmapVisualization, getHeatmapRenderer } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
-
-      expressions.registerFunction(() => heatmap);
-      expressions.registerFunction(() => heatmapLegendConfig);
-      expressions.registerFunction(() => heatmapGridConfig);
 
       expressions.registerRenderer(
         getHeatmapRenderer({

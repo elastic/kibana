@@ -7,7 +7,6 @@
 
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import { safeLoad } from 'js-yaml';
 import { keyBy } from 'lodash';
 
 import type {
@@ -47,7 +46,8 @@ export type PackagePolicyValidationResults = {
  */
 export const validatePackagePolicy = (
   packagePolicy: NewPackagePolicy,
-  packageInfo: PackageInfo
+  packageInfo: PackageInfo,
+  safeLoadYaml: (yaml: string) => any
 ): PackagePolicyValidationResults => {
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const validationResults: PackagePolicyValidationResults = {
@@ -75,7 +75,12 @@ export const validatePackagePolicy = (
   const packageVars = Object.entries(packagePolicy.vars || {});
   if (packageVars.length) {
     validationResults.vars = packageVars.reduce((results, [name, varEntry]) => {
-      results[name] = validatePackagePolicyConfig(varEntry, packageVarsByName[name]);
+      results[name] = validatePackagePolicyConfig(
+        varEntry,
+        packageVarsByName[name],
+        name,
+        safeLoadYaml
+      );
       return results;
     }, {} as ValidationEntry);
   }
@@ -97,12 +102,14 @@ export const validatePackagePolicy = (
   >((varDefs, policyTemplate) => {
     (policyTemplate.inputs || []).forEach((input) => {
       const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
+
       if ((input.vars || []).length) {
         varDefs[varDefKey] = keyBy(input.vars || [], 'name');
       }
     });
     return varDefs;
   }, {});
+
   const streamsByDatasetAndInput = (packageInfo.data_streams || []).reduce<
     Record<string, RegistryStream>
   >((streams, dataStream) => {
@@ -136,7 +143,9 @@ export const validatePackagePolicy = (
         results[name] = input.enabled
           ? validatePackagePolicyConfig(
               configEntry,
-              inputVarDefsByPolicyTemplateAndType[inputKey][name]
+              inputVarDefsByPolicyTemplateAndType[inputKey][name],
+              name,
+              safeLoadYaml
             )
           : null;
         return results;
@@ -149,6 +158,7 @@ export const validatePackagePolicy = (
     if (input.streams.length) {
       input.streams.forEach((stream) => {
         const streamValidationResults: PackagePolicyConfigValidationResults = {};
+
         const streamVarDefs =
           streamVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
 
@@ -157,8 +167,13 @@ export const validatePackagePolicy = (
           streamValidationResults.vars = Object.entries(stream.vars).reduce(
             (results, [name, configEntry]) => {
               results[name] =
-                streamVarDefs[name] && input.enabled && stream.enabled
-                  ? validatePackagePolicyConfig(configEntry, streamVarDefs[name])
+                streamVarDefs && streamVarDefs[name] && input.enabled && stream.enabled
+                  ? validatePackagePolicyConfig(
+                      configEntry,
+                      streamVarDefs[name],
+                      name,
+                      safeLoadYaml
+                    )
                   : null;
               return results;
             },
@@ -180,12 +195,15 @@ export const validatePackagePolicy = (
   if (Object.entries(validationResults.inputs!).length === 0) {
     validationResults.inputs = null;
   }
+
   return validationResults;
 };
 
 export const validatePackagePolicyConfig = (
   configEntry: PackagePolicyConfigRecordEntry,
-  varDef: RegistryVarsEntry
+  varDef: RegistryVarsEntry,
+  varName: string,
+  safeLoadYaml: (yaml: string) => any
 ): string[] | null => {
   const errors = [];
   const { value } = configEntry;
@@ -193,6 +211,13 @@ export const validatePackagePolicyConfig = (
 
   if (typeof value === 'string') {
     parsedValue = value.trim();
+  }
+
+  if (varDef === undefined) {
+    // eslint-disable-next-line no-console
+    console.debug(`No variable definition for ${varName} found`);
+
+    return null;
   }
 
   if (varDef.required) {
@@ -210,7 +235,7 @@ export const validatePackagePolicyConfig = (
 
   if (varDef.type === 'yaml') {
     try {
-      parsedValue = safeLoad(value);
+      parsedValue = safeLoadYaml(value);
     } catch (e) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage', {
@@ -264,6 +289,18 @@ export const validatePackagePolicyConfig = (
         })
       );
     }
+  }
+
+  if (
+    varDef.type === 'bool' &&
+    parsedValue &&
+    !['true', 'false'].includes(parsedValue.toString())
+  ) {
+    errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.boolValueError', {
+        defaultMessage: 'Boolean values must be either true or false',
+      })
+    );
   }
 
   return errors.length ? errors : null;

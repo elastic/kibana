@@ -132,7 +132,6 @@ export class DataPublicPlugin
         usageCollection,
       }),
       search: searchService,
-      fieldFormats,
       query: queryService,
     };
   }
@@ -203,6 +202,7 @@ export class DataPublicPlugin
       autocomplete: this.autocomplete.start(),
       fieldFormats,
       indexPatterns,
+      dataViews: indexPatterns,
       query,
       search,
       nowProvider: this.nowProvider,

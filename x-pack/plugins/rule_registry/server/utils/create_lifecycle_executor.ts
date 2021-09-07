@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
-import { Mutable } from 'utility-types';
 import { v4 } from 'uuid';
 import {
   AlertExecutorOptions,
@@ -23,21 +22,35 @@ import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_
 import {
   ALERT_DURATION,
   ALERT_END,
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
   ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
   TIMESTAMP,
-  SPACE_IDS,
+  VERSION,
 } from '../../common/technical_rule_data_field_names';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
-import { getRuleData } from './get_rule_executor_data';
+import {
+  CommonAlertFieldName,
+  CommonAlertIdFieldName,
+  getCommonAlertFields,
+} from './get_common_alert_fields';
+
+type ImplicitTechnicalFieldName = CommonAlertFieldName | CommonAlertIdFieldName;
+
+type ExplicitTechnicalAlertFields = Partial<
+  Omit<ParsedTechnicalFields, ImplicitTechnicalFieldName>
+>;
+
+type ExplicitAlertFields = Record<string, unknown> & // every field can have values of arbitrary types
+  ExplicitTechnicalAlertFields; // but technical fields must obey their respective type
 
 export type LifecycleAlertService<
   InstanceState extends AlertInstanceState = never,
@@ -45,7 +58,7 @@ export type LifecycleAlertService<
   ActionGroupIds extends string = never
 > = (alert: {
   id: string;
-  fields: Record<string, unknown> & Partial<Omit<ParsedTechnicalFields, typeof ALERT_ID>>;
+  fields: ExplicitAlertFields;
 }) => AlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
 
 export interface LifecycleAlertServices<
@@ -127,13 +140,9 @@ export const createLifecycleExecutor = (
   >
 ): Promise<WrappedLifecycleRuleState<State>> => {
   const {
-    rule,
     services: { alertInstanceFactory },
     state: previousState,
-    spaceId,
   } = options;
-
-  const ruleExecutorData = getRuleData(options);
 
   const state = getOrElse(
     (): WrappedLifecycleRuleState<State> => ({
@@ -142,9 +151,9 @@ export const createLifecycleExecutor = (
     })
   )(wrappedStateRt<State>().decode(previousState));
 
-  const currentAlerts: Record<string, Partial<ParsedTechnicalFields>> = {};
+  const commonRuleFields = getCommonAlertFields(options);
 
-  const timestamp = options.startedAt.toISOString();
+  const currentAlerts: Record<string, ExplicitAlertFields> = {};
 
   const lifecycleAlertServices: LifecycleAlertServices<
     InstanceState,
@@ -152,12 +161,7 @@ export const createLifecycleExecutor = (
     ActionGroupIds
   > = {
     alertWithLifecycle: ({ id, fields }) => {
-      currentAlerts[id] = {
-        ...fields,
-        [ALERT_ID]: id,
-        [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
-        [ALERT_RULE_CONSUMER]: rule.consumer,
-      };
+      currentAlerts[id] = fields;
       return alertInstanceFactory(id);
     },
   };
@@ -174,22 +178,20 @@ export const createLifecycleExecutor = (
   const currentAlertIds = Object.keys(currentAlerts);
   const trackedAlertIds = Object.keys(state.trackedAlerts);
   const newAlertIds = currentAlertIds.filter((alertId) => !trackedAlertIds.includes(alertId));
-
   const allAlertIds = [...new Set(currentAlertIds.concat(trackedAlertIds))];
 
-  const trackedAlertStatesOfRecovered = Object.values(state.trackedAlerts).filter(
-    (trackedAlertState) => !currentAlerts[trackedAlertState.alertId]
-  );
+  const trackedAlertStates = Object.values(state.trackedAlerts);
 
   logger.debug(
-    `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStatesOfRecovered.length} recovered)`
+    `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
   );
 
-  const alertsDataMap: Record<string, Partial<ParsedTechnicalFields>> = {
-    ...currentAlerts,
-  };
+  const trackedAlertsDataMap: Record<
+    string,
+    { indexName: string; fields: Partial<ParsedTechnicalFields> }
+  > = {};
 
-  if (trackedAlertStatesOfRecovered.length) {
+  if (trackedAlertStates.length) {
     const { hits } = await ruleDataClient.getReader().search({
       body: {
         query: {
@@ -197,12 +199,12 @@ export const createLifecycleExecutor = (
             filter: [
               {
                 term: {
-                  [ALERT_RULE_UUID]: ruleExecutorData[ALERT_RULE_UUID],
+                  [ALERT_RULE_UUID]: commonRuleFields[ALERT_RULE_UUID],
                 },
               },
               {
                 terms: {
-                  [ALERT_UUID]: trackedAlertStatesOfRecovered.map(
+                  [ALERT_UUID]: trackedAlertStates.map(
                     (trackedAlertState) => trackedAlertState.alertUuid
                   ),
                 },
@@ -210,7 +212,7 @@ export const createLifecycleExecutor = (
             ],
           },
         },
-        size: trackedAlertStatesOfRecovered.length,
+        size: trackedAlertStates.length,
         collapse: {
           field: ALERT_UUID,
         },
@@ -225,91 +227,78 @@ export const createLifecycleExecutor = (
 
     hits.hits.forEach((hit) => {
       const fields = parseTechnicalFields(hit.fields);
-      const alertId = fields[ALERT_ID]!;
-      alertsDataMap[alertId] = {
-        ...fields,
-        [ALERT_ID]: alertId,
-        [ALERT_RULE_TYPE_ID]: rule.ruleTypeId,
-        [ALERT_RULE_CONSUMER]: rule.consumer,
+      const indexName = hit._index;
+      const alertId = fields[ALERT_INSTANCE_ID];
+      trackedAlertsDataMap[alertId] = {
+        indexName,
+        fields,
       };
     });
   }
 
-  const eventsToIndex = allAlertIds.map((alertId) => {
-    const alertData = alertsDataMap[alertId];
+  const makeEventsDataMapFor = (alertIds: string[]) =>
+    alertIds.map((alertId) => {
+      const alertData = trackedAlertsDataMap[alertId];
+      const currentAlertData = currentAlerts[alertId];
 
-    if (!alertData) {
-      logger.warn(`Could not find alert data for ${alertId}`);
-    }
+      if (!alertData) {
+        logger.warn(`Could not find alert data for ${alertId}`);
+      }
 
-    const event: Mutable<ParsedTechnicalFields> = {
-      ...alertData,
-      ...ruleExecutorData,
-      [TIMESTAMP]: timestamp,
-      [EVENT_KIND]: 'signal',
-      [ALERT_RULE_CONSUMER]: rule.consumer,
-      [ALERT_ID]: alertId,
-    } as ParsedTechnicalFields;
+      const isNew = !state.trackedAlerts[alertId];
+      const isRecovered = !currentAlerts[alertId];
+      const isActive = !isRecovered;
 
-    const isNew = !state.trackedAlerts[alertId];
-    const isRecovered = !currentAlerts[alertId];
-    const isActiveButNotNew = !isNew && !isRecovered;
-    const isActive = !isRecovered;
+      const { alertUuid, started } = state.trackedAlerts[alertId] ?? {
+        alertUuid: v4(),
+        started: commonRuleFields[TIMESTAMP],
+      };
 
-    const { alertUuid, started } = state.trackedAlerts[alertId] ?? {
-      alertUuid: v4(),
-      started: timestamp,
-    };
+      const event: ParsedTechnicalFields = {
+        ...alertData?.fields,
+        ...commonRuleFields,
+        ...currentAlertData,
+        [ALERT_DURATION]: (options.startedAt.getTime() - new Date(started).getTime()) * 1000,
 
-    event[ALERT_START] = started;
-    event[ALERT_UUID] = alertUuid;
+        [ALERT_INSTANCE_ID]: alertId,
+        [ALERT_START]: started,
+        [ALERT_UUID]: alertUuid,
+        [ALERT_STATUS]: isRecovered ? ALERT_STATUS_RECOVERED : ALERT_STATUS_ACTIVE,
+        [ALERT_WORKFLOW_STATUS]: alertData?.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
+        [EVENT_KIND]: 'signal',
+        [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
+        [VERSION]: ruleDataClient.kibanaVersion,
+        ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
+      };
 
-    // not sure why typescript needs the non-null assertion here
-    // we already assert the value is not undefined with the ternary
-    // still getting an error with the ternary.. strange.
+      return {
+        indexName: alertData?.indexName,
+        event,
+      };
+    });
 
-    event[SPACE_IDS] =
-      event[SPACE_IDS] == null
-        ? [spaceId]
-        : [spaceId, ...event[SPACE_IDS]!.filter((sid) => sid !== spaceId)];
+  const trackedEventsToIndex = makeEventsDataMapFor(trackedAlertIds);
+  const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
+  const allEventsToIndex = [...trackedEventsToIndex, ...newEventsToIndex];
 
-    if (isNew) {
-      event[EVENT_ACTION] = 'open';
-    }
-
-    if (isRecovered) {
-      event[ALERT_END] = timestamp;
-      event[EVENT_ACTION] = 'close';
-      event[ALERT_STATUS] = 'closed';
-    }
-
-    if (isActiveButNotNew) {
-      event[EVENT_ACTION] = 'active';
-    }
-
-    if (isActive) {
-      event[ALERT_STATUS] = 'open';
-    }
-
-    event[ALERT_DURATION] =
-      (options.startedAt.getTime() - new Date(event[ALERT_START]!).getTime()) * 1000;
-
-    return event;
-  });
-
-  if (eventsToIndex.length > 0 && ruleDataClient.isWriteEnabled()) {
-    logger.debug(`Preparing to index ${eventsToIndex.length} alerts.`);
+  if (allEventsToIndex.length > 0 && ruleDataClient.isWriteEnabled()) {
+    logger.debug(`Preparing to index ${allEventsToIndex.length} alerts.`);
 
     await ruleDataClient.getWriter().bulk({
-      body: eventsToIndex.flatMap((event) => [{ index: { _id: event[ALERT_UUID]! } }, event]),
+      body: allEventsToIndex.flatMap(({ event, indexName }) => [
+        indexName
+          ? { index: { _id: event[ALERT_UUID]!, _index: indexName, require_alias: false } }
+          : { index: { _id: event[ALERT_UUID]! } },
+        event,
+      ]),
     });
   }
 
   const nextTrackedAlerts = Object.fromEntries(
-    eventsToIndex
-      .filter((event) => event[ALERT_STATUS] !== 'closed')
-      .map((event) => {
-        const alertId = event[ALERT_ID]!;
+    allEventsToIndex
+      .filter(({ event }) => event[ALERT_STATUS] !== 'closed')
+      .map(({ event }) => {
+        const alertId = event[ALERT_INSTANCE_ID]!;
         const alertUuid = event[ALERT_UUID]!;
         const started = new Date(event[ALERT_START]!).toISOString();
         return [alertId, { alertId, alertUuid, started }];

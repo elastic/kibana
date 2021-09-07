@@ -11,9 +11,8 @@ import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { getKibanaUpgradeStatus } from '../lib/kibana_status';
 import { RouteDependencies } from '../types';
-import { handleEsError } from '../shared_imports';
 
-export function registerUpgradeStatusRoute({ router }: RouteDependencies) {
+export function registerUpgradeStatusRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/status`,
@@ -46,14 +45,14 @@ export function registerUpgradeStatusRoute({ router }: RouteDependencies) {
               return i18n.translate(
                 'xpack.upgradeAssistant.status.allDeprecationsResolvedMessage',
                 {
-                  defaultMessage: 'All deprecation issues have been resolved.',
+                  defaultMessage: 'All deprecation warnings have been resolved.',
                 }
               );
             }
 
             return i18n.translate('xpack.upgradeAssistant.status.deprecationsUnresolvedMessage', {
               defaultMessage:
-                'You have {esTotalCriticalDeps} Elasticsearch deprecation issues and {kibanaTotalCriticalDeps} Kibana deprecation issues that must be resolved before upgrading.',
+                'You have {esTotalCriticalDeps} Elasticsearch deprecation warnings and {kibanaTotalCriticalDeps} Kibana deprecation warnings that must be resolved before upgrading.',
               values: { esTotalCriticalDeps, kibanaTotalCriticalDeps },
             });
           };
@@ -64,8 +63,8 @@ export function registerUpgradeStatusRoute({ router }: RouteDependencies) {
               details: getStatusMessage(),
             },
           });
-        } catch (e) {
-          return handleEsError({ error: e, response });
+        } catch (error) {
+          return handleEsError({ error, response });
         }
       }
     )

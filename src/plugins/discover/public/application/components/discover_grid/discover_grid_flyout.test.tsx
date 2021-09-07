@@ -144,9 +144,7 @@ describe('Discover flyout', function () {
     expect(props.setExpandedDoc.mock.calls[0][0]._id).toBe('4');
   });
 
-  // EuiFlyout is mocked in Jest environments.
-  // EUI team to reinstate `onKeyDown`: https://github.com/elastic/eui/issues/4883
-  it.skip('allows navigating with arrow keys through documents', () => {
+  it('allows navigating with arrow keys through documents', () => {
     const props = getProps();
     const component = mountWithIntl(<DiscoverGridFlyout {...props} />);
     findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });

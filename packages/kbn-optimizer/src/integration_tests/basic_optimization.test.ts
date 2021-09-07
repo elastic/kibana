@@ -132,7 +132,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(foo.cache.getModuleCount()).toBe(6);
   expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps/target/public_path_module_creator.js,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps/target_node/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
@@ -155,7 +155,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/node_modules/@kbn/optimizer/postcss.config.js,
       <absolute path>/node_modules/css-loader/package.json,
       <absolute path>/node_modules/style-loader/package.json,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps/target/public_path_module_creator.js,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps/target_node/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
@@ -175,7 +175,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   expect(baz.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps/target/public_path_module_creator.js,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps/target_node/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,

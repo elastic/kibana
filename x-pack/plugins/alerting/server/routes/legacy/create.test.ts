@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
 import { createAlertRoute } from './create';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';

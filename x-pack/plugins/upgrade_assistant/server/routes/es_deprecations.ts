@@ -12,7 +12,12 @@ import { RouteDependencies } from '../types';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../lib/reindexing';
 
-export function registerESDeprecationRoutes({ router, licensing, log }: RouteDependencies) {
+export function registerESDeprecationRoutes({
+  router,
+  lib: { handleEsError },
+  licensing,
+  log,
+}: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/es_deprecations`,
@@ -40,7 +45,7 @@ export function registerESDeprecationRoutes({ router, licensing, log }: RouteDep
             log,
             licensing
           );
-          const indexNames = status.indices
+          const indexNames = status.deprecations
             .filter(({ index }) => typeof index !== 'undefined')
             .map(({ index }) => index as string);
 
@@ -49,12 +54,8 @@ export function registerESDeprecationRoutes({ router, licensing, log }: RouteDep
           return response.ok({
             body: status,
           });
-        } catch (e) {
-          if (e.statusCode === 403) {
-            return response.forbidden(e.message);
-          }
-
-          throw e;
+        } catch (error) {
+          return handleEsError({ error, response });
         }
       }
     )

@@ -1741,83 +1741,6 @@
       },
       {
         "parentPluginId": "fieldFormats",
-        "id": "def-common.FieldFormatNotFoundError",
-        "type": "Class",
-        "tags": [],
-        "label": "FieldFormatNotFoundError",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatNotFoundError",
-            "text": "FieldFormatNotFoundError"
-          },
-          " extends Error"
-        ],
-        "path": "src/plugins/field_formats/common/errors.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.FieldFormatNotFoundError.formatId",
-            "type": "string",
-            "tags": [],
-            "label": "formatId",
-            "description": [],
-            "path": "src/plugins/field_formats/common/errors.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.FieldFormatNotFoundError.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/field_formats/common/errors.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.FieldFormatNotFoundError.Unnamed.$1",
-                "type": "string",
-                "tags": [],
-                "label": "message",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/field_formats/common/errors.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fieldFormats",
-                "id": "def-common.FieldFormatNotFoundError.Unnamed.$2",
-                "type": "string",
-                "tags": [],
-                "label": "formatId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/field_formats/common/errors.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fieldFormats",
         "id": "def-common.FieldFormatsRegistry",
         "type": "Class",
         "tags": [],
@@ -4231,7 +4154,7 @@
         "label": "FieldFormatsContentType",
         "description": [],
         "signature": [
-          "\"html\" | \"text\""
+          "\"text\" | \"html\""
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
@@ -4244,7 +4167,7 @@
         "tags": [],
         "label": "FieldFormatsGetConfigFn",
         "description": [
-          "\nIf a service is being shared on both the client and the server, and\nthe client code requires synchronous access to uiSettings, both client\nand server should wrap the core uiSettings services in a function\nmatching this signature.\n\nThis matches the signature of the public `core.uiSettings.get`, and\nshould only be used in scenarios where async access to uiSettings is\nnot possible."
+          "\nIf a service is being shared on both the client and the server, and\nthe client code requires synchronous access to uiSettings, both client\nand server should wrap the core uiSettings services in a function\nmatching this signature.\n\nThis matches the signature of the public `core.uiSettings.get`, and\nshould only be used in scenarios where async access to uiSettings is\nnot possible.\n"
         ],
         "signature": [
           "<T = any>(key: string, defaultOverride?: T | undefined) => T"
@@ -4435,7 +4358,7 @@
         "label": "HTML_CONTEXT_TYPE",
         "description": [],
         "signature": [
-          "\"html\" | \"text\""
+          "\"text\" | \"html\""
         ],
         "path": "src/plugins/field_formats/common/content_types/html_content_type.ts",
         "deprecated": false,
@@ -4577,7 +4500,7 @@
         "label": "TEXT_CONTEXT_TYPE",
         "description": [],
         "signature": [
-          "\"html\" | \"text\""
+          "\"text\" | \"html\""
         ],
         "path": "src/plugins/field_formats/common/content_types/text_content_type.ts",
         "deprecated": false,

@@ -6,7 +6,7 @@
  */
 
 import { pick } from 'lodash';
-import { MockedLogger, loggerMock } from '@kbn/logging/target/mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
 import { createRuleRoute } from './create_rule';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';

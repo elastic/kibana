@@ -232,14 +232,6 @@ export interface ChromeBadge {
 }
 
 // @public (undocumented)
-export interface ChromeBrand {
-    // (undocumented)
-    logo?: string;
-    // (undocumented)
-    smallLogo?: string;
-}
-
-// @public (undocumented)
 export type ChromeBreadcrumb = EuiBreadcrumb;
 
 // @public
@@ -355,11 +347,8 @@ export interface ChromeRecentlyAccessedHistoryItem {
 
 // @public
 export interface ChromeStart {
-    addApplicationClass(className: string): void;
     docTitle: ChromeDocTitle;
-    getApplicationClasses$(): Observable<string[]>;
     getBadge$(): Observable<ChromeBadge | undefined>;
-    getBrand$(): Observable<ChromeBrand>;
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
     // Warning: (ae-forgotten-export) The symbol "ChromeBreadcrumbsAppendExtension" needs to be exported by the entry point index.d.ts
     getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | undefined>;
@@ -370,10 +359,7 @@ export interface ChromeStart {
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
-    removeApplicationClass(className: string): void;
-    setAppTitle(appTitle: string): void;
     setBadge(badge?: ChromeBadge): void;
-    setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
     setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension): void;
     setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
@@ -488,6 +474,14 @@ export interface DocLinksStart {
     // (undocumented)
     readonly links: {
         readonly settings: string;
+        readonly apm: {
+            readonly kibanaSettings: string;
+            readonly supportedServiceMaps: string;
+            readonly customLinks: string;
+            readonly droppedTransactionSpans: string;
+            readonly upgrading: string;
+            readonly metaData: string;
+        };
         readonly canvas: {
             readonly guide: string;
         };
@@ -607,6 +601,7 @@ export interface DocLinksStart {
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
+            readonly privileges: string;
             readonly guide: string;
             readonly gettingStarted: string;
             readonly ml: string;

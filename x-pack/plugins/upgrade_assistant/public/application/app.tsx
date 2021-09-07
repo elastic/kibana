@@ -7,24 +7,15 @@
 
 import React from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { I18nStart, ScopedHistory } from 'src/core/public';
+import { ScopedHistory } from 'src/core/public';
 
-import { ApplicationStart } from 'kibana/public';
-import { KibanaContextProvider } from '../shared_imports';
-import { AppServicesContext } from '../types';
-import { AppContextProvider, ContextValue, useAppContext } from './app_context';
-import { ComingSoonPrompt } from './components/coming_soon_prompt';
-import { EsDeprecationsContent } from './components/es_deprecations';
-import { KibanaDeprecationsContent } from './components/kibana_deprecations';
-import { Overview } from './components/overview';
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
+import { APP_WRAPPER_CLASS, GlobalFlyout } from '../shared_imports';
+import { AppDependencies } from '../types';
+import { AppContextProvider, useAppContext } from './app_context';
+import { EsDeprecations, ComingSoonPrompt, KibanaDeprecations, Overview } from './components';
 
-export interface AppDependencies extends ContextValue {
-  i18n: I18nStart;
-  history: ScopedHistory;
-  application: ApplicationStart;
-  services: AppServicesContext;
-}
+const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const App: React.FunctionComponent = () => {
   const { isReadOnlyMode } = useAppContext();
@@ -37,8 +28,8 @@ const App: React.FunctionComponent = () => {
   return (
     <Switch>
       <Route exact path="/overview" component={Overview} />
-      <Route exact path="/es_deprecations/:tabName" component={EsDeprecationsContent} />
-      <Route exact path="/kibana_deprecations" component={KibanaDeprecationsContent} />
+      <Route exact path="/es_deprecations" component={EsDeprecations} />
+      <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
       <Redirect from="/" to="/overview" />
     </Switch>
   );
@@ -52,21 +43,20 @@ export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
   );
 };
 
-export const RootComponent = ({
-  i18n,
-  history,
-  services,
-  application,
-  ...contextValue
-}: AppDependencies) => {
+export const RootComponent = (dependencies: AppDependencies) => {
+  const {
+    history,
+    core: { i18n, application },
+  } = dependencies.services;
+
   return (
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
       <i18n.Context>
-        <KibanaContextProvider services={services}>
-          <AppContextProvider value={contextValue}>
+        <AppContextProvider value={dependencies}>
+          <GlobalFlyoutProvider>
             <AppWithRouter history={history} />
-          </AppContextProvider>
-        </KibanaContextProvider>
+          </GlobalFlyoutProvider>
+        </AppContextProvider>
       </i18n.Context>
     </RedirectAppLinks>
   );
