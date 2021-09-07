@@ -78,7 +78,6 @@ export function getColumns({
       sortable: true,
       name: getLatencyColumnLabel(latencyAggregationType),
       align: RIGHT_ALIGNMENT,
-      width: 'auto',
       render: (_, { latency, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.latency;
@@ -106,7 +105,6 @@ export function getColumns({
         { defaultMessage: 'Throughput' }
       ),
       align: RIGHT_ALIGNMENT,
-      width: 'auto',
       render: (_, { throughput, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.throughput;
@@ -135,7 +133,6 @@ export function getColumns({
         { defaultMessage: 'Failed transaction rate' }
       ),
       align: RIGHT_ALIGNMENT,
-      width: 'auto',
       render: (_, { errorRate, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.errorRate;

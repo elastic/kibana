@@ -150,17 +150,16 @@ export function getServiceColumns({
       dataType: 'number',
       render: (_, { serviceName, latency }) => (
         <ListMetric
-          hideSeries={!showWhenSmallOrGreaterThanLarge}
           series={comparisonData?.currentPeriod[serviceName]?.latency}
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.latency
           }
+          hideSeries={!showWhenSmallOrGreaterThanLarge}
           color="euiColorVis1"
           valueLabel={asMillisecondDuration(latency || 0)}
         />
       ),
       align: RIGHT_ALIGNMENT,
-      width: 'auto',
     },
     {
       field: 'throughput',
@@ -171,17 +170,16 @@ export function getServiceColumns({
       dataType: 'number',
       render: (_, { serviceName, throughput }) => (
         <ListMetric
-          hideSeries={!showWhenSmallOrGreaterThanLarge}
           series={comparisonData?.currentPeriod[serviceName]?.throughput}
           comparisonSeries={
             comparisonData?.previousPeriod[serviceName]?.throughput
           }
+          hideSeries={!showWhenSmallOrGreaterThanLarge}
           color="euiColorVis0"
           valueLabel={asTransactionRate(throughput)}
         />
       ),
       align: RIGHT_ALIGNMENT,
-      width: 'auto',
     },
     {
       field: 'transactionErrorRate',
@@ -194,20 +192,19 @@ export function getServiceColumns({
         const valueLabel = asPercent(transactionErrorRate, 1);
         return (
           <ListMetric
-            hideSeries={!showWhenSmallOrGreaterThanLarge}
             series={
               comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
             }
             comparisonSeries={
               comparisonData?.previousPeriod[serviceName]?.transactionErrorRate
             }
+            hideSeries={!showWhenSmallOrGreaterThanLarge}
             color="euiColorVis7"
             valueLabel={valueLabel}
           />
         );
       },
       align: RIGHT_ALIGNMENT,
-      width: 'auto',
     },
   ];
 }

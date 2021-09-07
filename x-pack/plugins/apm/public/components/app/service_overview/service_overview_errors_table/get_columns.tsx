@@ -59,7 +59,6 @@ export function getColumns({
         }
       ),
       align: RIGHT_ALIGNMENT,
-      width: 'auto',
       render: (_, { lastSeen }) => {
         return (
           <span style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
@@ -77,7 +76,6 @@ export function getColumns({
         }
       ),
       align: RIGHT_ALIGNMENT,
-      width: 'auto',
       render: (_, { occurrences, group_id: errorGroupId }) => {
         const currentPeriodTimeseries =
           errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]

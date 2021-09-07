@@ -80,7 +80,6 @@ export function DependenciesTable(props: Props) {
         defaultMessage: 'Latency (avg.)',
       }),
       align: RIGHT_ALIGNMENT,
-      width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
           <ListMetric
@@ -101,7 +100,6 @@ export function DependenciesTable(props: Props) {
         defaultMessage: 'Throughput',
       }),
       align: RIGHT_ALIGNMENT,
-      width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
           <ListMetric
@@ -122,7 +120,6 @@ export function DependenciesTable(props: Props) {
         defaultMessage: 'Failed transaction rate',
       }),
       align: RIGHT_ALIGNMENT,
-      width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
           <ListMetric
