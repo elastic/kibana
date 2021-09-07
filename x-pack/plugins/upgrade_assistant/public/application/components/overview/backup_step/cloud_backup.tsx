@@ -50,7 +50,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   }, [data]);
 
   if (isInitialRequest && isLoading) {
-    return <EuiLoadingContent lines={3} />;
+    return <EuiLoadingContent data-test-subj="cloudBackupLoading" lines={3} />;
   }
 
   if (error) {
@@ -78,7 +78,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   const lastBackupTime = moment(data!.lastBackupTime).toISOString();
 
   const statusMessage = data!.isBackedUp ? (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="dataBackedUpStatus">
       <EuiFlexItem grow={false}>
         <EuiIcon type="check" color="success" />
       </EuiFlexItem>
@@ -108,7 +108,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="dataNotBackedUpStatus">
       <EuiFlexItem grow={false}>
         <EuiIcon type="alert" color="danger" />
       </EuiFlexItem>

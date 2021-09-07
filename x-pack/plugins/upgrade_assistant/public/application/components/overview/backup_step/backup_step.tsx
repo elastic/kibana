@@ -31,10 +31,7 @@ export const getBackupStep = ({ cloud, isComplete, setIsComplete }: Props): EuiS
       title,
       'data-test-subj': `backupStep-${status}`,
       children: (
-        <CloudBackup
-          cloudSnapshotsUrl={`${cloud!.deploymentUrl}/elasticsearch/snapshots`}
-          setIsComplete={setIsComplete}
-        />
+        <CloudBackup cloudSnapshotsUrl={cloud!.snapshotsUrl!} setIsComplete={setIsComplete} />
       ),
     };
   }
