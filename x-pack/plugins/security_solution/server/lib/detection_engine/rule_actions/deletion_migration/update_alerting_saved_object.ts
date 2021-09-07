@@ -39,7 +39,10 @@ export const updateAlertingSavedObject = async ({
     await savedObjectsClient.update(
       'alert',
       alert.id,
-      [...alert.attributes.actions, ...transformedActions],
+      {
+        ...alert.attributes,
+        actions: [...alert.attributes.actions, ...transformedActions],
+      },
       {
         references: [...alert.references, ...transformedReferences],
       }

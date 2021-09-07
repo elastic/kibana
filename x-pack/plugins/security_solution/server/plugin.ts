@@ -353,7 +353,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (this.config.enableLegacySideCarActionMigration) {
       logger.debug(
-        'Legacy alerting side car actions data migration is going to run. If you see errors below on each restart, or issues with your actions on your alerts when you are restarting Kibana you can disable this with the config option of "enableLegacySideCarActionMigration: false" in kibana.yml'
+        'Legacy alerting side car actions data migration is starting. If you see errors below on each restart, or issues with your actions on your alerts when you are restarting Kibana you can disable this with the config option of "enableLegacySideCarActionMigration: false" in kibana.yml'
       );
       dangerousWorkaroundToMigrateActionsSideCarSavedObjects({
         logger,
