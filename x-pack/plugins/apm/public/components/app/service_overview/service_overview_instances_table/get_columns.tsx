@@ -25,12 +25,11 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { unit } from '../../../../utils/style';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { ListMetric } from '../../../shared/list_metric';
 import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_latency_column_label';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { InstanceActionsMenu } from './instance_actions_menu';
 
 type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
@@ -48,6 +47,7 @@ export function getColumns({
   itemIdToExpandedRowMap,
   toggleRowActionMenu,
   itemIdToOpenActionMenuRowMap,
+  shouldShowSparkPlots = true,
 }: {
   serviceName: string;
   kuery: string;
@@ -59,6 +59,7 @@ export function getColumns({
   itemIdToExpandedRowMap: Record<string, ReactNode>;
   toggleRowActionMenu: (selectedServiceNodeName: string) => void;
   itemIdToOpenActionMenuRowMap: Record<string, boolean>;
+  shouldShowSparkPlots?: boolean;
 }): Array<EuiBasicTableColumn<MainStatsServiceInstanceItem>> {
   return [
     {
@@ -109,9 +110,10 @@ export function getColumns({
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.latency;
         return (
-          <SparkPlot
+          <ListMetric
             color="euiColorVis1"
             valueLabel={asMillisecondDuration(latency)}
+            hideSeries={!shouldShowSparkPlots}
             series={currentPeriodTimestamp}
             comparisonSeries={
               comparisonEnabled ? previousPeriodTimestamp : undefined
@@ -135,9 +137,10 @@ export function getColumns({
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.throughput;
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis0"
+            hideSeries={!shouldShowSparkPlots}
             valueLabel={asTransactionRate(throughput)}
             series={currentPeriodTimestamp}
             comparisonSeries={
@@ -162,9 +165,10 @@ export function getColumns({
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.errorRate;
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis7"
+            hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(errorRate, 1)}
             series={currentPeriodTimestamp}
             comparisonSeries={
@@ -189,9 +193,10 @@ export function getColumns({
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.cpuUsage;
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis2"
+            hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(cpuUsage, 1)}
             series={currentPeriodTimestamp}
             comparisonSeries={
@@ -216,9 +221,10 @@ export function getColumns({
         const previousPeriodTimestamp =
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.memoryUsage;
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis3"
+            hideSeries={!shouldShowSparkPlots}
             valueLabel={asPercent(memoryUsage, 1)}
             series={currentPeriodTimestamp}
             comparisonSeries={

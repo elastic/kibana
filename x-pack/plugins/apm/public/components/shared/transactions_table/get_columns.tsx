@@ -21,10 +21,9 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { unit } from '../../../utils/style';
-import { SparkPlot } from '../charts/spark_plot';
 import { ImpactBar } from '../ImpactBar';
 import { TransactionDetailLink } from '../Links/apm/transaction_detail_link';
+import { ListMetric } from '../list_metric';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { getLatencyColumnLabel } from './get_latency_column_label';
 
@@ -40,11 +39,13 @@ export function getColumns({
   latencyAggregationType,
   transactionGroupDetailedStatistics,
   comparisonEnabled,
+  shouldShowSparkPlots = true,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
   transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
   comparisonEnabled?: boolean;
+  shouldShowSparkPlots?: boolean;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
@@ -84,9 +85,10 @@ export function getColumns({
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.latency;
         return (
-          <SparkPlot
+          <ListMetric
             color="euiColorVis1"
             compact
+            hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
@@ -112,9 +114,10 @@ export function getColumns({
           transactionGroupDetailedStatistics?.previousPeriod?.[name]
             ?.throughput;
         return (
-          <SparkPlot
+          <ListMetric
             color="euiColorVis0"
             compact
+            hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
@@ -139,9 +142,10 @@ export function getColumns({
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.errorRate;
         return (
-          <SparkPlot
+          <ListMetric
             color="euiColorVis7"
             compact
+            hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined

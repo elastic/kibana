@@ -19,10 +19,11 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
+import { useBreakPoints } from '../../../hooks/use_break_points';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { SparkPlot } from '../charts/spark_plot';
 import { EmptyMessage } from '../EmptyMessage';
 import { ImpactBar } from '../ImpactBar';
+import { ListMetric } from '../list_metric';
 import { ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { TableFetchWrapper } from '../table_fetch_wrapper';
@@ -39,6 +40,7 @@ export type DependenciesItem = Omit<
 interface Props {
   dependencies: DependenciesItem[];
   fixedHeight?: boolean;
+  isSingleColumn?: boolean;
   link?: React.ReactNode;
   title: React.ReactNode;
   nameColumnTitle: React.ReactNode;
@@ -50,12 +52,17 @@ export function DependenciesTable(props: Props) {
   const {
     dependencies,
     fixedHeight,
+    isSingleColumn = true,
     link,
     title,
     nameColumnTitle,
     status,
     compact = true,
   } = props;
+
+  // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
+  const { isXl } = useBreakPoints();
+  const shouldShowSparkPlots = isSingleColumn || !isXl;
 
   const columns: Array<ITableColumn<DependenciesItem>> = [
     {
@@ -76,9 +83,10 @@ export function DependenciesTable(props: Props) {
       width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis1"
+            hideSeries={!shouldShowSparkPlots}
             series={currentStats.latency.timeseries}
             comparisonSeries={previousStats?.latency.timeseries}
             valueLabel={asMillisecondDuration(currentStats.latency.value)}
@@ -96,9 +104,10 @@ export function DependenciesTable(props: Props) {
       width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis0"
+            hideSeries={!shouldShowSparkPlots}
             series={currentStats.throughput.timeseries}
             comparisonSeries={previousStats?.throughput.timeseries}
             valueLabel={asTransactionRate(currentStats.throughput.value)}
@@ -116,9 +125,10 @@ export function DependenciesTable(props: Props) {
       width: 'auto',
       render: (_, { currentStats, previousStats }) => {
         return (
-          <SparkPlot
+          <ListMetric
             compact
             color="euiColorVis7"
+            hideSeries={!shouldShowSparkPlots}
             series={currentStats.errorRate.timeseries}
             comparisonSeries={previousStats?.errorRate.timeseries}
             valueLabel={asPercent(currentStats.errorRate.value, 1)}

@@ -59,10 +59,11 @@ export function ServiceOverview() {
     replace(history, { query: { transactionType } });
   }
 
-  // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
+  // The default EuiFlexGroup breaks at 768, but we want to break at 1200, so we
   // observe the window width and set the flex directions of rows accordingly
-  const { isMedium } = useBreakPoints();
-  const rowDirection = isMedium ? 'column' : 'row';
+  const { isLarge } = useBreakPoints();
+  const isSingleColumn = isLarge;
+  const rowDirection = isSingleColumn ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);
   const isIosAgent = isIosAgentName(agentName);
 
@@ -116,6 +117,7 @@ export function ServiceOverview() {
                     kuery={kuery}
                     environment={environment}
                     fixedHeight={true}
+                    isSingleColumn={isSingleColumn}
                     start={start}
                     end={end}
                   />
@@ -164,6 +166,7 @@ export function ServiceOverview() {
                   <EuiPanel hasBorder={true}>
                     <ServiceOverviewDependenciesTable
                       fixedHeight={true}
+                      isSingleColumn={isSingleColumn}
                       link={
                         <EuiLink href={dependenciesLink}>
                           {i18n.translate(
