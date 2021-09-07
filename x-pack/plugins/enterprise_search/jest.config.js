@@ -10,7 +10,7 @@ module.exports = {
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/enterprise_search'],
   collectCoverage: true,
-  coverageReporters: ['text','html'],
+  coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/plugins/enterprise_search/**/*.{ts,tsx}',
     '!<rootDir>/x-pack/plugins/enterprise_search/public/*.ts',
