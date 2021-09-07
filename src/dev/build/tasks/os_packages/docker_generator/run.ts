@@ -7,7 +7,7 @@
  */
 
 import { access, link, unlink, chmod } from 'fs';
-import { resolve } from 'path';
+import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
 import { ToolingLog, kibanaPackageJson } from '@kbn/dev-utils';
@@ -55,6 +55,7 @@ export async function runDockerGenerator(
   const metricbeatTarball = `metricbeat-${version}-linux-${artifactArchitecture}.tar.gz`;
   const filebeatTarball = `filebeat-${version}-linux-${artifactArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
+  const beatsDir = config.resolveFromRepo('.beats');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
   // That would produce oss, default and default-ubi7
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
@@ -63,8 +64,10 @@ export async function runDockerGenerator(
     `kibana${imageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
   const dependencies = [
-    artifactTarball,
-    ...(flags.cloud ? [metricbeatTarball, filebeatTarball] : []),
+    resolve(artifactsDir, artifactTarball),
+    ...(flags.cloud
+      ? [resolve(beatsDir, metricbeatTarball), resolve(beatsDir, filebeatTarball)]
+      : []),
   ];
 
   const scope: TemplateContext = {
@@ -132,18 +135,18 @@ export async function runDockerGenerator(
   // Only build images on native targets
   if (flags.image) {
     // Link dependencies
-    for (const dep of dependencies) {
+    for (const src of dependencies) {
+      const file = basename(src);
+      const dest = resolve(dockerBuildDir, file);
       try {
-        await accessAsync(resolve(artifactsDir, dep));
-        await unlinkAsync(resolve(dockerBuildDir, dep));
+        await accessAsync(src);
+        await unlinkAsync(dest);
       } catch (e) {
         if (e && e.code === 'ENOENT' && e.syscall === 'access') {
-          throw new Error(
-            `${resolve(artifactsDir, dep)} is needed in order to build the docker image.`
-          );
+          throw new Error(`${src} is needed in order to build the docker image.`);
         }
       }
-      await linkAsync(resolve(artifactsDir, dep), resolve(dockerBuildDir, dep));
+      await linkAsync(src, dest);
     }
 
     await exec(log, `./build_docker.sh`, [], {
