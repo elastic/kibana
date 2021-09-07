@@ -73,13 +73,8 @@ export function FailedTransactionsCorrelations({
     setSelectedSignificantTerm,
   ] = useState<FailedTransactionsCorrelation | null>(null);
 
-  const selectedTerm = useMemo(() => {
-    if (selectedSignificantTerm) return selectedSignificantTerm;
-    return Array.isArray(response.failedTransactionsCorrelations) &&
-      response.failedTransactionsCorrelations.length > 0
-      ? response.failedTransactionsCorrelations[0]
-      : undefined;
-  }, [selectedSignificantTerm, response.failedTransactionsCorrelations]);
+  const selectedTerm =
+    selectedSignificantTerm ?? response.failedTransactionsCorrelations?.[0];
 
   const history = useHistory();
 
