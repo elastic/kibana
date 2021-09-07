@@ -38,6 +38,7 @@ export interface ExpressionWrapperProps {
   expression: string | null;
   errors: ErrorMessage[] | undefined;
   variables?: Record<string, unknown>;
+  interactive?: boolean;
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
@@ -113,6 +114,7 @@ export function ExpressionWrapper({
   searchContext,
   variables,
   handleEvent,
+  interactive,
   searchSessionId,
   onData$,
   renderMode,
@@ -137,6 +139,7 @@ export function ExpressionWrapper({
             padding="s"
             variables={variables}
             expression={expression}
+            interactive={interactive}
             searchContext={searchContext}
             searchSessionId={searchSessionId}
             onData$={onData$}
