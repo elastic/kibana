@@ -33,7 +33,6 @@ import {
   APM_SEARCH_STRATEGIES,
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../common/search_strategies/constants';
-import { FieldValuePair } from '../../../../common/search_strategies/types';
 import { LatencyCorrelation } from '../../../../common/search_strategies/latency_correlations/types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -137,7 +136,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             </>
           </EuiToolTip>
         ),
-        render: (correlation: number) => {
+        render: (_, { correlation }) => {
           return <div>{asPreciseDecimal(correlation, 2)}</div>;
         },
         sortable: true,
@@ -156,8 +155,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldValueLabel',
           { defaultMessage: 'Field value' }
         ),
-        render: (fieldValue: FieldValuePair['fieldValue']) =>
-          String(fieldValue).slice(0, 50),
+        render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
         sortable: true,
       },
       {

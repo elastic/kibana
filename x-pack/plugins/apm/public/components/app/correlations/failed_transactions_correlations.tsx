@@ -33,7 +33,6 @@ import {
 import { asPercent } from '../../../../common/utils/formatters';
 import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
-import { FieldValuePair } from '../../../../common/search_strategies/types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -120,7 +119,7 @@ export function FailedTransactionsCorrelations({
                 </>
               </EuiToolTip>
             ),
-            render: (failurePercentage: number) =>
+            render: (_, { failurePercentage }) =>
               asPercent(failurePercentage, 1),
             sortable: true,
           },
@@ -154,7 +153,7 @@ export function FailedTransactionsCorrelations({
               </EuiToolTip>
             ),
 
-            render: (successPercentage: number) =>
+            render: (_, { successPercentage }) =>
               asPercent(successPercentage, 1),
             sortable: true,
           },
@@ -174,7 +173,7 @@ export function FailedTransactionsCorrelations({
             )}
           </>
         ),
-        render: (normalizedScore: number) => {
+        render: (_, { normalizedScore }) => {
           return (
             <>
               <ImpactBar size="m" value={normalizedScore * 100} />
@@ -196,7 +195,7 @@ export function FailedTransactionsCorrelations({
             )}
           </>
         ),
-        render: (pValue: number) => {
+        render: (_, { pValue }) => {
           const label = getFailedTransactionsCorrelationImpactLabel(pValue);
           return label ? (
             <EuiBadge color={label.color}>{label.impact}</EuiBadge>
@@ -218,8 +217,7 @@ export function FailedTransactionsCorrelations({
           'xpack.apm.correlations.failedTransactions.correlationsTable.fieldValueLabel',
           { defaultMessage: 'Field value' }
         ),
-        render: (fieldValue: FieldValuePair['fieldValue']) =>
-          String(fieldValue).slice(0, 50),
+        render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
         sortable: true,
       },
       ...percentageColumns,
@@ -273,13 +271,13 @@ export function FailedTransactionsCorrelations({
           'xpack.apm.correlations.correlationsTable.actionsLabel',
           { defaultMessage: 'Filter' }
         ),
-        render: (_: unknown, term: FailedTransactionsCorrelation) => {
+        render: (_, { fieldName, fieldValue }) => {
           return (
             <>
               <EuiLink
                 href={createHref(history, {
                   query: {
-                    kuery: `${term.fieldName}:"${term.fieldValue}"`,
+                    kuery: `${fieldName}:"${fieldValue}"`,
                   },
                 })}
               >
@@ -289,7 +287,7 @@ export function FailedTransactionsCorrelations({
               <EuiLink
                 href={createHref(history, {
                   query: {
-                    kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
+                    kuery: `not ${fieldName}:"${fieldValue}"`,
                   },
                 })}
               >
