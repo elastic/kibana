@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import moment from 'moment';
 import Puid from 'puid';
 import { JOB_STATUSES } from '../../../common/constants';
-import type {
+import {
   ReportApiJSON,
   ReportDocument,
   ReportDocumentHead,
