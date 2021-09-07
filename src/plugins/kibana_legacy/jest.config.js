@@ -12,7 +12,5 @@ module.exports = {
   roots: ['<rootDir>/src/plugins/kibana_legacy'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/kibana_legacy',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/plugins/kibana_legacy/{public,server}/**/*.{js,ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/src/plugins/kibana_legacy/{public,server}/**/*.{js,ts,tsx}'],
 };

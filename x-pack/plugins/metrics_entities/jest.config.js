@@ -6,12 +6,10 @@
  */
 
 module.exports = {
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/metrics_entities/{common,server}/**/*.{ts,tsx}'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/metrics_entities',
+  coverageReporters: ['text', 'html'],
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/metrics_entities'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/metrics_entities',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/metrics_entities/{common,server}/**/*.{ts,tsx}'
-  ],
 };

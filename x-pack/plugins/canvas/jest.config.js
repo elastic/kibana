@@ -15,6 +15,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/canvas',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/canvas/{canvas_plugin_src,common,i18n,public,server,shareable_runtime}/**/*.{js,ts,tsx}'
+    '<rootDir>/x-pack/plugins/canvas/{canvas_plugin_src,common,i18n,public,server,shareable_runtime}/**/*.{js,ts,tsx}',
   ],
 };

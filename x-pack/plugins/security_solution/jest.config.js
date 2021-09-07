@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/security_solution',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/security_solution/{common,public,server}/**/*.{ts,tsx}'
+    '<rootDir>/x-pack/plugins/security_solution/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

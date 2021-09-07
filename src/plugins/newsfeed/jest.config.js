@@ -12,7 +12,5 @@ module.exports = {
   roots: ['<rootDir>/src/plugins/newsfeed'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/newsfeed',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/plugins/newsfeed/{common,public,server}/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/src/plugins/newsfeed/{common,public,server}/**/*.{ts,tsx}'],
 };

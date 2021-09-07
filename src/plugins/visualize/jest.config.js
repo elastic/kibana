@@ -12,7 +12,5 @@ module.exports = {
   roots: ['<rootDir>/src/plugins/visualize'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/visualize',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/plugins/visualize/{common,public,server}/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/src/plugins/visualize/{common,public,server}/**/*.{ts,tsx}'],
 };

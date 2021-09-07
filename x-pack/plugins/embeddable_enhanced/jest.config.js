@@ -11,7 +11,5 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/embeddable_enhanced'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/embeddable_enhanced',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/embeddable_enhanced/public/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/embeddable_enhanced/public/**/*.{ts,tsx}'],
 };

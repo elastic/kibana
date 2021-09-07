@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/triggers_actions_ui',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/triggers_actions_ui/{common,public,server}/**/*.{ts,tsx}'
+    '<rootDir>/x-pack/plugins/triggers_actions_ui/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

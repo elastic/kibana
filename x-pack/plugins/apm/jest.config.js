@@ -16,6 +16,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/apm',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/apm/{common,public,server}/**/*.{js,ts,tsx}'
+    '<rootDir>/x-pack/plugins/apm/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

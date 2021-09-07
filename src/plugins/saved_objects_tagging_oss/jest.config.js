@@ -13,6 +13,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/saved_objects_tagging_oss',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/saved_objects_tagging_oss/{common,public}/**/*.{ts,tsx}'
+    '<rootDir>/src/plugins/saved_objects_tagging_oss/{common,public}/**/*.{ts,tsx}',
   ],
 };

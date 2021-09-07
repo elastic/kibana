@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/searchprofiler',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/searchprofiler/{common,public,server}/**/*.{ts,tsx}'
+    '<rootDir>/x-pack/plugins/searchprofiler/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

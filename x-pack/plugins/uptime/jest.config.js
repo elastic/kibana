@@ -11,7 +11,5 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/uptime'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/uptime',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/uptime/{common,public,server}/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/uptime/{common,public,server}/**/*.{ts,tsx}'],
 };

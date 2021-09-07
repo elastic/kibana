@@ -13,6 +13,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/screenshot_mode',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/screenshot_mode/{common,public,server}/**/*.{ts,tsx}'
+    '<rootDir>/src/plugins/screenshot_mode/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

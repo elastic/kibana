@@ -12,7 +12,5 @@ module.exports = {
   roots: ['<rootDir>/src/plugins/field_formats'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/field_formats',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/plugins/field_formats/{common,public,server}/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/src/plugins/field_formats/{common,public,server}/**/*.{ts,tsx}'],
 };

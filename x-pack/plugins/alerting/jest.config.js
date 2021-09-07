@@ -11,7 +11,5 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/alerting'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/alerting',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/alerting/{common,public,server}/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/alerting/{common,public,server}/**/*.{ts,tsx}'],
 };

@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/painless_lab',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/painless_lab/{common,public,server}/**/*.{ts,tsx}'
+    '<rootDir>/x-pack/plugins/painless_lab/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

@@ -13,6 +13,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/observability/{common,public,server}/**/*.{js,ts,tsx}'
+    '<rootDir>/x-pack/plugins/observability/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

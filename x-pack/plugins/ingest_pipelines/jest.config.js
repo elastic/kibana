@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/ingest_pipelines',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/ingest_pipelines/{common,public,server}/**/*.{ts,tsx}'
+    '<rootDir>/x-pack/plugins/ingest_pipelines/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

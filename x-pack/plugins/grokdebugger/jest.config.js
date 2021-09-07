@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/grokdebugger',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/grokdebugger/{common,public,server}/**/*.{js,ts,tsx}'
+    '<rootDir>/x-pack/plugins/grokdebugger/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

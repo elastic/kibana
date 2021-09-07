@@ -11,7 +11,5 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/rule_registry'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/rule_registry',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/rule_registry/{common,server}/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/rule_registry/{common,server}/**/*.{ts,tsx}'],
 };

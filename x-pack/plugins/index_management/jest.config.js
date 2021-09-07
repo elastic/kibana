@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/index_management',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/index_management/{common,public,server}/**/*.{js,ts,tsx}'
+    '<rootDir>/x-pack/plugins/index_management/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

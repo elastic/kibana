@@ -11,7 +11,5 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/rollup'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/rollup',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/rollup/{common,public,server}/**/*.{js,ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/rollup/{common,public,server}/**/*.{js,ts,tsx}'],
 };

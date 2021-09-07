@@ -12,7 +12,5 @@ module.exports = {
   roots: ['<rootDir>/src/plugins/maps_ems'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/maps_ems',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/plugins/maps_ems/{common,public,server}/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/src/plugins/maps_ems/{common,public,server}/**/*.{ts,tsx}'],
 };

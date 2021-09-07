@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/saved_objects_tagging',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/saved_objects_tagging/{common,public,server}/**/*.{ts,tsx}'
+    '<rootDir>/x-pack/plugins/saved_objects_tagging/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

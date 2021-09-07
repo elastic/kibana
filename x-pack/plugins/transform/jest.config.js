@@ -11,7 +11,5 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/transform'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/transform',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/transform/{common,public,server}/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/transform/{common,public,server}/**/*.{ts,tsx}'],
 };

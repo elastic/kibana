@@ -11,7 +11,5 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/encrypted_saved_objects'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/encrypted_saved_objects',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/encrypted_saved_objects/server/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/encrypted_saved_objects/server/**/*.{ts,tsx}'],
 };

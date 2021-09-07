@@ -12,7 +12,5 @@ module.exports = {
   roots: ['<rootDir>/src/plugins/charts'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/charts',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/plugins/charts/{common,public,server}/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/src/plugins/charts/{common,public,server}/**/*.{ts,tsx}'],
 };

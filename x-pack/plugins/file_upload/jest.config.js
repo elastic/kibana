@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/file_upload',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/file_upload/{common,public,server}/**/*.{js,ts,tsx}'
+    '<rootDir>/x-pack/plugins/file_upload/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

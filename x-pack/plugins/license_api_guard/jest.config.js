@@ -11,7 +11,5 @@ module.exports = {
   roots: ['<rootDir>/x-pack/plugins/license_api_guard'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/license_api_guard',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/license_api_guard/server/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/license_api_guard/server/**/*.{ts,tsx}'],
 };

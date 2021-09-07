@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/data_visualizer',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/data_visualizer/{common,public,server}/**/*.{js,ts,tsx}'
+    '<rootDir>/x-pack/plugins/data_visualizer/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

@@ -13,6 +13,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/expression_image',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/expression_image/{common,public,server}/**/*.{ts,tsx}'
+    '<rootDir>/src/plugins/expression_image/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
