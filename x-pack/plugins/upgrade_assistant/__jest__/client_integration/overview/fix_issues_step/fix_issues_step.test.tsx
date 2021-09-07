@@ -46,7 +46,7 @@ describe('Overview - Fix deprecation issues step', () => {
 
   describe('Step status', () => {
     test(`It's complete when there are no critical deprecations`, async () => {
-      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(mockedResponses.esDeprecationsEmpty);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsEmpty);
 
       await act(async () => {
         const deprecationService = deprecationsServiceMock.createStartContract();

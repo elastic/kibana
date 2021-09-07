@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-
 import { CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS } from '../../../../common/constants';
 import { setupEnvironment, advanceTime } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
