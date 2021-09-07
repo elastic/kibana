@@ -87,6 +87,7 @@ export type TGridModelForTimeline = Pick<
   | 'excludedRowRendererIds'
   | 'expandedDetail'
   | 'filters'
+  | 'filterManager'
   | 'graphEventId'
   | 'kqlQuery'
   | 'id'
