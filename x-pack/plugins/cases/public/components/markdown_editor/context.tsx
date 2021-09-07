@@ -10,4 +10,6 @@ import React from 'react';
 export const CommentEditorContext = React.createContext<{
   editorId: string;
   value: string;
+  caseTitle?: string;
+  caseTags?: string[];
 } | null>(null);
