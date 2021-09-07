@@ -15,24 +15,25 @@ export default function ({
 }: FtrProviderContext & { updateBaselines: boolean }) {
   let expectExpression: ExpectExpression;
   describe('tag cloud pipeline expression tests', () => {
-    before(() => {
+    let dataContext: ExpressionResult;
+    before(async () => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
+
+      const expression = `kibana | kibana_context | esaggs index={indexPatternLoad id='logstash-*'}
+        aggs={aggCount id="1" enabled=true schema="metric"}
+        aggs={aggTerms id="2" enabled=true schema="segment" field="response.raw" size=4 order="desc" orderBy="1"}`;
+      // we execute the part of expression that fetches the data and store its response
+      dataContext = await expectExpression('partial_tagcloud_test', expression).getResponse();
     });
 
     describe('correctly renders tagcloud', () => {
-      let dataContext: ExpressionResult;
-      before(async () => {
-        const expression = `kibana | kibana_context | esaggs index={indexPatternLoad id='logstash-*'}
-          aggs={aggCount id="1" enabled=true schema="metric"}
-          aggs={aggTerms id="2" enabled=true schema="segment" field="response.raw" size=4 order="desc" orderBy="1"}`;
-        // we execute the part of expression that fetches the data and store its response
-        dataContext = await expectExpression('partial_tagcloud_test', expression).getResponse();
-      });
-
-      it('with invalid data', async () => {
+      it('with empty data', async () => {
         const expression = 'tagcloud metric={visdimension 0}';
         await (
-          await expectExpression('tagcloud_invalid_data', expression).toMatchSnapshot()
+          await expectExpression('tagcloud_empty_data', expression, {
+            ...dataContext,
+            rows: [],
+          }).toMatchSnapshot()
         ).toMatchScreenshot();
       });
 
@@ -63,6 +64,15 @@ export default function ({
           'tagcloud metric={visdimension 0} bucket={visdimension 1} scale="log" orientation="multiple"';
         await (
           await expectExpression('tagcloud_options', expression, dataContext).toMatchSnapshot()
+        ).toMatchScreenshot();
+      });
+    });
+
+    describe('throws error at tagcloud', () => {
+      it('with invalid data', async () => {
+        const expression = 'tagcloud metric={visdimension 0}';
+        await (
+          await expectExpression('tagcloud_invalid_data', expression).toMatchSnapshot()
         ).toMatchScreenshot();
       });
     });

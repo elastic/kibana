@@ -19,7 +19,7 @@ import {
 } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { truncate, unit } from '../../../utils/style';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
@@ -42,7 +42,7 @@ function ServiceNodeOverview() {
 
   const { serviceName } = useApmServiceContext();
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
         return undefined;
@@ -164,6 +164,7 @@ function ServiceNodeOverview() {
 
   return (
     <ManagedTable
+      isLoading={status === FETCH_STATUS.LOADING}
       noItemsMessage={i18n.translate('xpack.apm.jvmsTable.noJvmsLabel', {
         defaultMessage: 'No JVMs were found',
       })}
