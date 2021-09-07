@@ -26,9 +26,10 @@ export const renderApp = (element: HTMLElement) => {
       iconType: 'glasses',
     });
   }
-  toMountPoint(discoverRouter(services, history))(element);
+  const unmount = toMountPoint(discoverRouter(services, history))(element);
 
   return () => {
+    unmount();
     data.search.session.clear();
   };
 };
