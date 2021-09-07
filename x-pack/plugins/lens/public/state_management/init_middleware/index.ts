@@ -19,13 +19,7 @@ export const initMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAP
   );
   return (next: Dispatch) => (action: PayloadAction) => {
     if (lensSlice.actions.loadInitial.match(action)) {
-      return loadInitial(
-        store,
-        storeDeps,
-        action.payload.redirectCallback,
-        action.payload.initialInput,
-        action.payload.emptyState
-      );
+      return loadInitial(store, storeDeps, action.payload);
     } else if (lensSlice.actions.navigateAway.match(action)) {
       return unsubscribeFromExternalContext();
     }
