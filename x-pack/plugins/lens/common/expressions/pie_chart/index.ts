@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export * from './types';
-export * from './pie_chart';
+export { pie } from './pie_chart';
+
+export type {
+  SharedPieLayerState,
+  PieLayerState,
+  PieVisualizationState,
+  PieExpressionArgs,
+  PieExpressionProps,
+} from './types';

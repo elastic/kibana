@@ -49,7 +49,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ share }) => {
       ];
 
       if (!locatorParams) {
-        throw new Error('Could not find locator for report');
+        throw new Error('Could not find locator params for report');
       }
 
       share.navigate(locatorParams);
