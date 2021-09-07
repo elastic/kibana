@@ -99,14 +99,14 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      render: (_, { serviceName, agentName }) => (
+      render: (_, { serviceName, agentName, transactionType }) => (
         <TruncateWithTooltip
           data-test-subj="apmServiceListAppLink"
           text={formatString(serviceName)}
           content={
             <ServiceLink
               agentName={agentName}
-              query={query}
+              query={{ ...query, transactionType }}
               serviceName={serviceName}
             />
           }

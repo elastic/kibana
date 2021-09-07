@@ -88,13 +88,12 @@ export class APMPlugin
       plugins.apmOss.config,
       this.initContext.config.get<APMXPackConfig>()
     );
-
     this.currentConfig = currentConfig;
 
     if (
       plugins.taskManager &&
       plugins.usageCollection &&
-      this.currentConfig['xpack.apm.telemetryCollectionEnabled']
+      currentConfig['xpack.apm.telemetryCollectionEnabled']
     ) {
       createApmTelemetry({
         core,
@@ -156,21 +155,22 @@ export class APMPlugin
       };
     }) as APMRouteHandlerResources['plugins'];
 
-    plugins.home?.tutorials.registerTutorial(
-      tutorialProvider({
-        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
-        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
-        cloud: plugins.cloud,
-        isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
-        indices: {
-          errorIndices: this.currentConfig['apm_oss.errorIndices'],
-          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
-          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
-          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
-          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
-        },
-      })
-    );
+    const boundGetApmIndices = async () =>
+      getApmIndices({
+        savedObjectsClient: await getInternalSavedObjectsClient(core),
+        config: await mergedConfig$.pipe(take(1)).toPromise(),
+      });
+
+    boundGetApmIndices().then((indices) => {
+      plugins.home?.tutorials.registerTutorial(
+        tutorialProvider({
+          apmConfig: currentConfig,
+          apmIndices: indices,
+          cloud: plugins.cloud,
+          isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+        })
+      );
+    });
 
     const telemetryUsageCounter = resourcePlugins.usageCollection?.setup.createUsageCounter(
       APM_SERVER_FEATURE_ID
@@ -189,12 +189,6 @@ export class APMPlugin
       telemetryUsageCounter,
     });
 
-    const boundGetApmIndices = async () =>
-      getApmIndices({
-        savedObjectsClient: await getInternalSavedObjectsClient(core),
-        config: await mergedConfig$.pipe(take(1)).toPromise(),
-      });
-
     if (plugins.alerting) {
       registerApmAlerts({
         ruleDataClient,
@@ -208,7 +202,7 @@ export class APMPlugin
     registerFleetPolicyCallbacks({
       plugins: resourcePlugins,
       ruleDataClient,
-      config: this.currentConfig,
+      config: currentConfig,
       logger: this.logger,
     });
 
