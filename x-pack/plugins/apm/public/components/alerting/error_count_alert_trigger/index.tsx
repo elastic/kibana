@@ -17,6 +17,7 @@ import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
 import { AlertMetadata } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { getIntervalAndTimeRange } from '../../../../common/chart_preview';
 
 export interface AlertParams {
   windowSize: number;
@@ -54,15 +55,20 @@ export function ErrorCountAlertTrigger(props: Props) {
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (params.windowSize && params.windowUnit) {
+      const { interval, start, end } = getIntervalAndTimeRange({
+        windowSize: params.windowSize,
+        windowUnit: params.windowUnit,
+      });
+      if (interval && start && end) {
         return callApmApi({
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
           params: {
             query: {
               environment: params.environment,
               serviceName: params.serviceName,
-              windowSize: params.windowSize,
-              windowUnit: params.windowUnit,
+              interval,
+              start,
+              end,
             },
           },
         });

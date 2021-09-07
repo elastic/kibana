@@ -32,6 +32,7 @@ import {
 import { AlertMetadata } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
+import { getIntervalAndTimeRange } from '../../../../common/chart_preview';
 
 export interface AlertParams {
   aggregationType: 'avg' | '95th' | '99th';
@@ -104,7 +105,11 @@ export function TransactionDurationAlertTrigger(props: Props) {
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (params.windowSize && params.windowUnit) {
+      const { interval, start, end } = getIntervalAndTimeRange({
+        windowSize: params.windowSize,
+        windowUnit: params.windowUnit,
+      });
+      if (interval && start && end) {
         return callApmApi({
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
           params: {
@@ -113,8 +118,9 @@ export function TransactionDurationAlertTrigger(props: Props) {
               environment: params.environment,
               serviceName: params.serviceName,
               transactionType: params.transactionType,
-              windowSize: params.windowSize,
-              windowUnit: params.windowUnit,
+              interval,
+              start,
+              end,
             },
           },
         });

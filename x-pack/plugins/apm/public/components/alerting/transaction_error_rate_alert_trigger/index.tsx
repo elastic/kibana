@@ -25,6 +25,7 @@ import {
 } from '../fields';
 import { AlertMetadata } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { getIntervalAndTimeRange } from '../../../../common/chart_preview';
 
 interface AlertParams {
   windowSize: number;
@@ -71,7 +72,11 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (params.windowSize && params.windowUnit) {
+      const { interval, start, end } = getIntervalAndTimeRange({
+        windowSize: params.windowSize,
+        windowUnit: params.windowUnit,
+      });
+      if (interval && start && end) {
         return callApmApi({
           endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
           params: {
@@ -79,8 +84,9 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
               environment: params.environment,
               serviceName: params.serviceName,
               transactionType: params.transactionType,
-              windowSize: params.windowSize,
-              windowUnit: params.windowUnit,
+              interval,
+              start,
+              end,
             },
           },
         });

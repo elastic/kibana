@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isLeft } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 import moment from 'moment';
 
@@ -25,7 +26,7 @@ export enum TIME_UNITS {
   DAY = 'd',
 }
 
-export const toTimeUnitRt = getToEnumRt(TIME_UNITS, 'timeUnitRt');
+const toTimeUnitRt = getToEnumRt(TIME_UNITS, 'timeUnitRt');
 
 const BUCKET_SIZE = 20;
 
@@ -34,16 +35,20 @@ export function getIntervalAndTimeRange({
   windowUnit,
 }: {
   windowSize: number;
-  windowUnit: TIME_UNITS;
+  windowUnit: string;
 }) {
+  const decodedUnit = toTimeUnitRt.decode(windowUnit);
+  if (isLeft(decodedUnit)) {
+    return {};
+  }
+  const unit = decodedUnit.right;
   const end = Date.now();
   const start =
-    end -
-    moment.duration(windowSize, windowUnit).asMilliseconds() * BUCKET_SIZE;
+    end - moment.duration(windowSize, unit).asMilliseconds() * BUCKET_SIZE;
 
   return {
     interval: `${windowSize}${windowUnit}`,
-    start,
-    end,
+    start: new Date(start).toISOString(),
+    end: new Date(end).toISOString(),
   };
 }
