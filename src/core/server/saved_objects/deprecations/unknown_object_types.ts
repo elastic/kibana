@@ -65,7 +65,7 @@ const getUnknownTypesQuery = (knownTypes: string[]): estypes.QueryDslQueryContai
   };
 };
 
-export const hasUnknownObjectTypes = async ({
+const hasUnknownObjectTypes = async ({
   typeRegistry,
   esClient,
   kibanaConfig,
@@ -104,7 +104,7 @@ export const getUnknownTypesDeprecations = async (
         defaultMessage: 'Saved objects with unknown types are present in Kibana system indices',
       }),
       message: i18n.translate('core.savedObjects.deprecations.unknownTypes.message', {
-        defaultMessage: '',
+        defaultMessage: 'Unknown saved object types can be caused by disabled plugins, or ',
       }),
       level: 'critical',
       requireRestart: false,
