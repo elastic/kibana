@@ -1125,7 +1125,7 @@
             "references": [
               {
                 "plugin": "visTypeVega",
-                "path": "src/plugins/vis_type_vega/public/plugin.ts"
+                "path": "src/plugins/vis_types/vega/public/plugin.ts"
               }
             ]
           },
@@ -1423,15 +1423,15 @@
               },
               {
                 "plugin": "visTypeVega",
-                "path": "src/plugins/vis_type_vega/public/data_model/search_api.ts"
+                "path": "src/plugins/vis_types/vega/public/data_model/search_api.ts"
               },
               {
                 "plugin": "visTypeVega",
-                "path": "src/plugins/vis_type_vega/public/plugin.ts"
+                "path": "src/plugins/vis_types/vega/public/plugin.ts"
               },
               {
                 "plugin": "visTypeVega",
-                "path": "src/plugins/vis_type_vega/target/types/public/data_model/search_api.d.ts"
+                "path": "src/plugins/vis_types/vega/target/types/public/data_model/search_api.d.ts"
               }
             ]
           }

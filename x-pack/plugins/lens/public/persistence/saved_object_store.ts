@@ -9,9 +9,11 @@ import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
   SavedObjectReference,
+  ResolvedSimpleSavedObject,
 } from 'kibana/public';
 import { Query } from '../../../../../src/plugins/data/public';
 import { DOC_TYPE, PersistableFilter } from '../../common';
+import { LensSavedObjectAttributes } from '../async_services';
 
 export interface Document {
   savedObjectId?: string;
@@ -37,7 +39,7 @@ export interface DocumentSaver {
 }
 
 export interface DocumentLoader {
-  load: (savedObjectId: string) => Promise<Document>;
+  load: (savedObjectId: string) => Promise<ResolvedSimpleSavedObject>;
 }
 
 export type SavedObjectStore = DocumentLoader & DocumentSaver;
@@ -87,18 +89,16 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     ).savedObjects[1];
   }
 
-  async load(savedObjectId: string): Promise<Document> {
-    const { type, attributes, references, error } = await this.client.get(DOC_TYPE, savedObjectId);
+  async load(savedObjectId: string): Promise<ResolvedSimpleSavedObject<LensSavedObjectAttributes>> {
+    const resolveResult = await this.client.resolve<LensSavedObjectAttributes>(
+      DOC_TYPE,
+      savedObjectId
+    );
 
-    if (error) {
-      throw error;
+    if (resolveResult.saved_object.error) {
+      throw resolveResult.saved_object.error;
     }
 
-    return {
-      ...(attributes as SavedObjectAttributes),
-      references,
-      savedObjectId,
-      type,
-    } as Document;
+    return resolveResult;
   }
 }

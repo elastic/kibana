@@ -9,7 +9,6 @@ import React, {
   memo,
   forwardRef,
   useCallback,
-  useMemo,
   useRef,
   useState,
   useImperativeHandle,
@@ -24,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
-import { CommentEditorContext } from './context';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
 
 interface MarkdownEditorProps {
@@ -65,14 +63,6 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       value,
     });
 
-    const commentEditorContextValue = useMemo(
-      () => ({
-        editorId,
-        value,
-      }),
-      [editorId, value]
-    );
-
     // @ts-expect-error
     useImperativeHandle(ref, () => {
       if (!editorRef.current) {
@@ -88,22 +78,20 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
     });
 
     return (
-      <CommentEditorContext.Provider value={commentEditorContextValue}>
-        <EuiMarkdownEditor
-          ref={editorRef}
-          aria-label={ariaLabel}
-          editorId={editorId}
-          onChange={onChange}
-          value={value}
-          uiPlugins={uiPlugins}
-          parsingPluginList={parsingPlugins}
-          processingPluginList={processingPlugins}
-          onParse={onParse}
-          errors={markdownErrorMessages}
-          data-test-subj={dataTestSubj}
-          height={height}
-        />
-      </CommentEditorContext.Provider>
+      <EuiMarkdownEditor
+        ref={editorRef}
+        aria-label={ariaLabel}
+        editorId={editorId}
+        onChange={onChange}
+        value={value}
+        uiPlugins={uiPlugins}
+        parsingPluginList={parsingPlugins}
+        processingPluginList={processingPlugins}
+        onParse={onParse}
+        errors={markdownErrorMessages}
+        data-test-subj={dataTestSubj}
+        height={height}
+      />
     );
   }
 );

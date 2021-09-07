@@ -18,7 +18,7 @@ import { removeEmptyCoordinates, roundNumber } from '../../utils';
 type TransactionsGroupsDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];

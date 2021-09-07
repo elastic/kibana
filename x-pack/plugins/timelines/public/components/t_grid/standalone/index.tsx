@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
@@ -39,10 +38,16 @@ import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { LastUpdatedAt } from '../..';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
+import {
+  SELECTOR_TIMELINE_GLOBAL_CONTAINER,
+  UpdatedFlexItem,
+  UpdatedFlexGroup,
+  FullWidthFlexGroup,
+} from '../styles';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
+import { TGridLoading, TGridEmpty } from '../shared';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const STANDALONE_ID = 'standalone-t-grid';
@@ -66,12 +71,6 @@ const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   flex: 1;
   display: flex;
   flex-direction: column;
-`;
-
-const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
-  overflow: hidden;
-  margin: 0;
-  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
@@ -255,6 +254,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
     [deletedEventIds.length, totalCount]
   );
+  const hasAlerts = totalCountMinusDeleted > 0;
+
   const activeCaseFlowId = useSelector((state: State) => tGridSelectors.activeCaseFlowId(state));
   const selectedEvent = useMemo(() => {
     const matchedEvent = events.find((event) => event.ecs._id === activeCaseFlowId);
@@ -338,14 +339,14 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   return (
     <InspectButtonContainer data-test-subj="events-viewer-panel">
       <AlertsTableWrapper>
-        {isFirstUpdate.current && <EuiLoadingContent data-test-subj="loading-alerts-panel" />}
+        {isFirstUpdate.current && <TGridLoading />}
         {canQueryTimeline ? (
           <>
             <EventsContainerLoading
               data-timeline-id={STANDALONE_ID}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="baseline">
+              <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
                 <UpdatedFlexItem grow={false} $show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
@@ -354,28 +355,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                 </UpdatedFlexItem>
               </UpdatedFlexGroup>
 
-              {totalCountMinusDeleted === 0 && loading === false && (
-                <EuiEmptyPrompt
-                  title={
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaTitle"
-                        defaultMessage="No results match your search criteria"
-                      />
-                    </h2>
-                  }
-                  titleSize="s"
-                  body={
-                    <p>
-                      <FormattedMessage
-                        id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaDescription"
-                        defaultMessage="Try searching over a longer period of time or modifying your search."
-                      />
-                    </p>
-                  }
-                />
-              )}
-              {totalCountMinusDeleted > 0 && (
+              {!hasAlerts && !loading && <TGridEmpty />}
+
+              {hasAlerts && (
                 <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
                   <ScrollableFlexItem grow={1}>
                     <StatefulBody

@@ -98,6 +98,7 @@ describe('Machine Learning Alerts', () => {
       lists: dependencies.lists,
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
+      ignoreFields: [],
       ml: mlMock,
       ruleDataClient: dependencies.ruleDataClient,
       ruleDataService: dependencies.ruleDataService,
