@@ -5,15 +5,23 @@
  * 2.0.
  */
 
+import { inflate as _inflate } from 'zlib';
+import { promisify } from 'util';
 import { SavedObjectsClient, Logger } from 'kibana/server';
 import { EndpointArtifactClientInterface } from '../../services';
-import { InternalArtifactCompleteSchema } from '../../schemas';
+import { InternalArtifactCompleteSchema, InternalArtifactSchema } from '../../schemas';
 import { ArtifactConstants } from './common';
 
 class ArtifactMigrationError extends Error {
   constructor(message: string, public readonly meta?: unknown) {
     super(message);
   }
+}
+
+const inflateAsync = promisify(_inflate);
+
+function isCompressed(artifact: InternalArtifactSchema) {
+  return artifact.compressionAlgorithm === 'zlib';
 }
 
 /**
@@ -57,6 +65,15 @@ export const migrateArtifactsToFleet = async (
       }
 
       for (const artifact of artifactList) {
+        if (isCompressed(artifact.attributes)) {
+          artifact.attributes = {
+            ...artifact.attributes,
+            body: (await inflateAsync(Buffer.from(artifact.attributes.body, 'base64'))).toString(
+              'base64'
+            ),
+          };
+        }
+
         // Create new artifact in fleet index
         await endpointArtifactClient.createArtifact(artifact.attributes);
         // Delete old artifact from SO and if there are errors here, then ignore 404's

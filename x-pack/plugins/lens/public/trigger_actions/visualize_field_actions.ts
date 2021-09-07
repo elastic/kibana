@@ -11,7 +11,7 @@ import {
   ACTION_VISUALIZE_LENS_FIELD,
   VisualizeFieldContext,
 } from '../../../../../src/plugins/ui_actions/public';
-import { ApplicationStart } from '../../../../../src/core/public';
+import type { ApplicationStart } from '../../../../../src/core/public';
 
 export const visualizeFieldAction = (application: ApplicationStart) =>
   createAction<VisualizeFieldContext>({

@@ -111,21 +111,27 @@ describe('EventLogStart', () => {
       esContext.esAdapter.queryEventsBySavedObjects.mockResolvedValue(result);
 
       expect(
-        await eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'])
+        await eventLogClient.findEventsBySavedObjectIds(
+          'saved-object-type',
+          ['saved-object-id'],
+          undefined,
+          ['legacy-id']
+        )
       ).toEqual(result);
 
-      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith(
-        esContext.esNames.indexPattern,
-        undefined,
-        'saved-object-type',
-        ['saved-object-id'],
-        {
+      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith({
+        index: esContext.esNames.indexPattern,
+        namespace: undefined,
+        type: 'saved-object-type',
+        ids: ['saved-object-id'],
+        findOptions: {
           page: 1,
           per_page: 10,
           sort_field: '@timestamp',
           sort_order: 'asc',
-        }
-      );
+        },
+        legacyIds: ['legacy-id'],
+      });
     });
 
     test('fetches all events in time frame that reference the saved object', async () => {
@@ -189,26 +195,32 @@ describe('EventLogStart', () => {
       const end = moment().add(1, 'days').toISOString();
 
       expect(
-        await eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'], {
-          start,
-          end,
-        })
+        await eventLogClient.findEventsBySavedObjectIds(
+          'saved-object-type',
+          ['saved-object-id'],
+          {
+            start,
+            end,
+          },
+          ['legacy-id']
+        )
       ).toEqual(result);
 
-      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith(
-        esContext.esNames.indexPattern,
-        undefined,
-        'saved-object-type',
-        ['saved-object-id'],
-        {
+      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith({
+        index: esContext.esNames.indexPattern,
+        namespace: undefined,
+        type: 'saved-object-type',
+        ids: ['saved-object-id'],
+        findOptions: {
           page: 1,
           per_page: 10,
           sort_field: '@timestamp',
           sort_order: 'asc',
           start,
           end,
-        }
-      );
+        },
+        legacyIds: ['legacy-id'],
+      });
     });
 
     test('validates that the start date is valid', async () => {
