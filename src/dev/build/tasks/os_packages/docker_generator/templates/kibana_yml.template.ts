@@ -10,6 +10,8 @@ import dedent from 'dedent';
 
 import { TemplateContext } from '../template_context';
 
+// IMPORTANT: Please notify @elastic/kibana-security if you're changing any of the Docker specific
+// configuration defaults. We rely on these defaults in the interactive setup mode.
 function generator({ imageFlavor }: TemplateContext) {
   return dedent(`
   #
