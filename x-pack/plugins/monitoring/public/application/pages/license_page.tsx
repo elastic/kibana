@@ -22,9 +22,7 @@ export const LicensePage: React.FC<{}> = () => {
     defaultMessage: 'License',
   });
 
-  const state = useContext(GlobalStateContext);
   const { setIsDisabled } = useContext(MonitoringTimeContainer.Context);
-
   useEffect(() => {
     setIsDisabled(true);
     return () => {
@@ -32,13 +30,13 @@ export const LicensePage: React.FC<{}> = () => {
     };
   }, []);
 
+  const state = useContext(GlobalStateContext);
   const clusterUuid = state.cluster_uuid;
   const ccs = state.ccs;
-  const { services } = useKibana<{ data: any }>();
   const [clusters, setClusters] = useState([] as any);
 
+  const { services } = useKibana<{ data: any }>();
   const timezone = services.uiSettings?.get('dateFormat:tz');
-
   const uploadLicensePath = services.application?.getUrlForApp('management', {
     path: 'stack/license_management/upload_license',
   });
