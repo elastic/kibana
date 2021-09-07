@@ -15,7 +15,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsFindOptions } from '../../../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../../../security/common/model';
-import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
+import { defaultDataViewRef, UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import {
   SavedNote,
   NoteSavedObjectRuntimeType,
@@ -123,7 +123,9 @@ export const persistNote = async (
               const timelineResult = convertSavedObjectToSavedTimeline(
                 await savedObjectsClient.create(
                   timelineSavedObjectType,
-                  pickSavedTimeline(null, {}, request.user)
+                  pickSavedTimeline(null, {}, request.user),
+                  // TODO: Steph/sourcerer timeline is empty above, should i not default this?
+                  { references: [defaultDataViewRef] }
                 )
               );
               note.timelineId = timelineResult.savedObjectId;

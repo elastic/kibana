@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsType } from '../../../../../../../src/core/server';
+import { migrations } from './migrations';
 
 export const timelineSavedObjectType = 'siem-ui-timeline';
 
@@ -129,6 +130,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
           },
         },
       },
+    },
+    dataViewId: {
+      type: 'text',
     },
     description: {
       type: 'text',
@@ -322,4 +326,5 @@ export const timelineType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'single',
   mappings: timelineSavedObjectMappings,
+  migrations,
 };

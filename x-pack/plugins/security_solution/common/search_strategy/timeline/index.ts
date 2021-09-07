@@ -173,6 +173,7 @@ export interface SortTimelineInput {
 export interface TimelineInput {
   columns?: Maybe<ColumnHeaderInput[]>;
   dataProviders?: Maybe<DataProviderInput[]>;
+  dataViewId?: Maybe<string[]>;
   description?: Maybe<string>;
   eqlOptions?: Maybe<EqlOptionsInput>;
   eventType?: Maybe<string>;

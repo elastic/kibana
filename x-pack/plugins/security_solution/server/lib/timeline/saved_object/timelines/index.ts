@@ -8,7 +8,11 @@
 import { getOr } from 'lodash/fp';
 
 import { SavedObjectsFindOptions } from '../../../../../../../../src/core/server';
-import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
+import {
+  DEFAULT_INDEX_PATTERN_ID,
+  defaultDataViewRef,
+  UNAUTHENTICATED_USER,
+} from '../../../../../common/constants';
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
 import {
@@ -391,7 +395,12 @@ export const persistTimeline = async (
       const newTimeline = convertSavedObjectToSavedTimeline(
         await savedObjectsClient.create(
           timelineSavedObjectType,
-          pickSavedTimeline(timelineId, timeline, userInfo)
+          pickSavedTimeline(timelineId, timeline, userInfo),
+          {
+            references: [
+              { ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_INDEX_PATTERN_ID },
+            ],
+          }
         )
       );
       return {
@@ -407,6 +416,9 @@ export const persistTimeline = async (
       pickSavedTimeline(timelineId, timeline, userInfo),
       {
         version: version || undefined,
+        references: [
+          { ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_INDEX_PATTERN_ID },
+        ],
       }
     );
 
@@ -459,7 +471,8 @@ const updatePartialSavedTimeline = async (
         dateRange: currentSavedTimeline.attributes.dateRange,
       },
       request.user
-    )
+    ),
+    { references: [{ ...defaultDataViewRef, id: timeline.dataViewId || DEFAULT_INDEX_PATTERN_ID }] }
   );
 };
 

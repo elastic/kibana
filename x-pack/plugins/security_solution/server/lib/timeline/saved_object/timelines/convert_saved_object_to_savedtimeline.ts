@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { intersection, type, partial, literal, union, string } from 'io-ts/lib/index';
+import { array, exact, intersection, type, partial, literal, union, string } from 'io-ts/lib/index';
 import { failure } from 'io-ts/lib/PathReporter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
@@ -17,12 +17,21 @@ import {
   TimelineType,
   TimelineStatus,
 } from '../../../../../common/types/timeline';
+import { DEFAULT_INDEX_PATTERN_ID, defaultDataViewRef } from '../../../../../common/constants';
 
-// TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
 export const TimelineSavedObjectWithDraftRuntimeType = intersection([
   type({
     id: string,
     version: string,
+    references: array(
+      exact(
+        type({
+          id: string,
+          name: string,
+          type: string,
+        })
+      )
+    ),
     attributes: partial({
       ...SavedTimelineRuntimeType.props,
       timelineType: union([TimelineTypeLiteralWithNullRt, literal('draft')]),
@@ -72,6 +81,9 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
         savedObjectId: savedTimeline.id,
         version: savedTimeline.version,
         ...attributes,
+        dataViewId:
+          (savedTimeline.references || []).find((t) => t.type === defaultDataViewRef.type)?.id ||
+          DEFAULT_INDEX_PATTERN_ID,
       };
     }),
     fold((errors) => {

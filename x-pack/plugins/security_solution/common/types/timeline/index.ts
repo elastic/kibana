@@ -272,6 +272,7 @@ export type TimelineTypeLiteralWithNull = runtimeTypes.TypeOf<typeof TimelineTyp
 export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
+  dataViewId: unionWithNullType(runtimeTypes.string),
   description: unionWithNullType(runtimeTypes.string),
   eqlOptions: unionWithNullType(EqlOptionsRuntimeType),
   eventType: unionWithNullType(runtimeTypes.string),
@@ -699,6 +700,7 @@ export interface TimelineResult {
   created?: Maybe<number>;
   createdBy?: Maybe<string>;
   dataProviders?: Maybe<DataProviderResult[]>;
+  dataViewId?: Maybe<string>;
   dateRange?: Maybe<DateRangePickerResult>;
   description?: Maybe<string>;
   eqlOptions?: Maybe<EqlOptionsResult>;

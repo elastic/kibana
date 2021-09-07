@@ -8,6 +8,8 @@
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { metadataTransformPattern } from './endpoint/constants';
+import { SavedObjectReference } from '../../../../src/core/types';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../src/plugins/data/common';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -127,6 +129,12 @@ export const DEFAULT_INDEX_PATTERN = [
   'packetbeat-*',
   'winlogbeat-*',
 ];
+
+export const defaultDataViewRef: SavedObjectReference = {
+  id: DEFAULT_INDEX_PATTERN_ID,
+  name: 'dataViewId',
+  type: DATA_VIEW_SAVED_OBJECT_TYPE,
+};
 
 export const DEFAULT_INDEX_PATTERN_EXPERIMENTAL = [
   // TODO: Steph/ueba TEMP for testing UEBA data

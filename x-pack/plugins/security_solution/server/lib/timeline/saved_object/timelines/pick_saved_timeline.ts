@@ -12,9 +12,12 @@ import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../../comm
 
 export const pickSavedTimeline = (
   timelineId: string | null,
-  savedTimeline: SavedTimeline & { savedObjectId?: string | null },
+  savedTimelineRt: SavedTimeline & { savedObjectId?: string | null },
   userInfo: AuthenticatedUser | null
-): SavedTimeline & { savedObjectId?: string | null } => {
+): Omit<SavedTimeline, 'dataViewId'> & { savedObjectId?: string | null } => {
+  // dataViewId is saved in references as it is a reference to a data view saved object id
+  const { dataViewId, ...savedTimeline } = savedTimelineRt;
+
   const dateNow = new Date().valueOf();
 
   if (timelineId == null) {
