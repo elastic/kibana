@@ -286,7 +286,7 @@ describe('Config Deprecations', () => {
     const { messages } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\\" is is no longer used.",
+        "\\"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\\" is no longer used.",
       ]
     `);
   });

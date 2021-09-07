@@ -7,7 +7,7 @@
 
 import { Logger } from 'kibana/server';
 
-import { SearchAfterAndBulkCreateParams, SignalSourceHit, WrapHits } from '../../signals/types';
+import { SearchAfterAndBulkCreateParams, WrapHits } from '../../signals/types';
 import { buildBulkBody } from './utils/build_bulk_body';
 import { generateId } from '../../signals/utils';
 import { filterDuplicateSignals } from '../../signals/filter_duplicate_signals';
@@ -16,6 +16,7 @@ import { WrappedRACAlert } from '../types';
 
 export const wrapHitsFactory = ({
   logger,
+  ignoreFields,
   mergeStrategy,
   ruleSO,
   spaceId,
@@ -23,6 +24,7 @@ export const wrapHitsFactory = ({
   logger: Logger;
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  ignoreFields: ConfigType['alertIgnoreFields'];
   spaceId: string | null | undefined;
 }): WrapHits => (events, buildReasonMessage) => {
   try {
@@ -38,8 +40,9 @@ export const wrapHitsFactory = ({
         _source: buildBulkBody(
           spaceId,
           ruleSO,
-          doc as SignalSourceHit,
+          doc,
           mergeStrategy,
+          ignoreFields,
           true,
           buildReasonMessage
         ),

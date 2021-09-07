@@ -280,10 +280,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
   }, [selection, swimlaneData, swimlaneType]);
 
-  const swimLaneConfig: HeatmapSpec['config'] = useMemo(() => {
+  const swimLaneConfig = useMemo<HeatmapSpec['config']>(() => {
     if (!showSwimlane) return {};
 
-    return {
+    const config: HeatmapSpec['config'] = {
       onBrushEnd: (e: HeatmapBrushEvent) => {
         if (!e.cells.length) return;
 
@@ -318,7 +318,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       yAxisLabel: {
         visible: true,
         width: Y_AXIS_LABEL_WIDTH,
-        fill: euiTheme.euiTextSubduedColor,
+        textColor: euiTheme.euiTextSubduedColor,
         padding: Y_AXIS_LABEL_PADDING,
         formatter: (laneLabel: string) => {
           return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : laneLabel;
@@ -327,7 +327,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       },
       xAxisLabel: {
         visible: true,
-        fill: euiTheme.euiTextSubduedColor,
+        textColor: euiTheme.euiTextSubduedColor,
         formatter: (v: number) => {
           timeBuckets.setInterval(`${swimlaneData.interval}s`);
           const scaledDateFormat = timeBuckets.getScaledDateFormat();
@@ -346,6 +346,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
       timeZone: 'UTC',
     };
+
+    return config;
   }, [
     showSwimlane,
     swimlaneType,
