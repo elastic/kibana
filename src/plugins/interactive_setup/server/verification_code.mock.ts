@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart } from 'src/core/public';
+import type { PublicContract } from '@kbn/utility-types';
 
-export async function logLegacyImport(http: HttpStart) {
-  return http.post('/api/saved_objects/_log_legacy_import');
-}
+import type { VerificationCode } from './verification_code';
+
+export const verificationCodeMock = {
+  create: (): jest.Mocked<PublicContract<VerificationCode>> => ({
+    code: '123456',
+    remainingAttempts: 5,
+    verify: jest.fn().mockReturnValue(true),
+  }),
+};
