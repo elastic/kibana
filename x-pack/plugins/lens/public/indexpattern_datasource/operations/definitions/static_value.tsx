@@ -151,27 +151,42 @@ export const staticValueOperation: OperationDefinition<
         if (currentColumn.params.value === newValue) {
           return;
         }
-        updateLayer({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            [columnId]: {
-              ...currentColumn,
-              label: currentColumn?.customLabel ? currentColumn.label : ofName(newValue),
-              params: {
-                ...currentColumn.params,
-                value: newValue,
+        updateLayer((newLayer) => {
+          const newColumn = newLayer.columns[columnId] as StaticValueIndexPatternColumn;
+          return {
+            ...newLayer,
+            columns: {
+              ...newLayer.columns,
+              [columnId]: {
+                ...newColumn,
+                label: newColumn?.customLabel ? newColumn.label : ofName(newValue),
+                params: {
+                  ...newColumn.params,
+                  value: newValue,
+                },
               },
             },
-          },
+          };
         });
       },
-      [layer, currentColumn, columnId, updateLayer]
+      [columnId, updateLayer, currentColumn?.params?.value]
     );
+
+    // Pick the data from the current activeData (to be used when the current operation is not static_value)
+    const activeDataValue =
+      activeData &&
+      activeData[layerId] &&
+      activeData[layerId]?.rows?.length === 1 &&
+      activeData[layerId].rows[0][columnId];
+
+    const fallbackValue =
+      currentColumn?.operationType !== 'static_value' && activeDataValue != null
+        ? activeDataValue
+        : String(defaultValue);
 
     const { inputValue, handleInputChange } = useDebouncedValue<string | undefined>(
       {
-        value: currentColumn?.params?.value || String(defaultValue),
+        value: currentColumn?.params?.value || fallbackValue,
         onChange,
       },
       { allowFalsyValue: true }

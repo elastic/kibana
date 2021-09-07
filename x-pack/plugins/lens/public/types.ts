@@ -339,6 +339,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
     newState: Parameters<StateSetter<T>>[0],
     publishToVisualization?: {
       isDimensionComplete?: boolean;
+      forceRender?: boolean;
     }
   ) => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;

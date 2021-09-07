@@ -228,13 +228,25 @@ export function LayerPanel(
   const isDimensionPanelOpen = Boolean(activeId);
 
   const updateDataLayerState = useCallback(
-    (newState: unknown, { isDimensionComplete = true }: { isDimensionComplete?: boolean } = {}) => {
+    (
+      newState: unknown,
+      {
+        isDimensionComplete = true,
+        // this flag is a hack to force a sync render where it was planned an async/setTimeout state update
+        // TODO: revisit this once we get rid of updateDatasourceAsync upstream
+        forceRender = false,
+      }: { isDimensionComplete?: boolean; forceRender?: boolean } = {}
+    ) => {
       if (!activeGroup || !activeId) {
         return;
       }
       if (allAccessors.includes(activeId)) {
         if (isDimensionComplete) {
-          updateDatasourceAsync(datasourceId, newState);
+          if (forceRender) {
+            updateDatasource(datasourceId, newState);
+          } else {
+            updateDatasourceAsync(datasourceId, newState);
+          }
         } else {
           // The datasource can indicate that the previously-valid column is no longer
           // complete, which clears the visualization. This keeps the flyout open and reuses
@@ -264,7 +276,11 @@ export function LayerPanel(
         );
         setActiveDimension({ ...activeDimension, isNew: false });
       } else {
-        updateDatasourceAsync(datasourceId, newState);
+        if (forceRender) {
+          updateDatasource(datasourceId, newState);
+        } else {
+          updateDatasourceAsync(datasourceId, newState);
+        }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
