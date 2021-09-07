@@ -34,7 +34,7 @@ pageLoadAssetSize:
   indexPatternManagement: 28222
   indexPatternEditor: 25000
   infra: 184320
-  fleet: 465774
+  fleet: 250000
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -112,7 +112,7 @@ pageLoadAssetSize:
   expressionImage: 19288
   expressionMetric: 22238
   expressionShape: 34008
-  interactiveSetup: 70000
+  interactiveSetup: 80000
   expressionTagcloud: 27505
   expressions: 239290
   securitySolution: 231753
