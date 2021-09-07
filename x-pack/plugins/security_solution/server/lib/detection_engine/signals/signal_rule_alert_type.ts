@@ -29,7 +29,7 @@ import {
 } from '../../../../common/detection_engine/utils';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import { AlertAttributes, SignalRuleAlertTypeDefinition } from './types';
+import { AlertAttributes, SignalRuleAlertTypeDefinition, ThresholdAlertState } from './types';
 import {
   getListsClient,
   getExceptions,
@@ -125,6 +125,7 @@ export const signalRulesAlertType = ({
     async executor({
       previousStartedAt,
       startedAt,
+      state,
       alertId,
       services,
       params,
@@ -316,6 +317,7 @@ export const signalRulesAlertType = ({
               logger,
               buildRuleMessage,
               startedAt,
+              state: state as ThresholdAlertState,
               bulkCreate,
               wrapHits,
             });
