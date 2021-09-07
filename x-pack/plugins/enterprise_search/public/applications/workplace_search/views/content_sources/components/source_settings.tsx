@@ -236,11 +236,7 @@ export const SourceSettings: React.FC = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                onClick={syncClicked}
-                data-test-subj="SyncButton"
-              >
+              <EuiButton color="primary" onClick={syncClicked} data-test-subj="SyncButton">
                 {SYNC_BUTTON}
               </EuiButton>
             </EuiFlexItem>

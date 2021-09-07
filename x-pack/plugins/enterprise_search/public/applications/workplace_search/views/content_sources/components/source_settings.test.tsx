@@ -190,7 +190,7 @@ describe('SourceSettings', () => {
 
     wrapper.find('[data-test-subj="SyncButton"]').simulate('click');
 
-    expect(syncContentSource).toHaveBeenCalledWith(fullContentSources[0].id)
+    expect(syncContentSource).toHaveBeenCalledWith(fullContentSources[0].id);
   });
 
   describe('DownloadDiagnosticsButton', () => {
