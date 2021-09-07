@@ -124,6 +124,7 @@ export const useDashboardAppState = ({
       savedDashboards,
       kbnUrlStateStorage,
       initializerContext,
+      savedObjectsTagging,
       isEmbeddedExternally,
       dashboardCapabilities,
       dispatchDashboardStateChange,
