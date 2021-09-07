@@ -19,9 +19,6 @@ import type {
 
 export interface DateHistogramParams {
   date: boolean;
-  interval: number;
-  intervalESValue: number;
-  intervalESUnit: string;
   format: string;
   bounds?: {
     min: string | number;

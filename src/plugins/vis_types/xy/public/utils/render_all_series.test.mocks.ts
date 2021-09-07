@@ -20,6 +20,12 @@ export const getVisConfig = (): VisConfig => {
     tooltip: {
       type: 'vertical',
     },
+    xDomain: {
+      minInterval: 60000,
+      adjusted: {
+        minInterval: 60000,
+      },
+    },
     aspects: {
       x: {
         accessor: 'col-0-2',
@@ -34,9 +40,6 @@ export const getVisConfig = (): VisConfig => {
         id: '2',
         params: {
           date: true,
-          intervalESUnit: 'm',
-          intervalESValue: 1,
-          interval: 60000,
           format: 'HH:mm',
         },
       },
@@ -141,6 +144,12 @@ export const getVisConfigMutipleYaxis = (): VisConfig => {
     tooltip: {
       type: 'vertical',
     },
+    xDomain: {
+      minInterval: 60000,
+      adjusted: {
+        minInterval: 60000,
+      },
+    },
     aspects: {
       x: {
         accessor: 'col-0-2',
@@ -155,9 +164,6 @@ export const getVisConfigMutipleYaxis = (): VisConfig => {
         id: '2',
         params: {
           date: true,
-          intervalESUnit: 'm',
-          intervalESValue: 1,
-          interval: 60000,
           format: 'HH:mm',
         },
       },
@@ -272,6 +278,12 @@ export const getVisConfigPercentiles = (): VisConfig => {
     tooltip: {
       type: 'vertical',
     },
+    xDomain: {
+      minInterval: 60000,
+      adjusted: {
+        minInterval: 60000,
+      },
+    },
     aspects: {
       x: {
         accessor: 'col-0-2',
@@ -286,9 +298,6 @@ export const getVisConfigPercentiles = (): VisConfig => {
         id: '2',
         params: {
           date: true,
-          intervalESUnit: 'm',
-          intervalESValue: 1,
-          interval: 60000,
           format: 'HH:mm',
         },
       },

@@ -281,7 +281,6 @@ export const sampleAreaVis = {
         },
         params: {
           date: true,
-          interval: 43200000,
           format: 'YYYY-MM-DD HH:mm',
           bounds: {
             min: '2020-09-30T12:41:13.795Z',

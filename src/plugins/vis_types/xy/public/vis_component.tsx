@@ -213,13 +213,13 @@ const VisComponent = (props: VisComponentProps) => {
     config.xAxis.scale.type === ScaleType.Ordinal
       ? undefined
       : {
-          min: visParams.xDomain?.min,
-          max: visParams.xDomain?.max,
-          minInterval: visParams.xDomain?.minInterval,
+          min: config.xDomain?.min,
+          max: config.xDomain?.max,
+          minInterval: config.xDomain?.minInterval,
         };
 
   const adjustedXDomain =
-    config.xAxis.scale.type === ScaleType.Ordinal ? undefined : visParams.xDomain?.adjusted;
+    config.xAxis.scale.type === ScaleType.Ordinal ? undefined : config.xDomain?.adjusted;
 
   const legendPosition = useMemo(() => config.legend.position ?? Position.Right, [
     config.legend.position,

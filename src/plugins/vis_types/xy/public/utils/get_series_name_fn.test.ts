@@ -40,9 +40,6 @@ const aspects = {
     id: '2',
     params: {
       date: true,
-      intervalESUnit: 'd',
-      intervalESValue: 1,
-      interval: 86400000,
       format: 'YYYY-MM-DD',
     },
   },

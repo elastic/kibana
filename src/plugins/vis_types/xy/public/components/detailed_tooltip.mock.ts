@@ -20,9 +20,6 @@ export const aspects = {
     id: '3',
     params: {
       date: true,
-      intervalESUnit: 'h',
-      intervalESValue: 3,
-      interval: 10800000,
       format: 'YYYY-MM-DD HH:mm',
     },
   },
@@ -54,9 +51,6 @@ export const aspectsWithSplitColumn = {
     id: '3',
     params: {
       date: true,
-      intervalESUnit: 'h',
-      intervalESValue: 3,
-      interval: 10800000,
       format: 'YYYY-MM-DD HH:mm',
     },
   },
@@ -103,9 +97,6 @@ export const aspectsWithSplitRow = {
     id: '3',
     params: {
       date: true,
-      intervalESUnit: 'h',
-      intervalESValue: 3,
-      interval: 10800000,
       format: 'YYYY-MM-DD HH:mm',
     },
   },

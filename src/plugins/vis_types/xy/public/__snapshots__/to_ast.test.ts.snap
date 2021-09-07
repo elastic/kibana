@@ -73,6 +73,11 @@ Object {
         "toAst": [Function],
       },
     ],
+    "xDomain": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
     "yDimension": Array [
       Object {
         "toAst": [Function],

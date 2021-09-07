@@ -82,6 +82,7 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     legend: getLegend(params),
     rotation: getRotation(params.categoryAxes[0]),
     thresholdLine: getThresholdLine(thresholdLine, yAxes, params.seriesParams),
+    xDomain: params.xDomain,
   };
 }
 

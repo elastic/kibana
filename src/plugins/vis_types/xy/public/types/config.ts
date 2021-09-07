@@ -19,6 +19,7 @@ import {
   TooltipValueFormatter,
   YDomainRange,
 } from '@elastic/charts';
+import { XDomainOutput } from './expression_functions';
 
 import type { Dimension, Scale, ThresholdLine } from './param';
 
@@ -118,4 +119,5 @@ export interface VisConfig {
   fillOpacity?: number;
   detailedTooltip?: boolean;
   isVislibVis?: boolean;
+  xDomain?: XDomainOutput;
 }
