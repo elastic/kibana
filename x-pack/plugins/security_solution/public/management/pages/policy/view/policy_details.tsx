@@ -7,15 +7,15 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiBottomBar,
   EuiButton,
   EuiButtonEmpty,
-  EuiSpacer,
-  EuiConfirmModal,
   EuiCallOut,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
-  EuiBottomBar,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -24,15 +24,15 @@ import { useLocation } from 'react-router-dom';
 import { ApplicationStart } from 'kibana/public';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import {
-  policyDetails,
   agentStatusSummary,
-  updateStatus,
-  isLoading,
   apiError,
+  isLoading,
+  policyDetails,
+  updateStatus,
 } from '../store/policy_details/selectors';
-import { useKibana, toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint, useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
-import { useToasts } from '../../../../common/lib/kibana';
+import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
 import { AppAction } from '../../../../common/store/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
@@ -41,9 +41,10 @@ import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/
 import { APP_ID } from '../../../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { HeaderLinkBack } from '../../../../common/components/header_page';
 import { PolicyDetailsForm } from './policy_details_form';
 import { AdministrationListPage } from '../../../components/administration_list_page';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -54,6 +55,7 @@ export const PolicyDetails = React.memo(() => {
   } = useKibana<{ application: ApplicationStart }>();
   const toasts = useToasts();
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
+  const { getAppUrl } = useAppUrl();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -127,6 +129,35 @@ export const PolicyDetails = React.memo(() => {
     setShowConfirm(false);
   }, []);
 
+  const backLinkOptions = useMemo<BackToExternalAppButtonProps>(() => {
+    if (routeState?.backLink) {
+      return {
+        onBackButtonNavigateTo: routeState.backLink.navigateTo,
+        backButtonLabel: routeState.backLink.label,
+        backButtonUrl: routeState.backLink.href,
+      };
+    }
+
+    const endpointListPath = getEndpointListPath({ name: 'endpointList' });
+
+    return {
+      backButtonLabel: i18n.translate(
+        'xpack.securitySolution.endpoint.policy.details.backToListTitle',
+        {
+          defaultMessage: 'Back to endpoint hosts',
+        }
+      ),
+      backButtonUrl: getAppUrl({ path: endpointListPath }),
+      onBackButtonNavigateTo: [
+        APP_ID,
+        {
+          path: endpointListPath,
+        },
+      ],
+      dataTestSubj: 'policyDetailsBackLink',
+    };
+  }, [getAppUrl, routeState?.backLink]);
+
   useEffect(() => {
     if (!routeState && locationRouteState) {
       setRouteState(locationRouteState);
@@ -160,17 +191,7 @@ export const PolicyDetails = React.memo(() => {
     />
   );
 
-  const backToEndpointList = (
-    <HeaderLinkBack
-      backOptions={{
-        text: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToListTitle', {
-          defaultMessage: 'Back to endpoint hosts',
-        }),
-        pageId: SecurityPageName.endpoints,
-        dataTestSubj: 'policyDetailsBackLink',
-      }}
-    />
-  );
+  const backToEndpointList = <BackToExternalAppButton {...backLinkOptions} />;
 
   return (
     <>

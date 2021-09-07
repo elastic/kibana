@@ -7,8 +7,6 @@
 
 import React, { memo, useMemo } from 'react';
 
-import { pick } from 'lodash';
-
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -22,23 +20,24 @@ import {
   getListItems,
   getListPagination,
   isListLoading,
-  listOfPolicies,
   mapOfPoliciesById,
 } from '../../../store/selectors';
 
 import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from '../../hooks';
 
-import { getTrustedAppsListPath } from '../../../../../common/routing';
+import { getPolicyDetailPath, getTrustedAppsListPath } from '../../../../../common/routing';
 import {
   PaginatedContent,
   PaginatedContentProps,
 } from '../../../../../components/paginated_content';
-import { TrustedApp } from '../../../../../../../common/endpoint/types';
+import { PolicyDetailsRouteState, TrustedApp } from '../../../../../../../common/endpoint/types';
 import {
   ArtifactEntryCard,
   ArtifactEntryCardProps,
 } from '../../../../../components/artifact_entry_card';
 import { AppAction } from '../../../../../../common/store/actions';
+import { APP_ID } from '../../../../../../../common/constants';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
 
 export interface PaginationBarProps {
   pagination: Pagination;
@@ -56,6 +55,7 @@ const RootWrapper = styled.div`
 export const TrustedAppsGrid = memo(() => {
   const history = useHistory();
   const dispatch = useDispatch<Dispatch<AppAction>>();
+  const { getAppUrl } = useAppUrl();
 
   const pagination = useTrustedAppsSelector(getListPagination);
   const listItems = useTrustedAppsSelector(getListItems);
@@ -78,20 +78,50 @@ export const TrustedAppsGrid = memo(() => {
 
     return (trustedApp: TrustedApp): ArtifactEntryCardProps<TrustedApp> => {
       if (!cachedCardProps[trustedApp.id]) {
-        let policyNames: ArtifactEntryCardProps['policyNames'];
+        let policies: ArtifactEntryCardProps['policies'];
 
         if (trustedApp.effectScope.type === 'policy' && trustedApp.effectScope.policies.length) {
-          policyNames = trustedApp.effectScope.policies.reduce<
-            Required<ArtifactEntryCardProps>['policyNames']
-          >((nameMap, policyId) => {
-            nameMap[policyId] = policyListById[policyId]?.name ?? policyId;
-            return nameMap;
+          policies = trustedApp.effectScope.policies.reduce<
+            Required<ArtifactEntryCardProps>['policies']
+          >((policyToNavOptionsMap, policyId) => {
+            const currentPagePath = getTrustedAppsListPath({
+              ...location,
+            });
+
+            const policyDetailsPath = getPolicyDetailPath(policyId);
+
+            const routeState: PolicyDetailsRouteState = {
+              backLink: {
+                label: i18n.translate(
+                  'xpack.securitySolution.trustedapps.grid.policyDetailsLinkBackLabel',
+                  { defaultMessage: 'Back to trusted Applications' }
+                ),
+                navigateTo: [
+                  APP_ID,
+                  {
+                    path: currentPagePath,
+                  },
+                ],
+                href: getAppUrl({ path: currentPagePath }),
+              },
+            };
+
+            policyToNavOptionsMap[policyId] = {
+              navigateAppId: APP_ID,
+              navigateOptions: {
+                path: policyDetailsPath,
+                state: routeState,
+              },
+              href: getAppUrl({ path: policyDetailsPath }),
+              children: policyListById[policyId]?.name ?? policyId,
+            };
+            return policyToNavOptionsMap;
           }, {});
         }
 
         cachedCardProps[trustedApp.id] = {
           item: trustedApp,
-          policyNames,
+          policies,
           actions: [
             {
               icon: 'controlsHorizontal',
@@ -129,7 +159,7 @@ export const TrustedAppsGrid = memo(() => {
 
       return cachedCardProps[trustedApp.id];
     };
-  }, [dispatch, history, location, policyListById]);
+  }, [dispatch, getAppUrl, history, location, policyListById]);
 
   return (
     <RootWrapper>
