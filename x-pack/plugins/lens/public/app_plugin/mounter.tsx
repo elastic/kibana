@@ -55,6 +55,7 @@ export async function getLensServices(
     savedObjectsTagging,
     usageCollection,
     fieldFormats,
+    spaces,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -87,6 +88,7 @@ export async function getLensServices(
     },
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
+    spaces,
   };
 }
 
@@ -203,7 +205,9 @@ export async function mountApp(
       trackUiEvent('loaded');
       const initialInput = getInitialInput(props.id, props.editByValue);
 
-      lensStore.dispatch(loadInitial({ redirectCallback, initialInput, emptyState }));
+      lensStore.dispatch(
+        loadInitial({ redirectCallback, initialInput, emptyState, history: props.history })
+      );
 
       return (
         <Provider store={lensStore}>
