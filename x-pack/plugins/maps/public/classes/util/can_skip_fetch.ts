@@ -147,7 +147,6 @@ export async function canSkipSourceUpdate({
     !updateDueToApplyGlobalTime &&
     !updateDueToTime &&
     !updateDueToTimeslice &&
-    !updateDueToRefreshTimer &&
     !updateDueToExtentChange &&
     !updateDueToFields &&
     !updateDueToQuery &&
