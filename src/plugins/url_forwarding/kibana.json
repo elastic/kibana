@@ -6,6 +6,5 @@
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"
-  },
-  "requiredPlugins": ["kibanaLegacy"]
+  }
 }
