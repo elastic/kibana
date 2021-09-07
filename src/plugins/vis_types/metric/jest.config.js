@@ -12,7 +12,5 @@ module.exports = {
   roots: ['<rootDir>/src/plugins/vis_types/metric'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_types/metric',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/plugins/vis_types/metric/{public,server}/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/src/plugins/vis_types/metric/{public,server}/**/*.{ts,tsx}'],
 };

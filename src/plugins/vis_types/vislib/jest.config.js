@@ -13,6 +13,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_types/vislib',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/vis_types/vislib/{common,public,server}/**/*.{js,ts,tsx}'
+    '<rootDir>/src/plugins/vis_types/vislib/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

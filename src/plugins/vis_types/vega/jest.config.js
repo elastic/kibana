@@ -12,7 +12,5 @@ module.exports = {
   roots: ['<rootDir>/src/plugins/vis_types/vega'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_types/vega',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/plugins/vis_types/vega/{public,server}/**/*.{js,ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/src/plugins/vis_types/vega/{public,server}/**/*.{js,ts,tsx}'],
 };

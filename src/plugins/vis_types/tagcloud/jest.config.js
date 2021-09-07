@@ -13,7 +13,5 @@ module.exports = {
   testRunner: 'jasmine2',
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_types/tagcloud',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/plugins/vis_types/tagcloud/{public,server}/**/*.{ts,tsx}'
-  ],
+  collectCoverageFrom: ['<rootDir>/src/plugins/vis_types/tagcloud/{public,server}/**/*.{ts,tsx}'],
 };
