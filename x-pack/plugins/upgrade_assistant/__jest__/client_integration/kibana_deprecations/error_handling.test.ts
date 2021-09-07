@@ -8,9 +8,8 @@
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
 
-import { setupEnvironment } from '../helpers';
+import { setupEnvironment, kibanaDeprecationsServiceHelpers } from '../helpers';
 import { KibanaTestBed, setupKibanaPage } from './kibana_deprecations.helpers';
-import { kibanaDeprecationsMockResponse } from './mocked_responses';
 
 describe('Error handling', () => {
   let testBed: KibanaTestBed;
@@ -23,18 +22,21 @@ describe('Error handling', () => {
 
   test('handles plugin error', async () => {
     await act(async () => {
-      deprecationService.getAllDeprecations = jest.fn().mockReturnValue([
-        ...kibanaDeprecationsMockResponse,
-        {
-          domainId: 'failed_plugin_id',
-          title: 'Failed to fetch deprecations for "failed_plugin_id"',
-          message: `Failed to get deprecations info for plugin "failed_plugin_id".`,
-          level: 'fetch_error',
-          correctiveActions: {
-            manualSteps: ['Check Kibana server logs for error message.'],
+      kibanaDeprecationsServiceHelpers.setLoadDeprecations({
+        deprecationService,
+        response: [
+          ...kibanaDeprecationsServiceHelpers.defaultMockedResponses.mockedKibanaDeprecations,
+          {
+            domainId: 'failed_plugin_id',
+            title: 'Failed to fetch deprecations for "failed_plugin_id"',
+            message: `Failed to get deprecations info for plugin "failed_plugin_id".`,
+            level: 'fetch_error',
+            correctiveActions: {
+              manualSteps: ['Check Kibana server logs for error message.'],
+            },
           },
-        },
-      ]);
+        ],
+      });
 
       testBed = await setupKibanaPage({
         services: {
@@ -57,9 +59,10 @@ describe('Error handling', () => {
 
   test('handles request error', async () => {
     await act(async () => {
-      deprecationService.getAllDeprecations = jest
-        .fn()
-        .mockRejectedValue(new Error('Internal Server Error'));
+      kibanaDeprecationsServiceHelpers.setLoadDeprecations({
+        deprecationService,
+        mockRequestErrorMessage: 'Internal Server Error',
+      });
 
       testBed = await setupKibanaPage({
         services: {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DomainDeprecationDetails } from 'kibana/public';
 import { ESUpgradeStatus } from '../../../../common/types';
 
 export const esDeprecations: ESUpgradeStatus = {
@@ -37,20 +36,3 @@ export const esDeprecationsEmpty: ESUpgradeStatus = {
   totalCriticalDeprecations: 0,
   deprecations: [],
 };
-
-export const kibanaDeprecations: DomainDeprecationDetails[] = [
-  {
-    title: 'mock-deprecation-title',
-    correctiveActions: { manualSteps: ['test-step'] },
-    domainId: 'xpack.spaces',
-    level: 'critical',
-    message: 'Sample warning deprecation',
-  },
-  {
-    title: 'mock-deprecation-title',
-    correctiveActions: { manualSteps: ['test-step'] },
-    domainId: 'xpack.spaces',
-    level: 'warning',
-    message: 'Sample warning deprecation',
-  },
-];
