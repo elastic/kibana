@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { ApplicationStart } from 'kibana/public';
+import { safeLoad } from 'js-yaml';
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type {
@@ -191,7 +192,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       if (packageInfo) {
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
-          packageInfo
+          packageInfo,
+          safeLoad
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
