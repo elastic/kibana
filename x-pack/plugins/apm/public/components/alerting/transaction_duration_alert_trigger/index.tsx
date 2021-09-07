@@ -78,9 +78,11 @@ export function TransactionDurationAlertTrigger(props: Props) {
 
   createCallApmApi(services as CoreStart);
 
-  const transactionTypes = useServiceTransactionTypesFetcher(
-    metadata?.serviceName
-  );
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName: metadata?.serviceName,
+    start: metadata?.start,
+    end: metadata?.end,
+  });
 
   const params = defaults(
     {
