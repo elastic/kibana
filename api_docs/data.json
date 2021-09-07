@@ -16157,11 +16157,11 @@
           },
           {
             "plugin": "visTypeVega",
-            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+            "path": "src/plugins/vis_types/vega/public/vega_request_handler.ts"
           },
           {
             "plugin": "visTypeVega",
-            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+            "path": "src/plugins/vis_types/vega/public/vega_request_handler.ts"
           },
           {
             "plugin": "dashboard",
@@ -20282,15 +20282,15 @@
           },
           {
             "plugin": "visTypeVega",
-            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+            "path": "src/plugins/vis_types/vega/public/vega_request_handler.ts"
           },
           {
             "plugin": "visTypeVega",
-            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+            "path": "src/plugins/vis_types/vega/public/vega_request_handler.ts"
           },
           {
             "plugin": "visTypeVega",
-            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+            "path": "src/plugins/vis_types/vega/public/vega_request_handler.ts"
           }
         ],
         "children": [
@@ -22396,7 +22396,7 @@
             },
             {
               "plugin": "visTypeMetric",
-              "path": "src/plugins/vis_type_metric/public/plugin.ts"
+              "path": "src/plugins/vis_types/metric/public/plugin.ts"
             },
             {
               "plugin": "visTypeTable",
@@ -30417,11 +30417,11 @@
           },
           {
             "plugin": "visTypeVega",
-            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+            "path": "src/plugins/vis_types/vega/public/vega_request_handler.ts"
           },
           {
             "plugin": "visTypeVega",
-            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+            "path": "src/plugins/vis_types/vega/public/vega_request_handler.ts"
           },
           {
             "plugin": "dashboard",
@@ -36898,11 +36898,11 @@
           },
           {
             "plugin": "visTypeVega",
-            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+            "path": "src/plugins/vis_types/vega/public/vega_request_handler.ts"
           },
           {
             "plugin": "visTypeVega",
-            "path": "src/plugins/vis_type_vega/public/vega_request_handler.ts"
+            "path": "src/plugins/vis_types/vega/public/vega_request_handler.ts"
           },
           {
             "plugin": "dashboard",

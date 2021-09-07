@@ -16,6 +16,17 @@ Object {
         "type": "long",
       },
     },
+    "PNGV2": Object {
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
     "_all": Object {
       "type": "long",
     },
@@ -52,6 +63,17 @@ Object {
     },
     "last7Days": Object {
       "PNG": Object {
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "PNGV2": Object {
         "available": Object {
           "type": "boolean",
         },
@@ -117,6 +139,36 @@ Object {
           "type": "long",
         },
       },
+      "printable_pdf_v2": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
       "status": Object {
         "completed": Object {
           "type": "long",
@@ -147,6 +199,17 @@ Object {
               "type": "long",
             },
           },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
           "csv": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -170,6 +233,17 @@ Object {
             },
           },
           "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -193,6 +267,17 @@ Object {
               "type": "long",
             },
           },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
           "csv": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -216,6 +301,17 @@ Object {
             },
           },
           "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -239,6 +335,17 @@ Object {
               "type": "long",
             },
           },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
           "csv": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -262,6 +369,17 @@ Object {
             },
           },
           "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -285,6 +403,17 @@ Object {
               "type": "long",
             },
           },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
           "csv": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -308,6 +437,17 @@ Object {
             },
           },
           "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -331,6 +471,17 @@ Object {
               "type": "long",
             },
           },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
           "csv": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -364,10 +515,51 @@ Object {
               "type": "long",
             },
           },
+          "printable_pdf_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
         },
       },
     },
     "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "printable_pdf_v2": Object {
       "app": Object {
         "canvas workpad": Object {
           "type": "long",
@@ -427,6 +619,17 @@ Object {
             "type": "long",
           },
         },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
         "csv": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -450,6 +653,17 @@ Object {
           },
         },
         "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
           "canvas workpad": Object {
             "type": "long",
           },
@@ -473,6 +687,17 @@ Object {
             "type": "long",
           },
         },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
         "csv": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -496,6 +721,17 @@ Object {
           },
         },
         "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
           "canvas workpad": Object {
             "type": "long",
           },
@@ -519,6 +755,17 @@ Object {
             "type": "long",
           },
         },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
         "csv": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -542,6 +789,17 @@ Object {
           },
         },
         "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
           "canvas workpad": Object {
             "type": "long",
           },
@@ -565,6 +823,17 @@ Object {
             "type": "long",
           },
         },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
         "csv": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -588,6 +857,17 @@ Object {
           },
         },
         "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
           "canvas workpad": Object {
             "type": "long",
           },
@@ -611,6 +891,17 @@ Object {
             "type": "long",
           },
         },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
         "csv": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -634,6 +925,17 @@ Object {
           },
         },
         "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
           "canvas workpad": Object {
             "type": "long",
           },

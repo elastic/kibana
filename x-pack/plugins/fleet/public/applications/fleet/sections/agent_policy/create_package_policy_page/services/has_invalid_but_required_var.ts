@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { safeLoad } from 'js-yaml';
+
 import type { PackagePolicyConfigRecord, RegistryVarsEntry } from '../../../../types';
 
 import { validatePackagePolicyConfig } from './';
@@ -25,7 +27,8 @@ export const hasInvalidButRequiredVar = (
               validatePackagePolicyConfig(
                 packagePolicyVars[registryVar.name],
                 registryVar,
-                registryVar.name
+                registryVar.name,
+                safeLoad
               )?.length)
         )
     )
