@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { ESDeprecationStats } from './es_stats';
 import { KibanaDeprecationStats } from './kibana_stats';
-import type { OverviewStepsProps } from '../../types';
+import type { OverviewStepProps } from '../../types';
 
 import './_fix_issues_step.scss';
 
@@ -23,11 +23,11 @@ const i18nTexts = {
   }),
 };
 
-interface Props extends OverviewStepsProps {
+interface Props extends OverviewStepProps {
   nextMajor: number;
 }
 
-const FixIssuesStep: FunctionComponent<OverviewStepsProps> = ({ setIsComplete }) => {
+const FixIssuesStep: FunctionComponent<OverviewStepProps> = ({ setIsComplete }) => {
   const [isEsFixed, setIsEsFixed] = useState(false);
   const [isKibanaFixed, setIsKibanaFixed] = useState(false);
 

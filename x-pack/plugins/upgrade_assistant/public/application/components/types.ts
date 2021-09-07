@@ -32,7 +32,7 @@ export interface DeprecationLoggingPreviewProps {
   toggleLogging: () => void;
 }
 
-export interface OverviewStepsProps {
+export interface OverviewStepProps {
   isComplete: boolean;
   setIsComplete: (isComplete: boolean) => void;
 }

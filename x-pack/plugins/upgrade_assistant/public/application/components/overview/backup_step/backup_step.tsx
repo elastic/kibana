@@ -12,13 +12,13 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { CloudSetup } from '../../../../../../cloud/public';
 import { OnPremBackup } from './on_prem_backup';
 import { CloudBackup } from './cloud_backup';
-import type { OverviewStepsProps } from '../../types';
+import type { OverviewStepProps } from '../../types';
 
 const title = i18n.translate('xpack.upgradeAssistant.overview.backupStepTitle', {
   defaultMessage: 'Back up your data',
 });
 
-interface Props extends OverviewStepsProps {
+interface Props extends OverviewStepProps {
   cloud?: CloudSetup;
 }
 
