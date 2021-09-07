@@ -13,7 +13,6 @@ const alwaysImportedTests = [
   require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
   require.resolve('../test/new_visualize_flow/config.ts'),
   require.resolve('../test/security_functional/config.ts'),
-  require.resolve('../test/functional/config.legacy.ts'),
 ];
 // eslint-disable-next-line no-restricted-syntax
 const onlyNotInCoverageTests = [
