@@ -459,6 +459,13 @@ export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
   })
 )<{ $isVisible: boolean }>``;
 
+export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
+  overflow: hidden;
+  margin: 0;
+  min-height: 490px;
+  display: ${({ $visible = true }) => ($visible ? 'flex' : 'none')};
+`;
+
 export const UpdatedFlexGroup = styled(EuiFlexGroup)`
   position: absolute;
   z-index: ${({ theme }) => theme.eui.euiZLevel1};
