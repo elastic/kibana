@@ -6,6 +6,8 @@
  */
 
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+
+import { handleEsError } from '../shared_imports';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
@@ -26,6 +28,7 @@ describe('ML snapshots APIs', () => {
     mockRouter = createMockRouter();
     routeDependencies = {
       router: mockRouter,
+      lib: { handleEsError },
     };
     registerMlSnapshotRoutes(routeDependencies);
   });

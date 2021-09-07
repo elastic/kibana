@@ -10,6 +10,7 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiStat,
@@ -24,6 +25,7 @@ import {
   SERVICE_NODE_NAME_MISSING,
 } from '../../../../common/service_nodes';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -33,7 +35,6 @@ import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { truncate, unit } from '../../../utils/style';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
-import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
 const INITIAL_DATA = {
   host: '',
@@ -99,6 +100,7 @@ export function ServiceNodeMetrics() {
     [kuery, serviceName, serviceNodeName, start, end]
   );
 
+  const { docLinks } = useApmPluginContext().core;
   const isLoading = status === FETCH_STATUS.LOADING;
   const isAggregatedData = serviceNodeName === SERVICE_NODE_NAME_MISSING;
 
@@ -120,16 +122,12 @@ export function ServiceNodeMetrics() {
             defaultMessage="We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue. For more information on upgrading, see the {link}. As an alternative, you can use the Kibana Query bar to filter by hostname, container ID or other fields."
             values={{
               link: (
-                <ElasticDocsLink
-                  target="_blank"
-                  section="/apm/server"
-                  path="/upgrading.html"
-                >
+                <EuiLink href={docLinks.links.apm.upgrading}>
                   {i18n.translate(
                     'xpack.apm.serviceNodeMetrics.unidentifiedServiceNodesWarningDocumentationLink',
                     { defaultMessage: 'documentation of APM Server' }
                   )}
-                </ElasticDocsLink>
+                </EuiLink>
               ),
             }}
           />
