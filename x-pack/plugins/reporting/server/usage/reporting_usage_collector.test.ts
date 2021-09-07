@@ -487,6 +487,7 @@ describe('data modeling', () => {
     // just check that the example objects can be cast to ReportingUsageType
     check({
       PNG: { available: true, total: 7 },
+      PNGV2: { available: true, total: 7 },
       _all: 21,
       available: true,
       browser_type: 'chromium',
@@ -495,10 +496,17 @@ describe('data modeling', () => {
       enabled: true,
       last7Days: {
         PNG: { available: true, total: 0 },
+        PNGV2: { available: true, total: 0 },
         _all: 0,
         csv: { available: true, total: 0 },
         csv_searchsource: { available: true, total: 0 },
         printable_pdf: {
+          app: { dashboard: 0, visualization: 0 },
+          available: true,
+          layout: { preserve_layout: 0, print: 0 },
+          total: 0,
+        },
+        printable_pdf_v2: {
           app: { dashboard: 0, visualization: 0 },
           available: true,
           layout: { preserve_layout: 0, print: 0 },
@@ -513,17 +521,26 @@ describe('data modeling', () => {
         layout: { preserve_layout: 7, print: 3 },
         total: 10,
       },
+      printable_pdf_v2: {
+        app: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
+        available: true,
+        layout: { preserve_layout: 7, print: 3 },
+        total: 10,
+      },
       status: { completed: 21, failed: 0 },
       statuses: {
         completed: {
           PNG: { dashboard: 3, visualization: 4 },
+          PNGV2: { dashboard: 3, visualization: 4 },
           csv: {},
           printable_pdf: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
+          printable_pdf_v2: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
         },
       },
     });
     check({
       PNG: { available: true, total: 3 },
+      PNGV2: { available: true, total: 3 },
       _all: 4,
       available: true,
       browser_type: 'chromium',
@@ -532,10 +549,17 @@ describe('data modeling', () => {
       enabled: true,
       last7Days: {
         PNG: { available: true, total: 3 },
+        PNGV2: { available: true, total: 3 },
         _all: 4,
         csv: { available: true, total: 0 },
         csv_searchsource: { available: true, total: 0 },
         printable_pdf: {
+          app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
+          available: true,
+          layout: { preserve_layout: 1, print: 0 },
+          total: 1,
+        },
+        printable_pdf_v2: {
           app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
           available: true,
           layout: { preserve_layout: 1, print: 0 },
@@ -547,6 +571,12 @@ describe('data modeling', () => {
         },
       },
       printable_pdf: {
+        app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
+        available: true,
+        layout: { preserve_layout: 1, print: 0 },
+        total: 1,
+      },
+      printable_pdf_v2: {
         app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
         available: true,
         layout: { preserve_layout: 1, print: 0 },
@@ -571,9 +601,16 @@ describe('data modeling', () => {
           app: { dashboard: 0, visualization: 0 },
           layout: { preserve_layout: 0, print: 0 },
         },
+        printable_pdf_v2: {
+          available: true,
+          total: 0,
+          app: { dashboard: 0, visualization: 0 },
+          layout: { preserve_layout: 0, print: 0 },
+        },
         csv: { available: true, total: 0 },
         csv_searchsource: { available: true, total: 0 },
         PNG: { available: true, total: 0 },
+        PNGV2: { available: true, total: 0 },
       },
       _all: 0,
       status: { completed: 0, failed: 0 },
@@ -584,9 +621,16 @@ describe('data modeling', () => {
         app: { dashboard: 0, visualization: 0 },
         layout: { preserve_layout: 0, print: 0 },
       },
+      printable_pdf_v2: {
+        available: true,
+        total: 0,
+        app: { dashboard: 0, visualization: 0 },
+        layout: { preserve_layout: 0, print: 0 },
+      },
       csv: { available: true, total: 0 },
       csv_searchsource: { available: true, total: 0 },
       PNG: { available: true, total: 0 },
+      PNGV2: { available: true, total: 0 },
     });
   });
 });

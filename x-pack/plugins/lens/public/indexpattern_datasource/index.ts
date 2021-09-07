@@ -20,7 +20,6 @@ import type {
   FieldFormatsStart,
   FieldFormatsSetup,
 } from '../../../../../src/plugins/field_formats/public';
-import { getTimeZone } from '../utils';
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
@@ -38,8 +37,6 @@ export interface IndexPatternDatasourceStartPlugins {
 }
 
 export class IndexPatternDatasource {
-  constructor() {}
-
   setup(
     core: CoreSetup<IndexPatternDatasourceStartPlugins>,
     {
@@ -50,15 +47,9 @@ export class IndexPatternDatasource {
     }: IndexPatternDatasourceSetupPlugins
   ) {
     editorFrame.registerDatasource(async () => {
-      const {
-        getIndexPatternDatasource,
-        renameColumns,
-        formatColumn,
-        counterRate,
-        getTimeScale,
-        getSuffixFormatter,
-        suffixFormatterId,
-      } = await import('../async_services');
+      const { getIndexPatternDatasource, getSuffixFormatter, suffixFormatterId } = await import(
+        '../async_services'
+      );
 
       if (!fieldFormatsSetup.has(suffixFormatterId)) {
         const startServices = createStartServicesGetter(core.getStartServices);
@@ -68,11 +59,6 @@ export class IndexPatternDatasource {
 
         fieldFormatsSetup.register([suffixFormatter]);
       }
-
-      expressions.registerFunction(getTimeScale(() => getTimeZone(core.uiSettings)));
-      expressions.registerFunction(counterRate);
-      expressions.registerFunction(renameColumns);
-      expressions.registerFunction(formatColumn);
 
       const [
         coreStart,

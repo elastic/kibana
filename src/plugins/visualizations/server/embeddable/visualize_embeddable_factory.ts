@@ -16,6 +16,7 @@ import {
   commonMigrateVislibPie,
   commonAddEmptyValueColorRule,
   commonMigrateTagCloud,
+  commonAddDropLastBucketIntoTSVBModel,
 } from '../migrations/visualization_common_migrations';
 
 const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableRecord) => {
@@ -29,6 +30,13 @@ const byValueHideTSVBLastValueIndicator = (state: SerializableRecord) => {
   return {
     ...state,
     savedVis: commonHideTSVBLastValueIndicator(state.savedVis),
+  };
+};
+
+const byValueAddDropLastBucketIntoTSVBModel = (state: SerializableRecord) => {
+  return {
+    ...state,
+    savedVis: commonAddDropLastBucketIntoTSVBModel(state.savedVis),
   };
 };
 
@@ -72,7 +80,12 @@ export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
           byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel
         )(state),
       '7.14.0': (state) =>
-        flow(byValueAddEmptyValueColorRule, byValueMigrateVislibPie, byValueMigrateTagcloud)(state),
+        flow(
+          byValueAddEmptyValueColorRule,
+          byValueMigrateVislibPie,
+          byValueMigrateTagcloud,
+          byValueAddDropLastBucketIntoTSVBModel
+        )(state),
     },
   };
 };
