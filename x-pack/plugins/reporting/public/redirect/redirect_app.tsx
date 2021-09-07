@@ -40,27 +40,39 @@ const i18nTexts = {
   ),
 };
 
-export const RedirectApp: FunctionComponent<Props> = ({ share }) => {
+export const RedirectApp: FunctionComponent<Props> = ({ share, apiClient }) => {
   const [error, setError] = useState<undefined | Error>();
 
   useEffect(() => {
-    try {
-      const locatorParams = ((window as unknown) as Record<string, LocatorParams>)[
-        REPORTING_REDIRECT_LOCATOR_STORE_KEY
-      ];
+    (async () => {
+      try {
+        let locatorParams: LocatorParams;
 
-      if (!locatorParams) {
-        throw new Error('Could not find locator params for report');
+        const { jobId } = parse(window.location.search);
+
+        if (jobId) {
+          const jobPayload = await apiClient.getPayload(jobId as string);
+          locatorParams = ((jobPayload as unknown) as { locatorParams: LocatorParams[] })
+            .locatorParams[0];
+        } else {
+          locatorParams = ((window as unknown) as Record<string, LocatorParams>)[
+            REPORTING_REDIRECT_LOCATOR_STORE_KEY
+          ];
+        }
+
+        if (!locatorParams) {
+          throw new Error('Could not find locator params for report');
+        }
+
+        share.navigate(locatorParams);
+      } catch (e) {
+        setError(e);
+        // eslint-disable-next-line no-console
+        console.error(i18nTexts.consoleMessagePrefix, e.message);
+        throw e;
       }
-
-      share.navigate(locatorParams);
-    } catch (e) {
-      setError(e);
-      // eslint-disable-next-line no-console
-      console.error(i18nTexts.consoleMessagePrefix, e.message);
-      throw e;
-    }
-  }, [share]);
+    })();
+  }, [share, apiClient]);
 
   return error ? (
     <EuiCallOut title={i18nTexts.errorTitle} color="danger">

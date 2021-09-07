@@ -6,6 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
+import { stringify } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
@@ -29,15 +30,15 @@ export const ViewInAppLink: FunctionComponent<Props> = ({ job }) => {
   const {
     services: { http },
   } = useKibana();
-  return (
-    <EuiButtonIcon
-      aria-label={i18nTexts.label}
-      iconType="eye"
-      href={buildKibanaPath({
-        basePath: http.basePath.serverBasePath,
-        spaceId: job.spaceId,
-        appPath: getRedirectAppPath(),
-      })}
-    />
-  );
+
+  const searchParams = stringify({ jobId: job.id });
+
+  const path = buildKibanaPath({
+    basePath: http.basePath.serverBasePath,
+    spaceId: job.spaceId,
+    appPath: getRedirectAppPath(),
+  });
+  const href = `${path}?${searchParams}`;
+
+  return <EuiButtonIcon target="_blank" aria-label={i18nTexts.label} iconType="eye" href={href} />;
 };
