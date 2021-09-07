@@ -52,8 +52,6 @@ const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const DataVisualizerGridMemoized = React.memo(DiscoverDataVisualizerGrid);
 
-let storageViewPreference = 'discoverViewOptionDocument';
-
 export function DiscoverLayout({
   indexPattern,
   indexPatternList,
@@ -75,11 +73,18 @@ export function DiscoverLayout({
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
-  const [discoverViewMode, setDiscoverViewMode] = useState(storageViewPreference);
+  const [discoverViewMode, setDiscoverViewMode] = useState(DISCOVER_VIEW_MODES.DOCUMENT_LEVEL);
+
+  useEffect(() => {
+    const userSetViewMode = uiSettings?.get('discover:aggregatedView');
+    if (userSetViewMode) {
+      setDiscoverViewMode(DISCOVER_VIEW_MODES.FIELD_LEVEL);
+    } else {
+      setDiscoverViewMode(DISCOVER_VIEW_MODES.DOCUMENT_LEVEL);
+    }
+  }, [uiSettings]);
 
   const changeViewId = (option: string) => {
-    // @todo: temp hack to replace storage
-    storageViewPreference = option;
     setDiscoverViewMode(option);
   };
 
