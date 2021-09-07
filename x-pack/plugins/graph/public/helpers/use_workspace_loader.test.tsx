@@ -26,11 +26,6 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-jest.mock('React', () => ({
-  ...jest.requireActual('React'),
-  useEffect: jest.fn(),
-}));
-
 const mockSavedObjectsClient = ({
   resolve: jest.fn().mockResolvedValue({
     saved_object: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
