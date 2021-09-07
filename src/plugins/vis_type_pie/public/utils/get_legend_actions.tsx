@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
@@ -29,7 +29,7 @@ export const getLegendActions = (
   return ({ series: [pieSeries] }) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [isfilterable, setIsfilterable] = useState(true);
-    const filterData = getFilterEventData(pieSeries);
+    const filterData = useMemo(() => getFilterEventData(pieSeries), [pieSeries]);
 
     useEffect(() => {
       (async () => setIsfilterable(await canFilter(filterData, actions)))();
