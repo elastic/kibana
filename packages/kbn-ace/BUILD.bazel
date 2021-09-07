@@ -45,6 +45,8 @@ jsts_transpiler(
   srcs = SRCS,
   additional_args = [
     "--copy-files",
+    "--ignore",
+    "**/*/src/ace/modes/x_json/worker/x_json.ace.worker.js",
     "--quiet"
   ],
   build_pkg_name = package_name(),
