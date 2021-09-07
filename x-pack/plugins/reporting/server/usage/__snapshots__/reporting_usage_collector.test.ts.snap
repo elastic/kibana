@@ -158,6 +158,42 @@ Object {
         "type": "long",
       },
     },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
     "enabled": Object {
       "type": "boolean",
     },
@@ -274,6 +310,42 @@ Object {
         },
       },
       "csv_searchsource": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "csv_searchsource_immediate": Object {
         "app": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -456,6 +528,20 @@ Object {
               "type": "long",
             },
           },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
           "printable_pdf": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -529,6 +615,20 @@ Object {
             },
           },
           "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -628,6 +728,20 @@ Object {
               "type": "long",
             },
           },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
           "printable_pdf": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -714,6 +828,20 @@ Object {
               "type": "long",
             },
           },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
           "printable_pdf": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -787,6 +915,20 @@ Object {
             },
           },
           "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -978,6 +1120,20 @@ Object {
             "type": "long",
           },
         },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
         "printable_pdf": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -1051,6 +1207,20 @@ Object {
           },
         },
         "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
           "canvas workpad": Object {
             "type": "long",
           },
@@ -1150,6 +1320,20 @@ Object {
             "type": "long",
           },
         },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
         "printable_pdf": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -1236,6 +1420,20 @@ Object {
             "type": "long",
           },
         },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
         "printable_pdf": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -1309,6 +1507,20 @@ Object {
           },
         },
         "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
           "canvas workpad": Object {
             "type": "long",
           },
