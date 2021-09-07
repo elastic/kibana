@@ -6,36 +6,37 @@
  */
 
 import expect from '@kbn/expect';
-import { format } from 'url';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { SupertestReturnType } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const apmApiClient = getService('apmApiClient');
   const archiveName = 'apm_8.0.0';
   const range = archives_metadata[archiveName];
 
-  const url = format({
-    pathname: `/api/apm/correlations/errors/overall_timeseries`,
-    query: {
-      start: range.start,
-      end: range.end,
-      environment: 'ENVIRONMENT_ALL',
-      kuery: '',
+  const urlConfig = {
+    endpoint: `GET /api/apm/correlations/errors/overall_timeseries` as const,
+    params: {
+      query: {
+        start: range.start,
+        end: range.end,
+        environment: 'ENVIRONMENT_ALL',
+        kuery: '',
+      },
     },
-  });
+  };
 
   registry.when(
     'correlations errors overall without data',
     { config: 'trial', archives: [] },
     () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(url);
+        const response = await apmApiClient.readUser(urlConfig);
 
         expect(response.status).to.be(200);
-        expect(response.body.response).to.be(undefined);
+        expect(response.body.overall).to.be(null);
       });
     }
   );
@@ -44,14 +45,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'correlations errors overall with data and default args',
     { config: 'trial', archives: ['apm_8.0.0'] },
     () => {
-      type ResponseBody = APIReturnType<'GET /api/apm/correlations/errors/overall_timeseries'>;
-      let response: {
-        status: number;
-        body: NonNullable<ResponseBody>;
-      };
+      let response: SupertestReturnType<'GET /api/apm/correlations/errors/overall_timeseries'>;
 
       before(async () => {
-        response = await supertest.get(url);
+        response = await apmApiClient.readUser(urlConfig);
       });
 
       it('returns successfully', () => {

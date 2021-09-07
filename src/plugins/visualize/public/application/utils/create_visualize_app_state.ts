@@ -63,7 +63,6 @@ const pureTransitions = {
 function createVisualizeByValueAppState(stateDefaults: VisualizeAppState) {
   const initialState = migrateAppState({
     ...stateDefaults,
-    ...stateDefaults,
   });
   const stateContainer = createStateContainer<VisualizeAppState, VisualizeAppStateTransitions>(
     initialState,
