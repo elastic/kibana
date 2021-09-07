@@ -34,6 +34,7 @@ export class Job {
   public objectType: ReportPayload['objectType'];
   public title: ReportPayload['title'];
   public isDeprecated: ReportPayload['isDeprecated'];
+  public spaceId: ReportPayload['spaceId'];
   public browserTimezone?: ReportPayload['browserTimezone'];
   public layout: ReportPayload['layout'];
 
@@ -82,6 +83,7 @@ export class Job {
     this.content_type = report.output?.content_type;
 
     this.isDeprecated = report.payload.isDeprecated || false;
+    this.spaceId = report.payload.spaceId;
     this.csv_contains_formulas = report.output?.csv_contains_formulas;
     this.max_size_reached = report.output?.max_size_reached;
     this.warnings = report.output?.warnings;

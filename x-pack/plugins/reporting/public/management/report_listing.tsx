@@ -30,6 +30,7 @@ import { checkLicense } from '../lib/license_check';
 import { useInternalApiClient } from '../lib/reporting_api_client';
 import { useKibana } from '../shared_imports';
 import { ListingProps as Props } from './';
+import { PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2 } from '../../common/constants';
 import {
   IlmPolicyLink,
   MigrateIlmPolicyCallOut,
@@ -38,6 +39,7 @@ import {
   ReportDownloadLink,
   ReportInfoButton,
   ReportStatusIndicator,
+  ViewInAppLink,
 } from './components';
 
 type TableColumn = EuiBasicTableColumn<Job>;
@@ -362,6 +364,9 @@ class ReportListingUi extends Component<Props, State> {
             render: (job) => {
               return (
                 <div data-test-subj="reportJobActions">
+                  {[PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2].some((jobType) => jobType === job.jobtype) ? (
+                    <ViewInAppLink job={job} />
+                  ) : null}
                   <ReportInfoButton {...this.props} job={job} />
                 </div>
               );

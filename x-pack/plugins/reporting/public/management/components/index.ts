@@ -12,3 +12,4 @@ export { ReportDiagnostic } from './report_diagnostic';
 export { ReportDownloadLink } from './report_download_link';
 export { ReportInfoButton } from './report_info_button';
 export { ReportStatusIndicator } from './report_status_indicator';
+export { ViewInAppLink } from './view_in_app_link';
