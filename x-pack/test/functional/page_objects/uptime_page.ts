@@ -69,7 +69,7 @@ export class UptimePageObject extends FtrService {
   }
 
   public async pageUrlContains(value: string, expected: boolean = true): Promise<void> {
-    return this.retry.tryForTime(12000, async () => {
+    return this.retry.tryForTime(60 * 1000, async () => {
       expect(await this.commonService.urlContains(value)).to.eql(expected);
     });
   }
