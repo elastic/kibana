@@ -50,6 +50,7 @@ export const buildTimelineEventsAllQuery = ({
 
   const filters = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
   const filter = authFilter != null ? [...filters, authFilter] : filters;
+  console.log('HHHHHHHEEEEERE 10');
 
   const getSortField = (sortFields: TimelineRequestSortField[]) =>
     sortFields.map((item) => {
@@ -61,6 +62,7 @@ export const buildTimelineEventsAllQuery = ({
         },
       };
     });
+  console.log('HHHHHHHEEEEERE 11');
 
   const dslQuery = {
     allowNoIndices: true,

@@ -18,10 +18,12 @@ import { defineRoutes } from './routes';
 import { timelineSearchStrategyProvider } from './search_strategy/timeline';
 import { timelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { indexFieldsProvider } from './search_strategy/index_fields';
+import { SecurityPluginSetup } from '../../security/server';
 
 export class TimelinesPlugin
   implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
+  private security?: SecurityPluginSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -29,16 +31,20 @@ export class TimelinesPlugin
 
   public setup(core: CoreSetup<StartPlugins, TimelinesPluginStart>, plugins: SetupPlugins) {
     this.logger.debug('timelines: Setup');
+    this.security = plugins.security;
+
     const router = core.http.createRouter();
 
     // Register server side APIs
     defineRoutes(router);
 
     // Register search strategy
+    // Need to pass in security.audit.asScoped
     core.getStartServices().then(([_, depsStart]) => {
       const TimelineSearchStrategy = timelineSearchStrategyProvider(
         depsStart.data,
-        depsStart.alerting
+        depsStart.alerting,
+        this.security
       );
       const TimelineEqlSearchStrategy = timelineEqlSearchStrategyProvider(depsStart.data);
       const IndexFields = indexFieldsProvider();
