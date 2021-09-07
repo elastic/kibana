@@ -15,6 +15,7 @@ import { elasticsearchServiceMock } from '../../../../../../../src/core/server/m
 // Because mocks are for testing only, should be ok to import the FleetArtifactsClient directly
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FleetArtifactsClient } from '../../../../../fleet/server/services';
+import { createArtifactsClientMock } from '../../../../../fleet/server/mocks';
 
 export const getManifestClientMock = (
   savedObjectsClient?: SavedObjectsClientContract
@@ -35,17 +36,19 @@ export const createEndpointArtifactClientMock = (
 ): jest.Mocked<EndpointArtifactClientInterface> & {
   _esClient: ElasticsearchClientMock;
 } => {
-  const fleetArtifactClient = new FleetArtifactsClient(esClient, 'endpoint');
-  const endpointArtifactClient = new EndpointArtifactClient(fleetArtifactClient);
+  const fleetArtifactClientMocked = createArtifactsClientMock();
+  const endpointArtifactClientMocked = new EndpointArtifactClient(fleetArtifactClientMocked);
 
   // Return the interface mocked with jest.fn() that fowards calls to the real instance
   return {
     createArtifact: jest.fn(async (...args) => {
+      const fleetArtifactClient = new FleetArtifactsClient(esClient, 'endpoint');
+      const endpointArtifactClient = new EndpointArtifactClient(fleetArtifactClient);
       const response = await endpointArtifactClient.createArtifact(...args);
       return response;
     }),
-    getArtifact: jest.fn((...args) => endpointArtifactClient.getArtifact(...args)),
-    deleteArtifact: jest.fn((...args) => endpointArtifactClient.deleteArtifact(...args)),
+    getArtifact: jest.fn((...args) => endpointArtifactClientMocked.getArtifact(...args)),
+    deleteArtifact: jest.fn((...args) => endpointArtifactClientMocked.deleteArtifact(...args)),
     _esClient: esClient,
   };
 };
