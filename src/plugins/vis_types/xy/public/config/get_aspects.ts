@@ -14,6 +14,7 @@ import { DatatableColumn } from '../../../../expressions/public';
 
 import { Aspect, Dimension, Aspects, Dimensions } from '../types';
 import { getFormatService } from '../services';
+import { getColumnByAccessor } from '../utils/accessors';
 
 export function getEmptyAspect(): Aspect {
   return {
@@ -61,13 +62,13 @@ function getAspectsFromDimension(
   if (Array.isArray(dimensions)) {
     return compact(
       dimensions.map((d) => {
-        const column = d && columns[d.accessor];
+        const column = d && getColumnByAccessor(columns, d.accessor);
         return column && getAspect(column, d);
       })
     );
   }
 
-  const column = columns[dimensions.accessor];
+  const column = getColumnByAccessor(columns, dimensions.accessor);
   return column && getAspect(column, dimensions);
 }
 

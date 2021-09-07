@@ -163,7 +163,7 @@ export const xDomain = (): ExpressionFunctionDefinition<
       };
     }
     const adjusted = getAdjustedDomain(
-      context?.rows,
+      context?.rows ?? [],
       column,
       {
         min: min as number,
