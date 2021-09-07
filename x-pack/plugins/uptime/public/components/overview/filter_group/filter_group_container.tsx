@@ -40,9 +40,14 @@ export const FilterGroup: React.FC<Props> = ({ esFilters }: Props) => {
 
   const { filters: overviewFilters, loading, errors } = useSelector(overviewFiltersSelector);
 
+  /**
+   * Because this component renders on the Overview Page, and this component typically fetches
+   * its data fastest, there is a check whether the Heartbeat mappings are correctly installed.
+   *
+   * If the mappings are missing, we re-direct to a page with instructions on how to resolve
+   * the missing mappings issue.
+   */
   if (errors.length > 0 && shouldRedirectToMappingErrorPage(errors)) {
-    // TODO: clear the errors list, or allow the user to try and navigate
-    // back to the overview page again
     history.push(MAPPING_ERROR_ROUTE);
   }
 

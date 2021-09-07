@@ -147,7 +147,6 @@ const Routes: RouteProps[] = [
   },
   {
     title: i18n.translate('xpack.uptime.mappingErrorRoute.title', {
-      // TODO: placeholder copy
       defaultMessage: 'Synthetics | mapping error',
     }),
     path: MAPPING_ERROR_ROUTE,
@@ -155,8 +154,14 @@ const Routes: RouteProps[] = [
     dataTestSubj: 'uptimeMappingErrorPage',
     telemetryId: UptimePage.MappingError,
     pageHeader: {
-      // TODO: placeholder copy
-      pageTitle: <div>Mapping error</div>,
+      pageTitle: (
+        <div>
+          <FormattedMessage
+            id="xpack.uptime.mappingErrorRoute.pageHeader.title"
+            defaultMessage="Mapping error"
+          />
+        </div>
+      ),
       rightSideItems: [],
     },
   },

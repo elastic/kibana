@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import React from 'react';
 
@@ -30,9 +31,21 @@ export const MappingErrorPage = () => {
     <EuiEmptyPrompt
       iconColor="danger"
       iconType="cross"
-      // TODO: placeholder copy
-      title={<div>Heartbeat mappings are not installed</div>}
-      body={<div>You need to stop Heartbeat, delete your indices, and restart Heartbeat.</div>}
+      title={
+        <div>
+          <FormattedMessage
+            id="xpack.uptime.public.pages.mappingError.title"
+            defaultMessage="Heartbeat mappings missing"
+          />
+        </div>
+      }
+      body={
+        <FormattedMessage
+          id="xpack.uptime.public.pages.mappingError.bodyMessage"
+          defaultMessage="Incorrect mappings detected! Perhaps you forgot to run the heartbeat {setup} command?"
+          values={{ setup: <EuiCode>setup</EuiCode> }}
+        />
+      }
     />
   );
 };
