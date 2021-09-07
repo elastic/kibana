@@ -7,12 +7,12 @@
 
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment-timezone';
 import { PageTemplate } from './page_template';
 import { License } from '../../components';
 import { GlobalStateContext } from '../global_state_context';
 import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import moment from 'moment-timezone';
 import { MonitoringTimeContainer } from './use_monitoring_time';
 
 const CODE_PATHS = [CODE_PATH_LICENSE];
@@ -28,7 +28,7 @@ export const LicensePage: React.FC<{}> = () => {
     return () => {
       setIsDisabled(false);
     };
-  }, []);
+  }, [setIsDisabled]);
 
   const state = useContext(GlobalStateContext);
   const clusterUuid = state.cluster_uuid;
