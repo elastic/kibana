@@ -104,10 +104,10 @@ describe('build query', () => {
     test('should migrate deprecated match syntax', () => {
       const filters = [
         {
-          query: { match: { extension: { query: 'foo' } } },
+          match: { extension: { query: 'foo', type: 'phrase' } },
           meta: { type: 'phrase' },
         },
-      ] as Filter[];
+      ] as unknown as Filter[];
 
       const expectedESQueries = [
         {
@@ -137,7 +137,7 @@ describe('build query', () => {
     test('should wrap filters targeting nested fields in a nested query', () => {
       const filters = [
         {
-          exists: { field: 'nestedField.child' },
+          query: { exists: { field: 'nestedField.child' } },
           meta: { type: 'exists', alias: '', disabled: false, negate: false },
         },
       ];

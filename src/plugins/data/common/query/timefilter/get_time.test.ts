@@ -111,7 +111,7 @@ describe('get_time', () => {
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
 
-      expect(filter.range.myCustomDate).toEqual({
+      expect(filter.query.range.myCustomDate).toEqual({
         gte: 'now-60y',
         lte: 'now',
         format: 'strict_date_optional_time',
@@ -150,7 +150,7 @@ describe('get_time', () => {
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
 
-      expect(filter.range.myCustomDate).toEqual({
+      expect(filter.query.range.myCustomDate).toEqual({
         gte: '2020-09-01T08:30:00.000Z',
         lte: 'now',
         format: 'strict_date_optional_time',

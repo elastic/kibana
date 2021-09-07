@@ -18,7 +18,7 @@ function validateFilter(filter: RangeFilter) {
   expect(mockGetFieldFormatsStart().deserialize).toHaveBeenCalledTimes(1);
   expect(filter).toHaveProperty('meta');
   expect(filter.meta).toHaveProperty('index', '1234');
-  expect(filter).toHaveProperty('range');
+  expect(filter.query).toHaveProperty('range');
   expect(filter.query.range).toHaveProperty('bytes');
   expect(filter.query.range.bytes).toHaveProperty('gte', 2048);
   expect(filter.query.range.bytes).toHaveProperty('lt', 3072);

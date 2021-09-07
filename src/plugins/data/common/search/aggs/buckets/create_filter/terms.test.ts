@@ -92,7 +92,7 @@ describe('AggConfig Filters', () => {
         {}
       ) as ExistsFilter;
 
-      expect(filter).toHaveProperty('exists');
+      expect(filter.query).toHaveProperty('exists');
       expect(filter.query.exists).toHaveProperty('field', 'field');
       expect(filter).toHaveProperty('meta');
       expect(filter.meta).toHaveProperty('index', '1234');

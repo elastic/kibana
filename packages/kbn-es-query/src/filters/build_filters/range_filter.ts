@@ -100,7 +100,7 @@ export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(fil
  * @public
  */
 export const isScriptedRangeFilter = (filter: Filter): filter is ScriptedRangeFilter => {
-  const params: RangeFilterParams = get(filter, 'script.script.params', {});
+  const params: RangeFilterParams = get(filter, 'query.script.script.params', {});
 
   return hasRangeKeys(params);
 };

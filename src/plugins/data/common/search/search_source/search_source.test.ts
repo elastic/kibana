@@ -915,7 +915,9 @@ describe('SearchSource', () => {
                 "negate": false,
               },
               "query": Object {
-                "q": "query",
+                "query_string": Object {
+                  "query": "query",
+                },
               },
             },
           ],

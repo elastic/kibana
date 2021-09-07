@@ -24,7 +24,7 @@ const getFormattedValueFn = (left: any, right: any) => {
 
 const getFirstRangeKey = (filter: RangeFilter) =>
   filter.query.range && Object.keys(filter.query.range)[0];
-const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['query.range', key]);
+const getRangeByKey = (filter: RangeFilter, key: string) => get(filter.query, ['range', key]);
 
 function getParams(filter: RangeFilter) {
   const isScriptedRange = isScriptedRangeFilter(filter);

@@ -15,7 +15,7 @@ describe('interpreter/functions#filtersToAst', () => {
   };
   const negatedFilter = {
     meta: { negate: true, alias: '', disabled: false },
-    query: { query_string: { query: 'something' } },
+    query: { query_string: { query: 'test' } },
   };
 
   it('converts a list of filters to an expression AST node', () => {
@@ -28,7 +28,7 @@ describe('interpreter/functions#filtersToAst', () => {
       expect.objectContaining({
         disabled: [false],
         negate: [false],
-        query: ['{"query":{"test":"something"}}'],
+        query: ['{"query_string":{"query":"something"}}'],
       })
     );
 
@@ -39,7 +39,7 @@ describe('interpreter/functions#filtersToAst', () => {
       expect.objectContaining({
         disabled: [false],
         negate: [true],
-        query: ['{"query":{"test":"something"}}'],
+        query: ['{"query_string":{"query":"test"}}'],
       })
     );
   });

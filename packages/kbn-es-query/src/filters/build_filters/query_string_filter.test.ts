@@ -20,7 +20,9 @@ describe('Query string filter builder', () => {
         index: 'index',
       },
       query: {
-        foo: 'bar',
+        query_string: {
+          query: 'bar',
+        },
       },
     });
   });

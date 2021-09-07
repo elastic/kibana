@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { migrateFilter } from '@kbn/es-query';
 import { ExpressionFunctionKibana, ExpressionFunctionKibanaContext } from '../../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 
@@ -22,15 +23,24 @@ import { queryToAst, filtersToAst } from '../../../data/common';
 export const toExpressionAst: VisToExpressionAst = async (vis, params) => {
   const { savedSearchId, searchSource } = vis.data;
   const query = searchSource?.getField('query');
-  let filters = searchSource?.getField('filter');
+  let filters = searchSource?.getField('filter') || [];
   if (typeof filters === 'function') {
-    filters = filters();
+    filters = filters() || [];
+  }
+  if (filters && !Array.isArray(filters)) {
+    filters = [filters];
   }
 
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   const kibanaContext = buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
     q: query && queryToAst(query),
-    filters: filters && filtersToAst(filters),
+    filters:
+      filters &&
+      filtersToAst(
+        filters.map((filter) => {
+          return migrateFilter(filter);
+        })
+      ),
     savedSearchId,
   });
 

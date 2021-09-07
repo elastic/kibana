@@ -69,7 +69,7 @@ describe('AggConfig Filters', () => {
     test('creates a valid range filter', () => {
       init();
 
-      expect(filter).toHaveProperty('range');
+      expect(filter.query).toHaveProperty('range');
       expect(filter.query.range).toHaveProperty(field.name);
 
       const fieldParams = filter.query.range[field.name];

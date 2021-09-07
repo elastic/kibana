@@ -11,7 +11,6 @@ import { PhrasesFilter } from './phrases_filter';
 import { PhraseFilter } from './phrase_filter';
 import { RangeFilter } from './range_filter';
 import { MatchAllFilter } from './match_all_filter';
-import { DslQuery } from '../..';
 
 /**
  * A common type for filters supported by this package
@@ -72,7 +71,7 @@ export type Filter = {
     store: FilterStateStore;
   };
   meta: FilterMeta;
-  query?: DslQuery;
+  query?: Record<string, any>;
 };
 
 // eslint-disable-next-line

@@ -41,8 +41,10 @@ describe('build query', () => {
         { query: 'bar:baz', language: 'lucene' },
       ] as Query[];
       const filters = {
-        match: {
-          a: 'b',
+        query: {
+          match: {
+            a: 'b',
+          },
         },
         meta: {
           alias: '',
@@ -80,8 +82,10 @@ describe('build query', () => {
     it('should accept queries and filters as either single objects or arrays', () => {
       const queries = { query: 'extension:jpg', language: 'lucene' } as Query;
       const filters = {
-        match: {
-          a: 'b',
+        query: {
+          match: {
+            a: 'b',
+          },
         },
         meta: {
           alias: '',
@@ -122,8 +126,10 @@ describe('build query', () => {
           meta: { type: 'match_all' },
         } as MatchAllFilter,
         {
-          match: {
-            a: 'b',
+          query: {
+            match: {
+              a: 'b',
+            },
           },
           meta: {
             alias: '',

@@ -56,7 +56,7 @@ describe('AggConfig Filters', () => {
         to: '1.1.1.1',
       }) as RangeFilter;
 
-      expect(filter).toHaveProperty('range');
+      expect(filter.query).toHaveProperty('range');
       expect(filter).toHaveProperty('meta');
       expect(filter.meta).toHaveProperty('index', '1234');
       expect(filter.query.range).toHaveProperty('ip');
@@ -84,7 +84,7 @@ describe('AggConfig Filters', () => {
         mask: '67.129.65.201/27',
       }) as RangeFilter;
 
-      expect(filter).toHaveProperty('range');
+      expect(filter.query).toHaveProperty('range');
       expect(filter).toHaveProperty('meta');
       expect(filter.meta).toHaveProperty('index', '1234');
       expect(filter.query.range).toHaveProperty('ip');

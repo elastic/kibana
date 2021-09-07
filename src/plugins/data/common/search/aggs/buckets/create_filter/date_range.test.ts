@@ -57,7 +57,7 @@ describe('AggConfig Filters', () => {
         to: to.valueOf(),
       }) as RangeFilter;
 
-      expect(filter).toHaveProperty('range');
+      expect(filter.query).toHaveProperty('range');
       expect(filter).toHaveProperty('meta');
       expect(filter.meta).toHaveProperty('index', '1234');
       expect(filter.query.range).toHaveProperty('@timestamp');

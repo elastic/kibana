@@ -38,10 +38,12 @@ describe('Range filter builder', () => {
         index: 'id',
         params: {},
       },
-      range: {
-        bytes: {
-          gte: 1,
-          lte: 3,
+      query: {
+        range: {
+          bytes: {
+            gte: 1,
+            lte: 3,
+          },
         },
       },
     });
@@ -56,14 +58,16 @@ describe('Range filter builder', () => {
         index: 'id',
         params: {},
       },
-      script: {
+      query: {
         script: {
-          lang: 'expression',
-          source: '(' + field!.script + ')>=gte && (' + field!.script + ')<=lte',
-          params: {
-            value: '>=1 <=3',
-            gte: 1,
-            lte: 3,
+          script: {
+            lang: 'expression',
+            source: '(' + field!.script + ')>=gte && (' + field!.script + ')<=lte',
+            params: {
+              value: '>=1 <=3',
+              gte: 1,
+              lte: 3,
+            },
           },
         },
       },
@@ -79,14 +83,16 @@ describe('Range filter builder', () => {
         index: 'id',
         params: {},
       },
-      script: {
+      query: {
         script: {
-          lang: 'expression',
-          source: '(' + field!.script + ')>=gte && (' + field!.script + ')<=lte',
-          params: {
-            value: '>=1 <=3',
-            gte: 1,
-            lte: 3,
+          script: {
+            lang: 'expression',
+            source: '(' + field!.script + ')>=gte && (' + field!.script + ')<=lte',
+            params: {
+              value: '>=1 <=3',
+              gte: 1,
+              lte: 3,
+            },
           },
         },
       },
@@ -153,7 +159,7 @@ describe('Range filter builder', () => {
 
     describe('returned filter', () => {
       it('is a script filter', () => {
-        expect(filter).toHaveProperty('script');
+        expect(filter.query).toHaveProperty('script');
       });
 
       it('contain a param for the finite side', () => {
@@ -187,12 +193,12 @@ describe('Range filter builder', () => {
 
     describe('returned filter', () => {
       it('is a match_all filter', () => {
-        expect(filter).not.toHaveProperty('script');
-        expect(filter).toHaveProperty('match_all');
+        expect(filter.query).not.toHaveProperty('script');
+        expect(filter.query).toHaveProperty('match_all');
       });
 
       it('does not contain params', () => {
-        expect(filter).not.toHaveProperty('params');
+        expect(filter.query).not.toHaveProperty('params');
       });
 
       it('meta field is set to field name', () => {
