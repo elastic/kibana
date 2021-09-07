@@ -190,8 +190,13 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
-      useShardCount: {
-        defaultValue: false,
+      shrink: {
+        isUsingShardCount: {
+          defaultValue: false,
+        },
+        maxPrimaryShardSizeUnits: {
+          defaultValue: 'gb',
+        },
       },
     },
     warm: {
@@ -227,8 +232,13 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
-      useShardCount: {
-        defaultValue: false,
+      shrink: {
+        isUsingShardCount: {
+          defaultValue: false,
+        },
+        maxPrimaryShardSizeUnits: {
+          defaultValue: 'gb',
+        },
       },
     },
     cold: {

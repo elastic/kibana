@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
-import React, { FunctionComponent, useCallback } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { get } from 'lodash';
 import { NumericField, useFormData } from '../../../../../../shared_imports';
@@ -17,28 +17,28 @@ import { UseField, useGlobalFields } from '../../../form';
 import { i18nTexts } from '../../../i18n_texts';
 
 import { LearnMoreLink, DescribedFormRow } from '../../';
+import { byteSizeUnits } from '../../../constants';
+import { UnitField } from './unit_field';
 
 interface Props {
   phase: 'hot' | 'warm';
 }
 
 export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
-  const [formData] = useFormData({
-    watch: `_meta.${phase}.useShardCount`,
-  });
-  const useShardCount = get(formData, `_meta.${phase}.useShardCount`);
-  const path = `phases.${phase}.actions.shrink.${
-    useShardCount ? 'number_of_shards' : 'max_primary_shard_size'
-  }`;
-  const { policy } = useEditPolicyContext();
   const globalFields = useGlobalFields();
-  const { setValue: setUseShardCount } = globalFields[
-    `${phase}UseShardCount` as 'hotUseShardCount'
+  const { setValue: setIsUsingShardCount } = globalFields[
+    `${phase}IsUsingShardCount` as 'hotIsUsingShardCount'
   ];
-  const toggleUseShardCount = useCallback(() => {
-    setUseShardCount((prev) => !prev);
-  }, [setUseShardCount]);
-
+  const { policy } = useEditPolicyContext();
+  const isUsingShardCountPath = `_meta.${phase}.shrink.isUsingShardCount`;
+  const [formData] = useFormData({ watch: [isUsingShardCountPath] });
+  const isUsingShardCount: boolean | undefined = get(formData, isUsingShardCountPath);
+  const toggleIsUsingShardCount = () => {
+    setIsUsingShardCount(!isUsingShardCount);
+  };
+  const path = `phases.${phase}.actions.shrink.${
+    isUsingShardCount ? 'number_of_shards' : 'max_primary_shard_size'
+  }`;
   return (
     <DescribedFormRow
       title={
@@ -66,27 +66,42 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
       }}
       fullWidth
     >
-      <UseField
-        path={path}
-        component={NumericField}
-        componentProps={{
-          fullWidth: false,
-          euiFieldProps: {
-            'data-test-subj': `${phase}-primaryShard${useShardCount ? 'Count' : 'Size'}`,
-            min: 1,
-          },
-          labelAppend: (
-            <EuiText size="xs">
-              <EuiLink onClick={toggleUseShardCount} data-test-subj="toggleUseShardCount">
-                <FormattedMessage
-                  id="xpack.ingestPipelines.pipelineEditor.useCopyFromLabel"
-                  defaultMessage={`Configure shard ${useShardCount ? 'size' : 'count'}`}
+      {isUsingShardCount === undefined ? null : (
+        <UseField
+          path={path}
+          component={NumericField}
+          componentProps={{
+            fullWidth: false,
+            euiFieldProps: {
+              'data-test-subj': `${phase}-primaryShard${isUsingShardCount ? 'Count' : 'Size'}`,
+              min: 1,
+              append: isUsingShardCount ? null : (
+                <UnitField
+                  path={`_meta.${phase}.shrink.maxPrimaryShardSizeUnits`}
+                  options={byteSizeUnits}
+                  euiFieldProps={{
+                    'data-test-subj': `${phase}-shrinkMaxPrimaryShardSizeUnits`,
+                    'aria-label': i18nTexts.editPolicy.maxPrimaryShardSizeUnitsLabel,
+                  }}
                 />
-              </EuiLink>
-            </EuiText>
-          ),
-        }}
-      />
+              ),
+            },
+            labelAppend: (
+              <EuiText size="xs">
+                <EuiLink
+                  onClick={() => toggleIsUsingShardCount()}
+                  data-test-subj="toggleIsUsingShardCount"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.pipelineEditor.useCopyFromLabel"
+                    defaultMessage={`Configure shard ${isUsingShardCount ? 'size' : 'count'}`}
+                  />
+                </EuiLink>
+              </EuiText>
+            ),
+          }}
+        />
+      )}
     </DescribedFormRow>
   );
 };

@@ -23,7 +23,10 @@ export interface ForcemergeFields {
 }
 
 interface ShrinkFields {
-  useShardCount: boolean;
+  shrink: {
+    isUsingShardCount: boolean;
+    maxPrimaryShardSizeUnits?: string;
+  };
 }
 
 interface HotPhaseMetaFields extends ForcemergeFields, ShrinkFields {

@@ -89,6 +89,12 @@ export const i18nTexts = {
         defaultMessage: 'Searchable snapshot storage',
       }
     ),
+    maxPrimaryShardSizeUnitsLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.maximumPrimaryShardSizeAriaLabel',
+      {
+        defaultMessage: 'Maximum primary shard size units',
+      }
+    ),
     errors: {
       numberRequired: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.errors.numberRequiredErrorMessage',

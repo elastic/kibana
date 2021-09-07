@@ -18,8 +18,8 @@ export interface GlobalFieldsTypes {
   coldMinAgeMilliSeconds: number;
   frozenMinAgeMilliSeconds: number;
   deleteMinAgeMilliSeconds: number;
-  hotUseShardCount: boolean;
-  warmUseShardCount: boolean;
+  hotIsUsingShardCount: boolean;
+  warmIsUsingShardCount: boolean;
 }
 
 type GlobalFields = {
@@ -50,11 +50,11 @@ export const globalFields: Record<
   deleteMinAgeMilliSeconds: {
     path: '_meta.delete.minAgeToMilliSeconds',
   },
-  hotUseShardCount: {
-    path: '_meta.hot.useShardCount',
+  hotIsUsingShardCount: {
+    path: '_meta.hot.shrink.isUsingShardCount',
   },
-  warmUseShardCount: {
-    path: '_meta.warm.useShardCount',
+  warmIsUsingShardCount: {
+    path: '_meta.warm.shrink.isUsingShardCount',
   },
 };
 

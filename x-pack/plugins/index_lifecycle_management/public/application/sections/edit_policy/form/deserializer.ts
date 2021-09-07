@@ -39,7 +39,7 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
       },
       bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
       readonlyEnabled: Boolean(hot?.actions?.readonly),
-      useShardCount: Boolean(hot?.actions.shrink?.number_of_shards),
+      shrink: { isUsingShardCount: Boolean(hot?.actions.shrink?.number_of_shards) },
     },
     warm: {
       enabled: Boolean(warm),
@@ -48,7 +48,7 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
       dataTierAllocationType: determineDataTierAllocationType(warm?.actions),
       readonlyEnabled: Boolean(warm?.actions?.readonly),
       minAgeToMilliSeconds: -1,
-      useShardCount: Boolean(warm?.actions.shrink?.number_of_shards),
+      shrink: { isUsingShardCount: Boolean(warm?.actions.shrink?.number_of_shards) },
     },
     cold: {
       enabled: Boolean(cold),
@@ -100,6 +100,14 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
         }
       }
 
+      if (draft.phases.hot?.actions.shrink?.max_primary_shard_size) {
+        const primaryShardSize = splitSizeAndUnits(
+          draft.phases.hot.actions.shrink.max_primary_shard_size!
+        );
+        draft.phases.hot.actions.shrink.max_primary_shard_size = primaryShardSize.size;
+        draft._meta.hot.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
+      }
+
       if (draft.phases.warm) {
         if (draft.phases.warm.actions?.allocate?.require) {
           Object.entries(draft.phases.warm.actions.allocate.require).forEach((entry) => {
@@ -111,6 +119,14 @@ export const createDeserializer = (isCloudEnabled: boolean) => (
           const minAge = splitSizeAndUnits(draft.phases.warm.min_age);
           draft.phases.warm.min_age = minAge.size;
           draft._meta.warm.minAgeUnit = minAge.units;
+        }
+
+        if (draft.phases.warm.actions.shrink?.max_primary_shard_size) {
+          const primaryShardSize = splitSizeAndUnits(
+            draft.phases.warm.actions.shrink.max_primary_shard_size!
+          );
+          draft.phases.warm.actions.shrink.max_primary_shard_size = primaryShardSize.size;
+          draft._meta.warm.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
         }
       }
 
