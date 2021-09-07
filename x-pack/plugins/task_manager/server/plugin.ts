@@ -121,6 +121,12 @@ export class TaskManagerPlugin
       );
     }
 
+    if (this.config.internal.exclude_task_types.length) {
+      this.logger.debug(
+        `Excluding task types from execution: ${this.config.internal.exclude_task_types.join(', ')}`
+      );
+    }
+
     return {
       index: this.config.index,
       addMiddleware: (middleware: Middleware) => {
