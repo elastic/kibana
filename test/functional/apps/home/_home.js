@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('clicking on console on homepage should take you to console app', async () => {
-      await PageObjects.common.navigateToUrl('home');
+      await PageObjects.common.navigateToApp('home');
       await testSubjects.click('homeDevTools');
       const url = await browser.getCurrentUrl();
       expect(url.includes('/app/dev_tools#/console')).to.be(true);

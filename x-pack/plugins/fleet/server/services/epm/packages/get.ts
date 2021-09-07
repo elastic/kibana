@@ -217,7 +217,10 @@ export async function getPackageFromSource(options: {
         installedPkg.package_assets,
         savedObjectsClient
       );
-      logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
+
+      if (res) {
+        logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
+      }
     }
     // for packages not in cache or package storage and installed from registry, check registry
     if (!res && pkgInstallSource === 'registry') {

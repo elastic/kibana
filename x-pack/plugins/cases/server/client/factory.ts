@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsServiceStart, Logger } from 'kibana/server';
+import {
+  KibanaRequest,
+  SavedObjectsServiceStart,
+  Logger,
+  ElasticsearchClient,
+} from 'kibana/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
 import { SAVED_OBJECT_TYPES } from '../../common';
 import { Authorization } from '../authorization/authorization';
@@ -20,8 +25,8 @@ import {
 } from '../services';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
-import { RuleRegistryPluginStartContract } from '../../../rule_registry/server';
 import { LensServerPluginSetup } from '../../../lens/server';
+
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
 
@@ -31,7 +36,6 @@ interface CasesClientFactoryArgs {
   getSpace: GetSpaceFn;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
-  ruleRegistryPluginStart?: RuleRegistryPluginStartContract;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
@@ -65,10 +69,12 @@ export class CasesClientFactory {
    */
   public async create({
     request,
+    scopedClusterClient,
     savedObjectsService,
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
+    scopedClusterClient: ElasticsearchClient;
   }): Promise<CasesClient> {
     if (!this.isInitialized || !this.options) {
       throw new Error('CasesClientFactory must be initialized before calling create');
@@ -88,12 +94,9 @@ export class CasesClientFactory {
     const caseService = new CasesService(this.logger, this.options?.securityPluginStart?.authc);
     const userInfo = caseService.getUser({ request });
 
-    const alertsClient = await this.options.ruleRegistryPluginStart?.getRacClientWithRequest(
-      request
-    );
-
     return createCasesClient({
-      alertsService: new AlertService(alertsClient),
+      alertsService: new AlertService(),
+      scopedClusterClient,
       unsecuredSavedObjectsClient: savedObjectsService.getScopedClient(request, {
         includedHiddenTypes: SAVED_OBJECT_TYPES,
         // this tells the security plugin to not perform SO authorization and audit logging since we are handling
