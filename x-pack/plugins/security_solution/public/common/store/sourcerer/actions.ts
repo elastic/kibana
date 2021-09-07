@@ -32,6 +32,7 @@ export const setSelectedKip = actionCreator<{
   eventType?: TimelineEventsType;
 }>('SET_SELECTED_KIP');
 
+// TODO: Steph/sourcerer gtfo
 export const initTimelineIndexPatterns = actionCreator<{
   id: SourcererScopeName;
   // TODO: Need selectedKipId

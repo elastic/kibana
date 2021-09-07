@@ -48,6 +48,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     };
   })
+  // TODO: Steph/sourcerer gtfo
   .case(initTimelineIndexPatterns, (state, { id, selectedPatterns, eventType }) => {
     console.log('initTimelineIndexPatterns', selectedPatterns, eventType);
     return {
@@ -57,7 +58,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
         [id]: {
           ...state.sourcererScopes[id],
           selectedPatterns: isEmpty(selectedPatterns)
-            ? // TODO: Steph/sourcerer replace with createDefaultIndexPatterns
+            ? // TODO: Steph/sourcerer replace with createDefaultIndexPatterns or not cuz we're getting rid of this?
               defaultIndexPatternByEventType({ state, eventType })
             : selectedPatterns,
         },

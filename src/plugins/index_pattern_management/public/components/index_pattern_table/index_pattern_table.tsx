@@ -47,7 +47,8 @@ const search = {
 };
 
 const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
-  defaultMessage: 'Index patterns',
+  // TODO: Steph/sourcerer revert myob
+  defaultMessage: 'Data views',
 });
 
 interface Props extends RouteComponentProps {
@@ -135,7 +136,7 @@ export const IndexPatternTable = ({
     >
       <FormattedMessage
         id="indexPatternManagement.indexPatternTable.createBtn"
-        defaultMessage="Create index pattern"
+        defaultMessage="Create data view"
       />
     </EuiButton>
   ) : (
@@ -165,7 +166,8 @@ export const IndexPatternTable = ({
         description={
           <FormattedMessage
             id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
-            defaultMessage="Create and manage the index patterns that help you retrieve your data from Elasticsearch."
+            // TODO: Steph/sourcerer revert myob
+            defaultMessage="Create and manage the data views that help you retrieve your data from Elasticsearch."
           />
         }
         bottomBorder

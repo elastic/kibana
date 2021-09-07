@@ -33,7 +33,8 @@ export interface IndexPatternManagementSetup {}
 export interface IndexPatternManagementStart {}
 
 const sectionsHeader = i18n.translate('indexPatternManagement.indexPattern.sectionsHeader', {
-  defaultMessage: 'Index Patterns',
+  // TODO: Steph/sourcerer revert myob
+  defaultMessage: 'Data Views',
 });
 
 const IPM_APP_ID = 'indexPatterns';

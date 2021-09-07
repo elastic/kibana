@@ -13,7 +13,8 @@ export function getListBreadcrumbs() {
   return [
     {
       text: i18n.translate('indexPatternManagement.indexPatterns.listBreadcrumb', {
-        defaultMessage: 'Index patterns',
+        // TODO: Steph/sourcerer revert myob
+        defaultMessage: 'Data views',
       }),
       href: `/`,
     },
@@ -25,7 +26,8 @@ export function getCreateBreadcrumbs() {
     ...getListBreadcrumbs(),
     {
       text: i18n.translate('indexPatternManagement.indexPatterns.createBreadcrumb', {
-        defaultMessage: 'Create index pattern',
+        // TODO: Steph/sourcerer revert myob
+        defaultMessage: 'Create data view',
       }),
       href: `/create`,
     },
