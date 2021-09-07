@@ -64,7 +64,7 @@ describe('buildDefaultSettings', () => {
     `);
   });
 
-  it('should logger a warning if there is too many default fields', () => {
+  it('should log a warning if there is too many default fields', () => {
     const fields = [];
     for (let i = 0; i < 20000; i++) {
       fields.push({ name: `field${i}`, type: 'keyword' });
