@@ -10,9 +10,9 @@ import { registry } from '../../../common/registry';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function apiTest({ getService }: FtrProviderContext) {
-  const noAccessUser = getService('supertestAsNoAccessUser');
-  const readUser = getService('supertestAsApmReadUser');
-  const writeUser = getService('supertestAsApmWriteUser');
+  const noAccessUser = getService('legacySupertestAsNoAccessUser');
+  const readUser = getService('legacySupertestAsApmReadUser');
+  const writeUser = getService('legacySupertestAsApmWriteUser');
 
   type SupertestAsUser = typeof noAccessUser | typeof readUser | typeof writeUser;
 
