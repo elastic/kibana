@@ -9,20 +9,11 @@ import type {
   Datatable,
   ExpressionFunctionDefinition,
 } from '../../../../../../src/plugins/expressions';
+import type { FormatColumnArgs } from './index';
 
-export type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
-
-export interface TimeScaleArgs {
-  dateColumnId: string;
-  inputColumnId: string;
-  outputColumnId: string;
-  targetUnit: TimeScaleUnit;
-  outputColumnName?: string;
-}
-
-export type TimeScaleExpressionFunction = ExpressionFunctionDefinition<
-  'lens_time_scale',
+export type FormatColumnExpressionFunction = ExpressionFunctionDefinition<
+  'lens_format_column',
   Datatable,
-  TimeScaleArgs,
-  Promise<Datatable>
+  FormatColumnArgs,
+  Datatable | Promise<Datatable>
 >;
