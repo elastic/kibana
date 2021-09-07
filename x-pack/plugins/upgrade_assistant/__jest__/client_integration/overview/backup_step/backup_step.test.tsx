@@ -123,7 +123,8 @@ describe('Overview - Backup Step', () => {
         });
       });
 
-      test('polls for new status', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/111255
+      test.skip('polls for new status', async () => {
         // The behavior we're testing involves state changes over time, so we need finer control over
         // timing.
         jest.useFakeTimers();
