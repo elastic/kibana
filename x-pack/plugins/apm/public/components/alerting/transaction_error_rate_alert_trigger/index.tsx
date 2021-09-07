@@ -47,7 +47,6 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
 
   createCallApmApi(services as CoreStart);
-
   const transactionTypes = useServiceTransactionTypesFetcher(
     metadata?.serviceName
   );

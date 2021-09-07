@@ -18,6 +18,12 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import { Setup } from '../../helpers/setup_request';
 import { getIntervalAndTimeRange } from './helper';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+  getSearchAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
@@ -26,6 +32,11 @@ export async function getTransactionDurationChartPreview({
   alertParams: AlertParams;
   setup: Setup;
 }) {
+  const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    ...setup,
+    kuery: '',
+  });
+
   const { apmEventClient } = setup;
   const {
     aggregationType,
@@ -44,16 +55,22 @@ export async function getTransactionDurationChartPreview({
   const query = {
     bool: {
       filter: [
-        { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
         ...(transactionType
           ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
           : []),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
+        ...getDocumentTypeFilterForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
       ] as QueryDslQueryContainer[],
     },
   };
+
+  const transactionDurationField = getTransactionDurationFieldForAggregatedTransactions(
+    searchAggregatedTransactions
+  );
 
   const aggs = {
     timeseries: {
@@ -69,10 +86,10 @@ export async function getTransactionDurationChartPreview({
       aggs: {
         agg:
           aggregationType === 'avg'
-            ? { avg: { field: TRANSACTION_DURATION } }
+            ? { avg: { field: transactionDurationField } }
             : {
                 percentiles: {
-                  field: TRANSACTION_DURATION,
+                  field: transactionDurationField,
                   percents: [aggregationType === '95th' ? 95 : 99],
                 },
               },
@@ -80,7 +97,13 @@ export async function getTransactionDurationChartPreview({
     },
   };
   const params = {
-    apm: { events: [ProcessorEvent.transaction] },
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
     body: { size: 0, query, aggs },
   };
   const resp = await apmEventClient.search(

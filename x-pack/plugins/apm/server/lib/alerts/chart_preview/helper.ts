@@ -4,9 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import datemath from '@elastic/datemath';
-import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
+import * as t from 'io-ts';
+import moment from 'moment';
+
+const getToEnumRt = <T>(enumObj: T, enumName = 'enum') =>
+  new t.Type<T[keyof T], string>(
+    enumName,
+    (u): u is T[keyof T] => Object.values(enumObj).includes(u),
+    (u, c) =>
+      Object.values(enumObj).includes(u)
+        ? t.success(u as T[keyof T])
+        : t.failure(u, c),
+    (a) => (a as unknown) as string
+  );
+
+export enum TIME_UNITS {
+  SECOND = 's',
+  MINUTE = 'm',
+  HOUR = 'h',
+  DAY = 'd',
+}
+
+export const toTimeUnitRt = getToEnumRt(TIME_UNITS, 'timeUnitRt');
 
 const BUCKET_SIZE = 20;
 
@@ -15,24 +34,16 @@ export function getIntervalAndTimeRange({
   windowUnit,
 }: {
   windowSize: number;
-  windowUnit: string;
+  windowUnit: TIME_UNITS;
 }) {
-  const start = datemath
-    .parse(`now-${windowSize * BUCKET_SIZE}${windowUnit}`)
-    ?.valueOf();
-
-  if (!start) {
-    throw Boom.internal(
-      i18n.translate('xpack.apm.api.alert.chartPreview.invalidWindow', {
-        defaultMessage: `Invalid window {windowSize} {windowUnit}`,
-        values: { windowSize, windowUnit },
-      })
-    );
-  }
+  const end = Date.now();
+  const start =
+    end -
+    moment.duration(windowSize, windowUnit).asMilliseconds() * BUCKET_SIZE;
 
   return {
     interval: `${windowSize}${windowUnit}`,
     start,
-    end: new Date().valueOf(),
+    end,
   };
 }

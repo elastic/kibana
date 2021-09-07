@@ -10,6 +10,7 @@ import * as t from 'io-ts';
 import { getTransactionDurationChartPreview } from '../../lib/alerts/chart_preview/get_transaction_duration';
 import { getTransactionErrorCountChartPreview } from '../../lib/alerts/chart_preview/get_transaction_error_count';
 import { getTransactionErrorRateChartPreview } from '../../lib/alerts/chart_preview/get_transaction_error_rate';
+import { toTimeUnitRt } from '../../lib/alerts/chart_preview/helper';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../create_apm_server_route';
 import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
@@ -28,7 +29,7 @@ const alertParamsRt = t.intersection([
   environmentRt,
   t.type({
     windowSize: toNumberRt,
-    windowUnit: t.string,
+    windowUnit: toTimeUnitRt,
   }),
 ]);
 
