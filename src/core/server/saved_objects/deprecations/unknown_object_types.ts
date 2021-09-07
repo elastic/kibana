@@ -65,7 +65,7 @@ const getUnknownTypesQuery = (knownTypes: string[]): estypes.QueryDslQueryContai
   };
 };
 
-const hasUnknownObjectTypes = async ({
+const getUnknownSavedObjects = async ({
   typeRegistry,
   esClient,
   kibanaConfig,
@@ -91,26 +91,37 @@ const hasUnknownObjectTypes = async ({
   });
   const { hits: unknownDocs } = body.hits;
 
-  return unknownDocs.length > 0;
+  return unknownDocs.map((doc) => ({ id: doc._id, type: doc._source?.type ?? 'unknown' }));
 };
 
 export const getUnknownTypesDeprecations = async (
   options: UnknownTypesDeprecationOptions
 ): Promise<DeprecationsDetails[]> => {
   const deprecations: DeprecationsDetails[] = [];
-  if (await hasUnknownObjectTypes(options)) {
+  const unknownDocs = await getUnknownSavedObjects(options);
+  if (unknownDocs.length) {
     deprecations.push({
       title: i18n.translate('core.savedObjects.deprecations.unknownTypes.title', {
         defaultMessage: 'Saved objects with unknown types are present in Kibana system indices',
       }),
       message: i18n.translate('core.savedObjects.deprecations.unknownTypes.message', {
-        defaultMessage: 'Unknown saved object types can be caused by disabled plugins, or ',
+        defaultMessage:
+          'Upgrades will fail for 8.0+ because documents were found for unknown saved object types.' +
+          `To ensure that upgrades will succeed in the future, either re-enable plugins or delete these documents from the Kibana indices`,
       }),
       level: 'critical',
       requireRestart: false,
       deprecationType: undefined, // not config nor feature...
       correctiveActions: {
-        manualSteps: [], // TODO
+        manualSteps: [
+          i18n.translate('core.savedObjects.deprecations.unknownTypes.manualSteps.1', {
+            defaultMessage: 'If plugins are disabled, re-enable the, then restart Kibana.',
+          }),
+          i18n.translate('core.savedObjects.deprecations.unknownTypes.manualSteps.2', {
+            defaultMessage:
+              'If no plugins are disabled, or if enabling them does not fix the issue, delete the documents.',
+          }),
+        ],
         api: {
           path: '/internal/saved_objects/deprecations/_delete_unknown_types',
           method: 'POST',
