@@ -84,13 +84,8 @@ export function FailedTransactionsCorrelations({
     setSelectedSignificantTerm,
   ] = useState<FailedTransactionsCorrelation | null>(null);
 
-  const selectedTerm = useMemo(() => {
-    if (selectedSignificantTerm) return selectedSignificantTerm;
-    return Array.isArray(response.failedTransactionsCorrelations) &&
-      response.failedTransactionsCorrelations.length > 0
-      ? response.failedTransactionsCorrelations[0]
-      : undefined;
-  }, [selectedSignificantTerm, response.failedTransactionsCorrelations]);
+  const selectedTerm =
+    selectedSignificantTerm ?? response.failedTransactionsCorrelations?.[0];
 
   const history = useHistory();
 
@@ -345,25 +340,22 @@ export function FailedTransactionsCorrelations({
     setSortDirection(currentSortDirection);
   }, []);
 
-  const { sorting, correlationTerms } = useMemo(() => {
-    const orderedTerms = orderBy(
-      response.failedTransactionsCorrelations,
-      // The smaller the p value the higher the impact
-      // So we want to sort by the normalized score here
-      // which goes from 0 -> 1
-      sortField === 'pValue' ? 'normalizedScore' : sortField,
-      sortDirection
-    );
-    return {
-      correlationTerms: orderedTerms,
-      sorting: {
-        sort: {
-          field: sortField,
-          direction: sortDirection,
-        },
-      } as EuiTableSortingType<FailedTransactionsCorrelation>,
-    };
-  }, [response.failedTransactionsCorrelations, sortField, sortDirection]);
+  const sorting: EuiTableSortingType<FailedTransactionsCorrelation> = {
+    sort: { field: sortField, direction: sortDirection },
+  };
+
+  const correlationTerms = useMemo(
+    () =>
+      orderBy(
+        response.failedTransactionsCorrelations,
+        // The smaller the p value the higher the impact
+        // So we want to sort by the normalized score here
+        // which goes from 0 -> 1
+        sortField === 'pValue' ? 'normalizedScore' : sortField,
+        sortDirection
+      ),
+    [response.failedTransactionsCorrelations, sortField, sortDirection]
+  );
 
   const showCorrelationsTable =
     progress.isRunning || correlationTerms.length > 0;
