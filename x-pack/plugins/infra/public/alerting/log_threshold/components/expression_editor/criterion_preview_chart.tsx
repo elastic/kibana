@@ -197,14 +197,11 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   const hasData = series.length > 0;
   const { yMin, yMax, xMin, xMax } = getDomain(filteredSeries, isStacked);
   const chartDomain = {
-    max:
-      showThreshold && threshold && threshold.value
-        ? Math.max(yMax, threshold.value) * 1.1
-        : yMax * 1.1, // Add 10% headroom.
-    min: showThreshold && threshold && threshold.value ? Math.min(yMin, threshold.value) : yMin,
+    max: showThreshold && threshold ? Math.max(yMax, threshold.value) * 1.1 : yMax * 1.1, // Add 10% headroom.
+    min: showThreshold && threshold ? Math.min(yMin, threshold.value) : yMin,
   };
 
-  if (showThreshold && threshold && threshold.value && chartDomain.min === threshold.value) {
+  if (showThreshold && threshold && chartDomain.min === threshold.value) {
     chartDomain.min = chartDomain.min * 0.9; // Allow some padding so the threshold annotation has better visibility
   }
 
