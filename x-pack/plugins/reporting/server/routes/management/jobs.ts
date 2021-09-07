@@ -6,9 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { pipe } from 'fp-ts/lib/function';
-import * as E from 'fp-ts/lib/Either';
-import * as TE from 'fp-ts/lib/TaskEither';
 import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { ReportingCore } from '../../';
 import { ROUTE_TAG_CAN_REDIRECT } from '../../../../security/server';
@@ -89,28 +86,27 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
     })
   );
 
-  const getJobOrUnauthorizedResponse = (job: Report) => async () => {
+  const validateJobIsAvailable = async (job?: Report) => {
+    if (!job) {
+      // Bad result
+      return kibanaResponseFactory.notFound();
+    }
+
     const { jobtype: jobType } = job;
     const {
       management: { jobTypes = [] },
     } = await reporting.getLicenseInfo();
 
     if (!jobTypes.includes(jobType)) {
-      return E.left(
-        kibanaResponseFactory.unauthorized({
-          body: `Sorry, you are not authorized to view ${jobType} info`,
-        })
-      );
+      // Bad result
+      return kibanaResponseFactory.unauthorized({
+        body: `Sorry, you are not authorized to view ${jobType} info`,
+      });
     }
-    return E.right(job);
-  };
 
-  const validateJobTypeAvailable = (maybeJob?: Report) =>
-    pipe(
-      maybeJob ? E.right(maybeJob) : E.left(kibanaResponseFactory.notFound()),
-      TE.fromEither,
-      TE.chain(getJobOrUnauthorizedResponse)
-    )();
+    // Good result
+    return;
+  };
 
   // return some info about the job
   router.get(
@@ -132,16 +128,17 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
       const result = await jobsQuery.get(user, docId);
 
-      return validateJobTypeAvailable(result).then((checkedResult) =>
-        E.isLeft(checkedResult)
-          ? checkedResult.left
-          : res.ok({
-              body: checkedResult.right.toApiJSON(),
-              headers: {
-                'content-type': 'application/json',
-              },
-            })
-      );
+      const validationResult = await validateJobIsAvailable(result);
+      if (validationResult) {
+        return validationResult;
+      }
+
+      return res.ok({
+        body: result!.toApiJSON(),
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
     })
   );
 
@@ -164,16 +161,17 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
       const result = await jobsQuery.get(user, docId);
 
-      return validateJobTypeAvailable(result).then((checkedResult) =>
-        E.isLeft(checkedResult)
-          ? checkedResult.left
-          : res.ok({
-              body: checkedResult.right.payload,
-              headers: {
-                'content-type': 'application/json',
-              },
-            })
-      );
+      const validationResult = await validateJobIsAvailable(result);
+      if (validationResult) {
+        return validationResult;
+      }
+
+      return res.ok({
+        body: result!.payload,
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
     })
   );
 
