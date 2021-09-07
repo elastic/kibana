@@ -13,7 +13,7 @@ import { isRumAgentName, isIosAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { LatencyChart } from '../../shared/charts/latency_chart';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
@@ -61,7 +61,7 @@ export function ServiceOverview() {
 
   // The default EuiFlexGroup breaks at 768, but we want to break at 1200, so we
   // observe the window width and set the flex directions of rows accordingly
-  const { isLarge } = useBreakPoints();
+  const { isLarge } = useBreakpoints();
   const isSingleColumn = isLarge;
   const rowDirection = isSingleColumn ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);

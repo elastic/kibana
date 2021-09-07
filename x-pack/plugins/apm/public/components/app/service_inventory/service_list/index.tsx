@@ -30,10 +30,7 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import {
-  BreakPoints,
-  useBreakPoints,
-} from '../../../../hooks/use_break_points';
+import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../utils/style';
@@ -67,14 +64,14 @@ export function getServiceColumns({
   query,
   showTransactionTypeColumn,
   comparisonData,
-  breakPoints,
+  breakpoints,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
-  breakPoints: BreakPoints;
+  breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<ServiceListItem>> {
-  const { isSmall, isLarge, isXl } = breakPoints;
+  const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
   return [
@@ -228,7 +225,7 @@ export function ServiceList({
   comparisonData,
   isLoading,
 }: Props) {
-  const breakPoints = useBreakPoints();
+  const breakpoints = useBreakpoints();
   const displayHealthStatus = items.some((item) => 'healthStatus' in item);
 
   const showTransactionTypeColumn = items.some(
@@ -250,9 +247,9 @@ export function ServiceList({
         query,
         showTransactionTypeColumn,
         comparisonData,
-        breakPoints,
+        breakpoints,
       }),
-    [query, showTransactionTypeColumn, comparisonData, breakPoints]
+    [query, showTransactionTypeColumn, comparisonData, breakpoints]
   );
 
   const columns = displayHealthStatus

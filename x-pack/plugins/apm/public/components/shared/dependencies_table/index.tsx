@@ -19,7 +19,7 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyMessage } from '../EmptyMessage';
 import { ImpactBar } from '../ImpactBar';
@@ -61,7 +61,7 @@ export function DependenciesTable(props: Props) {
   } = props;
 
   // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
-  const { isXl } = useBreakPoints();
+  const { isXl } = useBreakpoints();
   const shouldShowSparkPlots = isSingleColumn || !isXl;
 
   const columns: Array<ITableColumn<DependenciesItem>> = [

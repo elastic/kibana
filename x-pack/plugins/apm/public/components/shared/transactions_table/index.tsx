@@ -28,7 +28,7 @@ import { getTimeRangeComparison } from '../time_comparison/get_time_range_compar
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
 import { ElasticDocsLink } from '../Links/ElasticDocsLink';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
@@ -91,7 +91,7 @@ export function TransactionsTable({
   });
 
   // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
-  const { width, breakpoint, isXl } = useBreakPoints();
+  const { isXl } = useBreakpoints();
   const shouldShowSparkPlots = isSingleColumn || !isXl;
 
   const { pageIndex, sort } = tableOptions;
