@@ -7,9 +7,9 @@
  */
 
 import { AccessorFn, Accessor } from '@elastic/charts';
-import { DatatableColumn } from '../../../../expressions';
+import { Datatable, DatatableColumn } from '../../../../expressions';
 import { KBN_FIELD_TYPES } from '../../../../data/public';
-import { FakeParams } from '../../../../visualizations/public';
+import { ExpressionValueVisDimension, FakeParams } from '../../../../visualizations/public';
 import { Aspect } from '../types';
 
 export const COMPLEX_X_ACCESSOR = '__customXAccessor__';
@@ -108,3 +108,25 @@ export const isValidSeriesForDimension = (seriesColumnId: string) => ({
 }) =>
   (id === seriesColumnId || isPercentileIdEqualToSeriesId(id ?? '', seriesColumnId)) &&
   accessor !== null;
+
+export const getValueByAccessor = (
+  data: Datatable['rows'][0],
+  accessor: ExpressionValueVisDimension['accessor']
+) => {
+  if (typeof accessor === 'number') {
+    return Object.values(data)[accessor];
+  }
+
+  return data[accessor.id];
+};
+
+export const getColumnByAccessor = <T extends { id: string }>(
+  columns: T[],
+  accessor: ExpressionValueVisDimension['accessor']
+) => {
+  if (typeof accessor === 'number') {
+    return columns[accessor];
+  }
+
+  return columns.filter((col) => col.id === accessor.id)[0];
+};

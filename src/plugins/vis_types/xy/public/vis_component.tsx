@@ -50,6 +50,7 @@ import { getThemeService, getDataActions, getPalettesService, getActiveCursor } 
 import './_chart.scss';
 import {
   COMPLEX_SPLIT_ACCESSOR,
+  getColumnByAccessor,
   getComplexAccessor,
   getSplitSeriesAccessorFnMap,
 } from './utils/accessors';
@@ -333,9 +334,9 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const splitChartDimension = visParams.dimensions.splitColumn
-    ? visData.columns[visParams.dimensions.splitColumn[0].accessor]
+    ? getColumnByAccessor(visData.columns, visParams.dimensions.splitColumn[0].accessor)
     : visParams.dimensions.splitRow
-    ? visData.columns[visParams.dimensions.splitRow[0].accessor]
+    ? getColumnByAccessor(visData.columns, visParams.dimensions.splitRow[0].accessor)
     : undefined;
 
   return (

@@ -13,6 +13,7 @@ import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions/public';
 import { getAdjustedInterval } from '../../common';
 import { XDomainArguments, ExpressionValueXDomain } from '../types';
+import { getValueByAccessor } from '../utils/accessors';
 
 export const getAdjustedDomain = (
   data: Datatable['rows'],
@@ -27,15 +28,7 @@ export const getAdjustedDomain = (
   timezone?: string,
   considerInterval?: boolean
 ) => {
-  const accessor = column.accessor;
-  const mapData = (d: Datatable['rows'][0]) => {
-    if (typeof accessor === 'number') {
-      return Object.values(d)[accessor];
-    }
-    return d[accessor.id];
-  };
-
-  const values = uniq(data.map(mapData).sort());
+  const values = uniq(data.map((row) => getValueByAccessor(row, column.accessor)).sort());
   const [first] = values;
   const last = values[values.length - 1];
   const domainMin = Math.min(first, domain.min);

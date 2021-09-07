@@ -49,7 +49,7 @@ export type ExpressionValueXYDimension = ExpressionValueBoxed<
   'xy_dimension',
   {
     label: string;
-    aggType: string;
+    aggType?: string;
     params: DateHistogramParams | HistogramParams | FakeParams | {};
     accessor: number | DatatableColumn;
     format: SerializedFieldFormat;

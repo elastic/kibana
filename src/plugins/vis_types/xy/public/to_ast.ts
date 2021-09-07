@@ -13,6 +13,7 @@ import {
   getVisSchemas,
   DateHistogramParams,
   ExpressionValueVisDimension,
+  SchemaConfig,
 } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 import { BUCKET_TYPES } from '../../../data/public';
@@ -20,7 +21,6 @@ import { Labels } from '../../../charts/public';
 
 import {
   Dimensions,
-  Dimension,
   VisParams,
   CategoryAxis,
   SeriesParam,
@@ -30,12 +30,18 @@ import {
   TimeMarker,
   AxisMode,
   XDomainArguments,
+  Dimension,
 } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
 import { ChartType, XyVisType } from '../common';
 import { getEsaggsFn } from './to_ast_esaggs';
 import { TimeRangeBounds } from '../../../data/common';
 import { getTimeZone } from './utils';
+import { getColumnByAccessor } from './utils/accessors';
+
+type XDomainPreArgs = Omit<XDomainArguments, 'column'> & {
+  column?: XDomainArguments['column'];
+};
 
 const prepareLabel = (data: Labels) => {
   const label = buildExpressionFunction('label', {
@@ -112,7 +118,7 @@ const prepareSeriesParam = (data: SeriesParam) => {
   return buildExpression([seriesParam]);
 };
 
-const prepareVisDimension = (data: Dimension) => {
+const prepareVisDimension = <T extends Omit<ExpressionValueVisDimension, 'type'>>(data: T) => {
   const visDimension = buildExpressionFunction('visdimension', { accessor: data.accessor });
 
   if (data.format) {
@@ -123,21 +129,25 @@ const prepareVisDimension = (data: Dimension) => {
   return buildExpression([visDimension]);
 };
 
-const prepareXYDimension = (data: Dimension) => {
+const prepareXYDimension = <T extends Dimension>(data: T) => {
   const xyDimension = buildExpressionFunction('xydimension', {
     params: JSON.stringify(data.params),
     label: data.label,
-    visDimension: prepareVisDimension(data),
+    visDimension: prepareVisDimension({
+      ...data,
+      format: {
+        ...data.format,
+        params: data.format.params ?? {},
+      },
+    }),
     id: data.id,
   });
 
   return buildExpression([xyDimension]);
 };
 
-const prepareXDomain = (data: XDomainArguments) => {
-  const column = data.column
-    ? prepareVisDimension((data.column as unknown) as Dimension)
-    : undefined;
+const prepareXDomain = (data: XDomainPreArgs) => {
+  const column = data.column ? prepareVisDimension(data.column) : undefined;
   const xDomain = buildExpressionFunction('x_domain', {
     ...data,
     column,
@@ -146,42 +156,54 @@ const prepareXDomain = (data: XDomainArguments) => {
   return buildExpression([xDomain]);
 };
 
+const getDimensionFromSchemaConfig = (schemaConfig: SchemaConfig): Dimension => ({
+  ...schemaConfig,
+  params: {},
+});
+
 export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
   const dimensions: Dimensions = {
-    x: schemas.segment ? schemas.segment[0] : null,
-    y: schemas.metric,
-    z: schemas.radius,
-    width: schemas.width,
-    series: schemas.group,
-    splitRow: schemas.split_row,
-    splitColumn: schemas.split_column,
+    x: schemas.segment ? getDimensionFromSchemaConfig(schemas.segment[0]) : null,
+    y: schemas.metric.map(getDimensionFromSchemaConfig),
+    z: schemas.radius?.map(getDimensionFromSchemaConfig),
+    width: schemas.width?.map(getDimensionFromSchemaConfig),
+    series: schemas.group?.map(getDimensionFromSchemaConfig),
+    splitRow: schemas.split_row?.map(getDimensionFromSchemaConfig),
+    splitColumn: schemas.split_column?.map(getDimensionFromSchemaConfig),
   };
 
   const responseAggs = vis.data.aggs?.getResponseAggs().filter(({ enabled }) => enabled) ?? [];
 
-  const xAgg = dimensions.x ? (responseAggs[dimensions.x?.accessor] as any) : null;
-  const enableHistogramMode = [BUCKET_TYPES.HISTOGRAM, BUCKET_TYPES.DATE_HISTOGRAM].includes(
-    xAgg?.type?.name
-  );
+  const xAgg = dimensions.x ? getColumnByAccessor(responseAggs, dimensions.x?.accessor) : null;
 
-  const xDomain: XDomainArguments = {};
+  const enableHistogramMode = ([
+    BUCKET_TYPES.HISTOGRAM,
+    BUCKET_TYPES.DATE_HISTOGRAM,
+  ] as string[]).includes(xAgg?.type?.name ?? '');
+
+  const xDomain: XDomainPreArgs = {};
+  if (dimensions.x && !dimensions.x.params) {
+    dimensions.x.params = {};
+  }
+
   if (dimensions.x && xAgg) {
     if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
       const timeZone = getTimeZone();
 
       (dimensions.x.params as DateHistogramParams).date = true;
-      (dimensions.x.params as DateHistogramParams).format = xAgg.buckets.getScaledDateFormat();
+      (dimensions.x.params as DateHistogramParams).format =
+        xAgg.buckets?.getScaledDateFormat() ?? '';
 
-      const { esUnit, esValue } = xAgg.buckets.getInterval();
+      const { esUnit, esValue } = xAgg.buckets?.getInterval() ?? {};
 
       xDomain.timezone = timeZone;
       xDomain.intervalValue = esValue;
       xDomain.intervalUnit = esUnit;
       xDomain.minInterval = moment.duration(esValue, esUnit).asMilliseconds();
-      // @TODO: rewrite x from Dimension to ExpressionValueVisDimension
-      xDomain.column = (dimensions.x as unknown) as ExpressionValueVisDimension;
-      const bounds = xAgg.buckets.getBounds() as TimeRangeBounds | undefined;
+
+      const bounds = xAgg.buckets?.getBounds() as TimeRangeBounds | undefined;
+
       if (bounds && bounds?.min && bounds?.max) {
         xDomain.min = bounds.min.valueOf();
         xDomain.max = bounds.max.valueOf();
@@ -189,17 +211,17 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     } else if (xAgg.type.name === BUCKET_TYPES.HISTOGRAM) {
       const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
-      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, vis.data.searchSource, {
+      await intervalParam?.modifyAggConfigOnSearchRequestStart(xAgg, vis.data.searchSource, {
         abortSignal: params.abortSignal,
       });
-      intervalParam.write(xAgg, output);
+      intervalParam?.write(xAgg, output);
 
       xDomain.minInterval = output.params.interval;
     }
   }
 
   (dimensions.y || []).forEach((yDimension) => {
-    const yAgg = responseAggs[yDimension.accessor];
+    const yAgg = getColumnByAccessor(responseAggs, yDimension.accessor);
     const seriesParam = (vis.params.seriesParams || []).find(
       (param: any) => param.data.id === yAgg.id
     );

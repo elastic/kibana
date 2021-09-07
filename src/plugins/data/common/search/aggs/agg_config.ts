@@ -23,6 +23,7 @@ import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
 import { parseTimeShift } from './utils';
+import { TimeBuckets } from './buckets/lib/time_buckets';
 
 /** @public **/
 export type AggConfigSerialized = Ensure<
@@ -92,6 +93,7 @@ export class AggConfig {
   public parent?: IAggConfigs;
   public brandNew?: boolean;
   public schema?: string;
+  public buckets?: TimeBuckets;
 
   private __type: IAggType;
   private __typeDecorations: any;
