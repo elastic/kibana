@@ -32,10 +32,16 @@ export function InspectorViewChooser({
   selectedView,
   views,
 }: InspectorViewChooserProps) {
-  const options: EuiSuperSelectOption<InspectorViewDescription> = views.map((view) => {
+  const options: Array<EuiSuperSelectOption<InspectorViewDescription>> = views.map((view) => {
     return {
-      value: view.title,
-      inputDisplay: view.title,
+      value: view,
+      inputDisplay: (
+        <FormattedMessage
+          id="inspector.view"
+          defaultMessage="View: {viewName}"
+          values={{ viewName: view.title }}
+        />
+      ),
       dropdownDisplay: (
         <>
           <strong>{view.title}</strong>
@@ -60,9 +66,12 @@ export function InspectorViewChooser({
   }
 
   return (
-    <EuiToolTip position="bottom" content={selectedView.help}>
-      <EuiSuperSelect hasDividers={true} options={options} valueOfSelected={selectedView.title} />
-    </EuiToolTip>
+    <EuiSuperSelect<InspectorViewDescription>
+      hasDividers={true}
+      options={options}
+      valueOfSelected={selectedView}
+      onChange={onViewSelected}
+    />
   );
 }
 

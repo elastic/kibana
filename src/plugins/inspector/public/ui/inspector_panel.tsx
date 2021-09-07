@@ -120,12 +120,12 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
       <KibanaContextProvider services={dependencies}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem grow={7}>
               <EuiTitle size="s">
                 <h1>{title}</h1>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={3}>
               <InspectorViewChooser
                 views={views}
                 onViewSelected={this.onViewSelected}
