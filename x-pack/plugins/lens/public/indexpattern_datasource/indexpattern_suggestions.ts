@@ -8,7 +8,7 @@
 import { flatten, minBy, pick, mapValues, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../id_generator';
-import { DatasourceSuggestion, TableChangeType } from '../types';
+import type { DatasourceSuggestion, TableChangeType } from '../types';
 import { columnToOperation } from './indexpattern';
 import {
   insertNewColumn,
@@ -23,7 +23,7 @@ import {
   getReferencedColumnIds,
 } from './operations';
 import { hasField } from './utils';
-import {
+import type {
   IndexPattern,
   IndexPatternPrivateState,
   IndexPatternLayer,
