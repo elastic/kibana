@@ -65,16 +65,19 @@ export class RequestHandler {
     jobParams.version = checkParamsVersion(jobParams, logger);
 
     // 2. encrypt request headers for the running report job to authenticate itself with Kibana
-    // 3. create the payload with the queued job info
-    // 4. get the Space ID from the request
-    const [job, headers, spaceId] = await Promise.all([
-      createJob(jobParams, context),
+    // 3. call the export type's createJobFn to create the job payload
+    const [headers, job] = await Promise.all([
       this.encryptHeaders(),
-      reporting.getSpaceId(request, logger),
+      createJob(jobParams, context),
     ]);
-    const payload = { ...job, headers, spaceId };
 
-    // 5. Add the report to ReportingStore to show as pending
+    const payload = {
+      ...job,
+      headers,
+      spaceId: reporting.getSpaceId(request, logger),
+    };
+
+    // 4. Add the report to ReportingStore to show as pending
     const report = await store.addReport(
       new Report({
         jobtype: exportType.jobType,
@@ -90,7 +93,7 @@ export class RequestHandler {
     );
     logger.debug(`Successfully stored pending job: ${report._index}/${report._id}`);
 
-    // 6. Schedule the report with Task Manager
+    // 5. Schedule the report with Task Manager
     const task = await reporting.scheduleTask(report.toReportTaskJSON());
     logger.info(
       `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
