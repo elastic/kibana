@@ -46,8 +46,9 @@ export const DiscoverTopNav = ({
     (newSavedSearchId: string) => {
       if (savedSearch.id && savedSearch.id === newSavedSearchId) {
         resetSavedSearch();
+      } else {
+        history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
       }
-      history.replace(`/view/${encodeURIComponent(newSavedSearchId)}`);
     },
     [history, resetSavedSearch, savedSearch.id]
   );
