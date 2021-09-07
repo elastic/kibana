@@ -7,35 +7,32 @@
 
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
+import type { DeprecationsServiceStart } from 'kibana/public';
 
-import { setupEnvironment } from '../helpers';
+import { setupEnvironment, kibanaDeprecationsServiceHelpers } from '../helpers';
 import { KibanaTestBed, setupKibanaPage } from './kibana_deprecations.helpers';
-import { kibanaDeprecationsMockResponse } from './mocked_responses';
-
-const criticalDeprecations = kibanaDeprecationsMockResponse.filter(
-  (deprecation) => deprecation.level === 'critical'
-);
-const warningDeprecations = kibanaDeprecationsMockResponse.filter(
-  (deprecation) => deprecation.level === 'warning'
-);
-const configDeprecations = kibanaDeprecationsMockResponse.filter(
-  (deprecation) => deprecation.deprecationType === 'config'
-);
 
 describe('Kibana deprecations table', () => {
   let testBed: KibanaTestBed;
+  let deprecationService: jest.Mocked<DeprecationsServiceStart>;
+
   const { server } = setupEnvironment();
-  const deprecationService = deprecationsServiceMock.createStartContract();
+  const {
+    mockedKibanaDeprecations,
+    mockedCriticalKibanaDeprecations,
+    mockedWarningKibanaDeprecations,
+    mockedConfigKibanaDeprecations,
+  } = kibanaDeprecationsServiceHelpers.defaultMockedResponses;
 
   afterAll(() => {
     server.restore();
   });
 
   beforeEach(async () => {
+    deprecationService = deprecationsServiceMock.createStartContract();
+
     await act(async () => {
-      deprecationService.getAllDeprecations = jest
-        .fn()
-        .mockReturnValue(kibanaDeprecationsMockResponse);
+      kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService });
 
       testBed = await setupKibanaPage({
         services: {
@@ -56,7 +53,7 @@ describe('Kibana deprecations table', () => {
 
     const { tableCellsValues } = table.getMetaData('kibanaDeprecationsTable');
 
-    expect(tableCellsValues.length).toEqual(kibanaDeprecationsMockResponse.length);
+    expect(tableCellsValues.length).toEqual(mockedKibanaDeprecations.length);
   });
 
   it('refreshes deprecation data', async () => {
@@ -72,8 +69,12 @@ describe('Kibana deprecations table', () => {
   it('shows critical and warning deprecations count', () => {
     const { find } = testBed;
 
-    expect(find('criticalDeprecationsCount').text()).toContain(criticalDeprecations.length);
-    expect(find('warningDeprecationsCount').text()).toContain(warningDeprecations.length);
+    expect(find('criticalDeprecationsCount').text()).toContain(
+      mockedCriticalKibanaDeprecations.length
+    );
+    expect(find('warningDeprecationsCount').text()).toContain(
+      mockedWarningKibanaDeprecations.length
+    );
   });
 
   describe('Search bar', () => {
@@ -83,12 +84,12 @@ describe('Kibana deprecations table', () => {
       // Show only critical deprecations
       await actions.searchBar.clickCriticalFilterButton();
       const { rows: criticalRows } = table.getMetaData('kibanaDeprecationsTable');
-      expect(criticalRows.length).toEqual(criticalDeprecations.length);
+      expect(criticalRows.length).toEqual(mockedCriticalKibanaDeprecations.length);
 
       // Show all deprecations
       await actions.searchBar.clickCriticalFilterButton();
       const { rows: allRows } = table.getMetaData('kibanaDeprecationsTable');
-      expect(allRows.length).toEqual(kibanaDeprecationsMockResponse.length);
+      expect(allRows.length).toEqual(mockedKibanaDeprecations.length);
     });
 
     it('filters by type', async () => {
@@ -99,7 +100,7 @@ describe('Kibana deprecations table', () => {
 
       const { rows: configRows } = table.getMetaData('kibanaDeprecationsTable');
 
-      expect(configRows.length).toEqual(configDeprecations.length);
+      expect(configRows.length).toEqual(mockedConfigKibanaDeprecations.length);
     });
   });
 
