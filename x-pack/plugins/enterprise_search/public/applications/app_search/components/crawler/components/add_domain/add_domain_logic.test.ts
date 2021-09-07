@@ -304,6 +304,8 @@ describe('AddDomainLogic', () => {
           http.post.mockReturnValueOnce(
             Promise.resolve({
               domains: [],
+              events: [],
+              most_recent_crawl_request: null,
             })
           );
 
@@ -312,6 +314,8 @@ describe('AddDomainLogic', () => {
 
           expect(CrawlerLogic.actions.onReceiveCrawlerData).toHaveBeenCalledWith({
             domains: [],
+            events: [],
+            mostRecentCrawlRequest: null,
           });
         });
 
@@ -328,6 +332,8 @@ describe('AddDomainLogic', () => {
                   name: 'https://swiftype.co/site-search',
                 },
               ],
+              events: [],
+              most_recent_crawl_request: null,
             })
           );
           jest.spyOn(AddDomainLogic.actions, 'onSubmitNewDomainSuccess');

@@ -36,7 +36,6 @@ const MOCK_VALUES = {
 const MOCK_ACTIONS = {
   fetchCrawlerData: jest.fn(),
   fetchDomainData: jest.fn(),
-  getLatestCrawlRequests: jest.fn(),
 };
 
 describe('CrawlerSingleDomain', () => {

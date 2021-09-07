@@ -16,16 +16,17 @@ import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../test_helpers';
 
-import { CrawlerStatus, CrawlRequest } from '../types';
+import { CrawlEvent, CrawlerStatus } from '../types';
 
 import { CrawlRequestsTable } from './crawl_requests_table';
 
-const values: { crawlRequests: CrawlRequest[] } = {
+const values: { events: CrawlEvent[] } = {
   // CrawlerLogic
-  crawlRequests: [
+  events: [
     {
       id: '618d0e66abe97bc688328900',
       status: CrawlerStatus.Pending,
+      stage: 'crawl',
       createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
       beganAt: null,
       completedAt: null,
@@ -69,7 +70,7 @@ describe('CrawlRequestsTable', () => {
     it('displays an empty prompt when there are no crawl requests', () => {
       setMockValues({
         ...values,
-        crawlRequests: [],
+        events: [],
       });
 
       wrapper = shallow(<CrawlRequestsTable />);
