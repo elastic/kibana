@@ -11,7 +11,7 @@ logging:
       type: file
       fileName: kibana.log
       layout:
-        type: pattern
+        type: json
   root:
     appenders:
       - default

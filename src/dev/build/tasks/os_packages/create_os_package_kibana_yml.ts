@@ -31,7 +31,7 @@ export async function createOSPackageKibanaYML(config: Config, build: Build) {
               type: 'file',
               fileName: '/var/log/kibana/kibana.log',
               layout: {
-                type: 'pattern',
+                type: 'json',
               },
             },
           },
