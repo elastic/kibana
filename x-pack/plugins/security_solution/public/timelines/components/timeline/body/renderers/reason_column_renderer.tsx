@@ -122,6 +122,8 @@ const ReasonCell: React.FC<{
           isOpen={isOpen}
           anchorPosition="rightCenter"
           closePopover={handleClosePopOver}
+          panelClassName="withHoverActions__popover"
+          data-test-subj="reason-popover"
           button={button}
         >
           <EuiPopoverTitle paddingSize="s">
