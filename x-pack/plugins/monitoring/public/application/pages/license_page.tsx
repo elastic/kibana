@@ -12,8 +12,8 @@ import { PageLoading, License } from '../../components';
 import { GlobalStateContext } from '../global_state_context';
 import { useClusters } from '../hooks/use_clusters';
 import { CODE_PATH_ALL } from '../../../common/constants';
-import { formatDateTimeLocal } from '../../../common/formatting';
 import { Legacy } from '../../legacy_shims';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -23,11 +23,10 @@ export const LicensePage: React.FC<{}> = () => {
   });
 
   const state = useContext(GlobalStateContext);
+  const { services } = useKibana<{ data: any }>();
   const { clusters, loaded } = useClusters(state.cluster_uuid, state.ccs, CODE_PATHS);
 
-  // TODO how do we get timezone from here?
-  // const timezone = injector.get('config').get('dateFormat:tz');
-  const timezone = null;
+  const timezone = services.uiSettings.get('dateFormat:tz');
 
   if (loaded) {
     const cluster = clusters[0];
@@ -36,20 +35,16 @@ export const LicensePage: React.FC<{}> = () => {
     let expiryDate = license?.expiry_date_in_millis;
 
     if (expiryDate !== undefined) {
-      // TODO pretty sure type definition is wrong, timezone should probably be string or null
-      expiryDate = formatDateTimeLocal(expiryDate, false, timezone);
+      expiryDate = formatDateTimeLocal(expiryDate, timezone);
     }
 
     const isExpired = Date.now() > expiryDate;
 
-    const basePath = Legacy.shims.getBasePath();
-    // TODO /license_management/common/constants has no BASE_PATH, just hard code for now
-    // this.uploadLicensePath = basePath + '/app/kibana#' + MANAGEMENT_BASE_PATH + 'upload_license';
-    const uploadLicensePath = basePath + '/app/management/stack/license_management/upload_license';
+    const uploadLicensePath = services.application.getUrlForApp('management', {
+      path: 'stack/license_management/upload_license',
+    });
 
     // TODO check expired case
-
-    // TODO breadcrumbs should include the current cluster. Probably something that needs to happen in PageTemplate
     return (
       <PageTemplate title={title} pageTitle="">
         <License
@@ -70,3 +65,9 @@ export const LicensePage: React.FC<{}> = () => {
     );
   }
 };
+
+// From x-pack/plugins/monitoring/common/formatting.ts with corrected typing
+// TODO open github issue to correct other usages
+export function formatDateTimeLocal(date: number | Date, timezone: string | null) {
+  return moment.tz(date, timezone || moment.tz.guess()).format('LL LTS');
+}
