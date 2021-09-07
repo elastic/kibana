@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from 'react-query';
-import { SortDirection } from '../../../../../src/plugins/data/common';
+import { IndexPattern, SortDirection } from '../../../../../src/plugins/data/common';
 
 import { useKibana } from '../common/lib/kibana';
 
@@ -14,6 +14,7 @@ interface UseScheduledQueryGroupQueryErrorsProps {
   actionId: string;
   agentIds?: string[];
   interval: number;
+  logsIndexPattern?: IndexPattern;
   skip?: boolean;
 }
 
@@ -21,6 +22,7 @@ export const useScheduledQueryGroupQueryErrors = ({
   actionId,
   agentIds,
   interval,
+  logsIndexPattern,
   skip = false,
 }: UseScheduledQueryGroupQueryErrorsProps) => {
   const data = useKibana().services.data;
@@ -28,9 +30,8 @@ export const useScheduledQueryGroupQueryErrors = ({
   return useQuery(
     ['scheduledQueryErrors', { actionId, interval }],
     async () => {
-      const indexPattern = await data.indexPatterns.find('logs-*');
       const searchSource = await data.search.searchSource.create({
-        index: indexPattern[0],
+        index: logsIndexPattern,
         fields: ['*'],
         sort: [
           {
@@ -80,7 +81,7 @@ export const useScheduledQueryGroupQueryErrors = ({
     },
     {
       keepPreviousData: true,
-      enabled: !!(!skip && actionId && interval && agentIds?.length),
+      enabled: !!(!skip && actionId && interval && agentIds?.length && logsIndexPattern),
       select: (response) => response.rawResponse.hits ?? [],
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
