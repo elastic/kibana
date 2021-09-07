@@ -7,11 +7,11 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError, ToolingLog } from '@kbn/dev-utils';
 
 import { TestFailure } from './get_failures';
 
-export async function reportFailuresToEs(failures: TestFailure[]) {
+export async function reportFailuresToEs(log: ToolingLog, failures: TestFailure[]) {
   if (!failures?.length) {
     return;
   }
@@ -38,7 +38,7 @@ export async function reportFailuresToEs(failures: TestFailure[]) {
 
   const body = failures.flatMap((failure) => [
     {
-      index: {
+      create: {
         _index: 'test-failures',
       },
     },
@@ -59,5 +59,8 @@ export async function reportFailuresToEs(failures: TestFailure[]) {
     },
   ]);
 
-  await client.bulk({ body });
+  const resp = await client.bulk({ body });
+  if (resp?.body?.errors) {
+    log.error(JSON.stringify(resp.body.items, null, 2));
+  }
 }

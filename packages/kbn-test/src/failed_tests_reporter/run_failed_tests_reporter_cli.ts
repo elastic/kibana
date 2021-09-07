@@ -98,7 +98,7 @@ export function runFailedTestsReporterCli() {
         const failures = await getFailures(report);
 
         if (indexInEs) {
-          await reportFailuresToEs(failures);
+          await reportFailuresToEs(log, failures);
         }
 
         for (const failure of failures) {
