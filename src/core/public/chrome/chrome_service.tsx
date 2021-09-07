@@ -309,6 +309,13 @@ export class ChromeService {
         headerBanner$.next(headerBanner);
       },
 
+      hasHeaderBanner$: () => {
+        return headerBanner$.pipe(
+          takeUntil(this.stop$),
+          map((banner) => Boolean(banner))
+        );
+      },
+
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
     };
   }
