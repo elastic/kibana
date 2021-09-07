@@ -68,6 +68,7 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
 
       // 95th percentile to be displayed as a marker in the log log chart
       const {
+        totalDocs,
         percentiles: percentilesResponseThresholds,
       } = await fetchTransactionDurationPercentiles(
         esClient,
@@ -77,6 +78,25 @@ export const failedTransactionsCorrelationsSearchServiceProvider: FailedTransact
       const percentileThresholdValue =
         percentilesResponseThresholds[`${params.percentileThreshold}.0`];
       state.setPercentileThresholdValue(percentileThresholdValue);
+
+      addLogMessage(
+        `Fetched ${params.percentileThreshold}th percentile value of ${percentileThresholdValue} based on ${totalDocs} documents.`
+      );
+
+      // finish early if we weren't able to identify the percentileThresholdValue.
+      if (percentileThresholdValue === undefined) {
+        addLogMessage(
+          `Abort service since percentileThresholdValue could not be determined.`
+        );
+        state.setProgress({
+          loadedFieldCandidates: 1,
+          loadedErrorCorrelations: 1,
+          loadedOverallHistogram: 1,
+          loadedFailedTransactionsCorrelations: 1,
+        });
+        state.setIsRunning(false);
+        return;
+      }
 
       const histogramRangeSteps = await fetchTransactionDurationHistogramRangeSteps(
         esClient,
