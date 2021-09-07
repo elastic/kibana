@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PageTemplate } from './page_template';
-import { PageLoading, License } from '../../components';
+import { License } from '../../components';
 import { GlobalStateContext } from '../global_state_context';
-import { useClusters } from '../hooks/use_clusters';
-import { CODE_PATH_ALL } from '../../../common/constants';
-import { Legacy } from '../../legacy_shims';
+import { CODE_PATH_ALL, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import moment from 'moment-timezone';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -23,12 +22,56 @@ export const LicensePage: React.FC<{}> = () => {
   });
 
   const state = useContext(GlobalStateContext);
+  const clusterUuid = state.cluster_uuid;
+  const ccs = state.ccs;
   const { services } = useKibana<{ data: any }>();
-  const { clusters, loaded } = useClusters(state.cluster_uuid, state.ccs, CODE_PATHS);
+  const [clusters, setClusters] = useState([] as any);
 
-  const timezone = services.uiSettings.get('dateFormat:tz');
+  const timezone = services.uiSettings?.get('dateFormat:tz');
 
-  if (loaded) {
+  const uploadLicensePath = services.application?.getUrlForApp('management', {
+    path: 'stack/license_management/upload_license',
+  });
+
+  const getPageData = useCallback(async () => {
+    const bounds = services.data?.query.timefilter.timefilter.getBounds();
+    let url = '../api/monitoring/v1/clusters';
+    if (clusterUuid) {
+      url += `/${clusterUuid}`;
+    }
+
+    try {
+      const response = await services.http?.fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          ccs,
+          timeRange: {
+            min: bounds.min.toISOString(),
+            max: bounds.max.toISOString(),
+          },
+          codePaths: CODE_PATHS,
+        }),
+      });
+
+      setClusters(formatClusters(response));
+    } catch (err) {
+      // TODO handle error
+    }
+  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
+
+  return (
+    <PageTemplate title={title} pageTitle="" getPageData={getPageData}>
+      {licenseComponent(clusters, timezone, uploadLicensePath)}
+    </PageTemplate>
+  );
+};
+
+function licenseComponent(
+  clusters: any,
+  timezone: string,
+  uploadLicensePath: string | undefined
+): any {
+  if (clusters.length) {
     const cluster = clusters[0];
     const isPrimaryCluster = cluster.isPrimary;
     const license = cluster.license;
@@ -40,34 +83,34 @@ export const LicensePage: React.FC<{}> = () => {
 
     const isExpired = Date.now() > expiryDate;
 
-    const uploadLicensePath = services.application.getUrlForApp('management', {
-      path: 'stack/license_management/upload_license',
-    });
-
-    // TODO check expired case
     return (
-      <PageTemplate title={title} pageTitle="">
-        <License
-          isPrimaryCluster={isPrimaryCluster}
-          status={license.status}
-          type={license.type}
-          isExpired={isExpired}
-          expiryDate={expiryDate}
-          uploadLicensePath={uploadLicensePath}
-        />
-      </PageTemplate>
+      <License
+        isPrimaryCluster={isPrimaryCluster}
+        status={license.status}
+        type={license.type}
+        isExpired={isExpired}
+        expiryDate={expiryDate}
+        uploadLicensePath={uploadLicensePath}
+      />
     );
   } else {
-    return (
-      <PageTemplate title={title} pageTitle={title}>
-        <PageLoading />
-      </PageTemplate>
-    );
+    return null;
   }
-};
+}
 
 // From x-pack/plugins/monitoring/common/formatting.ts with corrected typing
 // TODO open github issue to correct other usages
 export function formatDateTimeLocal(date: number | Date, timezone: string | null) {
   return moment.tz(date, timezone || moment.tz.guess()).format('LL LTS');
+}
+
+function formatClusters(clusters: any) {
+  return clusters.map(formatCluster);
+}
+
+function formatCluster(cluster: any) {
+  if (cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID) {
+    cluster.cluster_name = 'Standalone Cluster';
+  }
+  return cluster;
 }
