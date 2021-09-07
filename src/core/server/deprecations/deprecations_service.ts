@@ -33,6 +33,7 @@ import { SavedObjectsClientContract } from '../saved_objects/types';
  * @example
  * ```ts
  * import { DeprecationsDetails, GetDeprecationsContext, CoreSetup } from 'src/core/server';
+ * import { i18n } from '@kbn/i18n';
  *
  * async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
  *   const deprecations: DeprecationsDetails[] = [];
@@ -41,52 +42,44 @@ import { SavedObjectsClientContract } from '../saved_objects/types';
  *   if (count > 0) {
  *     // Example of a manual correctiveAction
  *     deprecations.push({
- *       message: `You have ${count} Timelion worksheets. The Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard.`,
+ *       title: i18n.translate('xpack.timelion.deprecations.worksheetsTitle', {
+ *         defaultMessage: 'Timelion worksheets are deprecated'
+ *       }),
+ *       message: i18n.translate('xpack.timelion.deprecations.worksheetsMessage', {
+ *         defaultMessage: 'You have {count} Timelion worksheets. Migrate your Timelion worksheets to a dashboard to continue using them.',
+ *         values: { count },
+ *       }),
  *       documentationUrl:
  *         'https://www.elastic.co/guide/en/kibana/current/create-panels-with-timelion.html',
  *       level: 'warning',
  *       correctiveActions: {
  *         manualSteps: [
- *           'Navigate to the Kibana Dashboard and click "Create dashboard".',
- *           'Select Timelion from the "New Visualization" window.',
- *           'Open a new tab, open the Timelion app, select the chart you want to copy, then copy the chart expression.',
- *           'Go to Timelion, paste the chart expression in the Timelion expression field, then click Update.',
- *           'In the toolbar, click Save.',
- *           'On the Save visualization window, enter the visualization Title, then click Save and return.',
+ *            i18n.translate('xpack.timelion.deprecations.worksheets.manualStepOneMessage', {
+ *              defaultMessage: 'Navigate to the Kibana Dashboard and click "Create dashboard".',
+ *            }),
+ *            i18n.translate('xpack.timelion.deprecations.worksheets.manualStepTwoMessage', {
+ *              defaultMessage: 'Select Timelion from the "New Visualization" window.',
+ *            }),
  *         ],
+ *         api: {
+ *           path: '/internal/security/users/test_dashboard_user',
+ *           method: 'POST',
+ *           body: {
+ *             username: 'test_dashboard_user',
+ *             roles: [
+ *               "machine_learning_user",
+ *               "enrich_user",
+ *               "kibana_admin"
+ *             ],
+ *             full_name: "Alison Goryachev",
+ *             email: "alisongoryachev@gmail.com",
+ *             metadata: {},
+ *             enabled: true
+ *           }
+ *         },
  *       },
  *     });
  *   }
- *
- *   // Example of an api correctiveAction
- *   deprecations.push({
- *     "message": "User 'test_dashboard_user' is using a deprecated role: 'kibana_user'",
- *     "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html",
- *     "level": "critical",
- *     "correctiveActions": {
- *         "api": {
- *             "path": "/internal/security/users/test_dashboard_user",
- *             "method": "POST",
- *             "body": {
- *                 "username": "test_dashboard_user",
- *                 "roles": [
- *                     "machine_learning_user",
- *                     "enrich_user",
- *                     "kibana_admin"
- *                 ],
- *                 "full_name": "Alison Goryachev",
- *                 "email": "alisongoryachev@gmail.com",
- *                 "metadata": {},
- *                 "enabled": true
- *             }
- *         },
- *         "manualSteps": [
- *             "Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.",
- *             "Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role."
- *         ]
- *     },
- *   });
- *
  *   return deprecations;
  * }
  *
@@ -192,16 +185,19 @@ export class DeprecationsService
       const deprecationsRegistry = deprecationsFactory.getRegistry(domainId);
       deprecationsRegistry.registerDeprecations({
         getDeprecations: () => {
-          return deprecationsContexts.map(({ message, correctiveActions, documentationUrl }) => {
-            return {
-              level: 'critical',
-              deprecationType: 'config',
-              message,
-              correctiveActions,
-              documentationUrl,
-              requireRestart: true,
-            };
-          });
+          return deprecationsContexts.map(
+            ({ title, message, correctiveActions, documentationUrl }) => {
+              return {
+                title: title || `${domainId} has a deprecated setting`,
+                level: 'critical',
+                deprecationType: 'config',
+                message,
+                correctiveActions,
+                documentationUrl,
+                requireRestart: true,
+              };
+            }
+          );
         },
       });
     }
