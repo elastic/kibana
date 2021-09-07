@@ -16,7 +16,6 @@ import {
   convertRegularRespToGeoJson,
   makeESBbox,
 } from '../../../../common/elasticsearch_util';
-// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
