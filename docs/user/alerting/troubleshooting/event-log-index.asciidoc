@@ -2,6 +2,8 @@
 [[event-log-index]]
 === Event log index
 
+experimental[]
+
 Use the event log index to determine:
 
 * Whether a rule successfully ran but its associated actions did not
