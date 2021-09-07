@@ -7,9 +7,9 @@
 
 import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
-import type { ReportingRequestHandlerContext } from '../types';
+import type { BasePayload, ReportingRequestHandlerContext } from '../types';
 import { BaseParams, ReportingUser } from '../types';
-import { checkParamsVersion, LevelLogger } from './';
+import { checkParamsVersion, cryptoFactory, LevelLogger } from './';
 import { Report } from './store';
 
 export async function enqueueJob(
@@ -37,10 +37,21 @@ export async function enqueueJob(
     reporting.getStore(),
   ]);
 
-  jobParams.version = checkParamsVersion(jobParams, logger);
-  const job = await createJob!(jobParams, context, request);
+  // 1. encrypt request headers for the running report job to authenticate itself with Kibana
+  const config = reporting.getConfig();
+  const crypto = cryptoFactory(config.get('encryptionKey'));
+  const serializedEncryptedHeaders = await crypto.encrypt(request.headers);
 
-  // 1. Add the report to ReportingStore to show as pending
+  jobParams.version = checkParamsVersion(jobParams, logger);
+
+  // 2. create the payload with the queued job info
+  const job: BasePayload = {
+    ...(await createJob!(jobParams, context)),
+    headers: serializedEncryptedHeaders,
+    spaceId: reporting.getSpaceId(request, logger),
+  };
+
+  // 3. Add the report to ReportingStore to show as pending
   const report = await store.addReport(
     new Report({
       jobtype: exportType.jobType,
@@ -56,7 +67,7 @@ export async function enqueueJob(
   );
   logger.debug(`Successfully stored pending job: ${report._index}/${report._id}`);
 
-  // 2. Schedule the report with Task Manager
+  // 4. Schedule the report with Task Manager
   const task = await reporting.scheduleTask(report.toReportTaskJSON());
   logger.info(
     `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
