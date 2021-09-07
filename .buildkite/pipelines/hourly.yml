@@ -148,6 +148,12 @@ steps:
       queue: c2-4
     key: checks
 
+  - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
+    label: 'Build Storybooks'
+    agents:
+      queue: c2-4
+    key: storybooks
+
   - wait: ~
     continue_on_failure: true
   - plugins:
