@@ -47,6 +47,9 @@ const modalErrorMessage = i18n.translate(
 
 interface Props {
   hasErrors?: boolean;
+  url: string;
+  username: string;
+  password: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
