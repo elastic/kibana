@@ -17,9 +17,12 @@ export const dynamicActionEnhancement = (
 ): EnhancementRegistryDefinition => {
   return {
     id: 'dynamicActions',
-    telemetry: (serializableState: SerializableRecord, stats: Record<string, any>) => {
+    telemetry: (
+      serializableState: SerializableRecord,
+      stats: Record<string, string | number | boolean>
+    ) => {
       const state = serializableState as DynamicActionsState;
-      stats = dynamicActionsCollector(state, stats);
+      stats = dynamicActionsCollector(state, stats as Record<string, number>);
       stats = dynamicActionFactoriesCollector(getActionFactory, state, stats);
 
       return stats;
