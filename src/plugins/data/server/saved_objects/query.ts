@@ -11,7 +11,8 @@ import { SavedObjectsType } from 'kibana/server';
 export const querySavedObjectType: SavedObjectsType = {
   name: 'query',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'search',
     defaultSearchField: 'title',
