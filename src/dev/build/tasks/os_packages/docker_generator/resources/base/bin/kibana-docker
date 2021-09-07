@@ -73,6 +73,8 @@ kibana_vars=(
     enterpriseSearch.host
     externalUrl.policy
     i18n.locale
+    interactiveSetup.enabled
+    interactiveSetup.connectionCheck.interval
     interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
     kibana.autocompleteTimeout
