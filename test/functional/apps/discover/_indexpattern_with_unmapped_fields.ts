@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'chrome']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'header']);
 
   describe('index pattern with unmapped fields', () => {
     before(async () => {
