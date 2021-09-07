@@ -9,15 +9,15 @@ import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins
 import type { LensMultiTable } from '../../types';
 import type { MetricConfig } from './types';
 
-export interface MetricChartProps {
-  data: LensMultiTable;
-  args: MetricConfig;
-}
-
-export interface MetricRender {
+interface MetricRender {
   type: 'render';
   as: 'lens_metric_chart_renderer';
   value: MetricChartProps;
+}
+
+export interface MetricChartProps {
+  data: LensMultiTable;
+  args: MetricConfig;
 }
 
 export const metricChart: ExpressionFunctionDefinition<

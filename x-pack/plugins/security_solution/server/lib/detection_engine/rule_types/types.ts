@@ -99,6 +99,7 @@ export type CreateSecurityRuleTypeFactory = (options: {
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  ignoreFields: ConfigType['alertIgnoreFields'];
   ruleDataClient: IRuleDataClient;
   ruleDataService: IRuleDataPluginService;
 }) => <
@@ -127,6 +128,7 @@ export interface CreateRuleOptions {
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  ignoreFields: ConfigType['alertIgnoreFields'];
   ml?: SetupPlugins['ml'];
   ruleDataClient: IRuleDataClient;
   version: string;

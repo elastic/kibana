@@ -37,10 +37,11 @@ export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SimpleHit,
   mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields'],
   applyOverrides: boolean,
   buildReasonMessage: BuildReasonMessage
 ): RACAlert => {
-  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
+  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);

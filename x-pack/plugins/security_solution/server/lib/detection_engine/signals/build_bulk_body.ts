@@ -38,9 +38,10 @@ export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit,
   mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields'],
   buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
-  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
+  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
   const timestamp = new Date().toISOString();
   const reason = buildReasonMessage({ mergedDoc, rule });
@@ -77,11 +78,19 @@ export const buildSignalGroupFromSequence = (
   ruleSO: SavedObject<AlertAttributes>,
   outputIndex: string,
   mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields'],
   buildReasonMessage: BuildReasonMessage
 ): WrappedSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
     sequence.events.map((event) => {
-      const signal = buildSignalFromEvent(event, ruleSO, false, mergeStrategy, buildReasonMessage);
+      const signal = buildSignalFromEvent(
+        event,
+        ruleSO,
+        false,
+        mergeStrategy,
+        ignoreFields,
+        buildReasonMessage
+      );
       signal.signal.rule.building_block_type = 'default';
       return signal;
     }),
@@ -147,9 +156,10 @@ export const buildSignalFromEvent = (
   ruleSO: SavedObject<AlertAttributes>,
   applyOverrides: boolean,
   mergeStrategy: ConfigType['alertMergeStrategy'],
+  ignoreFields: ConfigType['alertIgnoreFields'],
   buildReasonMessage: BuildReasonMessage
 ): SignalHit => {
-  const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event });
+  const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event, ignoreFields });
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, mergedEvent._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);

@@ -15,6 +15,7 @@ import { buildBulkBody } from './utils/build_bulk_body';
 
 export const wrapHitsFactory = ({
   logger,
+  ignoreFields,
   mergeStrategy,
   ruleSO,
   spaceId,
@@ -22,6 +23,7 @@ export const wrapHitsFactory = ({
   logger: Logger;
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  ignoreFields: ConfigType['alertIgnoreFields'];
   spaceId: string | null | undefined;
 }): WrapHits => (events, buildReasonMessage) => {
   try {
@@ -39,6 +41,7 @@ export const wrapHitsFactory = ({
           ruleSO,
           event as SimpleHit,
           mergeStrategy,
+          ignoreFields,
           true,
           buildReasonMessage
         ),
