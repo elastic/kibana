@@ -9,30 +9,10 @@
 import type { CoreSetup } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { migrateToLatest } from '../../../../kibana_utils/common';
 import type { UrlService } from '../../../common/url_service';
+import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
 import { render } from './render';
-import { parseSearchParams } from './util/parse_search_params';
-
-/**
- * @public
- * Serializable locator parameters that can be used by the redirect service to navigate to a location
- * in Kibana.
- *
- * When passed to the public {@link SharePluginSetup['navigate']} function, locator params will also be
- * migrated.
- */
-export interface RedirectOptions<P extends SerializableRecord = unknown & SerializableRecord> {
-  /** Locator ID. */
-  id: string;
-
-  /** Kibana version when locator params where generated. */
-  version: string;
-
-  /** Locator params. */
-  params: P;
-}
 
 export interface RedirectManagerDependencies {
   url: UrlService;

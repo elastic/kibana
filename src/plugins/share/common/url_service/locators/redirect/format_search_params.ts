@@ -7,7 +7,7 @@
  */
 
 import { compressToBase64 } from 'lz-string';
-import { RedirectOptions } from '../redirect_manager';
+import { RedirectOptions } from './types';
 
 interface FormatSearchParamsOptions {
   lzCompress?: boolean;
