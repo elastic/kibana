@@ -7,6 +7,7 @@
 
 import querystring from 'querystring';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
@@ -67,7 +68,8 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
   };
 
   const toggleFlyout = async () => {
-    return await (await getToggleFlyoutButton()).click();
+    await (await getToggleFlyoutButton()).click();
+    return await pageObjects.common.sleep(2500); // Wait for the animation
   };
 
   const getAlertsFlyout = async () => {
@@ -91,12 +93,12 @@ export function ObservabilityAlertsProvider({ getPageObjects, getService }: FtrP
     return await testSubjects.existOrFail('alertsFlyoutViewInAppButton');
   };
 
-  const getAlertsFlyoutDescriptionListTitles = async () => {
+  const getAlertsFlyoutDescriptionListTitles = async (): Promise<WebElementWrapper[]> => {
     const flyout = await getAlertsFlyout();
     return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListTitle', flyout);
   };
 
-  const getAlertsFlyoutDescriptionListDescriptions = async () => {
+  const getAlertsFlyoutDescriptionListDescriptions = async (): Promise<WebElementWrapper[]> => {
     const flyout = await getAlertsFlyout();
     return await testSubjects.findAllDescendant('alertsFlyoutDescriptionListDescription', flyout);
   };

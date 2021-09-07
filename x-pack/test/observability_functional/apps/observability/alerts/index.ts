@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-async function asyncForEach(array, callback) {
+async function asyncForEach<T>(array: T[], callback: (item: T, index: number) => void) {
   for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
+    await callback(array[index], index);
   }
 }
 
@@ -22,6 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     const pageObjects = getPageObjects(['common']);
     const testSubjects = getService('testSubjects');
+    const retry = getService('retry');
     const Observability = getService('observability');
 
     before(async () => {
@@ -63,8 +64,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('Applies filters correctly', async () => {
           await Observability.alerts.submitQuery('kibana.alert.status: recovered');
-          const cells = await Observability.alerts.getTableCells();
-          expect(cells.length).to.be(24);
+          await retry.try(async () => {
+            const cells = await Observability.alerts.getTableCells();
+            expect(cells.length).to.be(24);
+          });
         });
 
         it('Displays a no data state when filters produce zero results', async () => {
@@ -79,9 +82,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('Correctly applies date picker selections', async () => {
-          await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
-          // We shouldn't expect any data for the last 15 minutes
-          await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
+          await retry.try(async () => {
+            await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
+            // We shouldn't expect any data for the last 15 minutes
+            await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
+          });
           await Observability.alerts.getNoDataStateOrFail();
           await pageObjects.common.waitUntilUrlIncludes('rangeFrom=now-15m&rangeTo=now');
         });
