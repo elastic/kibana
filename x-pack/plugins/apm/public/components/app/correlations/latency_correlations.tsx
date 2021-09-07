@@ -225,26 +225,14 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     setSortDirection(currentSortDirection);
   }, []);
 
-  const { histogramTerms, sorting } = useMemo(() => {
-    if (!response.latencyCorrelations) {
-      return { histogramTerms: [], sorting: undefined };
-    }
-    const orderedTerms = orderBy(
-      response.latencyCorrelations,
-      sortField,
-      sortDirection
-    );
+  const sorting: EuiTableSortingType<LatencyCorrelation> = {
+    sort: { field: sortField, direction: sortDirection },
+  };
 
-    return {
-      histogramTerms: orderedTerms,
-      sorting: {
-        sort: {
-          field: sortField,
-          direction: sortDirection,
-        },
-      } as EuiTableSortingType<LatencyCorrelation>,
-    };
-  }, [response.latencyCorrelations, sortField, sortDirection]);
+  const histogramTerms = useMemo(
+    () => orderBy(response.latencyCorrelations ?? [], sortField, sortDirection),
+    [response.latencyCorrelations, sortField, sortDirection]
+  );
 
   const showCorrelationsTable = progress.isRunning || histogramTerms.length > 0;
   const showCorrelationsEmptyStatePrompt =
@@ -323,14 +311,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS
             }
             setSelectedSignificantTerm={setSelectedSignificantTerm}
-            selectedTerm={
-              selectedHistogram !== undefined
-                ? {
-                    fieldName: selectedHistogram.fieldName,
-                    fieldValue: selectedHistogram.fieldValue,
-                  }
-                : undefined
-            }
+            selectedTerm={selectedHistogram}
             onTableChange={onTableChange}
             sorting={sorting}
           />
