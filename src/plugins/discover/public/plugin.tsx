@@ -323,7 +323,6 @@ export class DiscoverPlugin
         const { renderApp } = await import('./application');
         const unmount = await renderApp(params.element);
         return () => {
-          params.element.classList.remove('dscAppWrapper');
           unlistenParentHistory();
           unmount();
           appUnMounted();
