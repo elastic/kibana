@@ -18,6 +18,7 @@ import {
   registerAccountSourceFederatedSummaryRoute,
   registerAccountSourceReauthPrepareRoute,
   registerAccountSourceSettingsRoute,
+  registerAccountSourceSyncRoute,
   registerAccountPreSourceRoute,
   registerAccountPrepareSourcesRoute,
   registerAccountSourceSearchableRoute,
@@ -33,6 +34,7 @@ import {
   registerOrgSourceFederatedSummaryRoute,
   registerOrgSourceReauthPrepareRoute,
   registerOrgSourceSettingsRoute,
+  registerOrgSourceSyncRoute,
   registerOrgPreSourceRoute,
   registerOrgPrepareSourcesRoute,
   registerOrgSourceSearchableRoute,
@@ -305,6 +307,29 @@ describe('sources routes', () => {
           },
         };
         mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('POST /api/workplace_search/account/sources/{id}/sync', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/account/sources/{id}/sync',
+      });
+
+      registerAccountSourceSyncRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/:id/sync',
       });
     });
   });
@@ -813,6 +838,29 @@ describe('sources routes', () => {
           },
         };
         mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('POST /api/workplace_search/org/sources/{id}/sync', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/org/sources/{id}/sync',
+      });
+
+      registerOrgSourceSyncRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/:id/sync',
       });
     });
   });

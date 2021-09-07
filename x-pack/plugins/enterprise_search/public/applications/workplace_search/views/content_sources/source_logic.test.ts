@@ -378,6 +378,47 @@ describe('SourceLogic', () => {
       });
     });
 
+    describe('syncContentSource', () => {
+      it('calls API for org', async () => {
+        AppLogic.values.isOrganization = true;
+
+        const promise = Promise.resolve([]);
+        http.post.mockReturnValue(promise);
+        SourceLogic.actions.syncContentSource(contentSource.id);
+
+        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/sources/123/sync');
+        await promise;
+        expect(flashSuccessToast).toHaveBeenCalledWith('Synchronizing...');
+      });
+
+      it('calls API for account', async () => {
+        AppLogic.values.isOrganization = false;
+
+        const promise = Promise.resolve([]);
+        http.post.mockReturnValue(promise);
+        SourceLogic.actions.syncContentSource(contentSource.id);
+
+        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/account/sources/123/sync');
+        await promise;
+        expect(flashSuccessToast).toHaveBeenCalledWith('Synchronizing...');
+      });
+
+      it('handles error', async () => {
+        const error = {
+          response: {
+            error: 'this is an error',
+            status: 400,
+          },
+        };
+        const promise = Promise.reject(error);
+        http.post.mockReturnValue(promise);
+        SourceLogic.actions.syncContentSource(contentSource.id);
+        await expectedAsyncError(promise);
+
+        expect(flashAPIErrors).toHaveBeenCalledWith(error);
+      });
+    });
+
     describe('removeContentSource', () => {
       it('calls API and sets values (org)', async () => {
         AppLogic.values.isOrganization = true;

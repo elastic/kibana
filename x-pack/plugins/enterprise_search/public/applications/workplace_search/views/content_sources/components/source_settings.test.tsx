@@ -22,6 +22,7 @@ import { SourceSettings } from './source_settings';
 
 describe('SourceSettings', () => {
   const updateContentSource = jest.fn();
+  const syncContentSource = jest.fn();
   const removeContentSource = jest.fn();
   const getSourceConfigData = jest.fn();
   const contentSource = fullContentSources[0];
@@ -39,6 +40,7 @@ describe('SourceSettings', () => {
     setMockValues({ ...mockValues });
     setMockActions({
       updateContentSource,
+      syncContentSource,
       removeContentSource,
       getSourceConfigData,
     });
@@ -181,6 +183,14 @@ describe('SourceSettings', () => {
     const synchronizeSwitch = wrapper.find('[data-test-subj="ThumbnailsToggle"]');
 
     expect(synchronizeSwitch.prop('disabled')).toEqual(true);
+  });
+
+  it('handles pressing the sync button', () => {
+    const wrapper = shallow(<SourceSettings />);
+
+    wrapper.find('[data-test-subj="SyncButton"]').simulate('click');
+
+    expect(syncContentSource).toHaveBeenCalledWith(fullContentSources[0].id)
   });
 
   describe('DownloadDiagnosticsButton', () => {
