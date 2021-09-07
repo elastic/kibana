@@ -34,7 +34,7 @@ export const registerLegacyExportRoute = (
     },
     async (ctx, req, res) => {
       logger.warn(
-        "The export dashboard API '/api/kibana/dashboards/export' is deprecated. Use the saved objects import objects API '/api/saved_objects/_export' instead."
+        "The export dashboard API '/api/kibana/dashboards/export' is deprecated. Use the saved objects export objects API '/api/saved_objects/_export' instead."
       );
 
       const ids = Array.isArray(req.query.dashboard) ? req.query.dashboard : [req.query.dashboard];
