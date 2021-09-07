@@ -40,22 +40,7 @@ const ServiceNowConnectorFields: React.FC<
     notifications: { toasts },
   } = useKibana().services;
   const { apiUrl, isLegacy } = action.config;
-
-  const isApiUrlInvalid: boolean =
-    errors.apiUrl !== undefined && errors.apiUrl.length > 0 && apiUrl !== undefined;
   const { username, password } = action.secrets;
-  const isUsernameInvalid: boolean =
-    errors.username !== undefined && errors.username.length > 0 && username !== undefined;
-  const isPasswordInvalid: boolean =
-    errors.password !== undefined && errors.password.length > 0 && password !== undefined;
-
-  const hasErrorsOrEmptyFields =
-    apiUrl === undefined ||
-    username === undefined ||
-    password === undefined ||
-    isApiUrlInvalid ||
-    isUsernameInvalid ||
-    isPasswordInvalid;
 
   const [showModal, setShowModal] = useState(false);
 
@@ -98,12 +83,6 @@ const ServiceNowConnectorFields: React.FC<
   const onModalCancel = useCallback(() => setShowModal(false), []);
 
   const onModalConfirm = useCallback(async () => {
-    // TODO: Handle properly
-    if (hasErrorsOrEmptyFields) {
-      return;
-    }
-
-    setShowModal(false);
     await getApplicationInfo();
     await updateActionConnector({
       http,
@@ -116,12 +95,13 @@ const ServiceNowConnectorFields: React.FC<
     });
 
     editActionConfig('isLegacy', false);
+    setShowModal(false);
+
     toasts.addSuccess({
       title: i18n.MIGRATION_SUCCESS_TOAST_TITLE(action.name),
       text: i18n.MIGRATION_SUCCESS_TOAST_TEXT,
     });
   }, [
-    hasErrorsOrEmptyFields,
     getApplicationInfo,
     http,
     action.name,
@@ -137,12 +117,14 @@ const ServiceNowConnectorFields: React.FC<
     <>
       {showModal && (
         <MigrationConfirmationModal
-          url={apiUrl}
-          username={username}
-          password={password}
+          action={action}
+          errors={errors}
+          readOnly={readOnly}
+          isLoading={isLoading}
+          editActionSecrets={editActionSecrets}
+          editActionConfig={editActionConfig}
           onConfirm={onModalConfirm}
           onCancel={onModalCancel}
-          hasErrors={hasErrorsOrEmptyFields}
         />
       )}
       {ENABLE_NEW_SN_ITSM_CONNECTOR && !isLegacy && <InstallationCallout />}

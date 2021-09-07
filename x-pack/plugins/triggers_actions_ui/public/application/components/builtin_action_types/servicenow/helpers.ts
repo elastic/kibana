@@ -6,6 +6,7 @@
  */
 
 import { EuiSelectOption } from '@elastic/eui';
+import { IErrorObject } from '../../../../../public/types';
 import { AppInfo, Choice, RESTApiError } from './types';
 
 export const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
@@ -13,3 +14,8 @@ export const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
 
 export const isRESTApiError = (res: AppInfo | RESTApiError): res is RESTApiError =>
   (res as RESTApiError).error != null || (res as RESTApiError).status === 'failure';
+
+export const isFieldInvalid = (
+  field: string | undefined,
+  error: string | IErrorObject | string[]
+): boolean => error !== undefined && error.length > 0 && field !== undefined;

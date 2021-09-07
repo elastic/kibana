@@ -22,6 +22,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
+import { isFieldInvalid } from './helpers';
 
 interface Props {
   action: ActionConnectorFieldsProps<ServiceNowActionConnector>['action'];
@@ -44,12 +45,9 @@ const CredentialsComponent: React.FC<Props> = ({
   const { apiUrl } = action.config;
   const { username, password } = action.secrets;
 
-  const isApiUrlInvalid: boolean =
-    errors.apiUrl !== undefined && errors.apiUrl.length > 0 && apiUrl !== undefined;
-  const isUsernameInvalid: boolean =
-    errors.username !== undefined && errors.username.length > 0 && username !== undefined;
-  const isPasswordInvalid: boolean =
-    errors.password !== undefined && errors.password.length > 0 && password !== undefined;
+  const isApiUrlInvalid = isFieldInvalid(apiUrl, errors.apiUrl);
+  const isUsernameInvalid = isFieldInvalid(username, errors.username);
+  const isPasswordInvalid = isFieldInvalid(password, errors.password);
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
