@@ -13,7 +13,6 @@ import {
   EMPTY_DOCVALUE_FIELD,
   EMPTY_INDEX_PATTERN,
 } from '../../../../common/search_strategy/index_fields';
-import { DEFAULT_INDEX_PATTERN, DEFAULT_INDEX_PATTERN_ID } from '../../../../common/constants';
 
 export type ErrorModel = Error[];
 
@@ -76,15 +75,11 @@ export const initSourcererScope = {
   selectedPatterns: [],
 };
 
-// instantiated in plugin.tsx `getKibanaIndexPattern` so these values don't matter
-// this is the state thats pulled into the mocks so it matters for tests
-// but is that really a good idea? maybe we should be throwing an error if its not actually
-// instantiated and delete this shiz
 export const initialSourcererState: SourcererModel = {
   defaultIndexPattern: {
-    id: DEFAULT_INDEX_PATTERN_ID,
-    title: DEFAULT_INDEX_PATTERN.join(','),
-    patternList: DEFAULT_INDEX_PATTERN,
+    id: '',
+    title: '',
+    patternList: [],
   },
   kibanaIndexPatterns: [],
   signalIndexName: null,

@@ -135,7 +135,7 @@ describe('useCreateTimelineButton', () => {
         wrapper.find('[data-test-subj="timeline-new"]').first().simulate('click');
 
         expect(mockDispatch.mock.calls[0][0].type).toEqual(
-          'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS'
+          'x-pack/security_solution/local/sourcerer/SET_SELECTED_KIP'
         );
         expect(mockDispatch.mock.calls[1][0].type).toEqual(
           'x-pack/security_solution/local/timeline/CREATE_TIMELINE'

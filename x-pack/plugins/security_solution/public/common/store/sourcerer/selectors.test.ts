@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { mockGlobalState } from '../../mock';
+import { mockGlobalState, mockSourcererState } from '../../mock';
 import { SourcererScopeName } from './model';
 import { getSourcererScopeSelector } from './selectors';
 
@@ -16,24 +16,20 @@ describe('Sourcerer selectors', () => {
       const mapStateToProps = getSourcererScopeSelector();
       expect(
         mapStateToProps(mockGlobalState, SourcererScopeName.default).selectedPatterns
-      ).toEqual([
-        'apm-*-transaction*',
-        'auditbeat-*',
-        'endgame-*',
-        'filebeat-*',
-        'logs-*',
-        'packetbeat-*',
-        'traces-apm*',
-        'winlogbeat-*',
-        '-*elastic-cloud-logs-*',
-      ]);
+      ).toEqual([...mockSourcererState.defaultIndexPattern.patternList, '-*elastic-cloud-logs-*']);
     });
 
     it('Should NOT exclude elastic cloud alias when selected patterns does NOT include "logs-*" as an alias', () => {
       const mapStateToProps = getSourcererScopeSelector();
       const myMockGlobalState = cloneDeep(mockGlobalState);
       myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = [
-        'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,traces-apm*,winlogbeat-*',
+        'apm-*-transaction*',
+        'auditbeat-*',
+        'endgame-*',
+        'filebeat-*',
+        'packetbeat-*',
+        'traces-apm*',
+        'winlogbeat-*',
       ];
       expect(
         mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns
@@ -52,7 +48,14 @@ describe('Sourcerer selectors', () => {
       const mapStateToProps = getSourcererScopeSelector();
       const myMockGlobalState = cloneDeep(mockGlobalState);
       myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = [
-        'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,traces-apm*,winlogbeat-*,logs-endpoint.event-*',
+        'apm-*-transaction*',
+        'auditbeat-*',
+        'endgame-*',
+        'filebeat-*',
+        'packetbeat-*',
+        'traces-apm*',
+        'winlogbeat-*',
+        'logs-endpoint.event-*',
       ];
       expect(
         mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns

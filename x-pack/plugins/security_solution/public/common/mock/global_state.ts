@@ -27,6 +27,7 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INDEX_PATTERN_ID,
+  DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
 import { uebaModel } from '../../ueba/store';
@@ -37,6 +38,15 @@ import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/mo
 import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
 import { mockIndexPattern } from './index_pattern';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
+
+export const mockSourcererState = {
+  ...initialSourcererState,
+  defaultIndexPattern: {
+    id: DEFAULT_INDEX_PATTERN_ID,
+    title: [...DEFAULT_INDEX_PATTERN, DEFAULT_SIGNALS_INDEX].join(','),
+    patternList: [...DEFAULT_INDEX_PATTERN, DEFAULT_SIGNALS_INDEX],
+  },
+};
 
 export const mockGlobalState: State = {
   app: {
@@ -296,31 +306,31 @@ export const mockGlobalState: State = {
     insertTimeline: null,
   },
   sourcerer: {
-    ...initialSourcererState,
+    ...mockSourcererState,
     defaultIndexPattern: {
-      ...initialSourcererState.defaultIndexPattern,
-      title: `${initialSourcererState.defaultIndexPattern.title},fakebeat-*`,
+      ...mockSourcererState.defaultIndexPattern,
+      title: `${mockSourcererState.defaultIndexPattern.title},fakebeat-*`,
     },
     kibanaIndexPatterns: [
       {
-        ...initialSourcererState.defaultIndexPattern,
-        title: `${initialSourcererState.defaultIndexPattern.title},fakebeat-*`,
+        ...mockSourcererState.defaultIndexPattern,
+        title: `${mockSourcererState.defaultIndexPattern.title},fakebeat-*`,
       },
     ],
     sourcererScopes: {
-      ...initialSourcererState.sourcererScopes,
+      ...mockSourcererState.sourcererScopes,
       [SourcererScopeName.default]: {
-        ...initialSourcererState.sourcererScopes[SourcererScopeName.default],
-        selectedKipId: initialSourcererState.defaultIndexPattern.id,
-        selectedPatterns: initialSourcererState.defaultIndexPattern.patternList,
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+        selectedKipId: mockSourcererState.defaultIndexPattern.id,
+        selectedPatterns: mockSourcererState.defaultIndexPattern.patternList,
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
         docValueFields: mockDocValueFields,
       },
       [SourcererScopeName.timeline]: {
-        ...initialSourcererState.sourcererScopes[SourcererScopeName.timeline],
-        selectedKipId: initialSourcererState.defaultIndexPattern.id,
-        selectedPatterns: initialSourcererState.defaultIndexPattern.patternList,
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.timeline],
+        selectedKipId: mockSourcererState.defaultIndexPattern.id,
+        selectedPatterns: mockSourcererState.defaultIndexPattern.patternList,
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
         docValueFields: mockDocValueFields,

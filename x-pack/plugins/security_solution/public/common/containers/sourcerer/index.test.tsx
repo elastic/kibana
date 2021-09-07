@@ -15,7 +15,7 @@ import { getScopeFromPath, useInitSourcerer } from '.';
 import { mockPatterns } from './mocks';
 // import { SourcererScopeName } from '../../store/sourcerer/model';
 import { RouteSpyState } from '../../utils/route/types';
-import { SecurityPageName } from '../../../../common/constants';
+import { DEFAULT_SIGNALS_INDEX, SecurityPageName } from '../../../../common/constants';
 import { createStore, State } from '../../store';
 import {
   useUserInfo,
@@ -26,8 +26,9 @@ import {
   kibanaObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
+  mockSourcererState,
 } from '../../mock';
-import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -141,7 +142,7 @@ describe('Sourcerer Hooks', () => {
       mockUseUserInfo.mockImplementation(() => ({
         ...userInfoState,
         loading: false,
-        signalIndexName: 'signals-*',
+        signalIndexName: DEFAULT_SIGNALS_INDEX,
       }));
       const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -150,13 +151,14 @@ describe('Sourcerer Hooks', () => {
       rerender();
       expect(mockDispatch.mock.calls[2][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
-        payload: { signalIndexName: 'signals-*' },
+        payload: { signalIndexName: DEFAULT_SIGNALS_INDEX },
       });
       expect(mockDispatch.mock.calls[3][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS',
+        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_KIP',
         payload: {
           id: 'timeline',
-          selectedPatterns: [initialSourcererState.defaultIndexPattern.title, 'signals-*'],
+          selectedKipId: mockSourcererState.defaultIndexPattern.id,
+          selectedPatterns: mockSourcererState.defaultIndexPattern.patternList,
         },
       });
     });
@@ -165,7 +167,7 @@ describe('Sourcerer Hooks', () => {
     await act(async () => {
       mockUseUserInfo.mockImplementation(() => ({
         ...userInfoState,
-        signalIndexName: 'signals-*',
+        signalIndexName: DEFAULT_SIGNALS_INDEX,
         isSignalIndexExists: true,
       }));
       const { rerender, waitForNextUpdate } = renderHook<string, void>(
@@ -176,10 +178,13 @@ describe('Sourcerer Hooks', () => {
       );
       await waitForNextUpdate();
       rerender();
-      // not sure why this wasn't like this before since it calls useIndexFields twice in a row...?
-      expect(mockDispatch.mock.calls[2][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS',
-        payload: { id: 'detections', selectedPatterns: ['signals-*'] },
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
+        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_KIP',
+        payload: {
+          id: 'detections',
+          selectedKipId: mockSourcererState.defaultIndexPattern.id,
+          selectedPatterns: [DEFAULT_SIGNALS_INDEX],
+        },
       });
     });
   });
