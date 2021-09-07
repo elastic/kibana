@@ -63,8 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('with logs collection enabled', async () => {
-        const toggle = await testSubjects.find('deprecationLoggingToggle');
-        await toggle.click();
+        await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
 
         await retry.waitFor('UA external links title to be present', async () => {
           return testSubjects.isDisplayed('externalLinksTitle');
