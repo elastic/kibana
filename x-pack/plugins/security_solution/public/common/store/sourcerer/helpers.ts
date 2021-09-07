@@ -35,26 +35,7 @@ export const getScopePatternListSelection = (
   return patternList.sort();
 };
 
-export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, state }: Args) => {
-  const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
-  const securitySolutionIndexPattern = state.defaultIndexPattern.patternList;
-  const newSelectedPatterns = selectedPatterns.filter(
-    (sp) =>
-      kibanaIndexPatterns.includes(sp) ||
-      (!isEmpty(state.signalIndexName) && state.signalIndexName === sp)
-  );
-  if (isEmpty(newSelectedPatterns)) {
-    let defaultPatternList = securitySolutionIndexPattern;
-    if (id === SourcererScopeName.timeline && isEmpty(newSelectedPatterns)) {
-      defaultPatternList = defaultIndexPatternByEventType({ state, eventType });
-    } else if (id === SourcererScopeName.detections && isEmpty(newSelectedPatterns)) {
-      defaultPatternList = [state.signalIndexName ?? ''];
-    }
-    return defaultPatternList;
-  }
-  return newSelectedPatterns;
-};
-
+// TODO: Steph/sourcerer eventType will be alerts only, when ui updates delete raw
 export const defaultIndexPatternByEventType = ({
   state,
   eventType,
@@ -62,11 +43,15 @@ export const defaultIndexPatternByEventType = ({
   state: SourcererModel;
   eventType?: TimelineEventsType;
 }) => {
-  let defaultIndexPatterns = state.defaultIndexPattern.patternList;
-  if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
-    defaultIndexPatterns = [...defaultIndexPatterns, state.signalIndexName ?? ''];
-  } else if (!isEmpty(state.signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
-    defaultIndexPatterns = [state.signalIndexName ?? ''];
+  const {
+    signalIndexName,
+    defaultIndexPattern: { id, patternList },
+  } = state;
+
+  if (!isEmpty(signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
+    return patternList.filter((index) => index === signalIndexName).sort();
+  } else if (eventType === 'raw') {
+    return patternList.filter((index) => index !== signalIndexName).sort();
   }
-  return defaultIndexPatterns;
+  return { selectedPatterns: patternList.sort(), selectedKipId: id };
 };

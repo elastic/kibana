@@ -8,13 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import {
-  setSourcererScopeLoading,
-  setSelectedKip,
-  setSignalIndexName,
-  setSource,
-  initTimelineIndexPatterns,
-} from './actions';
+import { setSourcererScopeLoading, setSelectedKip, setSignalIndexName, setSource } from './actions';
 import { initialSourcererState, SourcererModel } from './model';
 import { defaultIndexPatternByEventType } from './helpers';
 
@@ -44,23 +38,9 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
         [id]: {
           ...state.sourcererScopes[id],
           ...rest,
-        },
-      },
-    };
-  })
-  // TODO: Steph/sourcerer gtfo
-  .case(initTimelineIndexPatterns, (state, { id, selectedPatterns, eventType }) => {
-    console.log('initTimelineIndexPatterns', selectedPatterns, eventType);
-    return {
-      ...state,
-      sourcererScopes: {
-        ...state.sourcererScopes,
-        [id]: {
-          ...state.sourcererScopes[id],
-          selectedPatterns: isEmpty(selectedPatterns)
-            ? // TODO: Steph/sourcerer replace with createDefaultIndexPatterns or not cuz we're getting rid of this?
-              defaultIndexPatternByEventType({ state, eventType })
-            : selectedPatterns,
+          ...(isEmpty(payload.selectedPatterns)
+            ? defaultIndexPatternByEventType({ state, eventType })
+            : {}),
         },
       },
     };
