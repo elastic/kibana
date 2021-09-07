@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 
@@ -64,7 +64,11 @@ const getPreviousCheckpointDate = () => {
   return now;
 };
 
-export const DeprecationsCountCheckpoint: FunctionComponent = () => {
+interface Props {
+  setIsComplete: (isComplete: boolean) => void;
+}
+
+export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({ setIsComplete }) => {
   const {
     services: { api },
   } = useAppContext();
@@ -84,6 +88,13 @@ export const DeprecationsCountCheckpoint: FunctionComponent = () => {
     setPreviousCheck(now);
     localStorage.set(LS_SETTING_ID, now);
   };
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      setIsComplete(warningsCount === 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, isLoading, warningsCount]);
 
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent lines={6} />;

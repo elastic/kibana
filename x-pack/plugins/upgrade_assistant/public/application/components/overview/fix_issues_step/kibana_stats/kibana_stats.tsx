@@ -68,7 +68,11 @@ const i18nTexts = {
     }),
 };
 
-export const KibanaDeprecationStats: FunctionComponent = () => {
+interface Props {
+  setCriticalIssuesCount: (count: number) => void;
+}
+
+export const KibanaDeprecationStats: FunctionComponent<Props> = ({ setCriticalIssuesCount }) => {
   const history = useHistory();
   const {
     services: {
@@ -103,6 +107,14 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
     kibanaDeprecations?.filter((deprecation) => deprecation.level === 'warning')?.length ?? 0;
   const criticalDeprecationsCount =
     kibanaDeprecations?.filter((deprecation) => deprecation.level === 'critical')?.length ?? 0;
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      setCriticalIssuesCount(criticalDeprecationsCount);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [criticalDeprecationsCount, isLoading, error]);
 
   const hasCritical = criticalDeprecationsCount > 0;
   const hasWarnings = warningDeprecationsCount > 0;

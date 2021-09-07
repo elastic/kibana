@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import {
@@ -60,7 +60,11 @@ const i18nTexts = {
     }),
 };
 
-export const ESDeprecationStats: FunctionComponent = () => {
+interface Props {
+  setCriticalIssuesCount: (count: number) => void;
+}
+
+export const ESDeprecationStats: FunctionComponent<Props> = ({ setCriticalIssuesCount }) => {
   const history = useHistory();
   const {
     services: { api },
@@ -68,10 +72,22 @@ export const ESDeprecationStats: FunctionComponent = () => {
 
   const { data: esDeprecations, isLoading, error } = api.useLoadEsDeprecations();
 
-  const warningDeprecations =
-    esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical === false) || [];
-  const criticalDeprecations =
-    esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical) || [];
+  const warningDeprecations = useMemo(
+    () =>
+      esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical === false) || [],
+    [esDeprecations]
+  );
+  const criticalDeprecations = useMemo(
+    () => esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical) || [],
+    [esDeprecations]
+  );
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      setCriticalIssuesCount(criticalDeprecations.length);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [criticalDeprecations, isLoading, error]);
 
   const hasWarnings = warningDeprecations.length > 0;
   const hasCritical = criticalDeprecations.length > 0;

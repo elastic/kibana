@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { ESDeprecationStats } from './es_stats';
 import { KibanaDeprecationStats } from './kibana_stats';
+import type { OverviewStepsProps } from '../../types';
 
 import './_fix_issues_step.scss';
 
@@ -22,10 +23,51 @@ const i18nTexts = {
   }),
 };
 
-export const getFixIssuesStep = ({ nextMajor }: { nextMajor: number }): EuiStepProps => {
+interface Props extends OverviewStepsProps {
+  nextMajor: number;
+}
+
+const initialIssuesMap = {
+  kibana: null,
+  es: null,
+};
+
+const FixIssuesStep: FunctionComponent<OverviewStepsProps> = ({ setIsComplete }) => {
+  const [criticalIssuesCount, setCriticalIssuesCount] = useState(initialIssuesMap);
+  const setCriticalIssuesCountFor = (key: keyof typeof initialIssuesMap, count: number) => {
+    setCriticalIssuesCount({
+      ...criticalIssuesCount,
+      [key]: count,
+    });
+  };
+
+  useEffect(() => {
+    setIsComplete(criticalIssuesCount.es === 0 && criticalIssuesCount.kibana === 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [criticalIssuesCount]);
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <ESDeprecationStats setCriticalIssuesCount={setCriticalIssuesCountFor.bind(null, 'es')} />
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <KibanaDeprecationStats
+          setCriticalIssuesCount={setCriticalIssuesCountFor.bind(null, 'kibana')}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export const getFixIssuesStep = ({ nextMajor, isComplete, setIsComplete }: Props): EuiStepProps => {
+  const status = isComplete ? 'complete' : 'incomplete';
+
   return {
     title: i18nTexts.reviewStepTitle,
-    status: 'incomplete',
+    status,
+    'data-test-subj': `fixIssuesStep-${status}`,
     children: (
       <>
         <EuiText>
@@ -40,15 +82,7 @@ export const getFixIssuesStep = ({ nextMajor }: { nextMajor: number }): EuiStepP
 
         <EuiSpacer size="m" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <ESDeprecationStats />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <KibanaDeprecationStats />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FixIssuesStep isComplete={isComplete} setIsComplete={setIsComplete} />
       </>
     ),
   };

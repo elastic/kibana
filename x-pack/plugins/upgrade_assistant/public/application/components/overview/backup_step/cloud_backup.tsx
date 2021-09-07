@@ -20,12 +20,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { CloudBackupStatus } from '../../../../../common/types';
-import { UseRequestResponse } from '../../../../shared_imports';
-import { ResponseError } from '../../../lib/api';
 import { useAppContext } from '../../../app_context';
-
-export type CloudBackupStatusResponse = UseRequestResponse<CloudBackupStatus, ResponseError>;
 
 interface Props {
   cloudSnapshotsUrl: string;
@@ -51,7 +46,8 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   // Tell overview whether the step is complete or not.
   useEffect(() => {
     setIsComplete(data?.isBackedUp ?? false);
-  }, [data, setIsComplete]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent lines={3} />;

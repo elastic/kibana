@@ -112,8 +112,15 @@ export const Overview: FunctionComponent = () => {
               isComplete: isStepComplete('backup'),
               setIsComplete: setCompletedStep.bind(null, 'backup'),
             }),
-            getFixIssuesStep({ nextMajor }),
-            getFixLogsStep(),
+            getFixIssuesStep({
+              nextMajor,
+              isComplete: isStepComplete('fix_issues'),
+              setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
+            }),
+            getFixLogsStep({
+              isComplete: isStepComplete('fix_logs'),
+              setIsComplete: setCompletedStep.bind(null, 'fix_logs'),
+            }),
             getUpgradeStep({ docLinks, nextMajor }),
           ]}
         />
