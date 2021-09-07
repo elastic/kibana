@@ -34,7 +34,7 @@ describe('Overview - Fix deprecation logs step', () => {
   });
 
   describe('Step status', () => {
-    test('Its complete when there are no deprecation logs since last checkpoint', async () => {
+    test(`It's complete when there are no deprecation logs since last checkpoint`, async () => {
       httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
 
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({

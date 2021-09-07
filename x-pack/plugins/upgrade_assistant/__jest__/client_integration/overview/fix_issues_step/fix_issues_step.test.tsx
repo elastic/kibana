@@ -43,7 +43,7 @@ describe('Overview - Fix deprecation issues step', () => {
   });
 
   describe('Step status', () => {
-    test('Its complete when there are no critical deprecations', async () => {
+    test(`It's complete when there are no critical deprecations`, async () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(mockedResponses.esDeprecationsEmpty);
 
       await act(async () => {
