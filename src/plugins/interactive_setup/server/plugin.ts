@@ -19,6 +19,13 @@ import { KibanaConfigWriter } from './kibana_config_writer';
 import { defineRoutes } from './routes';
 import { VerificationCode } from './verification_code';
 
+// List of the Elasticsearch hosts Kibana uses by default.
+const DEFAULT_ELASTICSEARCH_HOSTS = [
+  'http://localhost:9200',
+  // It's a default host we use in the official Kibana Docker image (see `kibana_yml.template.ts`).
+  ...(process.env.ELASTIC_CONTAINER ? ['http://elasticsearch:9200'] : []),
+];
+
 export class InteractiveSetupPlugin implements PrebootPlugin {
   readonly #logger: Logger;
   readonly #elasticsearch: ElasticsearchService;
@@ -58,7 +65,7 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
     const shouldActiveSetupMode =
       !core.elasticsearch.config.credentialsSpecified &&
       core.elasticsearch.config.hosts.length === 1 &&
-      core.elasticsearch.config.hosts[0] === 'http://localhost:9200';
+      DEFAULT_ELASTICSEARCH_HOSTS.includes(core.elasticsearch.config.hosts[0]);
     if (!shouldActiveSetupMode) {
       this.#logger.debug(
         'Interactive setup mode will not be activated since Elasticsearch connection is already configured.'
