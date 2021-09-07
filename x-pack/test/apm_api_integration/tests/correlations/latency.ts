@@ -18,7 +18,7 @@ import { parseBfetchResponse } from '../../common/utils/parse_b_fetch';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const retry = getService('retry');
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const getRequestBody = () => {
     const request: IKibanaSearchRequest<LatencyCorrelationsParams> = {
