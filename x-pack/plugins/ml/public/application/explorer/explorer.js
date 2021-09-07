@@ -498,7 +498,10 @@ export class ExplorerUI extends React.Component {
                   </EuiFlexItem>
                   {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
                     <EuiFlexItem grow={false}>
-                      <CheckboxShowCharts />
+                      <CheckboxShowCharts
+                        showCharts={showCharts}
+                        setShowCharts={explorerService.setShowCharts}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

@@ -24,11 +24,12 @@ import { LensAppServices } from './app_plugin/types';
 import { DOC_TYPE, layerTypes } from '../common';
 import { DataPublicPluginStart, esFilters, UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { inspectorPluginMock } from '../../../../src/plugins/inspector/public/mocks';
+import { spacesPluginMock } from '../../spaces/public/mocks';
 import { dashboardPluginMock } from '../../../../src/plugins/dashboard/public/mocks';
 import type {
   LensByValueInput,
-  LensSavedObjectAttributes,
   LensByReferenceInput,
+  ResolvedLensSavedObjectAttributes,
 } from './embeddable/embeddable';
 import {
   mockAttributeService,
@@ -208,12 +209,14 @@ export const defaultDoc = ({
   savedObjectId: '1234',
   title: 'An extremely cool default document!',
   expression: 'definitely a valid expression',
+  visualizationType: 'testVis',
   state: {
     query: 'kuery',
     filters: [{ query: { match_phrase: { src: 'test' } } }],
     datasourceStates: {
       testDatasource: 'datasource',
     },
+    visualization: {},
   },
   references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
 } as unknown) as Document;
@@ -350,7 +353,7 @@ export function makeDefaultServices(
 
   function makeAttributeService(): LensAttributeService {
     const attributeServiceMock = mockAttributeService<
-      LensSavedObjectAttributes,
+      ResolvedLensSavedObjectAttributes,
       LensByValueInput,
       LensByReferenceInput
     >(
@@ -363,7 +366,12 @@ export function makeDefaultServices(
       core
     );
 
-    attributeServiceMock.unwrapAttributes = jest.fn().mockResolvedValue(doc);
+    attributeServiceMock.unwrapAttributes = jest.fn().mockResolvedValue({
+      ...doc,
+      sharingSavedObjectProps: {
+        outcome: 'exactMatch',
+      },
+    });
     attributeServiceMock.wrapAttributes = jest.fn().mockResolvedValue({
       savedObjectId: ((doc as unknown) as LensByReferenceInput).savedObjectId,
     });
@@ -402,6 +410,7 @@ export function makeDefaultServices(
       remove: jest.fn(),
       clear: jest.fn(),
     },
+    spaces: spacesPluginMock.createStartContract(),
   };
 }
 

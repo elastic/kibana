@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging/mocks';
 import {
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
@@ -17,6 +17,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  ALERT_WORKFLOW_STATUS,
   ALERT_UUID,
   EVENT_ACTION,
   EVENT_KIND,
@@ -90,14 +91,14 @@ describe('createLifecycleExecutor', () => {
           // alert documents
           { index: { _id: expect.any(String) } },
           expect.objectContaining({
-            [ALERT_ID]: 'TEST_ALERT_0',
+            [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             [EVENT_ACTION]: 'open',
             [EVENT_KIND]: 'signal',
           }),
           { index: { _id: expect.any(String) } },
           expect.objectContaining({
-            [ALERT_ID]: 'TEST_ALERT_1',
+            [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             [EVENT_ACTION]: 'open',
             [EVENT_KIND]: 'signal',
@@ -118,7 +119,7 @@ describe('createLifecycleExecutor', () => {
     );
   });
 
-  it('overwrites existing documents for repeatedly firing alerts', async () => {
+  it('updates existing documents for repeatedly firing alerts', async () => {
     const logger = loggerMock.create();
     const ruleDataClientMock = createRuleDataClientMock();
     ruleDataClientMock.getReader().search.mockResolvedValue({
@@ -126,17 +127,35 @@ describe('createLifecycleExecutor', () => {
         hits: [
           {
             fields: {
-              [ALERT_ID]: 'TEST_ALERT_0',
+              '@timestamp': '',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
+              [ALERT_UUID]: 'ALERT_0_UUID',
+              [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
               [ALERT_RULE_CONSUMER]: 'CONSUMER',
+              [ALERT_RULE_NAME]: 'NAME',
+              [ALERT_RULE_PRODUCER]: 'PRODUCER',
               [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
-              labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
+              [ALERT_RULE_UUID]: 'RULE_UUID',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [ALERT_WORKFLOW_STATUS]: 'closed',
+              [SPACE_IDS]: ['fake-space-id'],
+              labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must show up in the written doc
             },
           },
           {
             fields: {
-              [ALERT_ID]: 'TEST_ALERT_1',
+              '@timestamp': '',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+              [ALERT_UUID]: 'ALERT_1_UUID',
+              [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
               [ALERT_RULE_CONSUMER]: 'CONSUMER',
+              [ALERT_RULE_NAME]: 'NAME',
+              [ALERT_RULE_PRODUCER]: 'PRODUCER',
               [ALERT_RULE_TYPE_ID]: 'RULE_TYPE_ID',
+              [ALERT_RULE_UUID]: 'RULE_UUID',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [SPACE_IDS]: ['fake-space-id'],
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' }, // this must not show up in the written doc
             },
           },
@@ -187,15 +206,20 @@ describe('createLifecycleExecutor', () => {
           // alert document
           { index: { _id: 'TEST_ALERT_0_UUID' } },
           expect.objectContaining({
-            [ALERT_ID]: 'TEST_ALERT_0',
+            [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
+            [ALERT_WORKFLOW_STATUS]: 'closed',
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+            labels: { LABEL_0_KEY: 'LABEL_0_VALUE' },
+
             [EVENT_ACTION]: 'active',
             [EVENT_KIND]: 'signal',
           }),
           { index: { _id: 'TEST_ALERT_1_UUID' } },
           expect.objectContaining({
-            [ALERT_ID]: 'TEST_ALERT_1',
+            [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+            [ALERT_WORKFLOW_STATUS]: 'open',
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+
             [EVENT_ACTION]: 'active',
             [EVENT_KIND]: 'signal',
           }),
@@ -216,8 +240,6 @@ describe('createLifecycleExecutor', () => {
   });
 
   it('updates existing documents for recovered alerts', async () => {
-    // NOTE: the documents should actually also be updated for recurring,
-    // active alerts (see elastic/kibana#108670)
     const logger = loggerMock.create();
     const ruleDataClientMock = createRuleDataClientMock();
     ruleDataClientMock.getReader().search.mockResolvedValue({
@@ -226,7 +248,7 @@ describe('createLifecycleExecutor', () => {
           {
             fields: {
               '@timestamp': '',
-              [ALERT_ID]: 'TEST_ALERT_0',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_UUID]: 'ALERT_0_UUID',
               [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
               [ALERT_RULE_CONSUMER]: 'CONSUMER',
@@ -242,7 +264,7 @@ describe('createLifecycleExecutor', () => {
           {
             fields: {
               '@timestamp': '',
-              [ALERT_ID]: 'TEST_ALERT_1',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_UUID]: 'ALERT_1_UUID',
               [ALERT_RULE_CATEGORY]: 'RULE_TYPE_NAME',
               [ALERT_RULE_CONSUMER]: 'CONSUMER',
@@ -299,7 +321,7 @@ describe('createLifecycleExecutor', () => {
           // alert document
           { index: { _id: 'TEST_ALERT_0_UUID' } },
           expect.objectContaining({
-            [ALERT_ID]: 'TEST_ALERT_0',
+            [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
             [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
             labels: { LABEL_0_KEY: 'LABEL_0_VALUE' },
             [EVENT_ACTION]: 'close',
@@ -307,7 +329,7 @@ describe('createLifecycleExecutor', () => {
           }),
           { index: { _id: 'TEST_ALERT_1_UUID' } },
           expect.objectContaining({
-            [ALERT_ID]: 'TEST_ALERT_1',
+            [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
             [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
             [EVENT_ACTION]: 'active',
             [EVENT_KIND]: 'signal',

@@ -141,7 +141,7 @@ export const useMatrixHistogram = ({
                   data: response.matrixHistogramData,
                   inspect: getInspectResponse(response, prevResponse.inspect),
                   refetch: refetch.current,
-                  totalCount: response.totalCount,
+                  totalCount: histogramBuckets.reduce((acc, bucket) => bucket.doc_count + acc, 0),
                   buckets: histogramBuckets,
                 }));
                 searchSubscription$.current.unsubscribe();
