@@ -17,6 +17,7 @@ import type { ConfigSchema, ConfigType } from './config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { KibanaConfigWriter } from './kibana_config_writer';
 import { defineRoutes } from './routes';
+import { VerificationCode } from './verification_code';
 
 // List of the Elasticsearch hosts Kibana uses by default.
 const DEFAULT_ELASTICSEARCH_HOSTS = [
@@ -28,6 +29,7 @@ const DEFAULT_ELASTICSEARCH_HOSTS = [
 export class InteractiveSetupPlugin implements PrebootPlugin {
   readonly #logger: Logger;
   readonly #elasticsearch: ElasticsearchService;
+  readonly #verificationCode: VerificationCode;
 
   #elasticsearchConnectionStatusSubscription?: Subscription;
 
@@ -44,6 +46,9 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
     this.#logger = this.initializerContext.logger.get();
     this.#elasticsearch = new ElasticsearchService(
       this.initializerContext.logger.get('elasticsearch')
+    );
+    this.#verificationCode = new VerificationCode(
+      this.initializerContext.logger.get('verification')
     );
   }
 
@@ -99,13 +104,18 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
           this.#logger.debug(
             'Starting interactive setup mode since Kibana cannot to connect to Elasticsearch at http://localhost:9200.'
           );
-          const serverInfo = core.http.getServerInfo();
-          const url = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}`;
-          this.#logger.info(`
+          const { code } = this.#verificationCode;
+          const pathname = core.http.basePath.prepend('/');
+          const { protocol, hostname, port } = core.http.getServerInfo();
+          const url = `${protocol}://${hostname}:${port}${pathname}?code=${code}`;
+
+          // eslint-disable-next-line no-console
+          console.log(`
 
 ${chalk.whiteBright.bold(`${chalk.cyanBright('i')} Kibana has not been configured.`)}
 
 Go to ${chalk.cyanBright.underline(url)} to get started.
+
 `);
         }
       }
@@ -125,6 +135,7 @@ Go to ${chalk.cyanBright.underline(url)} to get started.
         preboot: { ...core.preboot, completeSetup },
         kibanaConfigWriter: new KibanaConfigWriter(configPath, this.#logger.get('kibana-config')),
         elasticsearch,
+        verificationCode: this.#verificationCode,
         getConfig: this.#getConfig.bind(this),
       });
     });
