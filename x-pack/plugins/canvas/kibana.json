@@ -25,7 +25,8 @@
     "features",
     "inspector",
     "presentationUtil",
-    "uiActions"
+    "uiActions",
+    "share"
   ],
   "optionalPlugins": ["home", "reporting", "usageCollection"],
   "requiredBundles": [

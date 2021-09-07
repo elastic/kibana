@@ -13,11 +13,11 @@ import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_n
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
+
 import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const apmApiSupertest = createApmApiSupertest(getService('supertest'));
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
-          const response = await apmApiSupertest({
+          const response = await apmApiClient.readUser({
             endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
@@ -62,7 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         beforeEach(async () => {
-          response = await apmApiSupertest({
+          response = await apmApiClient.readUser({
             endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
@@ -133,7 +133,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         beforeEach(async () => {
-          response = await apmApiSupertest({
+          response = await apmApiClient.readUser({
             endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-ruby' },
@@ -201,7 +201,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         beforeEach(async () => {
-          response = await apmApiSupertest({
+          response = await apmApiClient.readUser({
             endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics`,
             params: {
               path: { serviceName: 'opbeans-java' },
