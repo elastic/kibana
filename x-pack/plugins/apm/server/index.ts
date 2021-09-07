@@ -72,7 +72,6 @@ export function mergeConfigs(
     'apm_oss.metricsIndices': apmOssConfig.metricsIndices,
     'apm_oss.sourcemapIndices': apmOssConfig.sourcemapIndices,
     'apm_oss.onboardingIndices': apmOssConfig.onboardingIndices,
-    'apm_oss.indexPattern': apmOssConfig.indexPattern,
     /* eslint-enable @typescript-eslint/naming-convention */
     'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
     'xpack.apm.serviceMapFingerprintBucketSize':
@@ -116,10 +115,6 @@ export function mergeConfigs(
   mergedConfig[
     'apm_oss.metricsIndices'
   ] = `metrics-apm*,${mergedConfig['apm_oss.metricsIndices']}`;
-
-  mergedConfig[
-    'apm_oss.indexPattern'
-  ] = `traces-apm*,logs-apm*,metrics-apm*,${mergedConfig['apm_oss.indexPattern']}`;
 
   return mergedConfig;
 }

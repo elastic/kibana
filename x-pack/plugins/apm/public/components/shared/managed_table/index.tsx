@@ -127,16 +127,18 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     };
   }, [hidePerPageOptions, items, page, pageSize, pagination]);
 
+  const showNoItemsMessage = useMemo(() => {
+    return isLoading
+      ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
+          defaultMessage: 'Loading…',
+        })
+      : noItemsMessage;
+  }, [isLoading, noItemsMessage]);
+
   return (
     <EuiBasicTable
       loading={isLoading}
-      noItemsMessage={
-        isLoading
-          ? i18n.translate('xpack.apm.managedTable.loading', {
-              defaultMessage: 'Loading...',
-            })
-          : noItemsMessage
-      }
+      noItemsMessage={showNoItemsMessage}
       items={renderedItems}
       columns={(columns as unknown) as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
       sorting={sort}
