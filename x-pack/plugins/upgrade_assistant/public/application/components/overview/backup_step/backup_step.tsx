@@ -38,6 +38,7 @@ export const getBackupStep = ({ cloud, isComplete, setIsComplete }: Props): EuiS
 
   return {
     title,
+    'data-test-subj': 'backupStep-incomplete',
     status: 'incomplete',
     children: <OnPremBackup />,
   };

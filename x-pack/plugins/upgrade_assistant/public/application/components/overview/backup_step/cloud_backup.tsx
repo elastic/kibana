@@ -45,9 +45,14 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
 
   // Tell overview whether the step is complete or not.
   useEffect(() => {
-    setIsComplete(data?.isBackedUp ?? false);
+    // Loading shouldn't invalidate the previous state.
+    if (!isLoading) {
+      // An error should invalidate the previous state.
+      setIsComplete((!error && data?.isBackedUp) ?? false);
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, [error, isLoading, data]);
 
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent data-test-subj="cloudBackupLoading" lines={3} />;

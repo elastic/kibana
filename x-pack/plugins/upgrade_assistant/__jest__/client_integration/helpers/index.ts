@@ -6,3 +6,4 @@
  */
 
 export { setupEnvironment, WithAppDependencies } from './setup_environment';
+export { advanceTime } from './time_manipulation';

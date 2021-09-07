@@ -79,10 +79,11 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
     previousCheck
   );
 
-  const warningsCount = data?.count || 0;
-  const calloutTint = warningsCount > 0 ? 'warning' : 'success';
-  const calloutIcon = warningsCount > 0 ? 'alert' : 'check';
-  const calloutTestId = warningsCount > 0 ? 'hasWarningsCallout' : 'noWarningsCallout';
+  const logsCount = data?.count || 0;
+  const hasLogs = logsCount > 0;
+  const calloutTint = hasLogs ? 'warning' : 'success';
+  const calloutIcon = hasLogs ? 'alert' : 'check';
+  const calloutTestId = hasLogs ? 'hasWarningsCallout' : 'noWarningsCallout';
 
   const onResetClick = () => {
     const now = moment().toISOString();
@@ -95,11 +96,11 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
     // Loading shouldn't invalidate the previous state.
     if (!isLoading) {
       // An error should invalidate the previous state.
-      setHasNoDeprecationLogs(!error && warningsCount === 0);
+      setHasNoDeprecationLogs(!error && !hasLogs);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error, isLoading, warningsCount]);
+  }, [error, isLoading, hasLogs]);
 
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent lines={6} />;
@@ -125,7 +126,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
 
   return (
     <EuiCallOut
-      title={i18nTexts.calloutTitle(warningsCount, previousCheck)}
+      title={i18nTexts.calloutTitle(logsCount, previousCheck)}
       color={calloutTint}
       iconType={calloutIcon}
       data-test-subj={calloutTestId}
