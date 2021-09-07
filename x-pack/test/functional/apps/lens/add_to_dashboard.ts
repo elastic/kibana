@@ -237,7 +237,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // issue #111104
     it('should add a Lens heatmap to the dashboard', async () => {
-      await createAndSaveDashboard('My Wonderful Heatmap dashboard');
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
 
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -277,7 +278,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
-      expect(panelCount).to.eql(2);
+      expect(panelCount).to.eql(1);
     });
 
     describe('Capabilities', function capabilitiesTests() {
