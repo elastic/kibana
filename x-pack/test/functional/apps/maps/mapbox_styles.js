@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import {
   KBN_IS_TILE_COMPLETE,
-  KBN_METADATA_FEATURE
+  KBN_METADATA_FEATURE,
 } from '../../../../plugins/maps/common/constants';
 
 export default function ({ getPageObjects, getService }) {
