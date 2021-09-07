@@ -9,21 +9,12 @@ import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { GLOBAL_EFFECT_SCOPE, POLICY_EFFECT_SCOPE } from './translations';
 import { TextValueDisplay } from './text_value_display';
-import {
-  ContextMenuWithRouterSupport,
-  ContextMenuWithRouterSupportProps,
-} from '../../context_menu_with_router_support';
-import { getPolicyDetailPath } from '../../../common/routing';
-import { APP_ID } from '../../../../../common/constants';
+import { ContextMenuWithRouterSupport } from '../../context_menu_with_router_support';
+import { ContextMenuItemNavByRouterProps } from '../../context_menu_with_router_support/context_menu_item_nav_by_rotuer';
 
-interface PolicyAttributes {
-  id: string;
-  name: string;
-}
-
-export interface EffectScopeProps<T extends PolicyAttributes = PolicyAttributes> {
+export interface EffectScopeProps {
   /** If set (even if empty), then effect scope will be policy specific. Else, it shows as global */
-  policies?: T[];
+  policies?: ContextMenuItemNavByRouterProps[];
 }
 
 export const EffectScope = memo<EffectScopeProps>(({ policies }) => {
@@ -52,26 +43,14 @@ export const EffectScope = memo<EffectScopeProps>(({ policies }) => {
 });
 EffectScope.displayName = 'EffectScope';
 
-type WithContextMenuProps<T extends PolicyAttributes = PolicyAttributes> = PropsWithChildren<{
-  policies: T[];
+type WithContextMenuProps = PropsWithChildren<{
+  policies: Required<EffectScopeProps>['policies'];
 }>;
 
 export const WithContextMenu = memo<WithContextMenuProps>(({ policies, children }) => {
-  const menuItems: ContextMenuWithRouterSupportProps['items'] = useMemo(() => {
-    return policies.map(({ id, name }) => {
-      return {
-        navigateAppId: APP_ID,
-        navigateOptions: {
-          path: getPolicyDetailPath(id),
-        },
-        children: name,
-      };
-    });
-  }, [policies]);
-
   return (
     <ContextMenuWithRouterSupport
-      items={menuItems}
+      items={policies}
       anchorPosition="rightCenter"
       button={
         <EuiButtonEmpty flush="both" size="s">

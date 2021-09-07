@@ -15,6 +15,7 @@ import { getEmptyValue } from '../../../common/components/empty_value';
 import { CriteriaConditions } from './components/criteria_conditions';
 import { EffectScopeProps } from './components/effect_scope';
 import { TrustedApp } from '../../../../common/endpoint/types';
+import { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support/context_menu_item_nav_by_rotuer';
 
 const CardContainerPanel = styled(EuiPanel)`
   &.artifactEntryCard + &.artifactEntryCard {
@@ -30,11 +31,14 @@ export interface ArtifactEntryCardProps<T extends AnyArtifact = AnyArtifact> ext
    * The list of actions for the card. Will display an icon with the actions in a menu if defined.
    */
   actions?: CardHeaderProps['actions'];
+
   /**
-   * An object with policy names keyed by their `id`s. Used when the Artifact's `effectScope` is
-   * per policy to display them in a popup menu
+   * Information about the policies that are assigned to the `item`'s `effectScope` and that will be
+   * use to create a navigation link
    */
-  policyNames?: Record<string, string>;
+  policies?: {
+    [policyId: string]: ContextMenuItemNavByRouterProps;
+  };
 }
 
 /**
@@ -44,23 +48,27 @@ export interface ArtifactEntryCardProps<T extends AnyArtifact = AnyArtifact> ext
 export const ArtifactEntryCard = memo(
   <T extends AnyArtifact = AnyArtifact>({
     item,
-    policyNames,
+    policies,
     actions,
     ...commonProps
   }: ArtifactEntryCardProps<T>) => {
     // FIXME: make component generic for the data type
     // FIXME: revisit all dev code below
 
-    const policies = useMemo<EffectScopeProps['policies']>(() => {
+    // create the policy links for each policy listed in the artifact record by grabbing the
+    // navigation data from the `policies` prop (if any)
+    const policyNavLinks = useMemo<EffectScopeProps['policies']>(() => {
       return item.effectScope.type === 'policy'
         ? item.effectScope.policies.map((id) => {
-            return {
-              id,
-              name: policyNames ? policyNames[id] : id,
-            };
+            return policies && policies[id]
+              ? policies[id]
+              : // else, unable to build a nav link, so just show id
+                {
+                  children: id,
+                };
           })
         : undefined;
-    }, [item.effectScope.policies, item.effectScope.type, policyNames]);
+    }, [item.effectScope, policies]);
 
     return (
       <CardContainerPanel
@@ -79,7 +87,7 @@ export const ArtifactEntryCard = memo(
           <CardSubHeader
             createdBy={item.created_by}
             updatedBy={item.updated_by}
-            policies={policies}
+            policies={policyNavLinks}
           />
 
           <EuiSpacer size="m" />
