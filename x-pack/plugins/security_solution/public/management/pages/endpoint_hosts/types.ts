@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import {
   ActivityLog,
   HostInfo,
@@ -41,9 +42,14 @@ export interface EndpointState {
         disabled?: boolean;
         page: number;
         pageSize: number;
-        startDate?: string;
-        endDate?: string;
+        startDate: string;
+        endDate: string;
         isInvalidDateRange: boolean;
+        autoRefreshOptions: {
+          enabled: boolean;
+          duration: number;
+        };
+        recentlyUsedDateRanges: EuiSuperDatePickerRecentRange[];
       };
       logData: AsyncResourceState<ActivityLog>;
     };

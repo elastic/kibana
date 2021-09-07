@@ -25,9 +25,10 @@ export default function ({ getService }) {
           expect(body.version.build_number).to.be.a('number');
 
           expect(body.status.overall).to.be.an('object');
-          expect(body.status.overall.state).to.be('green');
+          expect(body.status.overall.level).to.be('available');
 
-          expect(body.status.statuses).to.be.an('array');
+          expect(body.status.core).to.be.an('object');
+          expect(body.status.plugins).to.be.an('object');
 
           expect(body.metrics.collection_interval_in_millis).to.be.a('number');
 

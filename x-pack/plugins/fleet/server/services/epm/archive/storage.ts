@@ -23,6 +23,8 @@ import type {
 } from '../../../../common';
 import { pkgToPkgKey } from '../registry';
 
+import { appContextService } from '../../app_context';
+
 import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from './index';
 import type { ArchiveEntry } from './index';
 import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
@@ -165,6 +167,7 @@ export const getEsPackage = async (
   references: PackageAssetReference[],
   savedObjectsClient: SavedObjectsClientContract
 ) => {
+  const logger = appContextService.getLogger();
   const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
   const bulkRes = await savedObjectsClient.bulkGet<PackageAsset>(
     references.map((reference) => ({
@@ -172,7 +175,26 @@ export const getEsPackage = async (
       fields: ['asset_path', 'data_utf8', 'data_base64'],
     }))
   );
+  const errors = bulkRes.saved_objects.filter((so) => so.error || !so.attributes);
   const assets = bulkRes.saved_objects.map((so) => so.attributes);
+
+  if (errors.length) {
+    const resolvedErrors = errors.map((so) =>
+      so.error
+        ? { type: so.type, id: so.id, error: so.error }
+        : !so.attributes
+        ? { type: so.type, id: so.id, error: { error: `No attributes retrieved` } }
+        : { type: so.type, id: so.id, error: { error: `Unknown` } }
+    );
+
+    logger.warn(
+      `Failed to retrieve ${pkgName}-${pkgVersion} package from ES storage. bulkGet failed for assets: ${JSON.stringify(
+        resolvedErrors
+      )}`
+    );
+
+    return undefined;
+  }
 
   const paths: string[] = [];
   const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);

@@ -16,6 +16,8 @@ interface DraftComment {
   commentId: string;
   comment: string;
   position: EuiMarkdownAstNodePosition;
+  caseTitle?: string;
+  caseTags?: string[];
 }
 
 export const useLensDraftComment = () => {
