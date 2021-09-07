@@ -439,21 +439,19 @@ export function FailedTransactionsCorrelations({
         </>
       )}
 
-      {showSummaryBadge &&
-        selectedTerm !== undefined &&
-        selectedTerm.pValue !== null && (
-          <>
-            <EuiSpacer size="m" />
-            <Summary
-              items={[
-                <EuiBadge color="hollow">
-                  {`${selectedTerm.fieldName}: ${selectedTerm.fieldValue}`}
-                </EuiBadge>,
-                <>{`p-value: ${selectedTerm.pValue.toPrecision(3)}`}</>,
-              ]}
-            />
-          </>
-        )}
+      {showSummaryBadge && selectedTerm?.pValue && (
+        <>
+          <EuiSpacer size="m" />
+          <Summary
+            items={[
+              <EuiBadge color="hollow">
+                {`${selectedTerm.fieldName}: ${selectedTerm.fieldValue}`}
+              </EuiBadge>,
+              <>{`p-value: ${selectedTerm.pValue.toPrecision(3)}`}</>,
+            ]}
+          />
+        </>
+      )}
 
       <EuiSpacer size="m" />
 
