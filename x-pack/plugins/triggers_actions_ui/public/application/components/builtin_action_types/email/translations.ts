@@ -28,6 +28,13 @@ export const PORT_REQUIRED = i18n.translate(
   }
 );
 
+export const SERVICE_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServiceText',
+  {
+    defaultMessage: 'Service is required.',
+  }
+);
+
 export const HOST_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredHostText',
   {
