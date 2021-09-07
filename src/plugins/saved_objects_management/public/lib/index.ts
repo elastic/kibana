@@ -13,17 +13,8 @@ export { getRelationships } from './get_relationships';
 export { getSavedObjectCounts } from './get_saved_object_counts';
 export { getSavedObjectLabel } from './get_saved_object_label';
 export { importFile } from './import_file';
-export { importLegacyFile } from './import_legacy_file';
 export { parseQuery } from './parse_query';
 export { resolveImportErrors } from './resolve_import_errors';
-export {
-  resolveIndexPatternConflicts,
-  resolveSavedObjects,
-  resolveSavedSearches,
-  saveObject,
-  saveObjects,
-} from './resolve_saved_objects';
-export { logLegacyImport } from './log_legacy_import';
 export {
   processImportResponse,
   ProcessedImportResponse,
