@@ -59,10 +59,15 @@ export function ServiceOverview() {
     replace(history, { query: { transactionType } });
   }
 
+  const latencyChartHeight = 200;
+
   // The default EuiFlexGroup breaks at 768, but we want to break at 1200, so we
   // observe the window width and set the flex directions of rows accordingly
   const { isLarge } = useBreakpoints();
   const isSingleColumn = isLarge;
+  const nonLatencyChartHeight = isSingleColumn
+    ? latencyChartHeight
+    : chartHeight;
   const rowDirection = isSingleColumn ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);
   const isIosAgent = isIosAgentName(agentName);
@@ -92,7 +97,7 @@ export function ServiceOverview() {
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
               <LatencyChart
-                height={200}
+                height={latencyChartHeight}
                 environment={environment}
                 kuery={kuery}
               />
@@ -106,7 +111,7 @@ export function ServiceOverview() {
             >
               <EuiFlexItem grow={3}>
                 <ServiceOverviewThroughputChart
-                  height={chartHeight}
+                  height={nonLatencyChartHeight}
                   environment={environment}
                   kuery={kuery}
                 />
@@ -134,7 +139,7 @@ export function ServiceOverview() {
               {!isRumAgent && (
                 <EuiFlexItem grow={3}>
                   <TransactionErrorRateChart
-                    height={chartHeight}
+                    height={nonLatencyChartHeight}
                     showAnnotations={false}
                     kuery={kuery}
                     environment={environment}
@@ -189,7 +194,7 @@ export function ServiceOverview() {
                 responsive={false}
               >
                 <ServiceOverviewInstancesChartAndTable
-                  chartHeight={chartHeight}
+                  chartHeight={nonLatencyChartHeight}
                   serviceName={serviceName}
                 />
               </EuiFlexGroup>

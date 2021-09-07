@@ -27,7 +27,7 @@ import { OverviewTableContainer } from '../../../shared/overview_table_container
 import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useBreakpoints } from '../../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 
 type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
