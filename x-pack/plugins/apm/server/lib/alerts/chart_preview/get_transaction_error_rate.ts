@@ -5,26 +5,24 @@
  * 2.0.
  */
 
+import { rangeQuery } from '../../../../../observability/server';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import { AlertParams } from '../../../routes/alerts/chart_preview';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+  getSearchAggregatedTransactions,
+} from '../../helpers/aggregated_transactions';
 import { Setup } from '../../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 import { getIntervalAndTimeRange } from './helper';
-import {
-  getDocumentTypeFilterForAggregatedTransactions,
-  getProcessorEventForAggregatedTransactions,
-  getSearchAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
 
 export async function getTransactionErrorRateChartPreview({
   setup,

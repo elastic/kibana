@@ -6,24 +6,21 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { rangeQuery } from '../../../../../observability/server';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { Setup } from '../../helpers/setup_request';
-import { getIntervalAndTimeRange } from './helper';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getSearchAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
+import { Setup } from '../../helpers/setup_request';
+import { getIntervalAndTimeRange } from './helper';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
