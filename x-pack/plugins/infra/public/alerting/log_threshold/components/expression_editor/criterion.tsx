@@ -131,6 +131,11 @@ export const Criterion: React.FC<Props> = ({
 
   const handleFieldChange = useCallback(
     ([selectedOption]) => {
+      if (!selectedOption) {
+        updateCriterion(idx, { field: '' });
+        return;
+      }
+
       const fieldName = selectedOption.label;
 
       const nextFieldInfo = getFieldInfo(fields, fieldName);
