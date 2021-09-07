@@ -275,8 +275,9 @@ class ReportListingUi extends Component<Props, State> {
    */
   private readonly tableColumnWidths = {
     title: '40%',
-    status: '20%',
-    createdAt: '20%',
+    type: '10%',
+    status: '15%',
+    createdAt: '15%',
     createdBy: '10%',
     actions: '10%',
   };
@@ -293,18 +294,13 @@ class ReportListingUi extends Component<Props, State> {
         render: (objectTitle: string, job) => {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
-              <div>
-                <ReportDownloadLink
-                  disabled={
-                    job.status !== JOB_STATUSES.COMPLETED && job.status !== JOB_STATUSES.WARNINGS
-                  }
-                  objectTitle={objectTitle}
-                  job={job}
-                />
-              </div>
-              <EuiText size="s">
-                <EuiTextColor color="subdued">{job.objectType}</EuiTextColor>
-              </EuiText>
+              <ReportDownloadLink
+                disabled={
+                  job.status !== JOB_STATUSES.COMPLETED && job.status !== JOB_STATUSES.WARNINGS
+                }
+                objectTitle={objectTitle}
+                job={job}
+              />
             </div>
           );
         },
@@ -326,6 +322,19 @@ class ReportListingUi extends Component<Props, State> {
         ),
         mobileOptions: {
           show: false,
+        },
+      },
+      {
+        field: 'type',
+        width: tableColumnWidths.type,
+        name: i18n.translate('xpack.reporting.listing.tableColumns.typeTitle', {
+          defaultMessage: 'Type',
+        }),
+        render: (_status: string, job) => (
+          <div data-test-subj="reportJobType">{job.objectType}</div>
+        ),
+        mobileOptions: {
+          show: true,
         },
       },
       {
@@ -363,12 +372,20 @@ class ReportListingUi extends Component<Props, State> {
           {
             render: (job) => {
               return (
-                <div data-test-subj="reportJobActions">
+                <EuiFlexGroup
+                  alignItems="flexEnd"
+                  gutterSize="none"
+                  data-test-subj="reportJobActions"
+                >
                   {[PDF_JOB_TYPE_V2, PNG_JOB_TYPE_V2].some((jobType) => jobType === job.jobtype) ? (
-                    <ViewInAppLink job={job} />
+                    <EuiFlexItem grow={false}>
+                      <ViewInAppLink job={job} />
+                    </EuiFlexItem>
                   ) : null}
-                  <ReportInfoButton {...this.props} job={job} />
-                </div>
+                  <EuiFlexItem grow={false}>
+                    <ReportInfoButton {...this.props} job={job} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               );
             },
           },
