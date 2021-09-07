@@ -61,3 +61,31 @@ image::user/alerting/images/rule-types-es-query-valid.png[Test {es} query return
 +
 [role="screenshot"]
 image::user/alerting/images/rule-types-es-query-invalid.png[Test {es} query shows error when invalid]
+
+[float]
+==== Match de-duplication
+
+The {es} query rule type performs de-duplication of document matches across rule executions. If you configure the rule with a schedule interval smaller than the time window, and a document matches a query in multiple rule executions, it will be alerted on only once.
+
+Suppose you have a rule configured to run every minute.  The rule uses a time window of 1 hour and checks if there are more than 99 matches for the query. The {es} query rule type will do the following:
+
+[cols="3*<"]
+|===
+
+| `Execution 1 (0:00)`
+| Rule finds 113 matches in the last hour: `113 > 99`
+| Rule is active and user will be alerted.
+
+| `Execution 2 (0:01)`
+| Rule finds 127 matches in the last hour. 105 of the matches are duplicates that were alerted on in Execution 1, so you actually have 22 matches: `22 !> 99`
+| No alert.
+
+| `Execution 3 (0:02)`
+| Rule finds 159 matches in the last hour. 88 of the matches are duplicates that were alerted on in Execution 1, so you actually have 71 matches: `71 !> 99`
+| No alert.
+
+| `Execution 4 (0:03)`
+| Rule finds 190 matches in the last hour. 71 of them are duplicates that were alerted on in Exeuction 1, so you actually have 119 matches: `119 > 99`
+| Rule is active and user will be alerted.
+
+|===
