@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import React from 'react';
@@ -32,12 +32,14 @@ export const MappingErrorPage = () => {
       iconColor="danger"
       iconType="cross"
       title={
-        <div>
-          <FormattedMessage
-            id="xpack.uptime.public.pages.mappingError.title"
-            defaultMessage="Heartbeat mappings missing"
-          />
-        </div>
+        <EuiTitle>
+          <h3>
+            <FormattedMessage
+              id="xpack.uptime.public.pages.mappingError.title"
+              defaultMessage="Heartbeat mappings missing"
+            />
+          </h3>
+        </EuiTitle>
       }
       body={
         <FormattedMessage
