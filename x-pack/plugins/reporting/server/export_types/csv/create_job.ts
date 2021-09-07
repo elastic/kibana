@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cryptoFactory } from '../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
 import {
   IndexPatternSavedObjectDeprecatedCSV,
