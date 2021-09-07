@@ -64,6 +64,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/security_api_integration/anonymous_es_anonymous.config.ts'),
   require.resolve('../test/observability_api_integration/basic/config.ts'),
   require.resolve('../test/observability_api_integration/trial/config.ts'),
+  require.resolve('../test/observability_functional/with_rac_write.config.ts'),
   require.resolve('../test/encrypted_saved_objects_api_integration/config.ts'),
   require.resolve('../test/spaces_api_integration/spaces_only/config.ts'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_trial.ts'),
