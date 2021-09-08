@@ -12,7 +12,7 @@ import { ElementSettings as Component } from './element_settings.component';
 import { State, PositionedElement } from '../../../../types';
 
 interface Props {
-  selectedElementId: string | null;
+  selectedElementId: string;
 }
 
 const mapStateToProps = (state: State, { selectedElementId }: Props): StateProps => ({
