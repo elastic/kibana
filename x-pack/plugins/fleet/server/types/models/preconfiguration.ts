@@ -77,7 +77,7 @@ export const PreconfiguredOutputsSchema = schema.arrayOf(
     is_default: schema.boolean({ defaultValue: false }),
     name: schema.string(),
     type: schema.oneOf([schema.literal('elasticsearch')]),
-    hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] })),
+    hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
     ca_sha256: schema.maybe(schema.string()),
     config: schema.maybe(schema.any()),
     fleet_server: schema.maybe(

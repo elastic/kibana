@@ -73,12 +73,14 @@ export interface FullAgentPolicyOutputPermissions {
   };
 }
 
+export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256' | 'api_key'> & {
+  [key: string]: any;
+};
+
 export interface FullAgentPolicy {
   id: string;
   outputs: {
-    [key: string]: Pick<Output, 'type' | 'hosts' | 'ca_sha256' | 'api_key'> & {
-      [key: string]: any;
-    };
+    [key: string]: FullAgentPolicyOutput;
   };
   output_permissions?: {
     [output: string]: FullAgentPolicyOutputPermissions;

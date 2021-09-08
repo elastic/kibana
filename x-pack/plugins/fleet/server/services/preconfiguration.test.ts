@@ -498,6 +498,7 @@ describe('output preconfiguration', () => {
   beforeEach(() => {
     mockedOutputService.create.mockReset();
     mockedOutputService.update.mockReset();
+    mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
     mockedOutputService.get.mockImplementation(
       async (soClient, id): Promise<Output> => {
         switch (id) {
@@ -532,6 +533,21 @@ describe('output preconfiguration', () => {
 
     expect(mockedOutputService.create).toBeCalled();
     expect(mockedOutputService.update).not.toBeCalled();
+  });
+
+  it('should set default hosts if hosts is not set output that does not exists', async () => {
+    const soClient = savedObjectsClientMock.create();
+    await ensurePreconfiguredOutputs(soClient, [
+      {
+        id: 'non-existing-output-1',
+        name: 'Output 1',
+        type: 'elasticsearch',
+        is_default: false,
+      },
+    ]);
+
+    expect(mockedOutputService.create).toBeCalled();
+    expect(mockedOutputService.create.mock.calls[0][1].hosts).toEqual(['http://default-es:9200']);
   });
 
   it('should update output if preconfigured output exists and changed', async () => {

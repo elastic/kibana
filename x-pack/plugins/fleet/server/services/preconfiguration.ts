@@ -81,6 +81,10 @@ export async function ensurePreconfiguredOutputs(
         is_preconfigured: true,
       };
 
+      if (!data.hosts || data.hosts.length === 0) {
+        data.hosts = outputService.getDefaultESHosts();
+      }
+
       if (!existingOutput) {
         return outputService.create(soClient, data, { id });
       } else if (isPreconfiguredOutputDifferentFromCurrent(existingOutput, data)) {
