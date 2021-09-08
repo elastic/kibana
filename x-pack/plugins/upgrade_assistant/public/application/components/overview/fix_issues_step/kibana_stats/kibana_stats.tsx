@@ -41,7 +41,11 @@ const i18nTexts = {
   ),
 };
 
-export const KibanaDeprecationStats: FunctionComponent = () => {
+interface Props {
+  setIsFixed: (isFixed: boolean) => void;
+}
+
+export const KibanaDeprecationStats: FunctionComponent<Props> = ({ setIsFixed }) => {
   const history = useHistory();
   const {
     services: {
@@ -76,6 +80,12 @@ export const KibanaDeprecationStats: FunctionComponent = () => {
     kibanaDeprecations?.filter((deprecation) => deprecation.level === 'warning')?.length ?? 0;
   const criticalDeprecationsCount =
     kibanaDeprecations?.filter((deprecation) => deprecation.level === 'critical')?.length ?? 0;
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      setIsFixed(criticalDeprecationsCount === 0);
+    }
+  }, [setIsFixed, criticalDeprecationsCount, isLoading, error]);
 
   const hasCritical = criticalDeprecationsCount > 0;
   const hasWarnings = warningDeprecationsCount > 0;

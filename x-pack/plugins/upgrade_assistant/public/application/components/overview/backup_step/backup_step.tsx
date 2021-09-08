@@ -11,33 +11,34 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import type { CloudSetup } from '../../../../../../cloud/public';
 import { OnPremBackup } from './on_prem_backup';
-import { CloudBackup, CloudBackupStatusResponse } from './cloud_backup';
+import { CloudBackup } from './cloud_backup';
+import type { OverviewStepProps } from '../../types';
 
 const title = i18n.translate('xpack.upgradeAssistant.overview.backupStepTitle', {
   defaultMessage: 'Back up your data',
 });
 
-interface Props {
+interface Props extends OverviewStepProps {
   cloud?: CloudSetup;
-  cloudBackupStatusResponse?: CloudBackupStatusResponse;
 }
 
-export const getBackupStep = ({ cloud, cloudBackupStatusResponse }: Props): EuiStepProps => {
+export const getBackupStep = ({ cloud, isComplete, setIsComplete }: Props): EuiStepProps => {
+  const status = isComplete ? 'complete' : 'incomplete';
+
   if (cloud?.isCloudEnabled) {
     return {
+      status,
       title,
-      status: cloudBackupStatusResponse!.data?.isBackedUp ? 'complete' : 'incomplete',
+      'data-test-subj': `backupStep-${status}`,
       children: (
-        <CloudBackup
-          cloudBackupStatusResponse={cloudBackupStatusResponse!}
-          cloudSnapshotsUrl={cloud!.snapshotsUrl!}
-        />
+        <CloudBackup cloudSnapshotsUrl={cloud!.snapshotsUrl!} setIsComplete={setIsComplete} />
       ),
     };
   }
 
   return {
     title,
+    'data-test-subj': 'backupStep-incomplete',
     status: 'incomplete',
     children: <OnPremBackup />,
   };
