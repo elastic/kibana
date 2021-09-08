@@ -625,7 +625,34 @@ describe('xy_visualization', () => {
         expect(options[0].groupId).toBe('yThresholdRight');
       });
 
-      it('should discard xAccessor as date histogram when computing groups', () => {
+      it('should compute no groups for thresholds when the only data accessor available is a date histogram', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = []; // empty the configuration
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should mark horizontal group is invalid when xAccessor is changed to a date histogram', () => {
         const state = getStateWithBaseThreshold();
         state.layers[0].xAccessor = 'b';
         state.layers[0].accessors = [];
@@ -649,7 +676,12 @@ describe('xy_visualization', () => {
           layerId: 'threshold',
         }).groups;
 
-        expect(options).toHaveLength(0);
+        expect(options[0]).toEqual(
+          expect.objectContaining({
+            invalid: true,
+            groupId: 'xThreshold',
+          })
+        );
       });
 
       it('should return groups in a specific order (left, right, bottom)', () => {
@@ -694,7 +726,7 @@ describe('xy_visualization', () => {
         const state = getStateWithBaseThreshold();
         state.layers[0].xAccessor = 'b';
         state.layers[0].accessors = [];
-        state.layers[1].yConfig![0].axisMode = 'bottom';
+        state.layers[1].yConfig = []; // empty the configuration
         // set the xAccessor as top values
         frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
           if (accessor === 'b') {
@@ -715,6 +747,38 @@ describe('xy_visualization', () => {
         }).groups;
 
         expect(options).toHaveLength(0);
+      });
+
+      it('should mark horizontal group is invalid when accessor is changed to a terms operation', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig![0].axisMode = 'bottom';
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'string',
+              isBucketed: true,
+              scale: 'ordinal',
+              label: 'top values',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options[0]).toEqual(
+          expect.objectContaining({
+            invalid: true,
+            groupId: 'xThreshold',
+          })
+        );
       });
     });
 
