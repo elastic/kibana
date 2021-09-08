@@ -61,8 +61,7 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ setIsFixed }) => 
     if (!isLoading && !error) {
       setIsFixed(criticalDeprecations.length === 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [criticalDeprecations, isLoading, error]);
+  }, [setIsFixed, criticalDeprecations, isLoading, error]);
 
   const hasWarnings = warningDeprecations.length > 0;
   const hasCritical = criticalDeprecations.length > 0;

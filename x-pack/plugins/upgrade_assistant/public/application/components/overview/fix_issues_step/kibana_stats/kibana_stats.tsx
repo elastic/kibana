@@ -85,9 +85,7 @@ export const KibanaDeprecationStats: FunctionComponent<Props> = ({ setIsFixed })
     if (!isLoading && !error) {
       setIsFixed(criticalDeprecationsCount === 0);
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [criticalDeprecationsCount, isLoading, error]);
+  }, [setIsFixed, criticalDeprecationsCount, isLoading, error]);
 
   const hasCritical = criticalDeprecationsCount > 0;
   const hasWarnings = warningDeprecationsCount > 0;
