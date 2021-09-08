@@ -9,8 +9,8 @@ import React, { useEffect, useState } from 'react';
 
 import { EuiToolTip, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SeriesUrl } from '../types';
-import { BuilderItem, getSeriesToEdit } from '../series_editor/series_editor';
+import { SeriesUrl, BuilderItem } from '../types';
+import { getSeriesToEdit } from '../series_editor/series_editor';
 import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { DEFAULT_TIME, ReportTypes } from '../configurations/constants';
