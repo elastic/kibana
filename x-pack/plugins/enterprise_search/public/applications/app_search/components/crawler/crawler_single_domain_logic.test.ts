@@ -158,7 +158,7 @@ describe('CrawlerSingleDomainLogic', () => {
         await nextTick();
 
         expect(http.delete).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/crawler/domains/1234'
+          '/internal/app_search/engines/some-engine/crawler/domains/1234'
         );
 
         expect(flashSuccessToast).toHaveBeenCalled();
@@ -194,7 +194,7 @@ describe('CrawlerSingleDomainLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/crawler/domains/507f1f77bcf86cd799439011'
+          '/internal/app_search/engines/some-engine/crawler/domains/507f1f77bcf86cd799439011'
         );
         expect(CrawlerSingleDomainLogic.actions.onReceiveDomainData).toHaveBeenCalledWith({
           id: '507f1f77bcf86cd799439011',
@@ -242,7 +242,7 @@ describe('CrawlerSingleDomainLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/crawler/domains/507f1f77bcf86cd799439011',
+          '/internal/app_search/engines/some-engine/crawler/domains/507f1f77bcf86cd799439011',
           {
             body: JSON.stringify({ deduplication_enabled: true, deduplication_fields: ['title'] }),
           }

@@ -73,7 +73,7 @@ describe('SearchAuthorizeLogic', () => {
         SearchAuthorizeLogic.actions.initializeSearchAuth(searchOAuth, entSearchStateParam);
 
         expect(clearFlashMessages).toHaveBeenCalled();
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/oauth/authorize', {
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/oauth/authorize', {
           query: preAuthQuery,
         });
         await nextTick();
@@ -84,7 +84,7 @@ describe('SearchAuthorizeLogic', () => {
         http.get.mockReturnValue(Promise.resolve(successRedirectResponse));
         SearchAuthorizeLogic.actions.initializeSearchAuth(searchOAuth, entSearchStateParam);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/oauth/authorize', {
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/oauth/authorize', {
           query: preAuthQuery,
         });
         await nextTick();
@@ -100,7 +100,7 @@ describe('SearchAuthorizeLogic', () => {
 
         SearchAuthorizeLogic.actions.initializeSearchAuth(searchOAuth, entSearchStateParam);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/oauth/authorize', {
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/oauth/authorize', {
           query: preAuthQuery,
         });
         await nextTick();

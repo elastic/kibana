@@ -286,7 +286,7 @@ describe('AddDomainLogic', () => {
         await nextTick();
 
         expect(http.post).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/crawler/domains',
+          '/internal/app_search/engines/some-engine/crawler/domains',
           {
             query: {
               respond_with: 'crawler_details',
