@@ -589,7 +589,6 @@
     "@types/prettier": "^2.1.5",
     "@types/pretty-ms": "^5.0.0",
     "@types/prop-types": "^15.7.3",
-    "@types/proper-lockfile": "^3.0.1",
     "@types/rbush": "^3.0.0",
     "@types/reach__router": "^1.2.6",
     "@types/react": "^16.9.36",
