@@ -6,32 +6,19 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React from 'react';
-import { Coordinate } from '../../../../../typings/timeseries';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
+import React, { ComponentProps } from 'react';
+import { SparkPlot } from './charts/spark_plot';
 
-export function ServiceListMetric({
-  color,
-  series,
-  valueLabel,
-  comparisonSeries,
-  hideSeries = false,
-}: {
-  color: 'euiColorVis1' | 'euiColorVis0' | 'euiColorVis7';
-  series?: Coordinate[];
-  comparisonSeries?: Coordinate[];
-  valueLabel: React.ReactNode;
+interface ListMetricProps extends ComponentProps<typeof SparkPlot> {
   hideSeries?: boolean;
-}) {
+}
+
+export function ListMetric(props: ListMetricProps) {
+  const { hideSeries, ...sparkPlotProps } = props;
+  const { valueLabel } = sparkPlotProps;
+
   if (!hideSeries) {
-    return (
-      <SparkPlot
-        valueLabel={valueLabel}
-        series={series}
-        color={color}
-        comparisonSeries={comparisonSeries}
-      />
-    );
+    return <SparkPlot {...sparkPlotProps} />;
   }
 
   return (
