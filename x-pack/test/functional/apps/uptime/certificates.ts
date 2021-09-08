@@ -13,11 +13,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime } = getPageObjects(['uptime']);
   const uptimeService = getService('uptime');
 
+  const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   describe('certificates', function () {
     describe('empty certificates', function () {
       before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
         await makeCheck({ es });
         await uptime.goToRoot(true);
       });
