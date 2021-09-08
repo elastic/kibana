@@ -172,8 +172,6 @@ export class ReportingPublicPlugin
         // report generation to navigate to the correct place with full app state.
         if (isRedirectAppPath(params.history.location.pathname)) {
           const { mountRedirectApp } = await import('./redirect');
-          const [start] = await getStartServices();
-          start.chrome.setIsVisible(false);
           return mountRedirectApp({ ...params, share, apiClient });
         }
 
