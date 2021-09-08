@@ -9,6 +9,7 @@ import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { safeLoad } from 'js-yaml';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -201,7 +202,9 @@ export const EditPackagePolicyForm = memo<{
 
             if (packageData?.response) {
               setPackageInfo(packageData.response);
-              setValidationResults(validatePackagePolicy(newPackagePolicy, packageData.response));
+              setValidationResults(
+                validatePackagePolicy(newPackagePolicy, packageData.response, safeLoad)
+              );
               setFormState('VALID');
             }
           }
@@ -239,7 +242,8 @@ export const EditPackagePolicyForm = memo<{
       if (packageInfo) {
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
-          packageInfo
+          packageInfo,
+          safeLoad
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console

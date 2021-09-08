@@ -8,9 +8,12 @@
 import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
 import { CoreStart } from 'src/core/public';
+import type { SearchSource } from 'src/plugins/data/common';
+import type { SavedSearch } from 'src/plugins/discover/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
-import { LicensingPluginSetup } from '../../../licensing/public';
+import type { ILicense, LicensingPluginSetup } from '../../../licensing/public';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+import type { ActionContext } from './get_csv_panel_action';
 import { ReportingCsvPanelAction } from './get_csv_panel_action';
 
 type LicenseResults = 'valid' | 'invalid' | 'unavailable' | 'expired';
@@ -19,9 +22,9 @@ const core = coreMock.createSetup();
 let apiClient: ReportingAPIClient;
 
 describe('GetCsvReportPanelAction', () => {
-  let context: any;
-  let mockLicense$: any;
-  let mockSearchSource: any;
+  let context: ActionContext;
+  let mockLicense$: (state?: LicenseResults) => Rx.Observable<ILicense>;
+  let mockSearchSource: SearchSource;
   let mockStartServicesPayload: [CoreStart, object, unknown];
   let mockStartServices$: Rx.Subject<typeof mockStartServicesPayload>;
 
@@ -54,15 +57,15 @@ describe('GetCsvReportPanelAction', () => {
       null,
     ];
 
-    mockSearchSource = {
+    mockSearchSource = ({
       createCopy: () => mockSearchSource,
       removeField: jest.fn(),
       setField: jest.fn(),
       getField: jest.fn(),
       getSerializedFields: jest.fn().mockImplementation(() => ({})),
-    };
+    } as unknown) as SearchSource;
 
-    context = {
+    context = ({
       embeddable: {
         type: 'search',
         getSavedSearch: () => {
@@ -78,7 +81,7 @@ describe('GetCsvReportPanelAction', () => {
           },
         }),
       },
-    } as any;
+    } as unknown) as ActionContext;
   });
 
   it('translates empty embeddable context into job params', async () => {
@@ -105,18 +108,18 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   it('translates embeddable context into job params', async () => {
-    mockSearchSource = {
+    mockSearchSource = ({
       createCopy: () => mockSearchSource,
       removeField: jest.fn(),
       setField: jest.fn(),
       getField: jest.fn(),
       getSerializedFields: jest.fn().mockImplementation(() => ({ testData: 'testDataValue' })),
-    };
+    } as unknown) as SearchSource;
     context.embeddable.getSavedSearch = () => {
-      return {
+      return ({
         searchSource: mockSearchSource,
         columns: ['column_a', 'column_b'],
-      };
+      } as unknown) as SavedSearch;
     };
 
     const panel = new ReportingCsvPanelAction({
