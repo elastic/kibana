@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getScreenSizes } from './use_break_points';
+import { getScreenSizes } from './use_breakpoints';
 
-describe('use_break_points', () => {
+describe('use_breakpoints', () => {
   describe('getScreenSizes', () => {
     it('return xs when within 0px - 5740x', () => {
       expect(getScreenSizes(0)).toEqual({
