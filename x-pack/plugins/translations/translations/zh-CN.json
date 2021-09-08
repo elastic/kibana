@@ -26546,7 +26546,6 @@
     "xpack.upgradeAssistant.kibanaDeprecations.loadingText": "正在加载弃用……",
     "xpack.upgradeAssistant.kibanaDeprecations.pageTitle": "Kibana",
     "xpack.upgradeAssistant.kibanaDeprecationStats.criticalDeprecationsTitle": "紧急",
-    "xpack.upgradeAssistant.kibanaDeprecationStats.getWarningDeprecationsMessage": "Kibana 有 {warningDeprecations} 个警告{warningDeprecations, plural, other {弃用}}",
     "xpack.upgradeAssistant.kibanaDeprecationStats.loadingErrorMessage": "检索 Kibana 弃用时发生错误。",
     "xpack.upgradeAssistant.kibanaDeprecationStats.statsTitle": "Kibana",
     "xpack.upgradeAssistant.kibanaDeprecationStats.warningDeprecationsTitle": "警告",
