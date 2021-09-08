@@ -14,6 +14,7 @@ import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_tab
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Filter } from '@kbn/es-query';
 import { Required } from 'utility-types';
+import useWindowSize from 'react-use/lib/useWindowSize';
 import {
   Embeddable,
   EmbeddableInput,
@@ -664,6 +665,7 @@ export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddable
     },
     [input, searchQueryLanguage, searchString]
   );
+  const { width: windowWidth } = useWindowSize();
 
   return (
     <DataVisualizerTable<FieldVisConfig>
@@ -673,6 +675,7 @@ export const DiscoverWrapper = ({ input }: { input: DataVisualizerGridEmbeddable
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
       showPreviewByDefault={input?.showPreviewByDefault}
+      width={windowWidth - 300}
     />
   );
 

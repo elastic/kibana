@@ -23,6 +23,7 @@ import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_tab
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
+import useWindowSize from 'react-use/lib/useWindowSize';
 import {
   IndexPatternField,
   KBN_FIELD_TYPES,
@@ -804,6 +805,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   }, [currentIndexPattern, services, searchQueryLanguage, searchString]);
 
   const helpLink = docLinks.links.ml.guide;
+  const { width: windowWidth } = useWindowSize();
 
   return (
     <Fragment>
@@ -896,6 +898,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     updatePageState={setDataVisualizerListState}
                     getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
                     extendedColumns={extendedColumns}
+                    width={windowWidth - 300}
                   />
                 </EuiPanel>
               </EuiFlexItem>

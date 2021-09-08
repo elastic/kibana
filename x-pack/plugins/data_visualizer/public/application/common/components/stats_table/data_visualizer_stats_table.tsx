@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import useWindowSize from 'react-use/lib/useWindowSize';
 import useDebounce from 'react-use/lib/useDebounce';
 import { JOB_FIELD_TYPES, JobFieldType, DataVisualizerTableState } from '../../../../../common';
 import { DocumentStat } from './components/field_data_row/document_stats';
@@ -53,10 +52,12 @@ interface DataVisualizerTableProps<T> {
   getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
   extendedColumns?: Array<EuiBasicTableColumn<T>>;
   showPreviewByDefault?: boolean;
+  /** Table width used to calculate the appropriate column widths **/
+  width: number;
 }
 
 export const calculateTableColumnsDimensions = (width: number, showDistributions: boolean) => {
-  const breakPoint = getBreakpoint(width - 300);
+  const breakPoint = getBreakpoint(width);
   switch (breakPoint) {
     case 'xs':
     case 's':
@@ -65,7 +66,7 @@ export const calculateTableColumnsDimensions = (width: number, showDistributions
         type: '40px',
         docCount: '110px',
         distinctValues: '75px',
-        distributions: showDistributions ? '120px' : '20px',
+        distributions: showDistributions ? '120px' : '50px',
         showIcons: false,
         breakPoint,
       };
@@ -101,6 +102,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   getItemIdToExpandedRowMap,
   extendedColumns,
   showPreviewByDefault,
+  width,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, toggleExpandAll] = useState<boolean>(false);
@@ -120,8 +122,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     showIcons: true,
     breakPoint: 'xl',
   });
-
-  const { width } = useWindowSize();
 
   useDebounce(
     () => {
@@ -263,37 +263,67 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {dimensions.showIcons ? (
               <EuiIcon type={'visBarVertical'} style={{ paddingRight: 4 }} />
-            ) : null}
-            {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
-              defaultMessage: 'Distributions',
-            })}
-            <EuiToolTip
-              content={
-                !showDistributions
-                  ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsTooltip', {
-                      defaultMessage: 'Show distributions',
-                    })
-                  : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsTooltip', {
-                      defaultMessage: 'Hide distributions',
-                    })
-              }
-            >
-              <EuiButtonIcon
-                style={{ marginLeft: 4 }}
-                size={'s'}
-                iconType={showDistributions ? 'eye' : 'eyeClosed'}
-                onClick={() => toggleShowDistribution()}
-                aria-label={
-                  showDistributions
-                    ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel', {
+            ) : (
+              <EuiToolTip
+                content={
+                  !showDistributions
+                    ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsTooltip', {
                         defaultMessage: 'Show distributions',
                       })
-                    : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsAriaLabel', {
+                    : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsTooltip', {
                         defaultMessage: 'Hide distributions',
                       })
                 }
-              />
-            </EuiToolTip>
+              >
+                <EuiButtonIcon
+                  style={{ marginLeft: 4 }}
+                  size={'s'}
+                  iconType={showDistributions ? 'eye' : 'eyeClosed'}
+                  onClick={() => toggleShowDistribution()}
+                  aria-label={
+                    showDistributions
+                      ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel', {
+                          defaultMessage: 'Show distributions',
+                        })
+                      : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsAriaLabel', {
+                          defaultMessage: 'Hide distributions',
+                        })
+                  }
+                />
+              </EuiToolTip>
+            )}
+            {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
+              defaultMessage: 'Distributions',
+            })}
+            {dimensions.showIcons ? (
+              <EuiToolTip
+                content={
+                  !showDistributions
+                    ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsTooltip', {
+                        defaultMessage: 'Show distributions',
+                      })
+                    : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsTooltip', {
+                        defaultMessage: 'Hide distributions',
+                      })
+                }
+              >
+                <EuiButtonIcon
+                  style={{ marginLeft: 4 }}
+                  size={'s'}
+                  iconType={showDistributions ? 'eye' : 'eyeClosed'}
+                  onClick={() => toggleShowDistribution()}
+                  aria-label={
+                    showDistributions
+                      ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel', {
+                          defaultMessage: 'Show distributions',
+                        })
+                      : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsAriaLabel', {
+                          defaultMessage: 'Hide distributions',
+                        })
+                  }
+                />
+              </EuiToolTip>
+            ) : null}
           </div>
         ),
         render: (item: DataVisualizerTableItem) => {
