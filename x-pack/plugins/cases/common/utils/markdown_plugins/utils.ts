@@ -16,14 +16,14 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { LENS_ID, LensParser, LensSerializer } from './lens';
 import { TimelineSerializer, TimelineParser } from './timeline';
 
-interface LensMarkdownNode extends Node {
+export interface LensMarkdownNode extends Node {
   timeRange: TimeRange;
   attributes: SerializableRecord;
   type: string;
   id: string;
 }
 
-interface LensMarkdownParent extends Node {
+export interface MarkdownNode extends Node {
   children: Array<LensMarkdownNode | Node>;
 }
 
@@ -32,10 +32,10 @@ export const getLensVisualizations = (parsedComment?: Array<LensMarkdownNode | N
 
 export const parseCommentString = (comment: string) => {
   const processor = unified().use([[markdown, {}], LensParser, TimelineParser]);
-  return processor.parse(comment) as LensMarkdownParent;
+  return processor.parse(comment) as MarkdownNode;
 };
 
-export const stringifyComment = (comment: LensMarkdownParent) =>
+export const stringifyMarkdownComment = (comment: MarkdownNode) =>
   unified()
     .use([
       [
@@ -54,3 +54,14 @@ export const stringifyComment = (comment: LensMarkdownParent) =>
       ],
     ])
     .stringify(comment);
+
+export const isLensMarkdownNode = (node?: unknown): node is LensMarkdownNode => {
+  const unsafeNode = node as LensMarkdownNode;
+  return (
+    unsafeNode != null &&
+    unsafeNode.timeRange != null &&
+    unsafeNode.attributes != null &&
+    unsafeNode != null &&
+    unsafeNode.type === 'lens'
+  );
+};
