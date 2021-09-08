@@ -62,6 +62,7 @@ core.chrome.setHelpExtension(elem => {
 |  [getIsVisible$()](./kibana-plugin-core-public.chromestart.getisvisible_.md) | Get an observable of the current visibility state of the chrome. |
 |  [removeApplicationClass(className)](./kibana-plugin-core-public.chromestart.removeapplicationclass.md) | Remove a className added with <code>addApplicationClass()</code>. If className is unknown it is ignored. |
 |  [setAppTitle(appTitle)](./kibana-plugin-core-public.chromestart.setapptitle.md) | Sets the current app's title |
+|  [hasHeaderBanner$()](./kibana-plugin-core-public.chromestart.hasheaderbanner_.md) | Get an observable of the current header banner presence state. |
 |  [setBadge(badge)](./kibana-plugin-core-public.chromestart.setbadge.md) | Override the current badge |
 |  [setBrand(brand)](./kibana-plugin-core-public.chromestart.setbrand.md) | Set the brand configuration. |
 |  [setBreadcrumbs(newBreadcrumbs)](./kibana-plugin-core-public.chromestart.setbreadcrumbs.md) | Override the current set of breadcrumbs |
