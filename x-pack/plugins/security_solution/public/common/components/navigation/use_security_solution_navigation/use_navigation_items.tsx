@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
+
 import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
@@ -20,7 +21,6 @@ export const usePrimaryNavigationItems = ({
   ...urlStateProps
 }: PrimaryNavigationItemsProps): Array<EuiSideNavItemType<{}>> => {
   const { navigateTo, getAppUrl } = useNavigation();
-
   const getSideNav = useCallback(
     (tab: NavTab) => {
       const { id, name, disabled } = tab;
@@ -62,7 +62,6 @@ export const usePrimaryNavigationItems = ({
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
-
   return useMemo(
     () => [
       {
@@ -76,7 +75,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       },
       {
         ...securityNavGroup.explore,
-        items: [navTabs.hosts, navTabs.network],
+        items: [navTabs.hosts, navTabs.network, ...(navTabs.ueba != null ? [navTabs.ueba] : [])],
       },
       {
         ...securityNavGroup.investigate,

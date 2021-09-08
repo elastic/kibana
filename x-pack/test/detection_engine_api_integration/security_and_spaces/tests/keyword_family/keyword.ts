@@ -37,15 +37,21 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('Rule detects against a keyword of event.dataset', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_keyword_family/keyword');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_keyword_family/keyword');
+    });
+
     beforeEach(async () => {
       await createSignalsIndex(supertest);
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_keyword_family/keyword');
     });
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_keyword_family/keyword');
     });
 
     describe('"kql" rule type', () => {
@@ -59,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits
-          .map((hit) => (hit._source.event as EventModule).dataset)
+          .map((hit) => (hit._source?.event as EventModule).dataset)
           .sort();
         expect(hits).to.eql([
           'dataset_name_1',
@@ -82,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits
-          .map((hit) => (hit._source.event as EventModule).dataset)
+          .map((hit) => (hit._source?.event as EventModule).dataset)
           .sort();
         expect(hits).to.eql([
           'dataset_name_1',
@@ -107,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits
-          .map((hit) => hit._source.signal.threshold_result ?? null)
+          .map((hit) => hit._source?.signal.threshold_result ?? null)
           .sort();
         expect(hits).to.eql([
           {

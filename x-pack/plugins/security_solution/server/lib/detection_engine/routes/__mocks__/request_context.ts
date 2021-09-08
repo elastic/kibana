@@ -11,15 +11,17 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../../alerting/server/mocks';
+import { rulesClientMock } from '../../../../../../alerting/server/mocks';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
 import { siemMock } from '../../../../mocks';
+import { ruleExecutionLogClientMock } from '../../rule_execution_log/__mocks__/rule_execution_log_client';
 
 const createMockClients = () => ({
-  alertsClient: alertsClientMock.create(),
+  rulesClient: rulesClientMock.create(),
   licensing: { license: licensingMock.createLicenseMock() },
   clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
+  ruleExecutionLogClient: ruleExecutionLogClientMock.create(),
   appClient: siemMock.createClient(),
 });
 
@@ -47,7 +49,7 @@ const createRequestContextMock = (
 ): SecuritySolutionRequestHandlerContextMock => {
   const coreContext = coreMock.createRequestHandlerContext();
   return ({
-    alerting: { getAlertsClient: jest.fn(() => clients.alertsClient) },
+    alerting: { getRulesClient: jest.fn(() => clients.rulesClient) },
     core: {
       ...coreContext,
       elasticsearch: {
@@ -57,7 +59,11 @@ const createRequestContextMock = (
       savedObjects: { client: clients.savedObjectsClient },
     },
     licensing: clients.licensing,
-    securitySolution: { getAppClient: jest.fn(() => clients.appClient) },
+    securitySolution: {
+      getAppClient: jest.fn(() => clients.appClient),
+      getExecutionLogClient: jest.fn(() => clients.ruleExecutionLogClient),
+      getSpaceId: jest.fn(() => 'default'),
+    },
   } as unknown) as SecuritySolutionRequestHandlerContextMock;
 };
 

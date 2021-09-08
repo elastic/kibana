@@ -6,7 +6,6 @@
  */
 
 import { Direction } from '../../../../../../common';
-// eslint-disable-next-line no-duplicate-imports
 import type { ColumnHeaderOptions } from '../../../../../../common';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { Sort, SortDirection } from '../../sort';

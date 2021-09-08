@@ -143,14 +143,6 @@ export const WARNING_NO_CONNECTOR_TITLE = i18n.translate(
   }
 );
 
-export const WARNING_NO_CONNECTOR_MESSAGE = i18n.translate(
-  'xpack.cases.configureCases.warningMessage',
-  {
-    defaultMessage:
-      'The selected connector has been deleted. Either select a different connector or create a new one.',
-  }
-);
-
 export const COMMENT = i18n.translate('xpack.cases.configureCases.commentMapping', {
   defaultMessage: 'Comments',
 });

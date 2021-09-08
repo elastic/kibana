@@ -18,7 +18,7 @@ export const DetectionEngineUserUnauthenticated = React.memo(() => {
       detectionUnauthenticated: {
         icon: 'documents',
         label: i18n.GO_TO_DOCUMENTATION,
-        url: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}/detections-permissions-section.html`,
+        url: `${docLinks.links.siem.detectionsReq}`,
         target: '_blank',
       },
     }),

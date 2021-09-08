@@ -23,6 +23,7 @@ import { selectedFiltersReducer } from './selected_filters';
 import { alertsReducer } from '../alerts/alerts';
 import { journeyReducer } from './journey';
 import { networkEventsReducer } from './network_events';
+import { syntheticsReducer } from './synthetics';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
@@ -42,4 +43,5 @@ export const rootReducer = combineReducers({
   alerts: alertsReducer,
   journeys: journeyReducer,
   networkEvents: networkEventsReducer,
+  synthetics: syntheticsReducer,
 });

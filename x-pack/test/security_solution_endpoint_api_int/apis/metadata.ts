@@ -23,8 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/106051
-  describe.skip('test metadata api', () => {
+  describe('test metadata api', () => {
     describe(`POST ${HOST_METADATA_LIST_ROUTE} when index is empty`, () => {
       it('metadata api should return empty result when index is empty', async () => {
         await deleteMetadataStream(getService);
@@ -222,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
           (ip: string) => ip === targetEndpointIp
         );
         expect(resultIp).to.eql([targetEndpointIp]);
-        expect(body.hosts[0].metadata.event.created).to.eql(1618841405309);
+        expect(body.hosts[0].metadata.event.created).to.eql(1626897841950);
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
@@ -264,7 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resultElasticAgentId: string = body.hosts[0].metadata.elastic.agent.id;
         expect(resultHostId).to.eql(targetEndpointId);
         expect(resultElasticAgentId).to.eql(targetElasticAgentId);
-        expect(body.hosts[0].metadata.event.created).to.eql(1618841405309);
+        expect(body.hosts[0].metadata.event.created).to.eql(1626897841950);
         expect(body.hosts[0].host_status).to.eql('unhealthy');
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);

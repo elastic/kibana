@@ -34,7 +34,7 @@ import { migrateLegacyQuery } from '../../../helpers/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../../../url_generator';
 import { SavedSearch } from '../../../../saved_searches';
-import { handleSourceColumnState } from '../../../angular/helpers';
+import { handleSourceColumnState } from '../../../helpers/state_helpers';
 
 export interface AppState {
   /**
@@ -112,7 +112,7 @@ export interface GetStateReturn {
    */
   appStateContainer: ReduxLikeStateContainer<AppState>;
   /**
-   * Function starting state sync when Discover main is loaded
+   * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
     indexPattern: IndexPattern,
@@ -392,6 +392,12 @@ function createUrlGeneratorState({
     sort: appState.sort,
     savedQuery: appState.savedQuery,
     interval: appState.interval,
+    refreshInterval: shouldRestoreSearchSession
+      ? {
+          pause: true, // force pause refresh interval when restoring a session
+          value: 0,
+        }
+      : undefined,
     useHash: false,
   };
 }

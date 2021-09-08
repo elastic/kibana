@@ -18,6 +18,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { configServiceMock } from '../config/mocks';
+import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
@@ -51,6 +52,7 @@ describe('StatusService', () => {
       environment: environmentServiceMock.createSetupContract(),
       http: httpServiceMock.createInternalSetupContract(),
       metrics: metricsServiceMock.createInternalSetupContract(),
+      coreUsageData: coreUsageDataServiceMock.createSetupContract(),
       ...overrides,
     };
   };
@@ -254,12 +256,9 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Object {
-                  "savedObjects": Object {
-                    "level": degraded,
-                    "summary": "This is degraded!",
-                  },
-                },
+                "affectedServices": Array [
+                  "savedObjects",
+                ],
               },
               "summary": "[savedObjects]: This is degraded!",
             },
@@ -307,12 +306,9 @@ describe('StatusService', () => {
               "detail": "See the status page for more information",
               "level": degraded,
               "meta": Object {
-                "affectedServices": Object {
-                  "savedObjects": Object {
-                    "level": degraded,
-                    "summary": "This is degraded!",
-                  },
-                },
+                "affectedServices": Array [
+                  "savedObjects",
+                ],
               },
               "summary": "[savedObjects]: This is degraded!",
             },

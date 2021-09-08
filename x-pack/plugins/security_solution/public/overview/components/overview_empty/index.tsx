@@ -36,7 +36,7 @@ const OverviewEmptyComponent: React.FC = () => {
   const endpointIntegrationUrlPath = endpointPackageVersion
     ? `/endpoint-${endpointPackageVersion}/add-integration`
     : '';
-  const endpointIntegrationUrl = `#/integrations${endpointIntegrationUrlPath}`;
+  const endpointIntegrationUrl = `/integrations${endpointIntegrationUrlPath}`;
   const handleEndpointClick = useNavigateToAppEventHandler('fleet', {
     path: endpointIntegrationUrl,
   });

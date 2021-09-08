@@ -161,6 +161,13 @@ export const fieldsBeat: BeatFields = {
     name: 'client.geo.city_name',
     type: 'keyword',
   },
+  'client.geo.continent_code': {
+    category: 'client',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'client.geo.continent_code',
+    type: 'keyword',
+  },
   'client.geo.continent_name': {
     category: 'client',
     description: 'Name of the continent.',
@@ -197,6 +204,14 @@ export const fieldsBeat: BeatFields = {
     name: 'client.geo.name',
     type: 'keyword',
   },
+  'client.geo.postal_code': {
+    category: 'client',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'client.geo.postal_code',
+    type: 'keyword',
+  },
   'client.geo.region_iso_code': {
     category: 'client',
     description: 'Region ISO code.',
@@ -211,6 +226,13 @@ export const fieldsBeat: BeatFields = {
     name: 'client.geo.region_name',
     type: 'keyword',
   },
+  'client.geo.timezone': {
+    category: 'client',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'client.geo.timezone',
+    type: 'keyword',
+  },
   'client.ip': {
     category: 'client',
     description: 'IP address of the client (IPv4 or IPv6).',
@@ -219,7 +241,9 @@ export const fieldsBeat: BeatFields = {
   },
   'client.mac': {
     category: 'client',
-    description: 'MAC address of the client.',
+    description:
+      'MAC address of the client. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '00-00-5E-00-53-23',
     name: 'client.mac',
     type: 'keyword',
   },
@@ -414,12 +438,28 @@ export const fieldsBeat: BeatFields = {
     name: 'cloud.region',
     type: 'keyword',
   },
+  'cloud.service.name': {
+    category: 'cloud',
+    description:
+      'The cloud service name is intended to distinguish services running on different platforms within a provider, eg AWS EC2 vs Lambda, GCP GCE vs App Engine, Azure VM vs App Server. Examples: app engine, app service, cloud run, fargate, lambda.',
+    example: 'lambda',
+    name: 'cloud.service.name',
+    type: 'keyword',
+  },
   'code_signature.exists': {
     category: 'code_signature',
     description: 'Boolean to capture if a signature is present.',
     example: 'true',
     name: 'code_signature.exists',
     type: 'boolean',
+  },
+  'code_signature.signing_id': {
+    category: 'code_signature',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'code_signature.signing_id',
+    type: 'keyword',
   },
   'code_signature.status': {
     category: 'code_signature',
@@ -434,6 +474,14 @@ export const fieldsBeat: BeatFields = {
     description: 'Subject name of the code signer',
     example: 'Microsoft Corporation',
     name: 'code_signature.subject_name',
+    type: 'keyword',
+  },
+  'code_signature.team_id': {
+    category: 'code_signature',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'code_signature.team_id',
     type: 'keyword',
   },
   'code_signature.trusted': {
@@ -489,6 +537,30 @@ export const fieldsBeat: BeatFields = {
     name: 'container.runtime',
     type: 'keyword',
   },
+  'data_stream.dataset': {
+    category: 'data_stream',
+    description:
+      'The field can contain anything that makes sense to signify the source of the data. Examples include `nginx.access`, `prometheus`, `endpoint` etc. For data streams that otherwise fit, but that do not have dataset set we use the value "generic" for the dataset value. `event.dataset` should have the same value as `data_stream.dataset`. Beyond the Elasticsearch data stream naming criteria noted above, the `dataset` value has additional restrictions:   * Must not contain `-`   * No longer than 100 characters',
+    example: 'nginx.access',
+    name: 'data_stream.dataset',
+    type: 'constant_keyword',
+  },
+  'data_stream.namespace': {
+    category: 'data_stream',
+    description:
+      'A user defined namespace. Namespaces are useful to allow grouping of data. Many users already organize their indices this way, and the data stream naming scheme now provides this best practice as a default. Many users will populate this field with `default`. If no value is used, it falls back to `default`. Beyond the Elasticsearch index naming criteria noted above, `namespace` value has the additional restrictions:   * Must not contain `-`   * No longer than 100 characters',
+    example: 'production',
+    name: 'data_stream.namespace',
+    type: 'constant_keyword',
+  },
+  'data_stream.type': {
+    category: 'data_stream',
+    description:
+      'An overarching type for the data stream. Currently allowed values are "logs" and "metrics". We expect to also add "traces" and "synthetics" in the near future.',
+    example: 'logs',
+    name: 'data_stream.type',
+    type: 'constant_keyword',
+  },
   'destination.address': {
     category: 'destination',
     description:
@@ -532,6 +604,13 @@ export const fieldsBeat: BeatFields = {
     name: 'destination.geo.city_name',
     type: 'keyword',
   },
+  'destination.geo.continent_code': {
+    category: 'destination',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'destination.geo.continent_code',
+    type: 'keyword',
+  },
   'destination.geo.continent_name': {
     category: 'destination',
     description: 'Name of the continent.',
@@ -568,6 +647,14 @@ export const fieldsBeat: BeatFields = {
     name: 'destination.geo.name',
     type: 'keyword',
   },
+  'destination.geo.postal_code': {
+    category: 'destination',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'destination.geo.postal_code',
+    type: 'keyword',
+  },
   'destination.geo.region_iso_code': {
     category: 'destination',
     description: 'Region ISO code.',
@@ -582,6 +669,13 @@ export const fieldsBeat: BeatFields = {
     name: 'destination.geo.region_name',
     type: 'keyword',
   },
+  'destination.geo.timezone': {
+    category: 'destination',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'destination.geo.timezone',
+    type: 'keyword',
+  },
   'destination.ip': {
     category: 'destination',
     description: 'IP address of the destination (IPv4 or IPv6).',
@@ -590,7 +684,9 @@ export const fieldsBeat: BeatFields = {
   },
   'destination.mac': {
     category: 'destination',
-    description: 'MAC address of the destination.',
+    description:
+      'MAC address of the destination. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '00-00-5E-00-53-23',
     name: 'destination.mac',
     type: 'keyword',
   },
@@ -720,6 +816,14 @@ export const fieldsBeat: BeatFields = {
     name: 'dll.code_signature.exists',
     type: 'boolean',
   },
+  'dll.code_signature.signing_id': {
+    category: 'dll',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'dll.code_signature.signing_id',
+    type: 'keyword',
+  },
   'dll.code_signature.status': {
     category: 'dll',
     description:
@@ -733,6 +837,14 @@ export const fieldsBeat: BeatFields = {
     description: 'Subject name of the code signer',
     example: 'Microsoft Corporation',
     name: 'dll.code_signature.subject_name',
+    type: 'keyword',
+  },
+  'dll.code_signature.team_id': {
+    category: 'dll',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'dll.code_signature.team_id',
     type: 'keyword',
   },
   'dll.code_signature.trusted': {
@@ -773,6 +885,12 @@ export const fieldsBeat: BeatFields = {
     category: 'dll',
     description: 'SHA512 hash.',
     name: 'dll.hash.sha512',
+    type: 'keyword',
+  },
+  'dll.hash.ssdeep': {
+    category: 'dll',
+    description: 'SSDEEP hash.',
+    name: 'dll.hash.ssdeep',
     type: 'keyword',
   },
   'dll.name': {
@@ -1233,6 +1351,14 @@ export const fieldsBeat: BeatFields = {
     name: 'file.code_signature.exists',
     type: 'boolean',
   },
+  'file.code_signature.signing_id': {
+    category: 'file',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'file.code_signature.signing_id',
+    type: 'keyword',
+  },
   'file.code_signature.status': {
     category: 'file',
     description:
@@ -1246,6 +1372,14 @@ export const fieldsBeat: BeatFields = {
     description: 'Subject name of the code signer',
     example: 'Microsoft Corporation',
     name: 'file.code_signature.subject_name',
+    type: 'keyword',
+  },
+  'file.code_signature.team_id': {
+    category: 'file',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'file.code_signature.team_id',
     type: 'keyword',
   },
   'file.code_signature.trusted': {
@@ -1344,6 +1478,12 @@ export const fieldsBeat: BeatFields = {
     category: 'file',
     description: 'SHA512 hash.',
     name: 'file.hash.sha512',
+    type: 'keyword',
+  },
+  'file.hash.ssdeep': {
+    category: 'file',
+    description: 'SSDEEP hash.',
+    name: 'file.hash.ssdeep',
     type: 'keyword',
   },
   'file.inode': {
@@ -1650,6 +1790,13 @@ export const fieldsBeat: BeatFields = {
     name: 'geo.city_name',
     type: 'keyword',
   },
+  'geo.continent_code': {
+    category: 'geo',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'geo.continent_code',
+    type: 'keyword',
+  },
   'geo.continent_name': {
     category: 'geo',
     description: 'Name of the continent.',
@@ -1686,6 +1833,14 @@ export const fieldsBeat: BeatFields = {
     name: 'geo.name',
     type: 'keyword',
   },
+  'geo.postal_code': {
+    category: 'geo',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'geo.postal_code',
+    type: 'keyword',
+  },
   'geo.region_iso_code': {
     category: 'geo',
     description: 'Region ISO code.',
@@ -1698,6 +1853,13 @@ export const fieldsBeat: BeatFields = {
     description: 'Region name.',
     example: 'Quebec',
     name: 'geo.region_name',
+    type: 'keyword',
+  },
+  'geo.timezone': {
+    category: 'geo',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'geo.timezone',
     type: 'keyword',
   },
   'group.domain': {
@@ -1743,12 +1905,39 @@ export const fieldsBeat: BeatFields = {
     name: 'hash.sha512',
     type: 'keyword',
   },
+  'hash.ssdeep': {
+    category: 'hash',
+    description: 'SSDEEP hash.',
+    name: 'hash.ssdeep',
+    type: 'keyword',
+  },
   'host.architecture': {
     category: 'host',
     description: 'Operating system architecture.',
     example: 'x86_64',
     name: 'host.architecture',
     type: 'keyword',
+  },
+  'host.cpu.usage': {
+    category: 'host',
+    description:
+      'Percent CPU used which is normalized by the number of CPU cores and it ranges from 0 to 1. Scaling factor: 1000. For example: For a two core host, this value should be the average of the two cores, between 0 and 1.',
+    name: 'host.cpu.usage',
+    type: 'scaled_float',
+  },
+  'host.disk.read.bytes': {
+    category: 'host',
+    description:
+      'The total number of bytes (gauge) read successfully (aggregated from all disks) since the last metric collection.',
+    name: 'host.disk.read.bytes',
+    type: 'long',
+  },
+  'host.disk.write.bytes': {
+    category: 'host',
+    description:
+      'The total number of bytes (gauge) written successfully (aggregated from all disks) since the last metric collection.',
+    name: 'host.disk.write.bytes',
+    type: 'long',
   },
   'host.domain': {
     category: 'host',
@@ -1763,6 +1952,13 @@ export const fieldsBeat: BeatFields = {
     description: 'City name.',
     example: 'Montreal',
     name: 'host.geo.city_name',
+    type: 'keyword',
+  },
+  'host.geo.continent_code': {
+    category: 'host',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'host.geo.continent_code',
     type: 'keyword',
   },
   'host.geo.continent_name': {
@@ -1801,6 +1997,14 @@ export const fieldsBeat: BeatFields = {
     name: 'host.geo.name',
     type: 'keyword',
   },
+  'host.geo.postal_code': {
+    category: 'host',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'host.geo.postal_code',
+    type: 'keyword',
+  },
   'host.geo.region_iso_code': {
     category: 'host',
     description: 'Region ISO code.',
@@ -1813,6 +2017,13 @@ export const fieldsBeat: BeatFields = {
     description: 'Region name.',
     example: 'Quebec',
     name: 'host.geo.region_name',
+    type: 'keyword',
+  },
+  'host.geo.timezone': {
+    category: 'host',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'host.geo.timezone',
     type: 'keyword',
   },
   'host.hostname': {
@@ -1837,7 +2048,9 @@ export const fieldsBeat: BeatFields = {
   },
   'host.mac': {
     category: 'host',
-    description: 'Host mac addresses.',
+    description:
+      'Host MAC addresses. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '["00-00-5E-00-53-23", "00-00-5E-00-53-24"]',
     name: 'host.mac',
     type: 'keyword',
   },
@@ -1847,6 +2060,34 @@ export const fieldsBeat: BeatFields = {
       'Name of the host. It can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.',
     name: 'host.name',
     type: 'keyword',
+  },
+  'host.network.egress.bytes': {
+    category: 'host',
+    description:
+      'The number of bytes (gauge) sent out on all network interfaces by the host since the last metric collection.',
+    name: 'host.network.egress.bytes',
+    type: 'long',
+  },
+  'host.network.egress.packets': {
+    category: 'host',
+    description:
+      'The number of packets (gauge) sent out on all network interfaces by the host since the last metric collection.',
+    name: 'host.network.egress.packets',
+    type: 'long',
+  },
+  'host.network.ingress.bytes': {
+    category: 'host',
+    description:
+      'The number of bytes received (gauge) on all network interfaces by the host since the last metric collection.',
+    name: 'host.network.ingress.bytes',
+    type: 'long',
+  },
+  'host.network.ingress.packets': {
+    category: 'host',
+    description:
+      'The number of packets (gauge) received on all network interfaces by the host since the last metric collection.',
+    name: 'host.network.ingress.packets',
+    type: 'long',
   },
   'host.os.family': {
     category: 'host',
@@ -2000,6 +2241,14 @@ export const fieldsBeat: BeatFields = {
     name: 'http.request.bytes',
     type: 'long',
     format: 'bytes',
+  },
+  'http.request.id': {
+    category: 'http',
+    description:
+      'A unique identifier for each HTTP request to correlate logs between clients and servers in transactions. The id may be contained in a non-standard HTTP header, such as `X-Request-ID` or `X-Correlation-ID`.',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: 'http.request.id',
+    type: 'keyword',
   },
   'http.request.method': {
     category: 'http',
@@ -2320,7 +2569,7 @@ export const fieldsBeat: BeatFields = {
   'observer.egress': {
     category: 'observer',
     description:
-      'Observer.egress holds information like interface number and name, vlan, and zone information to  classify egress traffic.  Single armed monitoring such as a network sensor on a span port should  only use observer.ingress to categorize traffic.',
+      'Observer.egress holds information like interface number and name, vlan, and zone information to classify egress traffic.  Single armed monitoring such as a network sensor on a span port should only use observer.ingress to categorize traffic.',
     name: 'observer.egress',
     type: 'object',
   },
@@ -2363,7 +2612,7 @@ export const fieldsBeat: BeatFields = {
   'observer.egress.zone': {
     category: 'observer',
     description:
-      'Network zone of outbound traffic as reported by the observer to categorize the destination area of egress  traffic, e.g. Internal, External, DMZ, HR, Legal, etc.',
+      'Network zone of outbound traffic as reported by the observer to categorize the destination area of egress traffic, e.g. Internal, External, DMZ, HR, Legal, etc.',
     example: 'Public_Internet',
     name: 'observer.egress.zone',
     type: 'keyword',
@@ -2373,6 +2622,13 @@ export const fieldsBeat: BeatFields = {
     description: 'City name.',
     example: 'Montreal',
     name: 'observer.geo.city_name',
+    type: 'keyword',
+  },
+  'observer.geo.continent_code': {
+    category: 'observer',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'observer.geo.continent_code',
     type: 'keyword',
   },
   'observer.geo.continent_name': {
@@ -2411,6 +2667,14 @@ export const fieldsBeat: BeatFields = {
     name: 'observer.geo.name',
     type: 'keyword',
   },
+  'observer.geo.postal_code': {
+    category: 'observer',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'observer.geo.postal_code',
+    type: 'keyword',
+  },
   'observer.geo.region_iso_code': {
     category: 'observer',
     description: 'Region ISO code.',
@@ -2425,6 +2689,13 @@ export const fieldsBeat: BeatFields = {
     name: 'observer.geo.region_name',
     type: 'keyword',
   },
+  'observer.geo.timezone': {
+    category: 'observer',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'observer.geo.timezone',
+    type: 'keyword',
+  },
   'observer.hostname': {
     category: 'observer',
     description: 'Hostname of the observer.',
@@ -2434,7 +2705,7 @@ export const fieldsBeat: BeatFields = {
   'observer.ingress': {
     category: 'observer',
     description:
-      'Observer.ingress holds information like interface number and name, vlan, and zone information to  classify ingress traffic.  Single armed monitoring such as a network sensor on a span port should  only use observer.ingress to categorize traffic.',
+      'Observer.ingress holds information like interface number and name, vlan, and zone information to classify ingress traffic.  Single armed monitoring such as a network sensor on a span port should only use observer.ingress to categorize traffic.',
     name: 'observer.ingress',
     type: 'object',
   },
@@ -2477,7 +2748,7 @@ export const fieldsBeat: BeatFields = {
   'observer.ingress.zone': {
     category: 'observer',
     description:
-      'Network zone of incoming traffic as reported by the observer to categorize the source area of ingress  traffic. e.g. internal, External, DMZ, HR, Legal, etc.',
+      'Network zone of incoming traffic as reported by the observer to categorize the source area of ingress traffic. e.g. internal, External, DMZ, HR, Legal, etc.',
     example: 'DMZ',
     name: 'observer.ingress.zone',
     type: 'keyword',
@@ -2490,7 +2761,9 @@ export const fieldsBeat: BeatFields = {
   },
   'observer.mac': {
     category: 'observer',
-    description: 'MAC addresses of the observer',
+    description:
+      'MAC addresses of the observer. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '["00-00-5E-00-53-23", "00-00-5E-00-53-24"]',
     name: 'observer.mac',
     type: 'keyword',
   },
@@ -2584,6 +2857,66 @@ export const fieldsBeat: BeatFields = {
     category: 'observer',
     description: 'Observer version.',
     name: 'observer.version',
+    type: 'keyword',
+  },
+  'orchestrator.api_version': {
+    category: 'orchestrator',
+    description: 'API version being used to carry out the action',
+    example: 'v1beta1',
+    name: 'orchestrator.api_version',
+    type: 'keyword',
+  },
+  'orchestrator.cluster.name': {
+    category: 'orchestrator',
+    description: 'Name of the cluster.',
+    name: 'orchestrator.cluster.name',
+    type: 'keyword',
+  },
+  'orchestrator.cluster.url': {
+    category: 'orchestrator',
+    description: 'URL of the API used to manage the cluster.',
+    name: 'orchestrator.cluster.url',
+    type: 'keyword',
+  },
+  'orchestrator.cluster.version': {
+    category: 'orchestrator',
+    description: 'The version of the cluster.',
+    name: 'orchestrator.cluster.version',
+    type: 'keyword',
+  },
+  'orchestrator.namespace': {
+    category: 'orchestrator',
+    description: 'Namespace in which the action is taking place.',
+    example: 'kube-system',
+    name: 'orchestrator.namespace',
+    type: 'keyword',
+  },
+  'orchestrator.organization': {
+    category: 'orchestrator',
+    description: 'Organization affected by the event (for multi-tenant orchestrator setups).',
+    example: 'elastic',
+    name: 'orchestrator.organization',
+    type: 'keyword',
+  },
+  'orchestrator.resource.name': {
+    category: 'orchestrator',
+    description: 'Name of the resource being acted upon.',
+    example: 'test-pod-cdcws',
+    name: 'orchestrator.resource.name',
+    type: 'keyword',
+  },
+  'orchestrator.resource.type': {
+    category: 'orchestrator',
+    description: 'Type of resource being acted upon.',
+    example: 'service',
+    name: 'orchestrator.resource.type',
+    type: 'keyword',
+  },
+  'orchestrator.type': {
+    category: 'orchestrator',
+    description: 'Orchestrator cluster type (e.g. kubernetes, nomad or cloudfoundry).',
+    example: 'kubernetes',
+    name: 'orchestrator.type',
     type: 'keyword',
   },
   'organization.id': {
@@ -2815,6 +3148,14 @@ export const fieldsBeat: BeatFields = {
     name: 'process.code_signature.exists',
     type: 'boolean',
   },
+  'process.code_signature.signing_id': {
+    category: 'process',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'process.code_signature.signing_id',
+    type: 'keyword',
+  },
   'process.code_signature.status': {
     category: 'process',
     description:
@@ -2828,6 +3169,14 @@ export const fieldsBeat: BeatFields = {
     description: 'Subject name of the code signer',
     example: 'Microsoft Corporation',
     name: 'process.code_signature.subject_name',
+    type: 'keyword',
+  },
+  'process.code_signature.team_id': {
+    category: 'process',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'process.code_signature.team_id',
     type: 'keyword',
   },
   'process.code_signature.trusted': {
@@ -2901,6 +3250,12 @@ export const fieldsBeat: BeatFields = {
     name: 'process.hash.sha512',
     type: 'keyword',
   },
+  'process.hash.ssdeep': {
+    category: 'process',
+    description: 'SSDEEP hash.',
+    name: 'process.hash.ssdeep',
+    type: 'keyword',
+  },
   'process.name': {
     category: 'process',
     description: 'Process name. Sometimes called program name or similar.',
@@ -2931,6 +3286,14 @@ export const fieldsBeat: BeatFields = {
     name: 'process.parent.code_signature.exists',
     type: 'boolean',
   },
+  'process.parent.code_signature.signing_id': {
+    category: 'process',
+    description:
+      'The identifier used to sign the process. This is used to identify the application manufactured by a software vendor. The field is relevant to Apple *OS only.',
+    example: 'com.apple.xpc.proxy',
+    name: 'process.parent.code_signature.signing_id',
+    type: 'keyword',
+  },
   'process.parent.code_signature.status': {
     category: 'process',
     description:
@@ -2944,6 +3307,14 @@ export const fieldsBeat: BeatFields = {
     description: 'Subject name of the code signer',
     example: 'Microsoft Corporation',
     name: 'process.parent.code_signature.subject_name',
+    type: 'keyword',
+  },
+  'process.parent.code_signature.team_id': {
+    category: 'process',
+    description:
+      'The team identifier used to sign the process. This is used to identify the team or vendor of a software product. The field is relevant to Apple *OS only.',
+    example: 'EQHXZ8M8AV',
+    name: 'process.parent.code_signature.team_id',
     type: 'keyword',
   },
   'process.parent.code_signature.trusted': {
@@ -3015,6 +3386,12 @@ export const fieldsBeat: BeatFields = {
     category: 'process',
     description: 'SHA512 hash.',
     name: 'process.parent.hash.sha512',
+    type: 'keyword',
+  },
+  'process.parent.hash.ssdeep': {
+    category: 'process',
+    description: 'SSDEEP hash.',
+    name: 'process.parent.hash.ssdeep',
     type: 'keyword',
   },
   'process.parent.name': {
@@ -3455,6 +3832,13 @@ export const fieldsBeat: BeatFields = {
     name: 'server.geo.city_name',
     type: 'keyword',
   },
+  'server.geo.continent_code': {
+    category: 'server',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'server.geo.continent_code',
+    type: 'keyword',
+  },
   'server.geo.continent_name': {
     category: 'server',
     description: 'Name of the continent.',
@@ -3491,6 +3875,14 @@ export const fieldsBeat: BeatFields = {
     name: 'server.geo.name',
     type: 'keyword',
   },
+  'server.geo.postal_code': {
+    category: 'server',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'server.geo.postal_code',
+    type: 'keyword',
+  },
   'server.geo.region_iso_code': {
     category: 'server',
     description: 'Region ISO code.',
@@ -3505,6 +3897,13 @@ export const fieldsBeat: BeatFields = {
     name: 'server.geo.region_name',
     type: 'keyword',
   },
+  'server.geo.timezone': {
+    category: 'server',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'server.geo.timezone',
+    type: 'keyword',
+  },
   'server.ip': {
     category: 'server',
     description: 'IP address of the server (IPv4 or IPv6).',
@@ -3513,7 +3912,9 @@ export const fieldsBeat: BeatFields = {
   },
   'server.mac': {
     category: 'server',
-    description: 'MAC address of the server.',
+    description:
+      'MAC address of the server. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '00-00-5E-00-53-23',
     name: 'server.mac',
     type: 'keyword',
   },
@@ -3733,6 +4134,13 @@ export const fieldsBeat: BeatFields = {
     name: 'source.geo.city_name',
     type: 'keyword',
   },
+  'source.geo.continent_code': {
+    category: 'source',
+    description: "Two-letter code representing continent's name.",
+    example: 'NA',
+    name: 'source.geo.continent_code',
+    type: 'keyword',
+  },
   'source.geo.continent_name': {
     category: 'source',
     description: 'Name of the continent.',
@@ -3769,6 +4177,14 @@ export const fieldsBeat: BeatFields = {
     name: 'source.geo.name',
     type: 'keyword',
   },
+  'source.geo.postal_code': {
+    category: 'source',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    example: 94040,
+    name: 'source.geo.postal_code',
+    type: 'keyword',
+  },
   'source.geo.region_iso_code': {
     category: 'source',
     description: 'Region ISO code.',
@@ -3783,6 +4199,13 @@ export const fieldsBeat: BeatFields = {
     name: 'source.geo.region_name',
     type: 'keyword',
   },
+  'source.geo.timezone': {
+    category: 'source',
+    description: 'The time zone of the location, such as IANA time zone name.',
+    example: 'America/Argentina/Buenos_Aires',
+    name: 'source.geo.timezone',
+    type: 'keyword',
+  },
   'source.ip': {
     category: 'source',
     description: 'IP address of the source (IPv4 or IPv6).',
@@ -3791,7 +4214,9 @@ export const fieldsBeat: BeatFields = {
   },
   'source.mac': {
     category: 'source',
-    description: 'MAC address of the source.',
+    description:
+      'MAC address of the source. The notation format from RFC 7042 is suggested: Each octet (that is, 8-bit byte) is represented by two [uppercase] hexadecimal digits giving the value of the octet as an unsigned integer. Successive octets are separated by a hyphen.',
+    example: '00-00-5E-00-53-23',
     name: 'source.mac',
     type: 'keyword',
   },
@@ -5437,6 +5862,12 @@ export const fieldsBeat: BeatFields = {
     name: 'kubernetes.pod.uid',
     type: 'keyword',
   },
+  'kubernetes.pod.ip': {
+    category: 'kubernetes',
+    description: 'Kubernetes Pod IP ',
+    name: 'kubernetes.pod.ip',
+    type: 'ip',
+  },
   'kubernetes.namespace': {
     category: 'kubernetes',
     description: 'Kubernetes namespace ',
@@ -5467,10 +5898,10 @@ export const fieldsBeat: BeatFields = {
     name: 'kubernetes.annotations.*',
     type: 'object',
   },
-  'kubernetes.service.selectors.*': {
+  'kubernetes.selectors.*': {
     category: 'kubernetes',
-    description: 'Kubernetes Service selectors map ',
-    name: 'kubernetes.service.selectors.*',
+    description: 'Kubernetes selectors map ',
+    name: 'kubernetes.selectors.*',
     type: 'object',
   },
   'kubernetes.replicaset.name': {
@@ -5493,7 +5924,7 @@ export const fieldsBeat: BeatFields = {
   },
   'kubernetes.container.name': {
     category: 'kubernetes',
-    description: 'Kubernetes container name ',
+    description: 'Kubernetes container name (different than the name from the runtime) ',
     name: 'kubernetes.container.name',
     type: 'keyword',
   },
@@ -5501,7 +5932,7 @@ export const fieldsBeat: BeatFields = {
     category: 'kubernetes',
     description: 'Kubernetes container image ',
     name: 'kubernetes.container.image',
-    type: 'keyword',
+    type: 'alias',
   },
   'process.exe': {
     category: 'process',
@@ -9407,6 +9838,13 @@ export const fieldsBeat: BeatFields = {
     name: 'mongodb.log.message',
     type: 'alias',
   },
+  'mongodb.log.id': {
+    category: 'mongodb',
+    description: 'Integer representing the unique identifier of the log statement ',
+    example: 4615611,
+    name: 'mongodb.log.id',
+    type: 'long',
+  },
   'mysql.thread_id': {
     category: 'mysql',
     description: 'The connection or thread ID for the query. ',
@@ -11563,6 +12001,12 @@ export const fieldsBeat: BeatFields = {
     name: 'aws.vpcflow.type',
     type: 'keyword',
   },
+  'awsfargate.log': {
+    category: 'awsfargate',
+    description: 'Fields for Amazon Fargate container logs. ',
+    name: 'awsfargate.log',
+    type: 'group',
+  },
   'azure.subscription_id': {
     category: 'azure',
     description: 'Azure subscription ID ',
@@ -11731,17 +12175,11 @@ export const fieldsBeat: BeatFields = {
     name: 'azure.activitylogs.event_category',
     type: 'keyword',
   },
-  'azure.activitylogs.properties.service_request_id': {
+  'azure.activitylogs.properties': {
     category: 'azure',
-    description: 'Service Request Id ',
-    name: 'azure.activitylogs.properties.service_request_id',
-    type: 'keyword',
-  },
-  'azure.activitylogs.properties.status_code': {
-    category: 'azure',
-    description: 'Status code ',
-    name: 'azure.activitylogs.properties.status_code',
-    type: 'keyword',
+    description: 'Properties ',
+    name: 'azure.activitylogs.properties',
+    type: 'flattened',
   },
   'azure.auditlogs.category': {
     category: 'azure',
@@ -12007,11 +12445,11 @@ export const fieldsBeat: BeatFields = {
     name: 'azure.platformlogs.ActivityId',
     type: 'keyword',
   },
-  'azure.platformlogs.properties.*': {
+  'azure.platformlogs.properties': {
     category: 'azure',
-    description: 'Properties ',
-    name: 'azure.platformlogs.properties.*',
-    type: 'object',
+    description: 'Event inner properties ',
+    name: 'azure.platformlogs.properties',
+    type: 'flattened',
   },
   'azure.signinlogs.operation_name': {
     category: 'azure',
@@ -17157,7 +17595,7 @@ export const fieldsBeat: BeatFields = {
   },
   'checkpoint.duration': {
     category: 'checkpoint',
-    description: 'Scan duration.       ',
+    description: 'Scan duration. ',
     name: 'checkpoint.duration',
     type: 'keyword',
   },
@@ -17211,7 +17649,7 @@ export const fieldsBeat: BeatFields = {
   },
   'checkpoint.next_scheduled_scan_date': {
     category: 'checkpoint',
-    description: 'Next scan scheduled time according to time object.      ',
+    description: 'Next scan scheduled time according to time object. ',
     name: 'checkpoint.next_scheduled_scan_date',
     type: 'keyword',
   },
@@ -18231,7 +18669,7 @@ export const fieldsBeat: BeatFields = {
     category: 'checkpoint',
     description: 'Matched object name on source column. ',
     name: 'checkpoint.source_object',
-    type: 'integer',
+    type: 'keyword',
   },
   'checkpoint.destination_object': {
     category: 'checkpoint',
@@ -18287,6 +18725,12 @@ export const fieldsBeat: BeatFields = {
     description: 'Connection drop reason. ',
     name: 'checkpoint.action_reason',
     type: 'integer',
+  },
+  'checkpoint.action_reason_msg': {
+    category: 'checkpoint',
+    description: 'Connection drop reason message. ',
+    name: 'checkpoint.action_reason_msg',
+    type: 'keyword',
   },
   'checkpoint.c_bytes': {
     category: 'checkpoint',
@@ -18916,10 +19360,10 @@ export const fieldsBeat: BeatFields = {
     name: 'cisco.amp.file.archived_file.identity.sha1',
     type: 'keyword',
   },
-  'cisco.amp.file.archived_file.identify.sha256': {
+  'cisco.amp.file.archived_file.identity.sha256': {
     category: 'cisco',
     description: 'SHA256 hash of the archived file related to the malicious event. ',
-    name: 'cisco.amp.file.archived_file.identify.sha256',
+    name: 'cisco.amp.file.archived_file.identity.sha256',
     type: 'keyword',
   },
   'cisco.amp.file.attack_details.application': {
@@ -19045,10 +19489,34 @@ export const fieldsBeat: BeatFields = {
     name: 'cisco.amp.tactics',
     type: 'flattened',
   },
+  'cisco.amp.mitre_tactics': {
+    category: 'cisco',
+    description: "Array of all related mitre tactic ID's ",
+    name: 'cisco.amp.mitre_tactics',
+    type: 'keyword',
+  },
   'cisco.amp.techniques': {
     category: 'cisco',
     description: 'List of all MITRE techniques related to the incident found. ',
     name: 'cisco.amp.techniques',
+    type: 'flattened',
+  },
+  'cisco.amp.mitre_techniques': {
+    category: 'cisco',
+    description: "Array of all related mitre technique ID's ",
+    name: 'cisco.amp.mitre_techniques',
+    type: 'keyword',
+  },
+  'cisco.amp.command_line.arguments': {
+    category: 'cisco',
+    description: 'The CLI arguments related to the Cloud Threat IOC reported by Cisco. ',
+    name: 'cisco.amp.command_line.arguments',
+    type: 'keyword',
+  },
+  'cisco.amp.bp_data': {
+    category: 'cisco',
+    description: 'Endpoint isolation information ',
+    name: 'cisco.amp.bp_data',
     type: 'flattened',
   },
   'cisco.asa.message_id': {
@@ -19240,6 +19708,18 @@ export const fieldsBeat: BeatFields = {
     name: 'cisco.asa.burst.cumulative_count',
     type: 'keyword',
   },
+  'cisco.asa.termination_user': {
+    category: 'cisco',
+    description: 'AAA name of user requesting termination ',
+    name: 'cisco.asa.termination_user',
+    type: 'keyword',
+  },
+  'cisco.asa.webvpn.group_name': {
+    category: 'cisco',
+    description: 'The WebVPN group name the user belongs to ',
+    name: 'cisco.asa.webvpn.group_name',
+    type: 'keyword',
+  },
   'cisco.ftd.message_id': {
     category: 'cisco',
     description: 'The Cisco FTD message identifier. ',
@@ -19367,6 +19847,18 @@ export const fieldsBeat: BeatFields = {
     category: 'cisco',
     description: 'The assigned DAP records ',
     name: 'cisco.ftd.dap_records',
+    type: 'keyword',
+  },
+  'cisco.ftd.termination_user': {
+    category: 'cisco',
+    description: 'AAA name of user requesting termination ',
+    name: 'cisco.ftd.termination_user',
+    type: 'keyword',
+  },
+  'cisco.ftd.webvpn.group_name': {
+    category: 'cisco',
+    description: 'The WebVPN group name the user belongs to ',
+    name: 'cisco.ftd.webvpn.group_name',
     type: 'keyword',
   },
   'cisco.ios.access_list': {
@@ -20063,6 +20555,387 @@ export const fieldsBeat: BeatFields = {
     category: 'crowdstrike',
     description: 'Commands run in a remote session. ',
     name: 'crowdstrike.event.Commands',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.action': {
+    category: 'cyberarkpas',
+    description: 'A description of the audit record.',
+    name: 'cyberarkpas.audit.action',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.address': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.address',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.cpm_disabled': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.cpm_disabled',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.cpm_error_details': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.cpm_error_details',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.cpm_status': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.cpm_status',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.creation_method': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.creation_method',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.customer': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.customer',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.database': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.database',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.device_type': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.device_type',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.dual_account_status': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.dual_account_status',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.group_name': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.group_name',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.in_process': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.in_process',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.index': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.index',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.last_fail_date': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.last_fail_date',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.last_success_change': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.last_success_change',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.last_success_reconciliation': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.last_success_reconciliation',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.last_success_verification': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.last_success_verification',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.last_task': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.last_task',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.logon_domain': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.logon_domain',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.policy_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.policy_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.port': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.port',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.privcloud': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.privcloud',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.reset_immediately': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.reset_immediately',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.retries_count': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.retries_count',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.sequence_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.sequence_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.tags': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.tags',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.user_dn': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.user_dn',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.user_name': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.user_name',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.virtual_username': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.virtual_username',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.ca_properties.other': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.ca_properties.other',
+    type: 'flattened',
+  },
+  'cyberarkpas.audit.category': {
+    category: 'cyberarkpas',
+    description: 'The category name (for category-related operations).',
+    name: 'cyberarkpas.audit.category',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.desc': {
+    category: 'cyberarkpas',
+    description: 'A static value that displays a description of the audit codes.',
+    name: 'cyberarkpas.audit.desc',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.ad_process_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.ad_process_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.ad_process_name': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.ad_process_name',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.application_type': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.application_type',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.command': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.command',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.connection_component_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.connection_component_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.dst_host': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.dst_host',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.logon_account': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.logon_account',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.managed_account': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.managed_account',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.process_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.process_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.process_name': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.process_name',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.protocol': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.protocol',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.psmid': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.psmid',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.session_duration': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.session_duration',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.session_id': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.session_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.src_host': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.src_host',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.username': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.username',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.extra_details.other': {
+    category: 'cyberarkpas',
+    name: 'cyberarkpas.audit.extra_details.other',
+    type: 'flattened',
+  },
+  'cyberarkpas.audit.file': {
+    category: 'cyberarkpas',
+    description: 'The name of the target file.',
+    name: 'cyberarkpas.audit.file',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.gateway_station': {
+    category: 'cyberarkpas',
+    description: 'The IP of the web application machine (PVWA).',
+    name: 'cyberarkpas.audit.gateway_station',
+    type: 'ip',
+  },
+  'cyberarkpas.audit.hostname': {
+    category: 'cyberarkpas',
+    description: 'The hostname, in upper case.',
+    example: 'MY-COMPUTER',
+    name: 'cyberarkpas.audit.hostname',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.iso_timestamp': {
+    category: 'cyberarkpas',
+    description: 'The timestamp, in ISO Timestamp format (RFC 3339).',
+    example: '"2013-06-25T10:47:19.000Z"',
+    name: 'cyberarkpas.audit.iso_timestamp',
+    type: 'date',
+  },
+  'cyberarkpas.audit.issuer': {
+    category: 'cyberarkpas',
+    description:
+      'The Vault user who wrote the audit. This is usually the user who performed the operation.',
+    name: 'cyberarkpas.audit.issuer',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.location': {
+    category: 'cyberarkpas',
+    description: 'The target Location (for Location operations).',
+    name: 'cyberarkpas.audit.location',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.message': {
+    category: 'cyberarkpas',
+    description: 'A description of the audit records (same information as in the Desc field).',
+    name: 'cyberarkpas.audit.message',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.message_id': {
+    category: 'cyberarkpas',
+    description: 'The code ID of the audit records.',
+    name: 'cyberarkpas.audit.message_id',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.product': {
+    category: 'cyberarkpas',
+    description: 'A static value that represents the product.',
+    name: 'cyberarkpas.audit.product',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.pvwa_details': {
+    category: 'cyberarkpas',
+    description: 'Specific details of the PVWA audit records.',
+    name: 'cyberarkpas.audit.pvwa_details',
+    type: 'flattened',
+  },
+  'cyberarkpas.audit.raw': {
+    category: 'cyberarkpas',
+    description:
+      'Raw XML for the original audit record. Only present when XSLT file has debugging enabled. ',
+    name: 'cyberarkpas.audit.raw',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.reason': {
+    category: 'cyberarkpas',
+    description: 'The reason entered by the user.',
+    name: 'cyberarkpas.audit.reason',
+    type: 'text',
+  },
+  'cyberarkpas.audit.rfc5424': {
+    category: 'cyberarkpas',
+    description: 'Whether the syslog format complies with RFC5424.',
+    example: 'yes',
+    name: 'cyberarkpas.audit.rfc5424',
+    type: 'boolean',
+  },
+  'cyberarkpas.audit.safe': {
+    category: 'cyberarkpas',
+    description: 'The name of the target Safe.',
+    name: 'cyberarkpas.audit.safe',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.severity': {
+    category: 'cyberarkpas',
+    description: 'The severity of the audit records.',
+    name: 'cyberarkpas.audit.severity',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.source_user': {
+    category: 'cyberarkpas',
+    description: 'The name of the Vault user who performed the operation.',
+    name: 'cyberarkpas.audit.source_user',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.station': {
+    category: 'cyberarkpas',
+    description:
+      'The IP from where the operation was performed. For PVWA sessions, this will be the real client machine IP.',
+    name: 'cyberarkpas.audit.station',
+    type: 'ip',
+  },
+  'cyberarkpas.audit.target_user': {
+    category: 'cyberarkpas',
+    description: 'The name of the Vault user on which the operation was performed.',
+    name: 'cyberarkpas.audit.target_user',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.timestamp': {
+    category: 'cyberarkpas',
+    description: 'The timestamp, in MMM DD HH:MM:SS format.',
+    example: 'Jun 25 10:47:19',
+    name: 'cyberarkpas.audit.timestamp',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.vendor': {
+    category: 'cyberarkpas',
+    description: 'A static value that represents the vendor.',
+    name: 'cyberarkpas.audit.vendor',
+    type: 'keyword',
+  },
+  'cyberarkpas.audit.version': {
+    category: 'cyberarkpas',
+    description: 'A static value that represents the version of the Vault.',
+    name: 'cyberarkpas.audit.version',
     type: 'keyword',
   },
   'envoyproxy.log_type': {
@@ -21006,6 +21879,12 @@ export const fieldsBeat: BeatFields = {
     category: 'fortinet',
     description: 'ESP Transform ',
     name: 'fortinet.firewall.esptransform',
+    type: 'keyword',
+  },
+  'fortinet.firewall.eventtype': {
+    category: 'fortinet',
+    description: 'UTM Event Type ',
+    name: 'fortinet.firewall.eventtype',
     type: 'keyword',
   },
   'fortinet.firewall.exch': {
@@ -22496,6 +23375,12 @@ export const fieldsBeat: BeatFields = {
     name: 'fortinet.firewall.utmaction',
     type: 'keyword',
   },
+  'fortinet.firewall.utmref': {
+    category: 'fortinet',
+    description: 'Reference to UTM ',
+    name: 'fortinet.firewall.utmref',
+    type: 'keyword',
+  },
   'fortinet.firewall.vap': {
     category: 'fortinet',
     description: 'Virtual AP ',
@@ -22682,323 +23567,323 @@ export const fieldsBeat: BeatFields = {
     name: 'fortinet.firewall.xid',
     type: 'integer',
   },
-  'googlecloud.destination.instance.project_id': {
-    category: 'googlecloud',
+  'gcp.destination.instance.project_id': {
+    category: 'gcp',
     description: 'ID of the project containing the VM. ',
-    name: 'googlecloud.destination.instance.project_id',
+    name: 'gcp.destination.instance.project_id',
     type: 'keyword',
   },
-  'googlecloud.destination.instance.region': {
-    category: 'googlecloud',
+  'gcp.destination.instance.region': {
+    category: 'gcp',
     description: 'Region of the VM. ',
-    name: 'googlecloud.destination.instance.region',
+    name: 'gcp.destination.instance.region',
     type: 'keyword',
   },
-  'googlecloud.destination.instance.zone': {
-    category: 'googlecloud',
+  'gcp.destination.instance.zone': {
+    category: 'gcp',
     description: 'Zone of the VM. ',
-    name: 'googlecloud.destination.instance.zone',
+    name: 'gcp.destination.instance.zone',
     type: 'keyword',
   },
-  'googlecloud.destination.vpc.project_id': {
-    category: 'googlecloud',
+  'gcp.destination.vpc.project_id': {
+    category: 'gcp',
     description: 'ID of the project containing the VM. ',
-    name: 'googlecloud.destination.vpc.project_id',
+    name: 'gcp.destination.vpc.project_id',
     type: 'keyword',
   },
-  'googlecloud.destination.vpc.vpc_name': {
-    category: 'googlecloud',
+  'gcp.destination.vpc.vpc_name': {
+    category: 'gcp',
     description: 'VPC on which the VM is operating. ',
-    name: 'googlecloud.destination.vpc.vpc_name',
+    name: 'gcp.destination.vpc.vpc_name',
     type: 'keyword',
   },
-  'googlecloud.destination.vpc.subnetwork_name': {
-    category: 'googlecloud',
+  'gcp.destination.vpc.subnetwork_name': {
+    category: 'gcp',
     description: 'Subnetwork on which the VM is operating. ',
-    name: 'googlecloud.destination.vpc.subnetwork_name',
+    name: 'gcp.destination.vpc.subnetwork_name',
     type: 'keyword',
   },
-  'googlecloud.source.instance.project_id': {
-    category: 'googlecloud',
+  'gcp.source.instance.project_id': {
+    category: 'gcp',
     description: 'ID of the project containing the VM. ',
-    name: 'googlecloud.source.instance.project_id',
+    name: 'gcp.source.instance.project_id',
     type: 'keyword',
   },
-  'googlecloud.source.instance.region': {
-    category: 'googlecloud',
+  'gcp.source.instance.region': {
+    category: 'gcp',
     description: 'Region of the VM. ',
-    name: 'googlecloud.source.instance.region',
+    name: 'gcp.source.instance.region',
     type: 'keyword',
   },
-  'googlecloud.source.instance.zone': {
-    category: 'googlecloud',
+  'gcp.source.instance.zone': {
+    category: 'gcp',
     description: 'Zone of the VM. ',
-    name: 'googlecloud.source.instance.zone',
+    name: 'gcp.source.instance.zone',
     type: 'keyword',
   },
-  'googlecloud.source.vpc.project_id': {
-    category: 'googlecloud',
+  'gcp.source.vpc.project_id': {
+    category: 'gcp',
     description: 'ID of the project containing the VM. ',
-    name: 'googlecloud.source.vpc.project_id',
+    name: 'gcp.source.vpc.project_id',
     type: 'keyword',
   },
-  'googlecloud.source.vpc.vpc_name': {
-    category: 'googlecloud',
+  'gcp.source.vpc.vpc_name': {
+    category: 'gcp',
     description: 'VPC on which the VM is operating. ',
-    name: 'googlecloud.source.vpc.vpc_name',
+    name: 'gcp.source.vpc.vpc_name',
     type: 'keyword',
   },
-  'googlecloud.source.vpc.subnetwork_name': {
-    category: 'googlecloud',
+  'gcp.source.vpc.subnetwork_name': {
+    category: 'gcp',
     description: 'Subnetwork on which the VM is operating. ',
-    name: 'googlecloud.source.vpc.subnetwork_name',
+    name: 'gcp.source.vpc.subnetwork_name',
     type: 'keyword',
   },
-  'googlecloud.audit.type': {
-    category: 'googlecloud',
+  'gcp.audit.type': {
+    category: 'gcp',
     description: 'Type property. ',
-    name: 'googlecloud.audit.type',
+    name: 'gcp.audit.type',
     type: 'keyword',
   },
-  'googlecloud.audit.authentication_info.principal_email': {
-    category: 'googlecloud',
+  'gcp.audit.authentication_info.principal_email': {
+    category: 'gcp',
     description: 'The email address of the authenticated user making the request.  ',
-    name: 'googlecloud.audit.authentication_info.principal_email',
+    name: 'gcp.audit.authentication_info.principal_email',
     type: 'keyword',
   },
-  'googlecloud.audit.authentication_info.authority_selector': {
-    category: 'googlecloud',
+  'gcp.audit.authentication_info.authority_selector': {
+    category: 'gcp',
     description:
       'The authority selector specified by the requestor, if any. It is not guaranteed  that the principal was allowed to use this authority.  ',
-    name: 'googlecloud.audit.authentication_info.authority_selector',
+    name: 'gcp.audit.authentication_info.authority_selector',
     type: 'keyword',
   },
-  'googlecloud.audit.authorization_info.permission': {
-    category: 'googlecloud',
+  'gcp.audit.authorization_info.permission': {
+    category: 'gcp',
     description: 'The required IAM permission.  ',
-    name: 'googlecloud.audit.authorization_info.permission',
+    name: 'gcp.audit.authorization_info.permission',
     type: 'keyword',
   },
-  'googlecloud.audit.authorization_info.granted': {
-    category: 'googlecloud',
+  'gcp.audit.authorization_info.granted': {
+    category: 'gcp',
     description: 'Whether or not authorization for resource and permission was granted.  ',
-    name: 'googlecloud.audit.authorization_info.granted',
+    name: 'gcp.audit.authorization_info.granted',
     type: 'boolean',
   },
-  'googlecloud.audit.authorization_info.resource_attributes.service': {
-    category: 'googlecloud',
+  'gcp.audit.authorization_info.resource_attributes.service': {
+    category: 'gcp',
     description: 'The name of the service. ',
-    name: 'googlecloud.audit.authorization_info.resource_attributes.service',
+    name: 'gcp.audit.authorization_info.resource_attributes.service',
     type: 'keyword',
   },
-  'googlecloud.audit.authorization_info.resource_attributes.name': {
-    category: 'googlecloud',
+  'gcp.audit.authorization_info.resource_attributes.name': {
+    category: 'gcp',
     description: 'The name of the resource. ',
-    name: 'googlecloud.audit.authorization_info.resource_attributes.name',
+    name: 'gcp.audit.authorization_info.resource_attributes.name',
     type: 'keyword',
   },
-  'googlecloud.audit.authorization_info.resource_attributes.type': {
-    category: 'googlecloud',
+  'gcp.audit.authorization_info.resource_attributes.type': {
+    category: 'gcp',
     description: 'The type of the resource. ',
-    name: 'googlecloud.audit.authorization_info.resource_attributes.type',
+    name: 'gcp.audit.authorization_info.resource_attributes.type',
     type: 'keyword',
   },
-  'googlecloud.audit.method_name': {
-    category: 'googlecloud',
+  'gcp.audit.method_name': {
+    category: 'gcp',
     description:
       "The name of the service method or operation. For API calls, this  should be the name of the API method.  For example, 'google.datastore.v1.Datastore.RunQuery'. ",
-    name: 'googlecloud.audit.method_name',
+    name: 'gcp.audit.method_name',
     type: 'keyword',
   },
-  'googlecloud.audit.num_response_items': {
-    category: 'googlecloud',
+  'gcp.audit.num_response_items': {
+    category: 'gcp',
     description: 'The number of items returned from a List or Query API method, if applicable. ',
-    name: 'googlecloud.audit.num_response_items',
+    name: 'gcp.audit.num_response_items',
     type: 'long',
   },
-  'googlecloud.audit.request.proto_name': {
-    category: 'googlecloud',
+  'gcp.audit.request.proto_name': {
+    category: 'gcp',
     description: 'Type property of the request. ',
-    name: 'googlecloud.audit.request.proto_name',
+    name: 'gcp.audit.request.proto_name',
     type: 'keyword',
   },
-  'googlecloud.audit.request.filter': {
-    category: 'googlecloud',
+  'gcp.audit.request.filter': {
+    category: 'gcp',
     description: 'Filter of the request. ',
-    name: 'googlecloud.audit.request.filter',
+    name: 'gcp.audit.request.filter',
     type: 'keyword',
   },
-  'googlecloud.audit.request.name': {
-    category: 'googlecloud',
+  'gcp.audit.request.name': {
+    category: 'gcp',
     description: 'Name of the request.  ',
-    name: 'googlecloud.audit.request.name',
+    name: 'gcp.audit.request.name',
     type: 'keyword',
   },
-  'googlecloud.audit.request.resource_name': {
-    category: 'googlecloud',
+  'gcp.audit.request.resource_name': {
+    category: 'gcp',
     description: 'Name of the request resource.  ',
-    name: 'googlecloud.audit.request.resource_name',
+    name: 'gcp.audit.request.resource_name',
     type: 'keyword',
   },
-  'googlecloud.audit.request_metadata.caller_ip': {
-    category: 'googlecloud',
+  'gcp.audit.request_metadata.caller_ip': {
+    category: 'gcp',
     description: 'The IP address of the caller.  ',
-    name: 'googlecloud.audit.request_metadata.caller_ip',
+    name: 'gcp.audit.request_metadata.caller_ip',
     type: 'ip',
   },
-  'googlecloud.audit.request_metadata.caller_supplied_user_agent': {
-    category: 'googlecloud',
+  'gcp.audit.request_metadata.caller_supplied_user_agent': {
+    category: 'gcp',
     description:
       'The user agent of the caller. This information is not authenticated and  should be treated accordingly. ',
-    name: 'googlecloud.audit.request_metadata.caller_supplied_user_agent',
+    name: 'gcp.audit.request_metadata.caller_supplied_user_agent',
     type: 'keyword',
   },
-  'googlecloud.audit.response.proto_name': {
-    category: 'googlecloud',
+  'gcp.audit.response.proto_name': {
+    category: 'gcp',
     description: 'Type property of the response. ',
-    name: 'googlecloud.audit.response.proto_name',
+    name: 'gcp.audit.response.proto_name',
     type: 'keyword',
   },
-  'googlecloud.audit.response.details.group': {
-    category: 'googlecloud',
+  'gcp.audit.response.details.group': {
+    category: 'gcp',
     description: 'The name of the group. ',
-    name: 'googlecloud.audit.response.details.group',
+    name: 'gcp.audit.response.details.group',
     type: 'keyword',
   },
-  'googlecloud.audit.response.details.kind': {
-    category: 'googlecloud',
+  'gcp.audit.response.details.kind': {
+    category: 'gcp',
     description: 'The kind of the response details. ',
-    name: 'googlecloud.audit.response.details.kind',
+    name: 'gcp.audit.response.details.kind',
     type: 'keyword',
   },
-  'googlecloud.audit.response.details.name': {
-    category: 'googlecloud',
+  'gcp.audit.response.details.name': {
+    category: 'gcp',
     description: 'The name of the response details. ',
-    name: 'googlecloud.audit.response.details.name',
+    name: 'gcp.audit.response.details.name',
     type: 'keyword',
   },
-  'googlecloud.audit.response.details.uid': {
-    category: 'googlecloud',
+  'gcp.audit.response.details.uid': {
+    category: 'gcp',
     description: 'The uid of the response details. ',
-    name: 'googlecloud.audit.response.details.uid',
+    name: 'gcp.audit.response.details.uid',
     type: 'keyword',
   },
-  'googlecloud.audit.response.status': {
-    category: 'googlecloud',
+  'gcp.audit.response.status': {
+    category: 'gcp',
     description: 'Status of the response.  ',
-    name: 'googlecloud.audit.response.status',
+    name: 'gcp.audit.response.status',
     type: 'keyword',
   },
-  'googlecloud.audit.resource_name': {
-    category: 'googlecloud',
+  'gcp.audit.resource_name': {
+    category: 'gcp',
     description:
       "The resource or collection that is the target of the operation.  The name is a scheme-less URI, not including the API service name.  For example, 'shelves/SHELF_ID/books'. ",
-    name: 'googlecloud.audit.resource_name',
+    name: 'gcp.audit.resource_name',
     type: 'keyword',
   },
-  'googlecloud.audit.resource_location.current_locations': {
-    category: 'googlecloud',
+  'gcp.audit.resource_location.current_locations': {
+    category: 'gcp',
     description: 'Current locations of the resource. ',
-    name: 'googlecloud.audit.resource_location.current_locations',
+    name: 'gcp.audit.resource_location.current_locations',
     type: 'keyword',
   },
-  'googlecloud.audit.service_name': {
-    category: 'googlecloud',
+  'gcp.audit.service_name': {
+    category: 'gcp',
     description:
       'The name of the API service performing the operation.  For example, datastore.googleapis.com. ',
-    name: 'googlecloud.audit.service_name',
+    name: 'gcp.audit.service_name',
     type: 'keyword',
   },
-  'googlecloud.audit.status.code': {
-    category: 'googlecloud',
+  'gcp.audit.status.code': {
+    category: 'gcp',
     description: 'The status code, which should be an enum value of google.rpc.Code.  ',
-    name: 'googlecloud.audit.status.code',
+    name: 'gcp.audit.status.code',
     type: 'integer',
   },
-  'googlecloud.audit.status.message': {
-    category: 'googlecloud',
+  'gcp.audit.status.message': {
+    category: 'gcp',
     description:
       'A developer-facing error message, which should be in English. Any user-facing  error message should be localized and sent in the google.rpc.Status.details  field, or localized by the client.  ',
-    name: 'googlecloud.audit.status.message',
+    name: 'gcp.audit.status.message',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.priority': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.priority': {
+    category: 'gcp',
     description: 'The priority for the firewall rule.',
-    name: 'googlecloud.firewall.rule_details.priority',
+    name: 'gcp.firewall.rule_details.priority',
     type: 'long',
   },
-  'googlecloud.firewall.rule_details.action': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.action': {
+    category: 'gcp',
     description: 'Action that the rule performs on match.',
-    name: 'googlecloud.firewall.rule_details.action',
+    name: 'gcp.firewall.rule_details.action',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.direction': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.direction': {
+    category: 'gcp',
     description: 'Direction of traffic that matches this rule.',
-    name: 'googlecloud.firewall.rule_details.direction',
+    name: 'gcp.firewall.rule_details.direction',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.reference': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.reference': {
+    category: 'gcp',
     description: 'Reference to the firewall rule.',
-    name: 'googlecloud.firewall.rule_details.reference',
+    name: 'gcp.firewall.rule_details.reference',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.source_range': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.source_range': {
+    category: 'gcp',
     description: 'List of source ranges that the firewall rule applies to.',
-    name: 'googlecloud.firewall.rule_details.source_range',
+    name: 'gcp.firewall.rule_details.source_range',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.destination_range': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.destination_range': {
+    category: 'gcp',
     description: 'List of destination ranges that the firewall applies to.',
-    name: 'googlecloud.firewall.rule_details.destination_range',
+    name: 'gcp.firewall.rule_details.destination_range',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.source_tag': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.source_tag': {
+    category: 'gcp',
     description: 'List of all the source tags that the firewall rule applies to. ',
-    name: 'googlecloud.firewall.rule_details.source_tag',
+    name: 'gcp.firewall.rule_details.source_tag',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.target_tag': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.target_tag': {
+    category: 'gcp',
     description: 'List of all the target tags that the firewall rule applies to. ',
-    name: 'googlecloud.firewall.rule_details.target_tag',
+    name: 'gcp.firewall.rule_details.target_tag',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.ip_port_info': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.ip_port_info': {
+    category: 'gcp',
     description: 'List of ip protocols and applicable port ranges for rules. ',
-    name: 'googlecloud.firewall.rule_details.ip_port_info',
+    name: 'gcp.firewall.rule_details.ip_port_info',
     type: 'array',
   },
-  'googlecloud.firewall.rule_details.source_service_account': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.source_service_account': {
+    category: 'gcp',
     description: 'List of all the source service accounts that the firewall rule applies to. ',
-    name: 'googlecloud.firewall.rule_details.source_service_account',
+    name: 'gcp.firewall.rule_details.source_service_account',
     type: 'keyword',
   },
-  'googlecloud.firewall.rule_details.target_service_account': {
-    category: 'googlecloud',
+  'gcp.firewall.rule_details.target_service_account': {
+    category: 'gcp',
     description: 'List of all the target service accounts that the firewall rule applies to. ',
-    name: 'googlecloud.firewall.rule_details.target_service_account',
+    name: 'gcp.firewall.rule_details.target_service_account',
     type: 'keyword',
   },
-  'googlecloud.vpcflow.reporter': {
-    category: 'googlecloud',
+  'gcp.vpcflow.reporter': {
+    category: 'gcp',
     description: "The side which reported the flow. Can be either 'SRC' or 'DEST'. ",
-    name: 'googlecloud.vpcflow.reporter',
+    name: 'gcp.vpcflow.reporter',
     type: 'keyword',
   },
-  'googlecloud.vpcflow.rtt.ms': {
-    category: 'googlecloud',
+  'gcp.vpcflow.rtt.ms': {
+    category: 'gcp',
     description:
       'Latency as measured (for TCP flows only) during the time interval. This is the time elapsed between sending a SEQ and receiving a corresponding ACK and it contains the network RTT as well as the application related delay. ',
-    name: 'googlecloud.vpcflow.rtt.ms',
+    name: 'gcp.vpcflow.rtt.ms',
     type: 'long',
   },
   'google_workspace.actor.type': {
@@ -23826,13 +24711,13 @@ export const fieldsBeat: BeatFields = {
     category: 'google_workspace',
     description: 'SAML status code. ',
     name: 'google_workspace.saml.status_code',
-    type: 'long',
+    type: 'keyword',
   },
   'google_workspace.saml.second_level_status_code': {
     category: 'google_workspace',
     description: 'SAML second level status code. ',
     name: 'google_workspace.saml.second_level_status_code',
-    type: 'long',
+    type: 'keyword',
   },
   'gsuite.actor.type': {
     category: 'gsuite',
@@ -24659,13 +25544,13 @@ export const fieldsBeat: BeatFields = {
     category: 'gsuite',
     description: 'SAML status code. ',
     name: 'gsuite.saml.status_code',
-    type: 'long',
+    type: 'keyword',
   },
   'gsuite.saml.second_level_status_code': {
     category: 'gsuite',
     description: 'SAML second level status code. ',
     name: 'gsuite.saml.second_level_status_code',
-    type: 'long',
+    type: 'keyword',
   },
   'ibmmq.errorlog.installation': {
     category: 'ibmmq',
@@ -27287,6 +28172,78 @@ export const fieldsBeat: BeatFields = {
     name: 'okta.debug_context.debug_data.url',
     type: 'keyword',
   },
+  'okta.debug_context.debug_data.suspicious_activity.browser': {
+    category: 'okta',
+    description: 'The browser used. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.browser',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_city': {
+    category: 'okta',
+    description: 'The city where the suspicious activity took place. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_city',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_country': {
+    category: 'okta',
+    description: 'The country where the suspicious activity took place. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_country',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_id': {
+    category: 'okta',
+    description: 'The event ID. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_id',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_ip': {
+    category: 'okta',
+    description: 'The IP of the suspicious event. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_ip',
+    type: 'ip',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_latitude': {
+    category: 'okta',
+    description: 'The latitude where the suspicious activity took place. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_latitude',
+    type: 'float',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_longitude': {
+    category: 'okta',
+    description: 'The longitude where the suspicious activity took place. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_longitude',
+    type: 'float',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_state': {
+    category: 'okta',
+    description: 'The state where the suspicious activity took place. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_state',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_transaction_id': {
+    category: 'okta',
+    description: 'The event transaction ID. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_transaction_id',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.event_type': {
+    category: 'okta',
+    description: 'The event type. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.event_type',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.os': {
+    category: 'okta',
+    description: 'The OS of the system from where the suspicious activity occured. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.os',
+    type: 'keyword',
+  },
+  'okta.debug_context.debug_data.suspicious_activity.timestamp': {
+    category: 'okta',
+    description: 'The timestamp of when the activity occurred. ',
+    name: 'okta.debug_context.debug_data.suspicious_activity.timestamp',
+    type: 'date',
+  },
   'okta.authentication_context.authentication_provider': {
     category: 'okta',
     description:
@@ -27630,6 +28587,228 @@ export const fieldsBeat: BeatFields = {
     category: 'panw',
     description: 'Specifies the sub type of the log',
     name: 'panw.panos.sub_type',
+  },
+  'panw.panos.virtual_sys': {
+    category: 'panw',
+    description: 'Virtual system instance ',
+    name: 'panw.panos.virtual_sys',
+    type: 'keyword',
+  },
+  'panw.panos.client_os_ver': {
+    category: 'panw',
+    description: 'The client device’s OS version. ',
+    name: 'panw.panos.client_os_ver',
+    type: 'keyword',
+  },
+  'panw.panos.client_os': {
+    category: 'panw',
+    description: 'The client device’s OS version. ',
+    name: 'panw.panos.client_os',
+    type: 'keyword',
+  },
+  'panw.panos.client_ver': {
+    category: 'panw',
+    description: 'The client’s GlobalProtect app version. ',
+    name: 'panw.panos.client_ver',
+    type: 'keyword',
+  },
+  'panw.panos.stage': {
+    category: 'panw',
+    description: 'A string showing the stage of the connection ',
+    example: 'before-login',
+    name: 'panw.panos.stage',
+    type: 'keyword',
+  },
+  'panw.panos.actionflags': {
+    category: 'panw',
+    description: 'A bit field indicating if the log was forwarded to Panorama. ',
+    name: 'panw.panos.actionflags',
+    type: 'keyword',
+  },
+  'panw.panos.error': {
+    category: 'panw',
+    description: 'A string showing that error that has occurred in any event. ',
+    name: 'panw.panos.error',
+    type: 'keyword',
+  },
+  'panw.panos.error_code': {
+    category: 'panw',
+    description: 'An integer associated with any errors that occurred. ',
+    name: 'panw.panos.error_code',
+    type: 'integer',
+  },
+  'panw.panos.repeatcnt': {
+    category: 'panw',
+    description:
+      'The number of sessions with the same source IP address, destination IP address, application, and subtype that GlobalProtect has detected within the last five seconds.An integer associated with any errors that occurred. ',
+    name: 'panw.panos.repeatcnt',
+    type: 'integer',
+  },
+  'panw.panos.serial_number': {
+    category: 'panw',
+    description: 'The serial number of the user’s machine or device. ',
+    name: 'panw.panos.serial_number',
+    type: 'keyword',
+  },
+  'panw.panos.auth_method': {
+    category: 'panw',
+    description: 'A string showing the authentication type ',
+    example: 'LDAP',
+    name: 'panw.panos.auth_method',
+    type: 'keyword',
+  },
+  'panw.panos.datasource': {
+    category: 'panw',
+    description: 'Source from which mapping information is collected. ',
+    name: 'panw.panos.datasource',
+    type: 'keyword',
+  },
+  'panw.panos.datasourcetype': {
+    category: 'panw',
+    description: 'Mechanism used to identify the IP/User mappings within a data source. ',
+    name: 'panw.panos.datasourcetype',
+    type: 'keyword',
+  },
+  'panw.panos.datasourcename': {
+    category: 'panw',
+    description: 'User-ID source that sends the IP (Port)-User Mapping. ',
+    name: 'panw.panos.datasourcename',
+    type: 'keyword',
+  },
+  'panw.panos.factorno': {
+    category: 'panw',
+    description: 'Indicates the use of primary authentication (1) or additional factors (2, 3). ',
+    name: 'panw.panos.factorno',
+    type: 'integer',
+  },
+  'panw.panos.factortype': {
+    category: 'panw',
+    description: 'Vendor used to authenticate a user when Multi Factor authentication is present. ',
+    name: 'panw.panos.factortype',
+    type: 'keyword',
+  },
+  'panw.panos.factorcompletiontime': {
+    category: 'panw',
+    description: 'Time the authentication was completed. ',
+    name: 'panw.panos.factorcompletiontime',
+    type: 'date',
+  },
+  'panw.panos.ugflags': {
+    category: 'panw',
+    description:
+      'Displays whether the user group that was found during user group mapping. Supported values are: User Group Found—Indicates whether the user could be mapped to a group. Duplicate User—Indicates whether duplicate users were found in a user group. Displays N/A if no user group is found. ',
+    name: 'panw.panos.ugflags',
+    type: 'keyword',
+  },
+  'panw.panos.device_group_hierarchy.level_1': {
+    category: 'panw',
+    description:
+      'A sequence of identification numbers that indicate the device group’s location within a device group hierarchy. The firewall (or virtual system) generating the log includes the identification number of each ancestor in its device group hierarchy. The shared device group (level 0) is not included in this structure. If the log values are 12, 34, 45, 0, it means that the log was generated by a firewall (or virtual system) that belongs to device group 45, and its ancestors are 34, and 12. ',
+    name: 'panw.panos.device_group_hierarchy.level_1',
+    type: 'keyword',
+  },
+  'panw.panos.device_group_hierarchy.level_2': {
+    category: 'panw',
+    description:
+      'A sequence of identification numbers that indicate the device group’s location within a device group hierarchy. The firewall (or virtual system) generating the log includes the identification number of each ancestor in its device group hierarchy. The shared device group (level 0) is not included in this structure. If the log values are 12, 34, 45, 0, it means that the log was generated by a firewall (or virtual system) that belongs to device group 45, and its ancestors are 34, and 12. ',
+    name: 'panw.panos.device_group_hierarchy.level_2',
+    type: 'keyword',
+  },
+  'panw.panos.device_group_hierarchy.level_3': {
+    category: 'panw',
+    description:
+      'A sequence of identification numbers that indicate the device group’s location within a device group hierarchy. The firewall (or virtual system) generating the log includes the identification number of each ancestor in its device group hierarchy. The shared device group (level 0) is not included in this structure. If the log values are 12, 34, 45, 0, it means that the log was generated by a firewall (or virtual system) that belongs to device group 45, and its ancestors are 34, and 12. ',
+    name: 'panw.panos.device_group_hierarchy.level_3',
+    type: 'keyword',
+  },
+  'panw.panos.device_group_hierarchy.level_4': {
+    category: 'panw',
+    description:
+      'A sequence of identification numbers that indicate the device group’s location within a device group hierarchy. The firewall (or virtual system) generating the log includes the identification number of each ancestor in its device group hierarchy. The shared device group (level 0) is not included in this structure. If the log values are 12, 34, 45, 0, it means that the log was generated by a firewall (or virtual system) that belongs to device group 45, and its ancestors are 34, and 12. ',
+    name: 'panw.panos.device_group_hierarchy.level_4',
+    type: 'keyword',
+  },
+  'panw.panos.timeout': {
+    category: 'panw',
+    description: 'Timeout after which the IP/User Mappings are cleared. ',
+    name: 'panw.panos.timeout',
+    type: 'integer',
+  },
+  'panw.panos.vsys_id': {
+    category: 'panw',
+    description: 'A unique identifier for a virtual system on a Palo Alto Networks firewall. ',
+    name: 'panw.panos.vsys_id',
+    type: 'keyword',
+  },
+  'panw.panos.vsys_name': {
+    category: 'panw',
+    description:
+      'The name of the virtual system associated with the session; only valid on firewalls enabled for multiple virtual systems. ',
+    name: 'panw.panos.vsys_name',
+    type: 'keyword',
+  },
+  'panw.panos.description': {
+    category: 'panw',
+    description: 'Additional information for any event that has occurred. ',
+    name: 'panw.panos.description',
+    type: 'keyword',
+  },
+  'panw.panos.tunnel_type': {
+    category: 'panw',
+    description: 'The type of tunnel (either SSLVPN or IPSec). ',
+    name: 'panw.panos.tunnel_type',
+    type: 'keyword',
+  },
+  'panw.panos.connect_method': {
+    category: 'panw',
+    description: 'A string showing the how the GlobalProtect app connects to Gateway ',
+    name: 'panw.panos.connect_method',
+    type: 'keyword',
+  },
+  'panw.panos.matchname': {
+    category: 'panw',
+    description: 'Name of the HIP object or profile. ',
+    name: 'panw.panos.matchname',
+    type: 'keyword',
+  },
+  'panw.panos.matchtype': {
+    category: 'panw',
+    description: 'Whether the hip field represents a HIP object or a HIP profile. ',
+    name: 'panw.panos.matchtype',
+    type: 'keyword',
+  },
+  'panw.panos.priority': {
+    category: 'panw',
+    description:
+      'The priority order of the gateway that is based on highest (1), high (2), medium (3), low (4), or lowest (5) to which the GlobalProtect app can connect. ',
+    name: 'panw.panos.priority',
+    type: 'keyword',
+  },
+  'panw.panos.response_time': {
+    category: 'panw',
+    description:
+      'The SSL response time of the selected gateway that is measured in milliseconds on the endpoint during tunnel setup. ',
+    name: 'panw.panos.response_time',
+    type: 'keyword',
+  },
+  'panw.panos.attempted_gateways': {
+    category: 'panw',
+    description:
+      'The fields that are collected for each gateway connection attempt with the gateway name, SSL response time, and priority ',
+    name: 'panw.panos.attempted_gateways',
+    type: 'keyword',
+  },
+  'panw.panos.gateway': {
+    category: 'panw',
+    description: 'The name of the gateway that is specified on the portal configuration. ',
+    name: 'panw.panos.gateway',
+    type: 'keyword',
+  },
+  'panw.panos.selection_type': {
+    category: 'panw',
+    description: 'The connection method that is selected to connect to the gateway. ',
+    name: 'panw.panos.selection_type',
+    type: 'keyword',
   },
   'rabbitmq.log.pid': {
     category: 'rabbitmq',
@@ -28103,10 +29282,10 @@ export const fieldsBeat: BeatFields = {
     name: 'sophos.xg.recv_bytes',
     type: 'long',
   },
-  'sophos.xg.trans_src_ ip': {
+  'sophos.xg.trans_src_ip': {
     category: 'sophos',
     description: 'Translated source IP address for outgoing traffic ',
-    name: 'sophos.xg.trans_src_ ip',
+    name: 'sophos.xg.trans_src_ip',
     type: 'ip',
   },
   'sophos.xg.trans_src_port': {
@@ -28313,16 +29492,16 @@ export const fieldsBeat: BeatFields = {
     name: 'sophos.xg.virus',
     type: 'keyword',
   },
-  'sophos.xg.FTP_url': {
+  'sophos.xg.ftp_url': {
     category: 'sophos',
     description: 'FTP URL from which virus was downloaded ',
-    name: 'sophos.xg.FTP_url',
+    name: 'sophos.xg.ftp_url',
     type: 'keyword',
   },
-  'sophos.xg.FTP_direction': {
+  'sophos.xg.ftp_direction': {
     category: 'sophos',
     description: 'Direction of FTP transfer: Upload or Download ',
-    name: 'sophos.xg.FTP_direction',
+    name: 'sophos.xg.ftp_direction',
     type: 'keyword',
   },
   'sophos.xg.filesize': {
@@ -28955,6 +30134,18 @@ export const fieldsBeat: BeatFields = {
     name: 'sophos.xg.clients_conn_ssid',
     type: 'keyword',
   },
+  'sophos.xg.sqli': {
+    category: 'sophos',
+    description: 'The related SQLI caught by the WAF ',
+    name: 'sophos.xg.sqli',
+    type: 'keyword',
+  },
+  'sophos.xg.xss': {
+    category: 'sophos',
+    description: 'The related XSS caught by the WAF ',
+    name: 'sophos.xg.xss',
+    type: 'keyword',
+  },
   'suricata.eve.event_type': {
     category: 'suricata',
     name: 'suricata.eve.event_type',
@@ -29240,6 +30431,131 @@ export const fieldsBeat: BeatFields = {
     category: 'suricata',
     name: 'suricata.eve.alert.signature_id',
     type: 'long',
+  },
+  'suricata.eve.alert.protocols': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.protocols',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.attack_target': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.attack_target',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.capec_id': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.capec_id',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cwe_id': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cwe_id',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.malware': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.malware',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cve': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cve',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cvss_v2_base': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cvss_v2_base',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cvss_v2_temporal': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cvss_v2_temporal',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cvss_v3_base': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cvss_v3_base',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.cvss_v3_temporal': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.cvss_v3_temporal',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.priority': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.priority',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.hostile': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.hostile',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.infected': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.infected',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.created_at': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.created_at',
+    type: 'date',
+  },
+  'suricata.eve.alert.updated_at': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.updated_at',
+    type: 'date',
+  },
+  'suricata.eve.alert.classtype': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.classtype',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.rule_source': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.rule_source',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.sid': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.sid',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.affected_product': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.affected_product',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.deployment': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.deployment',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.former_category': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.former_category',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.mitre_tool_id': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.mitre_tool_id',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.performance_impact': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.performance_impact',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.signature_severity': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.signature_severity',
+    type: 'keyword',
+  },
+  'suricata.eve.alert.tag': {
+    category: 'suricata',
+    name: 'suricata.eve.alert.tag',
+    type: 'keyword',
   },
   'suricata.eve.ssh.client.proto_version': {
     category: 'suricata',
@@ -30001,7 +31317,7 @@ export const fieldsBeat: BeatFields = {
     description:
       'The date and time when intelligence source first reported sighting this indicator. ',
     name: 'threatintel.indicator.first_seen',
-    type: 'keyword',
+    type: 'date',
   },
   'threatintel.indicator.last_seen': {
     category: 'threatintel',
@@ -30156,46 +31472,53 @@ export const fieldsBeat: BeatFields = {
     name: 'threatintel.indicator.registry.key',
     type: 'keyword',
   },
-  'threatintel.indicator.geo.geo.city_name': {
+  'threatintel.indicator.geo.city_name': {
     category: 'threatintel',
     description: 'City name.',
     example: 'Montreal',
-    name: 'threatintel.indicator.geo.geo.city_name',
+    name: 'threatintel.indicator.geo.city_name',
     type: 'keyword',
   },
-  'threatintel.indicator.geo.geo.country_iso_code': {
+  'threatintel.indicator.geo.continent_name': {
+    category: 'threatintel',
+    description: 'Name of the continent.',
+    example: 'North America',
+    name: 'threatintel.indicator.geo.continent_name',
+    type: 'keyword',
+  },
+  'threatintel.indicator.geo.country_iso_code': {
     category: 'threatintel',
     description: 'Country ISO code.',
     example: 'CA',
-    name: 'threatintel.indicator.geo.geo.country_iso_code',
+    name: 'threatintel.indicator.geo.country_iso_code',
     type: 'keyword',
   },
-  'threatintel.indicator.geo.geo.country_name': {
+  'threatintel.indicator.geo.country_name': {
     category: 'threatintel',
     description: 'Country name.',
     example: 'Canada',
-    name: 'threatintel.indicator.geo.geo.country_name',
+    name: 'threatintel.indicator.geo.country_name',
     type: 'keyword',
   },
-  'threatintel.indicator.geo.geo.location': {
+  'threatintel.indicator.geo.location': {
     category: 'threatintel',
     description: 'Longitude and latitude.',
     example: '{ "lon": -73.614830, "lat": 45.505918 }',
-    name: 'threatintel.indicator.geo.geo.location',
+    name: 'threatintel.indicator.geo.location',
     type: 'geo_point',
   },
-  'threatintel.indicator.geo.geo.region_iso_code': {
+  'threatintel.indicator.geo.region_iso_code': {
     category: 'threatintel',
     description: 'Region ISO code.',
     example: 'CA-QC',
-    name: 'threatintel.indicator.geo.geo.region_iso_code',
+    name: 'threatintel.indicator.geo.region_iso_code',
     type: 'keyword',
   },
-  'threatintel.indicator.geo.geo.region_name': {
+  'threatintel.indicator.geo.region_name': {
     category: 'threatintel',
     description: 'Region name.',
     example: 'Quebec',
-    name: 'threatintel.indicator.geo.geo.region_name',
+    name: 'threatintel.indicator.geo.region_name',
     type: 'keyword',
   },
   'threatintel.indicator.file.pe.imphash': {
@@ -30236,6 +31559,12 @@ export const fieldsBeat: BeatFields = {
     name: 'threatintel.indicator.file.hash.sha256',
     type: 'keyword',
   },
+  'threatintel.indicator.file.hash.sha384': {
+    category: 'threatintel',
+    description: "The file's sha384 hash, if available. ",
+    name: 'threatintel.indicator.file.hash.sha384',
+    type: 'keyword',
+  },
   'threatintel.indicator.file.hash.sha512': {
     category: 'threatintel',
     description: "The file's sha512 hash, if available. ",
@@ -30244,20 +31573,32 @@ export const fieldsBeat: BeatFields = {
   },
   'threatintel.indicator.file.type': {
     category: 'threatintel',
-    description: 'The file type ',
+    description: 'The file type. ',
     name: 'threatintel.indicator.file.type',
     type: 'keyword',
   },
   'threatintel.indicator.file.size': {
     category: 'threatintel',
-    description: "The file's total size ",
+    description: "The file's total size. ",
     name: 'threatintel.indicator.file.size',
     type: 'long',
   },
   'threatintel.indicator.file.name': {
     category: 'threatintel',
-    description: "The file's name ",
+    description: "The file's name. ",
     name: 'threatintel.indicator.file.name',
+    type: 'keyword',
+  },
+  'threatintel.indicator.file.extension': {
+    category: 'threatintel',
+    description: "The file's extension. ",
+    name: 'threatintel.indicator.file.extension',
+    type: 'keyword',
+  },
+  'threatintel.indicator.file.mime_type': {
+    category: 'threatintel',
+    description: "The file's MIME type. ",
+    name: 'threatintel.indicator.file.mime_type',
     type: 'keyword',
   },
   'threatintel.indicator.url.domain': {
@@ -30381,6 +31722,12 @@ export const fieldsBeat: BeatFields = {
       'List of subject alternative names (SAN). Name types vary by certificate authority and certificate type but commonly contain IP addresses, DNS names (and wildcards), and email addresses.',
     example: '*.elastic.co',
     name: 'threatintel.indicator.x509.alternative_names',
+    type: 'keyword',
+  },
+  'threatintel.indicator.signature': {
+    category: 'threatintel',
+    description: 'Malware family of sample (if available). ',
+    name: 'threatintel.indicator.signature',
     type: 'keyword',
   },
   'threatintel.abusemalware.file_type': {
@@ -30547,6 +31894,171 @@ export const fieldsBeat: BeatFields = {
     category: 'threatintel',
     description: 'The STIX reference object. ',
     name: 'threatintel.anomali.object_marking_refs',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.classification': {
+    category: 'threatintel',
+    description:
+      'Indicates whether an indicator is private or from a public feed and available publicly. Possible values: private, public. ',
+    example: 'private',
+    name: 'threatintel.anomalithreatstream.classification',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.confidence': {
+    category: 'threatintel',
+    description:
+      "The measure of the accuracy (from 0 to 100) assigned by ThreatStream's predictive analytics technology to indicators. ",
+    name: 'threatintel.anomalithreatstream.confidence',
+    type: 'short',
+  },
+  'threatintel.anomalithreatstream.detail2': {
+    category: 'threatintel',
+    description: 'Detail text for indicator. ',
+    example: 'Imported by user 42.',
+    name: 'threatintel.anomalithreatstream.detail2',
+    type: 'text',
+  },
+  'threatintel.anomalithreatstream.id': {
+    category: 'threatintel',
+    description: 'The ID of the indicator. ',
+    name: 'threatintel.anomalithreatstream.id',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.import_session_id': {
+    category: 'threatintel',
+    description: 'ID of the import session that created the indicator on ThreatStream. ',
+    name: 'threatintel.anomalithreatstream.import_session_id',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.itype': {
+    category: 'threatintel',
+    description:
+      'Indicator type. Possible values: "apt_domain", "apt_email", "apt_ip", "apt_url", "bot_ip", "c2_domain", "c2_ip", "c2_url", "i2p_ip", "mal_domain", "mal_email", "mal_ip", "mal_md5", "mal_url", "parked_ip", "phish_email", "phish_ip", "phish_url", "scan_ip", "spam_domain", "ssh_ip", "suspicious_domain", "tor_ip" and "torrent_tracker_url". ',
+    name: 'threatintel.anomalithreatstream.itype',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.maltype': {
+    category: 'threatintel',
+    description:
+      'Information regarding a malware family, a CVE ID, or another attack or threat, associated with the indicator. ',
+    name: 'threatintel.anomalithreatstream.maltype',
+    type: 'wildcard',
+  },
+  'threatintel.anomalithreatstream.md5': {
+    category: 'threatintel',
+    description: 'Hash for the indicator. ',
+    name: 'threatintel.anomalithreatstream.md5',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.resource_uri': {
+    category: 'threatintel',
+    description: 'Relative URI for the indicator details. ',
+    name: 'threatintel.anomalithreatstream.resource_uri',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.severity': {
+    category: 'threatintel',
+    description:
+      'Criticality associated with the threat feed that supplied the indicator. Possible values: low, medium, high, very-high. ',
+    name: 'threatintel.anomalithreatstream.severity',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.source': {
+    category: 'threatintel',
+    description: 'Source for the indicator. ',
+    example: 'Analyst',
+    name: 'threatintel.anomalithreatstream.source',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.source_feed_id': {
+    category: 'threatintel',
+    description: 'ID for the integrator source. ',
+    name: 'threatintel.anomalithreatstream.source_feed_id',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.state': {
+    category: 'threatintel',
+    description: 'State for this indicator. ',
+    example: 'active',
+    name: 'threatintel.anomalithreatstream.state',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.trusted_circle_ids': {
+    category: 'threatintel',
+    description: 'ID of the trusted circle that imported the indicator. ',
+    name: 'threatintel.anomalithreatstream.trusted_circle_ids',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.update_id': {
+    category: 'threatintel',
+    description: 'Update ID. ',
+    name: 'threatintel.anomalithreatstream.update_id',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.url': {
+    category: 'threatintel',
+    description: 'URL for the indicator. ',
+    name: 'threatintel.anomalithreatstream.url',
+    type: 'keyword',
+  },
+  'threatintel.anomalithreatstream.value_type': {
+    category: 'threatintel',
+    description: 'Data type of the indicator. Possible values: ip, domain, url, email, md5. ',
+    name: 'threatintel.anomalithreatstream.value_type',
+    type: 'keyword',
+  },
+  'threatintel.malwarebazaar.file_type': {
+    category: 'threatintel',
+    description: 'File type guessed by Malware Bazaar. ',
+    name: 'threatintel.malwarebazaar.file_type',
+    type: 'keyword',
+  },
+  'threatintel.malwarebazaar.signature': {
+    category: 'threatintel',
+    description: 'Malware familiy. ',
+    name: 'threatintel.malwarebazaar.signature',
+    type: 'keyword',
+  },
+  'threatintel.malwarebazaar.tags': {
+    category: 'threatintel',
+    description: 'A list of tags associated with the queried malware sample. ',
+    name: 'threatintel.malwarebazaar.tags',
+    type: 'keyword',
+  },
+  'threatintel.malwarebazaar.intelligence.downloads': {
+    category: 'threatintel',
+    description: 'Number of downloads from MalwareBazaar. ',
+    name: 'threatintel.malwarebazaar.intelligence.downloads',
+    type: 'long',
+  },
+  'threatintel.malwarebazaar.intelligence.uploads': {
+    category: 'threatintel',
+    description: 'Number of uploads from MalwareBazaar. ',
+    name: 'threatintel.malwarebazaar.intelligence.uploads',
+    type: 'long',
+  },
+  'threatintel.malwarebazaar.intelligence.mail.Generic': {
+    category: 'threatintel',
+    description: 'Malware seen in generic spam traffic. ',
+    name: 'threatintel.malwarebazaar.intelligence.mail.Generic',
+    type: 'keyword',
+  },
+  'threatintel.malwarebazaar.intelligence.mail.IT': {
+    category: 'threatintel',
+    description: 'Malware seen in IT spam traffic. ',
+    name: 'threatintel.malwarebazaar.intelligence.mail.IT',
+    type: 'keyword',
+  },
+  'threatintel.malwarebazaar.anonymous': {
+    category: 'threatintel',
+    description: 'Identifies if the sample was submitted anonymously. ',
+    name: 'threatintel.malwarebazaar.anonymous',
+    type: 'long',
+  },
+  'threatintel.malwarebazaar.code_sign': {
+    category: 'threatintel',
+    description: 'Code signing information for the sample. ',
+    name: 'threatintel.malwarebazaar.code_sign',
     type: 'keyword',
   },
   'threatintel.misp.id': {
@@ -30827,6 +32339,85 @@ export const fieldsBeat: BeatFields = {
     description: 'The indicator type, can for example be "domain, email, FileHash-SHA256". ',
     name: 'threatintel.otx.type',
     type: 'keyword',
+  },
+  'threatintel.recordedfuture.entity.id': {
+    category: 'threatintel',
+    description: 'Entity ID. ',
+    example: 'ip:192.0.2.13',
+    name: 'threatintel.recordedfuture.entity.id',
+    type: 'keyword',
+  },
+  'threatintel.recordedfuture.entity.name': {
+    category: 'threatintel',
+    description: 'Entity name. Value for the entity. ',
+    example: '192.0.2.13',
+    name: 'threatintel.recordedfuture.entity.name',
+    type: 'keyword',
+  },
+  'threatintel.recordedfuture.entity.type': {
+    category: 'threatintel',
+    description: 'Entity type. ',
+    example: 'IpAddress',
+    name: 'threatintel.recordedfuture.entity.type',
+    type: 'keyword',
+  },
+  'threatintel.recordedfuture.intelCard': {
+    category: 'threatintel',
+    description: 'Link to the Recorded Future Intelligence Card for to this indicator. ',
+    name: 'threatintel.recordedfuture.intelCard',
+    type: 'keyword',
+  },
+  'threatintel.recordedfuture.ip_range': {
+    category: 'threatintel',
+    description: 'Range of IPs for this indicator. ',
+    example: '192.0.2.0/16',
+    name: 'threatintel.recordedfuture.ip_range',
+    type: 'ip_range',
+  },
+  'threatintel.recordedfuture.risk.criticality': {
+    category: 'threatintel',
+    description: 'Risk criticality (0-4). ',
+    name: 'threatintel.recordedfuture.risk.criticality',
+    type: 'byte',
+  },
+  'threatintel.recordedfuture.risk.criticalityLabel': {
+    category: 'threatintel',
+    description:
+      'Risk criticality label. One of None, Unusual, Suspicious, Malicious, Very Malicious. ',
+    name: 'threatintel.recordedfuture.risk.criticalityLabel',
+    type: 'keyword',
+  },
+  'threatintel.recordedfuture.risk.evidenceDetails': {
+    category: 'threatintel',
+    description: "Risk's evidence details. ",
+    name: 'threatintel.recordedfuture.risk.evidenceDetails',
+    type: 'flattened',
+  },
+  'threatintel.recordedfuture.risk.score': {
+    category: 'threatintel',
+    description: 'Risk score (0-99). ',
+    name: 'threatintel.recordedfuture.risk.score',
+    type: 'short',
+  },
+  'threatintel.recordedfuture.risk.riskString': {
+    category: 'threatintel',
+    description: 'Number of Risk Rules observed as a factor of total number of rules. ',
+    example: '1/54',
+    name: 'threatintel.recordedfuture.risk.riskString',
+    type: 'keyword',
+  },
+  'threatintel.recordedfuture.risk.riskSummary': {
+    category: 'threatintel',
+    description: 'Risk summary. ',
+    example: '1 of 54 Risk Rules currently observed.',
+    name: 'threatintel.recordedfuture.risk.riskSummary',
+    type: 'keyword',
+  },
+  'threatintel.recordedfuture.risk.rules': {
+    category: 'threatintel',
+    description: 'Number of rules observed. ',
+    name: 'threatintel.recordedfuture.risk.rules',
+    type: 'long',
   },
   'zeek.session_id': {
     category: 'zeek',
@@ -32148,6 +33739,85 @@ export const fieldsBeat: BeatFields = {
     description: 'Tree name given by the server in a CHALLENGE. ',
     name: 'zeek.ntlm.server.name.tree',
     type: 'keyword',
+  },
+  'zeek.ntp.version': {
+    category: 'zeek',
+    description: 'The NTP version number (1, 2, 3, 4). ',
+    name: 'zeek.ntp.version',
+    type: 'integer',
+  },
+  'zeek.ntp.mode': {
+    category: 'zeek',
+    description: 'The NTP mode being used. ',
+    name: 'zeek.ntp.mode',
+    type: 'integer',
+  },
+  'zeek.ntp.stratum': {
+    category: 'zeek',
+    description: 'The stratum (primary server, secondary server, etc.). ',
+    name: 'zeek.ntp.stratum',
+    type: 'integer',
+  },
+  'zeek.ntp.poll': {
+    category: 'zeek',
+    description: 'The maximum interval between successive messages in seconds. ',
+    name: 'zeek.ntp.poll',
+    type: 'double',
+  },
+  'zeek.ntp.precision': {
+    category: 'zeek',
+    description: 'The precision of the system clock in seconds. ',
+    name: 'zeek.ntp.precision',
+    type: 'double',
+  },
+  'zeek.ntp.root_delay': {
+    category: 'zeek',
+    description: 'Total round-trip delay to the reference clock in seconds. ',
+    name: 'zeek.ntp.root_delay',
+    type: 'double',
+  },
+  'zeek.ntp.root_disp': {
+    category: 'zeek',
+    description: 'Total dispersion to the reference clock in seconds. ',
+    name: 'zeek.ntp.root_disp',
+    type: 'double',
+  },
+  'zeek.ntp.ref_id': {
+    category: 'zeek',
+    description:
+      'For stratum 0, 4 character string used for debugging. For stratum 1, ID assigned to the reference clock by IANA. Above stratum 1, when using IPv4, the IP address of the reference clock. Note that the NTP protocol did not originally specify a large enough field to represent IPv6 addresses, so they use the first four bytes of the MD5 hash of the reference clock’s IPv6 address (i.e. an IPv4 address here is not necessarily IPv4). ',
+    name: 'zeek.ntp.ref_id',
+    type: 'keyword',
+  },
+  'zeek.ntp.ref_time': {
+    category: 'zeek',
+    description: 'Time when the system clock was last set or correct. ',
+    name: 'zeek.ntp.ref_time',
+    type: 'date',
+  },
+  'zeek.ntp.org_time': {
+    category: 'zeek',
+    description: 'Time at the client when the request departed for the NTP server. ',
+    name: 'zeek.ntp.org_time',
+    type: 'date',
+  },
+  'zeek.ntp.rec_time': {
+    category: 'zeek',
+    description: 'Time at the server when the request arrived from the NTP client. ',
+    name: 'zeek.ntp.rec_time',
+    type: 'date',
+  },
+  'zeek.ntp.xmt_time': {
+    category: 'zeek',
+    description: 'Time at the server when the response departed for the NTP client. ',
+    name: 'zeek.ntp.xmt_time',
+    type: 'date',
+  },
+  'zeek.ntp.num_exts': {
+    category: 'zeek',
+    description: 'Number of extension fields (which are not currently parsed). ',
+    name: 'zeek.ntp.num_exts',
+    type: 'integer',
   },
   'zeek.ocsp.file_id': {
     category: 'zeek',
@@ -33864,6 +35534,50 @@ export const fieldsBeat: BeatFields = {
     name: 'zeek.x509.log_cert',
     type: 'boolean',
   },
+  'zookeeper.audit.session': {
+    category: 'zookeeper',
+    description: 'Client session id ',
+    name: 'zookeeper.audit.session',
+    type: 'keyword',
+  },
+  'zookeeper.audit.znode': {
+    category: 'zookeeper',
+    description: 'Path of the znode ',
+    name: 'zookeeper.audit.znode',
+    type: 'keyword',
+  },
+  'zookeeper.audit.znode_type': {
+    category: 'zookeeper',
+    description: 'Type of znode in case of creation operation ',
+    name: 'zookeeper.audit.znode_type',
+    type: 'keyword',
+  },
+  'zookeeper.audit.acl': {
+    category: 'zookeeper',
+    description:
+      'String representation of znode ACL like cdrwa(create, delete,read, write, admin). This is logged only for setAcl operation ',
+    name: 'zookeeper.audit.acl',
+    type: 'keyword',
+  },
+  'zookeeper.audit.result': {
+    category: 'zookeeper',
+    description:
+      'Result of the operation. Possible values are (success/failure/invoked). Result "invoked" is used for serverStop operation because stop is logged before ensuring that server actually stopped. ',
+    name: 'zookeeper.audit.result',
+    type: 'keyword',
+  },
+  'zookeeper.audit.user': {
+    category: 'zookeeper',
+    description: 'Comma separated list of users who are associate with a client session ',
+    name: 'zookeeper.audit.user',
+    type: 'keyword',
+  },
+  'zookeeper.log': {
+    category: 'zookeeper',
+    description: 'ZooKeeper logs. ',
+    name: 'zookeeper.log',
+    type: 'group',
+  },
   'zoom.master_account_id': {
     category: 'zoom',
     description: 'Master Account related to a specific Sub Account ',
@@ -34813,17 +36527,29 @@ export const fieldsBeat: BeatFields = {
     name: 'aws-cloudwatch.ingestion_time',
     type: 'keyword',
   },
-  bucket_name: {
-    category: 'base',
+  'bucket.name': {
+    category: 'bucket',
     description: 'Name of the S3 bucket that this log retrieved from. ',
-    name: 'bucket_name',
+    name: 'bucket.name',
     type: 'keyword',
   },
-  object_key: {
-    category: 'base',
-    description: 'Name of the S3 object that this log retrieved from. ',
-    name: 'object_key',
+  'bucket.arn': {
+    category: 'bucket',
+    description: 'ARN of the S3 bucket that this log retrieved from. ',
+    name: 'bucket.arn',
     type: 'keyword',
+  },
+  'object.key': {
+    category: 'object',
+    description: 'Name of the S3 object that this log retrieved from. ',
+    name: 'object.key',
+    type: 'keyword',
+  },
+  metadata: {
+    category: 'base',
+    description: 'AWS S3 object metadata values.',
+    name: 'metadata',
+    type: 'flattened',
   },
   'netflow.type': {
     category: 'netflow',
@@ -41981,6 +43707,12 @@ export const fieldsBeat: BeatFields = {
       'The task defined in the event. Task and opcode are typically used to identify the location in the application from where the event was logged. The category used by the Event Logging API (on pre Windows Vista operating systems) is written to this field. ',
     name: 'winlog.task',
     type: 'keyword',
+  },
+  'winlog.time_created': {
+    category: 'winlog',
+    description: 'The event creation time. ',
+    name: 'winlog.time_created',
+    type: 'date',
   },
   'winlog.process.thread.id': {
     category: 'winlog',

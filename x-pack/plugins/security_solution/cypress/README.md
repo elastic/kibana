@@ -2,6 +2,48 @@
 
 The `security_solution/cypress` directory contains functional UI tests that execute using [Cypress](https://www.cypress.io/).
 
+Currently with Cypress you can develop `functional` tests and coming soon `CCS` and `Upgrade` functional tests.
+
+If you are still having doubts, questions or queries, please feel free to ping our Cypress champions:
+
+- Functional Tests:
+  - Gloria Hornero, Frank Hassanabad and Patryk Kopycinsky 
+  
+- CCS Tests:
+  - Technical questions around the https://github.com/elastic/integration-test repo:
+     - Domenico Andreoli
+  - Doubts regarding testing CCS and Cypress best practices:
+     - Gloria Hornero   
+
+## Table of Contents
+
+[**How to add a new Cypress test**](#how-to-add-a-new-cypress-test)
+
+[**Running the tests**](#running-the-tests)
+
+[**Debugging your test**](#debugging-your-test)
+
+[**Folder structure**](#folder-structure)
+
+[**Test data**](#test-data)
+
+[**Development Best Practices**](#development-best-practices)
+
+[**Test Artifacts**](#test-artifacts)
+
+[**Linting**](#linting)
+
+## How to add a new Cypress test
+
+Before considering adding a new Cypress tests, please make sure you have added unit and API tests first. Note that, the aim of Cypress
+ is to test that the user interface operates as expected, hence, you should not be using this tool to test REST API or data contracts.
+
+First take a look to the [**Development Best Practices**](#development-best-practices) section.
+Then check check [**Folder structure**](#folder-structure) section to know where is the best place to put your test, [**Test data**](#test-data) section if you need to create any type
+of data for your test, [**Running the tests**](#running-the-tests) to know how to execute the tests and [**Debugging your test**](#debugging-your-test) to debug your test if needed.
+
+Please, before opening a PR with the new test, please make sure that the test fails. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
+
 ## Running the tests
 
 There are currently four ways to run the tests, comprised of two execution modes and two target environments, which will be detailed below.
@@ -165,7 +207,7 @@ node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solut
 
 # launch the cypress test runner with overridden environment variables
 cd x-pack/plugins/security_solution
-CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=password yarn cypress:run
+CYPRESS_base_url=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=<password> CYPRESS_protocol=<httpOrHttps> CYPRESS_hostname=<kibanaInstanceHostName> CYPRESS_configport=<kibanaPort> CYPRESS_KIBANA_URL=<kbnUrl> yarn  cypress:run
 ```
 
 #### Custom Target + Headless (Firefox)
@@ -183,7 +225,7 @@ node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solut
 
 # launch the cypress test runner with overridden environment variables
 cd x-pack/plugins/security_solution
-CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=password yarn cypress:run:firefox
+CYPRESS_base_url=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=<password> CYPRESS_protocol=<httpOrHttps> CYPRESS_hostname=<kibanaInstanceHostName> CYPRESS_configport=<kibanaPort> CYPRESS_KIBANA_URL=<kbnUrl> yarn cypress:run:firefox
 ```
 
 #### CCS Custom Target + Headless
@@ -216,7 +258,15 @@ Similar sequence, just ending with `yarn cypress:open:ccs`, can be used for inte
 
 Appending `--browser firefox` to the `yarn cypress:run:ccs` command above will run the tests on Firefox instead of Chrome.
 
+## Debugging your test
+In order to be able to debug any Cypress test you need to open Cypress on visual mode. [Here](https://docs.cypress.io/guides/guides/debugging)
+you can find an extended guide about how to proceed.
+
+If you are debugging a flaky test, a good tip is to insert a `cy.wait(<some long milliseconds>)` around async parts of the tes code base, such as network calls which can make an indeterministic test, deterministically fail locally. 
+
 ## Folder Structure
+
+Below you can find the folder structure used on our Cypress tests.
 
 ### ccs_integration/
 
@@ -352,6 +402,11 @@ export const unmappedCCSRule: CustomRule = {
 Similar approach should be used in defining all index patterns, rules, and queries to be applied on remote data.
 
 ## Development Best Practices
+Below you will a set of best practices that should be followed when writing Cypress tests.
+
+### Make sure your test fail
+
+Before open a PR with the new test, please make sure that the test fail. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
 ### Clean up the state 
 
@@ -371,6 +426,14 @@ taken into consideration until another solution is implemented:
 - All tests in a spec file must be order-independent.
 
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
+
+### Cypress-pipe
+It is very common in the code to don't have click handlers regitered. In this specific case, please use [Cypress pipe](https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/). 
+
+### CCS test specific
+When testing CCS we want to put our focus in making sure that our `Source` instance is receiving properly the data that comes from the `Remote` instances, as well as the data is displayed as we expect on the `Source`.
+
+For that reason and in order to make our test more stable, use the API to execute all the actions needed before the assertions, and use Cypress to assert that the UI is displaying all the expected things.
 
 ## Test Artifacts
 

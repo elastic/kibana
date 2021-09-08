@@ -7,7 +7,6 @@
 
 import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Aggregators } from '../types';
-import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
 import { createPercentileAggregation } from './create_percentile_aggregation';
 import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
 
@@ -34,12 +33,8 @@ export const getElasticsearchMetricQuery = (
     throw new Error('Can only aggregate without a metric if using the document count aggregator');
   }
   const interval = `${timeSize}${timeUnit}`;
-  const intervalAsSeconds = getIntervalInSeconds(interval);
-  const intervalAsMS = intervalAsSeconds * 1000;
   const to = timeframe.end;
   const from = timeframe.start;
-  const offset = calculateDateHistogramOffset({ from, to, interval, field: timefield });
-  const offsetInMS = parseInt(offset, 10);
 
   const aggregations =
     aggType === Aggregators.COUNT
@@ -63,7 +58,7 @@ export const getElasticsearchMetricQuery = (
             date_histogram: {
               field: timefield,
               fixed_interval: interval,
-              offset,
+              offset: calculateDateHistogramOffset({ from, to, interval, field: timefield }),
               extended_bounds: {
                 min: from,
                 max: to,
@@ -72,18 +67,7 @@ export const getElasticsearchMetricQuery = (
             aggregations,
           },
         }
-      : {
-          aggregatedIntervals: {
-            date_range: {
-              field: timefield,
-              ranges: Array.from(Array(Math.floor((to - from) / intervalAsMS)), (_, i) => ({
-                from: from + intervalAsMS * i + offsetInMS,
-                to: from + intervalAsMS * (i + 1) + offsetInMS,
-              })),
-            },
-            aggregations,
-          },
-        };
+      : aggregations;
 
   const aggs = groupBy
     ? {

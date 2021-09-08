@@ -8,6 +8,7 @@
 import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_NAME,
+  TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
@@ -16,36 +17,37 @@ import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup } from '../helpers/setup_request';
 
 interface Options {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   searchAggregatedTransactions: boolean;
   serviceName: string;
   setup: Setup;
   transactionType: string;
+  transactionName?: string;
   start: number;
   end: number;
+  intervalString: string;
+  throughputUnit: 'minute' | 'second';
 }
 
-function fetcher({
+export async function getThroughput({
   environment,
   kuery,
   searchAggregatedTransactions,
   serviceName,
   setup,
   transactionType,
+  transactionName,
   start,
   end,
+  intervalString,
+  throughputUnit,
 }: Options) {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSizeForAggregatedTransactions({
-    start,
-    end,
-    searchAggregatedTransactions,
-  });
+
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
@@ -56,6 +58,14 @@ function fetcher({
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
+
+  if (transactionName) {
+    filter.push({
+      term: {
+        [TRANSACTION_NAME]: transactionName,
+      },
+    });
+  }
 
   const params = {
     apm: {
@@ -79,7 +89,7 @@ function fetcher({
           aggs: {
             throughput: {
               rate: {
-                unit: 'minute' as const,
+                unit: throughputUnit,
               },
             },
           },
@@ -88,11 +98,10 @@ function fetcher({
     },
   };
 
-  return apmEventClient.search('get_throughput_for_service', params);
-}
-
-export async function getThroughput(options: Options) {
-  const response = await fetcher(options);
+  const response = await apmEventClient.search(
+    'get_throughput_for_service',
+    params
+  );
 
   return (
     response.aggregations?.timeseries.buckets.map((bucket) => {

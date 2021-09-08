@@ -15,10 +15,10 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { isEmpty, mapValues, once } from 'lodash';
+import { isEmpty, mapValues } from 'lodash';
 import { SavedObjectsClient } from '../../../../src/core/server';
-import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { Dataset } from '../../rule_registry/server';
 import { APMConfig, APMXPackConfig, APM_SERVER_FEATURE_ID } from '.';
 import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
@@ -28,12 +28,11 @@ import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
-import { apmCorrelationsSearchStrategyProvider } from './lib/search_strategies/correlations';
+import { registerSearchStrategies } from './lib/search_strategies';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
 import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
-import { uiSettings } from './ui_settings';
 import type {
   ApmPluginRequestHandlerContext,
   APMRouteHandlerResources,
@@ -81,19 +80,16 @@ export class APMPlugin
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
 
-    core.uiSettings.register(uiSettings);
-
     const currentConfig = mergeConfigs(
       plugins.apmOss.config,
       this.initContext.config.get<APMXPackConfig>()
     );
-
     this.currentConfig = currentConfig;
 
     if (
       plugins.taskManager &&
       plugins.usageCollection &&
-      this.currentConfig['xpack.apm.telemetryCollectionEnabled']
+      currentConfig['xpack.apm.telemetryCollectionEnabled']
     ) {
       createApmTelemetry({
         core,
@@ -109,31 +105,20 @@ export class APMPlugin
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
-    const { ruleDataService } = plugins.ruleRegistry;
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
 
-    const alertsIndexPattern = ruleDataService.getFullAssetName(
-      'observability-apm*'
-    );
-
-    const initializeRuleDataTemplates = once(async () => {
-      const componentTemplateName = ruleDataService.getFullAssetName(
-        'apm-mappings'
-      );
-
-      if (!ruleDataService.isWriteEnabled()) {
-        return;
-      }
-
-      await ruleDataService.createOrUpdateComponentTemplate({
-        name: componentTemplateName,
-        body: {
-          template: {
-            settings: {
-              number_of_shards: 1,
-            },
-            mappings: mappingFromFieldMap({
+    const { ruleDataService } = plugins.ruleRegistry;
+    const ruleDataClient = ruleDataService.initializeIndex({
+      feature: APM_SERVER_FEATURE_ID,
+      registrationContext: 'observability.apm',
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(
+            {
               [SERVICE_NAME]: {
                 type: 'keyword',
               },
@@ -146,38 +131,12 @@ export class APMPlugin
               [PROCESSOR_EVENT]: {
                 type: 'keyword',
               },
-            }),
-          },
+            },
+            'strict'
+          ),
         },
-      });
-
-      await ruleDataService.createOrUpdateIndexTemplate({
-        name: ruleDataService.getFullAssetName('apm-index-template'),
-        body: {
-          index_patterns: [alertsIndexPattern],
-          composed_of: [
-            ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-            componentTemplateName,
-          ],
-        },
-      });
-      await ruleDataService.updateIndexMappingsMatchingPattern(
-        alertsIndexPattern
-      );
+      ],
     });
-
-    // initialize eagerly
-    const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch(
-      (err) => {
-        this.logger!.error(err);
-      }
-    );
-
-    const ruleDataClient = ruleDataService.getRuleDataClient(
-      APM_SERVER_FEATURE_ID,
-      ruleDataService.getFullAssetName('observability-apm'),
-      () => initializeRuleDataTemplatesPromise
-    );
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
@@ -192,21 +151,22 @@ export class APMPlugin
       };
     }) as APMRouteHandlerResources['plugins'];
 
-    plugins.home?.tutorials.registerTutorial(
-      tutorialProvider({
-        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
-        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
-        cloud: plugins.cloud,
-        isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
-        indices: {
-          errorIndices: this.currentConfig['apm_oss.errorIndices'],
-          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
-          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
-          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
-          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
-        },
-      })
-    );
+    const boundGetApmIndices = async () =>
+      getApmIndices({
+        savedObjectsClient: await getInternalSavedObjectsClient(core),
+        config: await mergedConfig$.pipe(take(1)).toPromise(),
+      });
+
+    boundGetApmIndices().then((indices) => {
+      plugins.home?.tutorials.registerTutorial(
+        tutorialProvider({
+          apmConfig: currentConfig,
+          apmIndices: indices,
+          cloud: plugins.cloud,
+          isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+        })
+      );
+    });
 
     const telemetryUsageCounter = resourcePlugins.usageCollection?.setup.createUsageCounter(
       APM_SERVER_FEATURE_ID
@@ -225,12 +185,6 @@ export class APMPlugin
       telemetryUsageCounter,
     });
 
-    const boundGetApmIndices = async () =>
-      getApmIndices({
-        savedObjectsClient: await getInternalSavedObjectsClient(core),
-        config: await mergedConfig$.pipe(take(1)).toPromise(),
-      });
-
     if (plugins.alerting) {
       registerApmAlerts({
         ruleDataClient,
@@ -244,7 +198,7 @@ export class APMPlugin
     registerFleetPolicyCallbacks({
       plugins: resourcePlugins,
       ruleDataClient,
-      config: this.currentConfig,
+      config: currentConfig,
       logger: this.logger,
     });
 
@@ -255,14 +209,14 @@ export class APMPlugin
           coreStart.savedObjects.createInternalRepository()
         );
 
-        plugins.data.search.registerSearchStrategy(
-          'apmCorrelationsSearchStrategy',
-          apmCorrelationsSearchStrategyProvider(
-            boundGetApmIndices,
-            await coreStart.uiSettings
-              .asScopedToClient(savedObjectsClient)
-              .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
-          )
+        const includeFrozen = await coreStart.uiSettings
+          .asScopedToClient(savedObjectsClient)
+          .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
+
+        registerSearchStrategies(
+          plugins.data.search.registerSearchStrategy,
+          boundGetApmIndices,
+          includeFrozen
         );
       })();
     });

@@ -6,7 +6,7 @@
   "kibana": [
     {
       "feature": {
-        "apm": ["read", "alerts_all"]
+        "apm": ["all"]
       },
       "spaces": ["*"]
     }

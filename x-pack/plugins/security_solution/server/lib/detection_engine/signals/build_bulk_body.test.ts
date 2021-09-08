@@ -37,11 +37,14 @@ describe('buildBulkBody', () => {
   test('bulk body builds well-defined body', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      [],
+      buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -77,6 +80,7 @@ describe('buildBulkBody', () => {
           },
         ],
         original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: expectedRule(),
         depth: 1,
@@ -91,6 +95,7 @@ describe('buildBulkBody', () => {
   test('bulk body builds well-defined body with threshold results', () => {
     const ruleSO = sampleRuleSO(getThresholdRuleParams());
     const baseDoc = sampleDocNoSortId();
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     const doc: SignalSourceHit & { _source: Required<SignalSourceHit>['_source'] } = {
       ...baseDoc,
       _source: {
@@ -109,7 +114,9 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      [],
+      buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -145,6 +152,7 @@ describe('buildBulkBody', () => {
           },
         ],
         original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: {
           ...expectedRule(),
@@ -181,6 +189,7 @@ describe('buildBulkBody', () => {
   test('bulk body builds original_event if it exists on the event to begin with', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
     doc._source.event = {
       action: 'socket_opened',
@@ -191,7 +200,9 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      [],
+      buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -227,6 +238,7 @@ describe('buildBulkBody', () => {
             depth: 0,
           },
         ],
+        reason: 'reasonable reason',
         ancestors: [
           {
             id: sampleIdGuid,
@@ -250,6 +262,7 @@ describe('buildBulkBody', () => {
   test('bulk body builds original_event if it exists on the event to begin with but no kind information', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
     doc._source.event = {
       action: 'socket_opened',
@@ -259,7 +272,9 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      [],
+      buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -303,6 +318,7 @@ describe('buildBulkBody', () => {
           },
         ],
         original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: expectedRule(),
         depth: 1,
@@ -317,6 +333,7 @@ describe('buildBulkBody', () => {
   test('bulk body builds original_event if it exists on the event to begin with with only kind information', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete doc._source.source;
     doc._source.event = {
       kind: 'event',
@@ -324,7 +341,9 @@ describe('buildBulkBody', () => {
     const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      [],
+      buildReasonMessage
     );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -363,6 +382,7 @@ describe('buildBulkBody', () => {
           },
         ],
         original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: expectedRule(),
         depth: 1,
@@ -377,6 +397,7 @@ describe('buildBulkBody', () => {
   test('bulk body builds "original_signal" if it exists already as a numeric', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const sampleDoc = sampleDocNoSortId();
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete sampleDoc._source.source;
     const doc = ({
       ...sampleDoc,
@@ -388,7 +409,9 @@ describe('buildBulkBody', () => {
     const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      [],
+      buildReasonMessage
     );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
@@ -423,6 +446,7 @@ describe('buildBulkBody', () => {
           },
         ],
         original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: expectedRule(),
         depth: 1,
@@ -437,6 +461,7 @@ describe('buildBulkBody', () => {
   test('bulk body builds "original_signal" if it exists already as an object', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const sampleDoc = sampleDocNoSortId();
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     delete sampleDoc._source.source;
     const doc = ({
       ...sampleDoc,
@@ -448,7 +473,9 @@ describe('buildBulkBody', () => {
     const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
       ruleSO,
       doc,
-      'missingFields'
+      'missingFields',
+      [],
+      buildReasonMessage
     );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
@@ -483,6 +510,7 @@ describe('buildBulkBody', () => {
           },
         ],
         original_time: '2020-04-20T21:27:45.000Z',
+        reason: 'reasonable reason',
         status: 'open',
         rule: expectedRule(),
         depth: 1,
@@ -504,7 +532,12 @@ describe('buildSignalFromSequence', () => {
     block2._source.new_key = 'new_key_value';
     const blocks = [block1, block2];
     const ruleSO = sampleRuleSO(getQueryRuleParams());
-    const signal: SignalHitOptionalTimestamp = buildSignalFromSequence(blocks, ruleSO);
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
+    const signal: SignalHitOptionalTimestamp = buildSignalFromSequence(
+      blocks,
+      ruleSO,
+      buildReasonMessage
+    );
     // Timestamp will potentially always be different so remove it for the test
     delete signal['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { new_key: string } = {
@@ -573,6 +606,7 @@ describe('buildSignalFromSequence', () => {
           },
         ],
         status: 'open',
+        reason: 'reasonable reason',
         rule: expectedRule(),
         depth: 2,
         group: {
@@ -589,7 +623,12 @@ describe('buildSignalFromSequence', () => {
     block2._source['@timestamp'] = '2021-05-20T22:28:46+0000';
     block2._source.someKey = 'someOtherValue';
     const ruleSO = sampleRuleSO(getQueryRuleParams());
-    const signal: SignalHitOptionalTimestamp = buildSignalFromSequence([block1, block2], ruleSO);
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
+    const signal: SignalHitOptionalTimestamp = buildSignalFromSequence(
+      [block1, block2],
+      ruleSO,
+      buildReasonMessage
+    );
     // Timestamp will potentially always be different so remove it for the test
     delete signal['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> = {
@@ -657,6 +696,7 @@ describe('buildSignalFromSequence', () => {
           },
         ],
         status: 'open',
+        reason: 'reasonable reason',
         rule: expectedRule(),
         depth: 2,
         group: {
@@ -673,11 +713,14 @@ describe('buildSignalFromEvent', () => {
     const ancestor = sampleDocWithAncestors().hits.hits[0];
     delete ancestor._source.source;
     const ruleSO = sampleRuleSO(getQueryRuleParams());
+    const buildReasonMessage = jest.fn().mockReturnValue('reasonable reason');
     const signal: SignalHitOptionalTimestamp = buildSignalFromEvent(
       ancestor,
       ruleSO,
       true,
-      'missingFields'
+      'missingFields',
+      [],
+      buildReasonMessage
     );
 
     // Timestamp will potentially always be different so remove it for the test
@@ -724,6 +767,7 @@ describe('buildSignalFromEvent', () => {
           },
         ],
         status: 'open',
+        reason: 'reasonable reason',
         rule: expectedRule(),
         depth: 2,
       },

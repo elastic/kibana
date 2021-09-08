@@ -26,7 +26,7 @@ type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElem
  *
  * @example
  *
- * const handleOnClick = useNavigateToAppEventHandler('fleet', {path: '#/policies'})
+ * const handleOnClick = useNavigateToAppEventHandler('fleet', {path: '/policies'})
  * return <EuiLink onClick={handleOnClick}>See policies</EuiLink>
  */
 export const useNavigateToAppEventHandler = <S = unknown>(

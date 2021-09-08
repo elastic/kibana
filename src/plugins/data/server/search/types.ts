@@ -103,6 +103,11 @@ export interface ISearchStart<
 > {
   aggs: AggsStart;
   /**
+   * Search as the internal Kibana system user. This is not a registered search strategy as we don't
+   * want to allow access from the client.
+   */
+  searchAsInternalUser: ISearchStrategy;
+  /**
    * Get other registered search strategies by name (or, by default, the Elasticsearch strategy).
    * For example, if a new strategy needs to use the already-registered ES search strategy, it can
    * use this function to accomplish that.

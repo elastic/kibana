@@ -19,6 +19,7 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
     labelType="label"
   >
     <EuiSelect
+      data-test-subj="durationEditorInputFormat"
       isInvalid={false}
       onChange={[Function]}
       options={
@@ -49,6 +50,7 @@ exports[`DurationFormatEditor should not render show suffix on dynamic output 1`
     labelType="label"
   >
     <EuiSelect
+      data-test-subj="durationEditorOutputFormat"
       isInvalid={false}
       onChange={[Function]}
       options={
@@ -198,6 +200,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     labelType="label"
   >
     <EuiSelect
+      data-test-subj="durationEditorInputFormat"
       isInvalid={false}
       onChange={[Function]}
       options={
@@ -228,6 +231,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     labelType="label"
   >
     <EuiSelect
+      data-test-subj="durationEditorOutputFormat"
       isInvalid={false}
       onChange={[Function]}
       options={
@@ -310,6 +314,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     labelType="label"
   >
     <EuiSelect
+      data-test-subj="durationEditorInputFormat"
       isInvalid={false}
       onChange={[Function]}
       options={
@@ -340,6 +345,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     labelType="label"
   >
     <EuiSelect
+      data-test-subj="durationEditorOutputFormat"
       isInvalid={false}
       onChange={[Function]}
       options={

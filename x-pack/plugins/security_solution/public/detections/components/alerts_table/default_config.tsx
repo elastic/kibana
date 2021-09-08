@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+import {
+  ALERT_DURATION,
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_PRODUCER,
+  ALERT_START,
+  ALERT_WORKFLOW_STATUS,
+  ALERT_UUID,
+  ALERT_RULE_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_CATEGORY,
+} from '@kbn/rule-data-utils';
+
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -14,25 +26,73 @@ import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { columns } from '../../configurations/security_solution_detections/columns';
 
-export const buildAlertStatusFilter = (status: Status): Filter[] => [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: 'signal.status',
-      params: {
-        query: status,
+export const buildAlertStatusFilter = (status: Status): Filter[] => {
+  const combinedQuery =
+    status === 'acknowledged'
+      ? {
+          bool: {
+            should: [
+              {
+                term: {
+                  'signal.status': status,
+                },
+              },
+              {
+                term: {
+                  'signal.status': 'in-progress',
+                },
+              },
+            ],
+          },
+        }
+      : {
+          term: {
+            'signal.status': status,
+          },
+        };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+        type: 'phrase',
+        key: 'signal.status',
+        params: {
+          query: status,
+        },
       },
+      query: combinedQuery,
     },
-    query: {
-      term: {
-        'signal.status': status,
+  ];
+};
+
+/**
+ * For backwards compatability issues, if `acknowledged` is a status prop, `in-progress` will likely have to be too
+ */
+export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
+  const combinedQuery = {
+    bool: {
+      should: statuses.map((status) => ({
+        term: {
+          'signal.status': status,
+        },
+      })),
+    },
+  };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
       },
+      query: combinedQuery,
     },
-  },
-];
+  ];
+};
 
 export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
   ruleId
@@ -127,25 +187,71 @@ export const requiredFieldsForActions = [
 ];
 
 // TODO: Once we are past experimental phase this code should be removed
-export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: 'kibana.rac.alert.status',
-      params: {
-        query: status,
+export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => {
+  const combinedQuery =
+    status === 'acknowledged'
+      ? {
+          bool: {
+            should: [
+              {
+                term: {
+                  [ALERT_WORKFLOW_STATUS]: status,
+                },
+              },
+              {
+                term: {
+                  [ALERT_WORKFLOW_STATUS]: 'in-progress',
+                },
+              },
+            ],
+          },
+        }
+      : {
+          term: {
+            [ALERT_WORKFLOW_STATUS]: status,
+          },
+        };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+        type: 'phrase',
+        key: ALERT_WORKFLOW_STATUS,
+        params: {
+          query: status,
+        },
       },
+      query: combinedQuery,
     },
-    query: {
-      term: {
-        'kibana.rac.alert.status': status,
+  ];
+};
+
+// TODO: Once we are past experimental phase this code should be removed
+export const buildAlertStatusesFilterRuleRegistry = (statuses: Status[]): Filter[] => {
+  const combinedQuery = {
+    bool: {
+      should: statuses.map((status) => ({
+        term: {
+          [ALERT_WORKFLOW_STATUS]: status,
+        },
+      })),
+    },
+  };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
       },
+      query: combinedQuery,
     },
-  },
-];
+  ];
+};
 
 export const buildShowBuildingBlockFilterRuleRegistry = (
   showBuildingBlockAlerts: boolean
@@ -159,28 +265,27 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'kibana.rac.rule.building_block_type',
+            key: 'kibana.rule.building_block_type',
             value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'kibana.rac.rule.building_block_type' },
+          exists: { field: 'kibana.rule.building_block_type' },
         },
       ];
 
 export const requiredFieldMappingsForActionsRuleRegistry = {
   '@timestamp': '@timestamp',
-  'alert.id': 'kibana.rac.alert.id',
+  'alert.instance.id': ALERT_INSTANCE_ID,
   'event.kind': 'event.kind',
-  'alert.start': 'kibana.rac.alert.start',
-  'alert.uuid': 'kibana.rac.alert.uuid',
+  'alert.start': ALERT_START,
+  'alert.uuid': ALERT_UUID,
   'event.action': 'event.action',
-  'alert.status': 'kibana.rac.alert.status',
-  'alert.duration.us': 'kibana.rac.alert.duration.us',
-  'rule.uuid': 'rule.uuid',
-  'rule.id': 'rule.id',
-  'rule.name': 'rule.name',
-  'rule.category': 'rule.category',
-  producer: 'kibana.rac.alert.producer',
+  'alert.workflow_status': ALERT_WORKFLOW_STATUS,
+  'alert.duration.us': ALERT_DURATION,
+  'rule.uuid': ALERT_RULE_UUID,
+  'rule.name': ALERT_RULE_NAME,
+  'rule.category': ALERT_RULE_CATEGORY,
+  producer: ALERT_RULE_PRODUCER,
   tags: 'tags',
 };
 

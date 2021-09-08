@@ -19,5 +19,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./saved_searches'));
     loadTestFile(require.resolve('./visualize_field'));
     loadTestFile(require.resolve('./value_suggestions'));
+    loadTestFile(require.resolve('./value_suggestions_non_timebased'));
   });
 }

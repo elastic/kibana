@@ -95,6 +95,14 @@ export class TaskManagerPlugin
       this.config!
     );
 
+    core.status.derivedStatus$.subscribe((status) =>
+      this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
+    );
+    serviceStatus$.subscribe((status) =>
+      this.logger.debug(`status serviceStatus now set to ${status.level}`)
+    );
+
+    // here is where the system status is updated
     core.status.set(
       combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
         map(([derivedStatus, serviceStatus]) =>
@@ -126,7 +134,11 @@ export class TaskManagerPlugin
     };
   }
 
-  public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
+  public start({
+    savedObjects,
+    elasticsearch,
+    executionContext,
+  }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
     const serializer = savedObjects.createSerializer();
@@ -150,6 +162,7 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       taskStore,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
@@ -160,6 +173,7 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       pool: this.taskPollingLifecycle.pool,

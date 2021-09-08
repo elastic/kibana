@@ -95,24 +95,71 @@ describe('filters', () => {
         layer,
         uiSettingsMock
       );
-      expect(esAggsFn).toEqual(
-        expect.objectContaining({
-          arguments: expect.objectContaining({
-            filters: [
-              JSON.stringify([
-                {
-                  input: { query: 'bytes >= 1', language: 'kuery' },
-                  label: 'More than one',
+
+      expect(esAggsFn.arguments.filters).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "input": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "q": Array [
+                              "bytes >= 1",
+                            ],
+                          },
+                          "function": "kql",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ],
+                  "label": Array [
+                    "More than one",
+                  ],
                 },
-                {
-                  input: { query: 'src : 2', language: 'kuery' },
-                  label: '',
-                },
-              ]),
+                "function": "queryFilter",
+                "type": "function",
+              },
             ],
-          }),
-        })
-      );
+            "type": "expression",
+          },
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "input": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "q": Array [
+                              "src : 2",
+                            ],
+                          },
+                          "function": "kql",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ],
+                  "label": Array [
+                    "",
+                  ],
+                },
+                "function": "queryFilter",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ]
+      `);
     });
   });
 

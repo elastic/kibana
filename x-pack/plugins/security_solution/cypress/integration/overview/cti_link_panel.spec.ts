@@ -31,11 +31,9 @@ describe('CTI Link Panel', () => {
     cy.get(`${OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
     cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 indicators');
     cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`).should('exist');
-    cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`).should(
-      'have.attr',
-      'href',
-      'https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-module-threatintel.html'
-    );
+    cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`)
+      .should('have.attr', 'href')
+      .and('match', /filebeat-module-threatintel.html/);
   });
 
   describe('enabled threat intel module', () => {

@@ -32,8 +32,8 @@ export async function getTransactionBreakdown({
   transactionName,
   transactionType,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   transactionName?: string;
@@ -117,11 +117,11 @@ export async function getTransactionBreakdown({
       aggs: {
         ...subAggs,
         by_date: {
-          date_histogram: getMetricsDateHistogramParams(
+          date_histogram: getMetricsDateHistogramParams({
             start,
             end,
-            config['xpack.apm.metricsInterval']
-          ),
+            metricsInterval: config['xpack.apm.metricsInterval'],
+          }),
           aggs: subAggs,
         },
       },

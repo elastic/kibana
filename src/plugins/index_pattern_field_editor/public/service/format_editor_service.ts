@@ -9,18 +9,19 @@
 import { FieldFormatEditors } from './field_format_editors';
 
 import {
-  BytesFormatEditor,
-  ColorFormatEditor,
-  DateFormatEditor,
-  DateNanosFormatEditor,
-  DurationFormatEditor,
-  NumberFormatEditor,
-  PercentFormatEditor,
-  StaticLookupFormatEditor,
-  StringFormatEditor,
-  TruncateFormatEditor,
-  UrlFormatEditor,
-  HistogramFormatEditor,
+  bytesFormatEditorFactory,
+  colorFormatEditorFactory,
+  dateFormatEditorFactory,
+  dateNanosFormatEditorFactory,
+  durationFormatEditorFactory,
+  numberFormatEditorFactory,
+  percentFormatEditorFactory,
+  staticLookupFormatEditorFactory,
+  stringFormatEditorFactory,
+  truncateFormatEditorFactory,
+  urlFormatEditorFactory,
+  histogramFormatEditorFactory,
+  FieldFormatEditorFactory,
 } from '../components';
 
 /**
@@ -36,22 +37,24 @@ export class FormatEditorService {
   }
 
   public setup() {
-    const defaultFieldFormatEditors = [
-      BytesFormatEditor,
-      ColorFormatEditor,
-      DateFormatEditor,
-      DateNanosFormatEditor,
-      DurationFormatEditor,
-      NumberFormatEditor,
-      PercentFormatEditor,
-      StaticLookupFormatEditor,
-      StringFormatEditor,
-      TruncateFormatEditor,
-      UrlFormatEditor,
-      HistogramFormatEditor,
+    const defaultFieldFormatEditorFactories: FieldFormatEditorFactory[] = [
+      bytesFormatEditorFactory,
+      colorFormatEditorFactory,
+      dateFormatEditorFactory,
+      dateNanosFormatEditorFactory,
+      durationFormatEditorFactory,
+      numberFormatEditorFactory,
+      percentFormatEditorFactory,
+      staticLookupFormatEditorFactory,
+      stringFormatEditorFactory,
+      truncateFormatEditorFactory,
+      urlFormatEditorFactory,
+      histogramFormatEditorFactory,
     ];
 
-    const fieldFormatEditorsSetup = this.fieldFormatEditors.setup(defaultFieldFormatEditors);
+    const fieldFormatEditorsSetup = this.fieldFormatEditors.setup(
+      defaultFieldFormatEditorFactories
+    );
 
     return {
       fieldFormatEditors: fieldFormatEditorsSetup,

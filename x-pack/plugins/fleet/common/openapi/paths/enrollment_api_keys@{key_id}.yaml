@@ -19,7 +19,7 @@ get:
                 $ref: ../components/schemas/enrollment_api_key.yaml
             required:
               - item
-  operationId: get-fleet-enrollment-api-keys-keyId
+  operationId: get-enrollment-api-key
 delete:
   summary: Enrollment API Key - Delete
   tags: []
@@ -37,6 +37,6 @@ delete:
                   - deleted
             required:
               - action
-  operationId: delete-fleet-enrollment-api-keys-keyId
+  operationId: delete-enrollment-api-key
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

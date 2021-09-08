@@ -158,7 +158,7 @@ image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute,
 A rule can have one of the following statuses:
 
 `active`:: The conditions for the rule have been met, and the associated actions should be invoked.
-`ok`:: The conditions for the rule were previously met, but no longer. Changed to `recovered` in the 7.14 release.
+`ok`:: The conditions for the rule have not been met, and the associated actions are not invoked.
 `error`:: An error was encountered during rule execution.
 `pending`:: The rule has not yet executed.  The rule was either just created, or enabled after being disabled.
 `unknown`:: A problem occurred when calculating the status. Most likely, something went wrong with the alerting code.

@@ -8,58 +8,59 @@
 import {
   searchSessionSavedObjectMigrations,
   SearchSessionSavedObjectAttributesPre$7$13$0,
+  SearchSessionSavedObjectAttributesPre$7$14$0,
 } from './search_session_migration';
 import { SavedObject } from '../../../../../src/core/types';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../../../src/plugins/data/common';
 import { SavedObjectMigrationContext } from 'kibana/server';
 
-const mockCompletedSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> = {
-  id: 'id',
-  type: SEARCH_SESSION_TYPE,
-  attributes: {
-    name: 'my_name',
-    appId: 'my_app_id',
-    sessionId: 'sessionId',
-    urlGeneratorId: 'my_url_generator_id',
-    initialState: {},
-    restoreState: {},
-    persisted: true,
-    idMapping: {},
-    realmType: 'realmType',
-    realmName: 'realmName',
-    username: 'username',
-    created: '2021-03-26T00:00:00.000Z',
-    expires: '2021-03-30T00:00:00.000Z',
-    touched: '2021-03-29T00:00:00.000Z',
-    status: SearchSessionStatus.COMPLETE,
-  },
-  references: [],
-};
-
-const mockInProgressSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> = {
-  id: 'id',
-  type: SEARCH_SESSION_TYPE,
-  attributes: {
-    name: 'my_name',
-    appId: 'my_app_id',
-    sessionId: 'sessionId',
-    urlGeneratorId: 'my_url_generator_id',
-    initialState: {},
-    restoreState: {},
-    persisted: true,
-    idMapping: {},
-    realmType: 'realmType',
-    realmName: 'realmName',
-    username: 'username',
-    created: '2021-03-26T00:00:00.000Z',
-    expires: '2021-03-30T00:00:00.000Z',
-    touched: '2021-03-29T00:00:00.000Z',
-    status: SearchSessionStatus.IN_PROGRESS,
-  },
-  references: [],
-};
-
 describe('7.12.0 -> 7.13.0', () => {
+  const mockCompletedSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> = {
+    id: 'id',
+    type: SEARCH_SESSION_TYPE,
+    attributes: {
+      name: 'my_name',
+      appId: 'my_app_id',
+      sessionId: 'sessionId',
+      urlGeneratorId: 'my_url_generator_id',
+      initialState: {},
+      restoreState: {},
+      persisted: true,
+      idMapping: {},
+      realmType: 'realmType',
+      realmName: 'realmName',
+      username: 'username',
+      created: '2021-03-26T00:00:00.000Z',
+      expires: '2021-03-30T00:00:00.000Z',
+      touched: '2021-03-29T00:00:00.000Z',
+      status: SearchSessionStatus.COMPLETE,
+    },
+    references: [],
+  };
+
+  const mockInProgressSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> = {
+    id: 'id',
+    type: SEARCH_SESSION_TYPE,
+    attributes: {
+      name: 'my_name',
+      appId: 'my_app_id',
+      sessionId: 'sessionId',
+      urlGeneratorId: 'my_url_generator_id',
+      initialState: {},
+      restoreState: {},
+      persisted: true,
+      idMapping: {},
+      realmType: 'realmType',
+      realmName: 'realmName',
+      username: 'username',
+      created: '2021-03-26T00:00:00.000Z',
+      expires: '2021-03-30T00:00:00.000Z',
+      touched: '2021-03-29T00:00:00.000Z',
+      status: SearchSessionStatus.IN_PROGRESS,
+    },
+    references: [],
+  };
+
   const migration = searchSessionSavedObjectMigrations['7.13.0'];
   test('"completed" is populated from "touched" for completed session', () => {
     const migratedCompletedSession = migration(
@@ -104,5 +105,60 @@ describe('7.12.0 -> 7.13.0', () => {
     expect(migratedInProgressSession.attributes).toEqual(
       mockInProgressSessionSavedObject.attributes
     );
+  });
+});
+
+describe('7.13.0 -> 7.14.0', () => {
+  const mockSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$14$0> = {
+    id: 'id',
+    type: SEARCH_SESSION_TYPE,
+    attributes: {
+      name: 'my_name',
+      appId: 'my_app_id',
+      sessionId: 'sessionId',
+      urlGeneratorId: 'my_url_generator_id',
+      initialState: {},
+      restoreState: {},
+      persisted: true,
+      idMapping: {},
+      realmType: 'realmType',
+      realmName: 'realmName',
+      username: 'username',
+      created: '2021-03-26T00:00:00.000Z',
+      expires: '2021-03-30T00:00:00.000Z',
+      touched: '2021-03-29T00:00:00.000Z',
+      completed: '2021-03-29T00:00:00.000Z',
+      status: SearchSessionStatus.COMPLETE,
+    },
+    references: [],
+  };
+
+  const migration = searchSessionSavedObjectMigrations['7.14.0'];
+  test('version is populated', () => {
+    const migratedSession = migration(mockSessionSavedObject, {} as SavedObjectMigrationContext);
+
+    expect(migratedSession.attributes).toHaveProperty('version');
+    expect(migratedSession.attributes.version).toBe('7.13.0');
+    expect(migratedSession.attributes).toMatchInlineSnapshot(`
+      Object {
+        "appId": "my_app_id",
+        "completed": "2021-03-29T00:00:00.000Z",
+        "created": "2021-03-26T00:00:00.000Z",
+        "expires": "2021-03-30T00:00:00.000Z",
+        "idMapping": Object {},
+        "initialState": Object {},
+        "name": "my_name",
+        "persisted": true,
+        "realmName": "realmName",
+        "realmType": "realmType",
+        "restoreState": Object {},
+        "sessionId": "sessionId",
+        "status": "complete",
+        "touched": "2021-03-29T00:00:00.000Z",
+        "urlGeneratorId": "my_url_generator_id",
+        "username": "username",
+        "version": "7.13.0",
+      }
+    `);
   });
 });

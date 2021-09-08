@@ -14,6 +14,7 @@ export enum LastEventIndexKey {
   hosts = 'hosts',
   ipDetails = 'ipDetails',
   network = 'network',
+  ueba = 'ueba', // TODO: Steph/ueba implement this
 }
 
 export interface LastTimeDetails {

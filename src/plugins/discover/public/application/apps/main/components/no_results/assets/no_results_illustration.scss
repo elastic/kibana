@@ -1,0 +1,19 @@
+.dscNoResultsIllustration__decor {
+  fill: lightOrDarkTheme(#E6EBF2, #294492);
+}
+
+.dscNoResultsIllustration__fly {
+  fill: lightOrDarkTheme(#294492, #E6EBF2);
+}
+
+@include euiBreakpoint('xs', 's') {
+  .dscNoResults__illustration > svg {
+    width: $euiSize * 12;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .dscNoResults__title {
+    text-align: center;
+  }
+}

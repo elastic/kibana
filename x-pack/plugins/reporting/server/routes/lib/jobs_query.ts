@@ -11,8 +11,10 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { i18n } from '@kbn/i18n';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
+import { PromiseType } from 'utility-types';
 import { ReportingCore } from '../../';
-import { ReportApiJSON, ReportDocument, ReportSource } from '../../../common/types';
+import { ReportApiJSON, ReportSource } from '../../../common/types';
+import { statuses } from '../../lib/statuses';
 import { Report } from '../../lib/store';
 import { ReportingUser } from '../../types';
 
@@ -46,7 +48,7 @@ interface JobsQueryFactory {
   ): Promise<ReportApiJSON[]>;
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
-  getContent(user: ReportingUser, id: string): Promise<ReportContent | void>;
+  getError(id: string): Promise<string>;
   delete(deleteIndex: string, id: string): Promise<ApiResponse<DeleteResponse>>;
 }
 
@@ -57,9 +59,9 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     return `${config.get('index')}-*`;
   }
 
-  async function execQuery<T extends (client: ElasticsearchClient) => any>(
-    callback: T
-  ): Promise<UnwrapPromise<ReturnType<T>> | undefined> {
+  async function execQuery<
+    T extends (client: ElasticsearchClient) => Promise<PromiseType<ReturnType<T>> | undefined>
+  >(callback: T): Promise<UnwrapPromise<ReturnType<T>> | undefined> {
     try {
       const { asInternalUser: client } = await reportingCore.getEsClient();
 
@@ -101,11 +103,12 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       return (
         response?.body.hits?.hits.map((report: SearchHit<ReportSource>) => {
           const { _source: reportSource, ...reportHead } = report;
-          if (reportSource) {
-            const reportInstance = new Report({ ...reportSource, ...reportHead });
-            return reportInstance.toApiJSON();
+          if (!reportSource) {
+            throw new Error(`Search hit did not include _source!`);
           }
-          throw new Error(`Search hit did not include _source!`);
+
+          const reportInstance = new Report({ ...reportSource, ...reportHead });
+          return reportInstance.toApiJSON();
         }) ?? []
       );
     },
@@ -154,11 +157,11 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       });
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search({ body, index: getIndex() })
+        elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
       );
 
-      const result = response?.body.hits.hits[0] as SearchHit<ReportSource> | undefined;
-      if (!result || !result._source) {
+      const result = response?.body.hits?.hits?.[0];
+      if (!result?._source) {
         logger.warning(`No hits resulted in search`);
         return;
       }
@@ -167,19 +170,16 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       return report.toApiJSON();
     },
 
-    async getContent(user, id) {
-      if (!id) {
-        return;
-      }
-
-      const username = getUsername(user);
+    async getError(id) {
       const body: SearchRequest['body'] = {
-        _source: { excludes: ['payload.headers'] },
+        _source: {
+          includes: ['output.content', 'status'],
+        },
         query: {
           constant_score: {
             filter: {
               bool: {
-                must: [{ term: { _id: id } }, { term: { created_by: username } }],
+                must: [{ term: { _id: id } }],
               },
             },
           },
@@ -188,21 +188,16 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       };
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search({ body, index: getIndex() })
+        elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
       );
+      const hits = response?.body.hits?.hits?.[0];
+      const status = hits?._source?.status;
 
-      if (response?.body.hits?.hits?.length !== 1) {
-        return;
+      if (status !== statuses.JOB_STATUS_FAILED) {
+        throw new Error(`Can not get error for ${id}`);
       }
 
-      const report = response.body.hits.hits[0] as ReportDocument;
-
-      return {
-        status: report._source.status,
-        jobtype: report._source.jobtype,
-        output: report._source.output,
-        payload: report._source.payload,
-      };
+      return hits?._source?.output?.content!;
     },
 
     async delete(deleteIndex, id) {

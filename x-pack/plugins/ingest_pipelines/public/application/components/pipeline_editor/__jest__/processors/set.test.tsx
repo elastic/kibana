@@ -8,19 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
-// Default parameter values automatically added to the set processor when saved
-const defaultSetParameters = {
-  value: '',
-  if: undefined,
-  tag: undefined,
-  override: undefined,
-  media_type: undefined,
-  description: undefined,
-  ignore_missing: undefined,
-  ignore_failure: undefined,
-  ignore_empty_value: undefined,
-};
-
 const SET_TYPE = 'set';
 
 describe('Processor: Set', () => {
@@ -66,7 +53,10 @@ describe('Processor: Set', () => {
     await saveNewProcessor();
 
     // Expect form error as "field" is required parameter
-    expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
+    expect(form.getErrorsMessages()).toEqual([
+      'A field value is required.',
+      'A value is required.',
+    ]);
   });
 
   test('saves with default parameter value', async () => {
@@ -75,15 +65,43 @@ describe('Processor: Set', () => {
       form,
     } = testBed;
 
-    // Add "field" value (required)
+    // Add required fields
+    form.setInputValue('valueFieldInput', 'value');
     form.setInputValue('fieldNameField.input', 'field_1');
     // Save the field
     await saveNewProcessor();
 
     const processors = getProcessorValue(onUpdate, SET_TYPE);
     expect(processors[0][SET_TYPE]).toEqual({
-      ...defaultSetParameters,
       field: 'field_1',
+      value: 'value',
+    });
+  });
+
+  test('allows to save the the copy_from value', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+      find,
+    } = testBed;
+
+    // Add required fields
+    form.setInputValue('fieldNameField.input', 'field_1');
+
+    // Set value field
+    form.setInputValue('valueFieldInput', 'value');
+
+    // Toggle to copy_from field and set a random value
+    find('toggleCustomField').simulate('click');
+    form.setInputValue('copyFromInput', 'copy_from');
+
+    // Save the field with new changes
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, SET_TYPE);
+    expect(processors[0][SET_TYPE]).toEqual({
+      field: 'field_1',
+      copy_from: 'copy_from',
     });
   });
 
@@ -110,7 +128,6 @@ describe('Processor: Set', () => {
 
     const processors = getProcessorValue(onUpdate, SET_TYPE);
     expect(processors[0][SET_TYPE]).toEqual({
-      ...defaultSetParameters,
       field: 'field_1',
       value: '{{{hello}}}',
       media_type: 'text/plain',
@@ -136,7 +153,6 @@ describe('Processor: Set', () => {
 
     const processors = getProcessorValue(onUpdate, SET_TYPE);
     expect(processors[0][SET_TYPE]).toEqual({
-      ...defaultSetParameters,
       field: 'field_1',
       value: '{{{hello}}}',
       ignore_empty_value: true,

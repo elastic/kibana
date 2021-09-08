@@ -6,7 +6,7 @@
  */
 
 import type { History } from 'history';
-import { createMemoryHistory, createHashHistory } from 'history';
+import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender, act } from '@testing-library/react';
@@ -47,9 +47,10 @@ export const createFleetTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);
+  const history = createMemoryHistory({ initialEntries: [basePath] });
   const testRendererMocks: TestRenderer = {
-    history: createHashHistory(),
-    mountHistory: new ScopedHistory(createMemoryHistory({ initialEntries: [basePath] }), basePath),
+    history,
+    mountHistory: new ScopedHistory(history, basePath),
     startServices,
     config: createConfigurationMock(),
     startInterface: createStartMock(extensions),
@@ -89,7 +90,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);
   const testRendererMocks: TestRenderer = {
-    history: createHashHistory(),
+    history: createMemoryHistory(),
     mountHistory: new ScopedHistory(createMemoryHistory({ initialEntries: [basePath] }), basePath),
     startServices,
     config: createConfigurationMock(),

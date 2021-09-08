@@ -27,6 +27,7 @@ import {
   TIMELINES,
   CASE,
   MANAGE,
+  UEBA,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -40,7 +41,9 @@ import {
   ENDPOINTS_PATH,
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
+  UEBA_PATH,
 } from '../../../common/constants';
+import { ExperimentalFeatures } from '../../../common/experimental_features';
 
 export const topDeepLinks: AppDeepLink[] = [
   {
@@ -91,6 +94,18 @@ export const topDeepLinks: AppDeepLink[] = [
     order: 9003,
   },
   {
+    id: SecurityPageName.ueba,
+    title: UEBA,
+    path: UEBA_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.ueba', {
+        defaultMessage: 'Users & Entities',
+      }),
+    ],
+    order: 9004,
+  },
+  {
     id: SecurityPageName.timelines,
     title: TIMELINES,
     path: TIMELINES_PATH,
@@ -100,7 +115,7 @@ export const topDeepLinks: AppDeepLink[] = [
         defaultMessage: 'Timelines',
       }),
     ],
-    order: 9004,
+    order: 9005,
   },
   {
     id: SecurityPageName.case,
@@ -112,7 +127,7 @@ export const topDeepLinks: AppDeepLink[] = [
         defaultMessage: 'Cases',
       }),
     ],
-    order: 9005,
+    order: 9006,
   },
   {
     id: SecurityPageName.administration,
@@ -200,7 +215,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
         title: i18n.translate('xpack.securitySolution.search.hosts.externalAlerts', {
           defaultMessage: 'External Alerts',
         }),
-        path: `${HOSTS_PATH}/alerts`,
+        path: `${HOSTS_PATH}/externalAlerts`,
       },
     ],
     premium: [
@@ -253,6 +268,9 @@ const nestedDeepLinks: SecurityDeepLinks = {
         path: `${NETWORK_PATH}/anomalies`,
       },
     ],
+  },
+  [SecurityPageName.ueba]: {
+    base: [],
   },
   [SecurityPageName.timelines]: {
     base: [
@@ -315,19 +333,24 @@ const nestedDeepLinks: SecurityDeepLinks = {
 };
 
 /**
- * A function that generates the plugin deepLinks
+ * A function that generates the plugin deepLinks structure
+ * used by Kibana to build the global side navigation and application search results
+ * @param enableExperimental ExperimentalFeatures arg
  * @param licenseType optional string for license level, if not provided basic is assumed.
+ * @param capabilities optional arg for app start capabilities
  */
 export function getDeepLinks(
+  enableExperimental: ExperimentalFeatures,
   licenseType?: LicenseType,
   capabilities?: ApplicationStart['capabilities']
 ): AppDeepLink[] {
   return topDeepLinks
     .filter(
       (deepLink) =>
-        deepLink.id !== SecurityPageName.case ||
-        capabilities == null ||
-        (deepLink.id === SecurityPageName.case && capabilities.siem.read_cases === true)
+        (deepLink.id !== SecurityPageName.case && deepLink.id !== SecurityPageName.ueba) || // is not cases or ueba
+        (deepLink.id === SecurityPageName.case &&
+          (capabilities == null || capabilities.siem.read_cases === true)) || // is cases with at least read only caps
+        (deepLink.id === SecurityPageName.ueba && enableExperimental.uebaEnabled) // is ueba with ueba feature flag enabled
     )
     .map((deepLink) => {
       const deepLinkId = deepLink.id as SecurityDeepLinkName;
@@ -345,6 +368,7 @@ export function getDeepLinks(
           deepLinks: [],
         };
       }
+
       if (isPremiumLicense(licenseType) && subPluginDeepLinks?.premium) {
         return {
           ...deepLink,
@@ -370,28 +394,14 @@ export function isPremiumLicense(licenseType?: LicenseType): boolean {
 export function updateGlobalNavigation({
   capabilities,
   updater$,
+  enableExperimental,
 }: {
   capabilities: ApplicationStart['capabilities'];
   updater$: Subject<AppUpdater>;
+  enableExperimental: ExperimentalFeatures;
 }) {
-  const deepLinks = getDeepLinks(undefined, capabilities);
-  const updatedDeepLinks = deepLinks.map((link) => {
-    switch (link.id) {
-      case SecurityPageName.case:
-        return {
-          ...link,
-          navLinkStatus: capabilities.siem.read_cases
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.hidden,
-          searchable: capabilities.siem.read_cases === true,
-        };
-      default:
-        return link;
-    }
-  });
-
   updater$.next(() => ({
     navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent showing main nav link
-    deepLinks: updatedDeepLinks,
+    deepLinks: getDeepLinks(enableExperimental, undefined, capabilities),
   }));
 }

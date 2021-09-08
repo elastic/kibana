@@ -7,9 +7,9 @@
  */
 
 import uuid from 'uuid';
-import { SerializableState } from '../../../kibana_utils/common/persistable_state';
+import { Filter } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '../../../../core/types';
-import { Filter } from '../es_query/filters';
 
 export const extract = (filters: Filter[]) => {
   const references: SavedObjectReference[] = [];
@@ -51,7 +51,7 @@ export const inject = (filters: Filter[], references: SavedObjectReference[]) =>
   });
 };
 
-export const telemetry = (filters: SerializableState, collector: unknown) => {
+export const telemetry = (filters: SerializableRecord, collector: unknown) => {
   return {};
 };
 

@@ -16,6 +16,8 @@ paths:
   # plugin-wide endpoint(s)
   /setup:
     $ref: paths/setup.yaml
+  /settings:
+    $ref: paths/settings.yaml
   # EPM / integrations endpoints
   /epm/categories:
     $ref: paths/epm@categories.yaml
@@ -34,10 +36,16 @@ paths:
     $ref: paths/agents@bulk_upgrade.yaml
   '/agents/{agentId}':
     $ref: 'paths/agents@{agent_id}.yaml'
+  '/agents/{agentId}/reassign':
+    $ref: 'paths/agents@{agent_id}@reassign.yaml'
   '/agents/{agentId}/unenroll':
     $ref: 'paths/agents@{agent_id}@unenroll.yaml'
   '/agents/{agentId}/upgrade':
     $ref: 'paths/agents@{agent_id}@upgrade.yaml'
+  '/agents/bulk_reassign':
+    $ref: 'paths/agents@bulk_reassign.yaml'
+  '/agents/bulk_unenroll':
+    $ref: 'paths/agents@bulk_unenroll.yaml'
   /agent_policies:
     $ref: paths/agent_policies.yaml
   '/agent_policies/{agentPolicyId}':
@@ -52,8 +60,16 @@ paths:
     $ref: 'paths/enrollment_api_keys@{key_id}.yaml'
   /package_policies:
     $ref: paths/package_policies.yaml
+  /package_policies/delete:
+    $ref: paths/package_policies@delete.yaml
   '/package_policies/{packagePolicyId}':
     $ref: 'paths/package_policies@{package_policy_id}.yaml'
+  /outputs:
+    $ref: paths/outputs.yaml
+  /outputs/{outputId}:
+    $ref: paths/outputs@{output_id}.yaml
+  '/epm/packages/{pkgName}/stats':
+    $ref: 'paths/epm@packages@{pkg_name}@stats.yaml'
 components:
   securitySchemes:
     basicAuth:

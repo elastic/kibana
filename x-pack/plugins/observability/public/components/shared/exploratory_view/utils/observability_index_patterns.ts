@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { FieldFormat as IFieldFormat } from 'src/plugins/field_formats/common';
 import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/public';
 import {
   DataPublicPluginStart,
   IndexPattern,
-  FieldFormat as IFieldFormat,
   IndexPatternSpec,
 } from '../../../../../../../../src/plugins/data/public';
 import { rumFieldFormats } from '../configurations/rum/field_formats';

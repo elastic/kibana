@@ -10,5 +10,5 @@ get:
             type: array
             items:
               $ref: ../components/schemas/search_result.yaml
-  operationId: get-epm-list
+  operationId: list-all-packages
 parameters: []

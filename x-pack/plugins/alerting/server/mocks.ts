@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertsClientMock } from './alerts_client.mock';
+import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertInstance } from './alert_instance';
 import {
@@ -14,7 +14,7 @@ import {
 } from '../../../../src/core/server/mocks';
 import { AlertInstanceContext, AlertInstanceState } from './types';
 
-export { alertsClientMock };
+export { rulesClientMock };
 
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
@@ -27,7 +27,7 @@ const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     listTypes: jest.fn(),
     getAlertingAuthorizationWithRequest: jest.fn(),
-    getAlertsClientWithRequest: jest.fn().mockResolvedValue(alertsClientMock.create()),
+    getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),
   };
   return mock;

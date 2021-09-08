@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
-import { EuiFormRow, EuiSelect, EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiToolTip,
+  EuiIcon,
+  EuiFormRow,
+  EuiSelect,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonIcon,
+} from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -15,9 +22,9 @@ import {
   IndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
-import { unitSuffixesLong } from '../suffix_formatter';
-import { TimeScaleUnit } from '../time_scale';
-import { IndexPatternLayer } from '../types';
+import type { TimeScaleUnit } from '../../../common/expressions';
+import { unitSuffixesLong } from '../../../common/suffix_formatter';
+import type { IndexPatternLayer } from '../types';
 
 export function setTimeScaling(
   columnId: string,

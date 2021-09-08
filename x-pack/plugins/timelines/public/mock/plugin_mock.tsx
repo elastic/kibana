@@ -13,8 +13,10 @@ import {
   useDraggableKeyboardWrapper,
 } from '../components';
 import { useAddToTimeline, useAddToTimelineSensor } from '../hooks/use_add_to_timeline';
+import { mockHoverActions } from './mock_hover_actions';
 
 export const createTGridMocks = () => ({
+  getHoverActions: () => mockHoverActions,
   // eslint-disable-next-line react/display-name
   getTGrid: () => <>{'hello grid'}</>,
   // eslint-disable-next-line react/display-name
@@ -26,4 +28,8 @@ export const createTGridMocks = () => ({
   getUseAddToTimeline: () => useAddToTimeline,
   getUseAddToTimelineSensor: () => useAddToTimelineSensor,
   getUseDraggableKeyboardWrapper: () => useDraggableKeyboardWrapper,
+  // eslint-disable-next-line react/display-name
+  getAddToExistingCaseButton: () => <div data-test-subj="add-to-existing-case" />,
+  // eslint-disable-next-line react/display-name
+  getAddToNewCaseButton: () => <div data-test-subj="add-to-new-case" />,
 });

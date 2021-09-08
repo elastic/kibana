@@ -82,6 +82,7 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
     return getConstraints(node.type, program);
   }
 
+  // node input ('a' | 'b'). returns ['a', 'b'];
   if (ts.isUnionTypeNode(node)) {
     const types = node.types.filter(discardNullOrUndefined);
     return types.reduce<any>((acc, typeNode) => {
@@ -95,6 +96,10 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
     return node.literal.text;
   }
 
+  if (ts.isStringLiteral(node)) {
+    return node.text;
+  }
+
   if (ts.isImportSpecifier(node)) {
     const source = node.getSourceFile();
     const importedModuleName = getModuleSpecifier(node);
@@ -104,6 +109,24 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
     return getConstraints(declarationNode, program);
   }
 
+  // node input ( enum { A = 'my_a', B = 'my_b' } ). returns ['my_a', 'my_b'];
+  if (ts.isEnumDeclaration(node)) {
+    return node.members.map((member) => getConstraints(member, program));
+  }
+
+  // node input ( 'A = my_a' )
+  if (ts.isEnumMember(node)) {
+    const { initializer } = node;
+    if (!initializer) {
+      // no initializer ( enum { A } );
+      const memberName = node.getText();
+      throw Error(
+        `EnumMember (${memberName}) must have an initializer. Example: (enum { ${memberName} = '${memberName}' })`
+      );
+    }
+
+    return getConstraints(initializer, program);
+  }
   throw Error(`Unsupported constraint of kind ${node.kind} [${ts.SyntaxKind[node.kind]}]`);
 }
 
@@ -113,22 +136,41 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
       return getDescriptor(node.type, program);
     }
   }
+
+  /**
+   * Supported interface keys:
+   * inteface T { [computed_value]: ANY_VALUE };
+   * inteface T { hardcoded_string: ANY_VALUE };
+   */
   if (ts.isTypeLiteralNode(node) || ts.isInterfaceDeclaration(node)) {
     return node.members.reduce((acc, m) => {
-      const key = m.name?.getText();
-      if (key) {
-        return { ...acc, [key]: getDescriptor(m, program) };
-      } else {
-        return { ...acc, ...getDescriptor(m, program) };
+      const { name: nameNode } = m;
+      if (nameNode) {
+        const nodeText = nameNode.getText();
+        if (ts.isComputedPropertyName(nameNode)) {
+          const typeChecker = program.getTypeChecker();
+          const symbol = typeChecker.getSymbolAtLocation(nameNode);
+          const key = symbol?.getName();
+          if (!key) {
+            throw Error(`Unable to parse computed value of ${nodeText}.`);
+          }
+          return { ...acc, [key]: getDescriptor(m, program) };
+        }
+
+        return { ...acc, [nodeText]: getDescriptor(m, program) };
       }
+
+      return { ...acc, ...getDescriptor(m, program) };
     }, {});
   }
 
-  // If it's defined as signature { [key: string]: OtherInterface }
+  /**
+   * Supported signature constraints of `string`:
+   * { [key in 'prop1' | 'prop2']: value }
+   * { [key in Enum]: value }
+   */
   if ((ts.isIndexSignatureDeclaration(node) || ts.isMappedTypeNode(node)) && node.type) {
     const descriptor = getDescriptor(node.type, program);
-
-    // If we know the constraints of `string` ({ [key in 'prop1' | 'prop2']: value })
     const constraint = (node as ts.MappedTypeNode).typeParameter?.constraint;
     if (constraint) {
       const constraints = getConstraints(constraint, program);

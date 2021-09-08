@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { layerTypes } from '../../../../common';
 import { initialState } from '../../../state_management/lens_slice';
 import { removeLayer, appendLayer } from './layer_actions';
 
@@ -119,6 +120,7 @@ describe('appendLayer', () => {
       generateId: () => 'foo',
       state,
       trackUiEvent,
+      layerType: layerTypes.DATA,
     });
 
     expect(newState.visualization.state).toEqual(['layer1', 'layer2', 'foo']);

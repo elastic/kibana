@@ -15,6 +15,7 @@ import {
   inspectSearchParams,
 } from '../../utils/test_helpers';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('metrics queries', () => {
   let mock: SearchParamsMock;
@@ -22,7 +23,13 @@ describe('metrics queries', () => {
   const createTests = (serviceNodeName?: string) => {
     it('fetches cpu chart data', async () => {
       mock = await inspectSearchParams((setup) =>
-        getCPUChartData({ setup, serviceName: 'foo', serviceNodeName })
+        getCPUChartData({
+          setup,
+          serviceName: 'foo',
+          serviceNodeName,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
+        })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -30,7 +37,13 @@ describe('metrics queries', () => {
 
     it('fetches memory chart data', async () => {
       mock = await inspectSearchParams((setup) =>
-        getMemoryChartData({ setup, serviceName: 'foo', serviceNodeName })
+        getMemoryChartData({
+          setup,
+          serviceName: 'foo',
+          serviceNodeName,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
+        })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -38,7 +51,13 @@ describe('metrics queries', () => {
 
     it('fetches heap memory chart data', async () => {
       mock = await inspectSearchParams((setup) =>
-        getHeapMemoryChart({ setup, serviceName: 'foo', serviceNodeName })
+        getHeapMemoryChart({
+          setup,
+          serviceName: 'foo',
+          serviceNodeName,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
+        })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -46,7 +65,13 @@ describe('metrics queries', () => {
 
     it('fetches non heap memory chart data', async () => {
       mock = await inspectSearchParams((setup) =>
-        getNonHeapMemoryChart({ setup, serviceName: 'foo', serviceNodeName })
+        getNonHeapMemoryChart({
+          setup,
+          serviceName: 'foo',
+          serviceNodeName,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
+        })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -54,7 +79,13 @@ describe('metrics queries', () => {
 
     it('fetches thread count chart data', async () => {
       mock = await inspectSearchParams((setup) =>
-        getThreadCountChart({ setup, serviceName: 'foo', serviceNodeName })
+        getThreadCountChart({
+          setup,
+          serviceName: 'foo',
+          serviceNodeName,
+          environment: ENVIRONMENT_ALL.value,
+          kuery: '',
+        })
       );
 
       expect(mock.params).toMatchSnapshot();

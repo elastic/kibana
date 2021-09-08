@@ -14,6 +14,7 @@ import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
 } from '../../../../common/constants';
 import { useAppUrl } from '../../../../../common/lib/kibana';
+import { pagePathGetters } from '../../../../../../../fleet/public';
 
 export function useEndpointSelector<TSelected>(selector: (state: EndpointState) => TSelected) {
   return useSelector(function (state: State) {
@@ -47,7 +48,8 @@ export const useAgentDetailsIngestUrl = (
 ): { url: string; appId: string; appPath: string } => {
   const { getAppUrl } = useAppUrl();
   return useMemo(() => {
-    const appPath = `#/fleet/agents/${agentId}/activity`;
+    const appPath = pagePathGetters.agent_details_logs({ agentId })[1];
+
     return {
       url: `${getAppUrl({ appId: 'fleet' })}${appPath}`,
       appId: 'fleet',

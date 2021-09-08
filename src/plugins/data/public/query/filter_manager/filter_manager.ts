@@ -11,16 +11,14 @@ import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 
+import { isFilterPinned, onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
 import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './types';
 
 import {
   FilterStateStore,
-  Filter,
   uniqFilters,
-  isFilterPinned,
   compareFilters,
   COMPARE_ALL_OPTIONS,
   UI_SETTINGS,
@@ -230,15 +228,15 @@ export class FilterManager implements PersistableStateService {
     });
   }
 
-  // Filter needs to implement SerializableState
+  // Filter needs to implement SerializableRecord
   public extract = extract as any;
 
-  // Filter needs to implement SerializableState
+  // Filter needs to implement SerializableRecord
   public inject = inject as any;
 
   public telemetry = telemetry;
 
-  // Filter needs to implement SerializableState
+  // Filter needs to implement SerializableRecord
   public migrateToLatest = migrateToLatest as any;
 
   public getAllMigrations = getAllMigrations;

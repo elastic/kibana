@@ -12,7 +12,7 @@ import {
   SavedObject,
   SavedObjectAttributes,
   SavedObjectsFindResponse,
-  SavedObjectsClientContract,
+  SavedObjectsFindResult,
 } from 'kibana/server';
 import type {
   MachineLearningJobIdOrUndefined,
@@ -41,6 +41,8 @@ import type {
   Severity,
   MaxSignalsOrUndefined,
   MaxSignals,
+  ThrottleOrUndefinedOrNull,
+  ThrottleOrNull,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
 
@@ -86,7 +88,7 @@ import {
   QueryFilterOrUndefined,
   FieldsOrUndefined,
   SortOrderOrUndefined,
-  JobStatus,
+  RuleExecutionStatus,
   LastSuccessAt,
   StatusDate,
   LastSuccessMessage,
@@ -101,12 +103,12 @@ import {
   EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
-import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
+import { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
-import { RuleStatusSavedObjectsClient } from '../signals/rule_status_saved_objects_client';
+import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
 export type RuleAlertType = Alert<RuleParams>;
 
@@ -118,7 +120,7 @@ export interface IRuleStatusSOAttributes extends Record<string, any> {
   lastFailureMessage: LastFailureMessage | null | undefined;
   lastSuccessAt: LastSuccessAt | null | undefined;
   lastSuccessMessage: LastSuccessMessage | null | undefined;
-  status: JobStatus | null | undefined;
+  status: RuleExecutionStatus | null | undefined;
   lastLookBackDate: string | null | undefined;
   gap: string | null | undefined;
   bulkCreateTimeDurations: string[] | null | undefined;
@@ -132,7 +134,7 @@ export interface IRuleStatusResponseAttributes {
   last_failure_message: LastFailureMessage | null | undefined;
   last_success_at: LastSuccessAt | null | undefined;
   last_success_message: LastSuccessMessage | null | undefined;
-  status: JobStatus | null | undefined;
+  status: RuleExecutionStatus | null | undefined;
   last_look_back_date: string | null | undefined; // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
   gap: string | null | undefined;
   bulk_create_time_durations: string[] | null | undefined;
@@ -186,7 +188,7 @@ export interface HapiReadableStream extends Readable {
 }
 
 export interface Clients {
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
 }
 
 export const isAlertTypes = (
@@ -214,7 +216,7 @@ export const isRuleStatusFindType = (
 };
 
 export interface CreateRulesOptions {
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: Author;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -255,6 +257,7 @@ export interface CreateRulesOptions {
   concurrentSearches: ConcurrentSearchesOrUndefined;
   itemsPerSearch: ItemsPerSearchOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
+  throttle: ThrottleOrNull;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
@@ -266,15 +269,17 @@ export interface CreateRulesOptions {
 }
 
 export interface UpdateRulesOptions {
-  savedObjectsClient: SavedObjectsClientContract;
-  alertsClient: AlertsClient;
+  spaceId: string;
+  ruleStatusClient: IRuleExecutionLogClient;
+  rulesClient: RulesClient;
   defaultOutputIndex: string;
   ruleUpdate: UpdateRulesSchema;
 }
 
 export interface PatchRulesOptions {
-  savedObjectsClient: SavedObjectsClientContract;
-  alertsClient: AlertsClient;
+  spaceId: string;
+  ruleStatusClient: IRuleExecutionLogClient;
+  rulesClient: RulesClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -312,6 +317,7 @@ export interface PatchRulesOptions {
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
+  throttle: ThrottleOrUndefinedOrNull;
   timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;
@@ -324,21 +330,20 @@ export interface PatchRulesOptions {
 }
 
 export interface ReadRuleOptions {
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
   id: IdOrUndefined;
   ruleId: RuleIdOrUndefined;
 }
 
 export interface DeleteRuleOptions {
-  alertsClient: AlertsClient;
-  savedObjectsClient: SavedObjectsClientContract;
-  ruleStatusClient: RuleStatusSavedObjectsClient;
-  ruleStatuses: SavedObjectsFindResponse<IRuleStatusSOAttributes, unknown>;
+  rulesClient: RulesClient;
+  ruleStatusClient: IRuleExecutionLogClient;
+  ruleStatuses: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>;
   id: Id;
 }
 
 export interface FindRuleOptions {
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;

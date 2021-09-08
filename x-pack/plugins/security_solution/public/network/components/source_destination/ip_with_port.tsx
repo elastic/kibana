@@ -25,9 +25,10 @@ IpPortSeparator.displayName = 'IpPortSeparator';
 const PortWithSeparator = React.memo<{
   contextId: string;
   eventId: string;
+  isDraggable?: boolean;
   port?: string | null;
   portFieldName: string;
-}>(({ contextId, eventId, port, portFieldName }) => {
+}>(({ contextId, eventId, isDraggable, port, portFieldName }) => {
   return port != null ? (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
@@ -39,7 +40,7 @@ const PortWithSeparator = React.memo<{
           data-test-subj="port"
           eventId={eventId}
           fieldName={portFieldName}
-          isDraggable={true}
+          isDraggable={isDraggable}
           value={port}
         />
       </EuiFlexItem>
@@ -58,9 +59,10 @@ export const IpWithPort = React.memo<{
   eventId: string;
   ip?: string | null;
   ipFieldName: string;
+  isDraggable?: boolean;
   port?: string | null;
   portFieldName: string;
-}>(({ contextId, eventId, ip, ipFieldName, port, portFieldName }) => (
+}>(({ contextId, eventId, ip, ipFieldName, isDraggable, port, portFieldName }) => (
   <EuiFlexGroup gutterSize="none">
     <EuiFlexItem grow={false}>
       <Ip
@@ -68,6 +70,7 @@ export const IpWithPort = React.memo<{
         data-test-subj="ip"
         eventId={eventId}
         fieldName={ipFieldName}
+        isDraggable={isDraggable}
         value={ip}
       />
     </EuiFlexItem>
@@ -75,6 +78,7 @@ export const IpWithPort = React.memo<{
       <PortWithSeparator
         contextId={contextId}
         eventId={eventId}
+        isDraggable={isDraggable}
         port={port}
         portFieldName={portFieldName}
       />

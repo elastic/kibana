@@ -1,7 +1,7 @@
 ---
 id: kibDevDocsKPTTutorial
 slug: /kibana-dev-docs/tutorials/kibana-page-template
-title: KibanaPageTemplate component
+title: Kibana Page Template
 summary: Learn how to create pages in Kibana
 date: 2021-03-20
 tags: ['kibana', 'dev', 'ui', 'tutorials']
@@ -117,3 +117,56 @@ When using `EuiSideNav`, root level items should not be linked but provide secti
 ![Screenshot of Stack Management empty state with a provided solution navigation shown on the left, outlined in pink.](../assets/kibana_template_solution_nav.png)
 
 ![Screenshots of Stack Management page in mobile view. Menu closed on the left, menu open on the right.](../assets/kibana_template_solution_nav_mobile.png)
+
+## `noDataConfig`
+
+Increases the consistency in messaging across all the solutions during the getting started process when no data exists. Each solution/template instance decides when is the most appropriate time to show this configuration, but is messaged specifically towards having no indices or index patterns at all or that match the particular solution.
+
+This is a built-in configuration that displays a very specific UI and requires very specific keys. It will also ignore all other configurations of the template including `pageHeader` and `children`, with the exception of continuing to show `solutionNav`.
+
+The `noDataConfig` is of type [`NoDataPagProps`](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx):
+
+1. `solution: string`: Single name for the current solution, used to auto-generate the title, logo, and description *(required)*
+2. `docsLink: string`: Required to set the docs link for the whole solution *(required)*
+3. `logo?: string`: Optionally replace the auto-generated logo
+4. `pageTitle?: string`: Optionally replace the auto-generated page title (h1)
+5. `actions: NoDataPageActionsProps`: An object of `NoDataPageActions` configurations with unique primary keys *(required)*
+
+### `NoDataPageActions`
+
+There are two main actions for adding data that we promote throughout Kibana, Elastic Agent and Beats. They are added to the cards that are displayed by using the keys `elasticAgent` and `beats` respectively. For consistent messaging, these two cards are pre-configured but require specific `href`s and/or `onClick` handlers for directing the user to the right location for that solution.
+
+It also accepts a `recommended` prop as a boolean to promote one or more of the cards through visuals added to the UI. It will also place the `recommended` ones first in the list. Optionally you can also replace the `button` label by passing a string, or the whole component by passing a `ReactNode`.
+
+
+```tsx
+// Perform your own check
+const hasData = checkForData();
+
+// No data configuration
+const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
+  solution: 'Analytics',
+  logo: 'logoKibana',
+  docsLink: '#',
+  actions: {
+    beats: {
+      href: '#',
+    },
+    elasticAgent: {
+      href: '#',
+    },
+  },
+};
+
+// Conditionally apply the configuration if there is no data
+<KibanaPageTemplate
+  solutionNav={/* Solution navigation still show if it exists and use the right template type */}
+  pageHeader={/* Page header will be ignored */}
+  noDataConfig={hasData ? undefined : noDataConfig}
+>
+  {/* Children will be ignored */}
+</KibanaPageTemplate>
+```
+
+
+![Screenshot of and example in Observability using the no data configuration and using the corresponding list numbers to point out the UI elements that they adjust.](../assets/kibana_template_no_data_config.png)

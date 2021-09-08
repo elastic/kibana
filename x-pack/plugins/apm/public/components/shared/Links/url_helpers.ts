@@ -65,6 +65,8 @@ export function createHref(
 }
 
 export type APMQueryParams = {
+  sampleRangeFrom?: number;
+  sampleRangeTo?: number;
   transactionId?: string;
   transactionName?: string;
   transactionType?: string;

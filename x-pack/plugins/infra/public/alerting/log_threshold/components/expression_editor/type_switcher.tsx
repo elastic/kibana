@@ -70,7 +70,7 @@ export const TypeSwitcher: React.FC<Props> = ({ criteria, updateType }) => {
                 uppercase={true}
                 value={thresholdType === 'ratio' ? ratioI18n : countI18n}
                 isActive={isThresholdTypePopoverOpen}
-                onClick={() => setThresholdTypePopoverOpenState(true)}
+                onClick={() => setThresholdTypePopoverOpenState(!isThresholdTypePopoverOpen)}
               />
               <ExpressionLike
                 text={

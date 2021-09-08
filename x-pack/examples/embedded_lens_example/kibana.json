@@ -12,5 +12,9 @@
     "developerExamples"
   ],
   "optionalPlugins": [],
-  "requiredBundles": []
+  "requiredBundles": [],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  }
 }

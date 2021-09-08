@@ -6,96 +6,131 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
-import chalk from 'chalk';
-import dedent from 'dedent';
-import getopts from 'getopts';
+import Path from 'path';
+import Os from 'os';
 
-import { execInProjects } from './exec_in_projects';
-import { filterProjectsByFlag } from './projects';
+import * as Rx from 'rxjs';
+import { mergeMap, reduce } from 'rxjs/operators';
+import execa from 'execa';
+import { run, createFailError } from '@kbn/dev-utils';
+import { lastValueFrom } from '@kbn/std';
+
+import { PROJECTS } from './projects';
 import { buildAllTsRefs } from './build_ts_refs';
+import { updateRootRefsConfig } from './root_refs_config';
 
 export async function runTypeCheckCli() {
-  const extraFlags: string[] = [];
-  const opts = getopts(process.argv.slice(2), {
-    boolean: ['skip-lib-check', 'help'],
-    default: {
-      project: undefined,
+  run(
+    async ({ log, flags, procRunner }) => {
+      // if the tsconfig.refs.json file is not self-managed then make sure it has
+      // a reference to every composite project in the repo
+      await updateRootRefsConfig(log);
+
+      const { failed } = await buildAllTsRefs({ log, procRunner, verbose: !!flags.verbose });
+      if (failed) {
+        throw createFailError('Unable to build TS project refs');
+      }
+
+      const projectFilter =
+        flags.project && typeof flags.project === 'string'
+          ? Path.resolve(flags.project)
+          : undefined;
+
+      const projects = PROJECTS.filter((p) => {
+        return !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter);
+      });
+
+      if (!projects.length) {
+        if (projectFilter) {
+          throw createFailError(`Unable to find project at ${flags.project}`);
+        } else {
+          throw createFailError(`Unable to find projects to type-check`);
+        }
+      }
+
+      const nonCompositeProjects = projects.filter((p) => !p.isCompositeProject());
+      if (!nonCompositeProjects.length) {
+        if (projectFilter) {
+          log.success(
+            `${flags.project} is a composite project so its types are validated by scripts/build_ts_refs`
+          );
+        } else {
+          log.success(
+            `All projects are composite so their types are validated by scripts/build_ts_refs`
+          );
+        }
+
+        return;
+      }
+
+      const concurrency = Math.min(4, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
+      log.info('running type check in', nonCompositeProjects.length, 'non-composite projects');
+
+      const tscArgs = [
+        ...['--emitDeclarationOnly', 'false'],
+        '--noEmit',
+        '--pretty',
+        ...(flags['skip-lib-check']
+          ? ['--skipLibCheck', flags['skip-lib-check'] as string]
+          : ['--skipLibCheck', 'false']),
+      ];
+
+      const failureCount = await lastValueFrom(
+        Rx.from(nonCompositeProjects).pipe(
+          mergeMap(async (p) => {
+            const relativePath = Path.relative(process.cwd(), p.tsConfigPath);
+
+            const result = await execa(
+              process.execPath,
+              [
+                '--max-old-space-size=5120',
+                require.resolve('typescript/bin/tsc'),
+                ...['--project', p.tsConfigPath, ...(flags.verbose ? ['--verbose'] : [])],
+                ...tscArgs,
+              ],
+              {
+                reject: false,
+                all: true,
+              }
+            );
+
+            if (result.failed) {
+              log.error(`Type check failed in ${relativePath}:`);
+              log.error(result.all ?? ' - tsc produced no output - ');
+              return 1;
+            } else {
+              log.success(relativePath);
+              return 0;
+            }
+          }, concurrency),
+          reduce((acc, f) => acc + f, 0)
+        )
+      );
+
+      if (failureCount > 0) {
+        throw createFailError(`${failureCount} type checks failed`);
+      }
     },
-    unknown(name) {
-      extraFlags.push(name);
-      return false;
-    },
-  });
-
-  const log = new ToolingLog({
-    level: 'info',
-    writeTo: process.stdout,
-  });
-
-  if (extraFlags.length) {
-    for (const flag of extraFlags) {
-      log.error(`Unknown flag: ${flag}`);
-    }
-
-    process.exitCode = 1;
-    opts.help = true;
-  }
-
-  if (opts.help) {
-    process.stdout.write(
-      dedent(chalk`
-        {dim usage:} node scripts/type_check [...options]
-
-        Run the TypeScript compiler without emitting files so that it can check
-        types during development.
+    {
+      description: `
+        Run the TypeScript compiler without emitting files so that it can check types during development.
 
         Examples:
+          # check types in all projects
+          node scripts/type_check
 
-          {dim # check types in all projects}
-          {dim $} node scripts/type_check
-
-          {dim # check types in a single project}
-          {dim $} node scripts/type_check --project packages/kbn-pm/tsconfig.json
-
-        Options:
-
-          --project [path]    {dim Path to a tsconfig.json file determines the project to check}
-          --skip-lib-check    {dim Skip type checking of all declaration files (*.d.ts). Default is false}
-          --help              {dim Show this message}
-      `)
-    );
-    process.stdout.write('\n');
-    process.exit();
-  }
-
-  const { failed } = await buildAllTsRefs(log);
-  if (failed) {
-    log.error('Unable to build TS project refs');
-    process.exit(1);
-  }
-
-  const tscArgs = [
-    // composite project cannot be used with --noEmit
-    ...['--composite', 'false'],
-    ...['--emitDeclarationOnly', 'false'],
-    '--noEmit',
-    '--pretty',
-    ...(opts['skip-lib-check']
-      ? ['--skipLibCheck', opts['skip-lib-check']]
-      : ['--skipLibCheck', 'false']),
-  ];
-  const projects = filterProjectsByFlag(opts.project).filter((p) => !p.disableTypeCheck);
-
-  if (!projects.length) {
-    log.error(`Unable to find project at ${opts.project}`);
-    process.exit(1);
-  }
-
-  execInProjects(log, projects, process.execPath, (project) => [
-    '--max-old-space-size=5120',
-    require.resolve('typescript/bin/tsc'),
-    ...['--project', project.tsConfigPath],
-    ...tscArgs,
-  ]);
+          # check types in a single project
+          node scripts/type_check --project packages/kbn-pm/tsconfig.json
+      `,
+      flags: {
+        string: ['project'],
+        boolean: ['skip-lib-check'],
+        help: `
+          --project [path]    Path to a tsconfig.json file determines the project to check
+          --skip-lib-check    Skip type checking of all declaration files (*.d.ts). Default is false
+          --help              Show this message
+        `,
+      },
+    }
+  );
 }

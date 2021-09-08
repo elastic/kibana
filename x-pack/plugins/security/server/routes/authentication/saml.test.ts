@@ -43,6 +43,15 @@ describe('SAML authentication routes', () => {
       routeHandler = acsRouteHandler;
     });
 
+    it('additionally registers BWC route', () => {
+      expect(
+        router.post.mock.calls.find(([{ path }]) => path === '/api/security/saml/callback')
+      ).toBeDefined();
+      expect(
+        router.post.mock.calls.find(([{ path }]) => path === '/api/security/v1/saml')
+      ).toBeDefined();
+    });
+
     it('correctly defines route.', () => {
       expect(routeConfig.options).toEqual({
         authRequired: false,

@@ -11,7 +11,10 @@ import { createRuleValidateTypeDependents } from '../../../../../common/detectio
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+} from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
@@ -21,7 +24,6 @@ import { transformValidateBulkError } from './validate';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 
 export const createRulesBulkRoute = (
@@ -40,12 +42,12 @@ export const createRulesBulkRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
       const esClient = context.core.elasticsearch.client;
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.securitySolution?.getAppClient();
 
-      if (!siemClient || !alertsClient) {
+      if (!siemClient || !rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -65,7 +67,7 @@ export const createRulesBulkRoute = (
           .map(async (payloadRule) => {
             if (payloadRule.rule_id != null) {
               const rule = await readRules({
-                alertsClient,
+                rulesClient,
                 ruleId: payloadRule.rule_id,
                 id: undefined,
               });
@@ -99,25 +101,16 @@ export const createRulesBulkRoute = (
                 });
               }
 
-              const createdRule = await alertsClient.create({
+              const createdRule = await rulesClient.create({
                 data: internalRule,
               });
 
-              const ruleActions = await updateRulesNotifications({
-                ruleAlertId: createdRule.id,
-                alertsClient,
-                savedObjectsClient,
-                enabled: createdRule.enabled,
-                actions: payloadRule.actions,
-                throttle: payloadRule.throttle ?? null,
-                name: createdRule.name,
-              });
+              // mutes if we are creating the rule with the explicit "no_actions"
+              if (payloadRule.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+                await rulesClient.muteAll({ id: createdRule.id });
+              }
 
-              return transformValidateBulkError(
-                internalRule.params.ruleId,
-                createdRule,
-                ruleActions
-              );
+              return transformValidateBulkError(internalRule.params.ruleId, createdRule, undefined);
             } catch (err) {
               return transformBulkError(internalRule.params.ruleId, err);
             }

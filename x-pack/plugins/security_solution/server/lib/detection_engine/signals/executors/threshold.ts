@@ -36,11 +36,13 @@ import {
   mergeReturns,
 } from '../utils';
 import { BuildRuleMessage } from '../rule_messages';
+import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 
 export const thresholdExecutor = async ({
   rule,
   tuple,
   exceptionItems,
+  experimentalFeatures,
   services,
   version,
   logger,
@@ -52,6 +54,7 @@ export const thresholdExecutor = async ({
   rule: SavedObject<AlertAttributes<ThresholdRuleParams>>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
+  experimentalFeatures: ExperimentalFeatures;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
@@ -68,7 +71,12 @@ export const thresholdExecutor = async ({
     );
     result.warning = true;
   }
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
+  const inputIndex = await getInputIndex({
+    experimentalFeatures,
+    services,
+    version,
+    index: ruleParams.index,
+  });
 
   const {
     thresholdSignalHistory,

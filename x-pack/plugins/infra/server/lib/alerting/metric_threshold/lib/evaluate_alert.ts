@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mapValues, first, last, isNaN } from 'lodash';
+import { mapValues, first, last, isNaN, isNumber, isObject, has } from 'lodash';
+import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
 import {
   isTooManyBucketsPreviewException,
@@ -22,7 +23,11 @@ import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
 import { MetricExpressionParams, Comparator, Aggregators } from '../types';
 import { getElasticsearchMetricQuery } from './metric_query';
 
-interface Aggregation {
+interface AggregationWithoutIntervals {
+  aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
+}
+
+interface AggregationWithIntervals {
   aggregatedIntervals: {
     buckets: Array<{
       aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
@@ -32,6 +37,14 @@ interface Aggregation {
       key_as_string: string;
     }>;
   };
+}
+
+type Aggregation = AggregationWithIntervals | AggregationWithoutIntervals;
+
+function isAggregationWithIntervals(
+  subject: Aggregation | undefined
+): subject is AggregationWithIntervals {
+  return isObject(subject) && has(subject, 'aggregatedIntervals');
 }
 
 interface CompositeAggregationsResponse {
@@ -44,15 +57,16 @@ export interface EvaluatedAlertParams {
   criteria: MetricExpressionParams[];
   groupBy: string | undefined | string[];
   filterQuery: string | undefined;
+  shouldDropPartialBuckets?: boolean;
 }
 
 export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAlertParams>(
   esClient: ElasticsearchClient,
   params: Params,
   config: InfraSource['configuration'],
-  timeframe?: { start: number; end: number }
+  timeframe?: { start?: number; end: number }
 ) => {
-  const { criteria, groupBy, filterQuery } = params;
+  const { criteria, groupBy, filterQuery, shouldDropPartialBuckets } = params;
   return Promise.all(
     criteria.map(async (criterion) => {
       const currentValues = await getMetric(
@@ -62,7 +76,8 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
         config.fields.timestamp,
         groupBy,
         filterQuery,
-        timeframe
+        timeframe,
+        shouldDropPartialBuckets
       );
 
       const { threshold, warningThreshold, comparator, warningComparator } = criterion;
@@ -95,8 +110,6 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   );
 };
 
-const MINIMUM_BUCKETS = 5;
-
 const getMetric: (
   esClient: ElasticsearchClient,
   params: MetricExpressionParams,
@@ -104,7 +117,8 @@ const getMetric: (
   timefield: string,
   groupBy: string | undefined | string[],
   filterQuery: string | undefined,
-  timeframe?: { start: number; end: number }
+  timeframe?: { start?: number; end: number },
+  shouldDropPartialBuckets?: boolean
 ) => Promise<Record<string, number[]>> = async function (
   esClient,
   params,
@@ -112,7 +126,8 @@ const getMetric: (
   timefield,
   groupBy,
   filterQuery,
-  timeframe
+  timeframe,
+  shouldDropPartialBuckets
 ) {
   const { aggType, timeSize, timeUnit } = params;
   const hasGroupBy = groupBy && groupBy.length;
@@ -121,13 +136,15 @@ const getMetric: (
   const intervalAsSeconds = getIntervalInSeconds(interval);
   const intervalAsMS = intervalAsSeconds * 1000;
 
-  const to = roundTimestamp(timeframe ? timeframe.end : Date.now(), timeUnit);
-  // We need enough data for 5 buckets worth of data. We also need
-  // to convert the intervalAsSeconds to milliseconds.
-  const minimumFrom = to - intervalAsMS * MINIMUM_BUCKETS;
+  const to = moment(timeframe ? timeframe.end : Date.now()).valueOf();
+
+  // Rate aggregations need 5 buckets worth of data
+  const minimumBuckets = aggType === Aggregators.RATE ? 5 : 1;
+
+  const minimumFrom = to - intervalAsMS * minimumBuckets;
 
   const from = roundTimestamp(
-    timeframe && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
+    timeframe && timeframe.start && timeframe.start <= minimumFrom ? timeframe.start : minimumFrom,
     timeUnit
   );
 
@@ -138,6 +155,16 @@ const getMetric: (
     hasGroupBy ? groupBy : undefined,
     filterQuery
   );
+
+  const dropPartialBucketsOptions =
+    // Rate aggs always drop partial buckets; guard against this boolean being passed as false
+    shouldDropPartialBuckets || aggType === Aggregators.RATE
+      ? {
+          from,
+          to,
+          bucketSizeInMillis: intervalAsMS,
+        }
+      : null;
 
   try {
     if (hasGroupBy) {
@@ -154,20 +181,26 @@ const getMetric: (
         searchBody,
         bucketSelector,
         afterKeyHandler
-      )) as Array<Aggregation & { key: Record<string, string> }>;
-      return compositeBuckets.reduce(
+      )) as Array<Aggregation & { key: Record<string, string>; doc_count: number }>;
+      const groupedResults = compositeBuckets.reduce(
         (result, bucket) => ({
           ...result,
           [Object.values(bucket.key)
             .map((value) => value)
-            .join(', ')]: getValuesFromAggregations(bucket, aggType, {
-            from,
-            to,
-            bucketSizeInMillis: intervalAsMS,
-          }),
+            .join(', ')]: getValuesFromAggregations(
+            bucket,
+            aggType,
+            dropPartialBucketsOptions,
+            {
+              start: from,
+              end: to,
+            },
+            bucket.doc_count
+          ),
         }),
         {}
       );
+      return groupedResults;
     }
     const { body: result } = await esClient.search({
       body: searchBody,
@@ -178,7 +211,9 @@ const getMetric: (
       [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
         (result.aggregations! as unknown) as Aggregation,
         aggType,
-        { from, to, bucketSizeInMillis: intervalAsMS }
+        dropPartialBucketsOptions,
+        { start: from, end: to },
+        isNumber(result.hits.total) ? result.hits.total : result.hits.total.value
       ),
     };
   } catch (e) {
@@ -207,7 +242,7 @@ interface DropPartialBucketOptions {
 const dropPartialBuckets = ({ from, to, bucketSizeInMillis }: DropPartialBucketOptions) => (
   row: {
     key: string;
-    value: number;
+    value: number | null;
   } | null
 ) => {
   if (row == null) return null;
@@ -216,37 +251,73 @@ const dropPartialBuckets = ({ from, to, bucketSizeInMillis }: DropPartialBucketO
 };
 
 const getValuesFromAggregations = (
-  aggregations: Aggregation,
+  aggregations: Aggregation | undefined,
   aggType: MetricExpressionParams['aggType'],
-  dropPartialBucketsOptions: DropPartialBucketOptions
+  dropPartialBucketsOptions: DropPartialBucketOptions | null,
+  timeFrame: { start: number; end: number },
+  docCount?: number
 ) => {
   try {
-    const { buckets } = aggregations.aggregatedIntervals;
-    if (!buckets.length) return null; // No Data state
+    let buckets;
     if (aggType === Aggregators.COUNT) {
-      return buckets
-        .map((bucket) => ({
-          key: bucket.from_as_string,
-          value: bucket.doc_count,
-        }))
-        .filter(dropPartialBuckets(dropPartialBucketsOptions));
+      buckets = [
+        {
+          doc_count: docCount,
+          to_as_string: moment(timeFrame.end).toISOString(),
+          from_as_string: moment(timeFrame.start).toISOString(),
+          key_as_string: moment(timeFrame.start).toISOString(),
+        },
+      ];
+    } else if (isAggregationWithIntervals(aggregations)) {
+      buckets = aggregations.aggregatedIntervals.buckets;
+    } else {
+      buckets = [
+        {
+          ...aggregations,
+          doc_count: docCount,
+          to_as_string: moment(timeFrame.end).toISOString(),
+          from_as_string: moment(timeFrame.start).toISOString(),
+          key_as_string: moment(timeFrame.start).toISOString(),
+        },
+      ];
     }
-    if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
-      return buckets
-        .map((bucket) => {
-          const values = bucket.aggregatedValue?.values || [];
-          const firstValue = first(values);
-          if (!firstValue) return null;
-          return { key: bucket.from_as_string, value: firstValue.value };
-        })
-        .filter(dropPartialBuckets(dropPartialBucketsOptions));
-    }
-    return buckets
-      .map((bucket) => ({
+
+    if (!buckets.length) return null; // No Data state
+
+    let mappedBuckets: Array<{ key: string; value: number | null } | null>;
+
+    if (aggType === Aggregators.COUNT) {
+      mappedBuckets = buckets.map((bucket) => ({
+        key: bucket.from_as_string,
+        value: bucket.doc_count || null,
+      }));
+    } else if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
+      mappedBuckets = buckets.map((bucket) => {
+        const values = bucket.aggregatedValue?.values || [];
+        const firstValue = first(values);
+        if (!firstValue) return null;
+        return { key: bucket.from_as_string, value: firstValue.value };
+      });
+    } else if (aggType === Aggregators.AVERAGE) {
+      mappedBuckets = buckets.map((bucket) => ({
         key: bucket.key_as_string ?? bucket.from_as_string,
         value: bucket.aggregatedValue?.value ?? null,
-      }))
-      .filter(dropPartialBuckets(dropPartialBucketsOptions));
+      }));
+    } else if (aggType === Aggregators.RATE) {
+      mappedBuckets = buckets.map((bucket) => ({
+        key: bucket.key_as_string ?? bucket.from_as_string,
+        value: bucket.aggregatedValue?.value ?? null,
+      }));
+    } else {
+      mappedBuckets = buckets.map((bucket) => ({
+        key: bucket.key_as_string ?? bucket.from_as_string,
+        value: bucket.aggregatedValue?.value ?? null,
+      }));
+    }
+    if (dropPartialBucketsOptions) {
+      return mappedBuckets.filter(dropPartialBuckets(dropPartialBucketsOptions));
+    }
+    return mappedBuckets;
   } catch (e) {
     return NaN; // Error state
   }

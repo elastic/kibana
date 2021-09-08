@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './rule_data';
 export * from './types';

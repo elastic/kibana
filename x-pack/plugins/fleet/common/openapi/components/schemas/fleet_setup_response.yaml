@@ -1,0 +1,20 @@
+title: Fleet Setup response
+type: object
+properties:
+  isInitialized:
+    type: boolean
+  nonFatalErrors:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        message:
+          type: string
+      required:
+        - name
+        - message
+required:
+  - isInitialized
+  - nonFatalErrors

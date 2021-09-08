@@ -140,6 +140,12 @@ const normalizeTrustedAppsPageLocation = (
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+      ...(!isDefaultOrMissing(location.included_policies, '')
+        ? { included_policies: location.included_policies }
+        : ''),
+      ...(!isDefaultOrMissing(location.excluded_policies, '')
+        ? { excluded_policies: location.excluded_policies }
+        : ''),
     };
   } else {
     return {};
@@ -196,10 +202,24 @@ const extractFilter = (query: querystring.ParsedUrlQuery): string => {
   return extractFirstParamValue(query, 'filter') || '';
 };
 
+const extractIncludedPolicies = (query: querystring.ParsedUrlQuery): string => {
+  return extractFirstParamValue(query, 'included_policies') || '';
+};
+
+const extractExcludedPolicies = (query: querystring.ParsedUrlQuery): string => {
+  return extractFirstParamValue(query, 'excluded_policies') || '';
+};
+
 export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
   filter: extractFilter(query),
+});
+
+export const extractTrustedAppsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
+  ...extractListPaginationParams(query),
+  included_policies: extractIncludedPolicies(query),
+  excluded_policies: extractExcludedPolicies(query),
 });
 
 export const extractTrustedAppsListPageLocation = (
@@ -211,7 +231,7 @@ export const extractTrustedAppsListPageLocation = (
   ) as TrustedAppsListPageLocation['show'];
 
   return {
-    ...extractListPaginationParams(query),
+    ...extractTrustedAppsListPaginationParams(query),
     view_type: extractFirstParamValue(query, 'view_type') === 'list' ? 'list' : 'grid',
     show:
       showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,

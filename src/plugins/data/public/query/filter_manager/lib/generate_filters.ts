@@ -8,8 +8,6 @@
 
 import _ from 'lodash';
 import {
-  IFieldType,
-  IIndexPattern,
   Filter,
   isExistsFilter,
   isPhraseFilter,
@@ -19,7 +17,9 @@ import {
   buildFilter,
   FilterStateStore,
   FILTERS,
-} from '../../../../common';
+} from '@kbn/es-query';
+
+import { IFieldType, IIndexPattern } from '../../../../common';
 import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
@@ -40,7 +40,7 @@ function getExistingFilter(
     }
 
     if (isScriptedPhraseFilter(filter)) {
-      return filter.meta.field === fieldName && filter.script!.script.params.value === value;
+      return filter.meta.field === fieldName && filter.script.script.params?.value === value;
     }
   }) as any;
 }

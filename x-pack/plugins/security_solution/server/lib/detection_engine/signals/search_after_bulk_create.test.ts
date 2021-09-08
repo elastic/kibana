@@ -32,11 +32,13 @@ import { bulkCreateFactory } from './bulk_create_factory';
 import { wrapHitsFactory } from './wrap_hits_factory';
 import { mockBuildRuleMessage } from './__mocks__/build_rule_message.mock';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { BuildReasonMessage } from './reason_formatters';
 
 const buildRuleMessage = mockBuildRuleMessage;
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
+  let buildReasonMessage: BuildReasonMessage;
   let bulkCreate: BulkCreate;
   let wrapHits: WrapHits;
   let inputIndexPattern: string[] = [];
@@ -48,6 +50,7 @@ describe('searchAfterAndBulkCreate', () => {
   let tuple: RuleRangeTuple;
   beforeEach(() => {
     jest.clearAllMocks();
+    buildReasonMessage = jest.fn().mockResolvedValue('some alert reason message');
     listClient = listMock.getListClient();
     listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
     inputIndexPattern = ['auditbeat-*'];
@@ -71,6 +74,7 @@ describe('searchAfterAndBulkCreate', () => {
       ruleSO,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       mergeStrategy: 'missingFields',
+      ignoreFields: [],
     });
   });
 
@@ -191,6 +195,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -295,6 +300,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -373,6 +379,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -432,6 +439,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -511,6 +519,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -566,6 +575,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -638,6 +648,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -712,6 +723,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -763,6 +775,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -810,6 +823,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -871,6 +885,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -997,6 +1012,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,
@@ -1093,6 +1109,7 @@ describe('searchAfterAndBulkCreate', () => {
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       pageSize: 1,
       filter: undefined,
+      buildReasonMessage,
       buildRuleMessage,
       bulkCreate,
       wrapHits,

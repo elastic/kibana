@@ -14,7 +14,7 @@ import {
   createSearchAfterReturnType,
   createSearchResultReturnType,
   createSearchAfterReturnTypeFromResponse,
-  createTotalHitsFromSearchResult,
+  getTotalHitsValue,
   mergeReturns,
   mergeSearchResults,
   getSafeSortIds,
@@ -34,9 +34,12 @@ export const searchAfterAndBulkCreate = async ({
   filter,
   pageSize,
   buildRuleMessage,
+  buildReasonMessage,
   enrichment = identity,
   bulkCreate,
   wrapHits,
+  sortOrder,
+  trackTotalHits,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = ruleSO.attributes.params;
   let toReturn = createSearchAfterReturnType();
@@ -75,6 +78,8 @@ export const searchAfterAndBulkCreate = async ({
           filter,
           pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
           timestampOverride: ruleParams.timestampOverride,
+          trackTotalHits,
+          sortOrder,
         });
         mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
         toReturn = mergeReturns([
@@ -101,7 +106,7 @@ export const searchAfterAndBulkCreate = async ({
       }
 
       // determine if there are any candidate signals to be processed
-      const totalHits = createTotalHitsFromSearchResult({ searchResult: mergedSearchResults });
+      const totalHits = getTotalHitsValue(mergedSearchResults.hits.total);
       logger.debug(buildRuleMessage(`totalHits: ${totalHits}`));
       logger.debug(
         buildRuleMessage(`searchResult.hit.hits.length: ${mergedSearchResults.hits.hits.length}`)
@@ -142,7 +147,7 @@ export const searchAfterAndBulkCreate = async ({
           );
         }
         const enrichedEvents = await enrichment(filteredEvents);
-        const wrappedDocs = wrapHits(enrichedEvents.hits.hits);
+        const wrappedDocs = wrapHits(enrichedEvents.hits.hits, buildReasonMessage);
 
         const {
           bulkCreateDuration: bulkDuration,
@@ -151,6 +156,7 @@ export const searchAfterAndBulkCreate = async ({
           success: bulkSuccess,
           errors: bulkErrors,
         } = await bulkCreate(wrappedDocs);
+
         toReturn = mergeReturns([
           toReturn,
           createSearchAfterReturnType({

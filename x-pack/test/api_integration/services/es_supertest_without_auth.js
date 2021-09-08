@@ -7,7 +7,7 @@
 
 import { format as formatUrl } from 'url';
 
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
 
 /**
  * Supertest provider that doesn't include user credentials into base URL that is passed
@@ -17,7 +17,7 @@ export function EsSupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
   const elasticsearchServerConfig = config.get('servers.elasticsearch');
 
-  return supertestAsPromised(
+  return supertest(
     formatUrl({
       ...elasticsearchServerConfig,
       auth: false,

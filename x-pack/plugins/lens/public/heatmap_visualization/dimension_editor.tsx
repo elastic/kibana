@@ -14,8 +14,8 @@ import {
   EuiFlexGroup,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { VisualizationDimensionEditorProps } from '../types';
+import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { VisualizationDimensionEditorProps } from '../types';
 import {
   CustomizablePalette,
   FIXED_PROGRESSION,
@@ -23,7 +23,7 @@ import {
   PalettePanelContainer,
 } from '../shared_components/';
 import './dimension_editor.scss';
-import { HeatmapVisualizationState } from './types';
+import type { HeatmapVisualizationState } from './types';
 import { getSafePaletteParams } from './utils';
 
 export function HeatmapDimensionEditor(

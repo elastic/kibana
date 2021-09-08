@@ -14,19 +14,20 @@ import type { PluginSetupContract as AlertingSetup } from '../../../alerting/pub
 import { PLUGIN_ID } from '../../common/constants/app';
 import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 import { validateLookbackInterval, validateTopNBucket } from './validators';
+import { registerJobsHealthAlertingRule } from './jobs_health_rule';
 
 export function registerMlAlerts(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
   alerting?: AlertingSetup
 ) {
-  triggersActionsUi.alertTypeRegistry.register({
+  triggersActionsUi.ruleTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
       defaultMessage: 'Alert when anomaly detection jobs results match the condition.',
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/machine-learning/${docLinks.DOC_LINK_VERSION}/ml-configuring-alerts.html`;
+      return docLinks.links.ml.alertingRules;
     },
     alertParamsExpression: lazy(() => import('./ml_anomaly_alert_trigger')),
     validate: (alertParams: MlAnomalyDetectionAlertParams) => {
@@ -136,6 +137,8 @@ export function registerMlAlerts(
       }
     ),
   });
+
+  registerJobsHealthAlertingRule(triggersActionsUi, alerting);
 
   if (alerting) {
     registerNavigation(alerting);

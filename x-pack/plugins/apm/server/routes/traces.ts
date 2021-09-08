@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTrace } from '../lib/traces/get_trace';
-import { getTransactionGroupList } from '../lib/transaction_groups';
+import { getTopTransactionGroupList } from '../lib/transaction_groups';
 import { createApmServerRoute } from './create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
@@ -31,8 +31,8 @@ const tracesRoute = createApmServerRoute({
       kuery,
     });
 
-    return getTransactionGroupList(
-      { environment, kuery, type: 'top_traces', searchAggregatedTransactions },
+    return getTopTransactionGroupList(
+      { environment, kuery, searchAggregatedTransactions },
       setup
     );
   },

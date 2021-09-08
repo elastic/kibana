@@ -7,12 +7,12 @@
  */
 
 import { includes } from 'lodash';
-import { IndexPatternsContract } from './index_patterns';
+import { DataViewsContract } from './index_patterns';
 import { UiSettingsCommon } from '../types';
 
-export type EnsureDefaultIndexPattern = () => Promise<unknown> | undefined;
+export type EnsureDefaultDataView = () => Promise<unknown> | undefined;
 
-export const createEnsureDefaultIndexPattern = (
+export const createEnsureDefaultDataView = (
   uiSettings: UiSettingsCommon,
   onRedirectNoIndexPattern: () => Promise<unknown> | void
 ) => {
@@ -20,7 +20,7 @@ export const createEnsureDefaultIndexPattern = (
    * Checks whether a default index pattern is set and exists and defines
    * one otherwise.
    */
-  return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
+  return async function ensureDefaultDataView(this: DataViewsContract) {
     const patterns = await this.getIds();
     let defaultId = await uiSettings.get('defaultIndex');
     let defined = !!defaultId;
@@ -35,8 +35,9 @@ export const createEnsureDefaultIndexPattern = (
       return;
     }
 
-    // If there is any index pattern created, set the first as default
-    if (patterns.length >= 1) {
+    // If there is any user index pattern created, set the first as default
+    // if there is 0 patterns, then don't even call `hasUserIndexPattern()`
+    if (patterns.length >= 1 && (await this.hasUserIndexPattern().catch(() => true))) {
       defaultId = patterns[0];
       await uiSettings.set('defaultIndex', defaultId);
     } else {

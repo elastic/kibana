@@ -78,7 +78,23 @@ describe('date_range params', () => {
                 "date_range",
               ],
               "ranges": Array [
-                "[{\\"from\\":\\"now-1w/w\\",\\"to\\":\\"now\\"}]",
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {
+                        "from": Array [
+                          "now-1w/w",
+                        ],
+                        "to": Array [
+                          "now",
+                        ],
+                      },
+                      "function": "dateRange",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
               ],
               "schema": Array [
                 "buckets",

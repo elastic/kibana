@@ -29,7 +29,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/monitoring'),
       resolve(__dirname, './apps/watcher'),
       resolve(__dirname, './apps/dashboard'),
-      resolve(__dirname, './apps/dashboard_mode'),
       resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/spaces'),
@@ -60,7 +59,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
       resolve(__dirname, './apps/reporting'),
-      resolve(__dirname, './apps/observability'),
 
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
@@ -95,6 +93,7 @@ export default async function ({ readConfigFile }) {
         '--timelion.ui.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
         '--xpack.observability.unsafe.cases.enabled=true',
+        '--xpack.observability.unsafe.alertingExperience.enabled=true', // NOTE: Can be removed once enabled by default
       ],
     },
     uiSettings: {
@@ -207,6 +206,9 @@ export default async function ({ readConfigFile }) {
       },
       securitySolution: {
         pathname: '/app/security',
+      },
+      observability: {
+        pathname: '/app/observability',
       },
     },
 
@@ -384,6 +386,17 @@ export default async function ({ readConfigFile }) {
           },
         },
 
+        test_logs_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['test_data_stream'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
         geoall_data_writer: {
           elasticsearch: {
             indices: [
@@ -463,6 +476,17 @@ export default async function ({ readConfigFile }) {
               spaces: ['*'],
             },
           ],
+        },
+
+        test_rollup_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['rollup-*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
         },
 
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965

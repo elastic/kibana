@@ -7,7 +7,7 @@
  */
 
 import { extract, inject } from './persistable_state';
-import { Filter } from '../es_query/filters';
+import { Filter } from '@kbn/es-query';
 
 describe('filter manager persistable state tests', () => {
   const filters: Filter[] = [

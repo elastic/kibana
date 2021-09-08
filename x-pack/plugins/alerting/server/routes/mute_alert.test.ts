@@ -9,10 +9,10 @@ import { muteAlertRoute } from './mute_alert';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { alertsClientMock } from '../alerts_client.mock';
+import { rulesClientMock } from '../rules_client.mock';
 import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
-const alertsClient = alertsClientMock.create();
+const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
 }));
@@ -34,10 +34,10 @@ describe('muteAlertRoute', () => {
       `"/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute"`
     );
 
-    alertsClient.muteInstance.mockResolvedValueOnce();
+    rulesClient.muteInstance.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: {
           rule_id: '1',
@@ -49,8 +49,8 @@ describe('muteAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(alertsClient.muteInstance).toHaveBeenCalledTimes(1);
-    expect(alertsClient.muteInstance.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.muteInstance).toHaveBeenCalledTimes(1);
+    expect(rulesClient.muteInstance.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "alertId": "1",
@@ -70,11 +70,11 @@ describe('muteAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    alertsClient.muteInstance.mockRejectedValue(
+    rulesClient.muteInstance.mockRejectedValue(
       new AlertTypeDisabledError('Fail', 'license_invalid')
     );
 
-    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
       'forbidden',
     ]);

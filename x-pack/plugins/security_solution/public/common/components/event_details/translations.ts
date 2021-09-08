@@ -34,7 +34,7 @@ export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table',
 });
 
 export const JSON_VIEW = i18n.translate('xpack.securitySolution.eventDetails.jsonView', {
-  defaultMessage: 'JSON View',
+  defaultMessage: 'JSON',
 });
 
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
@@ -83,3 +83,32 @@ export const NESTED_COLUMN = (field: string) =>
 export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
   defaultMessage: 'Agent status',
 });
+
+export const MULTI_FIELD_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
+  {
+    defaultMessage: 'Multi-fields can have multiple values per field',
+  }
+);
+
+export const MULTI_FIELD_BADGE = i18n.translate(
+  'xpack.securitySolution.eventDetails.multiFieldBadge',
+  {
+    defaultMessage: 'multi-field',
+  }
+);
+
+export const ACTIONS = i18n.translate('xpack.securitySolution.eventDetails.table.actions', {
+  defaultMessage: 'Actions',
+});
+
+export const REASON = i18n.translate('xpack.securitySolution.eventDetails.reason', {
+  defaultMessage: 'Reason',
+});
+
+export const VIEW_RULE_DETAIL_PAGE = i18n.translate(
+  'xpack.securitySolution.eventDetails.viewRuleDetailPage',
+  {
+    defaultMessage: 'View Rule detail page',
+  }
+);

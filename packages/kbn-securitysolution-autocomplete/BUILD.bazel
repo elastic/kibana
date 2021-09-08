@@ -1,0 +1,122 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+
+PKG_BASE_NAME = "kbn-securitysolution-autocomplete"
+
+PKG_REQUIRE_NAME = "@kbn/securitysolution-autocomplete"
+
+SOURCE_FILES = glob(
+  [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  exclude = [
+    "**/*.test.*",
+    "**/*.mock.*",
+    "**/*.mocks.*",
+  ],
+)
+
+SRCS = SOURCE_FILES
+
+filegroup(
+  name = "srcs",
+  srcs = SRCS,
+)
+
+NPM_MODULE_EXTRA_FILES = [
+  "package.json",
+  "README.md",
+]
+
+RUNTIME_DEPS = [
+  "//packages/kbn-es-query",
+  "//packages/kbn-i18n",
+  "//packages/kbn-securitysolution-list-hooks",
+  "//packages/kbn-securitysolution-list-utils",
+  "//packages/kbn-securitysolution-io-ts-list-types",
+  "@npm//@elastic/eui",
+  "@npm//@testing-library/react",
+  "@npm//@testing-library/react-hooks",
+  "@npm//enzyme",
+  "@npm//moment",
+  "@npm//react",
+  "@npm//resize-observer-polyfill",
+]
+
+TYPES_DEPS = [
+  "//packages/kbn-es-query",
+  "//packages/kbn-i18n",
+  "//packages/kbn-securitysolution-list-hooks",
+  "//packages/kbn-securitysolution-list-utils",
+  "//packages/kbn-securitysolution-io-ts-list-types",
+  "@npm//@elastic/eui",
+  "@npm//@testing-library/react",
+  "@npm//@testing-library/react-hooks",
+  "@npm//moment",
+  "@npm//resize-observer-polyfill",
+  "@npm//@types/enzyme",
+  "@npm//@types/jest",
+  "@npm//@types/node",
+  "@npm//@types/react",
+]
+
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  web = True,
+)
+
+ts_config(
+  name = "tsconfig",
+  src = "tsconfig.json",
+  deps = [
+    "//:tsconfig.base.json",
+    "//:tsconfig.bazel.json",
+  ],
+)
+
+ts_project(
+  name = "tsc_types",
+  args = ["--pretty"],
+  srcs = SRCS,
+  deps = TYPES_DEPS,
+  declaration = True,
+  declaration_map = True,
+  emit_declaration_only = True,
+  out_dir = "target_types",
+  root_dir = "src",
+  source_map = True,
+  tsconfig = ":tsconfig",
+)
+
+js_library(
+  name = PKG_BASE_NAME,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "npm_module",
+  deps = [
+    ":%s" % PKG_BASE_NAME,
+  ]
+)
+
+filegroup(
+  name = "build",
+  srcs = [
+    ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)

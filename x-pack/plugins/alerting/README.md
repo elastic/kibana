@@ -639,7 +639,7 @@ Finally, all users, whether they're granted any role or not, are privileged to c
 
 - `listAlertTypes`, but the output is limited to displaying the rule types the user is privileged to `get`.
 
-Attempting to execute any operation the user isn't privileged to execute will result in an Authorization error thrown by the AlertsClient.
+Attempting to execute any operation the user isn't privileged to execute will result in an Authorization error thrown by the RulesClient.
 
 ## Alert Navigation
 

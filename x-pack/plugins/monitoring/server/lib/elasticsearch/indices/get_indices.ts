@@ -35,10 +35,11 @@ export function handleResponse(
       hit.inner_hits?.earliest?.hits?.hits[0]?._source.elasticsearch?.index;
 
     const rateOptions = {
-      hitTimestamp: hit._source.timestamp ?? hit._source['@timestamp'],
+      hitTimestamp: hit._source.timestamp ?? hit._source['@timestamp'] ?? null,
       earliestHitTimestamp:
         hit.inner_hits?.earliest?.hits?.hits[0]?._source.timestamp ??
-        hit.inner_hits?.earliest?.hits?.hits[0]?._source['@timestamp'],
+        hit.inner_hits?.earliest?.hits?.hits[0]?._source['@timestamp'] ??
+        null,
       timeWindowMin: min,
       timeWindowMax: max,
     };

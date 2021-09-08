@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { IndexPatternFieldBase } from '@kbn/es-query';
 import type {
   CreateExceptionListItemSchema,
   Entry,
@@ -30,21 +31,15 @@ export interface OperatorOption {
   type: OperatorTypeEnum;
 }
 
-/**
- * @deprecated Use the one from core once it is in its own package which will be from:
- * Original import was // import { IFieldType } from '../../../../../../../src/plugins/data/common';
- */
-type IFieldType = any;
-
 export interface FormattedBuilderEntry {
   id: string;
-  field: IFieldType | undefined;
+  field: IndexPatternFieldBase | undefined;
   operator: OperatorOption;
   value: string | string[] | undefined;
   nested: 'parent' | 'child' | undefined;
   entryIndex: number;
   parent: { parent: BuilderEntryNested; parentIndex: number } | undefined;
-  correspondingKeywordField: IFieldType | undefined;
+  correspondingKeywordField: IndexPatternFieldBase | undefined;
 }
 
 export interface EmptyEntry {

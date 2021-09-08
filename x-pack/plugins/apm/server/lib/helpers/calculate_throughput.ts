@@ -15,3 +15,8 @@ export function calculateThroughput({
   const durationAsMinutes = (end - start) / 1000 / 60;
   return value / durationAsMinutes;
 }
+
+export type ThroughputUnit = 'minute' | 'second';
+export function getThroughputUnit(bucketSize: number): ThroughputUnit {
+  return bucketSize >= 60 ? 'minute' : 'second';
+}

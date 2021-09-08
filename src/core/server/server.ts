@@ -243,6 +243,7 @@ export class Server {
       environment: environmentSetup,
       http: httpSetup,
       metrics: metricsSetup,
+      coreUsageData: coreUsageDataSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
@@ -278,6 +279,7 @@ export class Server {
       logging: loggingSetup,
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
+      coreUsageData: coreUsageDataSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -317,6 +319,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
+    const deprecationsStart = this.deprecations.start();
     this.status.start();
 
     this.coreStart = {
@@ -328,6 +331,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
+      deprecations: deprecationsStart,
     };
 
     await this.plugins.start(this.coreStart);

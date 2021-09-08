@@ -45,7 +45,7 @@ import { useApi } from '../../../../hooks/use_api';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
-import { DuplicateIndexPatternError } from '../../../../../../../../../src/plugins/data/public';
+import { DuplicateDataViewError } from '../../../../../../../../../src/plugins/data/public';
 import {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
@@ -257,7 +257,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
         setLoading(false);
         return true;
       } catch (e) {
-        if (e instanceof DuplicateIndexPatternError) {
+        if (e instanceof DuplicateDataViewError) {
           toastNotifications.addDanger(
             i18n.translate('xpack.transform.stepCreateForm.duplicateIndexPatternErrorMessage', {
               defaultMessage:

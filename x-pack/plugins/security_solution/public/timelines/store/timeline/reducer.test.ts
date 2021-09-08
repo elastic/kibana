@@ -80,6 +80,7 @@ const basicTimeline: TimelineModel = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.graph,
   columns: [],
+  defaultColumns: [],
   dataProviders: [{ ...basicDataProvider }],
   dateRange: {
     start: '2020-07-07T08:20:18.966Z',
@@ -87,6 +88,7 @@ const basicTimeline: TimelineModel = {
   },
   deletedEventIds: [],
   description: '',
+  documentType: '',
   eqlOptions: {
     eventCategoryField: 'event.category',
     tiebreakerField: '',
@@ -112,7 +114,9 @@ const basicTimeline: TimelineModel = {
   noteIds: [],
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
+  queryFields: [],
   savedObjectId: null,
+  selectAll: false,
   selectedEventIds: {},
   show: true,
   showCheckboxes: false,

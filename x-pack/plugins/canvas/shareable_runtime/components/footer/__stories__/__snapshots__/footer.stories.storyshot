@@ -1297,6 +1297,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
               >
                 <div
                   className="euiTextColor euiTextColor--ghost"
+                  style={Object {}}
                 >
                   <div
                     className="eui-textTruncate"
@@ -1327,7 +1328,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
               >
                 <button
                   aria-label="Previous Page"
-                  className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                  className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="pageControlsPrevPage"
                   disabled={true}
                   onClick={[Function]}
@@ -1363,6 +1364,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                       >
                         <div
                           className="euiTextColor euiTextColor--ghost"
+                          style={Object {}}
                         >
                           Page 
                           1
@@ -1549,6 +1551,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
               >
                 <div
                   className="euiTextColor euiTextColor--ghost"
+                  style={Object {}}
                 >
                   <div
                     className="eui-textTruncate"
@@ -1579,7 +1582,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
               >
                 <button
                   aria-label="Previous Page"
-                  className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                  className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="pageControlsPrevPage"
                   disabled={true}
                   onClick={[Function]}
@@ -1615,6 +1618,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                       >
                         <div
                           className="euiTextColor euiTextColor--ghost"
+                          style={Object {}}
                         >
                           Page 
                           1
@@ -1629,7 +1633,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
               >
                 <button
                   aria-label="Next Page"
-                  className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                  className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                   data-test-subj="pageControlsNextPage"
                   disabled={true}
                   onClick={[Function]}
