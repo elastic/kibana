@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await (
           await testSubjects.find('lnsXY_yThresholdLeftPanel > lns-dimensionTrigger')
         ).getVisibleText()
-      ).to.eql('Static value: 100');
+      ).to.eql('Static value: 4992.44');
     });
 
     it('should create a dynamic threshold when dragging a field to a threshold dimension group', async () => {
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yThresholdLeftPanel')).to.eql([
-        'Static value: 100',
+        'Static value: 4992.44',
         'Median of bytes',
       ]);
     });
