@@ -244,7 +244,7 @@ function RelatedErrors({
     return (
       // eslint-disable-next-line jsx-a11y/click-events-have-key-events
       <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-        <EuiBadge href={href} color={theme.eui.euiColorDanger}>
+        <EuiBadge href={href} color={theme.eui.euiColorDanger} iconType="arrowRight">
           {i18n.translate('xpack.apm.waterfall.errorCount', {
             defaultMessage:
               '{errorCount, plural, one {View related error} other {View # related errors}}',
