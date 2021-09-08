@@ -309,7 +309,7 @@ export const getXyVisualization = ({
       }, {});
       const { bottom, left, right } = groupBy(
         [...(layer.yConfig || [])].sort(
-          ({ forAccessor: forA }, { forAccessor: forB }) => idToIndex[forB] - idToIndex[forA]
+          ({ forAccessor: forA }, { forAccessor: forB }) => idToIndex[forA] - idToIndex[forB]
         ),
         ({ axisMode }) => {
           return axisMode;
