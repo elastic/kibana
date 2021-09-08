@@ -31,6 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+
       await kibanaServer.uiSettings.replace({
         defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
       });
@@ -78,7 +80,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Print PDF button', () => {
       it('is available if new', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openPdfReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
