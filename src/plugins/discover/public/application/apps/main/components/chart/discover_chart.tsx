@@ -96,10 +96,6 @@ export function DiscoverChart({
               onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>
-          <DocumentViewModeToggle
-            discoverViewMode={discoverViewMode}
-            setDiscoverViewMode={setDiscoverViewMode}
-          />
 
           {!state.hideChart && (
             <EuiFlexItem className="dscResultCount__actions">
@@ -131,6 +127,10 @@ export function DiscoverChart({
               </EuiButtonEmpty>
             </EuiFlexItem>
           )}
+          <DocumentViewModeToggle
+            discoverViewMode={discoverViewMode}
+            setDiscoverViewMode={setDiscoverViewMode}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
 

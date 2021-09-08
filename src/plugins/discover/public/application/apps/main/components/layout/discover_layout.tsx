@@ -83,10 +83,6 @@ export function DiscoverLayout({
     }
   }, [uiSettings]);
 
-  const changeViewId = (option: string) => {
-    setDiscoverViewMode(option);
-  };
-
   const fetchCounter = useRef<number>(0);
   const dataState: DataMainMsg = useDataState(main$);
 
@@ -270,6 +266,8 @@ export function DiscoverLayout({
                       services={services}
                       stateContainer={stateContainer}
                       timefield={timeField}
+                      discoverViewMode={discoverViewMode}
+                      setDiscoverViewMode={setDiscoverViewMode}
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />
