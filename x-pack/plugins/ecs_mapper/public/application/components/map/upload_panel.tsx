@@ -8,43 +8,53 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, useState } from 'react';
+import { getPluginsStart } from '../../../kibana_services';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiHorizontalRule,
   EuiFilePicker,
   EuiButton,
-  EuiSelect,
   EuiFormRow,
-  EuiDescribedFormGroup,
+  EuiIconTip,
+  EuiIcon,
+  EuiRadioGroup,
 } from '@elastic/eui';
 import { FieldCopyAction } from '../../../../common';
-import { Instructions } from './instructions';
 
 import './mapper_upload.scss';
 
 interface Props {
   actionOptions: FieldCopyAction[];
-  onFileUpload(action: string | null, files: FileList | null): void;
+  onFilePickerChange(files: FileList | null): void;
+  onFileUpload(action: string | null): void;
   isLoading: boolean;
   isUploaded: boolean;
+  hasError: boolean;
+  hasFile: boolean;
 }
 
 function getOptions(actions: FieldCopyAction[]) {
   const actionOptions = actions.map((action) => ({
-    value: action,
-    text: action,
+    id: action,
+    label: action,
   }));
 
   return [...actionOptions];
 }
 
-export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading, isUploaded }) => {
+export const UploadPanel: FC<Props> = ({ actionOptions, onFilePickerChange, onFileUpload, isLoading, isUploaded, hasError, hasFile }) => {
   const [action, setAction] = useState<FieldCopyAction>(FieldCopyAction.Copy);
-  const [file, setFile] = useState<FileList | null>(null);
+  const { fileUpload } = getPluginsStart();
 
-  const [hasSubmitted, setHasSubmitted] = useState<boolean>(false);
+  if (fileUpload === undefined) {
+    // eslint-disable-next-line no-console
+    console.error('Ecs Mapper plugin not available');
+    return null;
+  }
+
+  const maxFileSize = fileUpload.getMaxBytesFormatted();
+
 
   const selectedAction = [];
   if (action) {
@@ -53,94 +63,82 @@ export const UploadPanel: FC<Props> = ({ actionOptions, onFileUpload, isLoading,
 
   const options = getOptions(actionOptions);
 
-  const hasFile = file?.length;
-
-  const onSubmit = async () => {
-    setHasSubmitted(true);
-
-    if (hasFile) {
-      onFileUpload(action, file);
-    }
-  };
-
   return (
     <EuiFlexGroup gutterSize="xl">
       <EuiFlexItem grow={true}>
-        <Instructions />
-        <EuiHorizontalRule margin="l" />
-
-        <EuiDescribedFormGroup
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.ecsMapper.file.upload.copyAction.title"
-                defaultMessage="Default copy action"
-              />
-            </h3>
-          }
-          description={
-            <p>
-              <FormattedMessage
-                id="xpack.ecsMapper.file.upload.copyAction.description"
-                defaultMessage="This is the default action for field renames, and will only be utilized if not provided for a field in the uploaded CSV."
-              />
-            </p>
-          }
-        >
-          <EuiFormRow fullWidth={true} hasEmptyLabelSpace>
-            <EuiSelect
-              options={options}
-              value={action}
-              onChange={(option) => setAction(option.target.value as FieldCopyAction)}
-              data-test-subj="copyAction"
-            />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-
-        <EuiSpacer size="l" />
-
         <EuiFormRow
           fullWidth
-          isInvalid={hasSubmitted && !hasFile}
-          error={
-            !hasFile
-              ? i18n.translate(
-                  'xpack.ecsMapper.file.upload.selectOrDragAndDropFileDescription.noAttachedError',
-                  {
-                    defaultMessage: 'CSV file required.',
-                  }
-                )
-              : null
+          label={
+            <FormattedMessage
+              id="xpack.ecsMapper.file.upload.filePickerTitle"
+              defaultMessage="Upload file (up to {maxFileSize})"
+                values={{ maxFileSize }}
+            />
           }
         >
           <EuiFilePicker
             id="filePicker"
             initialPromptText={i18n.translate(
-              'xpack.ecsMapper.file.upload.selectOrDragAndDropFileDescription',
+              'xpack.ecsMapper.fileUpload.selectOrDragAndDropFileDescription',
               {
-                defaultMessage: 'Select or drag and drop a file',
+                defaultMessage: 'Select or drag and drop a CSV file',
               }
             )}
-            onChange={(files) => setFile(files)}
+            onChange={onFilePickerChange}
             className="ecs-mapper-file-picker"
             accept=".csv"
-            isInvalid={hasSubmitted && !hasFile}
           />
         </EuiFormRow>
 
         <EuiSpacer size="l" />
 
-        {!isUploaded && (
-          <EuiButton
-            target="_self"
-            onClick={() => onSubmit()}
-            isLoading={isLoading}
-            data-test-subj="ecsMapperProcessFileButton"
-            fill
+        <EuiFormRow
+          fullWidth
+          label={
+            <p>
+              Default copy action
+              <EuiIconTip
+                content="This is the default action for field renames, and will only be utilized if not provided for a field in the uploaded CSV."
+                position="right"
+              >
+                <EuiIcon type="info"/>
+              </EuiIconTip>
+            </p>
+          }
+        >
+          <EuiRadioGroup
+            options={options}
+            idSelected={action}
+            onChange={(id) => setAction(id as FieldCopyAction)}
+          />
+
+        </EuiFormRow>
+
+        <EuiSpacer size="l" />
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            className="prfDevTool__profileButtonContainer"
+            gutterSize="none"
+            direction="row"
           >
-            <FormattedMessage id="xpack.ecsMapper.file.process.button" defaultMessage="Process" />
-          </EuiButton>
-        )}
+            <EuiFlexItem grow={1}>
+              <EuiButton
+                onClick={() => onFileUpload(action)}
+                isLoading={isLoading}
+                isDisabled={!hasFile || isUploaded || hasError}
+                data-test-subj="ecsMapperProcessFileButton"
+                fill
+              >
+                <FormattedMessage id="xpack.ecsMapper.file.process.button" defaultMessage="Process CSV" />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={9}>
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
       </EuiFlexItem>
     </EuiFlexGroup>
   );

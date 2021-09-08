@@ -30,7 +30,6 @@ export const CreatePipelinePanel: FC<Props> = ({
   isPipelineCreated,
 }) => {
   const [pipelineName, setPipelineName] = useState('');
-  const [hasSubmitted] = useState<boolean>(false);
   const hasPipelineName = !!pipelineName || !!pipelineName.trim();
 
   return (
@@ -56,7 +55,6 @@ export const CreatePipelinePanel: FC<Props> = ({
         >
           <EuiFormRow
             fullWidth
-            isInvalid={hasSubmitted && !hasPipelineName}
             error={
               !hasPipelineName
                 ? i18n.translate('xpack.ecsMapper.file.upload.pipelineName.nameErrorMessage', {
@@ -70,7 +68,6 @@ export const CreatePipelinePanel: FC<Props> = ({
               onChange={(e) => {
                 setPipelineName(e.target.value);
               }}
-              isInvalid={hasSubmitted && !hasPipelineName}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -84,6 +81,7 @@ export const CreatePipelinePanel: FC<Props> = ({
                 data-test-subj="ecsMapperCreateIngestPipelineButton"
                 color="primary"
                 fill
+                isDisabled={!hasPipelineName || isPipelineCreated }
               >
                 <FormattedMessage
                   id="xpack.ecsMapper.createIngestPipeline"
@@ -94,7 +92,7 @@ export const CreatePipelinePanel: FC<Props> = ({
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={() => onCancel()}
+                onClick={onCancel}
                 data-test-subj="ecsMapperCancelIngestPipelineButton"
               >
                 <FormattedMessage

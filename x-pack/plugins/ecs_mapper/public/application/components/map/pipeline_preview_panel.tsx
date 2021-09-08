@@ -16,6 +16,10 @@ import {
   EuiIcon,
   EuiFormRow,
   EuiCopy,
+  EuiCallOut,
+  EuiText,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -59,9 +63,18 @@ export const PreviewPanel: FC<Props> = ({
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiTitle>
-          <h2>Mapping</h2>
-        </EuiTitle>
+        {!isCreatingPipeline && (
+          <EuiCallOut title="CSV processed successfully" color="success" iconType="check">
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.ecsMapper.preview.jsonMapSuccessful"
+                  defaultMessage="Your CSV mappings have been processed as JSON, which you may modify below."
+                />
+              </p>
+            </EuiText>
+          </EuiCallOut>
+        )}
 
         <EuiSpacer size="m" />
 
@@ -105,55 +118,41 @@ export const PreviewPanel: FC<Props> = ({
         <EuiSpacer size="xl" />
 
         {!isCreatingPipeline && (
-          <EuiFlexGroup>
-            <EuiFlexItem>
+          <EuiFlexGroup responsive={false} gutterSize="l" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={onClickToCreatePipeline}
+              >
+                <FormattedMessage
+                  id="xpack.ecsMapper.preview.createPipeline"
+                  defaultMessage="Create ingest node pipeline"
+                />
+              </EuiButton>  
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={processorsJson}>
                 {(copy: () => void) => (
-                  <EuiCard
-                    icon={<EuiIcon size="xxl" type={`copy`} />}
-                    data-test-subj="copyPipelineProcessors"
-                    title={
-                      <FormattedMessage
+                  <EuiButtonEmpty iconType="copy" size="s" onClick={copy}>
+                    <FormattedMessage
                         id="xpack.ecsMapper.preview.copy"
-                        defaultMessage="Copy to clipboard"
+                        defaultMessage="Copy JSON to clipboard"
                       />
-                    }
-                    onClick={copy}
-                    description=""
-                  />
+                  </EuiButtonEmpty>
                 )}
               </EuiCopy>
             </EuiFlexItem>
 
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type={`download`} />}
-                data-test-subj="downloadPipelineProcessors"
-                title={
-                  <FormattedMessage
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="download" size="s" onClick={onDownload}>
+                <FormattedMessage
                     id="xpack.ecsMapper.preview.download"
-                    defaultMessage="Download"
+                    defaultMessage="Download JSON"
                   />
-                }
-                description=""
-                onClick={onDownload}
-              />
+              </EuiButtonEmpty>
             </EuiFlexItem>
-
-            <EuiFlexItem>
-              <EuiCard
-                icon={<EuiIcon size="xxl" type={`gear`} />}
-                data-test-subj="createIngestNodePipeline"
-                title={
-                  <FormattedMessage
-                    id="xpack.ecsMapper.preview.createPipeline"
-                    defaultMessage="Create Ingest Node pipeline"
-                  />
-                }
-                description=""
-                onClick={onClickToCreatePipeline}
-              />
-            </EuiFlexItem>
+            
           </EuiFlexGroup>
         )}
       </EuiFlexItem>

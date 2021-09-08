@@ -10,17 +10,18 @@ import React, { FC } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
 interface Props {
-  error: string;
+  errorTitle: string;
+  errorDetails: string;
 }
 
-export const ErrorPanel: FC<Props> = ({ error }) => {
+export const ErrorPanel: FC<Props> = ({ errorTitle, errorDetails }) => {
   return (
-    <EuiCallOut title="Something went wrong" color="danger" iconType="alert">
+    <EuiCallOut title={errorTitle} color="danger" iconType="alert">
       <p>
         <FormattedMessage
           id="xpack.ecsMapper.results.errorMessage"
-          defaultMessage="{error}"
-          values={{ error }}
+          defaultMessage="{errorDetails}"
+          values={{ errorDetails }}
         />
       </p>
     </EuiCallOut>

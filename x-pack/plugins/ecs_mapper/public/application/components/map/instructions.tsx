@@ -7,19 +7,9 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { getPluginsStart } from '../../../kibana_services';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 export const Instructions: FC = () => {
-  const { fileUpload } = getPluginsStart();
-
-  if (fileUpload === undefined) {
-    // eslint-disable-next-line no-console
-    console.error('Ecs Mapper plugin not available');
-    return null;
-  }
-
-  const maxFileSize = fileUpload.getMaxBytesFormatted();
 
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">
@@ -31,15 +21,14 @@ export const Instructions: FC = () => {
           <p>
             <FormattedMessage
               id="xpack.ecsMapper.file.informational.welcome"
-              defaultMessage="ECS Mapper turns your mapping CSV into a starter ingest pipeline,
-               for you to utilize or build upon. Reference&nbsp;{templateLink} for a sample mapping template."
+              defaultMessage="ECS Mapper turns your mapping CSV into a starter ingest pipeline. Reference&nbsp;{templateLink} for more information."
               values={{
                 templateLink: (
                   <EuiLink
                     href="https://docs.google.com/spreadsheets/d/1m5JiOTeZtUueW3VOVqS8bFYqNGEEyp0jAsgO12NFkNM/edit#gid=0"
                     target="_blank"
                   >
-                    here
+                    sample mapping templates
                   </EuiLink>
                 ),
               }}
@@ -49,33 +38,17 @@ export const Instructions: FC = () => {
         <EuiSpacer size="m" />
         <EuiText>
           <p>
-            <FormattedMessage
-              id="xpack.ecsMapper.file.informational.requiredHeaders"
-              defaultMessage="Two headers are required: 'source_field' and 'destination_field', but please see the linked template for more header information."
-            />
+            Two headers are required: <EuiCode>source_field</EuiCode> and <EuiCode>destination_field</EuiCode>, but please see the linked template for more header information.
           </p>
         </EuiText>
         <EuiSpacer size="m" />
         <EuiText>
           <p>
-            <FormattedMessage
-              id="xpack.ecsMapper.file.informational.instructions"
-              defaultMessage="Please note that this tool generates starter pipelines. It will only 
-              perform field rename and copy operations, as well as some field format adjustments. It's up to you to integrate them in a complete pipeline that ingests and outputs the data however you need."
-            />
+            Please note that this tool generates starter pipelines. It will only perform field <strong>rename</strong> and <strong>copy</strong> operations, as well as some field format adjustments. 
+            It's up to you to integrate them in a complete pipeline that ingests and outputs the data however you need.
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.ecsMapper.file.informational.uploadedFilesAllowedSizeDescription"
-              defaultMessage="You can upload files up to {maxFileSize}."
-              values={{ maxFileSize }}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
