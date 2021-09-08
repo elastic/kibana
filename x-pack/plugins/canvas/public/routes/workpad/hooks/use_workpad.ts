@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { useWorkpadService, usePlatformService } from '../../../services';
 import { getWorkpad } from '../../../state/selectors/workpad';
@@ -15,6 +16,11 @@ import { setAssets } from '../../../state/actions/assets';
 // @ts-expect-error
 import { setZoomScale } from '../../../state/actions/transient';
 import { CanvasWorkpad } from '../../../../types';
+
+const getWorkpadLabel = () =>
+  i18n.translate('xpack.canvas.workpadResolve.redirectLabel', {
+    defaultMessage: 'Workpad',
+  });
 
 export const useWorkpad = (
   workpadId: string,
@@ -34,7 +40,7 @@ export const useWorkpad = (
           outcome,
           aliasId,
           workpad: { assets, ...workpad },
-        } = await workpadService.get(workpadId);
+        } = await workpadService.resolve(workpadId);
 
         if (outcome === 'conflict') {
           workpad.aliasId = aliasId;
@@ -45,10 +51,10 @@ export const useWorkpad = (
         dispatch(setZoomScale(1));
 
         if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
-          platformService.redirectLegacyUrl(`#${getRedirectPath(aliasId)}`, 'Workpad');
+          platformService.redirectLegacyUrl(`#${getRedirectPath(aliasId)}`, getWorkpadLabel());
         }
       } catch (e) {
-        setError(e);
+        setError(e as Error | string);
       }
     })();
   }, [workpadId, dispatch, setError, loadPages, workpadService, getRedirectPath, platformService]);

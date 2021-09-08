@@ -8,7 +8,7 @@
 import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 
 import { CanvasStartDeps } from '../../plugin';
-import { CanvasWorkpadService, GetWorkpadResponse } from '../workpad';
+import { CanvasWorkpadService, ResolveWorkpadResponse } from '../workpad';
 
 import {
   API_ROUTE_WORKPAD,
@@ -63,8 +63,13 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
 
   return {
     get: async (id: string) => {
-      const { workpad, outcome, aliasId } = await coreStart.http.get<GetWorkpadResponse>(
-        `${getApiPath()}/${id}`
+      const workpad = await coreStart.http.get(`${getApiPath()}/${id}`);
+
+      return { css: DEFAULT_WORKPAD_CSS, variables: [], ...workpad };
+    },
+    resolve: async (id: string) => {
+      const { workpad, outcome, aliasId } = await coreStart.http.get<ResolveWorkpadResponse>(
+        `${getApiPath()}/resolve/${id}`
       );
 
       return {

@@ -12,8 +12,7 @@ import { removeAttributesId } from './migrations/remove_attributes_id';
 export const workpadType: SavedObjectsType = {
   name: CANVAS_TYPE,
   hidden: false,
-  namespaceType: 'multiple-isolated',
-  convertToMultiNamespaceTypeVersion: '8.0.0',
+  namespaceType: 'single',
   mappings: {
     dynamic: false,
     properties: {

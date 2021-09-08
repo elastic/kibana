@@ -22,7 +22,8 @@ export interface CanvasRouteHandlerContext extends RequestHandlerContext {
   canvas: {
     workpad: {
       create: (attributes: CanvasWorkpad) => Promise<SavedObject<WorkpadAttributes>>;
-      get: (id: string) => Promise<SavedObjectsResolveResponse<WorkpadAttributes>>;
+      get: (id: string) => Promise<SavedObject<WorkpadAttributes>>;
+      resolve: (id: string) => Promise<SavedObjectsResolveResponse<WorkpadAttributes>>;
       update: (
         id: string,
         attributes: Partial<CanvasWorkpad>
@@ -62,6 +63,16 @@ export const createWorkpadRouteContext: (
         );
       },
       get: async (id: string) => {
+        const workpad = await context.core.savedObjects.client.get<WorkpadAttributes>(
+          CANVAS_TYPE,
+          id
+        );
+
+        workpad.attributes = injectReferences(workpad.attributes, workpad.references, expressions);
+
+        return workpad;
+      },
+      resolve: async (id: string) => {
         const resolved = await context.core.savedObjects.client.resolve<WorkpadAttributes>(
           CANVAS_TYPE,
           id

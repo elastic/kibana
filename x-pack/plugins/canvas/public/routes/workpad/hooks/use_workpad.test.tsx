@@ -11,7 +11,7 @@ import { useWorkpad } from './use_workpad';
 
 const mockDispatch = jest.fn();
 const mockSelector = jest.fn();
-const mockGetWorkpad = jest.fn();
+const mockResolveWorkpad = jest.fn();
 const mockRedirectLegacyUrl = jest.fn();
 
 const workpad = {
@@ -34,7 +34,7 @@ jest.mock('react-redux', () => ({
 
 jest.mock('../../../services', () => ({
   useWorkpadService: () => ({
-    get: mockGetWorkpad,
+    resolve: mockResolveWorkpad,
   }),
   usePlatformService: () => ({
     redirectLegacyUrl: mockRedirectLegacyUrl,
@@ -56,16 +56,16 @@ describe('useWorkpad', () => {
   test('fires request to load workpad and dispatches results', async () => {
     const workpadId = 'someworkpad';
     const getRedirectPath = (id: string) => id;
-    mockGetWorkpad.mockResolvedValue({
+    mockResolveWorkpad.mockResolvedValue({
       outcome: 'exactMatch',
       workpad: workpadResponse,
     });
 
     renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
-    await waitFor(() => expect(mockGetWorkpad).toHaveBeenCalledWith(workpadId));
+    await waitFor(() => expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId));
 
-    expect(mockGetWorkpad).toHaveBeenCalledWith(workpadId);
+    expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId);
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'setAssets', payload: assets });
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'setWorkpad', payload: workpad });
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'setZoomScale', payload: 1 });
@@ -75,7 +75,7 @@ describe('useWorkpad', () => {
     const workpadId = 'someworkpad';
     const getRedirectPath = (id: string) => id;
     const aliasId = 'someworkpad-alias';
-    mockGetWorkpad.mockResolvedValue({
+    mockResolveWorkpad.mockResolvedValue({
       outcome: 'conflict',
       workpad: workpadResponse,
       aliasId,
@@ -83,9 +83,9 @@ describe('useWorkpad', () => {
 
     renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
-    await waitFor(() => expect(mockGetWorkpad).toHaveBeenCalledWith(workpadId));
+    await waitFor(() => expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId));
 
-    expect(mockGetWorkpad).toHaveBeenCalledWith(workpadId);
+    expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId);
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'setAssets', payload: assets });
     expect(mockDispatch).toHaveBeenCalledWith({
       type: 'setWorkpad',
@@ -98,7 +98,7 @@ describe('useWorkpad', () => {
     const workpadId = 'someworkpad';
     const getRedirectPath = (id: string) => id;
     const aliasId = 'someworkpad-alias';
-    mockGetWorkpad.mockResolvedValue({
+    mockResolveWorkpad.mockResolvedValue({
       outcome: 'aliasMatch',
       workpad: workpadResponse,
       aliasId,
@@ -106,7 +106,7 @@ describe('useWorkpad', () => {
 
     renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
-    await waitFor(() => expect(mockGetWorkpad).toHaveBeenCalledWith(workpadId));
+    await waitFor(() => expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId));
 
     expect(mockRedirectLegacyUrl).toBeCalledWith(`#${aliasId}`, 'Workpad');
   });

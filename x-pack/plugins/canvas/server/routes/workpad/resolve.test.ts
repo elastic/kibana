@@ -6,7 +6,7 @@
  */
 
 import { CANVAS_TYPE } from '../../../common/lib/constants';
-import { initializeGetWorkpadRoute } from './get';
+import { initializeResolveWorkpadRoute } from './resolve';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
 import { workpadWithGroupAsElement } from '../../../__fixtures__/workpads';
@@ -18,12 +18,12 @@ const mockRouteContext = ({
   canvas: workpadRouteContextMock.create(),
 } as unknown) as MockWorkpadRouteContext;
 
-describe('GET workpad', () => {
+describe('RESOLVE workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
 
   beforeEach(() => {
     const routerDeps = getMockedRouterDeps();
-    initializeGetWorkpadRoute(routerDeps);
+    initializeResolveWorkpadRoute(routerDeps);
 
     routeHandler = routerDeps.router.get.mock.calls[0][1];
   });
@@ -35,17 +35,24 @@ describe('GET workpad', () => {
   it(`returns 200 when the workpad is found`, async () => {
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
-      path: 'api/canvas/workpad/123',
+      path: 'api/canvas/workpad/resolve/123',
       params: {
         id: '123',
       },
     });
 
-    mockRouteContext.canvas.workpad.get.mockResolvedValue({
-      id: '123',
-      type: CANVAS_TYPE,
-      attributes: { foo: true },
-      references: [],
+    const outcome = 'aliasMatch';
+    const aliasId = 'alias-id';
+
+    mockRouteContext.canvas.workpad.resolve.mockResolvedValue({
+      saved_object: {
+        id: '123',
+        type: CANVAS_TYPE,
+        attributes: { foo: true },
+        references: [],
+      },
+      outcome,
+      alias_target_id: aliasId,
     });
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
@@ -53,12 +60,16 @@ describe('GET workpad', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toMatchInlineSnapshot(`
       Object {
-        "foo": true,
-        "id": "123",
+        "aliasId": "alias-id",
+        "outcome": "aliasMatch",
+        "workpad": Object {
+          "foo": true,
+          "id": "123",
+        },
       }
     `);
 
-    expect(mockRouteContext.canvas.workpad.get.mock.calls).toMatchInlineSnapshot(`
+    expect(mockRouteContext.canvas.workpad.resolve.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           "123",
@@ -70,21 +81,24 @@ describe('GET workpad', () => {
   it('corrects elements that should be groups', async () => {
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
-      path: 'api/canvas/workpad/123',
+      path: 'api/canvas/workpad/resolve/123',
       params: {
         id: '123',
       },
     });
 
-    mockRouteContext.canvas.workpad.get.mockResolvedValue({
-      id: '123',
-      type: CANVAS_TYPE,
-      attributes: workpadWithGroupAsElement as any,
-      references: [],
+    mockRouteContext.canvas.workpad.resolve.mockResolvedValue({
+      saved_object: {
+        id: '123',
+        type: CANVAS_TYPE,
+        attributes: workpadWithGroupAsElement as any,
+        references: [],
+      },
+      outcome: 'exactMatch',
     });
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-    const workpad = response.payload as CanvasWorkpad;
+    const workpad = response.payload.workpad as CanvasWorkpad;
 
     expect(response.status).toBe(200);
     expect(workpad).not.toBeUndefined();
@@ -97,14 +111,14 @@ describe('GET workpad', () => {
     const id = '123';
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
-      path: 'api/canvas/workpad/123',
+      path: 'api/canvas/workpad/resolve/123',
       params: {
         id,
       },
     });
 
     const savedObjectsClient = savedObjectsClientMock.create();
-    mockRouteContext.canvas.workpad.get.mockImplementation(() => {
+    mockRouteContext.canvas.workpad.resolve.mockImplementation(() => {
       throw savedObjectsClient.errors.createGenericNotFoundError(CANVAS_TYPE, id);
     });
 

@@ -28,41 +28,52 @@ import { WorkpadPresentationHelper } from './workpad_presentation_helper';
 const { workpadRoutes: strings } = ErrorStrings;
 
 export const WorkpadRoute = () => {
-  const getRedirectPath = useCallback((workpadId: string) => `/workpad/${workpadId}`, []);
   return (
     <Route
-      path={'/workpad/:id'}
+      path={['/workpad/:id/page/:pageNumber', '/workpad/:id']}
       exact={false}
       children={(route: WorkpadRouteProps) => {
-        return (
-          <WorkpadLoaderComponent
-            params={route.match.params}
-            key="workpad-loader"
-            getRedirectPath={getRedirectPath}
-          >
-            {(workpad: CanvasWorkpad) => (
-              <Switch>
-                <Route
-                  path="/workpad/:id/page/:pageNumber"
-                  children={(pageRoute) => (
-                    <WorkpadHistoryManager>
-                      <WorkpadRoutingContextComponent>
-                        <WorkpadPresentationHelper>
-                          <WorkpadApp />
-                        </WorkpadPresentationHelper>
-                      </WorkpadRoutingContextComponent>
-                    </WorkpadHistoryManager>
-                  )}
-                />
-                <Route path="/workpad/:id" strict={false} exact={true}>
-                  <Redirect to={`/workpad/${route.match.params.id}/page/${workpad.page + 1}`} />
-                </Route>
-              </Switch>
-            )}
-          </WorkpadLoaderComponent>
-        );
+        return <WorkpadRouteComponent route={route} />;
       }}
     />
+  );
+};
+
+const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
+  const getRedirectPath = useCallback(
+    (workpadId: string) =>
+      `/workpad/${workpadId}${
+        route.match.params.pageNumber ? `/page/${route.match.params.pageNumber}` : ''
+      }`,
+    [route.match.params.pageNumber]
+  );
+
+  return (
+    <WorkpadLoaderComponent
+      params={route.match.params}
+      key="workpad-loader"
+      getRedirectPath={getRedirectPath}
+    >
+      {(workpad: CanvasWorkpad) => (
+        <Switch>
+          <Route
+            path="/workpad/:id/page/:pageNumber"
+            children={(pageRoute) => (
+              <WorkpadHistoryManager>
+                <WorkpadRoutingContextComponent>
+                  <WorkpadPresentationHelper>
+                    <WorkpadApp />
+                  </WorkpadPresentationHelper>
+                </WorkpadRoutingContextComponent>
+              </WorkpadHistoryManager>
+            )}
+          />
+          <Route path="/workpad/:id" strict={false} exact={true}>
+            <Redirect to={`/workpad/${route.match.params.id}/page/${workpad.page + 1}`} />
+          </Route>
+        </Switch>
+      )}
+    </WorkpadLoaderComponent>
   );
 };
 
