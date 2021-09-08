@@ -6,7 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
+import {
+  kibanaResponseFactory,
+  IKibanaResponse,
+  ResponseError,
+} from '../../../../../../src/core/server';
 import { ReportingCore } from '../../';
 import { ROUTE_TAG_CAN_REDIRECT } from '../../../../security/server';
 import { API_BASE_URL } from '../../../common/constants';
@@ -15,6 +19,7 @@ import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { jobsQueryFactory } from '../lib/jobs_query';
 import { deleteJobResponseHandler, downloadJobResponseHandler } from '../lib/job_response_handler';
 import { handleUnavailable } from '../lib/request_handler';
+import type { ReportApiJSON } from '../../lib/store/report';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
@@ -86,7 +91,14 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
     })
   );
 
-  const validateJobIsAvailable = async (job?: Report) => {
+  /**
+   * Returns appropriate {@link IKibanaResponse<ResponseError>} if the requested job is not valid either because:
+   * 1. It was not found
+   * 2. It is not permitted under the current licensing
+   */
+  const validateJobIsAvailable = async (
+    job?: Report | ReportApiJSON
+  ): Promise<undefined | IKibanaResponse<ResponseError>> => {
     if (!job) {
       // Bad result
       return kibanaResponseFactory.notFound();
@@ -134,7 +146,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
       }
 
       return res.ok({
-        body: result!.toApiJSON(),
+        body: result!,
         headers: {
           'content-type': 'application/json',
         },
@@ -159,7 +171,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
 
       const { docId } = req.params;
 
-      const result = await jobsQuery.get(user, docId);
+      const result = await jobsQuery.getReport(user, docId);
 
       const validationResult = await validateJobIsAvailable(result);
       if (validationResult) {

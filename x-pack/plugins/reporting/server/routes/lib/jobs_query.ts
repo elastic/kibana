@@ -47,7 +47,8 @@ interface JobsQueryFactory {
     jobIds: string[] | null
   ): Promise<ReportApiJSON[]>;
   count(jobTypes: string[], user: ReportingUser): Promise<number>;
-  get(user: ReportingUser, id: string): Promise<Report | undefined>;
+  get(user: ReportingUser, id: string): Promise<ReportApiJSON | undefined>;
+  getReport(user: ReportingUser, id: string): Promise<Report | undefined>;
   getError(id: string): Promise<string>;
   delete(deleteIndex: string, id: string): Promise<ApiResponse<DeleteResponse>>;
 }
@@ -75,7 +76,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     }
   }
 
-  return {
+  const factory: JobsQueryFactory = {
     async list(jobTypes, user, page = 0, size = defaultSize, jobIds) {
       const username = getUsername(user);
       const body = getSearchBody({
@@ -134,7 +135,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       return response?.body.count ?? 0;
     },
 
-    async get(user, id) {
+    async getReport(user, id) {
       const { logger } = reportingCore.getPluginSetupDeps();
       if (!id) {
         logger.warning(`No ID provided for GET`);
@@ -167,6 +168,11 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       }
 
       return new Report({ ...result, ...result._source });
+    },
+
+    async get(user, id) {
+      const report = await factory.getReport(user, id);
+      return report?.toApiJSON();
     },
 
     async getError(id) {
@@ -215,4 +221,6 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       }
     },
   };
+
+  return factory;
 }
