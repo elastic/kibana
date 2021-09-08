@@ -51,7 +51,7 @@
             "children": [
               {
                 "parentPluginId": "management",
-                "id": "def-public.params",
+                "id": "def-public.ManagementApp.mount.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -590,7 +590,7 @@
             "children": [
               {
                 "parentPluginId": "management",
-                "id": "def-public.params",
+                "id": "def-public.RegisterManagementAppArgs.mount.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",

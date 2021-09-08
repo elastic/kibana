@@ -471,32 +471,6 @@
           },
           {
             "parentPluginId": "savedObjectsManagement",
-            "id": "def-public.ProcessedImportResponse.conflictedSavedObjectsLinkedToSavedSearches",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "conflictedSavedObjectsLinkedToSavedSearches",
-            "description": [],
-            "signature": [
-              "undefined"
-            ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "savedObjectsManagement",
-            "id": "def-public.ProcessedImportResponse.conflictedSearchDocs",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "conflictedSearchDocs",
-            "description": [],
-            "signature": [
-              "undefined"
-            ],
-            "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "savedObjectsManagement",
             "id": "def-public.ProcessedImportResponse.importWarnings",
             "type": "Array",
             "tags": [],

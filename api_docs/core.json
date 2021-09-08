@@ -47,7 +47,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.ToastsApi.Unnamed.$1.deps",
+                "id": "def-public.ToastsApi.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "deps",
@@ -57,7 +57,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.ToastsApi.Unnamed.$1.deps.uiSettings",
+                    "id": "def-public.ToastsApi.Unnamed.$1.uiSettings",
                     "type": "Object",
                     "tags": [],
                     "label": "uiSettings",
@@ -1620,7 +1620,7 @@
             "label": "links",
             "description": [],
             "signature": [
-              "{ readonly settings: string; readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; readonly suricataModule: string; readonly zeekModule: string; }; readonly auditbeat: { readonly base: string; readonly auditdModule: string; readonly systemModule: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly libbeat: { readonly getStarted: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly autocompleteChanges: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; }>; readonly ecs: { readonly guide: string; }; }"
+              "{ readonly settings: string; readonly apm: { readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; }; readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; readonly suricataModule: string; readonly zeekModule: string; }; readonly auditbeat: { readonly base: string; readonly auditdModule: string; readonly systemModule: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly libbeat: { readonly getStarted: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly autocompleteChanges: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; }>; readonly ecs: { readonly guide: string; }; }"
             ],
             "path": "src/core/public/doc_links/doc_links_service.ts",
             "deprecated": false
@@ -1929,7 +1929,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.I18nStart.Context.$1.children",
+                "id": "def-public.I18nStart.Context.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ children }",
@@ -1939,7 +1939,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.I18nStart.Context.$1.children.children",
+                    "id": "def-public.I18nStart.Context.$1.children",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "children",
@@ -3703,7 +3703,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.mount",
+                "id": "def-public.OverlayStart.openFlyout.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
@@ -3724,7 +3724,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.element",
+                    "id": "def-public.OverlayStart.openFlyout.$1.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "element",
@@ -3739,7 +3739,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.options",
+                "id": "def-public.OverlayStart.openFlyout.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -3800,7 +3800,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.mount",
+                "id": "def-public.OverlayStart.openModal.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
@@ -3821,7 +3821,7 @@
                 "children": [
                   {
                     "parentPluginId": "core",
-                    "id": "def-public.element",
+                    "id": "def-public.OverlayStart.openModal.$1.$1",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "element",
@@ -3836,7 +3836,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.options",
+                "id": "def-public.OverlayStart.openModal.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -3890,7 +3890,7 @@
             "children": [
               {
                 "parentPluginId": "core",
-                "id": "def-public.message",
+                "id": "def-public.OverlayStart.openConfirm.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "message",
@@ -3911,7 +3911,7 @@
               },
               {
                 "parentPluginId": "core",
-                "id": "def-public.options",
+                "id": "def-public.OverlayStart.openConfirm.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -6472,7 +6472,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-public.element",
+            "id": "def-public.MountPoint.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "element",
@@ -6530,7 +6530,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-public.core",
+            "id": "def-public.PluginInitializer.$1",
             "type": "Object",
             "tags": [],
             "label": "core",
@@ -7555,7 +7555,7 @@
                 "label": "rawConfig",
                 "description": [],
                 "signature": [
-                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; hosts: string | string[]; requestTimeout: moment.Duration; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; healthCheck: Readonly<{} & { delay: moment.Duration; }>; ignoreVersionMismatch: boolean; }>"
+                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; hosts: string | string[]; requestTimeout: moment.Duration; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; healthCheck: Readonly<{} & { delay: moment.Duration; }>; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
                 ],
                 "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
                 "deprecated": false,
@@ -9192,11 +9192,25 @@
         "children": [
           {
             "parentPluginId": "core",
+            "id": "def-server.DeprecationsDetails.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "\nThe title of the deprecation.\nCheck the README for writing deprecations in `src/core/server/deprecations/README.mdx`"
+            ],
+            "path": "src/core/server/deprecations/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.DeprecationsDetails.message",
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": [],
+            "description": [
+              "\nThe description message to be displayed for the deprecation.\nCheck the README for writing deprecations in `src/core/server/deprecations/README.mdx`"
+            ],
             "path": "src/core/server/deprecations/types.ts",
             "deprecated": false
           },
@@ -11262,7 +11276,7 @@
             "signature": [
               "Pick<",
               "KibanaClient",
-              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
               "TransportRequestParams",
               ", options?: ",
               "TransportRequestOptions",
@@ -12376,7 +12390,7 @@
             "signature": [
               "Pick<",
               "KibanaClient",
-              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
               "TransportRequestParams",
               ", options?: ",
               "TransportRequestOptions",
@@ -12401,7 +12415,7 @@
             "signature": [
               "Pick<",
               "KibanaClient",
-              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+              ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
               "TransportRequestParams",
               ", options?: ",
               "TransportRequestOptions",
@@ -16041,7 +16055,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.details",
+            "id": "def-server.AddConfigDeprecation.$1",
             "type": "Object",
             "tags": [],
             "label": "details",
@@ -16145,7 +16159,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.CapabilitiesSwitcher.$1",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -16165,7 +16179,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.uiCapabilities",
+            "id": "def-server.CapabilitiesSwitcher.$2",
             "type": "Object",
             "tags": [],
             "label": "uiCapabilities",
@@ -16178,7 +16192,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.useDefaultCapabilities",
+            "id": "def-server.CapabilitiesSwitcher.$3",
             "type": "boolean",
             "tags": [],
             "label": "useDefaultCapabilities",
@@ -16211,7 +16225,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.factory",
+            "id": "def-server.ConfigDeprecationProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "factory",
@@ -16388,7 +16402,7 @@
         "signature": [
           "Pick<",
           "KibanaClient",
-          ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"count\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
+          ", \"get\" | \"delete\" | \"create\" | \"index\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"emit\" | \"on\" | \"once\" | \"off\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"dataFrameTransformDeprecated\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request(params: ",
           "TransportRequestParams",
           ", options?: ",
           "TransportRequestOptions",
@@ -16488,7 +16502,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.context",
+            "id": "def-server.HandlerFunction.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "context",
@@ -16501,7 +16515,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.args",
+            "id": "def-server.HandlerFunction.$2",
             "type": "Array",
             "tags": [],
             "label": "args",
@@ -16757,7 +16771,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.context",
+            "id": "def-server.HttpResourcesRequestHandler.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "context",
@@ -16770,7 +16784,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.request",
+            "id": "def-server.HttpResourcesRequestHandler.$2",
             "type": "Object",
             "tags": [],
             "label": "request",
@@ -16790,7 +16804,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.response",
+            "id": "def-server.HttpResourcesRequestHandler.$3",
             "type": "Uncategorized",
             "tags": [],
             "label": "response",
@@ -17028,7 +17042,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.context",
+            "id": "def-server.IContextProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -17043,7 +17057,7 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.rest",
+            "id": "def-server.IContextProvider.$2",
             "type": "Object",
             "tags": [],
             "label": "rest",
@@ -17285,7 +17299,7 @@
         "signature": [
           "Pick<",
           "EcsBase",
-          ", \"labels\" | \"tags\"> & ",
+          ", \"tags\" | \"labels\"> & ",
           "EcsTracing",
           " & { agent?: ",
           "EcsAgent",
@@ -17468,7 +17482,7 @@
         "children": [
           {
             "parentPluginId": "core",
-            "id": "def-server.core",
+            "id": "def-server.PluginInitializer.$1",
             "type": "Object",
             "tags": [],
             "label": "core",
