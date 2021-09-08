@@ -7,7 +7,7 @@
 
 import React, { ReactNode } from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 /**
  * The height for a table on a overview page. Is the height of a 5-row basic
@@ -62,7 +62,7 @@ export function OverviewTableContainer({
   fixedHeight?: boolean;
   isEmptyAndNotInitiated: boolean;
 }) {
-  const { isMedium } = useBreakPoints();
+  const { isMedium } = useBreakpoints();
 
   return (
     <OverviewTableContainerDiv
