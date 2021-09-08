@@ -271,8 +271,6 @@ export const DataFormatPicker = ({
                   id="visTypeTimeseries.dataFormatPicker.formatPatternHelpText"
                   defaultMessage="Documentation"
                 />
-                &nbsp;
-                <EuiIcon type="link" />
               </EuiLink>
             </span>
           }

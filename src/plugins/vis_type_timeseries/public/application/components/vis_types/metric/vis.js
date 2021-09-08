@@ -52,7 +52,7 @@ function MetricVisualization(props) {
           const metricsField = getMetricsField(seriesDef.metrics);
           // skip color field formatting if color rules applied
           const shouldSkipFormat =
-            fieldFormatMap[metricsField]?.id === FIELD_FORMAT_IDS.COLOR && colors.color;
+            fieldFormatMap?.[metricsField]?.id === FIELD_FORMAT_IDS.COLOR && colors.color;
           newProps.formatter = createFieldFormatter(
             shouldSkipFormat ? undefined : metricsField,
             fieldFormatMap,
