@@ -57,6 +57,7 @@ describe('test fetchDocuments', () => {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
+      savedSearch: savedSearchMock,
       searchSessionId: '123',
       services: discoverServiceMock,
     } as unknown) as FetchAllSubDeps;
