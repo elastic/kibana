@@ -24,7 +24,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { Immutable, TrustedApp } from '../../../../../common/endpoint/types';
+import {
+  Immutable,
+  ImmutableObject,
+  PolicyEffectScope,
+  GlobalEffectScope,
+  TrustedApp,
+} from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { useTrustedAppsSelector } from './hooks';
 import {
@@ -35,6 +41,11 @@ import {
 
 const CANCEL_SUBJ = 'trustedAppDeletionCancel';
 const CONFIRM_SUBJ = 'trustedAppDeletionConfirm';
+const isTrustedAppByPolicy = (
+  trustedApp: ImmutableObject<GlobalEffectScope> | ImmutableObject<PolicyEffectScope>
+): trustedApp is ImmutableObject<PolicyEffectScope> => {
+  return (trustedApp as ImmutableObject<PolicyEffectScope>).policies !== undefined;
+};
 
 const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
   title: (
@@ -55,7 +66,10 @@ const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
       id="xpack.securitySolution.trustedapps.deletionDialog.calloutMessage"
       defaultMessage="Deleting this entry will remove it from the {count} {count, plural, one {policy} other {policies}} it is associated with."
       values={{
-        count: entry?.effectScope.policies?.length,
+        count:
+          entry && isTrustedAppByPolicy(entry.effectScope)
+            ? entry.effectScope.policies.length
+            : 'all',
       }}
     />
   ),
