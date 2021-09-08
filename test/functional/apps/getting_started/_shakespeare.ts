@@ -65,6 +65,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
+      await esArchiver.unload('test/functional/fixtures/es_archiver/getting_started/shakespeare');
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('should create shakespeare index pattern', async function () {

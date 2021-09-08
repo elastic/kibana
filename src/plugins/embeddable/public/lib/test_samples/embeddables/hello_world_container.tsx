@@ -31,8 +31,8 @@ interface HelloWorldContainerInput extends ContainerInput {
 }
 
 interface HelloWorldContainerOptions {
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
-  panelComponent: EmbeddableStart['EmbeddablePanel'];
+  getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'];
+  panelComponent?: EmbeddableStart['EmbeddablePanel'];
 }
 
 export class HelloWorldContainer extends Container<InheritedInput, HelloWorldContainerInput> {
@@ -42,7 +42,7 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
     input: ContainerInput<{ firstName: string; lastName: string }>,
     private readonly options: HelloWorldContainerOptions
   ) {
-    super(input, { embeddableLoaded: {} }, options.getEmbeddableFactory);
+    super(input, { embeddableLoaded: {} }, options.getEmbeddableFactory || (() => undefined));
   }
 
   public getInheritedInput(id: string) {
@@ -56,10 +56,14 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
   public render(node: HTMLElement) {
     ReactDOM.render(
       <I18nProvider>
-        <HelloWorldContainerComponent
-          container={this}
-          panelComponent={this.options.panelComponent}
-        />
+        {this.options.panelComponent ? (
+          <HelloWorldContainerComponent
+            container={this}
+            panelComponent={this.options.panelComponent}
+          />
+        ) : (
+          <div>Panel component not provided.</div>
+        )}
       </I18nProvider>,
       node
     );
