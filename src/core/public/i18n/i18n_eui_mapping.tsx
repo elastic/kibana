@@ -275,12 +275,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSorting.buttonActive': i18n.translate('core.euiColumnSorting.buttonActive', {
       defaultMessage: 'fields sorted',
     }),
-    'euiColumnSortingDraggable.activeSortLabel': i18n.translate(
-      'core.euiColumnSortingDraggable.activeSortLabel',
-      {
-        defaultMessage: 'is sorting this data grid',
-      }
-    ),
+    'euiColumnSortingDraggable.activeSortLabel': ({ display }: EuiValues) =>
+      i18n.translate('core.euiColumnSortingDraggable.activeSortLabel', {
+        defaultMessage: '{display} is sorting this data grid',
+        values: { display },
+      }),
     'euiColumnSortingDraggable.defaultSortAsc': i18n.translate(
       'core.euiColumnSortingDraggable.defaultSortAsc',
       {
