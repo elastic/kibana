@@ -19,11 +19,9 @@ export {
   ES_FIELD_TYPES,
 } from '../../data/common';
 
-export type { SerializedFieldFormat } from '../../expressions/public';
-
 export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';
 
-export { FieldFormat } from '../../field_formats/common';
+export { FieldFormat, SerializedFieldFormat } from '../../field_formats/common';
 
 export {
   useForm,
