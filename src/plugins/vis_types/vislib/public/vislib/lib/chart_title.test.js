@@ -99,7 +99,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
 
     const visConfig = new VisConfig(
       {
-        type: 'histogram',
+        type: 'heatmap',
         title: {
           text: 'rows',
         },
