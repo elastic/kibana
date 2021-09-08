@@ -184,4 +184,81 @@ describe('useHoverActionItems', () => {
       );
     });
   });
+
+  test('if isCaseView is true, ShowTopNButton should enable popOver', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          isCaseView: true,
+          enableOverflowButton: false,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.allActionItems[1].props.enablePopOver).toEqual(true);
+    });
+  });
+
+  test('if isCaseView is false, ShowTopNButton should disable popOver if overflow button is enabled', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          isCaseView: false,
+          enableOverflowButton: true,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+      expect(result.current.allActionItems[4].props.enablePopOver).toEqual(false);
+    });
+  });
+
+  test('if isCaseView is true, it should show all items when shoTopN is true', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          showTopN: true,
+          isCaseView: true,
+          enableOverflowButton: false,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.allActionItems).toHaveLength(3);
+      expect(result.current.allActionItems[0].props['data-test-subj']).toEqual(
+        'hover-actions-add-timeline'
+      );
+      expect(result.current.allActionItems[1].props['data-test-subj']).toEqual(
+        'hover-actions-show-top-n'
+      );
+      expect(result.current.allActionItems[2].props['data-test-subj']).toEqual(
+        'hover-actions-copy-button'
+      );
+    });
+  });
+
+  test('when disable OverflowButton, it should show only "showTopNBtn" when shoTopN is true', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          showTopN: true,
+          isCaseView: false,
+          enableOverflowButton: false,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.allActionItems).toHaveLength(1);
+      expect(result.current.allActionItems[0].props['data-test-subj']).toEqual(
+        'hover-actions-show-top-n'
+      );
+    });
+  });
 });
