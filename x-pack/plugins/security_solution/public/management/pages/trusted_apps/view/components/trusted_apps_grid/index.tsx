@@ -74,9 +74,9 @@ export const TrustedAppsGrid = memo(() => {
 
   const handleArtifactCardProps = useMemo(() => {
     // cache card props to avoid re-renders
-    const cachedCardProps: Record<string, ArtifactEntryCardProps<TrustedApp>> = {};
+    const cachedCardProps: Record<string, ArtifactEntryCardProps> = {};
 
-    return (trustedApp: TrustedApp): ArtifactEntryCardProps<TrustedApp> => {
+    return (trustedApp: TrustedApp): ArtifactEntryCardProps => {
       if (!cachedCardProps[trustedApp.id]) {
         let policies: ArtifactEntryCardProps['policies'];
 
