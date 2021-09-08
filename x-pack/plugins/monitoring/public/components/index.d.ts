@@ -6,3 +6,4 @@
  */
 
 export const PageLoading: FunctionComponent<Props>;
+export const License: FunctionComponent<Props>;
