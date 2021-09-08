@@ -161,7 +161,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       before(async () => {
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
         await PageObjects.maps.toggleLayerVisibility('Road map');
-        await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
+        await PageObjects.maps.toggleLayerVisibility('Total Requests by Destination');
         await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();
         await PageObjects.maps.closeLegend();
