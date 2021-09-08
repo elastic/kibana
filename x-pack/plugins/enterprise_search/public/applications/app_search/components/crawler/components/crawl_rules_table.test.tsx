@@ -176,10 +176,10 @@ describe('CrawlRulesTable', () => {
         rule: CrawlerRules.beginsWith,
       };
       expect(table.prop('deleteRoute')(crawlRule)).toEqual(
-        '/api/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/crawl_rules/1'
+        '/internal/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/crawl_rules/1'
       );
       expect(table.prop('updateRoute')(crawlRule)).toEqual(
-        '/api/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/crawl_rules/1'
+        '/internal/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/crawl_rules/1'
       );
     });
   });
