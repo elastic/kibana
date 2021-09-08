@@ -262,7 +262,7 @@ describe('UrlDrilldown', () => {
         indexPatterns: [{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }],
       }
     );
-    const data: any = {
+    const data = {
       data: [
         createPoint({ field: 'field0', value: 'value0' }),
         createPoint({ field: 'field1', value: 'value1' }),

@@ -12,8 +12,13 @@ import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
 import { Chart, Settings, Wordcloud, RenderChangeListener } from '@elastic/charts';
 import type { PaletteRegistry } from '../../../../charts/public';
-import type { IInterpreterRenderHandlers } from '../../../../expressions/public';
-import { getFormatService } from '../services';
+import {
+  Datatable,
+  DatatableColumn,
+  IInterpreterRenderHandlers,
+} from '../../../../expressions/public';
+import { getFormatService } from '../format_service';
+import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { TagcloudRendererConfig } from '../../common/types';
 
 import './tag_cloud.scss';
@@ -68,6 +73,17 @@ const ORIENTATIONS = {
   },
 };
 
+const getColumn = (
+  accessor: ExpressionValueVisDimension['accessor'],
+  columns: Datatable['columns']
+): DatatableColumn => {
+  if (typeof accessor === 'number') {
+    return columns[accessor];
+  }
+
+  return columns.filter(({ id }) => id === accessor.id)[0];
+};
+
 export const TagCloudChart = ({
   visData,
   visParams,
@@ -81,18 +97,18 @@ export const TagCloudChart = ({
   const bucketFormatter = bucket ? getFormatService().deserialize(bucket.format) : null;
 
   const tagCloudData = useMemo(() => {
-    const tagColumn = bucket ? visData.columns[bucket.accessor].id : -1;
-    const metricColumn = visData.columns[metric.accessor]?.id;
+    const tagColumn = bucket ? getColumn(bucket.accessor, visData.columns).id : null;
+    const metricColumn = getColumn(metric.accessor, visData.columns).id;
 
     const metrics = visData.rows.map((row) => row[metricColumn]);
-    const values = bucket ? visData.rows.map((row) => row[tagColumn]) : [];
+    const values = bucket && tagColumn !== null ? visData.rows.map((row) => row[tagColumn]) : [];
     const maxValue = Math.max(...metrics);
     const minValue = Math.min(...metrics);
 
     return visData.rows.map((row) => {
-      const tag = row[tagColumn] === undefined ? 'all' : row[tagColumn];
+      const tag = tagColumn === null ? 'all' : row[tagColumn];
       return {
-        text: (bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag) as string,
+        text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         weight:
           tag === 'all' || visData.rows.length <= 1
             ? 1
@@ -112,7 +128,9 @@ export const TagCloudChart = ({
   ]);
 
   const label = bucket
-    ? `${visData.columns[bucket.accessor].name} - ${visData.columns[metric.accessor].name}`
+    ? `${getColumn(bucket.accessor, visData.columns).name} - ${
+        getColumn(metric.accessor, visData.columns).name
+      }`
     : '';
 
   const onRenderChange = useCallback<RenderChangeListener>(
@@ -133,17 +151,17 @@ export const TagCloudChart = ({
   );
 
   const handleWordClick = useCallback(
-    (d) => {
+    (elements) => {
       if (!bucket) {
         return;
       }
-      const termsBucket = visData.columns[bucket.accessor];
-      const clickedValue = d[0][0].text;
+      const termsBucketId = getColumn(bucket.accessor, visData.columns).id;
+      const clickedValue = elements[0][0].text;
 
       const rowIndex = visData.rows.findIndex((row) => {
         const formattedValue = bucketFormatter
-          ? bucketFormatter.convert(row[termsBucket.id], 'text')
-          : row[termsBucket.id];
+          ? bucketFormatter.convert(row[termsBucketId], 'text')
+          : row[termsBucketId];
         return formattedValue === clickedValue;
       });
 

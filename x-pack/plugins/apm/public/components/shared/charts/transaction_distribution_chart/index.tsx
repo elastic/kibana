@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -30,31 +30,28 @@ import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
+import type {
+  FieldValuePair,
+  HistogramItem,
+} from '../../../../../common/search_strategies/types';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
-import { ChartContainer, ChartContainerProps } from '../chart_container';
-
-export type TransactionDistributionChartLoadingState = Pick<
-  ChartContainerProps,
-  'hasData' | 'status'
->;
-
-export type OnHasData = (hasData: boolean) => void;
+import { ChartContainer } from '../chart_container';
 
 interface TransactionDistributionChartProps {
-  field?: string;
-  value?: string;
+  fieldName?: FieldValuePair['fieldName'];
+  fieldValue?: FieldValuePair['fieldValue'];
+  hasData: boolean;
   histogram?: HistogramItem[];
   markerCurrentTransaction?: number;
   markerValue: number;
   markerPercentile: number;
   overallHistogram?: HistogramItem[];
   onChartSelection?: BrushEndListener;
-  onHasData?: OnHasData;
   selection?: [number, number];
+  status: FETCH_STATUS;
 }
 
 const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
@@ -103,16 +100,17 @@ const xAxisTickFormat: TickFormatter<number> = (d) =>
   getDurationFormatter(d, 0.9999)(d).formatted;
 
 export function TransactionDistributionChart({
-  field: fieldName,
-  value: fieldValue,
+  fieldName,
+  fieldValue,
+  hasData,
   histogram: originalHistogram,
   markerCurrentTransaction,
   markerValue,
   markerPercentile,
   overallHistogram,
   onChartSelection,
-  onHasData,
   selection,
+  status,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
@@ -163,34 +161,12 @@ export function TransactionDistributionChart({
         ]
       : undefined;
 
-  const chartLoadingState: TransactionDistributionChartLoadingState = useMemo(
-    () => ({
-      hasData:
-        Array.isArray(patchedOverallHistogram) &&
-        patchedOverallHistogram.length > 0,
-      status: Array.isArray(patchedOverallHistogram)
-        ? FETCH_STATUS.SUCCESS
-        : FETCH_STATUS.LOADING,
-    }),
-    [patchedOverallHistogram]
-  );
-
-  useEffect(() => {
-    if (onHasData) {
-      onHasData(chartLoadingState.hasData);
-    }
-  }, [chartLoadingState, onHasData]);
-
   return (
     <div
       data-test-subj="apmCorrelationsChart"
       style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
     >
-      <ChartContainer
-        height={250}
-        hasData={chartLoadingState.hasData}
-        status={chartLoadingState.status}
-      >
+      <ChartContainer height={250} hasData={hasData} status={status}>
         <Chart>
           <Settings
             rotation={0}

@@ -718,18 +718,8 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                         onChange={[Function]}
                       >
                         <EuiI18n
-                          defaults={
-                            Array [
-                              "Clear selected files",
-                              "files selected",
-                            ]
-                          }
-                          tokens={
-                            Array [
-                              "euiFilePicker.clearSelectedFiles",
-                              "euiFilePicker.filesSelected",
-                            ]
-                          }
+                          default="Clear selected files"
+                          token="euiFilePicker.clearSelectedFiles"
                         >
                           <div
                             className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
@@ -1440,18 +1430,8 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                         onChange={[Function]}
                       >
                         <EuiI18n
-                          defaults={
-                            Array [
-                              "Clear selected files",
-                              "files selected",
-                            ]
-                          }
-                          tokens={
-                            Array [
-                              "euiFilePicker.clearSelectedFiles",
-                              "euiFilePicker.filesSelected",
-                            ]
-                          }
+                          default="Clear selected files"
+                          token="euiFilePicker.clearSelectedFiles"
                         >
                           <div
                             className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
@@ -2162,18 +2142,8 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                         onChange={[Function]}
                       >
                         <EuiI18n
-                          defaults={
-                            Array [
-                              "Clear selected files",
-                              "files selected",
-                            ]
-                          }
-                          tokens={
-                            Array [
-                              "euiFilePicker.clearSelectedFiles",
-                              "euiFilePicker.filesSelected",
-                            ]
-                          }
+                          default="Clear selected files"
+                          token="euiFilePicker.clearSelectedFiles"
                         >
                           <div
                             className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
@@ -2884,18 +2854,8 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                         onChange={[Function]}
                       >
                         <EuiI18n
-                          defaults={
-                            Array [
-                              "Clear selected files",
-                              "files selected",
-                            ]
-                          }
-                          tokens={
-                            Array [
-                              "euiFilePicker.clearSelectedFiles",
-                              "euiFilePicker.filesSelected",
-                            ]
-                          }
+                          default="Clear selected files"
+                          token="euiFilePicker.clearSelectedFiles"
                         >
                           <div
                             className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
@@ -3606,18 +3566,8 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                         onChange={[Function]}
                       >
                         <EuiI18n
-                          defaults={
-                            Array [
-                              "Clear selected files",
-                              "files selected",
-                            ]
-                          }
-                          tokens={
-                            Array [
-                              "euiFilePicker.clearSelectedFiles",
-                              "euiFilePicker.filesSelected",
-                            ]
-                          }
+                          default="Clear selected files"
+                          token="euiFilePicker.clearSelectedFiles"
                         >
                           <div
                             className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"

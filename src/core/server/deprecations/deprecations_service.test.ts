@@ -110,6 +110,7 @@ describe('DeprecationsService', () => {
             "level": "critical",
             "message": "testMessage",
             "requireRestart": true,
+            "title": "testDomain has a deprecated setting",
           },
         ]
       `);

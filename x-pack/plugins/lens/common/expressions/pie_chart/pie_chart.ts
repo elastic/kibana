@@ -7,11 +7,12 @@
 
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+
 import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
 import type { LensMultiTable } from '../../types';
 import type { PieExpressionProps, PieExpressionArgs } from './types';
 
-export interface PieRender {
+interface PieRender {
   type: 'render';
   as: 'lens_pie_renderer';
   value: PieExpressionProps;
