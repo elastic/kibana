@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { isPlainObject } from 'lodash';
 import { IndexPattern } from '../../../../../../../../data/public';
 
 export type SortPairObj = Record<string, string>;
@@ -30,7 +30,7 @@ function createSortObject(
   ) {
     const [field, direction] = sortPair as SortPairArr;
     return { [field]: direction };
-  } else if (_.isPlainObject(sortPair) && isSortable(Object.keys(sortPair)[0], indexPattern)) {
+  } else if (isPlainObject(sortPair) && isSortable(Object.keys(sortPair)[0], indexPattern)) {
     return sortPair as SortPairObj;
   }
 }
