@@ -548,10 +548,6 @@ The maximum geoHash precision displayed in tile maps. 7 is high, 10 is very high
 and 12 is the maximum. For more information, refer to
 {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Cell dimensions at the equator].
 
-[[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
-**The legacy XY charts are deprecated and will not be supported as of 7.16.**
-The visualize editor uses a new XY charts library with improved performance, color palettes, fill capacity, and more. Enable this option if you prefer to use the legacy charts library.
-
 [[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
 The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use to the legacy charts library.
 
