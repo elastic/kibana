@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
-import { cryptoFactory } from '../../../lib';
-import { CreateJobFn, CreateJobFnFactory, ReportingRequestHandlerContext } from '../../../types';
+import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPDF, JobParamsPDFLegacy, TaskPayloadPDF } from '../types';
 import { compatibilityShim } from './compatibility_shim';
@@ -18,24 +16,15 @@ import { compatibilityShim } from './compatibility_shim';
  */
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsPDF | JobParamsPDFLegacy, TaskPayloadPDF>
-> = function createJobFactoryFn(reporting, logger) {
-  const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
-
+> = function createJobFactoryFn(_reporting, logger) {
   return compatibilityShim(async function createJobFn(
-    { relativeUrls, ...jobParams }: JobParamsPDF, // relativeUrls does not belong in the payload
-    _context: ReportingRequestHandlerContext,
-    req: KibanaRequest
+    { relativeUrls, ...jobParams }: JobParamsPDF // relativeUrls does not belong in the payload of PDFV1
   ) {
     validateUrls(relativeUrls);
-
-    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
 
     // return the payload
     return {
       ...jobParams,
-      headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(req, logger),
       forceNow: new Date().toISOString(),
       objects: relativeUrls.map((u) => ({ relativeUrl: u })),
     };
