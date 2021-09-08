@@ -68,11 +68,13 @@ export interface UsageStats {
   'notifications:lifetime:banner': number;
   'notifications:lifetime:info': number;
   'notifications:lifetime:error': number;
+  'dataVisualizerTable:showPreview': boolean;
   'doc_table:highlight': boolean;
   'discover:searchOnPageLoad': boolean;
   // eslint-disable-next-line @typescript-eslint/naming-convention
   'doc_table:hideTimeColumn': boolean;
   'discover:sampleSize': number;
+  'discover:aggregatedView': boolean;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];

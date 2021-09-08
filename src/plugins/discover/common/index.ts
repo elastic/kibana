@@ -22,4 +22,4 @@ export const MAX_DOC_FIELDS_DISPLAYED = 'discover:maxDocFieldsDisplayed';
 export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
 export const SEARCH_EMBEDDABLE_TYPE = 'search';
 export const AGGREGATED_VIEW_SETTING = 'discover:aggregatedView';
-export const AGGREGATED_VIEW_PREVIEW = 'data_visualizer:showAggregatedPreview';
+export const AGGREGATED_VIEW_PREVIEW = 'dataVisualizerTable:showPreview';

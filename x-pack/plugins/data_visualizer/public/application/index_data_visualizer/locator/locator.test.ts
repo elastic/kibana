@@ -52,8 +52,7 @@ describe('Index data visualizer locator', () => {
     expect(location).toMatchObject({
       app: 'ml',
       path:
-        "/jobs/new_job/datavisualizer?_a=(DATA_VISUALIZER_INDEX_VIEWER:(visibleFieldNames:!('@timestamp',responsetime),visibleFieldTypes:!(number)))&_g=()",
-      state: {},
+        "/jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_a=(DATA_VISUALIZER_INDEX_VIEWER:(visibleFieldNames:!('@timestamp',responsetime),visibleFieldTypes:!(number)))&_g=()",
     });
   });
 

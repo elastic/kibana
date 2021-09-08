@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getBreakpoint } from '@elastic/eui';
 import { FileBasedFieldVisConfig } from './types';
 
 export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
@@ -35,4 +36,54 @@ export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
     trueCount,
     falseCount,
   };
+};
+
+export const calculateTableColumnsDimensions = (width: number, showDistributions: boolean) => {
+  const breakPoint = getBreakpoint(width);
+  switch (breakPoint) {
+    case 'xs':
+    case 's':
+      return {
+        expander: '25px',
+        type: '40px',
+        docCount: '110px',
+        distinctValues: '75px',
+        distributions: showDistributions ? '120px' : '50px',
+        showIcons: false,
+        breakPoint,
+      };
+
+    case 'm':
+    case 'l':
+      return {
+        expander: '25px',
+        type: '40px',
+        docCount: '110px',
+        distinctValues: '75px',
+        distributions: showDistributions ? '120px' : '50px',
+        showIcons: false,
+        breakPoint,
+      };
+
+    default:
+      return {
+        expander: '40px',
+        type: '75px',
+        docCount: '175px',
+        distinctValues: '175px',
+        distributions: '150px',
+        showIcons: true,
+        breakPoint: 'xl',
+      };
+  }
+};
+
+export const getKibanaFieldType = (fieldType: string) => {
+  switch (fieldType) {
+    case 'text':
+    case 'keyword':
+      return 'string';
+    default:
+      return fieldType;
+  }
 };

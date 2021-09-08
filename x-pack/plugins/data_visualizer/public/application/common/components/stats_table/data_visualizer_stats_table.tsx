@@ -16,7 +16,6 @@ import {
   EuiInMemoryTable,
   EuiText,
   EuiToolTip,
-  getBreakpoint,
   HorizontalAlignment,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
@@ -39,6 +38,7 @@ import {
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
 import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
+import { calculateTableColumnsDimensions, getKibanaFieldType } from './utils';
 
 const FIELD_NAME = 'fieldName';
 
@@ -56,45 +56,6 @@ interface DataVisualizerTableProps<T> {
   width: number;
 }
 
-export const calculateTableColumnsDimensions = (width: number, showDistributions: boolean) => {
-  const breakPoint = getBreakpoint(width);
-  switch (breakPoint) {
-    case 'xs':
-    case 's':
-      return {
-        expander: '25px',
-        type: '40px',
-        docCount: '110px',
-        distinctValues: '75px',
-        distributions: showDistributions ? '120px' : '50px',
-        showIcons: false,
-        breakPoint,
-      };
-
-    case 'm':
-    case 'l':
-      return {
-        expander: '25px',
-        type: '40px',
-        docCount: '110px',
-        distinctValues: '75px',
-        distributions: showDistributions ? '120px' : '50px',
-        showIcons: false,
-        breakPoint,
-      };
-
-    default:
-      return {
-        expander: '40px',
-        type: '75px',
-        docCount: '175px',
-        distinctValues: '175px',
-        distributions: '150px',
-        showIcons: true,
-        breakPoint: 'xl',
-      };
-  }
-};
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   items,
   pageState,
@@ -205,8 +166,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           defaultMessage: 'Type',
         }),
         render: (fieldType: JobFieldType) => {
-          // @todo: fix scripted
-          return <FieldIcon type={fieldType} label={fieldType} scripted={false} />;
+          return <FieldIcon type={getKibanaFieldType(fieldType)} label={fieldType} />;
         },
         width: dimensions.type,
         sortable: true,

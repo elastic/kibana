@@ -50,8 +50,6 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   number_range: { iconType: 'tokenNumber' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   string: { iconType: 'tokenString' },
-  text: { iconType: 'tokenString' },
-  keyword: { iconType: 'tokenString' },
   nested: { iconType: 'tokenNested' },
 };
 

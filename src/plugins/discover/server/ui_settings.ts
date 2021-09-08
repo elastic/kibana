@@ -186,7 +186,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     schema: schema.boolean(),
     metric: {
       type: METRIC_TYPE.CLICK,
-      name: 'discover:useAggregatedView',
+      name: 'discover:aggregatedView',
     },
   },
   [AGGREGATED_VIEW_PREVIEW]: {
@@ -201,7 +201,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     schema: schema.boolean(),
     metric: {
       type: METRIC_TYPE.CLICK,
-      name: 'discover:showAggregatedPreview',
+      name: 'dataVisualizerTable:showPreview',
     },
   },
 
