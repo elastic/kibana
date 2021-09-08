@@ -17,6 +17,7 @@ import {
   EuiBetaBadge,
   EuiBadge,
   EuiToolTip,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -198,7 +199,6 @@ export function FailedTransactionsCorrelations({
       : [];
     return [
       {
-        width: '80px',
         field: 'normalizedScore',
         name: (
           <>
@@ -210,7 +210,8 @@ export function FailedTransactionsCorrelations({
             )}
           </>
         ),
-        render: (normalizedScore: number) => {
+        align: RIGHT_ALIGNMENT,
+        render: (_, { normalizedScore }) => {
           return (
             <>
               <ImpactBar size="m" value={normalizedScore * 100} />

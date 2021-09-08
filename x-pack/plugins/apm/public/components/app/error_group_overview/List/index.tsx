@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiIconTip, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiIconTip,
+  EuiToolTip,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -150,7 +155,7 @@ function ErrorGroupList({ items, serviceName }: Props) {
         name: '',
         field: 'handled',
         sortable: false,
-        align: 'right',
+        align: RIGHT_ALIGNMENT,
         render: (_, { handled }) =>
           handled === false && (
             <EuiBadge color="warning">
@@ -181,7 +186,7 @@ function ErrorGroupList({ items, serviceName }: Props) {
             defaultMessage: 'Latest occurrence',
           }
         ),
-        align: 'right',
+        align: RIGHT_ALIGNMENT,
         render: (_, { latestOccurrenceAt }) =>
           latestOccurrenceAt ? (
             <TimestampTooltip time={latestOccurrenceAt} timeUnit="minutes" />
