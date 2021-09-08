@@ -240,6 +240,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
 
+      await PageObjects.dashboard.saveDashboard('My Wonderful Heatmap dashboard');
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await listingTable.searchAndExpectItemsCount(
+        'dashboard',
+        'My Wonderful Heatmap dashboard',
+        1
+      );
+
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
