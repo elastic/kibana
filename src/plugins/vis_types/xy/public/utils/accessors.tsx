@@ -13,6 +13,7 @@ import { Aspect } from '../types';
 
 export const COMPLEX_X_ACCESSOR = '__customXAccessor__';
 export const COMPLEX_SPLIT_ACCESSOR = '__complexSplitAccessor__';
+const SHARD_DELAY = 'shard_delay';
 
 export const getXAccessor = (aspect: Aspect): Accessor | AccessorFn => {
   return (
@@ -39,7 +40,7 @@ export const getComplexAccessor = (fieldName: string, isComplex: boolean = false
   aspect: Aspect,
   index?: number
 ): Accessor | AccessorFn | undefined => {
-  if (!aspect.accessor) {
+  if (!aspect.accessor || aspect.aggType === SHARD_DELAY) {
     return;
   }
 

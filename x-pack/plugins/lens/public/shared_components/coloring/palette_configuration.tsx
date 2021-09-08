@@ -75,11 +75,14 @@ export function CustomizablePalette({
   showContinuity = true,
 }: {
   palettes: PaletteRegistry;
-  activePalette: PaletteOutput<CustomPaletteParams>;
+  activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
-  dataBounds: { min: number; max: number };
+  dataBounds?: { min: number; max: number };
   showContinuity?: boolean;
 }) {
+  if (!dataBounds || !activePalette) {
+    return null;
+  }
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
   const colorStopsToShow = roundStopValues(
@@ -106,6 +109,7 @@ export function CustomizablePalette({
                 ...activePalette.params,
                 name: newPalette.name,
                 colorStops: undefined,
+                reverse: false, // restore the reverse flag
               };
 
               const newColorStops = getColorStops(palettes, [], activePalette, dataBounds);
@@ -317,28 +321,20 @@ export function CustomizablePalette({
                 className="lnsPalettePanel__reverseButton"
                 data-test-subj="lnsPalettePanel_dynamicColoring_reverse"
                 onClick={() => {
-                  const params: CustomPaletteParams = { reverse: !activePalette.params?.reverse };
-                  if (isCurrentPaletteCustom) {
-                    params.colorStops = reversePalette(colorStopsToShow);
-                    params.stops = getPaletteStops(
-                      palettes,
-                      {
-                        ...(activePalette?.params || {}),
-                        colorStops: params.colorStops,
-                      },
-                      { dataBounds }
-                    );
-                  } else {
-                    params.stops = reversePalette(
-                      activePalette?.params?.stops ||
-                        getPaletteStops(
-                          palettes,
-                          { ...activePalette.params, ...params },
-                          { prevPalette: activePalette.name, dataBounds }
-                        )
-                    );
-                  }
-                  setPalette(mergePaletteParams(activePalette, params));
+                  // when reversing a palette, the palette is automatically transitioned to a custom palette
+                  const newParams = getSwitchToCustomParams(
+                    palettes,
+                    activePalette,
+                    {
+                      colorStops: reversePalette(colorStopsToShow),
+                      steps: activePalette.params?.steps || DEFAULT_COLOR_STEPS,
+                      reverse: !activePalette.params?.reverse, // Store the reverse state
+                      rangeMin: colorStopsToShow[0]?.stop,
+                      rangeMax: colorStopsToShow[colorStopsToShow.length - 1]?.stop,
+                    },
+                    dataBounds
+                  );
+                  setPalette(newParams);
                 }}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
