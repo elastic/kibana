@@ -187,6 +187,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await testSubjects.exists('lens-dimensionTabs-formula')).to.eql(true);
       // Static value tab should not be visible
       expect(await testSubjects.exists('lens-dimensionTabs-static_value')).to.eql(false);
+
+      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('should be able to add very long labels and still be able to remove a dimension', async () => {
