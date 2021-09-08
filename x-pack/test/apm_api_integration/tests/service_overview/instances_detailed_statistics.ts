@@ -14,12 +14,12 @@ import { APIReturnType } from '../../../../plugins/apm/public/services/rest/crea
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
-import { createSupertestClient } from '../../common/apm_api_supertest';
+import { createApmApiClient } from '../../common/apm_api_supertest';
 import { getServiceNodeIds } from './get_service_node_ids';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('legacySupertestAsApmReadUser');
-  const apmApiSupertest = createSupertestClient(supertest);
+  const apmApiSupertest = createApmApiClient(supertest);
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];

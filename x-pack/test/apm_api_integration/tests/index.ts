@@ -157,6 +157,9 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     describe('traces/top_traces', function () {
       loadTestFile(require.resolve('./traces/top_traces'));
     });
+    describe('/api/apm/traces/{traceId}', function () {
+      loadTestFile(require.resolve('./traces/trace_by_id'));
+    });
 
     // transactions
     describe('transactions/breakdown', function () {
