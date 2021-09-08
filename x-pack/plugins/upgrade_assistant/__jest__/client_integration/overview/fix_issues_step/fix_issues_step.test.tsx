@@ -44,6 +44,37 @@ describe('Overview - Fix deprecation issues step', () => {
     server.restore();
   });
 
+  describe('Step status', () => {
+    test(`It's complete when there are no critical deprecations`, async () => {
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsEmpty);
+
+      await act(async () => {
+        const deprecationService = deprecationsServiceMock.createStartContract();
+        deprecationService.getAllDeprecations = jest.fn().mockRejectedValue([]);
+
+        testBed = await setupOverviewPage({
+          services: {
+            core: {
+              deprecations: deprecationService,
+            },
+          },
+        });
+      });
+
+      const { exists, component } = testBed;
+
+      component.update();
+
+      expect(exists(`fixIssuesStep-complete`)).toBe(true);
+    });
+
+    test(`It's incomplete when there are critical deprecations`, async () => {
+      const { exists } = testBed;
+
+      expect(exists(`fixIssuesStep-incomplete`)).toBe(true);
+    });
+  });
+
   describe('ES deprecations', () => {
     test('Shows deprecation warning and critical counts', () => {
       const { exists, find } = testBed;

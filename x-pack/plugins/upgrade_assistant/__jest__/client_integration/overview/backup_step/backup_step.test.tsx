@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-
-import { setupEnvironment } from '../../helpers';
+import { CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS } from '../../../../common/constants';
+import { setupEnvironment, advanceTime } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Backup Step', () => {
@@ -33,6 +32,11 @@ describe('Overview - Backup Step', () => {
       const { exists, find } = testBed;
       expect(exists('snapshotRestoreLink')).toBe(true);
       expect(find('snapshotRestoreLink').props().href).toBe('snapshotAndRestoreUrl');
+    });
+
+    test('renders step as incomplete ', () => {
+      const { exists } = testBed;
+      expect(exists('backupStep-incomplete')).toBe(true);
     });
   });
 
@@ -104,6 +108,11 @@ describe('Overview - Backup Step', () => {
           expect(exists('cloudSnapshotsLink')).toBe(true);
           expect(find('dataBackedUpStatus').text()).toContain('Last snapshot created on');
         });
+
+        test('renders step as complete ', () => {
+          const { exists } = testBed;
+          expect(exists('backupStep-complete')).toBe(true);
+        });
       });
 
       describe(`when data isn't backed up`, () => {
@@ -121,23 +130,46 @@ describe('Overview - Backup Step', () => {
           expect(exists('dataNotBackedUpStatus')).toBe(true);
           expect(exists('cloudSnapshotsLink')).toBe(true);
         });
+
+        test('renders step as incomplete ', () => {
+          const { exists } = testBed;
+          expect(exists('backupStep-incomplete')).toBe(true);
+        });
       });
+    });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/111255
-      test.skip('polls for new status', async () => {
-        // The behavior we're testing involves state changes over time, so we need finer control over
-        // timing.
+    describe('poll for new status', () => {
+      beforeEach(async () => {
         jest.useFakeTimers();
-        testBed = await setupCloudOverviewPage();
-        expect(server.requests.length).toBe(4);
 
-        // Resolve the polling timeout.
-        await act(async () => {
-          jest.runAllTimers();
+        // First request will succeed.
+        httpRequestsMockHelpers.setLoadCloudBackupStatusResponse({
+          isBackedUp: true,
+          lastBackupTime: '2021-08-25T19:59:59.863Z',
         });
 
-        expect(server.requests.length).toBe(5);
+        testBed = await setupCloudOverviewPage();
+      });
+
+      afterEach(() => {
         jest.useRealTimers();
+      });
+
+      test('renders step as incomplete when a success state is followed by an error state', async () => {
+        const { exists } = testBed;
+        expect(exists('backupStep-complete')).toBe(true);
+
+        // Second request will error.
+        httpRequestsMockHelpers.setLoadCloudBackupStatusResponse(undefined, {
+          statusCode: 400,
+          message: 'error',
+        });
+
+        // Resolve the polling timeout.
+        await advanceTime(CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS);
+        testBed.component.update();
+
+        expect(exists('backupStep-incomplete')).toBe(true);
       });
     });
   });

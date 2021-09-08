@@ -33,14 +33,49 @@ describe('Overview - Fix deprecation logs step', () => {
     server.restore();
   });
 
+  describe('Step status', () => {
+    test(`It's complete when there are no deprecation logs since last checkpoint`, async () => {
+      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
+
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+        count: 0,
+      });
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { exists, component } = testBed;
+
+      component.update();
+
+      expect(exists(`fixLogsStep-complete`)).toBe(true);
+    });
+
+    test(`It's incomplete when there are deprecation logs since last checkpoint`, async () => {
+      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
+
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+        count: 5,
+      });
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { exists, component } = testBed;
+
+      component.update();
+
+      expect(exists(`fixLogsStep-incomplete`)).toBe(true);
+    });
+  });
+
   describe('Step 1 - Toggle log writing and collecting', () => {
     test('toggles deprecation logging', async () => {
       const { find, actions } = testBed;
 
-      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse({
-        isDeprecationLogIndexingEnabled: false,
-        isDeprecationLoggingEnabled: false,
-      });
+      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(false));
 
       expect(find('deprecationLoggingToggle').props()['aria-checked']).toBe(true);
 

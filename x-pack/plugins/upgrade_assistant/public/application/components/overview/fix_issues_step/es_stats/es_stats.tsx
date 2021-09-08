@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { EuiStat, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
@@ -35,7 +35,11 @@ const i18nTexts = {
   ),
 };
 
-export const ESDeprecationStats: FunctionComponent = () => {
+interface Props {
+  setIsFixed: (isFixed: boolean) => void;
+}
+
+export const ESDeprecationStats: FunctionComponent<Props> = ({ setIsFixed }) => {
   const history = useHistory();
   const {
     services: { api },
@@ -43,10 +47,21 @@ export const ESDeprecationStats: FunctionComponent = () => {
 
   const { data: esDeprecations, isLoading, error } = api.useLoadEsDeprecations();
 
-  const warningDeprecations =
-    esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical === false) || [];
-  const criticalDeprecations =
-    esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical) || [];
+  const warningDeprecations = useMemo(
+    () =>
+      esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical === false) || [],
+    [esDeprecations]
+  );
+  const criticalDeprecations = useMemo(
+    () => esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical) || [],
+    [esDeprecations]
+  );
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      setIsFixed(criticalDeprecations.length === 0);
+    }
+  }, [setIsFixed, criticalDeprecations, isLoading, error]);
 
   const hasWarnings = warningDeprecations.length > 0;
   const hasCritical = criticalDeprecations.length > 0;
