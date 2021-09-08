@@ -39,7 +39,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"histogram\" | \"heatmap\" | \"metric\" | \"area\" | \"line\" | \"horizontal_bar\" | \"pie\" | \"point_series\" | \"gauge\" | \"goal\""
+              "\"goal\" | \"histogram\" | \"heatmap\" | \"metric\" | \"area\" | \"line\" | \"horizontal_bar\" | \"pie\" | \"point_series\" | \"gauge\""
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
             "deprecated": false
@@ -338,7 +338,7 @@
         "label": "VislibChartType",
         "description": [],
         "signature": [
-          "\"histogram\" | \"heatmap\" | \"metric\" | \"area\" | \"line\" | \"horizontal_bar\" | \"pie\" | \"point_series\" | \"gauge\" | \"goal\""
+          "\"goal\" | \"histogram\" | \"heatmap\" | \"metric\" | \"area\" | \"line\" | \"horizontal_bar\" | \"pie\" | \"point_series\" | \"gauge\""
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,

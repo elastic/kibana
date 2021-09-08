@@ -308,7 +308,7 @@ describe('AddSourceLogic', () => {
         const { serviceName, indexPermissions, serviceType } = response;
         http.get.mockReturnValue(Promise.resolve(response));
         AddSourceLogic.actions.saveSourceParams(queryString, params, true);
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/sources/create', {
           query: {
             ...params,
             kibana_host: '',
@@ -347,7 +347,7 @@ describe('AddSourceLogic', () => {
           })
         );
         AddSourceLogic.actions.saveSourceParams(queryString, params, true);
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/sources/create', {
           query: {
             ...params,
             kibana_host: '',
@@ -407,7 +407,7 @@ describe('AddSourceLogic', () => {
 
           AddSourceLogic.actions.getSourceConfigData('github');
           expect(http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/settings/connectors/github'
+            '/internal/workplace_search/org/settings/connectors/github'
           );
           await nextTick();
           expect(setSourceConfigDataSpy).toHaveBeenCalledWith(sourceConfigData);
@@ -444,8 +444,10 @@ describe('AddSourceLogic', () => {
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
           expect(http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/github/prepare',
-            { query }
+            '/internal/workplace_search/org/sources/github/prepare',
+            {
+              query,
+            }
           );
           await nextTick();
           expect(setSourceConnectDataSpy).toHaveBeenCalledWith(sourceConnectData);
@@ -465,8 +467,10 @@ describe('AddSourceLogic', () => {
           };
 
           expect(http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/github/prepare',
-            { query }
+            '/internal/workplace_search/org/sources/github/prepare',
+            {
+              query,
+            }
           );
         });
 
@@ -491,7 +495,7 @@ describe('AddSourceLogic', () => {
           AddSourceLogic.actions.getSourceReConnectData('github');
 
           expect(http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/github/reauth_prepare',
+            '/internal/workplace_search/org/sources/github/reauth_prepare',
             {
               query: {
                 kibana_host: '',
@@ -523,7 +527,7 @@ describe('AddSourceLogic', () => {
 
           AddSourceLogic.actions.getPreContentSourceConfigData();
 
-          expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/pre_sources/123');
+          expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/pre_sources/123');
           await nextTick();
           expect(setPreContentSourceConfigDataSpy).toHaveBeenCalledWith(config);
         });
@@ -568,7 +572,7 @@ describe('AddSourceLogic', () => {
           expect(
             http.put
           ).toHaveBeenCalledWith(
-            `/api/workplace_search/org/settings/connectors/${sourceConfigData.serviceType}`,
+            `/internal/workplace_search/org/settings/connectors/${sourceConfigData.serviceType}`,
             { body: JSON.stringify(params) }
           );
 
@@ -591,9 +595,12 @@ describe('AddSourceLogic', () => {
             consumer_key: sourceConfigData.configuredFields?.consumerKey,
           };
 
-          expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/settings/connectors', {
-            body: JSON.stringify(createParams),
-          });
+          expect(http.post).toHaveBeenCalledWith(
+            '/internal/workplace_search/org/settings/connectors',
+            {
+              body: JSON.stringify(createParams),
+            }
+          );
         });
 
         it('handles error', async () => {
@@ -644,7 +651,7 @@ describe('AddSourceLogic', () => {
 
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
-          expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/create_source', {
+          expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/org/create_source', {
             body: JSON.stringify({ ...params }),
           });
           await nextTick();
@@ -677,16 +684,19 @@ describe('AddSourceLogic', () => {
 
         AddSourceLogic.actions.getSourceConnectData('github', jest.fn());
 
-        expect(
-          http.get
-        ).toHaveBeenCalledWith('/api/workplace_search/account/sources/github/prepare', { query });
+        expect(http.get).toHaveBeenCalledWith(
+          '/internal/workplace_search/account/sources/github/prepare',
+          {
+            query,
+          }
+        );
       });
 
       it('getSourceReConnectData', () => {
         AddSourceLogic.actions.getSourceReConnectData('123');
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/reauth_prepare',
+          '/internal/workplace_search/account/sources/123/reauth_prepare',
           {
             query: {
               kibana_host: '',
@@ -699,13 +709,13 @@ describe('AddSourceLogic', () => {
         mount({ preContentSourceId: '123' });
         AddSourceLogic.actions.getPreContentSourceConfigData();
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/pre_sources/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/pre_sources/123');
       });
 
       it('createContentSource', () => {
         AddSourceLogic.actions.createContentSource('github', jest.fn());
 
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/account/create_source', {
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/account/create_source', {
           body: JSON.stringify({ service_type: 'github' }),
         });
       });

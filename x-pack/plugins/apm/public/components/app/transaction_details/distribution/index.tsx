@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BrushEndListener, XYBrushArea } from '@elastic/charts';
 import {
   EuiBadge,
@@ -18,20 +18,24 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useTransactionDistributionFetcher } from '../../../../hooks/use_transaction_distribution_fetcher';
 import {
-  OnHasData,
-  TransactionDistributionChart,
-} from '../../../shared/charts/transaction_distribution_chart';
-import { useUiTracker } from '../../../../../../observability/public';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { isErrorMessage } from '../../correlations/utils/is_error_message';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+  APM_SEARCH_STRATEGIES,
+  DEFAULT_PERCENTILE_THRESHOLD,
+} from '../../../../../common/search_strategies/constants';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
-const DEFAULT_PERCENTILE_THRESHOLD = 95;
+import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
+import { useUiTracker } from '../../../../../../observability/public';
+import { isErrorMessage } from '../../correlations/utils/is_error_message';
+import { getOverallHistogram } from '../../correlations/utils/get_overall_histogram';
+
+import type { TabContentProps } from '../types';
+import { useWaterfallFetcher } from '../use_waterfall_fetcher';
+import { WaterfallWithSummary } from '../waterfall_with_summary';
+
 // Enforce min height so it's consistent across all tabs on the same level
 // to prevent "flickering" behavior
 const MIN_TAB_TITLE_HEIGHT = 56;
@@ -51,45 +55,28 @@ export function getFormattedSelection(selection: Selection): string {
 }
 
 interface TransactionDistributionProps {
-  markerCurrentTransaction?: number;
   onChartSelection: BrushEndListener;
   onClearSelection: () => void;
-  onHasData: OnHasData;
   selection?: Selection;
+  traceSamples: TabContentProps['traceSamples'];
 }
 
 export function TransactionDistribution({
-  markerCurrentTransaction,
   onChartSelection,
   onClearSelection,
-  onHasData,
   selection,
+  traceSamples,
 }: TransactionDistributionProps) {
   const {
     core: { notifications },
   } = useApmPluginContext();
 
-  const { serviceName, transactionType } = useApmServiceContext();
-
-  const {
-    query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/transactions/view');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
   const { urlParams } = useUrlParams();
 
-  const { transactionName } = urlParams;
+  const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
 
-  const [showSelection, setShowSelection] = useState(false);
-
-  const onTransactionDistributionHasData: OnHasData = useCallback(
-    (hasData) => {
-      setShowSelection(hasData);
-      onHasData(hasData);
-    },
-    [onHasData]
-  );
+  const markerCurrentTransaction =
+    waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
 
   const emptySelectionText = i18n.translate(
     'xpack.apm.transactionDetails.emptySelectionText',
@@ -105,43 +92,20 @@ export function TransactionDistribution({
     }
   );
 
-  const {
-    error,
-    percentileThresholdValue,
-    startFetch,
-    cancelFetch,
-    transactionDistribution,
-  } = useTransactionDistributionFetcher();
-
-  const startFetchHandler = useCallback(() => {
-    startFetch({
-      environment,
-      kuery,
-      serviceName,
-      transactionName,
-      transactionType,
-      start,
-      end,
+  const { progress, response } = useSearchStrategy(
+    APM_SEARCH_STRATEGIES.APM_LATENCY_CORRELATIONS,
+    {
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-    });
-  }, [
-    startFetch,
-    environment,
-    serviceName,
-    transactionName,
-    transactionType,
-    kuery,
-    start,
-    end,
-  ]);
+      analyzeCorrelations: false,
+    }
+  );
+  const { overallHistogram, hasData, status } = getOverallHistogram(
+    response,
+    progress.isRunning
+  );
 
   useEffect(() => {
-    startFetchHandler();
-    return cancelFetch;
-  }, [cancelFetch, startFetchHandler]);
-
-  useEffect(() => {
-    if (isErrorMessage(error)) {
+    if (isErrorMessage(progress.error)) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.transactionDetails.distribution.errorTitle',
@@ -149,10 +113,10 @@ export function TransactionDistribution({
             defaultMessage: 'An error occurred fetching the distribution',
           }
         ),
-        text: error.toString(),
+        text: progress.error.toString(),
       });
     }
-  }, [error, notifications.toasts]);
+  }, [progress.error, notifications.toasts]);
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
@@ -183,7 +147,7 @@ export function TransactionDistribution({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-        {showSelection && !selection && (
+        {hasData && !selection && (
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               <EuiFlexItem
@@ -201,7 +165,7 @@ export function TransactionDistribution({
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
-        {showSelection && selection && (
+        {hasData && selection && (
           <EuiFlexItem grow={false}>
             <EuiBadge
               iconType="cross"
@@ -231,12 +195,26 @@ export function TransactionDistribution({
       <TransactionDistributionChart
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-        markerValue={percentileThresholdValue ?? 0}
-        overallHistogram={transactionDistribution}
+        markerValue={response.percentileThresholdValue ?? 0}
+        overallHistogram={overallHistogram}
         onChartSelection={onTrackedChartSelection}
-        onHasData={onTransactionDistributionHasData}
+        hasData={hasData}
         selection={selection}
+        status={status}
       />
+
+      {hasData && (
+        <>
+          <EuiSpacer size="s" />
+
+          <WaterfallWithSummary
+            urlParams={urlParams}
+            waterfall={waterfall}
+            isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+            traceSamples={traceSamples}
+          />
+        </>
+      )}
     </div>
   );
 }

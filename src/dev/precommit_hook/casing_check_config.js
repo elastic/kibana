@@ -69,7 +69,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/BUILD.bazel',
 
   // Buildkite
-  '.buildkite/hooks/*',
+  '.buildkite/*',
 ];
 
 /**

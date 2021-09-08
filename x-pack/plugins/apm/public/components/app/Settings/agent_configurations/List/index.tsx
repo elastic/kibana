@@ -12,6 +12,7 @@ import {
   EuiEmptyPrompt,
   EuiHealth,
   EuiToolTip,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -180,7 +181,7 @@ export function AgentConfigurationList({
       render: (_, { service }) => getOptionLabel(service.environment),
     },
     {
-      align: 'right',
+      align: RIGHT_ALIGNMENT,
       field: '@timestamp',
       name: i18n.translate(
         'xpack.apm.agentConfig.configTable.lastUpdatedColumnLabel',

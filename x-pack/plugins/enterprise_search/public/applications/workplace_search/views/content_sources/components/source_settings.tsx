@@ -119,8 +119,10 @@ export const SourceSettings: React.FC = () => {
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
 
   const diagnosticsPath = isOrganization
-    ? http.basePath.prepend(`/api/workplace_search/org/sources/${id}/download_diagnostics`)
-    : http.basePath.prepend(`/api/workplace_search/account/sources/${id}/download_diagnostics`);
+    ? http.basePath.prepend(`/internal/workplace_search/org/sources/${id}/download_diagnostics`)
+    : http.basePath.prepend(
+        `/internal/workplace_search/account/sources/${id}/download_diagnostics`
+      );
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 

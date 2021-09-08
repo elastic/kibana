@@ -3681,7 +3681,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.options",
+                "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -3691,7 +3691,7 @@
                 "children": [
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.options.path",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.path",
                     "type": "string",
                     "tags": [],
                     "label": "path",
@@ -3704,7 +3704,7 @@
                   },
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.options.openInNewTab",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.openInNewTab",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "openInNewTab",
@@ -3717,7 +3717,7 @@
                   },
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.options.state",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.$2.state",
                     "type": "Object",
                     "tags": [],
                     "label": "state",
@@ -3778,7 +3778,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.options",
+                "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -3788,7 +3788,7 @@
                 "children": [
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.options.path",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.path",
                     "type": "string",
                     "tags": [],
                     "label": "path",
@@ -3801,7 +3801,7 @@
                   },
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.options.state",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.state",
                     "type": "Object",
                     "tags": [],
                     "label": "state",
@@ -5041,7 +5041,7 @@
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.openAddPanelFlyout.$1.options",
+            "id": "def-public.openAddPanelFlyout.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -5051,7 +5051,7 @@
             "children": [
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.embeddable",
+                "id": "def-public.openAddPanelFlyout.$1.embeddable",
                 "type": "Object",
                 "tags": [],
                 "label": "embeddable",
@@ -5087,7 +5087,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.getFactory",
+                "id": "def-public.openAddPanelFlyout.$1.getFactory",
                 "type": "Function",
                 "tags": [],
                 "label": "getFactory",
@@ -5159,7 +5159,7 @@
                 "children": [
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.embeddableFactoryId",
+                    "id": "def-public.openAddPanelFlyout.$1.getFactory.$1",
                     "type": "string",
                     "tags": [],
                     "label": "embeddableFactoryId",
@@ -5171,7 +5171,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.getAllFactories",
+                "id": "def-public.openAddPanelFlyout.$1.getAllFactories",
                 "type": "Function",
                 "tags": [],
                 "label": "getAllFactories",
@@ -5236,7 +5236,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.overlays",
+                "id": "def-public.openAddPanelFlyout.$1.overlays",
                 "type": "Object",
                 "tags": [],
                 "label": "overlays",
@@ -5255,7 +5255,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.notifications",
+                "id": "def-public.openAddPanelFlyout.$1.notifications",
                 "type": "Object",
                 "tags": [],
                 "label": "notifications",
@@ -5274,7 +5274,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.SavedObjectFinder",
+                "id": "def-public.openAddPanelFlyout.$1.SavedObjectFinder",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "SavedObjectFinder",
@@ -5287,7 +5287,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.showCreateNewMenu",
+                "id": "def-public.openAddPanelFlyout.$1.showCreateNewMenu",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "showCreateNewMenu",
@@ -5300,7 +5300,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.options.reportUiCounter",
+                "id": "def-public.openAddPanelFlyout.$1.reportUiCounter",
                 "type": "Function",
                 "tags": [],
                 "label": "reportUiCounter",
@@ -5711,7 +5711,7 @@
             "children": [
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.props",
+                "id": "def-public.EmbeddableChildPanelProps.PanelComponent.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -5724,7 +5724,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.context",
+                "id": "def-public.EmbeddableChildPanelProps.PanelComponent.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "context",
@@ -8289,7 +8289,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"telemetry\" | \"extract\" | \"inject\" | \"migrations\" | \"grouping\" | \"getIconType\" | \"getDescription\">>"
+          "<I, O, E, T>, \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"grouping\" | \"getIconType\" | \"getDescription\">>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory_definition.ts",
         "deprecated": false,
@@ -8361,7 +8361,7 @@
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.props",
+            "id": "def-public.EmbeddablePanelHOC.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -8374,7 +8374,7 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.context",
+            "id": "def-public.EmbeddablePanelHOC.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -9021,7 +9021,7 @@
           "children": [
             {
               "parentPluginId": "embeddable",
-              "id": "def-public.props",
+              "id": "def-public.EmbeddableStart.EmbeddablePanel.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "props",
@@ -9034,7 +9034,7 @@
             },
             {
               "parentPluginId": "embeddable",
-              "id": "def-public.context",
+              "id": "def-public.EmbeddableStart.EmbeddablePanel.$2",
               "type": "Any",
               "tags": [],
               "label": "context",
@@ -10232,7 +10232,7 @@
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-common.state",
+            "id": "def-common.MigrateFunction.$1",
             "type": "Object",
             "tags": [],
             "label": "state",
@@ -10245,7 +10245,7 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-common.version",
+            "id": "def-common.MigrateFunction.$2",
             "type": "string",
             "tags": [],
             "label": "version",

@@ -35,8 +35,9 @@ import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/http_info_
 import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { SyncBadge } from '../sync_badge';
-import { DatabaseContext } from './database_context';
+import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
+import { FailureBadge } from '../failure_badge';
 
 function formatType(type: string) {
   switch (type) {
@@ -73,13 +74,11 @@ function getSpanTypes(span: Span) {
   };
 }
 
-const SpanBadge = euiStyled(EuiBadge)`
-  display: inline-block;
-  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
-const HttpInfoContainer = euiStyled('div')`
-  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
+const ContainerWithMarginRight = euiStyled.div`
+  /* add margin to all direct descendants */
+  & > * {
+    margin-right: ${({ theme }) => theme.eui.euiSizeXS};
+  }
 `;
 
 interface Props {
@@ -101,7 +100,7 @@ export function SpanFlyout({
 
   const stackframes = span.span.stacktrace;
   const codeLanguage = parentTransaction?.service.language?.name;
-  const dbContext = span.span.db;
+  const spanDb = span.span.db;
   const httpContext = span.span.http;
   const spanTypes = getSpanTypes(span);
   const spanHttpStatusCode = httpContext?.response?.status_code;
@@ -173,15 +172,13 @@ export function SpanFlyout({
                   />
                 )}
               </>,
-              <>
+              <ContainerWithMarginRight>
                 {spanHttpUrl && (
-                  <HttpInfoContainer>
-                    <HttpInfoSummaryItem
-                      method={spanHttpMethod}
-                      url={spanHttpUrl}
-                      status={spanHttpStatusCode}
-                    />
-                  </HttpInfoContainer>
+                  <HttpInfoSummaryItem
+                    method={spanHttpMethod}
+                    url={spanHttpUrl}
+                    status={spanHttpStatusCode}
+                  />
                 )}
                 <EuiToolTip
                   content={i18n.translate(
@@ -189,7 +186,7 @@ export function SpanFlyout({
                     { defaultMessage: 'Type' }
                   )}
                 >
-                  <SpanBadge color="hollow">{spanTypes.spanType}</SpanBadge>
+                  <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
                 </EuiToolTip>
                 {spanTypes.spanSubtype && (
                   <EuiToolTip
@@ -198,9 +195,7 @@ export function SpanFlyout({
                       { defaultMessage: 'Subtype' }
                     )}
                   >
-                    <SpanBadge color="hollow">
-                      {spanTypes.spanSubtype}
-                    </SpanBadge>
+                    <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
                   </EuiToolTip>
                 )}
                 {spanTypes.spanAction && (
@@ -210,15 +205,18 @@ export function SpanFlyout({
                       { defaultMessage: 'Action' }
                     )}
                   >
-                    <SpanBadge color="hollow">{spanTypes.spanAction}</SpanBadge>
+                    <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
                   </EuiToolTip>
                 )}
+
+                <FailureBadge outcome={span.event?.outcome} />
+
                 <SyncBadge sync={span.span.sync} />
-              </>,
+              </ContainerWithMarginRight>,
             ]}
           />
           <EuiHorizontalRule />
-          <DatabaseContext dbContext={dbContext} />
+          <SpanDatabase spanDb={spanDb} />
           <EuiTabbedContent
             tabs={[
               {
