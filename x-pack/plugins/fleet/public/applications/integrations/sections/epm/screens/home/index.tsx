@@ -92,7 +92,10 @@ const InstalledPackages: React.FC = memo(() => {
   );
   const history = useHistory();
   function setSelectedCategory(categoryId: string) {
-    const url = pagePathGetters.integrations_all({ category: categoryId, query: searchParam })[1];
+    const url = pagePathGetters.integrations_installed({
+      category: categoryId,
+      query: searchParam,
+    })[1];
     history.push(url);
   }
 
@@ -152,6 +155,7 @@ const InstalledPackages: React.FC = memo(() => {
       isLoading={isLoadingPackages}
       controls={controls}
       category={selectedCategory}
+      setSelectedCategory={setSelectedCategory}
       initialSearch={searchParam}
       title={title}
       list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
