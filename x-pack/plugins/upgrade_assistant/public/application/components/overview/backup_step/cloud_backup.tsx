@@ -50,7 +50,9 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
       // An error should invalidate the previous state.
       setIsComplete((!error && data?.isBackedUp) ?? false);
     }
-  }, [setIsComplete, error, isLoading, data]);
+    // Depending upon setIsComplete would create an infinite loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, isLoading, data]);
 
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent data-test-subj="cloudBackupLoading" lines={3} />;

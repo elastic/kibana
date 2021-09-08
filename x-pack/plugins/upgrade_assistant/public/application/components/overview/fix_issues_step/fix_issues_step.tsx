@@ -38,7 +38,9 @@ const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
 
   useEffect(() => {
     setIsComplete(isEsFixed && isKibanaFixed);
-  }, [setIsComplete, isEsFixed, isKibanaFixed]);
+    // Depending upon setIsComplete would create an infinite loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEsFixed, isKibanaFixed]);
 
   return (
     <EuiFlexGroup>
