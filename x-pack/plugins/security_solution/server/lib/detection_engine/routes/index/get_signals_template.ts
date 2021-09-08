@@ -24,7 +24,9 @@ import signalExtraFields from './signal_extra_fields.json';
   @description This value represents the template version assumed by app code.
   If this number is greater than the user's signals index version, the
   detections UI will attempt to update the signals template and roll over to
-  a new signals index.
+  a new signals index. 
+  
+  Since we create a new index for new versions, this version on an existing index should never change.
 
   If making mappings changes in a patch release, this number should be incremented by 1.
   If making mappings changes in a minor release, this number should be
@@ -38,6 +40,8 @@ export const SIGNALS_TEMPLATE_VERSION = 57;
   @description This value represents the version of the field aliases that map the new field names
   used for alerts-as-data to the old signal.* field names and any other runtime fields that are added
   to .siem-signals indices for compatibility reasons (e.g. host.os.name.caseless).
+
+  This version number can change over time on existing indices as we add backwards compatibility fields.
 
   If any .siem-signals-<space id> indices have an aliases_version less than this value, the detections 
   UI will call create_index_route and and go through the index update process. Increment this number if 
