@@ -35,7 +35,13 @@ export const SelectedFilters = ({ onChange }: Props) => {
                     excludedItems
                   );
                 }}
-                invertFilter={(val) => {}}
+                invertFilter={(val) => {
+                  onChange(
+                    field,
+                    selectedItems.filter((valT) => valT !== value),
+                    [...excludedItems, value]
+                  );
+                }}
                 field={field}
                 value={value}
                 negate={false}
@@ -54,7 +60,13 @@ export const SelectedFilters = ({ onChange }: Props) => {
                     excludedItems.filter((valT) => valT !== value)
                   );
                 }}
-                invertFilter={(val) => {}}
+                invertFilter={(val) => {
+                  onChange(
+                    field,
+                    [...selectedItems, value],
+                    excludedItems.filter((valT) => valT !== value)
+                  );
+                }}
                 field={field}
                 value={value}
                 negate={true}
