@@ -130,9 +130,7 @@ export const createBackwardsCompatibilityMapping = (version: number) => {
   const mappings = backwardsCompatibilityMappings
     .filter((mapping) => version <= mapping.maxVersion && version >= mapping.minVersion)
     .map((mapping) => mapping.mapping);
-  if (mappings.length === 0) {
-    return undefined;
-  }
+
   const meta = {
     _meta: {
       version,

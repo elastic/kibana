@@ -153,13 +153,11 @@ const addFieldAliasesToIndices = async ({
   for (const [indexName, mapping] of Object.entries(indexMappings)) {
     const currentVersion: number | undefined = get(mapping.mappings?._meta, 'version');
     const body = createBackwardsCompatibilityMapping(currentVersion ?? 0);
-    if (body != null) {
-      await esClient.indices.putMapping({
-        index: indexName,
-        body,
-        allow_no_indices: true,
-      } as estypes.IndicesPutMappingRequest);
-    }
+    await esClient.indices.putMapping({
+      index: indexName,
+      body,
+      allow_no_indices: true,
+    } as estypes.IndicesPutMappingRequest);
   }
 };
 
