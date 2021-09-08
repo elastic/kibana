@@ -7,7 +7,7 @@
 
 import { ReportingStart } from '../../../reporting/public';
 
-type ReportingPanelPDFComponent = ReportingStart['components']['ReportingPanelPDF'];
+type ReportingPanelPDFComponent = ReportingStart['components']['ReportingPanelPDFV2'];
 export interface CanvasReportingService {
   getReportingPanelPDFComponent: () => ReportingPanelPDFComponent | null;
 }

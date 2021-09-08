@@ -105,8 +105,8 @@ export const metricsVisDefinition: VisTypeDefinition<
     editor: TSVB_EDITOR_NAME,
   },
   options: {
-    showQueryBar: false,
-    showFilterBar: false,
+    showQueryBar: true,
+    showFilterBar: true,
     showIndexSelection: false,
   },
   toExpressionAst,
@@ -117,6 +117,7 @@ export const metricsVisDefinition: VisTypeDefinition<
     return [];
   },
   inspectorAdapters: {},
+  requiresSearch: true,
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
     const indexPatternValue = params.index_pattern;
