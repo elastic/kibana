@@ -29,7 +29,12 @@ import { getAccessorColorConfig, getColorAssignments } from './color_assignment'
 import { getColumnToLabelMap } from './state_helpers';
 import { LensIconChartBarThreshold } from '../assets/chart_bar_threshold';
 import { generateId } from '../id_generator';
-import { getGroupsAvailableInData, getGroupsToShow, getStaticValue } from './threshold_helpers';
+import {
+  getGroupsAvailableInData,
+  getGroupsRelatedToData,
+  getGroupsToShow,
+  getStaticValue,
+} from './threshold_helpers';
 import {
   checkScaleOperation,
   checkXAccessorCompatibility,
@@ -215,7 +220,7 @@ export const getXyVisualization = ({
       'number',
       frame?.datasourceLayers || {}
     );
-    const thresholdGroups = getGroupsToShow(
+    const thresholdGroups = getGroupsRelatedToData(
       thresholdGroupIds,
       state,
       frame?.datasourceLayers || {}
@@ -317,19 +322,19 @@ export const getXyVisualization = ({
           {
             config: left,
             id: 'yThresholdLeft',
-            label: 'yLeft' as const,
+            label: 'yLeft',
             dataTestSubj: 'lnsXY_yThresholdLeftPanel',
           },
           {
             config: right,
             id: 'yThresholdRight',
-            label: 'yRight' as const,
+            label: 'yRight',
             dataTestSubj: 'lnsXY_yThresholdRightPanel',
           },
           {
             config: bottom,
             id: 'xThreshold',
-            label: 'x' as const,
+            label: 'x',
             dataTestSubj: 'lnsXY_xThresholdPanel',
           },
         ],
@@ -341,7 +346,7 @@ export const getXyVisualization = ({
         // Each thresholds layer panel will have sections for each available axis
         // (horizontal axis, vertical axis left, vertical axis right).
         // Only axes that support numeric thresholds should be shown
-        groups: groupsToShow.map(({ config = [], id, label, dataTestSubj }) => ({
+        groups: groupsToShow.map(({ config = [], id, label, dataTestSubj, valid }) => ({
           groupId: id,
           groupLabel: getAxisName(label, { isHorizontal }),
           accessors: config.map(({ forAccessor, color }) => ({
@@ -354,6 +359,11 @@ export const getXyVisualization = ({
           required: false,
           enableDimensionEditor: true,
           dataTestSubj,
+          invalid: !valid,
+          invalidMessage: i18n.translate('xpack.lens.configure.invalidThresholdDimension', {
+            defaultMessage:
+              'This threshold is assigned to an axis that no longer exists. You may move this threshold to another available axis or remove it.',
+          }),
         })),
       };
     }
@@ -488,7 +498,9 @@ export const getXyVisualization = ({
         (id) => !groupsAvailable[id]
       )
     ) {
-      newLayers = newLayers.filter(({ layerType }) => layerType === layerTypes.DATA);
+      newLayers = newLayers.filter(
+        ({ layerType, accessors }) => layerType === layerTypes.DATA || accessors.length
+      );
     }
 
     return {

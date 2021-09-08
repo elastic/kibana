@@ -6,7 +6,7 @@
  */
 
 import { layerTypes } from '../../common';
-import { XYLayerConfig } from '../../common/expressions';
+import { XYLayerConfig, YConfig } from '../../common/expressions';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
 import { isPercentageSeries } from './state_helpers';
 import { XYState } from './types';
@@ -16,7 +16,32 @@ export interface ThresholdBase {
   label: 'x' | 'yRight' | 'yLeft';
 }
 
-export function getGroupsToShow<T extends ThresholdBase>(
+/**
+ * Return the threshold layers groups to show based on multiple criteria:
+ * * what groups are current defined in data layers
+ * * what existing threshold are currently defined in data thresholds
+ */
+export function getGroupsToShow<T extends ThresholdBase & { config?: YConfig[] }>(
+  thresholdLayers: T[],
+  state: XYState | undefined,
+  datasourceLayers: Record<string, DatasourcePublicAPI>
+): Array<T & { valid: boolean }> {
+  if (!state) {
+    return [];
+  }
+  const dataLayers = state.layers.filter(
+    ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
+  );
+  const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers);
+  return thresholdLayers
+    .filter(({ label, config }: T) => groupsAvailable[label] || config?.length)
+    .map((layer) => ({ ...layer, valid: groupsAvailable[layer.label] }));
+}
+
+/**
+ * Returns the threshold layers groups to show based on what groups are current defined in data layers.
+ */
+export function getGroupsRelatedToData<T extends ThresholdBase>(
   thresholdLayers: T[],
   state: XYState | undefined,
   datasourceLayers: Record<string, DatasourcePublicAPI>
@@ -30,7 +55,9 @@ export function getGroupsToShow<T extends ThresholdBase>(
   const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers);
   return thresholdLayers.filter(({ label }: T) => groupsAvailable[label]);
 }
-
+/**
+ * Returns a dictionary with the groups filled in all the data layers
+ */
 export function getGroupsAvailableInData(
   dataLayers: XYState['layers'],
   datasourceLayers: Record<string, DatasourcePublicAPI>

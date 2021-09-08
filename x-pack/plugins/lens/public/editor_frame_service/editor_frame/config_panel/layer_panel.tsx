@@ -476,6 +476,8 @@ export function LayerPanel(
                                   columnId: accessorConfig.columnId,
                                   groupId: group.groupId,
                                   filterOperations: group.filterOperations,
+                                  invalid: group.invalid,
+                                  invalidMessage: group.invalidMessage,
                                 }}
                               />
                             </DimensionButton>
