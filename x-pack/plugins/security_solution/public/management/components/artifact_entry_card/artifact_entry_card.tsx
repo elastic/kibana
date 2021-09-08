@@ -7,15 +7,15 @@
 
 import React, { memo, useMemo } from 'react';
 import { CommonProps, EuiHorizontalRule, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import styled from 'styled-components';
 import { CardHeader, CardHeaderProps } from './components/card_header';
 import { CardSubHeader } from './components/card_sub_header';
 import { getEmptyValue } from '../../../common/components/empty_value';
-import { CriteriaConditions } from './components/criteria_conditions';
+import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
 import { EffectScopeProps } from './components/effect_scope';
-import { TrustedApp } from '../../../../common/endpoint/types';
 import { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support/context_menu_item_nav_by_rotuer';
+import { AnyArtifact } from './types';
+import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 
 const CardContainerPanel = styled(EuiPanel)`
   &.artifactEntryCard + &.artifactEntryCard {
@@ -23,10 +23,8 @@ const CardContainerPanel = styled(EuiPanel)`
   }
 `;
 
-type AnyArtifact = ExceptionListItemSchema & TrustedApp;
-
-export interface ArtifactEntryCardProps<T extends AnyArtifact = AnyArtifact> extends CommonProps {
-  item: T;
+export interface ArtifactEntryCardProps extends CommonProps {
+  item: AnyArtifact;
   /**
    * The list of actions for the card. Will display an icon with the actions in a menu if defined.
    */
@@ -46,20 +44,14 @@ export interface ArtifactEntryCardProps<T extends AnyArtifact = AnyArtifact> ext
  * This component is a TS Generic that allows you to set what the Item type is
  */
 export const ArtifactEntryCard = memo(
-  <T extends AnyArtifact = AnyArtifact>({
-    item,
-    policies,
-    actions,
-    ...commonProps
-  }: ArtifactEntryCardProps<T>) => {
-    // FIXME: make component generic for the data type
-    // FIXME: revisit all dev code below
+  ({ item, policies, actions, ...commonProps }: ArtifactEntryCardProps) => {
+    const artifact = useNormalizedArtifact(item);
 
     // create the policy links for each policy listed in the artifact record by grabbing the
     // navigation data from the `policies` prop (if any)
     const policyNavLinks = useMemo<EffectScopeProps['policies']>(() => {
-      return item.effectScope.type === 'policy'
-        ? item.effectScope.policies.map((id) => {
+      return artifact.effectScope.type === 'policy'
+        ? artifact?.effectScope.policies.map((id) => {
             return policies && policies[id]
               ? policies[id]
               : // else, unable to build a nav link, so just show id
@@ -68,7 +60,7 @@ export const ArtifactEntryCard = memo(
                 };
           })
         : undefined;
-    }, [item.effectScope, policies]);
+    }, [artifact.effectScope, policies]);
 
     return (
       <CardContainerPanel
@@ -79,28 +71,31 @@ export const ArtifactEntryCard = memo(
       >
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
           <CardHeader
-            name={item.name}
-            createdDate={item.created_at}
-            updatedDate={item.updated_at}
+            name={artifact.name}
+            createdDate={artifact.created_at}
+            updatedDate={artifact.updated_at}
             actions={actions}
           />
           <CardSubHeader
-            createdBy={item.created_by}
-            updatedBy={item.updated_by}
+            createdBy={artifact.created_by}
+            updatedBy={artifact.updated_by}
             policies={policyNavLinks}
           />
 
           <EuiSpacer size="m" />
 
           <EuiText>
-            <p>{item.description || getEmptyValue()}</p>
+            <p>{artifact.description || getEmptyValue()}</p>
           </EuiText>
         </EuiPanel>
 
         <EuiHorizontalRule margin="xs" />
 
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-          <CriteriaConditions os={item.os} entries={item.entries} />
+          <CriteriaConditions
+            os={artifact.os as CriteriaConditionsProps['os']}
+            entries={artifact.entries}
+          />
         </EuiPanel>
       </CardContainerPanel>
     );

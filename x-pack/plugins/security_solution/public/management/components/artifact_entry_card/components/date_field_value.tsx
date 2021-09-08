@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { CREATED, LAST_UPDATED } from './translations';
 import {
   FormattedRelativePreferenceDate,
