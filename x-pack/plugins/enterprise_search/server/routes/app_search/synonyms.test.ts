@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerSynonymsRoutes } from './synonyms';
 
 describe('synonyms routes', () => {
-  describe('GET /api/app_search/engines/{engineName}/synonyms', () => {
+  describe('GET /internal/app_search/engines/{engineName}/synonyms', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/synonyms',
+        path: '/internal/app_search/engines/{engineName}/synonyms',
       });
 
       registerSynonymsRoutes({
@@ -50,14 +50,14 @@ describe('synonyms routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{engineName}/synonyms', () => {
+  describe('POST /internal/app_search/engines/{engineName}/synonyms', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{engineName}/synonyms',
+        path: '/internal/app_search/engines/{engineName}/synonyms',
       });
 
       registerSynonymsRoutes({
@@ -73,14 +73,14 @@ describe('synonyms routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{engineName}/synonyms/{synonymId}', () => {
+  describe('PUT /internal/app_search/engines/{engineName}/synonyms/{synonymId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/app_search/engines/{engineName}/synonyms/{synonymId}',
+        path: '/internal/app_search/engines/{engineName}/synonyms/{synonymId}',
       });
 
       registerSynonymsRoutes({
@@ -96,14 +96,14 @@ describe('synonyms routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{engineName}/synonyms/{synonymId}', () => {
+  describe('DELETE /internal/app_search/engines/{engineName}/synonyms/{synonymId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/engines/{engineName}/synonyms/{synonymId}',
+        path: '/internal/app_search/engines/{engineName}/synonyms/{synonymId}',
       });
 
       registerSynonymsRoutes({
