@@ -6,17 +6,22 @@
  */
 
 import expect from '@kbn/expect';
+
+import { IKibanaSearchRequest } from '../../../../../src/plugins/data/common';
+
+import type { FailedTransactionsCorrelationsParams } from '../../../../plugins/apm/common/search_strategies/failed_transactions_correlations/types';
+import { APM_SEARCH_STRATEGIES } from '../../../../plugins/apm/common/search_strategies/constants';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import { PartialSearchRequest } from '../../../../plugins/apm/server/lib/search_strategies/correlations/search_strategy';
 import { parseBfetchResponse } from '../../common/utils/parse_b_fetch';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const retry = getService('retry');
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const getRequestBody = () => {
-    const partialSearchRequest: PartialSearchRequest = {
+    const request: IKibanaSearchRequest<FailedTransactionsCorrelationsParams> = {
       params: {
         environment: 'ENVIRONMENT_ALL',
         start: '2020',
@@ -28,8 +33,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return {
       batch: [
         {
-          request: partialSearchRequest,
-          options: { strategy: 'apmFailedTransactionsCorrelationsSearchStrategy' },
+          request,
+          options: { strategy: APM_SEARCH_STRATEGIES.APM_FAILED_TRANSACTIONS_CORRELATIONS },
         },
       ],
     };
@@ -117,9 +122,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       expect(typeof finalRawResponse?.took).to.be('number');
 
-      expect(finalRawResponse?.values.length).to.eql(
+      expect(finalRawResponse?.failedTransactionsCorrelations.length).to.eql(
         0,
-        `Expected 0 identified correlations, got ${finalRawResponse?.values.length}.`
+        `Expected 0 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations.length}.`
       );
     });
   });
@@ -209,9 +214,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(finalRawResponse?.percentileThresholdValue).to.be(undefined);
       expect(finalRawResponse?.overallHistogram).to.be(undefined);
 
-      expect(finalRawResponse?.values.length).to.eql(
+      expect(finalRawResponse?.failedTransactionsCorrelations.length).to.eql(
         43,
-        `Expected 43 identified correlations, got ${finalRawResponse?.values.length}.`
+        `Expected 43 identified correlations, got ${finalRawResponse?.failedTransactionsCorrelations.length}.`
       );
 
       expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
@@ -220,7 +225,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         'Identified 43 significant correlations relating to failed transactions.',
       ]);
 
-      const sortedCorrelations = finalRawResponse?.values.sort();
+      const sortedCorrelations = finalRawResponse?.failedTransactionsCorrelations.sort();
       const correlation = sortedCorrelations[0];
 
       expect(typeof correlation).to.be('object');

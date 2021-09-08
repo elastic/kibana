@@ -13,6 +13,7 @@ import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SkipBottomButton } from '../skip_bottom_button';
+import { shouldLoadNextDocPatch } from './lib/should_load_next_doc_patch';
 
 const FOOTER_PADDING = { padding: 0 };
 
@@ -92,29 +93,25 @@ export const DocTableInfinite = (props: DocTableProps) => {
    */
   useEffect(() => {
     // After mounting table wrapper should be initialized
-    const scrollDesktopElem = tableWrapperRef.current as HTMLDivElement;
+    const scrollDiv = tableWrapperRef.current as HTMLDivElement;
     const scrollMobileElem = document.documentElement;
 
     const scheduleCheck = debounce(() => {
       const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
-      const usedScrollDiv = isMobileView ? scrollMobileElem : scrollDesktopElem;
 
-      const scrollusedHeight = usedScrollDiv.scrollHeight;
-      const scrollTop = Math.abs(usedScrollDiv.scrollTop);
-      const clientHeight = usedScrollDiv.clientHeight;
-
-      if (scrollTop + clientHeight === scrollusedHeight) {
+      const usedScrollDiv = isMobileView ? scrollMobileElem : scrollDiv;
+      if (shouldLoadNextDocPatch(usedScrollDiv)) {
         setLimit((prevLimit) => prevLimit + 50);
       }
     }, 50);
 
-    scrollDesktopElem.addEventListener('scroll', scheduleCheck);
+    scrollDiv.addEventListener('scroll', scheduleCheck);
     window.addEventListener('scroll', scheduleCheck);
 
     scheduleCheck();
 
     return () => {
-      scrollDesktopElem.removeEventListener('scroll', scheduleCheck);
+      scrollDiv.removeEventListener('scroll', scheduleCheck);
       window.removeEventListener('scroll', scheduleCheck);
     };
   }, []);
