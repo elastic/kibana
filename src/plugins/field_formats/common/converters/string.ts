@@ -136,8 +136,8 @@ export class StringFormat extends FieldFormat {
       return `<span class="ffString__emptyValue">${emptyLabel}</span>`;
     }
 
-    return hit?.highlight?.[field?.name]
-      ? getHighlightHtml(escape(val), hit.highlight[field.name])
+    return hit?.highlight?.[field?.name!]
+      ? getHighlightHtml(escape(val), hit.highlight[field!.name])
       : escape(this.textConvert(val));
   };
 }

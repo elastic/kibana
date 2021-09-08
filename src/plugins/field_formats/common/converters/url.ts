@@ -188,8 +188,8 @@ export class UrlFormat extends FieldFormat {
 
         let linkLabel;
 
-        if (hit && hit.highlight && hit.highlight[field.name]) {
-          linkLabel = getHighlightHtml(label, hit.highlight[field.name]);
+        if (hit && hit.highlight && hit.highlight[field?.name!]) {
+          linkLabel = getHighlightHtml(label, hit.highlight[field!.name]);
         } else {
           linkLabel = label;
         }
