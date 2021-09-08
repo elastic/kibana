@@ -8,9 +8,9 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
-
+import { SortDirection } from 'src/plugins/data/common';
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
-import { setServices, SortDirection } from '../../../../kibana_services';
+import { setServices } from '../../../../kibana_services';
 import { Query } from '../../../../../../data/public';
 import { fetchContextProvider, SurrDocType } from './context';
 import { DiscoverServices } from '../../../../build_services';
