@@ -10,14 +10,14 @@ import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks_
 import { registerCrawlerEntryPointRoutes } from './crawler_entry_points';
 
 describe('crawler entry point routes', () => {
-  describe('POST /api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points', () => {
+  describe('POST /internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points',
+        path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points',
       });
 
       registerCrawlerEntryPointRoutes({
@@ -51,7 +51,7 @@ describe('crawler entry point routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}', () => {
+  describe('PUT /internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -59,7 +59,7 @@ describe('crawler entry point routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+          '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       });
 
       registerCrawlerEntryPointRoutes({
@@ -93,7 +93,7 @@ describe('crawler entry point routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}', () => {
+  describe('DELETE /internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -101,7 +101,7 @@ describe('crawler entry point routes', () => {
       mockRouter = new MockRouter({
         method: 'delete',
         path:
-          '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
+          '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/entry_points/{entryPointId}',
       });
 
       registerCrawlerEntryPointRoutes({

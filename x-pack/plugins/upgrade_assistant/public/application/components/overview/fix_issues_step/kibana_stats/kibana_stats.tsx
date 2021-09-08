@@ -8,15 +8,7 @@
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import {
-  EuiCard,
-  EuiStat,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import { EuiCard, EuiStat, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { DomainDeprecationDetails } from 'kibana/public';
@@ -47,25 +39,6 @@ const i18nTexts = {
       defaultMessage: 'An error occurred while retrieving Kibana deprecations.',
     }
   ),
-  loadingText: i18n.translate('xpack.upgradeAssistant.kibanaDeprecationStats.loadingText', {
-    defaultMessage: 'Loading Kibana deprecation stats…',
-  }),
-  getCriticalDeprecationsMessage: (criticalDeprecations: number) =>
-    i18n.translate('xpack.upgradeAssistant.kibanaDeprecationStats.criticalDeprecationsLabel', {
-      defaultMessage:
-        'Kibana has {criticalDeprecations} critical {criticalDeprecations, plural, one {deprecation} other {deprecations}}',
-      values: {
-        criticalDeprecations,
-      },
-    }),
-  getWarningDeprecationsMessage: (warningDeprecations: number) =>
-    i18n.translate('xpack.upgradeAssistant.kibanaDeprecationStats.getWarningDeprecationsMessage', {
-      defaultMessage:
-        'Kibana has {warningDeprecations} warning {warningDeprecations, plural, one {deprecation} other {deprecations}}',
-      values: {
-        warningDeprecations,
-      },
-    }),
 };
 
 interface Props {
@@ -163,17 +136,7 @@ export const KibanaDeprecationStats: FunctionComponent<Props> = ({ setIsFixed })
               description={i18nTexts.criticalDeprecationsTitle}
               titleColor="danger"
               isLoading={isLoading}
-            >
-              {error === undefined && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.loadingText
-                      : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecationsCount)}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
+            />
           </EuiFlexItem>
         )}
 
@@ -185,17 +148,7 @@ export const KibanaDeprecationStats: FunctionComponent<Props> = ({ setIsFixed })
               titleElement="span"
               description={i18nTexts.warningDeprecationsTitle}
               isLoading={isLoading}
-            >
-              {!error && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.loadingText
-                      : i18nTexts.getWarningDeprecationsMessage(warningDeprecationsCount)}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
