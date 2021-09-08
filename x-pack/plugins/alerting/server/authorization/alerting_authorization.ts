@@ -288,7 +288,6 @@ export class AlertingAuthorization {
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
     logSuccessfulAuthorization: () => void;
   }> {
-    console.log({ auth: this.authorization, shouldCheck: this.shouldCheckAuthorization() });
     if (this.authorization && this.shouldCheckAuthorization()) {
       const { username, authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
         this.ruleTypeRegistry.list(),
@@ -297,12 +296,10 @@ export class AlertingAuthorization {
       );
 
       if (!authorizedRuleTypes.size) {
-        console.log('HHHHHHHEEEEERE');
         throw Boom.forbidden(
           this.auditLogger.logUnscopedAuthorizationFailure(username!, 'find', authorizationEntity)
         );
       }
-      console.log('HHHHHHHEEEEERE 2');
 
       const authorizedRuleTypeIdsToConsumers = new Set<string>(
         [...authorizedRuleTypes].reduce<string[]>((ruleTypeIdConsumerPairs, ruleType) => {
@@ -312,7 +309,6 @@ export class AlertingAuthorization {
           return ruleTypeIdConsumerPairs;
         }, [])
       );
-      console.log('HHHHHHHEEEEERE 3');
 
       const authorizedEntries: Map<string, Set<string>> = new Map();
       return {
@@ -323,7 +319,6 @@ export class AlertingAuthorization {
         ) as JsonObject,
         ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
           if (!authorizedRuleTypeIdsToConsumers.has(`${ruleTypeId}/${consumer}/${authType}`)) {
-            console.log('FORBIDDEN');
             throw Boom.forbidden(
               this.auditLogger.logAuthorizationFailure(
                 username!,
