@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { EuiTheme } from 'src/plugins/kibana_react/common';
+import type { EuiTheme } from 'src/plugins/kibana_react/common';
 import { getDateDifference } from '../../../../common/utils/formatters';
 
 export enum TimeRangeComparisonType {

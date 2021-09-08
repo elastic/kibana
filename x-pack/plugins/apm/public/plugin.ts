@@ -7,16 +7,18 @@
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { UsageCollectionStart } from 'src/plugins/usage_collection/public';
+import type { UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import type { ConfigSchema } from '.';
-import {
+import type {
   AppMountParameters,
-  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
+} from '../../../../src/core/public';
+import {
+  AppNavLinkStatus,
+  DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
 import type {
   DataPublicPluginSetup,
@@ -24,7 +26,7 @@ import type {
 } from '../../../../src/plugins/data/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
+import type { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
@@ -34,13 +36,13 @@ import type { FleetStart } from '../../fleet/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { MapsStartApi } from '../../maps/public';
 import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
-import {
+import type {
   FetchDataParams,
   HasDataParams,
-  METRIC_TYPE,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '../../observability/public';
+import { METRIC_TYPE } from '../../observability/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -54,6 +56,7 @@ import { getLazyApmAgentsTabExtension } from './components/fleet_integration/laz
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
+
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
 export type ApmPluginStart = void;

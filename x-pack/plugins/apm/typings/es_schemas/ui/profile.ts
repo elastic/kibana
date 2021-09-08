@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Observer } from '@elastic/eui/src/components/observer/observer';
-import { Agent } from './fields/agent';
+import type { Observer } from '@elastic/eui/src/components/observer/observer';
+import type { Agent } from './fields/agent';
 
 export interface ProfileStackFrame {
   filename?: string;

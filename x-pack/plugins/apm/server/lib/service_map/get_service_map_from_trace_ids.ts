@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { find, uniqBy } from 'lodash';
-import { Connection, ConnectionNode } from '../../../common/service_map';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import type { Connection, ConnectionNode } from '../../../common/service_map';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
 export function getConnections({

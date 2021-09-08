@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { Maybe } from '../../../typings/common';
+import type { Maybe } from '../../../typings/common';
 import { NOT_AVAILABLE_LABEL } from '../../i18n';
 import { isFiniteNumber } from '../is_finite_number';
 

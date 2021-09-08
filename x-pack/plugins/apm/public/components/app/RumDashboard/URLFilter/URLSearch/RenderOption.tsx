@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactNode } from 'react';
-import classNames from 'classnames';
-import { EuiHighlight, EuiSelectableOption } from '@elastic/eui';
-import styled from 'styled-components';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiHighlight } from '@elastic/eui';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import classNames from 'classnames';
+import type { ReactNode } from 'react';
+import React from 'react';
+import styled from 'styled-components';
 
 const StyledSpan = styled.span`
   color: ${euiLightVars.euiColorSecondaryText};

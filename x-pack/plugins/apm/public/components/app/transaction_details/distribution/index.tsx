@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect } from 'react';
-import { BrushEndListener, XYBrushArea } from '@elastic/charts';
+import type { BrushEndListener, XYBrushArea } from '@elastic/charts';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -17,21 +15,20 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import React, { useEffect } from 'react';
+import { useUiTracker } from '../../../../../../observability/public';
 import {
   APM_SEARCH_STRATEGIES,
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../../common/search_strategies/constants';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-
+import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
 import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
-import { useUiTracker } from '../../../../../../observability/public';
-import { isErrorMessage } from '../../correlations/utils/is_error_message';
 import { getOverallHistogram } from '../../correlations/utils/get_overall_histogram';
-
+import { isErrorMessage } from '../../correlations/utils/is_error_message';
 import type { TabContentProps } from '../types';
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';

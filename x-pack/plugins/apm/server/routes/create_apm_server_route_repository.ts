@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { createServerRouteRepository } from '@kbn/server-route-repository';
-import { APMRouteCreateOptions, APMRouteHandlerResources } from './typings';
+import type {
+  APMRouteCreateOptions,
+  APMRouteHandlerResources,
+} from './typings';
 
 export function createApmServerRouteRepository() {
   return createServerRouteRepository<

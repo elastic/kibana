@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   AlertType,
   APM_SERVER_FEATURE_ID,
 } from '../../../../common/alert_types';
-import { getInitialAlertValues } from '../get_initial_alert_values';
-import { ApmPluginStartDeps } from '../../../plugin';
-import { useServiceName } from '../../../hooks/use_service_name';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { AlertMetadata } from '../helper';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useServiceName } from '../../../hooks/use_service_name';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import type { ApmPluginStartDeps } from '../../../plugin';
+import { getInitialAlertValues } from '../get_initial_alert_values';
+import type { AlertMetadata } from '../helper';
 
 interface Props {
   addFlyoutVisible: boolean;

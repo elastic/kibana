@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { uniq, defaultsDeep, cloneDeep } from 'lodash';
+import { cloneDeep, defaultsDeep, uniq } from 'lodash';
+import type { APMEventESSearchRequest } from '.';
+import type {
+  ESFilter,
+  ESSearchRequest,
+} from '../../../../../../../../src/core/types/elasticsearch';
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
-import {
-  ESSearchRequest,
-  ESFilter,
-} from '../../../../../../../../src/core/types/elasticsearch';
-import { APMEventESSearchRequest } from '.';
-import {
+import type {
   ApmIndicesConfig,
   ApmIndicesName,
 } from '../../../settings/apm_indices/get_apm_indices';

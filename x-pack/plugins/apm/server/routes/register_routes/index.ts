@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import * as t from 'io-ts';
-import { KibanaRequest, RouteRegistrar } from 'src/core/server';
 import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
-import agent from 'elastic-apm-node';
-import { ServerRouteRepository } from '@kbn/server-route-repository';
-import { merge } from 'lodash';
+import Boom from '@hapi/boom';
+import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
+import type { ServerRouteRepository } from '@kbn/server-route-repository';
 import {
   decodeRequestParams,
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { mergeRt, jsonRt } from '@kbn/io-ts-utils';
+import agent from 'elastic-apm-node';
+import * as t from 'io-ts';
+import { merge } from 'lodash';
+import type { RouteRegistrar } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
-import type { ApmPluginRequestHandlerContext } from '../typings';
-import { InspectResponse } from '../../../typings/common';
+import type { InspectResponse } from '../../../typings/common';
+import type {
+  ApmPluginRequestHandlerContext,
+  APMRouteHandlerResources,
+  TelemetryUsageCounter,
+} from '../typings';
 
 const inspectRt = t.exact(
   t.partial({

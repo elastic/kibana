@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { PackagePolicyVars, SettingsRow } from '../typings';
 import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
+import type { PackagePolicyVars, SettingsRow } from '../typings';
 
 const ENABLE_RUM_KEY = 'enable_rum';
 export function getRUMSettings(): SettingsRow[] {

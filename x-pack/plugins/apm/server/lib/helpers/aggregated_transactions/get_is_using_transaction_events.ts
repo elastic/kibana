@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { getSearchAggregatedTransactions } from '.';
-import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../setup_request';
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { APMEventClient } from '../create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../create_es_client/create_apm_event_client';
+import type { Setup, SetupTimeRange } from '../setup_request';
 
 export async function getIsUsingTransactionEvents({
   setup: { config, start, end, apmEventClient },

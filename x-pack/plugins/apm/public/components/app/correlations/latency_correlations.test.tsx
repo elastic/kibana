@@ -4,29 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import React, { ReactNode } from 'react';
-import { of } from 'rxjs';
-
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
-
-import { CoreStart } from 'kibana/public';
+import type { CoreStart } from 'kibana/public';
 import { merge } from 'lodash';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import type { ReactNode } from 'react';
+import React from 'react';
+import { of } from 'rxjs';
 import type { IKibanaSearchResponse } from 'src/plugins/data/public';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import type { LatencyCorrelationsRawResponse } from '../../../../common/search_strategies/latency_correlations/types';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { fromQuery } from '../../shared/Links/url_helpers';
-
 import { LatencyCorrelations } from './latency_correlations';
 
 function Wrapper({

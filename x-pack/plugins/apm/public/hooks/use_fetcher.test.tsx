@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import React, { ReactNode } from 'react';
-import { CoreStart } from '../../../../../src/core/public';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { CoreStart } from '../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 import { delay } from '../utils/testHelpers';
-import { FetcherResult, useFetcher } from './use_fetcher';
+import type { FetcherResult } from './use_fetcher';
+import { useFetcher } from './use_fetcher';
 
 // Wrap the hook with a provider so it can useKibana
 const KibanaReactContext = createKibanaReactContext(({

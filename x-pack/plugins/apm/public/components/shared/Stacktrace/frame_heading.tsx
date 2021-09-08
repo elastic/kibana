@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import type { FrameHeadingRendererProps } from './frame_heading_renderers';
 import {
   CSharpFrameHeadingRenderer,
   DefaultFrameHeadingRenderer,
-  FrameHeadingRendererProps,
   JavaFrameHeadingRenderer,
   JavaScriptFrameHeadingRenderer,
   RubyFrameHeadingRenderer,

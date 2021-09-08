@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButton, EuiCard, EuiTextColor } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useKibanaUrl } from '../../../hooks/useKibanaUrl';
 
 export interface LicensePromptProps {

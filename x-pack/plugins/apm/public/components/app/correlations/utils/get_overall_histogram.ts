@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { LatencyCorrelationsRawResponse } from '../../../../../common/search_strategies/latency_correlations/types';
-
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 // `isRunning` refers to the search strategy as whole which might still be in the process

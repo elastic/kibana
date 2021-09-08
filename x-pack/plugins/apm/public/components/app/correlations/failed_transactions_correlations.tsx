@@ -4,52 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { orderBy } from 'lodash';
-
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
+  EuiBadge,
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiIcon,
   EuiLink,
+  EuiSpacer,
   EuiTitle,
-  EuiBetaBadge,
-  EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
-
 import { i18n } from '@kbn/i18n';
+import { orderBy } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   enableInspectEsQueries,
   useUiTracker,
 } from '../../../../../observability/public';
-
-import { asPercent } from '../../../../common/utils/formatters';
-import { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
 import { APM_SEARCH_STRATEGIES } from '../../../../common/search_strategies/constants';
-
+import type { FailedTransactionsCorrelation } from '../../../../common/search_strategies/failed_transactions_correlations/types';
+import { asPercent } from '../../../../common/utils/formatters';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSearchStrategy } from '../../../hooks/use_search_strategy';
-
 import { ImpactBar } from '../../shared/ImpactBar';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { Summary } from '../../shared/Summary';
-
-import { CorrelationsTable } from './correlations_table';
-import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
-import { isErrorMessage } from './utils/is_error_message';
-import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { CorrelationsLog } from './correlations_log';
-import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
+import { CorrelationsTable } from './correlations_table';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
+import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
+import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
 import { CorrelationsProgressControls } from './progress_controls';
+import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
+import { isErrorMessage } from './utils/is_error_message';
 
 export function FailedTransactionsCorrelations({
   onFilter,

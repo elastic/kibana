@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useBreakPoints } from '../../../hooks/use_break_points';
+import { DatePicker } from '../../shared/DatePicker';
+import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { RumOverview } from '../RumDashboard';
 import { CsmSharedContextProvider } from './CsmSharedContext';
 import { WebApplicationSelect } from './Panels/WebApplicationSelect';
-import { DatePicker } from '../../shared/DatePicker';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
-import { useBreakPoints } from '../../../hooks/use_break_points';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'Dashboard',

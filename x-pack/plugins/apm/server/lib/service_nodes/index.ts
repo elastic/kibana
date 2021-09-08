@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
+  HOST_NAME,
   METRIC_JAVA_HEAP_MEMORY_USED,
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
   METRIC_JAVA_THREAD_COUNT,
   METRIC_PROCESS_CPU_PERCENT,
-  HOST_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const getServiceNodes = async ({
   kuery,
@@ -108,5 +107,4 @@ const getServiceNodes = async ({
         item.threadCount != null
     );
 };
-
 export { getServiceNodes };

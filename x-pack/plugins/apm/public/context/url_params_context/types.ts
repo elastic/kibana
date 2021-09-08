@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { UxLocalUIFilterName } from '../../../common/ux_ui_filter';
+import type { UxLocalUIFilterName } from '../../../common/ux_ui_filter';
 import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
 
 export type UrlParams = {

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -12,14 +11,14 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { ContentsProps } from '.';
+import type { ContentsProps } from '.';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_TYPE,
   SPAN_SUBTYPE,
+  SPAN_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { ExternalConnectionNode } from '../../../../../common/service_map';
+import type { ExternalConnectionNode } from '../../../../../common/service_map';
 
 const ExternalResourcesList = euiStyled.section`
   max-height: 360px;

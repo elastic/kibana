@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { SetupTimeRange } from '../helpers/setup_request';
-import { SetupUX } from '../../routes/rum_client';
+import type { SetupUX } from '../../routes/rum_client';
+import type { SetupTimeRange } from '../helpers/setup_request';
 
 export const MICRO_TO_SEC = 1000000;
 

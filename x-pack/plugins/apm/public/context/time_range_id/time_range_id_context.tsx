@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, useState, useMemo } from 'react';
+import React, { createContext, useMemo, useState } from 'react';
 
 export const TimeRangeIdContext = createContext<{
   incrementTimeRangeId: () => void;

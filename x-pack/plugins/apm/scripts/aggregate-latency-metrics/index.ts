@@ -4,29 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { argv } from 'yargs';
+import { set } from '@elastic/safer-lodash-set';
+import * as histogram from 'hdr-histogram-js';
+import { flatten, merge, uniq, without } from 'lodash';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { set } from '@elastic/safer-lodash-set';
-import { uniq, without, merge, flatten } from 'lodash';
-import * as histogram from 'hdr-histogram-js';
+import { argv } from 'yargs';
 import {
-  HOST_NAME,
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
   AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  POD_NAME,
   CONTAINER_ID,
-  SERVICE_VERSION,
-  TRANSACTION_RESULT,
+  HOST_NAME,
+  POD_NAME,
   PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  SERVICE_VERSION,
+  TRANSACTION_NAME,
+  TRANSACTION_RESULT,
+  TRANSACTION_TYPE,
 } from '../../common/elasticsearch_fieldnames';
 import { createOrUpdateIndex } from '../shared/create-or-update-index';
+import type { ESClient } from '../shared/get_es_client';
+import { getEsClient } from '../shared/get_es_client';
 import { parseIndexUrl } from '../shared/parse_index_url';
-import { ESClient, getEsClient } from '../shared/get_es_client';
 
 // This script will try to estimate how many latency metric documents
 // will be created based on the available transaction documents.

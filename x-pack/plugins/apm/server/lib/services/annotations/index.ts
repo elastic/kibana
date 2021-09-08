@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ElasticsearchClient, Logger } from 'kibana/server';
-import { ScopedAnnotationsClient } from '../../../../../observability/server';
+import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ScopedAnnotationsClient } from '../../../../../observability/server';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getStoredAnnotations } from './get_stored_annotations';
 
 export async function getServiceAnnotations({

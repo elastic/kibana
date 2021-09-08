@@ -5,29 +5,27 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { of } from 'rxjs';
-
 import type { ElasticsearchClient } from 'src/core/server';
-
-import type { ISearchStrategy } from '../../../../../../src/plugins/data/server';
-import {
+import uuid from 'uuid';
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
 } from '../../../../../../src/plugins/data/common';
-
-import type { SearchStrategyClientParams } from '../../../common/search_strategies/types';
-import type { RawResponseBase } from '../../../common/search_strategies/types';
-import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
-
+import type { ISearchStrategy } from '../../../../../../src/plugins/data/server';
 import type {
-  LatencyCorrelationsSearchServiceProvider,
-  LatencyCorrelationsSearchStrategy,
-} from './latency_correlations';
+  RawResponseBase,
+  SearchStrategyClientParams,
+} from '../../../common/search_strategies/types';
+import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import type {
   FailedTransactionsCorrelationsSearchServiceProvider,
   FailedTransactionsCorrelationsSearchStrategy,
 } from './failed_transactions_correlations';
+import type {
+  LatencyCorrelationsSearchServiceProvider,
+  LatencyCorrelationsSearchStrategy,
+} from './latency_correlations';
 
 interface SearchServiceState<TRawResponse extends RawResponseBase> {
   cancel: () => void;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React from 'react';
 
 export function LoadingStatePrompt() {
   return (

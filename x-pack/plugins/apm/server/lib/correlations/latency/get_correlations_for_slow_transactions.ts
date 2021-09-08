@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AggregationOptionsByType } from '../../../../../../../src/core/types/elasticsearch';
+import type { AggregationOptionsByType } from '../../../../../../../src/core/types/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { getDurationForPercentile } from './get_duration_for_percentile';
-import { processSignificantTermAggs } from '../process_significant_term_aggs';
-import { getLatencyDistribution } from './get_latency_distribution';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
+import type { CorrelationsOptions } from '../get_filters';
+import { getCorrelationsFilters } from '../get_filters';
+import { processSignificantTermAggs } from '../process_significant_term_aggs';
+import { getDurationForPercentile } from './get_duration_for_percentile';
+import { getLatencyDistribution } from './get_latency_distribution';
 
 interface Options extends CorrelationsOptions {
   durationPercentile: number;

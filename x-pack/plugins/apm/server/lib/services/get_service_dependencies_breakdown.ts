@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { sortBy, take } from 'lodash';
-import { getNodeName } from '../../../common/connections';
 import { kqlQuery } from '../../../../observability/server';
+import { getNodeName } from '../../../common/connections';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup } from '../helpers/setup_request';
 import { getConnectionStats } from '../connections/get_connection_stats';
+import type { Setup } from '../helpers/setup_request';
 
 export async function getServiceDependenciesBreakdown({
   setup,

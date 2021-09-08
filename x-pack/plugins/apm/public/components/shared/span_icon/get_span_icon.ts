@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { maybe } from '../../../../common/utils/maybe';
+import javaIcon from '../../shared/agent_icon/icons/java.svg';
 import awsIcon from './icons/aws.svg';
 import azureIcon from './icons/azure.svg';
 import cassandraIcon from './icons/cassandra.svg';
@@ -23,7 +23,6 @@ import mysqlIcon from './icons/mysql.svg';
 import postgresqlIcon from './icons/postgresql.svg';
 import redisIcon from './icons/redis.svg';
 import websocketIcon from './icons/websocket.svg';
-import javaIcon from '../../shared/agent_icon/icons/java.svg';
 
 const defaultSpanTypeIcons: { [key: string]: string } = {
   cache: databaseIcon,

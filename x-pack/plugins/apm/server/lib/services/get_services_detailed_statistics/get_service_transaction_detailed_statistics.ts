@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { keyBy } from 'lodash';
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import {
@@ -24,7 +23,7 @@ import {
 } from '../../helpers/aggregated_transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,

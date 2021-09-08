@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import type {
   ElasticsearchClient,
-  SavedObjectsClientContract,
   Logger,
+  SavedObjectsClientContract,
 } from 'kibana/server';
-import { PackagePolicy } from '../../../../fleet/common';
+import type { PackagePolicy } from '../../../../fleet/common';
 import {
-  APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
+  APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
-import {
+import type {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from '../../types';
+import type { Setup } from '../helpers/setup_request';
 import { getApmPackagePolicyDefinition } from './get_apm_package_policy_definition';
-import { Setup } from '../helpers/setup_request';
 import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
 
 export async function createCloudApmPackgePolicy({

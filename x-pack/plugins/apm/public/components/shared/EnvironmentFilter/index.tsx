@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
+import type { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
-import { fromQuery, toQuery } from '../Links/url_helpers';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { useApmParams } from '../../../hooks/use_apm_params';
 import { useUxUrlParams } from '../../../context/url_params_context/use_ux_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { fromQuery, toQuery } from '../Links/url_helpers';
 
 function updateEnvironmentUrl(
   history: History,

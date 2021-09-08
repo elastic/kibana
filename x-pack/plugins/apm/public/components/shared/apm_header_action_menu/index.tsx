@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceName } from '../../../hooks/use_service_name';
 import { getAlertingCapabilities } from '../../alerting/get_alerting_capabilities';
 import { getAPMHref } from '../Links/apm/APMLink';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
-import { useServiceName } from '../../../hooks/use_service_name';
 import { InspectorHeaderLink } from './inspector_header_link';
 
 export function ApmHeaderActionMenu() {

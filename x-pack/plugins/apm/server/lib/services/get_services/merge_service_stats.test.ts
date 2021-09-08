@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PromiseReturnType } from '../../../../../observability/typings/common';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 

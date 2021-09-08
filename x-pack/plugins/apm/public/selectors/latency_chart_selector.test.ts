@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
+import type { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
-import {
-  getLatencyChartSelector,
-  LatencyChartsResponse,
-} from './latency_chart_selectors';
+import type { LatencyChartsResponse } from './latency_chart_selectors';
+import { getLatencyChartSelector } from './latency_chart_selectors';
 
 const theme = {
   eui: {

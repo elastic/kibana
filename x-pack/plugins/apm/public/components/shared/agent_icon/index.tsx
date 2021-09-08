@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { EuiIconProps } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { EuiIcon, EuiIconProps } from '@elastic/eui';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { getAgentIcon } from './get_agent_icon';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { useTheme } from '../../../hooks/use_theme';
+import { getAgentIcon } from './get_agent_icon';
 
 interface Props {
   agentName?: AgentName;

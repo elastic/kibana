@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Stacktrace } from '.';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
 const Accordion = euiStyled(EuiAccordion)`
   border-top: ${({ theme }) => theme.eui.euiBorderThin};

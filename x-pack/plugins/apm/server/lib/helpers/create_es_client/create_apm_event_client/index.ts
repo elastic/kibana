@@ -4,25 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ValuesType } from 'utility-types';
-import { withApmSpan } from '../../../../utils/with_apm_span';
-import { Profile } from '../../../../../typings/es_schemas/ui/profile';
-import {
-  ElasticsearchClient,
-  KibanaRequest,
-} from '../../../../../../../../src/core/server';
-import {
+import type { ValuesType } from 'utility-types';
+import type { ElasticsearchClient } from '../../../../../../../../src/core/server';
+import { KibanaRequest } from '../../../../../../../../src/core/server';
+import type {
   ESSearchRequest,
   InferSearchResponseOf,
 } from '../../../../../../../../src/core/types/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { ProcessorEvent } from '../../../../../common/processor_event';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { Metric } from '../../../../../typings/es_schemas/ui/metric';
-import { Span } from '../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
+import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import type { Metric } from '../../../../../typings/es_schemas/ui/metric';
+import type { Profile } from '../../../../../typings/es_schemas/ui/profile';
+import type { Span } from '../../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { withApmSpan } from '../../../../utils/with_apm_span';
+import type { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
 import {
   callAsyncWithDebug,
   getDebugBody,

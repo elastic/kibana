@@ -8,7 +8,7 @@
 import datemath from '@elastic/datemath';
 import { compact, pickBy } from 'lodash';
 import moment from 'moment';
-import { UrlParams } from './types';
+import type { UrlParams } from './types';
 
 function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {

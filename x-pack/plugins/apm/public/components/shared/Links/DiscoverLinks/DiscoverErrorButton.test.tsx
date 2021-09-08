@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { DiscoverErrorLink } from './DiscoverErrorLink';
 
 describe('DiscoverErrorLink without kuery', () => {

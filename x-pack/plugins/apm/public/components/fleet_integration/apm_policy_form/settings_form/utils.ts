@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isEmpty, isFinite } from 'lodash';
-import { PackagePolicyVars, SettingsRow, BasicSettingRow } from '../typings';
+import type {
+  BasicSettingRow,
+  PackagePolicyVars,
+  SettingsRow,
+} from '../typings';
 
 export const REQUIRED_LABEL = i18n.translate(
   'xpack.apm.fleet_integration.settings.requiredLabel',

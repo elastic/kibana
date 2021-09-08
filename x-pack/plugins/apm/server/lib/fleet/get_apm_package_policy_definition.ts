@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
-import { APMPluginSetupDependencies } from '../../types';
+import type { APMPluginSetupDependencies } from '../../types';
 import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 
 interface GetApmPackagePolicyDefinitionOptions {

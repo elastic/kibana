@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ServiceHealthStatus } from '../../../common/service_health_status';
-
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -15,10 +12,9 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import {
-  transformServiceMapResponses,
-  ServiceMapResponse,
-} from './transform_service_map_responses';
+import { ServiceHealthStatus } from '../../../common/service_health_status';
+import type { ServiceMapResponse } from './transform_service_map_responses';
+import { transformServiceMapResponses } from './transform_service_map_responses';
 
 const nodejsService = {
   [SERVICE_NAME]: 'opbeans-node',

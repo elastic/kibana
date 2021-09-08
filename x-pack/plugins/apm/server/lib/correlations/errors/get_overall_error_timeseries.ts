@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import {
-  getTimeseriesAggregation,
   getFailedTransactionRateTimeSeries,
+  getTimeseriesAggregation,
 } from '../../helpers/transaction_error_rate';
-import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
+import type { CorrelationsOptions } from '../get_filters';
+import { getCorrelationsFilters } from '../get_filters';
 
 export async function getOverallErrorTimeseries(options: CorrelationsOptions) {
   const { setup } = options;

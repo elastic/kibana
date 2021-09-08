@@ -6,13 +6,13 @@
  */
 import React from 'react';
 import { APMPolicyForm } from '.';
-import {
+import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../../common/fleet';
+import type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyEditExtensionComponentProps,
   PackagePolicyVars,
 } from './typings';
-import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../../common/fleet';
 
 interface Props {
   policy: PackagePolicy;

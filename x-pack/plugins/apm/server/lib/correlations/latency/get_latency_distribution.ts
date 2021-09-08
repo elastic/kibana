@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AggregationOptionsByType } from '../../../../../../../src/core/types/elasticsearch';
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import type {
+  AggregationOptionsByType,
+  ESFilter,
+} from '../../../../../../../src/core/types/elasticsearch';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { TopSigTerm } from '../process_significant_term_aggs';
-
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import type { TopSigTerm } from '../process_significant_term_aggs';
 import {
   getDistributionAggregation,
   trimBuckets,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render as testLibRender } from '@testing-library/react';
-import { CoreStart } from 'kibana/public';
-import { of } from 'rxjs';
+import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
+import type { CoreStart } from 'kibana/public';
+import React from 'react';
 import { Router } from 'react-router-dom';
-import { MemoryHistory } from 'history';
+import { of } from 'rxjs';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { UrlParamsProvider } from '../../../../context/url_params_context/url_params_context';

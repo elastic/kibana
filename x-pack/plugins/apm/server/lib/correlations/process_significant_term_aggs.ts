@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { orderBy } from 'lodash';
-import {
+import type {
   AggregationOptionsByType,
   AggregationResultOf,
 } from '../../../../../../src/core/types/elasticsearch';

@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { fireEvent, render } from '@testing-library/react';
-import { CoreStart } from 'kibana/public';
-import { merge } from 'lodash';
 // import { renderWithTheme } from '../../../../utils/testHelpers';
-import React, { ReactNode } from 'react';
+import { fireEvent, render } from '@testing-library/react';
+import type { CoreStart } from 'kibana/public';
+import { merge } from 'lodash';
+import type { ReactNode } from 'react';
+import React from 'react';
+import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import { ServiceIcons } from '.';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import * as fetcherHook from '../../../hooks/use_fetcher';
-import { ServiceIcons } from '.';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },

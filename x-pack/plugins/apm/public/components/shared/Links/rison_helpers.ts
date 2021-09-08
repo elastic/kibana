@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Location } from 'history';
+import type { Location } from 'history';
 import { toQuery } from './url_helpers';
 
 export interface TimepickerRisonData {

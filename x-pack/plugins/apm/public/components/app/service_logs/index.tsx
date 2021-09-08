@@ -4,23 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isEmpty } from 'lodash';
-import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import moment from 'moment';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import React, { useMemo } from 'react';
 import { LogStream } from '../../../../../infra/public';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
-
 import {
   CONTAINER_ID,
   HOSTNAME,
 } from '../../../../common/elasticsearch_fieldnames';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import type { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 export function ServiceLogs() {
   const { serviceName } = useApmServiceContext();

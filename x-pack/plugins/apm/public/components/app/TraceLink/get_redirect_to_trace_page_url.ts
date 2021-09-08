@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { format } from 'url';
 import { TRACE_ID } from '../../../../common/elasticsearch_fieldnames';
 

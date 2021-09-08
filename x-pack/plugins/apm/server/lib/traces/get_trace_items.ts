@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { ProcessorEvent } from '../../../common/processor_event';
-import {
-  TRACE_ID,
-  PARENT_ID,
-  TRANSACTION_DURATION,
-  SPAN_DURATION,
-  TRANSACTION_ID,
-  ERROR_LOG_LEVEL,
-} from '../../../common/elasticsearch_fieldnames';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { rangeQuery } from '../../../../observability/server';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { PromiseValueType } from '../../../typings/common';
+import {
+  ERROR_LOG_LEVEL,
+  PARENT_ID,
+  SPAN_DURATION,
+  TRACE_ID,
+  TRANSACTION_DURATION,
+  TRANSACTION_ID,
+} from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
+import type { PromiseValueType } from '../../../typings/common';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getTraceItems(
   traceId: string,

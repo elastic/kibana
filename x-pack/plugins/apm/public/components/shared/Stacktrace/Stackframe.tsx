@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiAccordion } from '@elastic/eui';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import {
+import type {
   Stackframe as StackframeType,
   StackframeWithLineContext,
 } from '../../../../typings/es_schemas/raw/fields/stackframe';

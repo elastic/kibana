@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import type {
   FieldValuePair,
   RawResponseBase,
   SearchStrategyClientParams,
 } from '../types';
-
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from './constants';
 
 export interface FailedTransactionsCorrelation extends FieldValuePair {

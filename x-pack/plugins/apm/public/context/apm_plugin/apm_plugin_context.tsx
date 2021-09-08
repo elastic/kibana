@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import type { AppMountParameters, CoreStart } from 'kibana/public';
 import { createContext } from 'react';
-import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
-import { ConfigSchema } from '../..';
-import { ApmPluginSetupDeps } from '../../plugin';
-import { MapsStartApi } from '../../../../maps/public';
-import { ObservabilityPublicStart } from '../../../../observability/public';
-import { Start as InspectorPluginStart } from '../../../../../../src/plugins/inspector/public';
+import type { ConfigSchema } from '../..';
+import type { Start as InspectorPluginStart } from '../../../../../../src/plugins/inspector/public';
+import type { MapsStartApi } from '../../../../maps/public';
+import type {
+  ObservabilityPublicStart,
+  ObservabilityRuleTypeRegistry,
+} from '../../../../observability/public';
+import type { ApmPluginSetupDeps } from '../../plugin';
 
 export interface ApmPluginContextValue {
   appMountParameters: AppMountParameters;

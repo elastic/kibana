@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getAgentAuthorizationSettings } from './agent_authorization_settings';
-import { SettingsRow } from '../typings';
 import { isSettingsFormValid } from '../settings_form/utils';
+import type { SettingsRow } from '../typings';
+import { getAgentAuthorizationSettings } from './agent_authorization_settings';
 
 describe('apm-fleet-apm-integration', () => {
   describe('getAgentAuthorizationSettings', () => {

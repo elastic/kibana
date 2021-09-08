@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import {
-  uxFiltersByName,
+import type {
   UxLocalUIFilter,
   UxLocalUIFilterName,
 } from '../../../../../common/ux_ui_filter';
+import { uxFiltersByName } from '../../../../../common/ux_ui_filter';
 import {
   fromQuery,
   toQuery,

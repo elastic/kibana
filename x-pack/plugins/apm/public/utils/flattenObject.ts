@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { compact, isObject } from 'lodash';
-import { Maybe } from '../../typings/common';
+import type { Maybe } from '../../typings/common';
 
 export interface KeyValuePair {
   key: string;

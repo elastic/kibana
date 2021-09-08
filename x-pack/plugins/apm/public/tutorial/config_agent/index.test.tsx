@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { fireEvent, render, screen } from '@testing-library/react';
-import { HttpStart } from 'kibana/public';
+import type { HttpStart } from 'kibana/public';
 import React from 'react';
 import {
   expectTextsInDocument,

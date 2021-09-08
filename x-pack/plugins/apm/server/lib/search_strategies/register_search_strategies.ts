@@ -4,13 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
-
+import type { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
 import { APM_SEARCH_STRATEGIES } from '../../../common/search_strategies/constants';
-
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
-
 import { failedTransactionsCorrelationsSearchServiceProvider } from './failed_transactions_correlations';
 import { latencyCorrelationsSearchServiceProvider } from './latency_correlations';
 import { searchStrategyProvider } from './search_strategy_provider';

@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
-import { tasks } from './tasks';
 import {
-  SERVICE_NAME,
   SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
+import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import { tasks } from './tasks';
 
 describe('data telemetry collection tasks', () => {
   const indices = {

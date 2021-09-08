@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { orderBy } from 'lodash';
-import React, { ReactNode, useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
@@ -151,5 +152,5 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
 const ManagedTable = React.memo(
   UnoptimizedManagedTable
 ) as typeof UnoptimizedManagedTable;
-
-export { ManagedTable, UnoptimizedManagedTable };
+export { ManagedTable };
+export { UnoptimizedManagedTable };

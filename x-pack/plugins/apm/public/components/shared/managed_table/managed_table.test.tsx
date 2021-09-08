@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { shallow } from 'enzyme';
 import React from 'react';
-import { ITableColumn, UnoptimizedManagedTable } from '.';
+import type { ITableColumn } from '.';
+import { UnoptimizedManagedTable } from '.';
 
 interface Person {
   name: string;

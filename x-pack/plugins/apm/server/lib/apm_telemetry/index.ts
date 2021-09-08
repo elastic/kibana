@@ -4,18 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  CoreSetup,
-  Logger,
-  SavedObjectsErrorHelpers,
-} from '../../../../../../src/core/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { APMConfig } from '../..';
+import type { CoreSetup, Logger } from '../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { unwrapEsResponse } from '../../../../observability/server';
-import { APMConfig } from '../..';
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
@@ -25,12 +21,10 @@ import {
 } from '../../../common/apm_saved_object_constants';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import {
-  collectDataTelemetry,
-  CollectTelemetryParams,
-} from './collect_data_telemetry';
-import { APMUsage } from './types';
+import type { CollectTelemetryParams } from './collect_data_telemetry';
+import { collectDataTelemetry } from './collect_data_telemetry';
 import { apmSchema } from './schema';
+import type { APMUsage } from './types';
 
 const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 

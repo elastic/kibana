@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useMemo } from 'react';
-import { callApi } from '../../../../services/rest/callApi';
+import type { FetchOptions } from '../../../../../common/fetch_options';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { FetchOptions } from '../../../../../common/fetch_options';
+import { callApi } from '../../../../services/rest/callApi';
 
 export function useCallApi() {
   const { core } = useApmPluginContext();

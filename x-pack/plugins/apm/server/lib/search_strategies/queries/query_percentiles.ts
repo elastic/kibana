@@ -4,21 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { estypes } from '@elastic/elasticsearch';
-
 import type { ElasticsearchClient } from 'src/core/server';
-
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import type {
   FieldValuePair,
   ResponseHit,
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
-
+import { SIGNIFICANT_VALUE_DIGITS } from '../constants';
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
-import { SIGNIFICANT_VALUE_DIGITS } from '../constants';
 
 export const getTransactionDurationPercentilesRequest = (
   params: SearchStrategyParams,

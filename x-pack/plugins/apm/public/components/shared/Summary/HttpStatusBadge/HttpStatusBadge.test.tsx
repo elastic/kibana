@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
-import { HttpStatusBadge } from './index';
+import React from 'react';
 import {
-  successColor,
-  neutralColor,
-  warningColor,
   errorColor,
+  neutralColor,
+  successColor,
+  warningColor,
 } from '../../../../utils/httpStatusCodeToColor';
+import { HttpStatusBadge } from './index';
 
 describe('HttpStatusBadge', () => {
   describe('render', () => {

@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
-
-export { environmentRt } from '../../common/environment_rt';
-
+import * as t from 'io-ts';
 export const rangeRt = t.type({
   start: isoToEpochRt,
   end: isoToEpochRt,
@@ -23,3 +20,5 @@ export const comparisonRangeRt = t.partial({
 });
 
 export const kueryRt = t.type({ kuery: t.string });
+
+export { environmentRt } from '../../common/environment_rt';

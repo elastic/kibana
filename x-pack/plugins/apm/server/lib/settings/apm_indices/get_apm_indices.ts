@@ -4,22 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { merge } from 'lodash';
-
 import { SavedObjectsClient } from 'src/core/server';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
+import type { APMConfig } from '../../..';
+import type { ApmIndicesConfig } from '../../../../../observability/common/typings';
+import type { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
-  APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID,
+  APM_INDICES_SAVED_OBJECT_TYPE,
 } from '../../../../common/apm_saved_object_constants';
-import { APMConfig } from '../../..';
-import { APMRouteHandlerResources } from '../../../routes/typings';
+import type { APMRouteHandlerResources } from '../../../routes/typings';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { ApmIndicesConfig } from '../../../../../observability/common/typings';
-
-export { ApmIndicesConfig };
-
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 
 export type ApmIndicesName = keyof ApmIndicesConfig;
@@ -103,3 +98,5 @@ export async function getApmIndexSettings({
     savedValue: apmIndicesSavedObject[configurationName], // value saved via Saved Objects service
   }));
 }
+
+export type { ApmIndicesConfig };

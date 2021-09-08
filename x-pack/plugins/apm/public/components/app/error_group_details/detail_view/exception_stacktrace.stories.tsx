@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Story } from '@storybook/react';
-import React, { ComponentProps, ComponentType } from 'react';
+import type { Story } from '@storybook/react';
+import type { ComponentProps, ComponentType } from 'react';
+import React from 'react';
 import { ExceptionStacktrace } from './exception_stacktrace';
 
 type Args = ComponentProps<typeof ExceptionStacktrace>;

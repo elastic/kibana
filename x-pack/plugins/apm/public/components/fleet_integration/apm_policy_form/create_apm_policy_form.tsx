@@ -6,10 +6,10 @@
  */
 import React from 'react';
 import { APMPolicyForm } from '.';
-import {
-  PackagePolicyVars,
+import type {
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
+  PackagePolicyVars,
 } from './typings';
 
 interface Props {

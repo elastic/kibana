@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useMemo, useState } from 'react';
-import { debounce } from 'lodash';
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useUiTracker } from '../../../../../observability/public';
-import { useTheme } from '../../../hooks/use_theme';
 import type { FieldValuePair } from '../../../../common/search_strategies/types';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useTheme } from '../../../hooks/use_theme';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 

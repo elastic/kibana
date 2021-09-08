@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { Maybe } from '../../../typings/common';
-import { APMError } from '../../../typings/es_schemas/ui/apm_error';
+import type { Maybe } from '../../../typings/common';
+import type { APMError } from '../../../typings/es_schemas/ui/apm_error';
 
 export function getErrorName({ error }: { error: Maybe<APMError['error']> }) {
   return (

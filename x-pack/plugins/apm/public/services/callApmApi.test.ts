@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { CoreStart } from 'kibana/public';
 import * as callApiExports from './rest/callApi';
-import { createCallApmApi, callApmApi } from './rest/createCallApmApi';
-import { CoreStart } from 'kibana/public';
+import { callApmApi, createCallApmApi } from './rest/createCallApmApi';
 
 const callApi = jest
   .spyOn(callApiExports, 'callApi')

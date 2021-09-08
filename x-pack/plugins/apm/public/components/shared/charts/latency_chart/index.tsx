@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED } from '@kbn/rule-data-utils';
+import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import type { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED } from '@kbn/rule-data-utils';
-// @ts-expect-error
-import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { AlertType } from '../../../../../common/alert_types';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -26,6 +24,7 @@ import {
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
 import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
+// @ts-expect-error
 import * as urlHelpers from '../../../shared/Links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 

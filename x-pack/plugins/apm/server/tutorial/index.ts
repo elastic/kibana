@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { APMConfig } from '..';
-import {
+import type { APMConfig } from '..';
+import type {
   ArtifactsSchema,
-  TutorialsCategory,
   TutorialSchema,
 } from '../../../../../src/plugins/home/server';
-import { CloudSetup } from '../../../cloud/server';
+import { TutorialsCategory } from '../../../../../src/plugins/home/server';
+import type { CloudSetup } from '../../../cloud/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
 import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_pattern_title';
-import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
+import type { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
 import apmIndexPattern from './index_pattern.json';

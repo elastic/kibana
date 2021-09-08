@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { APMQueryParams } from '../url_helpers';
-import { APMLinkExtendProps, useAPMHref } from './APMLink';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
+import type { APMQueryParams } from '../url_helpers';
+import type { APMLinkExtendProps } from './APMLink';
+import { useAPMHref } from './APMLink';
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'transactionResult',

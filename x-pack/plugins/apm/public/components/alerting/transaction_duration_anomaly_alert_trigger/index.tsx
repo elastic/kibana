@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { defaults, omit } from 'lodash';
 import React from 'react';
@@ -17,7 +16,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata } from '../helper';
+import type { AlertMetadata } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 import {

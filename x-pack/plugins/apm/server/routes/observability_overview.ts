@@ -6,15 +6,15 @@
  */
 
 import * as t from 'io-ts';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceCount } from '../lib/observability_overview/get_service_count';
 import { getTransactionsPerMinute } from '../lib/observability_overview/get_transactions_per_minute';
 import { getHasData } from '../lib/observability_overview/has_data';
-import { rangeRt } from './default_api_types';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { withApmSpan } from '../utils/with_apm_span';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { rangeRt } from './default_api_types';
 
 const observabilityOverviewHasDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/observability_overview/has_data',

@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import type { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getBuckets({
   environment,

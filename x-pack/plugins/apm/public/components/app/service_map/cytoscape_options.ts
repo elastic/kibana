@@ -6,9 +6,9 @@
  */
 
 import cytoscape from 'cytoscape';
-import { CSSProperties } from 'react';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
+import type { CSSProperties } from 'react';
+import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import type { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,

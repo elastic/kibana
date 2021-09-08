@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import {
@@ -14,11 +13,12 @@ import {
   asPercent,
   getFixedByteFormatter,
 } from '../../../../../common/utils/formatters';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform_metrics_chart';
-import { Maybe } from '../../../../../typings/common';
+import type { GenericMetricsChart } from '../../../../../server/lib/metrics/transform_metrics_chart';
+import type { Maybe } from '../../../../../typings/common';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { TimeseriesChart } from '../timeseries_chart';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 
 function getYTickFormatter(chart: GenericMetricsChart) {
   switch (chart.yUnit) {

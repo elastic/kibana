@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
 import { OPTIONAL_LABEL } from '../settings_form/utils';
-import { SettingsRow } from '../typings';
+import type { SettingsRow } from '../typings';
 
 export function getAgentAuthorizationSettings({
   isCloudPolicy,

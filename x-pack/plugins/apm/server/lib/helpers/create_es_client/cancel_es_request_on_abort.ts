@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { KibanaRequest } from 'src/core/server';
 
 export function cancelEsRequestOnAbort<T extends TransportRequestPromise<any>>(

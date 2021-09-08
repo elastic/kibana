@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/failed_transactions_correlations/constants';
+import type {
   FailedTransactionsCorrelation,
   FailedTransactionsCorrelationsImpactThreshold,
 } from '../../../../../common/search_strategies/failed_transactions_correlations/types';
-import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/failed_transactions_correlations/constants';
 
 export function getFailedTransactionsCorrelationImpactLabel(
   pValue: FailedTransactionsCorrelation['pValue']

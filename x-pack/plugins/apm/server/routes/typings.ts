@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import type {
   CoreSetup,
-  RequestHandlerContext,
-  Logger,
-  KibanaRequest,
   CoreStart,
+  Logger,
+  RequestHandlerContext,
 } from 'src/core/server';
-import { IRuleDataClient } from '../../../rule_registry/server';
-import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
-import type { RacApiRequestHandlerContext } from '../../../rule_registry/server';
-import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
-import { APMConfig } from '..';
-import { APMPluginDependencies } from '../types';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import { KibanaRequest } from 'src/core/server';
+import type { APMConfig } from '..';
+import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import type { AlertingApiRequestHandlerContext } from '../../../alerting/server';
+import type { LicensingApiRequestHandlerContext } from '../../../licensing/server';
+import type {
+  IRuleDataClient,
+  RacApiRequestHandlerContext,
+} from '../../../rule_registry/server';
+import type { APMPluginDependencies } from '../types';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;

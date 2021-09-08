@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { SetupTimeRange } from '../helpers/setup_request';
-import { SetupUX } from '../../routes/rum_client';
 import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../common/elasticsearch_fieldnames';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
+import { mergeProjection } from '../../projections/util/merge_projection';
+import type { SetupUX } from '../../routes/rum_client';
+import type { SetupTimeRange } from '../helpers/setup_request';
 
 export async function getVisitorBreakdown({
   setup,

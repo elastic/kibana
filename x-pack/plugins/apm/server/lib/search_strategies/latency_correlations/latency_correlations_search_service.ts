@@ -4,37 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
-
-import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';
-import {
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
 } from '../../../../../../../src/plugins/data/common';
-
-import type { SearchStrategyServerParams } from '../../../../common/search_strategies/types';
+import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';
 import type {
   LatencyCorrelationsParams,
   LatencyCorrelationsRawResponse,
 } from '../../../../common/search_strategies/latency_correlations/types';
-
+import type { SearchStrategyServerParams } from '../../../../common/search_strategies/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
-
 import {
   fetchTransactionDurationFieldCandidates,
   fetchTransactionDurationFieldValuePairs,
   fetchTransactionDurationFractions,
-  fetchTransactionDurationPercentiles,
-  fetchTransactionDurationHistograms,
   fetchTransactionDurationHistogramRangeSteps,
+  fetchTransactionDurationHistograms,
+  fetchTransactionDurationPercentiles,
   fetchTransactionDurationRanges,
 } from '../queries';
-import { computeExpectationsAndRanges } from '../utils';
 import { searchServiceLogProvider } from '../search_service_log';
 import type { SearchServiceProvider } from '../search_strategy_provider';
-
+import { computeExpectationsAndRanges } from '../utils';
 import { latencyCorrelationsSearchServiceStateProvider } from './latency_correlations_search_service_state';
 
 export type LatencyCorrelationsSearchServiceProvider = SearchServiceProvider<

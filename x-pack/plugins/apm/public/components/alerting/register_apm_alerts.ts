@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { lazy } from 'react';
-import { stringify } from 'querystring';
 import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
@@ -17,10 +14,10 @@ import {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
   ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
-  // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { stringify } from 'querystring';
+import { lazy } from 'react';
 import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import {
   AlertType,
   formatErrorCountReason,
@@ -28,6 +25,7 @@ import {
   formatTransactionDurationReason,
   formatTransactionErrorRateReason,
 } from '../../../common/alert_types';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';

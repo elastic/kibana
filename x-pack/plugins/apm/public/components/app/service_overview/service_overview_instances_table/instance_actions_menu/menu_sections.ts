@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from 'kibana/public';
+import type { IBasePath } from 'kibana/public';
 import moment from 'moment';
-import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../../../services/rest/createCallApmApi';
 import { getInfraHref } from '../../../../shared/Links/InfraLink';
-import {
+import type {
   Action,
-  getNonEmptySections,
   SectionRecord,
 } from '../../../../shared/transaction_action_menu/sections_helper';
+import { getNonEmptySections } from '../../../../shared/transaction_action_menu/sections_helper';
 
 type InstaceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 

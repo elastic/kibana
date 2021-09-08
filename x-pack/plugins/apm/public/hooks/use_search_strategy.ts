@@ -4,31 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import type { Subscription } from 'rxjs';
-
-import {
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
+} from '../../../../../src/plugins/data/public';
+import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-
-import type { SearchStrategyClientParams } from '../../common/search_strategies/types';
-import type { RawResponseBase } from '../../common/search_strategies/types';
-import type { LatencyCorrelationsRawResponse } from '../../common/search_strategies/latency_correlations/types';
+import type { ApmSearchStrategies } from '../../common/search_strategies/constants';
+import { APM_SEARCH_STRATEGIES } from '../../common/search_strategies/constants';
 import type { FailedTransactionsCorrelationsRawResponse } from '../../common/search_strategies/failed_transactions_correlations/types';
-import {
-  ApmSearchStrategies,
-  APM_SEARCH_STRATEGIES,
-} from '../../common/search_strategies/constants';
+import type { LatencyCorrelationsRawResponse } from '../../common/search_strategies/latency_correlations/types';
+import type {
+  RawResponseBase,
+  SearchStrategyClientParams,
+} from '../../common/search_strategies/types';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
-
-import { ApmPluginStartDeps } from '../plugin';
-
+import type { ApmPluginStartDeps } from '../plugin';
 import { useApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
 

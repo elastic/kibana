@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Setup } from '../helpers/setup_request';
-import { APMPluginStartDependencies } from '../../types';
+import type { APMPluginStartDependencies } from '../../types';
+import type { Setup } from '../helpers/setup_request';
 import { listConfigurations } from '../settings/agent_configuration/list_configurations';
-import {
-  getPackagePolicyWithAgentConfigurations,
-  PackagePolicy,
-} from './register_fleet_policy_callbacks';
+import type { PackagePolicy } from './register_fleet_policy_callbacks';
+import { getPackagePolicyWithAgentConfigurations } from './register_fleet_policy_callbacks';
 import { getPackagePolicyWithSourceMap, listArtifacts } from './source_maps';
 
 export async function mergePackagePolicyWithApm({

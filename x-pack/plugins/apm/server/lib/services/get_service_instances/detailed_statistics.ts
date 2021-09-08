@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { keyBy } from 'lodash';
-import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import { Coordinate } from '../../../../typings/timeseries';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
+import type { Coordinate } from '../../../../typings/timeseries';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
 

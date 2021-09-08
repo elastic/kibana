@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useDynamicIndexPatternFetcher } from '../../../../hooks/use_dynamic_index_pattern';
-import {
-  IndexPattern,
-  IndexPatternSpec,
-} from '../../../../../../../../src/plugins/data/common';
+import type { IndexPatternSpec } from '../../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import type { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useDynamicIndexPatternFetcher } from '../../../../hooks/use_dynamic_index_pattern';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 
 export function useIndexPattern() {
   const { indexPattern: indexPatternDynamic } = useDynamicIndexPatternFetcher();

@@ -4,16 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { estypes } from '@elastic/elasticsearch';
-
 import type { ElasticsearchClient } from 'src/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-
+import type { BucketCorrelation } from './query_correlation';
 import {
   fetchTransactionDurationCorrelation,
   getTransactionDurationCorrelationRequest,
-  BucketCorrelation,
 } from './query_correlation';
 
 const params = {

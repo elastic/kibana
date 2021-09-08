@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { BrushEndListener, SeriesNameFn } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
-  BrushEndListener,
   Chart,
   DARK_THEME,
   LIGHT_THEME,
   niceTimeFormatByDay,
+  Position,
   ScaleType,
-  SeriesNameFn,
   Settings,
   timeFormatter,
-  Position,
 } from '@elastic/charts';
 import {
   EUI_CHARTS_THEME_DARK,

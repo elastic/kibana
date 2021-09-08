@@ -7,8 +7,8 @@
 
 import * as t from 'io-ts';
 import { compact } from 'lodash';
-import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import type { Setup } from '../../helpers/setup_request';
 import { filterOptionsRt } from './custom_link_types';
 import { splitFilterValueByComma } from './helper';
 

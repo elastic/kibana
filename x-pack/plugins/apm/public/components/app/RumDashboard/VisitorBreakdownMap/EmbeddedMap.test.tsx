@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { render } from 'enzyme';
 import React from 'react';
-
-import { EmbeddedMap } from './EmbeddedMap';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { embeddablePluginMock } from '../../../../../../../../src/plugins/embeddable/public/mocks';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { EmbeddedMap } from './EmbeddedMap';
 
 describe('Embedded Map', () => {
   test('it renders', () => {

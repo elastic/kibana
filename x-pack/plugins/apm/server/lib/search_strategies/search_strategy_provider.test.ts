@@ -4,18 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { estypes } from '@elastic/elasticsearch';
-
-import { SearchStrategyDependencies } from 'src/plugins/data/server';
-
-import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common';
-
+import type { SearchStrategyDependencies } from 'src/plugins/data/server';
+import type { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import type { LatencyCorrelationsParams } from '../../../common/search_strategies/latency_correlations/types';
-
 import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
-
 import { latencyCorrelationsSearchServiceProvider } from './latency_correlations';
 import { searchStrategyProvider } from './search_strategy_provider';
 

@@ -4,20 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { estypes } from '@elastic/elasticsearch';
-
 import type { ElasticsearchClient } from 'src/core/server';
-
 import type {
   FieldValuePair,
   SearchStrategyParams,
 } from '../../../../common/search_strategies/types';
-
-import type { SearchServiceLog } from '../search_service_log';
-import type { LatencyCorrelationsSearchServiceState } from '../latency_correlations/latency_correlations_search_service_state';
 import { CORRELATION_THRESHOLD, KS_TEST_THRESHOLD } from '../constants';
-
+import type { LatencyCorrelationsSearchServiceState } from '../latency_correlations/latency_correlations_search_service_state';
+import type { SearchServiceLog } from '../search_service_log';
 import { getPrioritizedFieldValuePairs } from './get_prioritized_field_value_pairs';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
 import { fetchTransactionDurationRanges } from './query_ranges';

@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   uxLocalUIFilterNames,
   uxLocalUIFilters,
 } from '../../../../common/ux_ui_filter';
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
-import { UxUIFilters } from '../../../../typings/ui_filters';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import type { UxUIFilters } from '../../../../typings/ui_filters';
 
 export function getEsFilter(uiFilters: UxUIFilters, exclude?: boolean) {
   const localFilterValues = uiFilters;

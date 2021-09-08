@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -17,15 +16,15 @@ import React, { useState } from 'react';
 import uuid from 'uuid';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
+import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
-import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_column';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 
 interface Props {
   serviceName: string;

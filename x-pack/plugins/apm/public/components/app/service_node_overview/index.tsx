@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
@@ -19,11 +19,12 @@ import {
 } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { truncate, unit } from '../../../utils/style';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
-import { ITableColumn, ManagedTable } from '../../shared/managed_table';
+import type { ITableColumn } from '../../shared/managed_table';
+import { ManagedTable } from '../../shared/managed_table';
 
 const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_FIELD = 'cpu';

@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 // TODO: is it possible to get rid of `any`?
 export type SettingValidation = t.Type<any, string, unknown>;

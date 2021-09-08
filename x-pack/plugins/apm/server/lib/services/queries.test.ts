@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import type { SearchParamsMock } from '../../utils/test_helpers';
+import { inspectSearchParams } from '../../utils/test_helpers';
+import { getLegacyDataStatus } from './get_services/get_legacy_data_status';
+import { getServicesItems } from './get_services/get_services_items';
+import { hasHistoricalAgentData } from './get_services/has_historical_agent_data';
 import { getServiceAgent } from './get_service_agent';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
-import { getServicesItems } from './get_services/get_services_items';
-import { getLegacyDataStatus } from './get_services/get_legacy_data_status';
-import { hasHistoricalAgentData } from './get_services/has_historical_agent_data';
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../utils/test_helpers';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('services queries', () => {
   let mock: SearchParamsMock;

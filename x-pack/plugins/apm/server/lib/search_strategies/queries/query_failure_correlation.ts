@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from 'kibana/server';
-import { SearchStrategyParams } from '../../../../common/search_strategies/types';
+import type { ElasticsearchClient } from 'kibana/server';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
+import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
 import { getQueryWithParams, getTermsQuery } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 

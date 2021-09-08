@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { latencyCorrelationsSearchServiceStateProvider } from './latency_correlations_search_service_state';
 
 describe('search service', () => {

@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Story } from '@storybook/react';
-import { HttpStart } from 'kibana/public';
+import type { Story } from '@storybook/react';
+import type { HttpStart } from 'kibana/public';
 import React from 'react';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
+import type { APIReturnType } from '../../services/rest/createCallApmApi';
 import TutorialConfigAgent from './';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
 
 export type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
 

@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiCallOut, EuiButton } from '@elastic/eui';
-import React from 'react';
+import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import React from 'react';
 import { useMlHref } from '../../../../../../ml/public';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 export function LegacyJobsCallout() {
   const {

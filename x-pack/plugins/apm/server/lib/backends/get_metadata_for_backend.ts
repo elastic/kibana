@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { maybe } from '../../../common/utils/maybe';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../observability/server';
-import { Setup } from '../helpers/setup_request';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { maybe } from '../../../common/utils/maybe';
+import type { Setup } from '../helpers/setup_request';
 
 export async function getMetadataForBackend({
   setup,

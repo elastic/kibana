@@ -6,12 +6,12 @@
  */
 
 import hash from 'object-hash';
-import { Setup } from '../../helpers/setup_request';
-import {
+import type {
   AgentConfiguration,
   AgentConfigurationIntake,
 } from '../../../../common/agent_configuration/configuration_types';
-import { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
+import type { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
+import type { Setup } from '../../helpers/setup_request';
 
 export function createOrUpdateConfiguration({
   configurationId,

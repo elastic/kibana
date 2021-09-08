@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { withApmSpan } from '../../../../utils/with_apm_span';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { kqlQuery, rangeQuery } from '../../../../../../observability/server';
 import {
   SERVICE_NAME,
   TRACE_ID,
@@ -15,9 +15,9 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
-import { rangeQuery, kqlQuery } from '../../../../../../observability/server';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
+import { withApmSpan } from '../../../../utils/with_apm_span';
+import type { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 const TRACE_SAMPLES_SIZE = 500;
 

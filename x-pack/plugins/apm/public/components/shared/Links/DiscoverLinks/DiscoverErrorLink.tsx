@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { DiscoverLink } from './DiscoverLink';
 
 function getDiscoverQuery(error: APMError, kuery?: string) {

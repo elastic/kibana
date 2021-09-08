@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getIsUsingTransactionEvents } from './get_is_using_transaction_events';
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../../utils/test_helpers';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
+import type { SearchParamsMock } from '../../../utils/test_helpers';
+import { inspectSearchParams } from '../../../utils/test_helpers';
+import { getIsUsingTransactionEvents } from './get_is_using_transaction_events';
 
 const mockResponseNoHits = {
   took: 398,

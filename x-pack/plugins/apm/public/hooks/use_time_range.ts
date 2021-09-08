@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useRef } from 'react';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import { getDateRange } from '../context/url_params_context/helpers';

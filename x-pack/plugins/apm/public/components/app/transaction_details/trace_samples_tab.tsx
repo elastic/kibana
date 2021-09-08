@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-
 import { i18n } from '@kbn/i18n';
-
+import React from 'react';
 import { TransactionDistribution } from './distribution';
 import type { TabContentProps } from './types';
 

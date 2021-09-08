@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
 import {
   fireEvent,
+  screen,
   waitFor,
   waitForElementToBeRemoved,
-  screen,
 } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
+import React, { useState } from 'react';
 import * as fetcherHook from '../../../../../hooks/use_fetcher';
-import { SelectableUrlList } from './SelectableUrlList';
-import { render } from '../../utils/test_helper';
 import { I18LABELS } from '../../translations';
+import { render } from '../../utils/test_helper';
+import { SelectableUrlList } from './SelectableUrlList';
 
 describe('SelectableUrlList', () => {
   jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({

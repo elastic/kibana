@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { SERVICE_ENVIRONMENT } from './elasticsearch_fieldnames';
-import { Environment } from './environment_rt';
+import type { Environment } from './environment_rt';
 
 const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
 const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED' as const;

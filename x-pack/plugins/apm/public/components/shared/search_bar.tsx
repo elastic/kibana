@@ -4,14 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import {
-  EuiFlexGroup,
-  EuiFlexGroupProps,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import type { EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useBreakPoints } from '../../hooks/use_break_points';
 import { DatePicker } from './DatePicker';

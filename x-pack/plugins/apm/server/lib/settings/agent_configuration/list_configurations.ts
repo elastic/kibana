@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Setup } from '../../helpers/setup_request';
-import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import type { Setup } from '../../helpers/setup_request';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 
 export async function listConfigurations({ setup }: { setup: Setup }) {

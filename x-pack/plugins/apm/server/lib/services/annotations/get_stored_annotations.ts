@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { ElasticsearchClient, Logger } from 'kibana/server';
-import { rangeQuery } from '../../../../../observability/server';
-import { environmentQuery } from '../../../../common/utils/environment_query';
+import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ESSearchResponse } from '../../../../../../../src/core/types/elasticsearch';
+import type { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
+import type { ScopedAnnotationsClient } from '../../../../../observability/server';
 import {
+  rangeQuery,
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../../../../../observability/server';
-import { ESSearchResponse } from '../../../../../../../src/core/types/elasticsearch';
-import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
-import { ScopedAnnotationsClient } from '../../../../../observability/server';
-import { Annotation, AnnotationType } from '../../../../common/annotations';
+import type { Annotation } from '../../../../common/annotations';
+import { AnnotationType } from '../../../../common/annotations';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export function getStoredAnnotations({
   setup,

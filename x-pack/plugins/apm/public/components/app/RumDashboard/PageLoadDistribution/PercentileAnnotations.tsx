@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import type { LineAnnotationDatum, LineAnnotationStyle } from '@elastic/charts';
 import {
   AnnotationDomainType,
   LineAnnotation,
-  LineAnnotationDatum,
-  LineAnnotationStyle,
   Position,
 } from '@elastic/charts';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiToolTip } from '@elastic/eui';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import * as React from 'react';
 
 interface Props {
   percentiles?: Record<string, number | null>;

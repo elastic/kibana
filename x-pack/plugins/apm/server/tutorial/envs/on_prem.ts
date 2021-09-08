@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { APMConfig } from '../..';
-import {
-  INSTRUCTION_VARIANT,
-  InstructionsSchema,
-} from '../../../../../../src/plugins/home/server';
+import type { APMConfig } from '../..';
+import type { InstructionsSchema } from '../../../../../../src/plugins/home/server';
+import { INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/server';
 import {
   createDjangoAgentInstructions,
   createDotNetAgentInstructions,

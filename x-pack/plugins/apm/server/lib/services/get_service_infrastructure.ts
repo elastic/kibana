@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
-import { rangeQuery, kqlQuery } from '../../../../observability/server';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { ProcessorEvent } from '../../../common/processor_event';
+import type { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import {
-  SERVICE_NAME,
   CONTAINER_ID,
   HOSTNAME,
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export const getServiceInfrastructure = async ({
   kuery,

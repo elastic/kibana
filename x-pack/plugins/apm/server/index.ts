@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'src/core/server';
-import { APMOSSConfig } from 'src/plugins/apm_oss/server';
-import { APMPlugin } from './plugin';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginInitializerContext } from 'src/core/server';
+import type { APMOSSConfig } from 'src/plugins/apm_oss/server';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
+import { APMPlugin } from './plugin';
 
 // plugin config
 export const config = {
@@ -121,11 +121,9 @@ export function mergeConfigs(
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
-
 export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
-export { APMPlugin } from './plugin';
-export { APMPluginSetup } from './types';
-export { APMServerRouteRepository } from './routes/get_global_apm_server_route_repository';
-export { APMRouteHandlerResources } from './routes/typings';
-
 export type { ProcessorEvent } from '../common/processor_event';
+export { APMPlugin } from './plugin';
+export type { APMServerRouteRepository } from './routes/get_global_apm_server_route_repository';
+export type { APMRouteHandlerResources } from './routes/typings';
+export type { APMPluginSetup } from './types';

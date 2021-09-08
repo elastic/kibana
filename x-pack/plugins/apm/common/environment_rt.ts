@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
 import { nonEmptyStringRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,

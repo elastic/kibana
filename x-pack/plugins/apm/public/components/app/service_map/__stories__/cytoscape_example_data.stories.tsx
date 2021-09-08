@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiFieldNumber,
@@ -15,9 +14,9 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import { Meta, Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import React, { useEffect, useState } from 'react';
-import { CoreStart } from '../../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../../src/core/public';
 import {
   CodeEditor,
   createKibanaReactContext,

@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 // @ts-expect-error
-import configureStore from '../../../../../store/config/configureStore';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverQuery } from './DiscoverTransactionLink';
 
 function getMockTransaction() {

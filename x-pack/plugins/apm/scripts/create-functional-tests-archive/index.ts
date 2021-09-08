@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { argv } from 'yargs';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { execSync } from 'child_process';
+import fs from 'fs';
 import moment from 'moment';
 import path from 'path';
-import fs from 'fs';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { argv } from 'yargs';
 import { getEsClient } from '../shared/get_es_client';
 import { parseIndexUrl } from '../shared/parse_index_url';
 

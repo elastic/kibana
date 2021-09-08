@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import type { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { SearchBar } from '../../shared/search_bar';
 import { TraceList } from './trace_list';
-import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
-import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
-import { useTimeRange } from '../../../hooks/use_time_range';
 
 type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {

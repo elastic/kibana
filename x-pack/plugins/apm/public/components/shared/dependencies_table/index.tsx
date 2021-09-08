@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
+import type { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
 import {
   asMillisecondDuration,
   asPercent,
@@ -17,12 +16,13 @@ import {
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { unit } from '../../../utils/style';
 import { SparkPlot } from '../charts/spark_plot';
-import { ImpactBar } from '../ImpactBar';
-import { TruncateWithTooltip } from '../truncate_with_tooltip';
-import { ITableColumn, ManagedTable } from '../managed_table';
 import { EmptyMessage } from '../EmptyMessage';
-import { TableFetchWrapper } from '../table_fetch_wrapper';
+import { ImpactBar } from '../ImpactBar';
+import type { ITableColumn } from '../managed_table';
+import { ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
+import { TableFetchWrapper } from '../table_fetch_wrapper';
+import { TruncateWithTooltip } from '../truncate_with_tooltip';
 
 export type DependenciesItem = Omit<
   ConnectionStatsItemWithComparisonData,

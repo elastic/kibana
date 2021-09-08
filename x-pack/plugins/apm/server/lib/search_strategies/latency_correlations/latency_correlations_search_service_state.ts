@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { HistogramItem } from '../../../../common/search_strategies/types';
 import type {
-  LatencyCorrelationSearchServiceProgress,
   LatencyCorrelation,
+  LatencyCorrelationSearchServiceProgress,
 } from '../../../../common/search_strategies/latency_correlations/types';
+import type { HistogramItem } from '../../../../common/search_strategies/types';
 
 export const latencyCorrelationsSearchServiceStateProvider = () => {
   let ccsWarning = false;

@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { TableHTMLAttributes } from 'react';
+import type { EuiTableProps } from '@elastic/eui';
 import {
   EuiTable,
-  EuiTableProps,
   EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import type { TableHTMLAttributes } from 'react';
+import React from 'react';
+import type { KeyValuePair } from '../../../utils/flattenObject';
 import { FormattedValue } from './FormattedValue';
-import { KeyValuePair } from '../../../utils/flattenObject';
 
 export function KeyValueTable({
   keyValuePairs,

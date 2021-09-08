@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
-import { IBasePath } from 'kibana/public';
+import type { Location } from 'history';
+import type { IBasePath } from 'kibana/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
@@ -17,7 +16,8 @@ import { getDiscoverHref } from '../Links/DiscoverLinks/DiscoverLink';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { getInfraHref } from '../Links/InfraLink';
 import { fromQuery } from '../Links/url_helpers';
-import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
+import type { Action, SectionRecord } from './sections_helper';
+import { getNonEmptySections } from './sections_helper';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();

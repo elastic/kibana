@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -19,12 +18,13 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { HeightRetainer } from '../HeightRetainer';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { filterSectionsByTerm, SectionsWithRows } from './helper';
+import type { SectionsWithRows } from './helper';
+import { filterSectionsByTerm } from './helper';
 import { Section } from './Section';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   sections: SectionsWithRows;

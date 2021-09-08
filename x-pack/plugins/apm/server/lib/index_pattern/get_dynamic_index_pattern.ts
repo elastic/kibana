@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  IndexPatternsFetcher,
-  FieldDescriptor,
-} from '../../../../../../src/plugins/data/server';
-import { APMRouteHandlerResources } from '../../routes/typings';
+import type { FieldDescriptor } from '../../../../../../src/plugins/data/server';
+import { IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
+import type { APMRouteHandlerResources } from '../../routes/typings';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';

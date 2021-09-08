@@ -6,12 +6,12 @@
  */
 
 import * as t from 'io-ts';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { createApmServerRoute } from './create_apm_server_route';
+import { environmentRt } from '../../common/environment_rt';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceNodes } from '../lib/service_nodes';
-import { rangeRt, kueryRt } from './default_api_types';
-import { environmentRt } from '../../common/environment_rt';
+import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { kueryRt, rangeRt } from './default_api_types';
 
 const serviceNodesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/serviceNodes',

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { IBasePath } from 'kibana/public';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import type { IBasePath } from 'kibana/public';
 import { pick } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -14,7 +14,8 @@ import url from 'url';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { APMQueryParams, fromQuery, toQuery } from '../url_helpers';
+import type { APMQueryParams } from '../url_helpers';
+import { fromQuery, toQuery } from '../url_helpers';
 
 interface Props extends EuiLinkAnchorProps {
   path?: string;

@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
 import { createRuleTypeMocks } from './test_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 describe('registerTransactionDurationAlertType', () => {
   it('sends alert when value is greater than threashold', async () => {
     const {

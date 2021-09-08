@@ -5,19 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
-
-export {
-  PackagePolicyCreateExtensionComponentProps,
-  PackagePolicyEditExtensionComponentProps,
-} from '../../../../../fleet/public';
-
-export {
-  NewPackagePolicy,
-  PackagePolicy,
-  PackagePolicyConfigRecordEntry,
-} from '../../../../../fleet/common';
-
+import type { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
 export type PackagePolicyVars = Record<string, PackagePolicyConfigRecordEntry>;
 
 export type SettingValidation = t.Type<any, string, unknown>;
@@ -50,3 +38,13 @@ export interface BasicSettingRow {
 }
 
 export type SettingsRow = BasicSettingRow | AdvancedSettingRow;
+
+export type {
+  NewPackagePolicy,
+  PackagePolicy,
+  PackagePolicyConfigRecordEntry,
+} from '../../../../../fleet/common';
+export type {
+  PackagePolicyCreateExtensionComponentProps,
+  PackagePolicyEditExtensionComponentProps,
+} from '../../../../../fleet/public';

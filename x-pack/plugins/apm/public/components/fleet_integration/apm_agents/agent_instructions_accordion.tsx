@@ -4,27 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
+  EuiAccordion,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiAccordion,
   EuiSpacer,
   EuiText,
-  EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CreateAgentInstructions } from './agent_instructions_mappings';
 import {
   Markdown,
   useKibana,
 } from '../../../../../../../src/plugins/kibana_react/public';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { AgentIcon } from '../../shared/agent_icon';
-import { NewPackagePolicy } from '../apm_policy_form/typings';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getCommands } from '../../../tutorial/config_agent/commands/get_commands';
 import { CopyCommands } from '../../../tutorial/config_agent/copy_commands';
+import { AgentIcon } from '../../shared/agent_icon';
+import type { NewPackagePolicy } from '../apm_policy_form/typings';
+import type { CreateAgentInstructions } from './agent_instructions_mappings';
 import { replaceTemplateStrings } from './replace_template_strings';
 
 function AccordionButtonContent({

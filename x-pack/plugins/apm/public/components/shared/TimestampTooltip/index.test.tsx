@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { shallow } from 'enzyme';
-import React from 'react';
 import moment from 'moment-timezone';
-import { TimestampTooltip } from './index';
+import React from 'react';
 import { mockNow } from '../../../utils/testHelpers';
+import { TimestampTooltip } from './index';
 
 describe('TimestampTooltip', () => {
   const timestamp = 1570720000123; // Oct 10, 2019, 08:06:40.123 (UTC-7)

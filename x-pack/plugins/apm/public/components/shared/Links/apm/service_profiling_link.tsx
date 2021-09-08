@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { APMLinkExtendProps, useAPMHref } from './APMLink';
+import type { APMLinkExtendProps } from './APMLink';
+import { useAPMHref } from './APMLink';
 
 interface ServiceProfilingLinkProps extends APMLinkExtendProps {
   serviceName: string;

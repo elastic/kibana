@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { CoreStart, HttpSetup } from 'kibana/public';
 import { mockNow } from '../utils/testHelpers';
-import { clearCache, callApi } from './rest/callApi';
-import { CoreStart, HttpSetup } from 'kibana/public';
+import { callApi, clearCache } from './rest/callApi';
 
 type CoreMock = CoreStart & {
   http: {

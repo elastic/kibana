@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { createContext, ReactChild, useState } from 'react';
+import type { ReactChild } from 'react';
+import React, { createContext, useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../services/rest/createCallApmApi';
 
 export interface AnomalyDetectionJobsContextValue {
   anomalyDetectionJobsData?: APIReturnType<'GET /api/apm/settings/anomaly-detection/jobs'>;

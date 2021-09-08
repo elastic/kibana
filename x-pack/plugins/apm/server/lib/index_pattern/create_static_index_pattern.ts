@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
+import type { APMRouteHandlerResources } from '../../routes/typings';
 import apmIndexPattern from '../../tutorial/index_pattern.json';
-import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
-import { Setup } from '../helpers/setup_request';
-import { APMRouteHandlerResources } from '../../routes/typings';
-import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client.js';
 import { withApmSpan } from '../../utils/with_apm_span';
+import type { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client.js';
+import type { Setup } from '../helpers/setup_request';
+import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
 import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 
 type ApmIndexPatternAttributes = typeof apmIndexPattern.attributes & {

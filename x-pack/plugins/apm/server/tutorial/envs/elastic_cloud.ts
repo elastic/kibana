@@ -4,27 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import {
-  INSTRUCTION_VARIANT,
-  TutorialSchema,
+import type {
   InstructionSetSchema,
+  TutorialSchema,
 } from '../../../../../../src/plugins/home/server';
-
+import { INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/server';
+import type { CloudSetup } from '../../../../cloud/server';
 import {
-  createNodeAgentInstructions,
   createDjangoAgentInstructions,
+  createDotNetAgentInstructions,
   createFlaskAgentInstructions,
-  createRailsAgentInstructions,
-  createRackAgentInstructions,
-  createJsAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
-  createDotNetAgentInstructions,
+  createJsAgentInstructions,
+  createNodeAgentInstructions,
   createPhpAgentInstructions,
+  createRackAgentInstructions,
+  createRailsAgentInstructions,
 } from '../../../common/tutorial/instructions/apm_agent_instructions';
-import { CloudSetup } from '../../../../cloud/server';
 
 export function createElasticCloudInstructions(
   cloudSetup?: CloudSetup

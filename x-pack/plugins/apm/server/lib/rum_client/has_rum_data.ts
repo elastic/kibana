@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SetupTimeRange } from '../helpers/setup_request';
-import { SetupUX } from '../../routes/rum_client';
+import { rangeQuery } from '../../../../observability/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../../observability/server';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
+import type { SetupUX } from '../../routes/rum_client';
+import type { SetupTimeRange } from '../helpers/setup_request';
 
 export async function hasRumData({
   setup,

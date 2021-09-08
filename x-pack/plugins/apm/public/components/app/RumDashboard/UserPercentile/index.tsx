@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect } from 'react';
-
 import { EuiSelect } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';

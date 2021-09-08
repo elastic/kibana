@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { rangeQuery } from '../../../../observability/server';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../../observability/server';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 /**
  * This is used for getting the list of environments for the environments selector,

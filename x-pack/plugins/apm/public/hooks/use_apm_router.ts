@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useRouter } from '@kbn/typed-react-router-config';
 import type { ApmRouter } from '../components/routing/apm_route_config';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';

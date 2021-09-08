@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { omit } from 'lodash';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { filterByAgent, settingDefinitions } from '../setting_definitions';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { SettingDefinition } from './types';
+import type { SettingDefinition } from './types';
 
 describe('filterByAgent', () => {
   describe('when `excludeAgents` is dotnet and nodejs', () => {

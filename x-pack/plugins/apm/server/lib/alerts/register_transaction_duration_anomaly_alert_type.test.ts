@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
+import type { Job, MlPluginSetup } from '../../../../ml/server';
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
-import { Job, MlPluginSetup } from '../../../../ml/server';
 import * as GetServiceAnomalies from '../service_map/get_service_anomalies';
+import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
 import { createRuleTypeMocks } from './test_utils';
 
 describe('Transaction duration anomaly alert', () => {

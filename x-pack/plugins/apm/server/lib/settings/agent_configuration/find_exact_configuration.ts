@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SearchHit } from '../../../../../../../src/core/types/elasticsearch';
-import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import type { SearchHit } from '../../../../../../../src/core/types/elasticsearch';
+import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../helpers/setup_request';
+import type { Setup } from '../../helpers/setup_request';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 
 export async function findExactConfiguration({

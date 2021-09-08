@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -23,11 +22,11 @@ import {
   SectionTitle,
 } from '../../../../../../observability/public';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
-import {
+import type {
   CustomLink,
   Filter,
 } from '../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { CreateEditCustomLinkFlyout } from '../../../app/Settings/customize_ui/custom_link/create_edit_custom_link_flyout';

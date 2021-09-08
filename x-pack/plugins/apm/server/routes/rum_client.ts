@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { Logger } from 'kibana/server';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
-import {
-  setupRequest,
-  Setup,
-  SetupRequestParams,
-} from '../lib/helpers/setup_request';
+import * as t from 'io-ts';
+import type { Logger } from 'kibana/server';
+import type { UxUIFilters } from '../../typings/ui_filters';
+import type { Setup, SetupRequestParams } from '../lib/helpers/setup_request';
+import { setupRequest } from '../lib/helpers/setup_request';
 import { getClientMetrics } from '../lib/rum_client/get_client_metrics';
 import { getJSErrors } from '../lib/rum_client/get_js_errors';
 import { getLongTaskMetrics } from '../lib/rum_client/get_long_task_metrics';
@@ -23,11 +21,10 @@ import { getUrlSearch } from '../lib/rum_client/get_url_search';
 import { getVisitorBreakdown } from '../lib/rum_client/get_visitor_breakdown';
 import { getWebCoreVitals } from '../lib/rum_client/get_web_core_vitals';
 import { hasRumData } from '../lib/rum_client/has_rum_data';
+import type { APMRouteHandlerResources } from '../routes/typings';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { rangeRt } from './default_api_types';
-import { UxUIFilters } from '../../typings/ui_filters';
-import { APMRouteHandlerResources } from '../routes/typings';
 
 export type SetupUX = Setup & {
   uiFilters: UxUIFilters;

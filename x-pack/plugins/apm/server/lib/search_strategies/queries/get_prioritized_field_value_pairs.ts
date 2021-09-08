@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { FieldValuePair } from '../../../../common/search_strategies/types';
 import { FIELDS_TO_ADD_AS_CANDIDATE } from '../constants';
 import { hasPrefixToInclude } from '../utils';
-
-import type { FieldValuePair } from '../../../../common/search_strategies/types';
 
 export const getPrioritizedFieldValuePairs = (
   fieldValuePairs: FieldValuePair[]

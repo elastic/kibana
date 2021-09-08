@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import type { ValuesType } from 'utility-types';
-import type { AsDuration, AsPercent } from '../../observability/common';
 import type { ActionGroup } from '../../alerting/common';
+import type { AsDuration, AsPercent } from '../../observability/common';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from './ml_constants';
 
 export const APM_SERVER_FEATURE_ID = 'apm';

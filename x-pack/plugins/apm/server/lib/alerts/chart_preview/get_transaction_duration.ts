@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { rangeQuery } from '../../../../../observability/server';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -13,11 +13,10 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { AlertParams } from '../../../routes/alerts/chart_preview';
+import type { AlertParams } from '../../../routes/alerts/chart_preview';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getTransactionDurationChartPreview({
   alertParams,

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 

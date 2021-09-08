@@ -4,33 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from 'src/core/public';
+import { waitFor } from '@testing-library/dom';
 import { isEqual } from 'lodash';
+import type { ReactNode } from 'react';
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import type { CoreStart } from 'src/core/public';
+import { uiSettingsServiceMock } from '../../../../../../../src/core/public/mocks';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import * as useAnnotationsHooks from '../../../context/annotations/use_annotations_context';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import * as useApmServiceContextHooks from '../../../context/apm_service/use_apm_service_context';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import * as useAnnotationsHooks from '../../../context/annotations/use_annotations_context';
-import * as useTransactionBreakdownHooks from '../../shared/charts/transaction_breakdown_chart/use_transaction_breakdown';
-import { renderWithTheme } from '../../../utils/testHelpers';
-import { ServiceOverview } from './';
-import { waitFor } from '@testing-library/dom';
-import * as useApmServiceContextHooks from '../../../context/apm_service/use_apm_service_context';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import {
   getCallApmApiSpy,
   getCreateCallApmApiSpy,
 } from '../../../services/rest/callApmApiSpy';
+import { renderWithTheme } from '../../../utils/testHelpers';
+import * as useTransactionBreakdownHooks from '../../shared/charts/transaction_breakdown_chart/use_transaction_breakdown';
 import { fromQuery } from '../../shared/Links/url_helpers';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import { uiSettingsServiceMock } from '../../../../../../../src/core/public/mocks';
+import { ServiceOverview } from './';
 
 const uiSettings = uiSettingsServiceMock.create().setup({} as any);
 

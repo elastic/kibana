@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiPanel } from '@elastic/eui';
-import { EuiCard } from '@elastic/eui';
-import { EuiImage } from '@elastic/eui';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiLoadingSpinner,
+  EuiPanel,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpStart } from 'kibana/public';
+import type { HttpStart } from 'kibana/public';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../services/rest/createCallApmApi';
 
 interface Props {
   http: HttpStart;

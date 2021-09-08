@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../common/event_outcome';
-import {
+import type {
   AggregationOptionsByType,
   AggregationResultOf,
 } from '../../../../../../src/core/types/elasticsearch';
+import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../common/event_outcome';
 
 export const getOutcomeAggregation = () => ({
   terms: {

@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Connection, ConnectionNode } from '../../../common/service_map';
 import { getConnections } from './get_service_map_from_trace_ids';
-import { Connection, ConnectionNode } from '../../../common/service_map';
 
 function getConnectionsPairs(connections: Connection[]) {
   return connections

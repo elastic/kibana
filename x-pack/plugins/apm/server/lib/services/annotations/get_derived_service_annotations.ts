@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
-import { Annotation, AnnotationType } from '../../../../common/annotations';
+import type { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import { rangeQuery } from '../../../../../observability/server';
+import type { Annotation } from '../../../../common/annotations';
+import { AnnotationType } from '../../../../common/annotations';
 import {
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getDerivedServiceAnnotations({
   setup,

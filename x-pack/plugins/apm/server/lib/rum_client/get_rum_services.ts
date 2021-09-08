@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
-import { SetupTimeRange } from '../helpers/setup_request';
-import { SetupUX } from '../../routes/rum_client';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
+import type { SetupUX } from '../../routes/rum_client';
+import type { SetupTimeRange } from '../helpers/setup_request';
 
 export async function getRumServices({
   setup,

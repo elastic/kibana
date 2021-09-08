@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useMemo } from 'react';
-import { useFetcher } from './use_fetcher';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../common/environment_filter_values';
+import { useFetcher } from './use_fetcher';
 
 function getEnvironmentOptions(environments: string[]) {
   const environmentOptions = environments

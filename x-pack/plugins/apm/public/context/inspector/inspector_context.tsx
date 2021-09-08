@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { createContext, ReactNode, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import React, { createContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { RequestAdapter } from '../../../../../../src/plugins/inspector/common';
-import { InspectResponse } from '../../../typings/common';
-import { FetcherResult } from '../../hooks/use_fetcher';
+import type { InspectResponse } from '../../../typings/common';
+import type { FetcherResult } from '../../hooks/use_fetcher';
 
 export interface InspectorContextValue {
   addInspectorRequest: <Data>(result: FetcherResult<Data>) => void;

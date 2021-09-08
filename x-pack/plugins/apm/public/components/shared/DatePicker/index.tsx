@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -13,7 +12,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { clearCache } from '../../../services/rest/callApi';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { TimePickerQuickRange, TimePickerTimeDefaults } from './typings';
+import type { TimePickerQuickRange, TimePickerTimeDefaults } from './typings';
 
 export function DatePicker() {
   const history = useHistory();

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import {
   AGENT_NAME,
@@ -17,7 +16,7 @@ import {
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -28,7 +27,7 @@ import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
-import { ServicesItemsSetup } from './get_services_items';
+import type { ServicesItemsSetup } from './get_services_items';
 
 interface AggregationParams {
   environment: string;

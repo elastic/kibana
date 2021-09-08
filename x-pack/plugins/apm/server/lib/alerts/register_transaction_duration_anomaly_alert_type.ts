@@ -4,48 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { schema } from '@kbn/config-schema';
-import { compact } from 'lodash';
-import { ESSearchResponse } from 'src/core/types/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
-  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
-  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
   ALERT_REASON as ALERT_REASON_NON_TYPED,
-  // @ts-expect-error
+  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { getSeverity } from '../../../common/anomaly_detection';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
+import { compact } from 'lodash';
+import type { ESSearchResponse } from 'src/core/types/elasticsearch';
 import { KibanaRequest } from '../../../../../../src/core/server';
+import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   AlertType,
   ALERT_TYPES_CONFIG,
   ANOMALY_ALERT_SEVERITY_TYPES,
   formatTransactionDurationAnomalyReason,
 } from '../../../common/alert_types';
-import { getMLJobs } from '../service_map/get_service_anomalies';
-import { apmActionVariables } from './action_variables';
-import { RegisterRuleDependencies } from './register_apm_alerts';
+import { getSeverity } from '../../../common/anomaly_detection';
+import {
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../common/elasticsearch_fieldnames';
 import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
+import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { getMLJobs } from '../service_map/get_service_anomalies';
+import { apmActionVariables } from './action_variables';
+import type { RegisterRuleDependencies } from './register_apm_alerts';
 
 const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
 const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;

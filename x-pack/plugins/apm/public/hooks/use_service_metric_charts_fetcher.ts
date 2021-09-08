@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
+import type { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
+import { useApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';
-import { useApmParams } from './use_apm_params';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
   charts: [],
 };

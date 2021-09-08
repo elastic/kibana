@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -26,7 +25,7 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { getAgentIcon } from '../../../shared/agent_icon/get_agent_icon';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
 import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -21,8 +20,9 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { MLExplorerLink } from '../../../shared/Links/MachineLearningLinks/MLExplorerLink';
 import { MLManageJobsLink } from '../../../shared/Links/MachineLearningLinks/MLManageJobsLink';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { AnomalyDetectionApiResponse } from './index';
+import type { ITableColumn } from '../../../shared/managed_table';
+import { ManagedTable } from '../../../shared/managed_table';
+import type { AnomalyDetectionApiResponse } from './index';
 import { LegacyJobsCallout } from './legacy_jobs_callout';
 
 type Jobs = AnomalyDetectionApiResponse['jobs'];

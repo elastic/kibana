@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiPageHeaderProps } from '@elastic/eui';
+import type { EuiPageHeaderProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { History } from 'history';
+import type { CoreStart } from 'kibana/public';
 import React from 'react';
-import { History } from 'history';
 import { useHistory } from 'react-router-dom';
-import { CoreStart } from 'kibana/public';
-import { ApmMainTemplate } from './apm_main_template';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
+import { ApmMainTemplate } from './apm_main_template';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:

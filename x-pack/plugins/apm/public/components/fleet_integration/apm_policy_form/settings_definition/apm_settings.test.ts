@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getApmSettings } from './apm_settings';
-import { SettingsRow, BasicSettingRow } from '../typings';
 import { isSettingsFormValid } from '../settings_form/utils';
+import type { BasicSettingRow, SettingsRow } from '../typings';
+import { getApmSettings } from './apm_settings';
 
 describe('apm_settings', () => {
   describe('getApmSettings', () => {

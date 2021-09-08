@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiCallOut,
   EuiFlexGrid,
@@ -24,8 +23,8 @@ import {
   getServiceNodeName,
   SERVICE_NODE_NAME_MISSING,
 } from '../../../../common/service_nodes';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';

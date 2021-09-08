@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
-import {
+import type { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import type { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type {
   AggregatedTransactionsCounts,
   APMUsage,
   TimeframeMap,
   TimeframeMap1d,
   TimeframeMapAll,
 } from './types';
-import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const long: { type: 'long' } = { type: 'long' };
 

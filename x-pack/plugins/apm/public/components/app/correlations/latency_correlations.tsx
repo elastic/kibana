@@ -4,52 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { orderBy } from 'lodash';
-
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiIcon,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
-import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
-
+import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
-
+import { orderBy } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   enableInspectEsQueries,
   useUiTracker,
 } from '../../../../../observability/public';
-
-import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import {
   APM_SEARCH_STRATEGIES,
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../common/search_strategies/constants';
-import { LatencyCorrelation } from '../../../../common/search_strategies/latency_correlations/types';
-
+import type { LatencyCorrelation } from '../../../../common/search_strategies/latency_correlations/types';
+import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSearchStrategy } from '../../../hooks/use_search_strategy';
-
 import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
 import { push } from '../../shared/Links/url_helpers';
-
-import { CorrelationsTable } from './correlations_table';
-import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
-import { isErrorMessage } from './utils/is_error_message';
-import { getOverallHistogram } from './utils/get_overall_histogram';
 import { CorrelationsLog } from './correlations_log';
-import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
+import { CorrelationsTable } from './correlations_table';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
+import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
+import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
 import { CorrelationsProgressControls } from './progress_controls';
+import { getOverallHistogram } from './utils/get_overall_histogram';
+import { isErrorMessage } from './utils/is_error_message';
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {

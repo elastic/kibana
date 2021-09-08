@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { createContext } from 'react';
-import { Annotation } from '../../../common/annotations';
+import type { Annotation } from '../../../common/annotations';
 import { useFetcher } from '../../hooks/use_fetcher';
 
 export const AnnotationsContext = createContext({ annotations: [] } as {

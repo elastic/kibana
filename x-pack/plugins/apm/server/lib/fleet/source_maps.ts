@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   CoreSetup,
   CoreStart,
   ElasticsearchClient,
@@ -12,11 +12,12 @@ import {
 } from 'kibana/server';
 import { promisify } from 'util';
 import { unzip } from 'zlib';
-import { Artifact } from '../../../../fleet/server';
-import { SourceMap } from '../../routes/source_maps';
-import { APMPluginStartDependencies } from '../../types';
+import type { Artifact } from '../../../../fleet/server';
+import type { SourceMap } from '../../routes/source_maps';
+import type { APMPluginStartDependencies } from '../../types';
 import { getApmPackgePolicies } from './get_apm_package_policies';
-import { APM_SERVER, PackagePolicy } from './register_fleet_policy_callbacks';
+import type { PackagePolicy } from './register_fleet_policy_callbacks';
+import { APM_SERVER } from './register_fleet_policy_callbacks';
 
 export interface ApmArtifactBody {
   serviceName: string;

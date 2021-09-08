@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { TimeFormatter } from '../../../../../common/utils/formatters';
 import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
-import { Coordinate } from '../../../../../typings/timeseries';
-import { TimeFormatter } from '../../../../../common/utils/formatters';
+import type { Coordinate } from '../../../../../typings/timeseries';
 
 export function getResponseTimeTickFormatter(formatter: TimeFormatter) {
   return (t: number) => formatter(t).formatted;

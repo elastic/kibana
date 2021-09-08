@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiSelect } from '@elastic/eui';
-import React, { FormEvent, useCallback } from 'react';
+import type { FormEvent } from 'react';
+import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';

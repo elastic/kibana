@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -13,9 +14,8 @@ import {
 import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { Coordinate } from '../../../../typings/timeseries';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import type { Coordinate } from '../../../../typings/timeseries';
 import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
@@ -26,7 +26,7 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
-import { Setup } from '../../helpers/setup_request';
+import type { Setup } from '../../helpers/setup_request';
 
 interface ServiceInstanceTransactionPrimaryStatistics {
   serviceNodeName: string;

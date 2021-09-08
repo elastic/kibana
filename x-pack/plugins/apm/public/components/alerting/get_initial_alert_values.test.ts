@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getInitialAlertValues } from './get_initial_alert_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import { getInitialAlertValues } from './get_initial_alert_values';
 
 test('handles null alert type and undefined service name', () => {
   expect(getInitialAlertValues(null, undefined)).toEqual({ tags: ['apm'] });

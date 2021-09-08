@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { uniq } from 'lodash';
-import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
+import type { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 export function getApmIndexPatternTitle(apmIndicesConfig: ApmIndicesConfig) {
   return uniq([

@@ -7,10 +7,8 @@
 
 import React from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import {
-  InstancesLatencyDistributionChart,
-  InstancesLatencyDistributionChartProps,
-} from './';
+import type { InstancesLatencyDistributionChartProps } from './';
+import { InstancesLatencyDistributionChart } from './';
 
 export default {
   title: 'shared/charts/InstancesLatencyDistributionChart',

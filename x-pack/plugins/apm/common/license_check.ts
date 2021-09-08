@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ILicense, LicenseType } from '../../licensing/common/types';
+import type { ILicense, LicenseType } from '../../licensing/common/types';
 
 function isActiveLicense(licenseType: LicenseType, license?: ILicense) {
   return license && license.isActive && license.hasAtLeast(licenseType);

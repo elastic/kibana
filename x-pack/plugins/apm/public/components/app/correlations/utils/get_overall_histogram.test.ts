@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { LatencyCorrelationsRawResponse } from '../../../../../common/search_strategies/latency_correlations/types';
-
 import { getOverallHistogram } from './get_overall_histogram';
 
 describe('getOverallHistogram', () => {

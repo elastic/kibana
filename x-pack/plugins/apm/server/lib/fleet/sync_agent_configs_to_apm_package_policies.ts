@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import type {
   CoreSetup,
   CoreStart,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { TelemetryUsageCounter } from '../../routes/typings';
-import { APMPluginStartDependencies } from '../../types';
+import type { TelemetryUsageCounter } from '../../routes/typings';
+import type { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
-import { Setup } from '../helpers/setup_request';
+import type { Setup } from '../helpers/setup_request';
 import { listConfigurations } from '../settings/agent_configuration/list_configurations';
 import { getApmPackgePolicies } from './get_apm_package_policies';
 import { getPackagePolicyWithAgentConfigurations } from './register_fleet_policy_callbacks';

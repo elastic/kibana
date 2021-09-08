@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type {
+  ElementClickListener,
+  GeometryValue,
+  TooltipInfo,
+  TooltipProps,
+} from '@elastic/charts';
 import {
   Axis,
   BubbleSeries,
   Chart,
-  ElementClickListener,
-  GeometryValue,
   Position,
   ScaleType,
   Settings,
-  TooltipInfo,
-  TooltipProps,
   TooltipType,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
@@ -30,7 +31,7 @@ import {
 } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import * as urlHelpers from '../../Links/url_helpers';
 import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';

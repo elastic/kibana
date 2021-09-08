@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ElasticsearchClient, Logger } from 'src/core/server';
 import { estypes } from '@elastic/elasticsearch';
-import {
-  createOrUpdateIndex,
-  Mappings,
-} from '../../../../../observability/server';
-import { APMConfig } from '../../..';
+import type { ElasticsearchClient, Logger } from 'src/core/server';
+import type { APMConfig } from '../../..';
+import type { Mappings } from '../../../../../observability/server';
+import { createOrUpdateIndex } from '../../../../../observability/server';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export const createApmCustomLinkIndex = async ({

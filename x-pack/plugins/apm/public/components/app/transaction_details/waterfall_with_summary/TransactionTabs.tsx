@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { LogStream } from '../../../../../../infra/public';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import type { ApmUrlParams } from '../../../../context/url_params_context/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
 import { WaterfallContainer } from './waterfall_container';
-import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
+import type { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
   transaction: Transaction;

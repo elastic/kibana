@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import numeral from '@elastic/numeral';
-import styled from 'styled-components';
-import { useContext, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiStat,
   EuiToolTip,
-  EuiIconTip,
 } from '@elastic/eui';
+import numeral from '@elastic/numeral';
+import * as React from 'react';
+import { useContext, useEffect } from 'react';
+import styled from 'styled-components';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { I18LABELS } from '../translations';
-import { useUxQuery } from '../hooks/useUxQuery';
-import { formatToSec } from '../UXMetrics/KeyUXMetrics';
 import { CsmSharedContext } from '../CsmSharedContext';
+import { useUxQuery } from '../hooks/useUxQuery';
+import { I18LABELS } from '../translations';
+import { formatToSec } from '../UXMetrics/KeyUXMetrics';
 
 const ClFlexGroup = styled(EuiFlexGroup)`
   flex-direction: row;

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 

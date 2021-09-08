@@ -4,34 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { chunk } from 'lodash';
-
 import type { ElasticsearchClient } from 'src/core/server';
-
-import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';
-import {
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
 } from '../../../../../../../src/plugins/data/common';
-
+import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
-import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
 import type {
   FailedTransactionsCorrelationsParams,
   FailedTransactionsCorrelationsRawResponse,
 } from '../../../../common/search_strategies/failed_transactions_correlations/types';
+import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
-import { searchServiceLogProvider } from '../search_service_log';
+import { ERROR_CORRELATION_THRESHOLD } from '../constants';
 import {
   fetchFailedTransactionsCorrelationPValues,
   fetchTransactionDurationFieldCandidates,
 } from '../queries';
+import { searchServiceLogProvider } from '../search_service_log';
 import type { SearchServiceProvider } from '../search_strategy_provider';
-
 import { failedTransactionsCorrelationsSearchServiceStateProvider } from './failed_transactions_correlations_search_service_state';
-
-import { ERROR_CORRELATION_THRESHOLD } from '../constants';
 
 export type FailedTransactionsCorrelationsSearchServiceProvider = SearchServiceProvider<
   FailedTransactionsCorrelationsParams,

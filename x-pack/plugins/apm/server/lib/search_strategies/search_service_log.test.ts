@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
-  searchServiceLogProvider,
   currentTimeAsString,
+  searchServiceLogProvider,
 } from './search_service_log';
 
 describe('search service', () => {

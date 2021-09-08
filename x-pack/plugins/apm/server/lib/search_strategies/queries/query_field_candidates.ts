@@ -4,21 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { estypes } from '@elastic/elasticsearch';
-
 import type { ElasticsearchClient } from 'src/core/server';
-
 import type { SearchStrategyParams } from '../../../../common/search_strategies/types';
-
 import {
-  FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
   FIELDS_TO_ADD_AS_CANDIDATE,
   FIELDS_TO_EXCLUDE_AS_CANDIDATE,
+  FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE,
   POPULATED_DOC_COUNT_SAMPLE_SIZE,
 } from '../constants';
 import { hasPrefixToInclude } from '../utils';
-
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 

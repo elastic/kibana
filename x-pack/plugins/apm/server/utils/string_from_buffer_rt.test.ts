@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { isRight } from 'fp-ts/lib/Either';
 import { stringFromBufferRt } from './string_from_buffer_rt';
 

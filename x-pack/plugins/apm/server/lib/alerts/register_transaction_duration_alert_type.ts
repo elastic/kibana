@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { schema } from '@kbn/config-schema';
 import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
@@ -16,7 +15,6 @@ import {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
   ALERT_REASON as ALERT_REASON_NON_TYPED,
-  // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { take } from 'rxjs/operators';
 import { asDuration } from '../../../../observability/common/utils/formatters';
@@ -47,7 +45,7 @@ import {
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-import { RegisterRuleDependencies } from './register_apm_alerts';
+import type { RegisterRuleDependencies } from './register_apm_alerts';
 
 const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
 const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;

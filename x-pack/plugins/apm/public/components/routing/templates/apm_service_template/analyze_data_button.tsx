@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import type { SeriesUrl } from '../../../../../../observability/public';
 import {
+  ALL_VALUES_SELECTED,
   createExploratoryViewUrl,
-  SeriesUrl,
 } from '../../../../../../observability/public';
-import { ALL_VALUES_SELECTED } from '../../../../../../observability/public';
 import {
   isIosAgentName,
   isRumAgentName,

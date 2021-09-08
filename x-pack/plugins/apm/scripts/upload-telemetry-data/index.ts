@@ -4,6 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Logger } from 'kibana/server';
+import { chunk, flatten, merge, omit } from 'lodash';
+import { argv } from 'yargs';
+import { unwrapEsResponse } from '../../../observability/server/utils/unwrap_es_response';
+import { mergeApmTelemetryMapping } from '../../common/apm_telemetry';
+import type { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
+import { createOrUpdateIndex } from '../shared/create-or-update-index';
+import { downloadTelemetryTemplate } from '../shared/download-telemetry-template';
+import { getHttpAuth } from '../shared/get-http-auth';
+import { getEsClient } from '../shared/get_es_client';
+import { readKibanaConfig } from '../shared/read-kibana-config';
+import { generateSampleDocuments } from './generate-sample-documents';
 
 // This script downloads the telemetry mapping, runs the APM telemetry tasks,
 // generates a bunch of randomized data based on the downloaded sample,
@@ -11,21 +23,8 @@
 // stored in the telemetry cluster. Its purpose is twofold:
 // - Easier testing of the telemetry tasks
 // - Validate whether we can run the queries we want to on the telemetry data
-
-import { merge, chunk, flatten, omit } from 'lodash';
-import { argv } from 'yargs';
-import { Logger } from 'kibana/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { unwrapEsResponse } from '../../../observability/server/utils/unwrap_es_response';
-import { downloadTelemetryTemplate } from '../shared/download-telemetry-template';
-import { mergeApmTelemetryMapping } from '../../common/apm_telemetry';
-import { generateSampleDocuments } from './generate-sample-documents';
-import { readKibanaConfig } from '../shared/read-kibana-config';
-import { getHttpAuth } from '../shared/get-http-auth';
-import { createOrUpdateIndex } from '../shared/create-or-update-index';
-import { getEsClient } from '../shared/get_es_client';
 
 async function uploadData() {
   const githubToken = process.env.GITHUB_TOKEN;

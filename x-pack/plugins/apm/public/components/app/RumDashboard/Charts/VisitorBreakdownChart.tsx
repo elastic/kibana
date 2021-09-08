@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
+import type { Datum, PartialTheme } from '@elastic/charts';
 import {
   Chart,
   DARK_THEME,
-  Datum,
   LIGHT_THEME,
-  PartialTheme,
   Partition,
   PartitionLayout,
   Settings,
 } from '@elastic/charts';
-import styled from 'styled-components';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
 } from '@elastic/eui/dist/eui_charts_theme';
+import React from 'react';
+import styled from 'styled-components';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ChartWrapper } from '../ChartWrapper';
 import { I18LABELS } from '../translations';

@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 import { asTransactionRate } from '../../../../common/utils/formatters';
+import type { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useComparison } from '../../../hooks/use_comparison';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
-import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 import { useTheme } from '../../../hooks/use_theme';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 
 export function BackendThroughputChart({ height }: { height: number }) {
   const { backendName } = useApmBackendContext();

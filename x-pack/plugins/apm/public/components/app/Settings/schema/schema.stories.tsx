@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { Meta, Story } from '@storybook/react';
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '../../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../../src/core/public';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
 import { Schema } from './';

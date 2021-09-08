@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
+import { kqlQuery, rangeQuery } from '../../../observability/server';
 import { SERVICE_NAME } from '../../common/elasticsearch_fieldnames';
-import { rangeQuery, kqlQuery } from '../../../observability/server';
 import { ProcessorEvent } from '../../common/processor_event';
+import type {
+  Setup,
+  SetupTimeRange,
+} from '../../server/lib/helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 
 export function getServicesProjection({

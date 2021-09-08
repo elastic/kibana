@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import * as t from 'io-ts';
-import { Outlet } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
+import { Outlet } from '@kbn/typed-react-router-config';
+import * as t from 'io-ts';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';
 import { Breadcrumb } from '../../app/breadcrumb';
-import { SettingsTemplate } from '../templates/settings_template';
 import { AgentConfigurations } from '../../app/Settings/agent_configurations';
-import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
-import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
+import { AnomalyDetection } from '../../app/Settings/anomaly_detection';
 import { ApmIndices } from '../../app/Settings/ApmIndices';
 import { CustomizeUI } from '../../app/Settings/customize_ui';
 import { Schema } from '../../app/Settings/schema';
-import { AnomalyDetection } from '../../app/Settings/anomaly_detection';
+import { SettingsTemplate } from '../templates/settings_template';
+import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
+import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
 
 function page<TPath extends string>({
   path,

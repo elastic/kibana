@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { estypes } from '@elastic/elasticsearch';
 import { getOrElse } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -16,7 +15,7 @@ import type {
 } from '../../../../common/search_strategies/types';
 import { rangeRt } from '../../../routes/default_api_types';
 import { getCorrelationsFilters } from '../../correlations/get_filters';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export const getTermsQuery = (
   fieldName: FieldValuePair['fieldName'] | undefined,

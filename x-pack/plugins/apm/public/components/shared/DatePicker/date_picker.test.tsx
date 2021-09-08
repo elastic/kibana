@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { createMemoryHistory } from 'history';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { Router } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import { UrlParamsContext } from '../../../context/url_params_context/url_params_context';
-import { ApmUrlParams } from '../../../context/url_params_context/types';
 import { DatePicker } from './';
 
 const history = createMemoryHistory();

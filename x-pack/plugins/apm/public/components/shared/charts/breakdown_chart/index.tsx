@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { TickFormatter } from '@elastic/charts';
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -16,29 +16,28 @@ import {
   Position,
   ScaleType,
   Settings,
-  TickFormatter,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { Annotation } from '../../../../../common/annotations';
 import { useChartTheme } from '../../../../../../observability/public';
+import type { Annotation } from '../../../../../common/annotations';
 import {
   asAbsoluteDateTime,
   asDuration,
   asPercent,
 } from '../../../../../common/utils/formatters';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import type { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { unit } from '../../../../utils/style';
 import { ChartContainer } from '../../charts/chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../../charts/helper/helper';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 
 interface Props {
   fetchStatus: FETCH_STATUS;

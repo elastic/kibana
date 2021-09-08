@@ -4,15 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  Chart,
-  Datum,
-  Partition,
-  PartitionLayout,
-  PrimitiveValue,
-  Settings,
-  TooltipInfo,
-} from '@elastic/charts';
+import type { Datum, PrimitiveValue, TooltipInfo } from '@elastic/charts';
+import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import {
   EuiCheckbox,
   EuiFieldText,
@@ -31,9 +24,9 @@ import React, { useMemo, useState } from 'react';
 import seedrandom from 'seedrandom';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useChartTheme } from '../../../../../observability/public';
+import type { ProfileNode } from '../../../../common/profiling';
 import {
   getValueTypeConfig,
-  ProfileNode,
   ProfilingValueType,
   ProfilingValueTypeUnit,
 } from '../../../../common/profiling';

@@ -4,17 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import type {
   FetchDataParams,
   HasDataParams,
   UxFetchDataResponse,
   UXHasDataResponse,
 } from '../../../../../observability/public/';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
-
-export { createCallApmApi } from '../../../services/rest/createCallApmApi';
-
 export const fetchUxOverviewDate = async ({
   absoluteTime,
   relativeTime,
@@ -55,3 +51,5 @@ export async function hasRumData(
     },
   });
 }
+
+export { createCallApmApi } from '../../../services/rest/createCallApmApi';
