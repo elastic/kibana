@@ -8,14 +8,7 @@
 import React, { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import {
-  EuiStat,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCard,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
+import { EuiStat, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
@@ -40,24 +33,6 @@ const i18nTexts = {
       defaultMessage: 'Critical',
     }
   ),
-  loadingText: i18n.translate('xpack.upgradeAssistant.esDeprecationStats.loadingText', {
-    defaultMessage: 'Loading Elasticsearch deprecation stats…',
-  }),
-  getCriticalDeprecationsMessage: (criticalDeprecations: number) =>
-    i18n.translate('xpack.upgradeAssistant.esDeprecationStats.criticalDeprecationsLabel', {
-      defaultMessage: 'This cluster has {criticalDeprecations} critical deprecations',
-      values: {
-        criticalDeprecations,
-      },
-    }),
-  getWarningDeprecationMessage: (warningDeprecations: number) =>
-    i18n.translate('xpack.upgradeAssistant.esDeprecationStats.warningDeprecationsTooltip', {
-      defaultMessage:
-        'This cluster has {warningDeprecations} non-critical {warningDeprecations, plural, one {deprecation} other {deprecations}}',
-      values: {
-        warningDeprecations,
-      },
-    }),
 };
 
 export const ESDeprecationStats: FunctionComponent = () => {
@@ -107,17 +82,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
               description={i18nTexts.criticalDeprecationsTitle}
               titleColor="danger"
               isLoading={isLoading}
-            >
-              {error === null && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.loadingText
-                      : i18nTexts.getCriticalDeprecationsMessage(criticalDeprecations.length)}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
+            />
           </EuiFlexItem>
         )}
 
@@ -129,17 +94,7 @@ export const ESDeprecationStats: FunctionComponent = () => {
               titleElement="span"
               description={i18nTexts.warningDeprecationsTitle}
               isLoading={isLoading}
-            >
-              {!error && (
-                <EuiScreenReaderOnly>
-                  <p>
-                    {isLoading
-                      ? i18nTexts.loadingText
-                      : i18nTexts.getWarningDeprecationMessage(warningDeprecations.length)}
-                  </p>
-                </EuiScreenReaderOnly>
-              )}
-            </EuiStat>
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
