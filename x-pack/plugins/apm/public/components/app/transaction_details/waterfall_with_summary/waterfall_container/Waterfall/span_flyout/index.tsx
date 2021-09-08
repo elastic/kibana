@@ -35,8 +35,9 @@ import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/http_info_
 import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { SyncBadge } from '../sync_badge';
-import { DatabaseContext } from './database_context';
+import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
+import { FailureBadge } from '../failure_badge';
 
 function formatType(type: string) {
   switch (type) {
@@ -101,7 +102,7 @@ export function SpanFlyout({
 
   const stackframes = span.span.stacktrace;
   const codeLanguage = parentTransaction?.service.language?.name;
-  const dbContext = span.span.db;
+  const spanDb = span.span.db;
   const httpContext = span.span.http;
   const spanTypes = getSpanTypes(span);
   const spanHttpStatusCode = httpContext?.response?.status_code;
@@ -214,11 +215,13 @@ export function SpanFlyout({
                   </EuiToolTip>
                 )}
                 <SyncBadge sync={span.span.sync} />
+
+                <FailureBadge outcome={span.event?.outcome} />
               </>,
             ]}
           />
           <EuiHorizontalRule />
-          <DatabaseContext dbContext={dbContext} />
+          <SpanDatabase spanDb={spanDb} />
           <EuiTabbedContent
             tabs={[
               {

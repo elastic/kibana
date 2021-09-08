@@ -30,20 +30,20 @@ const DatabaseStatement = euiStyled.div`
 `;
 
 interface Props {
-  dbContext?: NonNullable<Span['span']>['db'];
+  spanDb?: NonNullable<Span['span']>['db'];
 }
 
-export function DatabaseContext({ dbContext }: Props) {
+export function SpanDatabase({ spanDb }: Props) {
   const theme = useTheme();
   const dbSyntaxLineHeight = theme.eui.euiSizeL;
   const previewHeight = 240; // 10 * dbSyntaxLineHeight
 
-  if (!dbContext || !dbContext.statement) {
+  if (!spanDb || !spanDb.statement) {
     return null;
   }
 
-  if (dbContext.type !== 'sql') {
-    return <DatabaseStatement>{dbContext.statement}</DatabaseStatement>;
+  if (spanDb.type !== 'sql') {
+    return <DatabaseStatement>{spanDb.statement}</DatabaseStatement>;
   }
 
   return (
@@ -73,7 +73,7 @@ export function DatabaseContext({ dbContext }: Props) {
               overflowX: 'scroll',
             }}
           >
-            {dbContext.statement}
+            {spanDb.statement}
           </SyntaxHighlighter>
         </TruncateHeightSection>
       </DatabaseStatement>
