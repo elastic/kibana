@@ -14,7 +14,7 @@ import { Fullscreen } from '../fullscreen';
 import { isTextInput } from '../../lib/is_text_input';
 import { HEADER_BANNER_HEIGHT, WORKPAD_CANVAS_BUFFER } from '../../../common/lib/constants';
 
-export class WorkpadUI extends React.PureComponent {
+export class Workpad extends React.PureComponent {
   static propTypes = {
     selectedPageNumber: PropTypes.number.isRequired,
     getAnimation: PropTypes.func.isRequired,
@@ -37,6 +37,7 @@ export class WorkpadUI extends React.PureComponent {
     zoomIn: PropTypes.func.isRequired,
     zoomOut: PropTypes.func.isRequired,
     resetZoom: PropTypes.func.isRequired,
+    hasHeaderBanner: PropTypes.bool,
   };
 
   _toggleFullscreen = () => {
@@ -80,14 +81,13 @@ export class WorkpadUI extends React.PureComponent {
       registerLayout,
       unregisterLayout,
       zoomScale,
+      hasHeaderBanner = false,
     } = this.props;
 
     const bufferStyle = {
       height: isFullscreen ? height : (height + 2 * WORKPAD_CANVAS_BUFFER) * zoomScale,
       width: isFullscreen ? width : (width + 2 * WORKPAD_CANVAS_BUFFER) * zoomScale,
     };
-
-    const hasHeaderBanner = document.getElementsByClassName('kbnBody--hasHeaderBanner').length;
 
     const headerBannerOffset = hasHeaderBanner ? HEADER_BANNER_HEIGHT : 0;
 
