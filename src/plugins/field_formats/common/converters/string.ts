@@ -121,7 +121,7 @@ export class StringFormat extends FieldFormat {
       case 'title':
         return this.toTitleCase(val);
       case 'short':
-        return shortenDottedString(val);
+        return asPrettyString(shortenDottedString(val));
       case 'base64':
         return this.base64Decode(val);
       case 'urlparam':

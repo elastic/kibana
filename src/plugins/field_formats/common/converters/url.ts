@@ -16,6 +16,7 @@ import {
   HtmlContextTypeConvert,
   FieldFormatMetaParams,
   FIELD_FORMAT_IDS,
+  FieldFormatParams,
 } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
@@ -61,7 +62,7 @@ export class UrlFormat extends FieldFormat {
   ];
   static urlTypes = URL_TYPES;
 
-  constructor(params: FieldFormatMetaParams) {
+  constructor(params: FieldFormatParams & FieldFormatMetaParams) {
     super(params);
     this.compileTemplate = memoize(this.compileTemplate);
   }
