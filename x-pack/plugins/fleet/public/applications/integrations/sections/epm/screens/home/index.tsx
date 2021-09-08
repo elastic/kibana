@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Switch, Route, useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
@@ -73,7 +73,17 @@ const InstalledPackages: React.FC = memo(() => {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
     experimental: true,
   });
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const history = useHistory();
+  const { category } = useParams<CategoryParams>();
+  const selectedCategory = category || '';
+  const queryParams = new URLSearchParams(useLocation().search);
+  const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
+  function setSelectedCategory(categoryId: string) {
+    const url = searchParam
+      ? `/browse/${categoryId}?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchParam}`
+      : `/browse/${categoryId}`;
+    history.push(url);
+  }
 
   const allInstalledPackages = useMemo(
     () =>
@@ -118,21 +128,19 @@ const InstalledPackages: React.FC = memo(() => {
     [allInstalledPackages.length, updatablePackages.length]
   );
 
-  const controls = useMemo(
-    () => (
-      <CategoryFacets
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
-      />
-    ),
-    [categories, selectedCategory]
+  const controls = (
+    <CategoryFacets
+      categories={categories}
+      selectedCategory={selectedCategory}
+      onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
+    />
   );
 
   return (
     <PackageListGrid
       isLoading={isLoadingPackages}
       controls={controls}
+      category={selectedCategory}
       title={title}
       list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
     />
@@ -144,9 +152,14 @@ const AvailablePackages: React.FC = memo(() => {
   const history = useHistory();
   const { category } = useParams<CategoryParams>();
   const selectedCategory = category || '';
-
   const queryParams = new URLSearchParams(useLocation().search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
+  function setSelectedCategory(categoryId: string) {
+    const url = searchParam
+      ? `/browse/${categoryId}?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchParam}`
+      : `/browse/${categoryId}`;
+    history.push(url);
+  }
 
   const { data: allCategoryPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages({
     category: '',
@@ -188,13 +201,6 @@ const AvailablePackages: React.FC = memo(() => {
     ],
     [allPackages?.length, categoriesRes]
   );
-
-  function setSelectedCategory(categoryId: string) {
-    const url = searchParam
-      ? `/browse/${categoryId}?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchParam}`
-      : `/browse/${categoryId}`;
-    history.push(url);
-  }
 
   const controls = categories ? (
     <CategoryFacets
