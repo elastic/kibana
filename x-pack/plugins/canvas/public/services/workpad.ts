@@ -23,7 +23,7 @@ export interface TemplateFindResponse {
 export interface ResolveWorkpadResponse {
   workpad: CanvasWorkpad;
   outcome: SavedObjectsResolveResponse['outcome'];
-  aliasId: SavedObjectsResolveResponse['alias_target_id'];
+  aliasId?: SavedObjectsResolveResponse['alias_target_id'];
 }
 export interface CanvasWorkpadService {
   get: (id: string) => Promise<CanvasWorkpad>;
