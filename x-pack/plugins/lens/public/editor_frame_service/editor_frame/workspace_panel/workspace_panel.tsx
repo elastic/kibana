@@ -79,7 +79,7 @@ export interface WorkspacePanelProps {
 interface WorkspaceState {
   expressionBuildError?: Array<{
     shortMessage: string;
-    longMessage: string;
+    longMessage: React.ReactNode;
     fixAction?: DatasourceFixAction<unknown>;
   }>;
   expandError: boolean;
@@ -416,10 +416,10 @@ export const VisualizationWrapper = ({
   localState: WorkspaceState & {
     configurationValidationError?: Array<{
       shortMessage: string;
-      longMessage: string;
+      longMessage: React.ReactNode;
       fixAction?: DatasourceFixAction<unknown>;
     }>;
-    missingRefsErrors?: Array<{ shortMessage: string; longMessage: string }>;
+    missingRefsErrors?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
   };
   ExpressionRendererComponent: ReactExpressionRendererType;
   application: ApplicationStart;
@@ -454,7 +454,7 @@ export const VisualizationWrapper = ({
     validationError:
       | {
           shortMessage: string;
-          longMessage: string;
+          longMessage: React.ReactNode;
           fixAction?: DatasourceFixAction<unknown>;
         }
       | undefined
@@ -499,7 +499,7 @@ export const VisualizationWrapper = ({
           .map((validationError) => (
             <>
               <p
-                key={validationError.longMessage}
+                key={validationError.shortMessage}
                 className="eui-textBreakWord"
                 data-test-subj="configuration-failure-error"
               >

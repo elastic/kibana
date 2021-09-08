@@ -8,6 +8,7 @@
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import {
   applyPaletteParams,
+  getColorStops,
   getContrastColor,
   getDataMinMax,
   getPaletteStops,
@@ -55,6 +56,78 @@ describe('applyPaletteParams', () => {
     ).toEqual([
       { color: 'blue', stop: 20 },
       { color: 'yellow', stop: 70 },
+    ]);
+  });
+});
+
+describe('getColorStops', () => {
+  const paletteRegistry = chartPluginMock.createPaletteRegistry();
+  it('should return the same colorStops if a custom palette is passed, avoiding recomputation', () => {
+    const colorStops = [
+      { stop: 0, color: 'red' },
+      { stop: 100, color: 'blue' },
+    ];
+    expect(
+      getColorStops(
+        paletteRegistry,
+        colorStops,
+        { name: 'custom', type: 'palette' },
+        { min: 0, max: 100 }
+      )
+    ).toBe(colorStops);
+  });
+
+  it('should get a fresh list of colors', () => {
+    expect(
+      getColorStops(
+        paletteRegistry,
+        [
+          { stop: 0, color: 'red' },
+          { stop: 100, color: 'blue' },
+        ],
+        { name: 'mocked', type: 'palette' },
+        { min: 0, max: 100 }
+      )
+    ).toEqual([
+      { color: 'blue', stop: 0 },
+      { color: 'yellow', stop: 50 },
+    ]);
+  });
+
+  it('should get a fresh list of colors even if custom palette but empty colorStops', () => {
+    expect(
+      getColorStops(paletteRegistry, [], { name: 'mocked', type: 'palette' }, { min: 0, max: 100 })
+    ).toEqual([
+      { color: 'blue', stop: 0 },
+      { color: 'yellow', stop: 50 },
+    ]);
+  });
+
+  it('should correctly map the new colorStop to the current data bound and minValue', () => {
+    expect(
+      getColorStops(
+        paletteRegistry,
+        [],
+        { name: 'mocked', type: 'palette', params: { rangeType: 'number' } },
+        { min: 100, max: 1000 }
+      )
+    ).toEqual([
+      { color: 'blue', stop: 100 },
+      { color: 'yellow', stop: 550 },
+    ]);
+  });
+
+  it('should reverse the colors', () => {
+    expect(
+      getColorStops(
+        paletteRegistry,
+        [],
+        { name: 'mocked', type: 'palette', params: { reverse: true } },
+        { min: 100, max: 1000 }
+      )
+    ).toEqual([
+      { color: 'yellow', stop: 0 },
+      { color: 'blue', stop: 50 },
     ]);
   });
 });
