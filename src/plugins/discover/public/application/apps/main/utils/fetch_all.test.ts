@@ -32,6 +32,7 @@ describe('test fetchAll', () => {
       data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
+      savedSearch: savedSearchMock,
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
       useNewFieldsApi: true,

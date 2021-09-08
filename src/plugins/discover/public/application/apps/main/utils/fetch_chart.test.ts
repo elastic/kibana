@@ -8,13 +8,14 @@
 import { FetchStatus } from '../../../types';
 import { BehaviorSubject, of, throwError as throwErrorRx } from 'rxjs';
 import { RequestAdapter } from '../../../../../../inspector';
-import { savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
+import { savedSearchMock, savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
 import { fetchChart, updateSearchSource } from './fetch_chart';
 import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
 import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { calculateBounds, IKibanaSearchResponse } from '../../../../../../data/common';
 import { estypes } from '@elastic/elasticsearch';
+import { FetchAllSubDeps } from './fetch_all';
 
 function getDataSubjects() {
   return {
@@ -63,7 +64,7 @@ describe('test fetchCharts', () => {
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async (done) => {
     const subjects = getDataSubjects();
-    const deps = {
+    const deps = ({
       appStateContainer: {
         getState: () => {
           return { interval: 'auto' };
@@ -73,8 +74,9 @@ describe('test fetchCharts', () => {
       data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
+      savedSearch: savedSearchMock,
       searchSessionId: '123',
-    };
+    } as unknown) as FetchAllSubDeps;
     deps.data.query.timefilter.timefilter.getTime = () => {
       return { from: '2021-07-07T00:05:13.590', to: '2021-07-07T11:20:13.590' };
     };
@@ -134,7 +136,7 @@ describe('test fetchCharts', () => {
   test('change of fetchStatus on fetch error', async (done) => {
     const subjects = getDataSubjects();
 
-    const deps = {
+    const deps = ({
       appStateContainer: {
         getState: () => {
           return { interval: 'auto' };
@@ -145,7 +147,7 @@ describe('test fetchCharts', () => {
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
       searchSessionId: '123',
-    };
+    } as unknown) as FetchAllSubDeps;
 
     savedSearchMockWithTimeField.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
 

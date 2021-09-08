@@ -11,6 +11,7 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { fetchTotalHits } from './fetch_total_hits';
 import { discoverServiceMock } from '../../../../__mocks__/services';
+import { FetchAllSubDeps } from './fetch_all';
 
 function getDataSubjects() {
   return {
@@ -26,13 +27,13 @@ describe('test fetchTotalHits', () => {
     const subjects = getDataSubjects();
     const { totalHits$ } = subjects;
 
-    const deps = {
+    const deps = ({
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
       searchSessionId: '123',
       data: discoverServiceMock.data,
-    };
+    } as unknown) as FetchAllSubDeps;
 
     const stateArr: FetchStatus[] = [];
 
@@ -52,13 +53,13 @@ describe('test fetchTotalHits', () => {
   test('change of fetchStatus on fetch error', async (done) => {
     const subjects = getDataSubjects();
     const { totalHits$ } = subjects;
-    const deps = {
+    const deps = ({
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
       searchSessionId: '123',
       data: discoverServiceMock.data,
-    };
+    } as unknown) as FetchAllSubDeps;
 
     savedSearchMock.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
 
