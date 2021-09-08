@@ -50,4 +50,6 @@ export {
   FieldFormatInstanceType,
   IFieldFormat,
   FieldFormatsStartCommon,
+  FieldFormatParams,
+  FieldFormatMetaParams,
 } from './types';

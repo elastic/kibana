@@ -105,7 +105,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
           <EuiSelect
             data-test-subj={'durationEditorInputFormat'}
             value={formatParams.inputFormat}
-            options={format.type.inputFormats.map((fmt: InputFormat) => {
+            options={DurationFormat.inputFormats.map((fmt: InputFormat) => {
               return {
                 value: fmt.kind,
                 text: fmt.text,
@@ -129,7 +129,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
           <EuiSelect
             data-test-subj={'durationEditorOutputFormat'}
             value={formatParams.outputFormat}
-            options={format.type.outputFormats.map((fmt: OutputFormat) => {
+            options={DurationFormat.outputFormats.map((fmt: OutputFormat) => {
               return {
                 value: fmt.method,
                 text: fmt.text,

@@ -9,6 +9,7 @@ import type { IndexPatternColumn, IncompleteColumn } from './operations';
 import type { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
 import type { FieldSpec } from '../../../../../src/plugins/data/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
+import type { FieldFormatParams } from '../../../../../src/plugins/field_formats/common';
 
 export {
   FieldBasedIndexPatternColumn,
@@ -51,7 +52,7 @@ export interface IndexPattern {
     string,
     {
       id: string;
-      params: unknown;
+      params: FieldFormatParams;
     }
   >;
   hasRestrictions: boolean;
