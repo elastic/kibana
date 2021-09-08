@@ -63,9 +63,5 @@ describe('ExploratoryView', () => {
 
     expect((await screen.findAllByText('Performance distribution'))[0]).toBeInTheDocument();
     expect(await screen.findByText(/Lens Embeddable Component/i)).toBeInTheDocument();
-
-    await waitFor(() => {
-      screen.getByRole('table', { name: /this table contains 1 rows\./i });
-    });
   });
 });

@@ -38,7 +38,7 @@ export function ExpandedSeriesRow({ seriesId, series, seriesConfig }: Props) {
   const columnType = getColumnType(seriesConfig, selectedMetricField);
 
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: '100%' }} id={`exploratoryViewExpandedRow${seriesId}`}>
       <EuiFlexGroup>
         <EuiFlexItem>
           <ReportDefinitionCol seriesId={seriesId} series={series} seriesConfig={seriesConfig} />
