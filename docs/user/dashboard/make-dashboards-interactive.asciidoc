@@ -7,7 +7,7 @@
 you to apply dashboard-level filters, and drilldowns that allow you to navigate to other \
 dashboards and external websites.
 
-Add interactive capabilities to your dashboard, such as controls that allow you to apply dashboard-level filters, and drilldowns that allow you to navigate to other dashboards and external websites. 
+Add interactive capabilities to your dashboard, such as controls that allow you to apply dashboard-level filters, and drilldowns that allow you to navigate to *Discover*, other dashboards, and external websites. 
 
 ++++
 <script type="text/javascript" async 
@@ -27,7 +27,7 @@ Third-party developers can create drilldowns. To learn how to code drilldowns, r
 
 [float]
 [[add-controls]]
-=== Add Controls panels
+=== experimental[] Add Controls panels
 
 *Controls* panels allow you to apply dashboard-level filters based on values from a list, or a range of values. 
 
