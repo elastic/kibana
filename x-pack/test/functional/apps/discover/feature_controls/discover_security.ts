@@ -112,7 +112,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('does show CSV reports', async () => {
+      it('shows CSV reports', async () => {
         await PageObjects.share.clickShareTopNavButton();
         await testSubjects.existOrFail('sharePanel-CSVReports');
         await PageObjects.share.clickShareTopNavButton();
