@@ -7,17 +7,17 @@
 
 export default function ({ loadTestFile }) {
   describe('MetricsUI Endpoints', () => {
-    // loadTestFile(require.resolve('./metadata'));
-    // loadTestFile(require.resolve('./log_entry_highlights'));
-    // loadTestFile(require.resolve('./log_sources'));
-    // loadTestFile(require.resolve('./log_summary'));
-    // loadTestFile(require.resolve('./metrics'));
-    // loadTestFile(require.resolve('./sources'));
-    // loadTestFile(require.resolve('./snapshot'));
-    // loadTestFile(require.resolve('./metrics_alerting'));
-    // loadTestFile(require.resolve('./metrics_explorer'));
-    // loadTestFile(require.resolve('./ip_to_hostname'));
-    // loadTestFile(require.resolve('./http_source'));
+    loadTestFile(require.resolve('./metadata'));
+    loadTestFile(require.resolve('./log_entry_highlights'));
+    loadTestFile(require.resolve('./log_sources'));
+    loadTestFile(require.resolve('./log_summary'));
+    loadTestFile(require.resolve('./metrics'));
+    loadTestFile(require.resolve('./sources'));
+    loadTestFile(require.resolve('./snapshot'));
+    loadTestFile(require.resolve('./metrics_alerting'));
+    loadTestFile(require.resolve('./metrics_explorer'));
+    loadTestFile(require.resolve('./ip_to_hostname'));
+    loadTestFile(require.resolve('./http_source'));
     loadTestFile(require.resolve('./metric_threshold_alert'));
   });
 }
