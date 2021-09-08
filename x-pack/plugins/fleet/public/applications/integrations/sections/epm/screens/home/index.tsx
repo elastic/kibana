@@ -11,7 +11,11 @@ import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
 
 import { installationStatuses } from '../../../../../../../common/constants';
-import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
+import {
+  INTEGRATIONS_ROUTING_PATHS,
+  INTEGRATIONS_SEARCH_QUERYPARAM,
+  pagePathGetters,
+} from '../../../../constants';
 import { useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
 import { DefaultLayout } from '../../../../layouts';
@@ -79,9 +83,7 @@ const InstalledPackages: React.FC = memo(() => {
   const queryParams = new URLSearchParams(useLocation().search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
   function setSelectedCategory(categoryId: string) {
-    const url = searchParam
-      ? `/browse/${categoryId}?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchParam}`
-      : `/browse/${categoryId}`;
+    const url = pagePathGetters.integrations_all({ category: categoryId, query: searchParam })[1];
     history.push(url);
   }
 
@@ -155,9 +157,7 @@ const AvailablePackages: React.FC = memo(() => {
   const queryParams = new URLSearchParams(useLocation().search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
   function setSelectedCategory(categoryId: string) {
-    const url = searchParam
-      ? `/browse/${categoryId}?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchParam}`
-      : `/browse/${categoryId}`;
+    const url = pagePathGetters.integrations_all({ category: categoryId, query: searchParam })[1];
     history.push(url);
   }
 

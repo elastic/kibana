@@ -28,7 +28,7 @@ import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../../../hooks';
 
-import { INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../../constants';
+import { INTEGRATIONS_SEARCH_QUERYPARAM, pagePathGetters } from '../../../../../constants';
 
 import { PackageCard } from './package_card';
 
@@ -69,9 +69,7 @@ export function PackageListGrid({
     queryText: string;
     error: { message: string } | null;
   }) => {
-    history.push(
-      `/browse/${category}?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query ? query.text : ''}`
-    );
+    history.push(pagePathGetters.integrations_all({ category, query: query ? query.text : '' })[1]);
     if (!error) {
       setQuery(query);
       setSearchTerm(userInput);

@@ -11,7 +11,6 @@ export type StaticPage =
   | 'base'
   | 'overview'
   | 'integrations'
-  | 'integrations_all'
   | 'integrations_installed'
   | 'policies'
   | 'policies_list'
@@ -19,6 +18,7 @@ export type StaticPage =
   | 'data_streams';
 
 export type DynamicPage =
+  | 'integrations_all'
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
@@ -88,7 +88,11 @@ export const pagePathGetters: {
   base: () => [FLEET_BASE_PATH, '/'],
   overview: () => [FLEET_BASE_PATH, '/'],
   integrations: () => [INTEGRATIONS_BASE_PATH, '/'],
-  integrations_all: () => [INTEGRATIONS_BASE_PATH, '/browse'],
+  integrations_all: ({ query, category }: { query?: string; category?: string }) => {
+    const categoryPath = category ? `/${category}` : ``;
+    const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
+    return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${queryParams}`];
+  },
   integrations_installed: () => [INTEGRATIONS_BASE_PATH, '/installed'],
   integration_details_overview: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
