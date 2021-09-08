@@ -45,7 +45,7 @@ interface CrawlerActions {
 }
 
 export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
-  path: ['enterprise_search', 'app_search', 'crawler', 'crawler_overview'],
+  path: ['enterprise_search', 'app_search', 'crawler_logic'],
   actions: {
     clearTimeoutId: true,
     createNewTimeoutForCrawlRequests: (duration) => ({ duration }),
