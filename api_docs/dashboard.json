@@ -933,7 +933,7 @@
             "children": [
               {
                 "parentPluginId": "dashboard",
-                "id": "def-public.state",
+                "id": "def-public.DashboardContainerFactoryDefinition.inject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -946,7 +946,7 @@
               },
               {
                 "parentPluginId": "dashboard",
-                "id": "def-public.references",
+                "id": "def-public.DashboardContainerFactoryDefinition.inject.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "references",
@@ -994,7 +994,7 @@
             "children": [
               {
                 "parentPluginId": "dashboard",
-                "id": "def-public.state",
+                "id": "def-public.DashboardContainerFactoryDefinition.extract.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
@@ -2680,7 +2680,7 @@
           },
           {
             "parentPluginId": "dashboard",
-            "id": "def-common.migratePanelsTo730.$4.uiState",
+            "id": "def-common.migratePanelsTo730.$4",
             "type": "Object",
             "tags": [],
             "label": "uiState",
@@ -2690,7 +2690,7 @@
             "children": [
               {
                 "parentPluginId": "dashboard",
-                "id": "def-common.migratePanelsTo730.$4.uiState.Unnamed",
+                "id": "def-common.migratePanelsTo730.$4.Unnamed",
                 "type": "Any",
                 "tags": [],
                 "label": "Unnamed",

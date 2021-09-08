@@ -347,7 +347,7 @@
             "children": [
               {
                 "parentPluginId": "mapsEms",
-                "id": "def-public.IServiceSettings.setQueryParams.$1.params",
+                "id": "def-public.IServiceSettings.setQueryParams.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -357,7 +357,7 @@
                 "children": [
                   {
                     "parentPluginId": "mapsEms",
-                    "id": "def-public.IServiceSettings.setQueryParams.$1.params.Unnamed",
+                    "id": "def-public.IServiceSettings.setQueryParams.$1.Unnamed",
                     "type": "Any",
                     "tags": [],
                     "label": "Unnamed",

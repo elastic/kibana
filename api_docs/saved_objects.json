@@ -57,7 +57,7 @@
                 "children": [
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.props",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.onChoose.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "props",
@@ -70,7 +70,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.onChoose.$2",
                     "type": "string",
                     "tags": [],
                     "label": "propName",
@@ -80,7 +80,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.componentName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.onChoose.$3",
                     "type": "string",
                     "tags": [],
                     "label": "componentName",
@@ -90,7 +90,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.location",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.onChoose.$4",
                     "type": "string",
                     "tags": [],
                     "label": "location",
@@ -100,7 +100,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propFullName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.onChoose.$5",
                     "type": "string",
                     "tags": [],
                     "label": "propFullName",
@@ -129,7 +129,7 @@
                 "children": [
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.props",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.noItemsMessage.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "props",
@@ -142,7 +142,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.noItemsMessage.$2",
                     "type": "string",
                     "tags": [],
                     "label": "propName",
@@ -152,7 +152,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.componentName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.noItemsMessage.$3",
                     "type": "string",
                     "tags": [],
                     "label": "componentName",
@@ -162,7 +162,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.location",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.noItemsMessage.$4",
                     "type": "string",
                     "tags": [],
                     "label": "location",
@@ -172,7 +172,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propFullName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.noItemsMessage.$5",
                     "type": "string",
                     "tags": [],
                     "label": "propFullName",
@@ -199,7 +199,7 @@
                 "children": [
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.props",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.savedObjectMetaData.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "props",
@@ -212,7 +212,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.savedObjectMetaData.$2",
                     "type": "string",
                     "tags": [],
                     "label": "propName",
@@ -222,7 +222,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.componentName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.savedObjectMetaData.$3",
                     "type": "string",
                     "tags": [],
                     "label": "componentName",
@@ -232,7 +232,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.location",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.savedObjectMetaData.$4",
                     "type": "string",
                     "tags": [],
                     "label": "location",
@@ -242,7 +242,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propFullName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.savedObjectMetaData.$5",
                     "type": "string",
                     "tags": [],
                     "label": "propFullName",
@@ -269,7 +269,7 @@
                 "children": [
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.props",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.initialPageSize.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "props",
@@ -282,7 +282,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.initialPageSize.$2",
                     "type": "string",
                     "tags": [],
                     "label": "propName",
@@ -292,7 +292,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.componentName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.initialPageSize.$3",
                     "type": "string",
                     "tags": [],
                     "label": "componentName",
@@ -302,7 +302,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.location",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.initialPageSize.$4",
                     "type": "string",
                     "tags": [],
                     "label": "location",
@@ -312,7 +312,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propFullName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.initialPageSize.$5",
                     "type": "string",
                     "tags": [],
                     "label": "propFullName",
@@ -339,7 +339,7 @@
                 "children": [
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.props",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.fixedPageSize.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "props",
@@ -352,7 +352,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.fixedPageSize.$2",
                     "type": "string",
                     "tags": [],
                     "label": "propName",
@@ -362,7 +362,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.componentName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.fixedPageSize.$3",
                     "type": "string",
                     "tags": [],
                     "label": "componentName",
@@ -372,7 +372,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.location",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.fixedPageSize.$4",
                     "type": "string",
                     "tags": [],
                     "label": "location",
@@ -382,7 +382,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propFullName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.fixedPageSize.$5",
                     "type": "string",
                     "tags": [],
                     "label": "propFullName",
@@ -409,7 +409,7 @@
                 "children": [
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.props",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.showFilter.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "props",
@@ -422,7 +422,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.showFilter.$2",
                     "type": "string",
                     "tags": [],
                     "label": "propName",
@@ -432,7 +432,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.componentName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.showFilter.$3",
                     "type": "string",
                     "tags": [],
                     "label": "componentName",
@@ -442,7 +442,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.location",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.showFilter.$4",
                     "type": "string",
                     "tags": [],
                     "label": "location",
@@ -452,7 +452,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.propFullName",
+                    "id": "def-public.SavedObjectFinderUi.propTypes.showFilter.$5",
                     "type": "string",
                     "tags": [],
                     "label": "propFullName",
@@ -979,7 +979,7 @@
             "children": [
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences",
+                "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    attributes,\n    id,\n    references = [],\n  }",
@@ -989,7 +989,7 @@
                 "children": [
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences.attributes",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributes",
                     "type": "Object",
                     "tags": [],
                     "label": "attributes",
@@ -1002,7 +1002,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences.id",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.id",
                     "type": "string",
                     "tags": [],
                     "label": "id",
@@ -1012,7 +1012,7 @@
                   },
                   {
                     "parentPluginId": "savedObjects",
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.attributesidreferences.references",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.$1.references",
                     "type": "Array",
                     "tags": [],
                     "label": "references",
@@ -1448,7 +1448,7 @@
         "children": [
           {
             "parentPluginId": "savedObjects",
-            "id": "def-public.isErrorNonFatal.$1.error",
+            "id": "def-public.isErrorNonFatal.$1",
             "type": "Object",
             "tags": [],
             "label": "error",
@@ -1458,7 +1458,7 @@
             "children": [
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.isErrorNonFatal.$1.error.message",
+                "id": "def-public.isErrorNonFatal.$1.message",
                 "type": "string",
                 "tags": [],
                 "label": "message",
@@ -1588,7 +1588,7 @@
           },
           {
             "parentPluginId": "savedObjects",
-            "id": "def-public.saveWithConfirmation.$2.savedObject",
+            "id": "def-public.saveWithConfirmation.$2",
             "type": "Object",
             "tags": [],
             "label": "savedObject",
@@ -1598,7 +1598,7 @@
             "children": [
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.saveWithConfirmation.$2.savedObject.getEsType",
+                "id": "def-public.saveWithConfirmation.$2.getEsType",
                 "type": "Function",
                 "tags": [],
                 "label": "getEsType",
@@ -1613,7 +1613,7 @@
               },
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.saveWithConfirmation.$2.savedObject.title",
+                "id": "def-public.saveWithConfirmation.$2.title",
                 "type": "string",
                 "tags": [],
                 "label": "title",
@@ -1623,7 +1623,7 @@
               },
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.saveWithConfirmation.$2.savedObject.displayName",
+                "id": "def-public.saveWithConfirmation.$2.displayName",
                 "type": "string",
                 "tags": [],
                 "label": "displayName",
@@ -1657,7 +1657,7 @@
           },
           {
             "parentPluginId": "savedObjects",
-            "id": "def-public.saveWithConfirmation.$4.services",
+            "id": "def-public.saveWithConfirmation.$4",
             "type": "Object",
             "tags": [],
             "label": "services",
@@ -1667,7 +1667,7 @@
             "children": [
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.saveWithConfirmation.$4.services.savedObjectsClient",
+                "id": "def-public.saveWithConfirmation.$4.savedObjectsClient",
                 "type": "Object",
                 "tags": [],
                 "label": "savedObjectsClient",
@@ -1794,7 +1794,7 @@
               },
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.saveWithConfirmation.$4.services.overlays",
+                "id": "def-public.saveWithConfirmation.$4.overlays",
                 "type": "Object",
                 "tags": [],
                 "label": "overlays",
@@ -3298,7 +3298,7 @@
             "children": [
               {
                 "parentPluginId": "savedObjects",
-                "id": "def-public.services",
+                "id": "def-public.SavedObjectDecoratorConfig.factory.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "services",
@@ -3807,7 +3807,7 @@
         "children": [
           {
             "parentPluginId": "savedObjects",
-            "id": "def-public.services",
+            "id": "def-public.SavedObjectDecoratorFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "services",
@@ -3969,6 +3969,14 @@
             {
               "plugin": "maps",
               "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
+            },
+            {
+              "plugin": "graph",
+              "path": "x-pack/plugins/graph/public/apps/listing_route.tsx"
+            },
+            {
+              "plugin": "graph",
+              "path": "x-pack/plugins/graph/public/apps/listing_route.tsx"
             },
             {
               "plugin": "visualize",
