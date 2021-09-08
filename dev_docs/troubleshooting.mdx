@@ -12,5 +12,9 @@ tags: ['kibana', 'onboarding', 'dev', 'troubleshooting']
 If you run into some really head-scratching Typescript errors, and are starting to question your sanity, try to run `git clean` to restore your repository to a totally fresh state. Sometimes the Typescript caches can get mixed up when switching branches and show errors that are totally wrong.
 
 ```
+# dry-run the clean to see what will be deleted
 git clean -fdxn -e /config -e /.vscode
+
+# review the files which will be deleted, consider adding some more excludes (-e)
+# re-run without the dry-run (-n) flag to actually delete the files
 ```
