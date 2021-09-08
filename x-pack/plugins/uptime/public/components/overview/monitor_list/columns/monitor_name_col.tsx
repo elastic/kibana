@@ -44,7 +44,7 @@ export const MonitorNameColumn = ({ summary }: Props) => {
   const currExcludedFilters = parseCurrentFilters(params.excludedFilters);
 
   const [filterType, setFilterType] = useState<string[]>(currFilters.get('monitor.type') ?? []);
-  const excludedFilters = React.useRef<string[]>(currExcludedFilters.get('tags') ?? []);
+  const excludedFilters = React.useRef<string[]>(currExcludedFilters.get('monitor.type') ?? []);
 
   useFilterUpdate('monitor.type', filterType, excludedFilters.current);
 
