@@ -9,6 +9,7 @@
 import React, { Fragment, useContext, useEffect } from 'react';
 import themeLight from '@elastic/eui/dist/eui_theme_light.json';
 import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import type { IndexPattern } from 'src/plugins/data/common';
 
 import {
   EuiDataGridCellValueElementProps,
@@ -16,7 +17,6 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { IndexPattern } from '../../../kibana_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
