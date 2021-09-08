@@ -13,9 +13,8 @@ import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
 import { isTextInput } from '../../lib/is_text_input';
 import { HEADER_BANNER_HEIGHT, WORKPAD_CANVAS_BUFFER } from '../../../common/lib/constants';
-import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 
-class WorkpadUI extends React.PureComponent {
+export class WorkpadUI extends React.PureComponent {
   static propTypes = {
     selectedPageNumber: PropTypes.number.isRequired,
     getAnimation: PropTypes.func.isRequired,
@@ -81,13 +80,16 @@ class WorkpadUI extends React.PureComponent {
       registerLayout,
       unregisterLayout,
       zoomScale,
-      kibana,
     } = this.props;
 
     const bufferStyle = {
       height: isFullscreen ? height : (height + 2 * WORKPAD_CANVAS_BUFFER) * zoomScale,
       width: isFullscreen ? width : (width + 2 * WORKPAD_CANVAS_BUFFER) * zoomScale,
     };
+
+    const hasHeaderBanner = document.getElementsByClassName('kbnBody--hasHeaderBanner').length;
+
+    const headerBannerOffset = hasHeaderBanner ? HEADER_BANNER_HEIGHT : 0;
 
     return (
       <div className="canvasWorkpad__buffer" style={bufferStyle}>
@@ -106,13 +108,6 @@ class WorkpadUI extends React.PureComponent {
 
           <Fullscreen>
             {({ isFullscreen, windowSize }) => {
-              console.log(kibana);
-
-              const hasHeaderBanner = document.getElementsByClassName('kbnBody--hasHeaderBanner')
-                .length;
-
-              const headerBannerOffset = hasHeaderBanner ? HEADER_BANNER_HEIGHT : 0;
-
               const scale = Math.min(
                 (windowSize.height - headerBannerOffset) / height,
                 windowSize.width / width
@@ -163,5 +158,3 @@ class WorkpadUI extends React.PureComponent {
     );
   }
 }
-
-export const Workpad = withKibana(WorkpadUI);
