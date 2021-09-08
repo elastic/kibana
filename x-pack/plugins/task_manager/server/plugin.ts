@@ -117,7 +117,8 @@ export class TaskManagerPlugin
         usageCollection,
         monitoredHealth$,
         this.config.ephemeral_tasks.enabled,
-        this.config.ephemeral_tasks.request_capacity
+        this.config.ephemeral_tasks.request_capacity,
+        this.config.internal.exclude_task_types
       );
     }
 
