@@ -101,7 +101,8 @@ export class Metric extends Component {
         <div className="tvbVisMetric__secondary">
           {secondaryLabel}
           <div style={styles.secondary_value} className="tvbVisMetric__value--secondary">
-            {secondaryValue}
+            {/* eslint-disable-next-line react/no-danger */}
+            <span dangerouslySetInnerHTML={{ __html: secondaryValue }} />
           </div>
         </div>
       );
@@ -132,7 +133,8 @@ export class Metric extends Component {
                 data-test-subj="tsvbMetricValue"
                 className="tvbVisMetric__value--primary"
               >
-                {primaryValue}
+                {/* eslint-disable-next-line react/no-danger */}
+                <span dangerouslySetInnerHTML={{ __html: primaryValue }} />
               </div>
             </div>
             {secondarySnippet}

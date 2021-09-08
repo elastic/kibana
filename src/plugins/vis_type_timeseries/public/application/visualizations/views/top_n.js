@@ -139,7 +139,8 @@ export class TopN extends Component {
             </div>
           </td>
           <td className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">
-            {formatter(lastValue)}
+            {/* eslint-disable-next-line react/no-danger */}
+            <span dangerouslySetInnerHTML={{ __html: formatter(lastValue) }} />
           </td>
         </tr>
       );

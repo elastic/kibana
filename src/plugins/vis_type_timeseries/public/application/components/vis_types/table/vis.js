@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable react/no-danger */
-
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import { parse as parseUrl } from 'url';
@@ -71,7 +69,7 @@ class TableVis extends Component {
     // we should skip url field formatting for key if tsvb have drilldown_url
     if (fieldFormatMap?.[model.pivot_id]?.id !== FIELD_FORMAT_IDS.URL || !model.drilldown_url) {
       const formatter = createFieldFormatter(model?.pivot_id, fieldFormatMap, 'html');
-      rowDisplay = <span dangerouslySetInnerHTML={{ __html: formatter(rowDisplay) }} />;
+      rowDisplay = <span dangerouslySetInnerHTML={{ __html: formatter(rowDisplay) }} />; // eslint-disable-line react/no-danger
     }
 
     if (model.drilldown_url) {
@@ -117,6 +115,7 @@ class TableVis extends Component {
             className="eui-textRight"
             style={style}
           >
+            {/* eslint-disable-next-line react/no-danger */}
             <span dangerouslySetInnerHTML={{ __html: value }} />
             {trend}
           </td>

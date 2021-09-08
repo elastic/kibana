@@ -122,7 +122,9 @@ export const DataFormatPicker = ({
     [shouldIncludeDefaultOption, shouldIncludeNumberOptions]
   );
   const [selectedFormatter, setSelectedFormatter] = useState(getFormatterType(formatterValue));
-  const [customFormatPattern, setCustomFormatPattern] = useState('');
+  const [customFormatPattern, setCustomFormatPattern] = useState(
+    selectedFormatter === DATA_FORMATTERS.CUSTOM ? formatterValue : ''
+  );
   const [durationParams, setDurationParams] = useState(
     getDurationParams(selectedFormatter === DATA_FORMATTERS.DURATION ? formatterValue : 'ms,ms,')
   );
@@ -290,7 +292,7 @@ export const DataFormatPicker = ({
       <EuiFlexItem>
         <EuiFormRow
           label={i18n.translate('visTypeTimeseries.defaultDataFormatterLabel', {
-            defaultMessage: 'Data Formatter',
+            defaultMessage: 'Data formatter',
           })}
           fullWidth
         >

@@ -63,24 +63,32 @@ export function Agg(props: AggProps) {
     [name, onChange, siblings, series]
   );
 
-  useEffect(() => {
-    const formatterType = getFormatterType(series.formatter);
-    const isNumericMetric = checkIfNumericMetric(model, fields, indexPattern);
-    const isNumberFormatter = ![DATA_FORMATTERS.DEFAULT, DATA_FORMATTERS.CUSTOM].includes(
-      formatterType
-    );
+  const isLastAgg = useMemo(
+    () => siblings.findIndex(({ id }) => id === model.id) === siblings.length - 1,
+    [model.id, siblings]
+  );
 
-    if (isNumberFormatter && !isNumericMetric) {
-      onChange({ formatter: DATA_FORMATTERS.DEFAULT });
+  useEffect(() => {
+    // formatter is based on the last agg, i.e. active or resulting one as pipeline
+    if (isLastAgg) {
+      const formatterType = getFormatterType(series.formatter);
+      const isNumericMetric = checkIfNumericMetric(model, fields, indexPattern);
+      const isNumberFormatter = ![DATA_FORMATTERS.DEFAULT, DATA_FORMATTERS.CUSTOM].includes(
+        formatterType
+      );
+
+      if (isNumberFormatter && !isNumericMetric) {
+        onChange({ formatter: DATA_FORMATTERS.DEFAULT });
+      }
+      // in case of string index pattern mode, change default formatter depending on metric type
+      // "number" formatter for numeric metric and "" as custom formatter for any other type
+      if (formatterType === DATA_FORMATTERS.DEFAULT && !isKibanaIndexPattern) {
+        onChange({
+          formatter: isNumericMetric ? DATA_FORMATTERS.NUMBER : '',
+        });
+      }
     }
-    // in case of string index pattern mode, change default formatter depending on metric type
-    // "number" formatter for numeric metric and "" as custom formatter for any other type
-    if (formatterType === DATA_FORMATTERS.DEFAULT && !isKibanaIndexPattern) {
-      onChange({
-        formatter: isNumericMetric ? DATA_FORMATTERS.NUMBER : '',
-      });
-    }
-  }, [indexPattern, model, onChange, fields, series.formatter, isKibanaIndexPattern]);
+  }, [indexPattern, model, onChange, fields, series.formatter, isKibanaIndexPattern, isLastAgg]);
 
   return (
     <div className={props.className} style={style}>
