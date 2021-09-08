@@ -17,7 +17,8 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
-  MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
 import { AdministrationSubTab } from '../types';
@@ -115,7 +116,14 @@ export const getPoliciesPath = (search?: string) => {
 };
 
 export const getPolicyDetailPath = (policyId: string, search?: string) => {
-  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  })}${appendSearch(search)}`;
+};
+
+export const getPolicyTrustedAppsPath = (policyId: string, search?: string) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.policies,
     policyId,
   })}${appendSearch(search)}`;

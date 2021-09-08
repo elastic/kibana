@@ -177,7 +177,7 @@ const TimelionVisComponent = ({
   }, [chart]);
 
   return (
-    <div className="timelionChart" data-test-subj="visTypeXyChart">
+    <div className="timelionChart" data-test-subj="timelionChart">
       {title && (
         <EuiTitle className="timelionChart__topTitle" size="xxxs">
           <h4>{title}</h4>
