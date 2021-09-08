@@ -492,6 +492,34 @@ export interface CoreUsageDataStart {
 // @internal
 export interface CoreUsageStats {
     // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardExport.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.legacyDashboardImport.total'?: number;
+    // (undocumented)
     'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no'?: number;
     // (undocumented)
     'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes'?: number;
