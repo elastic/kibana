@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   FailureReason,
   LoadingStatus,
@@ -27,27 +27,25 @@ export function ContextErrorMessage({ status }: ContextErrorMessageProps) {
     return null;
   }
   return (
-    <I18nProvider>
-      <EuiCallOut
-        title={
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="discover.context.failedToLoadAnchorDocumentDescription"
+          defaultMessage="Failed to load the anchor document"
+        />
+      }
+      color="danger"
+      iconType="alert"
+      data-test-subj="contextErrorMessageTitle"
+    >
+      <EuiText data-test-subj="contextErrorMessageBody">
+        {status.reason === FailureReason.UNKNOWN && (
           <FormattedMessage
-            id="discover.context.failedToLoadAnchorDocumentDescription"
-            defaultMessage="Failed to load the anchor document"
+            id="discover.context.reloadPageDescription.reloadOrVisitTextMessage"
+            defaultMessage="Please reload or go back to the document list to select a valid anchor document."
           />
-        }
-        color="danger"
-        iconType="alert"
-        data-test-subj="contextErrorMessageTitle"
-      >
-        <EuiText data-test-subj="contextErrorMessageBody">
-          {status.reason === FailureReason.UNKNOWN && (
-            <FormattedMessage
-              id="discover.context.reloadPageDescription.reloadOrVisitTextMessage"
-              defaultMessage="Please reload or go back to the document list to select a valid anchor document."
-            />
-          )}
-        </EuiText>
-      </EuiCallOut>
-    </I18nProvider>
+        )}
+      </EuiText>
+    </EuiCallOut>
   );
 }

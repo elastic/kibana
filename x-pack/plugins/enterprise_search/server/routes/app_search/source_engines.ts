@@ -15,7 +15,7 @@ export function registerSourceEnginesRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{name}/source_engines',
+      path: '/internal/app_search/engines/{name}/source_engines',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -33,7 +33,7 @@ export function registerSourceEnginesRoutes({
 
   router.post(
     {
-      path: '/api/app_search/engines/{name}/source_engines/bulk_create',
+      path: '/internal/app_search/engines/{name}/source_engines/bulk_create',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -50,7 +50,7 @@ export function registerSourceEnginesRoutes({
 
   router.delete(
     {
-      path: '/api/app_search/engines/{name}/source_engines/{source_engine_name}',
+      path: '/internal/app_search/engines/{name}/source_engines/{source_engine_name}',
       validate: {
         params: schema.object({
           name: schema.string(),

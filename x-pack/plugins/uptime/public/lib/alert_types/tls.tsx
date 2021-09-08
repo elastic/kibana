@@ -23,7 +23,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
-    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/tls-certificate-alert.html`;
+    return `${docLinks.links.observability.tlsCertificate}`;
   },
   alertParamsExpression: (params: any) => (
     <TLSAlert core={core} plugins={plugins} params={params} />

@@ -282,6 +282,10 @@ export class DocLinksService {
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
+          monitorStatus: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-status-alert.html`,
+          monitorUptime: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
+          tlsCertificate: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/tls-certificate-alert.html`,
+          uptimeDurationAnomaly: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/duration-anomaly-alert.html`,
         },
         alerting: {
           guide: `${KIBANA_DOCS}create-and-manage-rules.html`,
@@ -639,7 +643,13 @@ export interface DocLinksStart {
       timeUnits: string;
       updateTransform: string;
     }>;
-    readonly observability: Record<string, string>;
+    readonly observability: Readonly<{
+      guide: string;
+      monitorStatus: string;
+      monitorUptime: string;
+      tlsCertificate: string;
+      uptimeDurationAnomaly: string;
+    }>;
     readonly alerting: Record<string, string>;
     readonly maps: Record<string, string>;
     readonly monitoring: Record<string, string>;

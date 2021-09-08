@@ -13,7 +13,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
-import { useBreakPoints } from '../../hooks/use_break_points';
+import { useBreakpoints } from '../../hooks/use_breakpoints';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './kuery_bar';
 import { TimeComparison } from './time_comparison';
@@ -36,7 +36,7 @@ export function SearchBar({
   kueryBarBoolFilter,
   kueryBarPlaceholder,
 }: Props) {
-  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakPoints();
+  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakpoints();
 
   if (hidden) {
     return null;
