@@ -977,6 +977,18 @@ export function getCoreUsageCollector(
             'How many times this API has been called by a non-Kibana client in a custom space.',
         },
       },
+      'apiCalls.savedObjectsExport.allTypesSelected.yes': {
+        type: 'long',
+        _meta: {
+          description: 'How many times this API has been called with all types selected.',
+        },
+      },
+      'apiCalls.savedObjectsExport.allTypesSelected.no': {
+        type: 'long',
+        _meta: {
+          description: 'How many times this API has been called without all types selected.',
+        },
+      },
       'apiCalls.legacyDashboardImport.total': {
         type: 'long',
         _meta: { description: 'How many times this API has been called.' },
