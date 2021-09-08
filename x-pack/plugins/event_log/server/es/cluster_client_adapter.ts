@@ -410,9 +410,9 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       },
     };
 
-    this.logger.info(`esContext debug BODY: ${JSON.stringify(body)}`)
-    this.logger.info(`esContext debug legacyIds: ${JSON.stringify(legacyIds)}`)
-    this.logger.info(`esContext debug kibanaVersion: ${JSON.stringify(this.kibanaVersion)}`)
+    this.logger.info(`esContext debug BODY: ${JSON.stringify(body)}`);
+    this.logger.info(`esContext debug legacyIds: ${JSON.stringify(legacyIds)}`);
+    this.logger.info(`esContext debug kibanaVersion: ${JSON.stringify(this.kibanaVersion)}`);
 
     try {
       const {
