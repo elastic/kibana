@@ -103,7 +103,6 @@ export const ConditionGroup = memo<ConditionGroupProps>(
           <div>
             <EuiSpacer size="s" />
             <EuiButton
-              fill
               size="s"
               iconType="plusInCircle"
               onClick={onAndClicked}
