@@ -40,7 +40,6 @@ export const emsConfigSchema = schema.object({
   tilemap: tilemapConfigSchema,
   includeElasticMapsService: schema.boolean({ defaultValue: true }),
   proxyElasticMapsServiceInMaps: schema.boolean({ defaultValue: false }),
-  manifestServiceUrl: schema.string({ defaultValue: '' }),
   emsUrl: schema.conditional(
     schema.siblingRef('proxyElasticMapsServiceInMaps'),
     true,
