@@ -15,7 +15,7 @@ export function registerOnboardingRoutes({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/app_search/onboarding_complete',
+      path: '/internal/app_search/onboarding_complete',
       validate: {
         body: schema.object({
           seed_sample_engine: schema.maybe(schema.boolean()),
