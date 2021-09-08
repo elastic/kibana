@@ -24,6 +24,7 @@ import { Job } from '../lib/job';
 import { InternalApiClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
 import { KibanaContextProvider } from '../shared_imports';
 import { ListingProps as Props, ReportListing } from '.';
+import { ReportDownloadLink } from './components';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -317,10 +318,10 @@ describe('ReportListing', () => {
     jest.clearAllMocks();
   });
 
-  it('Report job listing with some items', () => {
+  it('renders a listing with some items', () => {
     const { actions } = testBed;
     const table = actions.findListTable();
-    expect(table).toMatchSnapshot();
+    expect(table.find(ReportDownloadLink).length).toBe(mockJobs.length);
   });
 
   it('subscribes to license changes, and unsubscribes on dismount', async () => {

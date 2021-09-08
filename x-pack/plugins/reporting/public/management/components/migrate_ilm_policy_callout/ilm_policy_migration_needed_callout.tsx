@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { EuiCallOut, EuiButton, EuiCode } from '@elastic/eui';
 
 import type { NotificationsSetup } from 'src/core/public';
@@ -63,6 +64,7 @@ export const IlmPolicyMigrationNeededCallOut: FunctionComponent<Props> = ({
   onMigrationDone,
 }) => {
   const [isMigratingIndices, setIsMigratingIndices] = useState(false);
+  const isMounted = useMountedState();
 
   const { apiClient } = useInternalApiClient();
 
@@ -78,7 +80,7 @@ export const IlmPolicyMigrationNeededCallOut: FunctionComponent<Props> = ({
         toastMessage: e.body?.message,
       });
     } finally {
-      setIsMigratingIndices(false);
+      if (isMounted()) setIsMigratingIndices(false);
     }
   };
 
