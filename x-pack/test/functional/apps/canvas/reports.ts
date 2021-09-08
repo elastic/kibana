@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ],
       });
       await security.testUser.setRoles([
-        'kibana_admin', // FIXME remove this
         'test_canvas_user',
         'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
       ]);
