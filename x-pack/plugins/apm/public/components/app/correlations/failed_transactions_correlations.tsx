@@ -20,6 +20,7 @@ import {
   EuiBetaBadge,
   EuiBadge,
   EuiToolTip,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '@elastic/eui/src/services/sort/sort_direction';
@@ -156,7 +157,6 @@ export function FailedTransactionsCorrelations({
       : [];
     return [
       {
-        width: '80px',
         field: 'normalizedScore',
         name: (
           <>
@@ -168,6 +168,7 @@ export function FailedTransactionsCorrelations({
             )}
           </>
         ),
+        align: RIGHT_ALIGNMENT,
         render: (_, { normalizedScore }) => {
           return (
             <>
