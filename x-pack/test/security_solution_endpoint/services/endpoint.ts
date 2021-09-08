@@ -189,7 +189,9 @@ export class EndpointTestResources extends FtrService {
    * installs (or upgrades) the Endpoint Fleet package
    * (NOTE: ensure that fleet is setup first before calling this function)
    */
-  async installOrUpgradeEndpointFleetPackage(): Promise<void> {
+  async installOrUpgradeEndpointFleetPackage(): ReturnType<
+    typeof installOrUpgradeEndpointFleetPackage
+  > {
     return installOrUpgradeEndpointFleetPackage(this.kbnClient);
   }
 }
