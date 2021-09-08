@@ -20,7 +20,24 @@ jest.mock('../../../../../kibana_services', () => {
 
 import { OpenSearchPanel } from './open_search_panel';
 
-test('render', () => {
-  const component = shallow(<OpenSearchPanel onClose={jest.fn()} makeUrl={jest.fn()} />);
-  expect(component).toMatchSnapshot();
+describe('OpenSearchPanel', () => {
+  test('render', () => {
+    const component = shallow(
+      <OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should not render manage searches button without permissions', () => {
+    mockCapabilities.mockReturnValue({
+      savedObjectsManagement: {
+        edit: false,
+        delete: false,
+      },
+    });
+    const component = shallow(
+      <OpenSearchPanel onClose={jest.fn()} onOpenSavedSearch={jest.fn()} />
+    );
+    expect(component.find('[data-test-subj="manageSearches"]').exists()).toBe(false);
+  });
 });

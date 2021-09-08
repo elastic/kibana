@@ -27,7 +27,7 @@ const SEARCH_OBJECT_TYPE = 'search';
 
 interface OpenSearchPanelProps {
   onClose: () => void;
-  makeUrl: (id: string) => string;
+  onOpenSavedSearch: (id: string) => void;
 }
 
 export function OpenSearchPanel(props: OpenSearchPanelProps) {
@@ -66,7 +66,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
             },
           ]}
           onChoose={(id) => {
-            window.location.assign(props.makeUrl(id));
+            props.onOpenSavedSearch(id);
             props.onClose();
           }}
           uiSettings={uiSettings}

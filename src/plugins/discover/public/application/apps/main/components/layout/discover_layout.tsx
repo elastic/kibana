@@ -72,7 +72,7 @@ export function DiscoverLayout({
   onChangeIndexPattern,
   onUpdateQuery,
   savedSearchRefetch$,
-  resetQuery,
+  resetSavedSearch,
   savedSearchData$,
   savedSearch,
   searchSource,
@@ -231,6 +231,7 @@ export function DiscoverLayout({
           services={services}
           stateContainer={stateContainer}
           updateQuery={onUpdateQuery}
+          resetSavedSearch={resetSavedSearch}
         />
         <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
           <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
@@ -316,7 +317,7 @@ export function DiscoverLayout({
                         indexPattern={indexPattern}
                         isLegacy={isLegacy}
                         state={state}
-                        resetQuery={resetQuery}
+                        resetSavedSearch={resetSavedSearch}
                         savedSearch={savedSearch}
                         stateContainer={stateContainer}
                         timefield={timeField}

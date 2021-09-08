@@ -22,13 +22,14 @@ import { DiscoverHistogram } from './histogram';
 const TimechartHeaderMemoized = React.memo(TimechartHeader);
 const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
 export function DiscoverChart({
+
   config,
   data,
   bucketInterval,
   chartData,
   hits,
   isLegacy,
-  resetQuery,
+  resetSavedSearch,
   savedSearch,
   state,
   stateContainer,
@@ -41,7 +42,7 @@ export function DiscoverChart({
   hits?: number;
   indexPattern: IndexPattern;
   isLegacy: boolean;
-  resetQuery: () => void;
+  resetSavedSearch: () => void;
   savedSearch: SavedSearch;
   state: AppState;
   stateContainer: GetStateReturn;
@@ -95,7 +96,7 @@ export function DiscoverChart({
             <HitsCounter
               hits={hits}
               showResetButton={!!(savedSearch && savedSearch.id)}
-              onResetQuery={resetQuery}
+              onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>
           {!state.hideChart && (

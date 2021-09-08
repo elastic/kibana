@@ -25,7 +25,7 @@ export interface DiscoverLayoutProps {
   navigateTo: (url: string) => void;
   onChangeIndexPattern: (id: string) => void;
   onUpdateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
-  resetQuery: () => void;
+  resetSavedSearch: () => void;
   savedSearch: SavedSearch;
   savedSearchData$: SavedSearchDataSubject;
   savedSearchRefetch$: SavedSearchRefetchSubject;
