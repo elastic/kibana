@@ -64,11 +64,11 @@ const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
   calloutMessage: (
     <FormattedMessage
       id="xpack.securitySolution.trustedapps.deletionDialog.calloutMessage"
-      defaultMessage="Deleting this entry will remove it from the {count} {count, plural, one {policy} other {policies}} it is associated with."
+      defaultMessage="Deleting this entry will remove it from {count} {count, plural, one {policy} other {policies}} it is associated with."
       values={{
         count:
           entry && isTrustedAppByPolicy(entry.effectScope)
-            ? entry.effectScope.policies.length
+            ? `the ${entry.effectScope.policies.length}`
             : 'all',
       }}
     />
