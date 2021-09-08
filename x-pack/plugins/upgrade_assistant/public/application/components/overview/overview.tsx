@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState, useCallback } from 'react';
 
 import {
   EuiSteps,
@@ -60,12 +60,14 @@ export const Overview: FunctionComponent = () => {
   });
 
   const isStepComplete = (step: OverviewStep) => completedStepsMap[step];
-  const setCompletedStep = (step: OverviewStep, isCompleted: boolean) => {
-    setCompletedStepsMap({
-      ...completedStepsMap,
-      [step]: isCompleted,
-    });
-  };
+  const setCompletedStep = useCallback(() => {
+    return (step: OverviewStep, isCompleted: boolean) => {
+      setCompletedStepsMap({
+        ...completedStepsMap,
+        [step]: isCompleted,
+      });
+    };
+  }, [completedStepsMap]);
 
   return (
     <EuiPageBody restrictWidth={true} data-test-subj="overview">
@@ -110,16 +112,22 @@ export const Overview: FunctionComponent = () => {
             getBackupStep({
               cloud,
               isComplete: isStepComplete('backup'),
-              setIsComplete: setCompletedStep.bind(null, 'backup'),
+              setIsComplete: useCallback(() => setCompletedStep.bind(null, 'backup'), [
+                setCompletedStep,
+              ]),
             }),
             getFixIssuesStep({
               nextMajor,
               isComplete: isStepComplete('fix_issues'),
-              setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
+              setIsComplete: useCallback(() => setCompletedStep.bind(null, 'fix_issues'), [
+                setCompletedStep,
+              ]),
             }),
             getFixLogsStep({
               isComplete: isStepComplete('fix_logs'),
-              setIsComplete: setCompletedStep.bind(null, 'fix_logs'),
+              setIsComplete: useCallback(() => setCompletedStep.bind(null, 'fix_logs'), [
+                setCompletedStep,
+              ]),
             }),
             getUpgradeStep({ docLinks, nextMajor }),
           ]}

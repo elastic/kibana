@@ -33,8 +33,7 @@ const FixIssuesStep: FunctionComponent<OverviewStepProps> = ({ setIsComplete }) 
 
   useEffect(() => {
     setIsComplete(isEsFixed && isKibanaFixed);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEsFixed, isKibanaFixed]);
+  }, [setIsComplete, isEsFixed, isKibanaFixed]);
 
   return (
     <EuiFlexGroup>

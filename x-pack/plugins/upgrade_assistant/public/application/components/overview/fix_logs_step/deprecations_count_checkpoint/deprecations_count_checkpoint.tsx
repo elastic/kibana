@@ -98,9 +98,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
       // An error should invalidate the previous state.
       setHasNoDeprecationLogs(!error && !hasLogs);
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error, isLoading, hasLogs]);
+  }, [setHasNoDeprecationLogs, error, isLoading, hasLogs]);
 
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent lines={6} />;
