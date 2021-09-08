@@ -35,9 +35,9 @@ Layers narrowed by semi-structured search and filters contain the filter icon im
 
 You can prevent the global search from applying to a layer by configuring the following:
 
-* In *Filtering*, clear the *Apply global search to layer data* checkbox to turn off global search for the layer source.
+* In *Filtering*, clear the *Apply global filter to layer data* checkbox to turn off global search for the layer source.
 
-* In *Term joins*, clear the *Apply global search to join* checkbox to turn off global search for the <<terms-join, term join>>.
+* In *Term joins*, clear the *Apply global filter to join* checkbox to turn off global search for the <<terms-join, term join>>.
 
 [float]
 [[maps-narrow-layer-by-global-time]]
@@ -150,7 +150,7 @@ The most common cause for empty layers are searches for a field that exists in o
 [[maps-disable-search-for-layer]]
 ==== Disable global search for a layer
 
-One strategy for eliminating empty layers from cross index searches is to <<maps-narrow-layer-by-global-search, disable global search for a layer>>.
+One strategy for eliminating unintentional empty layers from a cross index search is to <<maps-narrow-layer-by-global-search, disable global search for a layer>>.
 
 [float]
 [[maps-add-index-search]]
