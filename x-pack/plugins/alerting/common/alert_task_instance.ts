@@ -17,9 +17,13 @@ export const alertStateSchema = t.partial({
 
 export type AlertTaskState = t.TypeOf<typeof alertStateSchema>;
 
-export const alertParamsSchema = t.type({
-  alertId: t.string,
-  spaceId: t.string,
-  alertConsumer: t.string,
-});
+export const alertParamsSchema = t.intersection([
+  t.type({
+    alertId: t.string,
+  }),
+  t.partial({
+    spaceId: t.string,
+    alertConsumer: t.string,
+  }),
+]);
 export type AlertTaskParams = t.TypeOf<typeof alertParamsSchema>;

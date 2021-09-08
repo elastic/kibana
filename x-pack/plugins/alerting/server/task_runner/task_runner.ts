@@ -28,6 +28,7 @@ import {
   Services,
   RawAlertInstance,
   AlertTaskState,
+  AlertTaskParams,
   Alert,
   SanitizedAlert,
   AlertExecutionStatus,
@@ -65,6 +66,7 @@ interface AlertTaskRunResult {
 }
 
 interface AlertTaskInstance extends ConcreteTaskInstance {
+  params: AlertTaskParams;
   state: AlertTaskState;
 }
 
@@ -450,7 +452,7 @@ export class TaskRunner<
       alertId,
       alert.name,
       alert.tags,
-      spaceId,
+      spaceId || 'default',
       apiKey,
       this.context.kibanaBaseUrl,
       alert.actions,
@@ -462,7 +464,7 @@ export class TaskRunner<
       alert,
       validatedParams,
       executionHandler,
-      spaceId,
+      spaceId || 'default',
       event
     );
   }
@@ -473,11 +475,14 @@ export class TaskRunner<
     } = this.taskInstance;
     let apiKey: string | null;
     try {
-      apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
+      apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId || 'default');
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
-    const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
+    const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(
+      spaceId || 'default',
+      apiKey
+    );
 
     let alert: SanitizedAlert<Params>;
 

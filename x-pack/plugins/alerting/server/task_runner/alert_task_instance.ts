@@ -30,7 +30,7 @@ export function taskInstanceToAlertTaskInstance<Params extends AlertTypeParams>(
   taskInstance: ConcreteTaskInstance,
   alert?: SanitizedAlert<Params>
 ): AlertTaskInstance {
-  return {
+  const result = {
     ...taskInstance,
     params: pipe(
       alertParamsSchema.decode(taskInstance.params),
@@ -53,4 +53,15 @@ export function taskInstanceToAlertTaskInstance<Params extends AlertTypeParams>(
       }, t.identity)
     ),
   };
+
+  // ensure spaceId and consumer are actually strings
+  if (result.params.spaceId === undefined) {
+    result.params.spaceId = 'undefined';
+  }
+
+  if (result.params.alertConsumer === undefined) {
+    result.params.alertConsumer = 'undefined';
+  }
+
+  return result;
 }
