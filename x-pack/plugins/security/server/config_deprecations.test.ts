@@ -342,7 +342,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Disabling the security plugin \\"xpack.security.enabled\\" will only be supported by disable security in Elasticsearch.",
+        "Enabling or disabling the security plugin from Kibana using xpack.security.enabled is deprecated. This should instead be controlled by Elasticsearch.",
       ]
     `);
   });
