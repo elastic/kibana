@@ -195,7 +195,7 @@ describe('When using the Trusted App Form', () => {
       expect(getConditionRemoveButton(defaultCondition).disabled).toBe(true);
     });
 
-    it('should display 2 options for Field', () => {
+    it('should display 3 options for Field for Windows', () => {
       const conditionFieldSelect = getConditionFieldSelect(getCondition());
       reactTestingLibrary.act(() => {
         fireEvent.click(conditionFieldSelect, { button: 1 });
@@ -205,6 +205,7 @@ describe('When using the Trusted App Form', () => {
           '.euiSuperSelect__listbox button.euiSuperSelect__item'
         )
       ).map((button) => button.textContent);
+      expect(options.length).toEqual(3);
       expect(options).toEqual([
         'Hashmd5, sha1, or sha256',
         'PathThe full path of the application',
