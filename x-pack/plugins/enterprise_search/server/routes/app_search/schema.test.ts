@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerSchemaRoutes } from './schema';
 
 describe('schema routes', () => {
-  describe('GET /api/app_search/engines/{engineName}/schema', () => {
+  describe('GET /internal/app_search/engines/{engineName}/schema', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/schema',
+        path: '/internal/app_search/engines/{engineName}/schema',
       });
 
       registerSchemaRoutes({
@@ -33,14 +33,14 @@ describe('schema routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{engineName}/schema', () => {
+  describe('POST /internal/app_search/engines/{engineName}/schema', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{engineName}/schema',
+        path: '/internal/app_search/engines/{engineName}/schema',
       });
 
       registerSchemaRoutes({
@@ -56,14 +56,14 @@ describe('schema routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{engineName}/reindex_job/{reindexJobId}', () => {
+  describe('GET /internal/app_search/engines/{engineName}/reindex_job/{reindexJobId}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/reindex_job/{reindexJobId}',
+        path: '/internal/app_search/engines/{engineName}/reindex_job/{reindexJobId}',
       });
 
       registerSchemaRoutes({
