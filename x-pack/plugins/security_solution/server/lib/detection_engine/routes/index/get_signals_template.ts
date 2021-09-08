@@ -44,6 +44,14 @@ export const SIGNALS_TEMPLATE_VERSION = 57;
   making changes to the field aliases we use to make signals forwards-compatible.
 */
 export const SIGNALS_FIELD_ALIASES_VERSION = 1;
+
+/**
+  @constant
+  @type {number}
+  @description This value represents the minimum required index version (SIGNALS_TEMPLATE_VERSION) for EQL 
+  rules to write signals correctly. If the write index has a `version` less than this value, the EQL rule
+  will throw an error on execution.
+*/
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
 export const ALIAS_VERSION_FIELD = 'aliases_version';
 

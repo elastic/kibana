@@ -129,4 +129,9 @@ describe('get_signals_template', () => {
     const mapping = createBackwardsCompatibilityMapping(45);
     expect(mapping).toMatchSnapshot();
   });
+
+  test('backwards compatibility mappings for version 57 should match snapshot', () => {
+    const mapping = createBackwardsCompatibilityMapping(57);
+    expect(mapping).toMatchSnapshot();
+  });
 });

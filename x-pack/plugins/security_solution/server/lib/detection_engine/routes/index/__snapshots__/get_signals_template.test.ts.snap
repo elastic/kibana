@@ -595,6 +595,15 @@ Object {
 }
 `;
 
+exports[`get_signals_template backwards compatibility mappings for version 57 should match snapshot 1`] = `
+Object {
+  "_meta": Object {
+    "aliases_version": 1,
+    "version": 57,
+  },
+}
+`;
+
 exports[`get_signals_template it should match snapshot 1`] = `
 Object {
   "index_patterns": Array [
