@@ -31,11 +31,11 @@ export class ColorFormat extends FieldFormat {
     };
   }
 
-  findColorRuleForVal(val: any) {
+  findColorRuleForVal(val: string | number) {
     switch (this.param('fieldType')) {
       case 'string':
         return findLast(this.param('colors'), (colorParam: typeof DEFAULT_CONVERTER_COLOR) => {
-          return new RegExp(colorParam.regex).test(val);
+          return new RegExp(colorParam.regex).test(val as string);
         });
 
       case 'number':

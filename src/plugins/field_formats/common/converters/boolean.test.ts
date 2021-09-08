@@ -9,7 +9,7 @@
 import { BoolFormat } from './boolean';
 
 describe('Boolean Format', () => {
-  let boolean: Record<string, any>;
+  let boolean: BoolFormat;
 
   beforeEach(() => {
     boolean = new BoolFormat({}, jest.fn());

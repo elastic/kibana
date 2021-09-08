@@ -30,7 +30,7 @@ class DateNanosFormatServer extends DateNanosFormat {
       this.timeZone = timezone;
       this.memoizedPattern = pattern;
 
-      this.memoizedConverter = memoize((value: any) => {
+      this.memoizedConverter = memoize((value: null | undefined | string) => {
         if (value === null || value === undefined) {
           return '-';
         }

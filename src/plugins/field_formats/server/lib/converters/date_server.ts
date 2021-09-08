@@ -11,7 +11,7 @@ import { memoize, noop } from 'lodash';
 import moment from 'moment-timezone';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat, FIELD_FORMAT_IDS, FieldFormatsGetConfigFn } from '../../../common';
-import { IFieldFormatMetaParams, TextContextTypeConvert } from '../../../common/types';
+import { FieldFormatMetaParams, TextContextTypeConvert } from '../../../common/types';
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;
@@ -24,10 +24,10 @@ export class DateFormat extends FieldFormat {
   private memoizedPattern: string = '';
   private timeZone: string = '';
 
-  constructor(params: IFieldFormatMetaParams, getConfig?: FieldFormatsGetConfigFn) {
+  constructor(params: FieldFormatMetaParams, getConfig?: FieldFormatsGetConfigFn) {
     super(params, getConfig);
 
-    this.memoizedConverter = memoize((val: any) => {
+    this.memoizedConverter = memoize((val: string | null | undefined) => {
       if (val == null) {
         return '-';
       }

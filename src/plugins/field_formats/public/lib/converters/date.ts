@@ -43,7 +43,7 @@ export class DateFormat extends FieldFormat {
       this.timeZone = timezone;
       this.memoizedPattern = pattern;
 
-      this.memoizedConverter = memoize(function converter(value: any) {
+      this.memoizedConverter = memoize(function converter(value: string | null | undefined) {
         if (value === null || value === undefined) {
           return '-';
         }

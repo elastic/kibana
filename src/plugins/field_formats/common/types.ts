@@ -15,7 +15,10 @@ export type FieldFormatsContentType = 'html' | 'text';
 /** @internal **/
 export interface HtmlContextTypeOptions {
   field?: any;
-  indexPattern?: any;
+  // TODO: get rid of indexPattern dep completely
+  indexPattern?: {
+    formatHit: (hit: Record<string, any> | undefined) => Record<string, any> | undefined;
+  };
   hit?: Record<string, any>;
 }
 
@@ -61,7 +64,7 @@ export enum FIELD_FORMAT_IDS {
 /** @public */
 export interface FieldFormatConfig {
   id: FieldFormatId;
-  params: Record<string, any>;
+  params: FieldFormatParams;
   es?: boolean;
 }
 
@@ -74,10 +77,10 @@ export interface FieldFormatConfig {
  * This matches the signature of the public `core.uiSettings.get`, and
  * should only be used in scenarios where async access to uiSettings is
  * not possible.
- * 
+ *
  @public
  */
-export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+export type FieldFormatsGetConfigFn<T = unknown> = (key: string, defaultOverride?: T) => T;
 
 export type IFieldFormat = FieldFormat;
 
@@ -88,7 +91,7 @@ export type FieldFormatId = FIELD_FORMAT_IDS | string;
 
 /** @internal **/
 export type FieldFormatInstanceType = (new (
-  params?: any,
+  params?: FieldFormatParams,
   getConfig?: FieldFormatsGetConfigFn
 ) => FieldFormat) & {
   // Static properties:
@@ -98,8 +101,23 @@ export type FieldFormatInstanceType = (new (
   fieldType: string | string[];
 };
 
-export interface IFieldFormatMetaParams {
-  [key: string]: any;
+/**
+ * Params provided when creating a formatter.
+ * Params are vary per formatter
+ *
+ * TODO: support strict typing for params depending on format type
+ * https://github.com/elastic/kibana/issues/108158
+ */
+export interface FieldFormatParams {
+  [param: string]: any;
+}
+
+/**
+ * Params provided by the registry to every field formatter
+ *
+ * @public
+ */
+export interface FieldFormatMetaParams {
   parsedUrl?: {
     origin: string;
     pathname?: string;
@@ -116,7 +134,7 @@ export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' | 'regis
  *
  * @public
  */
-export interface SerializedFieldFormat<TParams = Record<string, any>> {
+export interface SerializedFieldFormat<TParams = FieldFormatParams> {
   id?: string;
   params?: TParams;
 }

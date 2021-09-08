@@ -14,7 +14,7 @@ import { FieldFormat } from '../field_format';
 import {
   TextContextTypeConvert,
   HtmlContextTypeConvert,
-  IFieldFormatMetaParams,
+  FieldFormatMetaParams,
   FIELD_FORMAT_IDS,
 } from '../types';
 
@@ -61,7 +61,7 @@ export class UrlFormat extends FieldFormat {
   ];
   static urlTypes = URL_TYPES;
 
-  constructor(params: IFieldFormatMetaParams) {
+  constructor(params: FieldFormatMetaParams) {
     super(params);
     this.compileTemplate = memoize(this.compileTemplate);
   }
@@ -101,7 +101,7 @@ export class UrlFormat extends FieldFormat {
     // trim all the odd bits, the variable names
     const parts = template.split(templateMatchRE).map((part, i) => (i % 2 ? part.trim() : part));
 
-    return function (locals: Record<string, any>): string {
+    return function (locals: Record<string, string>): string {
       // replace all the odd bits with their local var
       let output = '';
       let i = -1;

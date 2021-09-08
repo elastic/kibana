@@ -54,16 +54,16 @@ export class SourceFormat extends FieldFormat {
 
     const highlights = (hit && hit.highlight) || {};
     // TODO: remove index pattern dependency
-    const formatted = indexPattern.formatHit(hit);
-    const highlightPairs: any[] = [];
-    const sourcePairs: any[] = [];
+    const formatted = indexPattern!.formatHit(hit);
+    const highlightPairs: Array<[string, string]> = [];
+    const sourcePairs: Array<[string, string]> = [];
     const isShortDots = this.getConfig!(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
 
     keys(formatted).forEach((key) => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
       const newField = isShortDots ? shortenDottedString(key) : key;
-      const val = formatted[key];
-      pairs.push([newField, val]);
+      const val = formatted![key];
+      pairs.push([newField as string, val]);
     }, []);
 
     return ReactDOM.renderToStaticMarkup(

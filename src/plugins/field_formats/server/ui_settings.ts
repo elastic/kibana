@@ -17,7 +17,7 @@ import { FORMATS_UI_SETTINGS } from '../common';
 // default fallback in case the locale is not found.
 const numeralLanguageIds = [
   'en',
-  ...numeralLanguages.map((numeralLanguage: any) => {
+  ...numeralLanguages.map((numeralLanguage: { id: string }) => {
     return numeralLanguage.id;
   }),
 ];
@@ -201,7 +201,10 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       type: 'select',
       options: numeralLanguageIds,
       optionLabels: Object.fromEntries(
-        numeralLanguages.map((language: Record<string, any>) => [language.id, language.name])
+        numeralLanguages.map((language: { id: string; name: string }) => [
+          language.id,
+          language.name,
+        ])
       ),
       description: i18n.translate('fieldFormats.advancedSettings.format.formattingLocaleText', {
         defaultMessage: `{numeralLanguageLink} locale`,

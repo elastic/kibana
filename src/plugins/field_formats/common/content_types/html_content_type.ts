@@ -34,16 +34,18 @@ export const setup = (
 ): HtmlContextTypeConvert => {
   const convert = getConvertFn(format, htmlContextTypeConvert);
 
-  const recurse: HtmlContextTypeConvert = (value, options = {}) => {
+  const recurse: HtmlContextTypeConvert = (value: unknown, options = {}) => {
     if (value == null) {
       return asPrettyString(value);
     }
 
+    // @ts-ignore
     if (!value || !isFunction(value.map)) {
       return convert.call(format, value, options);
     }
 
-    const subValues = value.map((v: any) => recurse(v, options));
+    // @ts-ignore
+    const subValues = value.map((v: unknown) => recurse(v, options));
     const useMultiLine = subValues.some((sub: string) => sub.indexOf('\n') > -1);
 
     return subValues.join(',' + (useMultiLine ? '\n' : ' '));
