@@ -16,7 +16,7 @@ import {
   PropsForAnchor,
   PropsForButton,
 } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, SyntheticEvent } from 'react';
 import { isNil } from 'lodash/fp';
 import styled from 'styled-components';
 
@@ -105,7 +105,8 @@ const HostDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   hostName: string;
   isButton?: boolean;
-}> = ({ children, hostName, isButton }) => {
+  onClick?: (e: SyntheticEvent) => void;
+}> = ({ children, hostName, isButton, onClick }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateToApp } = useKibana().services.application;
   const goToHostDetails = useCallback(
@@ -121,15 +122,17 @@ const HostDetailsLinkComponent: React.FC<{
 
   return isButton ? (
     <LinkButton
-      onClick={goToHostDetails}
+      onClick={onClick ?? goToHostDetails}
       href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+      data-test-subj="host-details-button"
     >
       {children ? children : hostName}
     </LinkButton>
   ) : (
     <LinkAnchor
-      onClick={goToHostDetails}
+      onClick={onClick ?? goToHostDetails}
       href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+      data-test-subj="host-details-button"
     >
       {children ? children : hostName}
     </LinkAnchor>
@@ -177,7 +180,8 @@ const NetworkDetailsLinkComponent: React.FC<{
   ip: string;
   flowTarget?: FlowTarget | FlowTargetSourceDest;
   isButton?: boolean;
-}> = ({ children, ip, flowTarget = FlowTarget.source, isButton }) => {
+  onClick?: (e: SyntheticEvent) => void | undefined;
+}> = ({ children, ip, flowTarget = FlowTarget.source, isButton, onClick }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
   const { navigateToApp } = useKibana().services.application;
   const goToNetworkDetails = useCallback(
@@ -194,14 +198,16 @@ const NetworkDetailsLinkComponent: React.FC<{
   return isButton ? (
     <LinkButton
       href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
-      onClick={goToNetworkDetails}
+      onClick={onClick ?? goToNetworkDetails}
+      data-test-subj="network-details"
     >
       {children ? children : ip}
     </LinkButton>
   ) : (
     <LinkAnchor
-      onClick={goToNetworkDetails}
+      onClick={onClick ?? goToNetworkDetails}
       href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
+      data-test-subj="network-details"
     >
       {children ? children : ip}
     </LinkAnchor>

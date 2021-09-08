@@ -12,7 +12,7 @@ piece of hardware, like a host or pod. Or, perhaps a set of users, based on IP
 address or region, is facing increased latency due to local data center issues.
 
 To find correlations, select a service on the *Services* page in the {apm-app}
-and click **View correlations**.
+then select a transaction group from the *Transactions* tab.
 
 NOTE: Queries within the {apm-app} are also applied to the correlations.
 
@@ -20,26 +20,25 @@ NOTE: Queries within the {apm-app} are also applied to the correlations.
 [[correlations-latency]]
 ==== Find high transaction latency correlations
 
-The correlations on the *Latency* tab help you discover which attributes are
-contributing to increased transaction latency. 
+The correlations on the *Latency correlations* tab help you discover which
+attributes are contributing to increased transaction latency. 
 
 [role="screenshot"]
 image::apm/images/correlations-hover.png[Latency correlations]
 
 The progress bar indicates the status of the asynchronous analysis, which
 performs statistical searches across a large number of attributes. For large
-time ranges and services with high transaction throughput this might take some
-time. To improve performance, reduce the time range on the service overview
-page.
+time ranges and services with high transaction throughput, this might take some
+time. To improve performance, reduce the time range.
 
 The latency distribution chart visualizes the overall latency of the
-transactions in the service. If there are attributes that have a statistically
-significant correlation with slow response times, they are listed in a table
-below the chart. The table is sorted by correlation coefficients that range from
-0 to 1. Attributes with higher correlation values are more likely to contribute
-to high latency transactions. By default, the attribute with the highest
-correlation value is added to the chart. To see the latency distribution for
-other attributes, hover over their row in the table.
+transactions in the transaction group. If there are attributes that have a
+statistically significant correlation with slow response times, they are listed
+in a table below the chart. The table is sorted by correlation coefficients that
+range from 0 to 1. Attributes with higher correlation values are more likely to
+contribute to high latency transactions. By default, the attribute with the
+highest correlation value is added to the chart. To see the latency distribution
+for other attributes, hover over their row in the table.
 
 If a correlated attribute seems noteworthy, use the **Filter** quick links:
 

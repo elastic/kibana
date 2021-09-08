@@ -23,6 +23,7 @@ import {
   SIGNAL_STATUS,
   ALERTS_HEADERS_TARGET_IMPORT_HASH,
   TIMESTAMP,
+  ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
 import {
   AGENT_STATUS_FIELD_NAME,
@@ -35,7 +36,7 @@ import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
-import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
+import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
@@ -102,6 +103,11 @@ const memoryShellCodeAlertFields: EventSummaryField[] = [
   },
 ];
 
+const behaviorAlertFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
+  { id: 'rule.description', label: ALERTS_HEADERS_RULE_DESCRIPTION },
+];
+
 const memorySignatureAlertFields: EventSummaryField[] = [
   ...defaultDisplayFields,
   { id: 'rule.name', label: ALERTS_HEADERS_RULE_NAME },
@@ -151,10 +157,12 @@ function getEventFieldsToDisplay({
 }): EventSummaryField[] {
   switch (eventCode) {
     // memory protection fields
-    case EventCode.MALICIOUS_THREAD:
+    case EventCode.SHELLCODE_THREAD:
       return memoryShellCodeAlertFields;
     case EventCode.MEMORY_SIGNATURE:
       return memorySignatureAlertFields;
+    case EventCode.BEHAVIOR:
+      return behaviorAlertFields;
   }
 
   switch (eventCategory) {
@@ -236,7 +244,7 @@ export const getSummaryRows = ({
           fieldFromBrowserField: browserField,
         };
 
-        if (item.id === 'agent.id' && !endpointAlertCheck({ data })) {
+        if (item.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
           return acc;
         }
 

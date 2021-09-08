@@ -110,6 +110,9 @@ describe('When using the Trusted App Form', () => {
   const getAllValidationErrors = (): HTMLElement[] => {
     return Array.from(renderResult.container.querySelectorAll('.euiFormErrorText'));
   };
+  const getAllValidationWarnings = (): HTMLElement[] => {
+    return Array.from(renderResult.container.querySelectorAll('.euiFormHelpText'));
+  };
 
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
@@ -192,7 +195,7 @@ describe('When using the Trusted App Form', () => {
       expect(getConditionRemoveButton(defaultCondition).disabled).toBe(true);
     });
 
-    it('should display 2 options for Field', () => {
+    it('should display 3 options for Field for Windows', () => {
       const conditionFieldSelect = getConditionFieldSelect(getCondition());
       reactTestingLibrary.act(() => {
         fireEvent.click(conditionFieldSelect, { button: 1 });
@@ -202,6 +205,7 @@ describe('When using the Trusted App Form', () => {
           '.euiSuperSelect__listbox button.euiSuperSelect__item'
         )
       ).map((button) => button.textContent);
+      expect(options.length).toEqual(3);
       expect(options).toEqual([
         'Hashmd5, sha1, or sha256',
         'PathThe full path of the application',
@@ -406,6 +410,49 @@ describe('When using the Trusted App Form', () => {
               operator: 'included',
               type: 'match',
               value: 'e50fb1a0e5fff590ece385082edc6c41',
+            },
+          ],
+        },
+      });
+    });
+
+    it('should not validate form to true if name input is empty', () => {
+      const props = {
+        name: 'some name',
+        description: '',
+        effectScope: {
+          type: 'global',
+        },
+        os: OperatingSystem.WINDOWS,
+        entries: [
+          { field: ConditionEntryField.PATH, operator: 'included', type: 'wildcard', value: 'x' },
+        ],
+      } as NewTrustedApp;
+
+      formProps.trustedApp = props;
+      render();
+
+      formProps.trustedApp = {
+        ...props,
+        name: '',
+      };
+      rerender();
+
+      expect(getAllValidationErrors()).toHaveLength(0);
+      expect(getAllValidationWarnings()).toHaveLength(1);
+      expect(formProps.onChange).toHaveBeenLastCalledWith({
+        isValid: false,
+        item: {
+          name: '',
+          description: '',
+          os: OperatingSystem.WINDOWS,
+          effectScope: { type: 'global' },
+          entries: [
+            {
+              field: ConditionEntryField.PATH,
+              operator: 'included',
+              type: 'wildcard',
+              value: 'x',
             },
           ],
         },

@@ -15,7 +15,7 @@ import { DatePicker } from '../../shared/DatePicker';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { UxEnvironmentFilter } from '../../shared/EnvironmentFilter';
 import { UserPercentile } from './UserPercentile';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
@@ -26,7 +26,7 @@ export function RumHome() {
   const { core, observability } = useApmPluginContext();
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
-  const { isSmall, isXXL } = useBreakPoints();
+  const { isSmall, isXXL } = useBreakpoints();
 
   const envStyle = isSmall ? {} : { maxWidth: 500 };
 
@@ -87,7 +87,7 @@ export function RumHome() {
 }
 
 function PageHeader() {
-  const { isSmall } = useBreakPoints();
+  const { isSmall } = useBreakpoints();
 
   const envStyle = isSmall ? {} : { maxWidth: 400 };
 

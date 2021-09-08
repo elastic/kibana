@@ -49,11 +49,11 @@ export const configureClient = (
   const client = new Client({ ...clientOptions, Transport: KibanaTransport });
   addLogging(client, logger.get('query', type));
 
-  // ------------------------------------------------------------------------ //
-  // Hack to disable the "Product check" while the bugs in                    //
-  // https://github.com/elastic/kibana/issues/105557 are handled.             //
-  skipProductCheck(client);
-  // ------------------------------------------------------------------------ //
+  // --------------------------------------------------------------------------------- //
+  // Hack to disable the "Product check" only in the scoped clients while we           //
+  // come up with a better approach in https://github.com/elastic/kibana/issues/110675 //
+  if (scoped) skipProductCheck(client);
+  // --------------------------------------------------------------------------------- //
 
   return client;
 };
@@ -140,10 +140,10 @@ const addLogging = (client: Client, logger: Logger) => {
 
 /**
  * Hack to skip the Product Check performed by the Elasticsearch-js client.
- * We noticed a couple of bugs that may need to be fixed before taking full
- * advantage of this feature.
- *
- * The bugs are detailed in this issue: https://github.com/elastic/kibana/issues/105557
+ * We noticed that the scoped clients are always performing this check because
+ * of the way we initialize the clients. We'll discuss changing this in the issue
+ * https://github.com/elastic/kibana/issues/110675. In the meanwhile, let's skip
+ * it for the scoped clients.
  *
  * The hack is copied from the test/utils in the elasticsearch-js repo
  * (https://github.com/elastic/elasticsearch-js/blob/master/test/utils/index.js#L45-L56)

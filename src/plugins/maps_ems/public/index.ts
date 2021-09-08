@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/109853
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { PluginInitializerContext } from 'kibana/public';
 import { MapsEmsPlugin } from './plugin';
 import { IServiceSettings } from './service_settings';
@@ -24,7 +27,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
 }
 
-export type { MapsEmsConfig, LayerConfig } from '../config';
+export type { MapsEmsConfig } from '../config';
 
 export * from '../common';
 
