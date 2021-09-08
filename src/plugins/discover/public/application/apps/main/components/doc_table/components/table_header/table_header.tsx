@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { IndexPattern } from '../../../../../../../kibana_services';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { TableHeaderColumn } from './table_header_column';
 import { SortOrder, getDisplayedColumns } from './helpers';
 import { getDefaultSort } from '../../lib/get_default_sort';

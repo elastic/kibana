@@ -59,6 +59,19 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
       <EuiSpacer />
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
+          <EuiCardTo
+            display="subdued"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.crawl',
+              { defaultMessage: 'Use the Crawler' }
+            )}
+            description=""
+            icon={<EuiIcon type="globe" size="xxl" color="primary" />}
+            to={crawlerLink}
+            isDisabled={disabled}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
           <EuiCard
             display="subdued"
             title={i18n.translate(
@@ -94,19 +107,6 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
             description=""
             icon={<EuiIcon type="editorCodeBlock" size="xxl" color="primary" />}
             onClick={() => openDocumentCreation('api')}
-            isDisabled={disabled}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCardTo
-            display="subdued"
-            title={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documentCreation.buttons.crawl',
-              { defaultMessage: 'Use the Crawler' }
-            )}
-            description=""
-            icon={<EuiIcon type="globe" size="xxl" color="primary" />}
-            to={crawlerLink}
             isDisabled={disabled}
           />
         </EuiFlexItem>

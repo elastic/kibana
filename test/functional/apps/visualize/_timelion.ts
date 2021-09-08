@@ -20,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const elasticChart = getService('elasticChart');
   const find = getService('find');
+  const timelionChartSelector = 'timelionChart';
 
   describe('Timelion visualization', () => {
     before(async () => {
@@ -35,13 +36,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     const initVisualization = async (expression: string, interval: string = '12h') => {
       await visEditor.setTimelionInterval(interval);
       await monacoEditor.setCodeEditorValue(expression);
-      await visEditor.clickGo();
+      await visEditor.clickGo(true);
     };
 
     it('should display correct data for specified index pattern and timefield', async () => {
       await initVisualization('.es(index=long-window-logstash-*,timefield=@timestamp)');
 
-      const chartData = await visChart.getAreaChartData('q:* > count');
+      const chartData = await visChart.getAreaChartData('q:* > count', timelionChartSelector);
       expect(chartData).to.eql([3, 5, 2, 6, 1, 6, 1, 7, 0, 0]);
     });
 
@@ -62,10 +63,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         '36h'
       );
 
-      const firstAreaChartData = await visChart.getAreaChartData('q:* > avg(bytes)');
-      const secondAreaChartData = await visChart.getAreaChartData('q:* > min(bytes)');
-      const thirdAreaChartData = await visChart.getAreaChartData('q:* > max(bytes)');
-      const forthAreaChartData = await visChart.getAreaChartData('q:* > cardinality(bytes)');
+      const firstAreaChartData = await visChart.getAreaChartData(
+        'q:* > avg(bytes)',
+        timelionChartSelector
+      );
+      const secondAreaChartData = await visChart.getAreaChartData(
+        'q:* > min(bytes)',
+        timelionChartSelector
+      );
+      const thirdAreaChartData = await visChart.getAreaChartData(
+        'q:* > max(bytes)',
+        timelionChartSelector
+      );
+      const forthAreaChartData = await visChart.getAreaChartData(
+        'q:* > cardinality(bytes)',
+        timelionChartSelector
+      );
 
       expect(firstAreaChartData).to.eql([5732.783676366217, 5721.775973559419]);
       expect(secondAreaChartData).to.eql([0, 0]);
@@ -84,10 +97,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           '.es(*).if(operator=gt,if=200,then=50,else=150).label("condition")'
       );
 
-      const firstAreaChartData = await visChart.getAreaChartData('initial');
-      const secondAreaChartData = await visChart.getAreaChartData('add multiply abs divide');
-      const thirdAreaChartData = await visChart.getAreaChartData('query derivative min sum');
-      const forthAreaChartData = await visChart.getAreaChartData('condition');
+      const firstAreaChartData = await visChart.getAreaChartData('initial', timelionChartSelector);
+      const secondAreaChartData = await visChart.getAreaChartData(
+        'add multiply abs divide',
+        timelionChartSelector
+      );
+      const thirdAreaChartData = await visChart.getAreaChartData(
+        'query derivative min sum',
+        timelionChartSelector
+      );
+      const forthAreaChartData = await visChart.getAreaChartData(
+        'condition',
+        timelionChartSelector
+      );
 
       expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
       expect(secondAreaChartData).to.eql(firstAreaExpectedChartData);
@@ -112,20 +134,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         '36h'
       );
 
-      const leftAxesCount = await visChart.getAxesCountByPosition('left');
-      const rightAxesCount = await visChart.getAxesCountByPosition('right');
-      const firstAxesLabels = await visChart.getYAxisLabels();
-      const secondAxesLabels = await visChart.getYAxisLabels(1);
-      const thirdAxesLabels = await visChart.getYAxisLabels(2);
-      const firstAreaChartData = await visChart.getAreaChartData('Average Machine RAM amount');
+      const leftAxesCount = await visChart.getAxesCountByPosition('left', timelionChartSelector);
+      const rightAxesCount = await visChart.getAxesCountByPosition('right', timelionChartSelector);
+      const firstAxesLabels = await visChart.getYAxisLabels(timelionChartSelector);
+      const secondAxesLabels = await visChart.getYAxisLabels(timelionChartSelector, 1);
+      const thirdAxesLabels = await visChart.getYAxisLabels(timelionChartSelector, 2);
+      const firstAreaChartData = await visChart.getAreaChartData(
+        'Average Machine RAM amount',
+        timelionChartSelector
+      );
       const secondAreaChartData = await visChart.getAreaChartData(
         'Average Bytes for request',
-        undefined,
+        timelionChartSelector,
         true
       );
       const thirdAreaChartData = await visChart.getAreaChartData(
         'Average Bytes for request with offset',
-        undefined,
+        timelionChartSelector,
         true
       );
 
@@ -144,9 +169,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should display correct chart data for split expression', async () => {
       await initVisualization('.es(index=logstash-*, split=geo.dest:3)', '1 day');
 
-      const firstAreaChartData = await visChart.getAreaChartData('q:* > geo.dest:CN > count');
-      const secondAreaChartData = await visChart.getAreaChartData('q:* > geo.dest:IN > count');
-      const thirdAreaChartData = await visChart.getAreaChartData('q:* > geo.dest:US > count');
+      const firstAreaChartData = await visChart.getAreaChartData(
+        'q:* > geo.dest:CN > count',
+        timelionChartSelector
+      );
+      const secondAreaChartData = await visChart.getAreaChartData(
+        'q:* > geo.dest:IN > count',
+        timelionChartSelector
+      );
+      const thirdAreaChartData = await visChart.getAreaChartData(
+        'q:* > geo.dest:US > count',
+        timelionChartSelector
+      );
 
       expect(firstAreaChartData).to.eql([0, 905, 910, 850, 0]);
       expect(secondAreaChartData).to.eql([0, 763, 699, 825, 0]);
@@ -156,8 +190,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should display two areas and one bar chart items', async () => {
       await initVisualization('.es(*), .es(*), .es(*).bars(stack=true)');
 
-      const areasChartsCount = await visChart.getAreaSeriesCount();
-      const barsChartsCount = await visChart.getHistogramSeriesCount();
+      const areasChartsCount = await visChart.getAreaSeriesCount(timelionChartSelector);
+      const barsChartsCount = await visChart.getHistogramSeriesCount(timelionChartSelector);
 
       expect(areasChartsCount).to.be(2);
       expect(barsChartsCount).to.be(1);
@@ -167,7 +201,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should correctly display the legend items names and position', async () => {
         await initVisualization('.es(*).label("first series"), .es(*).label("second series")');
 
-        const legendNames = await visChart.getLegendEntries();
+        const legendNames = await visChart.getLegendEntriesXYCharts(timelionChartSelector);
         const legendElement = await find.byClassName('echLegend');
         const isLegendTopPositioned = await legendElement.elementHasClass('echLegend--top');
         const isLegendLeftPositioned = await legendElement.elementHasClass('echLegend--left');

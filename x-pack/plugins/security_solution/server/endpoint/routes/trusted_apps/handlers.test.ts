@@ -337,14 +337,7 @@ describe('handlers', () => {
 
   describe('getTrustedAppsSummaryHandler', () => {
     let getTrustedAppsSummaryHandler: ReturnType<typeof getTrustedAppsSummaryRouteHandler>;
-
-    beforeEach(() => {
-      getTrustedAppsSummaryHandler = getTrustedAppsSummaryRouteHandler(appContextMock);
-    });
-
-    it('should return ok with list when no errors', async () => {
-      const mockResponse = httpServerMock.createResponseFactory();
-
+    const getExceptionsListClientMokcResolvedValue = () => {
       exceptionsListClient.findExceptionListItem.mockResolvedValue({
         data: [
           // Linux === 5
@@ -373,10 +366,45 @@ describe('handlers', () => {
         per_page: 100,
         total: 23,
       });
+    };
+
+    beforeEach(() => {
+      getTrustedAppsSummaryHandler = getTrustedAppsSummaryRouteHandler(appContextMock);
+    });
+
+    it('should return ok with list when no errors', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      getExceptionsListClientMokcResolvedValue();
 
       await getTrustedAppsSummaryHandler(
         createHandlerContextMock(),
         httpServerMock.createKibanaRequest(),
+        mockResponse
+      );
+
+      assertResponse(mockResponse, 'ok', {
+        linux: 5,
+        macos: 3,
+        windows: 15,
+        total: 23,
+      });
+    });
+
+    it('should return ok with list when no errors filtering by policyId', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      const policyId = 'caf1a334-53f3-4be9-814d-a32245f43d34';
+
+      getExceptionsListClientMokcResolvedValue();
+
+      await getTrustedAppsSummaryHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({
+          query: {
+            kuery: `exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all"`,
+          },
+        }),
         mockResponse
       );
 
