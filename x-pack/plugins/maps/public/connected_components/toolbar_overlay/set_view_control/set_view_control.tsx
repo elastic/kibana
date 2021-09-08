@@ -334,7 +334,6 @@ export class SetViewControl extends Component<Props, State> {
     let point;
     try {
       point = convertMGRStoLL(value);
-      console.log('MGRS Point here: ', point);
     } catch (err) {
       point = undefined;
       // eslint-disable-next-line no-console
@@ -483,63 +482,74 @@ export class SetViewControl extends Component<Props, State> {
   };
 
   _renderSetViewForm() {
-    const { isInvalid: isLatInvalid, component: latFormRow } = this._renderNumberFormRow({
-      value: this.state.lat,
-      min: -90,
-      max: 90,
-      onChange: this._onLatChange,
-      label: i18n.translate('xpack.maps.setViewControl.latitudeLabel', {
-        defaultMessage: 'Latitude',
-      }),
-      dataTestSubj: 'latitudeInput',
-    });
+    
+    
 
-    const { isInvalid: isLonInvalid, component: lonFormRow } = this._renderNumberFormRow({
-      value: this.state.lon,
-      min: -180,
-      max: 180,
-      onChange: this._onLonChange,
-      label: i18n.translate('xpack.maps.setViewControl.longitudeLabel', {
-        defaultMessage: 'Longitude',
-      }),
-      dataTestSubj: 'longitudeInput',
-    });
 
-    const { isInvalid: isMGRSInvalid, component: mgrsFormRow } = this._renderMGRSFormRow({
-      value: this.state.mgrs,
-      onChange: this._onMGRSChange,
-      label: i18n.translate('xpack.maps.setViewControl.mgrsLabel', {
-        defaultMessage: 'MGRS',
-      }),
-      dataTestSubj: 'mgrsInput',
-    });
+    if(this.state.coord == COORDINATE_SYSTEM_DEGREES_DECIMAL){
+      var { isInvalid: isLatInvalid, component: latFormRow } = this._renderNumberFormRow({
+        value: this.state.lat,
+        min: -90,
+        max: 90,
+        onChange: this._onLatChange,
+        label: i18n.translate('xpack.maps.setViewControl.latitudeLabel', {
+          defaultMessage: 'Latitude',
+        }),
+        dataTestSubj: 'latitudeInput',
+      });
+  
+      var { isInvalid: isLonInvalid, component: lonFormRow } = this._renderNumberFormRow({
+        value: this.state.lon,
+        min: -180,
+        max: 180,
+        onChange: this._onLonChange,
+        label: i18n.translate('xpack.maps.setViewControl.longitudeLabel', {
+          defaultMessage: 'Longitude',
+        }),
+        dataTestSubj: 'longitudeInput',
+      });
+    }
+    
 
-    const { isInvalid: isUtmZoneInvalid, component: utmZoneRow } = this._renderUTMZoneRow({
-      value: this.state.utm !== undefined ? this.state.utm.zone : '',
-      onChange: this._onUTMZoneChange,
-      label: i18n.translate('xpack.maps.setViewControl.utmZoneLabel', {
-        defaultMessage: 'UTM Zone',
-      }),
-      dataTestSubj: 'utmZoneInput',
-    });
+    else if(this.state.coord == COORDINATE_SYSTEM_MGRS){
+      var { isInvalid: isMGRSInvalid, component: mgrsFormRow } = this._renderMGRSFormRow({
+        value: this.state.mgrs,
+        onChange: this._onMGRSChange,
+        label: i18n.translate('xpack.maps.setViewControl.mgrsLabel', {
+          defaultMessage: 'MGRS',
+        }),
+        dataTestSubj: 'mgrsInput',
+      });
+    }
 
-    const { isInvalid: isUtmEastingInvalid, component: utmEastingRow } = this._renderUTMEastingRow({
-      value: this.state.utm !== undefined ? this.state.utm.easting : '',
-      onChange: this._onUTMEastingChange,
-      label: i18n.translate('xpack.maps.setViewControl.utmEastingLabel', {
-        defaultMessage: 'UTM Easting',
-      }),
-      dataTestSubj: 'utmEastingInput',
-    });
-
-    const { isInvalid: isUtmNorthingInvalid, component: utmNorthingRow } = this._renderUTMNorthingRow({
-      value: this.state.utm !== undefined ? this.state.utm.northing : '',
-      onChange: this._onUTMNorthingChange,
-      label: i18n.translate('xpack.maps.setViewControl.utmNorthingLabel', {
-        defaultMessage: 'UTM Northing',
-      }),
-      dataTestSubj: 'utmNorthingInput',
-    });
+    else if(this.state.coord == COORDINATE_SYSTEM_UTM){
+      var { isInvalid: isUtmZoneInvalid, component: utmZoneRow } = this._renderUTMZoneRow({
+        value: this.state.utm !== undefined ? this.state.utm.zone : '',
+        onChange: this._onUTMZoneChange,
+        label: i18n.translate('xpack.maps.setViewControl.utmZoneLabel', {
+          defaultMessage: 'UTM Zone',
+        }),
+        dataTestSubj: 'utmZoneInput',
+      });
+  
+      var { isInvalid: isUtmEastingInvalid, component: utmEastingRow } = this._renderUTMEastingRow({
+        value: this.state.utm !== undefined ? this.state.utm.easting : '',
+        onChange: this._onUTMEastingChange,
+        label: i18n.translate('xpack.maps.setViewControl.utmEastingLabel', {
+          defaultMessage: 'UTM Easting',
+        }),
+        dataTestSubj: 'utmEastingInput',
+      });
+  
+      var { isInvalid: isUtmNorthingInvalid, component: utmNorthingRow } = this._renderUTMNorthingRow({
+        value: this.state.utm !== undefined ? this.state.utm.northing : '',
+        onChange: this._onUTMNorthingChange,
+        label: i18n.translate('xpack.maps.setViewControl.utmNorthingLabel', {
+          defaultMessage: 'UTM Northing',
+        }),
+        dataTestSubj: 'utmNorthingInput',
+      });
+    }
 
     const { isInvalid: isZoomInvalid, component: zoomFormRow } = this._renderNumberFormRow({
       value: this.state.zoom,
