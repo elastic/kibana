@@ -22,7 +22,6 @@ import { DiscoverHistogram } from './histogram';
 const TimechartHeaderMemoized = React.memo(TimechartHeader);
 const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
 export function DiscoverChart({
-
   config,
   data,
   bucketInterval,

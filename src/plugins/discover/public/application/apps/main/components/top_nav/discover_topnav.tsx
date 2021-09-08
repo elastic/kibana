@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
 import { Query, TimeRange } from '../../../../../../../data/common/query';
@@ -38,7 +37,6 @@ export const DiscoverTopNav = ({
   services,
   resetSavedSearch,
 }: DiscoverTopNavProps) => {
-  const history = useHistory();
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
   const { TopNavMenu } = services.navigation.ui;
 
@@ -47,10 +45,10 @@ export const DiscoverTopNav = ({
       if (savedSearch.id && savedSearch.id === newSavedSearchId) {
         resetSavedSearch();
       } else {
-        history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
+        window.location.assign(`#/view/${encodeURIComponent(newSavedSearchId)}`);
       }
     },
-    [history, resetSavedSearch, savedSearch.id]
+    [resetSavedSearch, savedSearch.id]
   );
 
   const topNavMenu = useMemo(
