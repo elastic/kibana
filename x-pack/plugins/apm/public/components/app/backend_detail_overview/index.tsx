@@ -27,7 +27,7 @@ import {
   getKueryBarBoolFilter,
   kueryBarPlaceholder,
 } from '../../../../common/backends';
-import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 export function BackendDetailOverview() {
   const {
@@ -63,7 +63,7 @@ export function BackendDetailOverview() {
     backendName,
   });
 
-  const largeScreenOrSmaller = useBreakPoints().isLarge;
+  const largeScreenOrSmaller = useBreakpoints().isLarge;
 
   return (
     <ApmBackendContextProvider>

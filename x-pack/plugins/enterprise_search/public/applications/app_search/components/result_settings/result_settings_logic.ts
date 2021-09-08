@@ -292,7 +292,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
-      const url = `/api/app_search/engines/${engineName}/result_settings/details`;
+      const url = `/internal/app_search/engines/${engineName}/result_settings/details`;
 
       try {
         const {
@@ -317,7 +317,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
 
         const { http } = HttpLogic.values;
         const { engineName } = EngineLogic.values;
-        const url = `/api/app_search/engines/${engineName}/result_settings`;
+        const url = `/internal/app_search/engines/${engineName}/result_settings`;
 
         actions.saving();
 

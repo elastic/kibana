@@ -8,29 +8,18 @@ the dashboards and saved objects that belong to that space.
 
 {kib} creates a default space for you.
 After you create your own
-spaces, you're asked to choose a space when you log in to Kibana. You can change your
+spaces, you're asked to choose a space when you log in to {kib}. You can change your
 current space at any time by using the menu.
 
 [role="screenshot"]
 image::images/change-space.png["Change current space menu"]
 
-Kibana supports spaces in several ways.  You can:
-
-[[spaces-getting-started]]
-
-* <<spaces-managing, View&comma; create&comma; and delete spaces>>
-* <<spaces-control-feature-visibility, Control feature access based on user needs>>
-* <<spaces-control-user-access, Control feature access based on user privileges>>
-* <<spaces-moving-objects, Move objects between spaces>>
-* <<spaces-default-route, Configure a Space-level landing page>>
-* <<spaces-delete-started, Disable the Spaces feature>>
-
 [float]
-==== Required permissions
+==== Required privileges
 
 The `kibana_admin` role or equivalent is required to manage **Spaces**.
 
-TIP: Looking to support multiple tenants? See <<xpack-security-multiple-tenants, the Security documentation>> for more information.
+TIP: Looking to support multiple tenants? Refer to <<xpack-security-multiple-tenants, the Security documentation>> for more information.
 
 [float]
 [[spaces-managing]]
@@ -71,14 +60,14 @@ You can't delete the default space, but you can customize it to your liking.
 === Control feature access based on user needs
 
 You have control over which features are visible in each space.
-For example, you might hide Dev Tools
-in your "Executive" space or show Stack Monitoring only in your "Admin" space.
+For example, you might hide *Dev Tools*
+in your "Executive" space or show *Stack Monitoring* only in your "Admin" space.
 You can define which features to show or hide when you add or edit a space.
 
 Controlling feature
 visibility is not a security feature. To secure access
 to specific features on a per-user basis, you must configure
-<<xpack-security-authorization, Kibana Security>>.
+<<xpack-security-authorization, {kib} Security>>.
 
 [role="screenshot"]
 image::images/edit-space-feature-visibility.png["Controlling features visiblity"]
@@ -87,12 +76,12 @@ image::images/edit-space-feature-visibility.png["Controlling features visiblity"
 [[spaces-control-user-access]]
 === Control feature access based on user privileges
 
-When using Kibana with security, you can configure applications and features
+When using {kib} with security, you can configure applications and features
 based on your users’ privileges. This means different roles can have access
 to different features in the same space.
 Power users might have privileges to create and edit visualizations and dashboards,
-while analysts or executives might have Dashboard and Canvas with read-only privileges.
-See <<adding_kibana_privileges>> for details.
+while analysts or executives might have read-only privileges for *Dashboard* and *Canvas*.
+Refer to <<adding_kibana_privileges>> for details.
 
 [role="screenshot"]
 image::images/spaces-roles.png["Controlling features visiblity"]
@@ -105,7 +94,7 @@ To move saved objects between spaces, you can <<managing-saved-objects-copy-to-s
 
 [float]
 [[spaces-default-route]]
-=== Configure a Space-level landing page
+=== Configure a space-level landing page
 
 You can create a custom experience for users by configuring the {kib} landing page on a per-space basis.
 The landing page can route users to a specific dashboard, application, or saved object as they enter each space.
@@ -123,9 +112,8 @@ image::images/spaces-configure-landing-page.png["Configure space-level landing p
 === Disable and version updates
 
 Spaces are automatically enabled in {kib}. If you don't want use this feature,
-you can disable it
-by setting `xpack.spaces.enabled` to `false` in your
-`kibana.yml` configuration file.
+you can disable it. For more information, refer to <<spaces-settings-kb,Spaces settings in {kib}>>.
 
-If you are upgrading your
-version of {kib}, the default space will contain all of your existing saved objects.
+When you upgrade {kib}, the default space contains all of your existing saved objects.
+
+

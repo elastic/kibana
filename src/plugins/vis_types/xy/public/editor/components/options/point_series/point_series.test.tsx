@@ -34,9 +34,6 @@ describe('PointSeries Editor', function () {
     props = ({
       aggs: getAggs(),
       hasHistogramAgg: false,
-      extraProps: {
-        showElasticChartsOptions: false,
-      },
       isTabSelected: false,
       setMultipleValidity: jest.fn(),
       setTouched: jest.fn(),
@@ -85,54 +82,22 @@ describe('PointSeries Editor', function () {
     });
   });
 
-  it('not renders the editor options that are specific for the es charts implementation if showElasticChartsOptions is false', async () => {
+  it('renders the detailedTooltip option', async () => {
     component = mountWithIntl(<PointSeriesOptions {...props} />);
-    await act(async () => {
-      expect(findTestSubject(component, 'detailedTooltip').length).toBe(0);
-    });
-  });
-
-  it('renders the editor options that are specific for the es charts implementation if showElasticChartsOptions is true', async () => {
-    const newVisProps = ({
-      ...props,
-      extraProps: {
-        showElasticChartsOptions: true,
-      },
-    } as unknown) as PointSeriesOptionsProps;
-    component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'detailedTooltip').length).toBe(1);
     });
   });
 
-  it('not renders the long legend options if showElasticChartsOptions is false', async () => {
+  it('renders the long legend options', async () => {
     component = mountWithIntl(<PointSeriesOptions {...props} />);
-    await act(async () => {
-      expect(findTestSubject(component, 'xyLongLegendsOptions').length).toBe(0);
-    });
-  });
-
-  it('renders the long legend options if showElasticChartsOptions is true', async () => {
-    const newVisProps = ({
-      ...props,
-      extraProps: {
-        showElasticChartsOptions: true,
-      },
-    } as unknown) as PointSeriesOptionsProps;
-    component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'xyLongLegendsOptions').length).toBe(1);
     });
   });
 
   it('not renders the fitting function for a bar chart', async () => {
-    const newVisProps = ({
-      ...props,
-      extraProps: {
-        showElasticChartsOptions: true,
-      },
-    } as unknown) as PointSeriesOptionsProps;
-    component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
+    component = mountWithIntl(<PointSeriesOptions {...props} />);
     await act(async () => {
       expect(findTestSubject(component, 'fittingFunction').length).toBe(0);
     });
@@ -142,9 +107,6 @@ describe('PointSeries Editor', function () {
     const newVisProps = ({
       ...props,
       stateParams: getStateParams(ChartType.Line, false),
-      extraProps: {
-        showElasticChartsOptions: true,
-      },
     } as unknown) as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
@@ -153,13 +115,7 @@ describe('PointSeries Editor', function () {
   });
 
   it('renders the showCategoryLines switch', async () => {
-    const newVisProps = ({
-      ...props,
-      extraProps: {
-        showElasticChartsOptions: true,
-      },
-    } as unknown) as PointSeriesOptionsProps;
-    component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
+    component = mountWithIntl(<PointSeriesOptions {...props} />);
     await act(async () => {
       expect(findTestSubject(component, 'showValuesOnChart').length).toBe(1);
     });

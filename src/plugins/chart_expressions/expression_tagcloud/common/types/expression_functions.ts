@@ -10,18 +10,9 @@ import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-  SerializedFieldFormat,
 } from '../../../../expressions';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { EXPRESSION_NAME } from '../constants';
-
-interface Dimension {
-  accessor: number;
-  format: {
-    id?: string;
-    params?: SerializedFieldFormat<object>;
-  };
-}
 
 interface TagCloudCommonParams {
   scale: 'linear' | 'log' | 'square root';
@@ -36,16 +27,16 @@ export interface TagCloudVisConfig extends TagCloudCommonParams {
   bucket?: ExpressionValueVisDimension;
 }
 
-export interface TagCloudVisParams extends TagCloudCommonParams {
+export interface TagCloudRendererParams extends TagCloudCommonParams {
   palette: PaletteOutput;
-  metric: Dimension;
-  bucket?: Dimension;
+  metric: ExpressionValueVisDimension;
+  bucket?: ExpressionValueVisDimension;
 }
 
 export interface TagcloudRendererConfig {
   visType: typeof EXPRESSION_NAME;
   visData: Datatable;
-  visParams: TagCloudVisParams;
+  visParams: TagCloudRendererParams;
   syncColors: boolean;
 }
 

@@ -479,7 +479,7 @@ export class DiscoverPageObject extends FtrService {
    * Check if Discover app is currently rendered on the screen.
    */
   public async isDiscoverAppOnScreen(): Promise<boolean> {
-    const result = await this.find.allByCssSelector('discover-app');
+    const result = await this.find.allByCssSelector('.dscPage');
     return result.length === 1;
   }
 
