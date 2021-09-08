@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { decorateRangeStats } from './decorate_range_stats';
+import { getExportTypesRegistry } from '../lib';
+import { getExportStats } from './get_export_stats';
+import { getExportTypesHandler } from './get_export_type_handler';
 import { FeatureAvailabilityMap } from './types';
 
 let featureMap: FeatureAvailabilityMap;
@@ -14,8 +16,10 @@ beforeEach(() => {
   featureMap = { PNG: true, csv: true, csv_searchsource: true, printable_pdf: true };
 });
 
+const exportTypesHandler = getExportTypesHandler(getExportTypesRegistry());
+
 test('Model of job status and status-by-pdf-app', () => {
-  const result = decorateRangeStats(
+  const result = getExportStats(
     {
       status: { completed: 0, processing: 1, pending: 2, failed: 3 },
       statuses: {
@@ -24,7 +28,8 @@ test('Model of job status and status-by-pdf-app', () => {
         failed: { printable_pdf: { visualization: 2, dashboard: 2, 'canvas workpad': 1 } },
       },
     },
-    featureMap
+    featureMap,
+    exportTypesHandler
   );
 
   expect(result.status).toMatchInlineSnapshot(`
@@ -60,7 +65,7 @@ test('Model of job status and status-by-pdf-app', () => {
 });
 
 test('Model of jobTypes', () => {
-  const result = decorateRangeStats(
+  const result = getExportStats(
     {
       PNG: { available: true, total: 3 },
       printable_pdf: {
@@ -71,27 +76,61 @@ test('Model of jobTypes', () => {
       },
       csv_searchsource: { available: true, total: 3 },
     },
-    featureMap
+    featureMap,
+    exportTypesHandler
   );
 
   expect(result.PNG).toMatchInlineSnapshot(`
     Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
       "available": true,
       "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
       "total": 3,
     }
   `);
   expect(result.csv).toMatchInlineSnapshot(`
     Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
       "available": true,
       "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
       "total": 0,
     }
   `);
   expect(result.csv_searchsource).toMatchInlineSnapshot(`
     Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
       "available": true,
       "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
       "total": 3,
     }
   `);
@@ -100,11 +139,13 @@ test('Model of jobTypes', () => {
       "app": Object {
         "canvas workpad": 3,
         "dashboard": 0,
+        "search": 0,
         "visualization": 0,
       },
       "available": true,
       "deprecated": 0,
       "layout": Object {
+        "canvas": 0,
         "preserve_layout": 3,
         "print": 0,
       },
@@ -114,28 +155,52 @@ test('Model of jobTypes', () => {
 });
 
 test('PNG counts, provided count of deprecated jobs explicitly', () => {
-  const result = decorateRangeStats(
+  const result = getExportStats(
     { PNG: { available: true, total: 15, deprecated: 5 } },
-    featureMap
+    featureMap,
+    exportTypesHandler
   );
   expect(result.PNG).toMatchInlineSnapshot(`
     Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
       "available": true,
       "deprecated": 5,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
       "total": 15,
     }
   `);
 });
 
 test('CSV counts, provides all jobs implicitly deprecated due to jobtype', () => {
-  const result = decorateRangeStats(
+  const result = getExportStats(
     { csv: { available: true, total: 15, deprecated: 0 } },
-    featureMap
+    featureMap,
+    exportTypesHandler
   );
   expect(result.csv).toMatchInlineSnapshot(`
     Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
       "available": true,
       "deprecated": 15,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
       "total": 15,
     }
   `);
