@@ -8,7 +8,7 @@
 import { SerializedEvent } from './types';
 
 /**
- * This interface represents the state of @type {DynamicActionManager} at any
+ * This interface represents the state of @type {DynamicActionManager} at every
  * point in time.
  */
 export interface State {
