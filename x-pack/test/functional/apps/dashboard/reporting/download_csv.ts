@@ -83,7 +83,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickDownloadCsv();
 
         const csvFile = await getDownload(getCsvPath('Ecommerce Data'));
-        expectSnapshot(csvFile).toMatch();
+        const lines = csvFile.split('\n');
+        expect(csvFile.length).to.be(782100);
+        expectSnapshot(lines.length).toMatchInline(`4677`);
+        expectSnapshot(lines[lines.length - 2]).toMatchInline(
+          `"\\"Jun 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing\\",EUR,13,550568,3,\\"Dec 1, 2016 @ 00:00:00.000, Dec 1, 2016 @ 00:00:00.000\\",\\"ZO0388403884, ZO0447604476\\""`
+        );
       });
 
       it('Downloads a filtered CSV export of a saved search panel', async function () {
@@ -128,8 +133,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('names dashboard');
         await PageObjects.timePicker.setAbsoluteRange(
-          'Jan 01, 1980 @ 00:00:00.000',
-          'Dec 31, 1984 @ 23:59:59.000'
+          'Nov 26, 1981 @ 21:54:15.526',
+          'Mar 5, 1982 @ 18:17:44.821'
         );
 
         await PageObjects.common.sleep(1000);
