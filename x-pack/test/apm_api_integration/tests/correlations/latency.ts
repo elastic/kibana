@@ -138,7 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Correlations latency with data and opbeans-node args',
+    'correlations latency with data and opbeans-node args',
     { config: 'trial', archives: ['8.0.0'] },
     () => {
       // putting this into a single `it` because the responses depend on each other

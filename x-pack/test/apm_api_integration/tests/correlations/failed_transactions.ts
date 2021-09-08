@@ -211,8 +211,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const { rawResponse: finalRawResponse } = followUpResult;
 
       expect(typeof finalRawResponse?.took).to.be('number');
-      expect(finalRawResponse?.percentileThresholdValue).to.be(undefined);
-      expect(finalRawResponse?.overallHistogram).to.be(undefined);
+      expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
+      expect(finalRawResponse?.errorHistogram.length).to.be(101);
+      expect(finalRawResponse?.overallHistogram.length).to.be(101);
 
       expect(finalRawResponse?.failedTransactionsCorrelations.length).to.eql(
         30,
@@ -220,6 +221,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
 
       expect(finalRawResponse?.log.map((d: string) => d.split(': ')[1])).to.eql([
+        'Fetched 95th percentile value of 1309695.875 based on 1244 documents.',
         'Identified 68 fieldCandidates.',
         'Identified correlations for 68 fields out of 68 candidates.',
         'Identified 30 significant correlations relating to failed transactions.',
