@@ -121,12 +121,12 @@ export function FailedTransactionsCorrelations({
 
   const history = useHistory();
 
-  const failedTransactionsCorrelationsColumns: Array<EuiBasicTableColumn<
-    FailedTransactionsCorrelationValue
-  >> = useMemo(() => {
-    const percentageColumns: Array<EuiBasicTableColumn<
-      FailedTransactionsCorrelationValue
-    >> = inspectEnabled
+  const failedTransactionsCorrelationsColumns: Array<
+    EuiBasicTableColumn<FailedTransactionsCorrelationValue>
+  > = useMemo(() => {
+    const percentageColumns: Array<
+      EuiBasicTableColumn<FailedTransactionsCorrelationValue>
+    > = inspectEnabled
       ? [
           {
             width: '100px',

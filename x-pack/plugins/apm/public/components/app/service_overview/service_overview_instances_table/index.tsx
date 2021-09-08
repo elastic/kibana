@@ -28,13 +28,9 @@ import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 
-type ServiceInstanceMainStatistics = APIReturnType<
-  'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'
->;
+type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
-type ServiceInstanceDetailedStatistics = APIReturnType<
-  'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'
->;
+type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 export interface TableOptions {
   pageIndex: number;

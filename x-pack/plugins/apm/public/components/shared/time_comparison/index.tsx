@@ -14,9 +14,7 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { useUiTracker } from '../../../../../observability/public';
 import { getDateDifference } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import {
   getTimeRangeComparison,

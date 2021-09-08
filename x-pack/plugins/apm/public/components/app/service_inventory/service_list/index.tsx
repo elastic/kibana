@@ -45,9 +45,7 @@ import { HealthBadge } from './HealthBadge';
 
 type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 type Items = ServiceListAPIResponse['items'];
-type ServicesDetailedStatisticsAPIResponse = APIReturnType<
-  'GET /api/apm/services/detailed_statistics'
->;
+type ServicesDetailedStatisticsAPIResponse = APIReturnType<'GET /api/apm/services/detailed_statistics'>;
 
 type ServiceListItem = ValuesType<Items>;
 
