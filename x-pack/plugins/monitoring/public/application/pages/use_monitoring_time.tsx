@@ -34,6 +34,7 @@ export const useMonitoringTime = () => {
   const [refreshInterval, setRefreshInterval] = useState(value || DEFAULT_REFRESH_INTERVAL_VALUE);
   const [isPaused, setIsPaused] = useState(pause || DEFAULT_REFRESH_INTERVAL_PAUSE);
   const [currentTimerange, setTimeRange] = useState<TimeOptions>(defaultTimeRange);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const handleTimeChange = useCallback(
     (start: string, end: string) => {
@@ -50,6 +51,8 @@ export const useMonitoringTime = () => {
     refreshInterval,
     setIsPaused,
     isPaused,
+    setIsDisabled,
+    isDisabled,
   };
 };
 
