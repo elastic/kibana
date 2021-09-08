@@ -105,7 +105,15 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
       id="hostsDetailsQuery"
       indexNames={
         Array [
-          "apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*",
+          ".siem-signals",
+          "apm-*-transaction*",
+          "auditbeat-*",
+          "endgame-*",
+          "filebeat-*",
+          "logs-*",
+          "packetbeat-*",
+          "traces-apm*",
+          "winlogbeat-*",
         ]
       }
       isInDetailsSidePanel={true}
