@@ -382,7 +382,7 @@ describe('saved query service', () => {
 
       const result = getSavedQuery('food');
       expect(result).rejects.toMatchInlineSnapshot(
-        `[Error: Multiple saved queries found with ID: food]`
+        `[Error: Multiple saved queries found with ID: food (legacy URL alias conflict)]`
       );
     });
   });
