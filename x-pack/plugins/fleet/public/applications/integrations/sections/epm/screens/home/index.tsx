@@ -36,6 +36,10 @@ function getParams(params: CategoryParams, search: string) {
   return { selectedCategory, searchParam };
 }
 
+function categoryExists(category: string, categories: Array<{ id: string }>) {
+  return categories.some((c) => c.id === category);
+}
+
 export const EPMHomePage: React.FC = memo(() => {
   return (
     <Switch>
@@ -152,7 +156,7 @@ const InstalledPackages: React.FC = memo(() => {
   const controls = (
     <CategoryFacets
       categories={categories}
-      selectedCategory={selectedCategory}
+      selectedCategory={categoryExists(selectedCategory, categories) ? selectedCategory : ''}
       onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
     />
   );
@@ -161,7 +165,6 @@ const InstalledPackages: React.FC = memo(() => {
     <PackageListGrid
       isLoading={isLoadingPackages}
       controls={controls}
-      category={selectedCategory}
       setSelectedCategory={setSelectedCategory}
       onSearchChange={setSearchTerm}
       initialSearch={searchParam}
@@ -233,7 +236,7 @@ const AvailablePackages: React.FC = memo(() => {
     <CategoryFacets
       isLoading={isLoadingCategories || isLoadingAllPackages}
       categories={categories}
-      selectedCategory={selectedCategory}
+      selectedCategory={categoryExists(selectedCategory, categories) ? selectedCategory : ''}
       onCategoryChange={({ id }: CategorySummaryItem) => {
         setSelectedCategory(id);
       }}
@@ -245,7 +248,6 @@ const AvailablePackages: React.FC = memo(() => {
       isLoading={isLoadingCategoryPackages}
       title={title}
       controls={controls}
-      category={selectedCategory}
       initialSearch={searchParam}
       list={packages}
       setSelectedCategory={setSelectedCategory}

@@ -32,7 +32,6 @@ import { PackageCard } from './package_card';
 
 interface ListProps {
   isLoading?: boolean;
-  category: string;
   controls?: ReactNode;
   title: string;
   list: PackageList;
