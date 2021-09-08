@@ -8,22 +8,24 @@
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from 'src/core/public/mocks';
 
-import * as mockedResponses from './mocked_responses';
-import { setupEnvironment } from '../../helpers';
+import { setupEnvironment, kibanaDeprecationsServiceHelpers } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
+import { esDeprecations, esDeprecationsEmpty } from './mocked_responses';
 
 describe('Overview - Fix deprecation issues step', () => {
   let testBed: OverviewTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const {
+    mockedCriticalKibanaDeprecations,
+    mockedWarningKibanaDeprecations,
+  } = kibanaDeprecationsServiceHelpers.defaultMockedResponses;
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(mockedResponses.esDeprecations);
+    httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecations);
 
     await act(async () => {
       const deprecationService = deprecationsServiceMock.createStartContract();
-      deprecationService.getAllDeprecations = jest
-        .fn()
-        .mockReturnValue(mockedResponses.kibanaDeprecations);
+      kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService });
 
       testBed = await setupOverviewPage({
         services: {
@@ -52,7 +54,7 @@ describe('Overview - Fix deprecation issues step', () => {
     });
 
     test(`Hides deprecation counts if it doesn't have any`, async () => {
-      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(mockedResponses.esDeprecationsEmpty);
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsEmpty);
 
       await act(async () => {
         testBed = await setupOverviewPage();
@@ -166,14 +168,18 @@ describe('Overview - Fix deprecation issues step', () => {
       const { exists, find } = testBed;
 
       expect(exists('kibanaStatsPanel')).toBe(true);
-      expect(find('kibanaStatsPanel.warningDeprecations').text()).toContain('1');
-      expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
+      expect(find('kibanaStatsPanel.warningDeprecations').text()).toContain(
+        mockedWarningKibanaDeprecations.length
+      );
+      expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain(
+        mockedCriticalKibanaDeprecations.length
+      );
     });
 
     test(`Hides deprecation count if it doesn't have any`, async () => {
       await act(async () => {
         const deprecationService = deprecationsServiceMock.createStartContract();
-        deprecationService.getAllDeprecations = jest.fn().mockRejectedValue([]);
+        kibanaDeprecationsServiceHelpers.setLoadDeprecations({ deprecationService, response: [] });
 
         testBed = await setupOverviewPage({
           services: {
@@ -184,7 +190,9 @@ describe('Overview - Fix deprecation issues step', () => {
         });
       });
 
-      const { exists } = testBed;
+      const { exists, component } = testBed;
+
+      component.update();
 
       expect(exists('noDeprecationsLabel')).toBe(true);
       expect(exists('kibanaStatsPanel.warningDeprecations')).toBe(false);
@@ -204,9 +212,10 @@ describe('Overview - Fix deprecation issues step', () => {
       test('Handles network failure', async () => {
         await act(async () => {
           const deprecationService = deprecationsServiceMock.createStartContract();
-          deprecationService.getAllDeprecations = jest
-            .fn()
-            .mockRejectedValue(new Error('Internal Server Error'));
+          kibanaDeprecationsServiceHelpers.setLoadDeprecations({
+            deprecationService,
+            mockRequestErrorMessage: 'Internal Server Error',
+          });
 
           testBed = await setupOverviewPage({
             services: {
