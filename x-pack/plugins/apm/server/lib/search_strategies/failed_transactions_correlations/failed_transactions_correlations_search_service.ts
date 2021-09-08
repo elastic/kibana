@@ -6,6 +6,7 @@
  */
 
 import { chunk } from 'lodash';
+
 import type { ElasticsearchClient } from 'src/core/server';
 
 import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';

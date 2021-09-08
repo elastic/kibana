@@ -11,6 +11,8 @@ import {
 } from '../../../../../../src/plugins/data/server';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { withApmSpan } from '../../utils/with_apm_span';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 
 export interface IndexPatternTitleAndFields {
   title: string;
@@ -18,14 +20,17 @@ export interface IndexPatternTitleAndFields {
   fields: FieldDescriptor[];
 }
 
-// TODO: this is currently cached globally. In the future we might want to cache this per user
 export const getDynamicIndexPattern = ({
   config,
   context,
   logger,
 }: Pick<APMRouteHandlerResources, 'logger' | 'config' | 'context'>) => {
   return withApmSpan('get_dynamic_index_pattern', async () => {
-    const indexPatternTitle = config['apm_oss.indexPattern'];
+    const apmIndicies = await getApmIndices({
+      savedObjectsClient: context.core.savedObjects.client,
+      config,
+    });
+    const indexPatternTitle = getApmIndexPatternTitle(apmIndicies);
 
     const indexPatternsFetcher = new IndexPatternsFetcher(
       context.core.elasticsearch.client.asCurrentUser

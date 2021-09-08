@@ -17,11 +17,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { useUiTracker } from '../../../../../../observability/public';
+
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import {
   APM_SEARCH_STRATEGIES,
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../../common/search_strategies/constants';
+
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useSearchStrategy } from '../../../../hooks/use_search_strategy';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -31,7 +35,6 @@ import {
   TransactionDistributionChart,
   TransactionDistributionChartData,
 } from '../../../shared/charts/transaction_distribution_chart';
-import { useUiTracker } from '../../../../../../observability/public';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
 import { getOverallHistogram } from '../../correlations/utils/get_overall_histogram';
 

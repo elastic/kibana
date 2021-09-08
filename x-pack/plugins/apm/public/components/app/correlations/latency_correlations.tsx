@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+
 import { i18n } from '@kbn/i18n';
 
 import {

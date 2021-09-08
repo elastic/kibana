@@ -15,9 +15,6 @@ export function doesInheritTimeRange(embeddable: Embeddable<TimeRangeInput>) {
 
   const parent = embeddable.parent as IContainer<{}, ContainerInput<TimeRangeInput>>;
 
-  // Note: this logic might not work in a container nested world... the explicit input
-  // may be on the root... or any of the interim parents.
-
   // if it's a dashboard emptys screen, there will be no embeddable
   if (!parent.getInput().panels[embeddable.id]) {
     return false;
