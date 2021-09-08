@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerOverviewRoute } from './overview';
 
 describe('Overview route', () => {
-  describe('GET /api/workplace_search/overview', () => {
+  describe('GET /internal/workplace_search/overview', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/overview',
+        path: '/internal/workplace_search/overview',
       });
 
       registerOverviewRoute({
