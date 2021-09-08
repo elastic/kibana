@@ -103,10 +103,10 @@ describe('EntryPointsTable', () => {
 
       const entryPoint = { id: '1', value: '/whatever' };
       expect(table.prop('deleteRoute')(entryPoint)).toEqual(
-        '/api/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/entry_points/1'
+        '/internal/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/entry_points/1'
       );
       expect(table.prop('updateRoute')(entryPoint)).toEqual(
-        '/api/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/entry_points/1'
+        '/internal/app_search/engines/my-engine/crawler/domains/6113e1407a2f2e6f42489794/entry_points/1'
       );
     });
   });

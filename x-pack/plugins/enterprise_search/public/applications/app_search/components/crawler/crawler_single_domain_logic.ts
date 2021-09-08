@@ -74,7 +74,9 @@ export const CrawlerSingleDomainLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        await http.delete(`/api/app_search/engines/${engineName}/crawler/domains/${domain.id}`);
+        await http.delete(
+          `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}`
+        );
 
         flashSuccessToast(getDeleteDomainSuccessMessage(domain.url));
         KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CRAWLER_PATH));
@@ -88,7 +90,7 @@ export const CrawlerSingleDomainLogic = kea<
 
       try {
         const response = await http.get(
-          `/api/app_search/engines/${engineName}/crawler/domains/${domainId}`
+          `/internal/app_search/engines/${engineName}/crawler/domains/${domainId}`
         );
 
         const domainData = crawlerDomainServerToClient(response);
@@ -109,7 +111,7 @@ export const CrawlerSingleDomainLogic = kea<
 
       try {
         const response = await http.put(
-          `/api/app_search/engines/${engineName}/crawler/domains/${domain.id}`,
+          `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}`,
           {
             body: JSON.stringify(payload),
           }
