@@ -25,7 +25,10 @@ describe('SharePlugin', () => {
       const plugins = {
         securityOss: mockSecurityOssPlugin.createSetup(),
       };
-      const setup = await new SharePlugin().setup(coreSetup, plugins);
+      const setup = await new SharePlugin(coreMock.createPluginInitializerContext()).setup(
+        coreSetup,
+        plugins
+      );
       expect(registryMock.setup).toHaveBeenCalledWith();
       expect(setup.register).toBeDefined();
     });
@@ -35,7 +38,7 @@ describe('SharePlugin', () => {
       const plugins = {
         securityOss: mockSecurityOssPlugin.createSetup(),
       };
-      await new SharePlugin().setup(coreSetup, plugins);
+      await new SharePlugin(coreMock.createPluginInitializerContext()).setup(coreSetup, plugins);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'short_url_redirect',
@@ -50,7 +53,7 @@ describe('SharePlugin', () => {
       const pluginsSetup = {
         securityOss: mockSecurityOssPlugin.createSetup(),
       };
-      const service = new SharePlugin();
+      const service = new SharePlugin(coreMock.createPluginInitializerContext());
       await service.setup(coreSetup, pluginsSetup);
       const pluginsStart = {
         securityOss: mockSecurityOssPlugin.createStart(),
