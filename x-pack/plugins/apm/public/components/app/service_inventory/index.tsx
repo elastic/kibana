@@ -179,8 +179,6 @@ export function ServiceInventory() {
     canCreateJob &&
     !userHasDismissedCallout;
 
-  const isLoading = mainStatisticsStatus === FETCH_STATUS.LOADING;
-
   return (
     <>
       <SearchBar showTimeComparison />
@@ -192,17 +190,10 @@ export function ServiceInventory() {
         )}
         <EuiFlexItem>
           <ServiceList
-            isLoading={isLoading}
+            isLoading={mainStatisticsStatus === FETCH_STATUS.LOADING}
             items={mainStatisticsData.items}
             comparisonData={comparisonData}
-            noItemsMessage={
-              !isLoading && (
-                <NoServicesMessage
-                  historicalDataFound={mainStatisticsData.hasHistoricalData}
-                  status={mainStatisticsStatus}
-                />
-              )
-            }
+            noItemsMessage={<NoServicesMessage status={mainStatisticsStatus} />}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
