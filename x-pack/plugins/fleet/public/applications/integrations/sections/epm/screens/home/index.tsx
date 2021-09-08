@@ -28,6 +28,14 @@ export interface CategoryParams {
   category?: string;
 }
 
+function getParams(params: CategoryParams, search: string) {
+  const { category } = params;
+  const selectedCategory = category || '';
+  const queryParams = new URLSearchParams(search);
+  const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
+  return { selectedCategory, searchParam };
+}
+
 export const EPMHomePage: React.FC = memo(() => {
   return (
     <Switch>
@@ -77,11 +85,12 @@ const InstalledPackages: React.FC = memo(() => {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
     experimental: true,
   });
+
+  const { selectedCategory, searchParam } = getParams(
+    useParams<CategoryParams>(),
+    useLocation().search
+  );
   const history = useHistory();
-  const { category } = useParams<CategoryParams>();
-  const selectedCategory = category || '';
-  const queryParams = new URLSearchParams(useLocation().search);
-  const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
   function setSelectedCategory(categoryId: string) {
     const url = pagePathGetters.integrations_all({ category: categoryId, query: searchParam })[1];
     history.push(url);
@@ -151,11 +160,11 @@ const InstalledPackages: React.FC = memo(() => {
 
 const AvailablePackages: React.FC = memo(() => {
   useBreadcrumbs('integrations_all');
+  const { selectedCategory, searchParam } = getParams(
+    useParams<CategoryParams>(),
+    useLocation().search
+  );
   const history = useHistory();
-  const { category } = useParams<CategoryParams>();
-  const selectedCategory = category || '';
-  const queryParams = new URLSearchParams(useLocation().search);
-  const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
   function setSelectedCategory(categoryId: string) {
     const url = pagePathGetters.integrations_all({ category: categoryId, query: searchParam })[1];
     history.push(url);

@@ -28,7 +28,7 @@ import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../../../hooks';
 
-import { INTEGRATIONS_SEARCH_QUERYPARAM, pagePathGetters } from '../../../../../constants';
+import { pagePathGetters } from '../../../../../constants';
 
 import { PackageCard } from './package_card';
 
