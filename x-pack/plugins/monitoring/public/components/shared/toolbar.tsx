@@ -30,6 +30,7 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
     refreshInterval,
     setIsPaused,
     isPaused,
+    isDisabled,
   } = useContext(MonitoringTimeContainer.Context);
   const state = useContext(GlobalStateContext);
 
@@ -85,6 +86,7 @@ export const MonitoringToolbar: React.FC<MonitoringToolbarProps> = ({ pageTitle,
       <EuiFlexItem grow={false}>
         <div style={{ padding: 8 }}>
           <EuiSuperDatePicker
+            isDisabled={isDisabled}
             start={currentTimerange.from}
             end={currentTimerange.to}
             onTimeChange={onTimeChange}

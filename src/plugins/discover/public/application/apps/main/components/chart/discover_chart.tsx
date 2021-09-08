@@ -22,7 +22,7 @@ import { DocumentViewModeToggle } from '../view_mode_toggle';
 const TimechartHeaderMemoized = memo(TimechartHeader);
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export function DiscoverChart({
-  resetQuery,
+  resetSavedSearch,
   savedSearch,
   savedSearchDataChart$,
   savedSearchDataTotalHits$,
@@ -33,7 +33,7 @@ export function DiscoverChart({
   discoverViewMode,
   setDiscoverViewMode,
 }: {
-  resetQuery: () => void;
+  resetSavedSearch: () => void;
   savedSearch: SavedSearch;
   savedSearchDataChart$: DataCharts$;
   savedSearchDataTotalHits$: DataTotalHits$;
@@ -93,7 +93,7 @@ export function DiscoverChart({
             <HitsCounter
               savedSearchData$={savedSearchDataTotalHits$}
               showResetButton={!!(savedSearch && savedSearch.id)}
-              onResetQuery={resetQuery}
+              onResetQuery={resetSavedSearch}
             />
           </EuiFlexItem>
           <DocumentViewModeToggle
