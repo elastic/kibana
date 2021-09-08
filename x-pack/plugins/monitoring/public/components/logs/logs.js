@@ -16,9 +16,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from './reason';
 
 const getFormattedDateTimeLocal = (timestamp) => {
-  const injector = Legacy.shims.getAngularInjector();
-  const timezone = injector.get('config').get('dateFormat:tz');
-  return formatDateTimeLocal(timestamp, timezone);
+  try {
+    const injector = Legacy.shims.getAngularInjector();
+    const timezone = injector.get('config').get('dateFormat:tz');
+    return formatDateTimeLocal(timestamp, timezone);
+  } catch {
+    // TODO: get timezone from usekibana
+    return formatDateTimeLocal();
+  }
 };
 
 const columnTimestampTitle = i18n.translate('xpack.monitoring.logs.listing.timestampTitle', {
