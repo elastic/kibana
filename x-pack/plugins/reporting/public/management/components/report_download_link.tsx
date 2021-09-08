@@ -48,17 +48,10 @@ export const ReportDownloadLink: FunctionComponent<Props> = ({ objectTitle, job,
     </EuiLink>
   );
 
-  const warnings = job.getWarnings();
-
-  if (warnings) {
-    return (
-      <EuiToolTip position="top" content={i18nTexts.toolTipDownloadWithWarnings}>
-        {link}
-      </EuiToolTip>
-    );
-  } else if (disabled) {
+  if (disabled) {
     return link;
   }
+
   return (
     <EuiToolTip position="top" content={i18nTexts.toolTipDownload}>
       {link}

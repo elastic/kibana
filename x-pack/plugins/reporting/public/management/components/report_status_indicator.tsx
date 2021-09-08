@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiHealth } from '@elastic/eui';
+import { EuiHealth, EuiToolTip, IconColor } from '@elastic/eui';
 
 import type { Job } from '../../lib/job';
 import { JOB_STATUSES } from '../../../common/constants';
@@ -40,16 +40,23 @@ const i18nTexts = {
 export const ReportStatusIndicator: FC<Props> = ({ job }) => {
   const status = job.status;
 
+  const renderToolTip = (statusText: string, color: IconColor) => (
+    <EuiHealth aria-label={statusText} color={color}>
+      {statusText}
+    </EuiHealth>
+  );
+
   switch (status) {
     case JOB_STATUSES.COMPLETED:
-      return <EuiHealth color="success">{i18nTexts.completed}</EuiHealth>;
+      return renderToolTip(i18nTexts.completed, 'success');
     case JOB_STATUSES.WARNINGS:
-      return <EuiHealth color="warning">{i18nTexts.completedWithWarnings}</EuiHealth>;
+      return renderToolTip(i18nTexts.completedWithWarnings, 'warning');
     case JOB_STATUSES.PENDING:
-      return <EuiHealth color="primary">{i18nTexts.pending}</EuiHealth>;
+    case JOB_STATUSES.PROCESSING:
+      return renderToolTip(i18nTexts.pending, 'primary');
     case JOB_STATUSES.FAILED:
-      return <EuiHealth color="danger">{i18nTexts.failed}</EuiHealth>;
+      return renderToolTip(i18nTexts.failed, 'danger');
     default:
-      return <EuiHealth color="">{i18nTexts.unknown}</EuiHealth>;
+      return renderToolTip(i18nTexts.unknown, 'subdued');
   }
 };
