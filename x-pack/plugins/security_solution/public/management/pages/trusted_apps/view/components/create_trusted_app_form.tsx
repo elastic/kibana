@@ -161,12 +161,6 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
       } else if (
         !isPathValid({ os: values.os, field: entry.field, type: entry.type, value: entry.value })
       ) {
-        if (!values.name.trim()) {
-          isValid = false;
-        } else {
-          // show soft warnings and thus allow entry
-          isValid = true;
-        }
         addResultToValidation(
           validation,
           'entries',
