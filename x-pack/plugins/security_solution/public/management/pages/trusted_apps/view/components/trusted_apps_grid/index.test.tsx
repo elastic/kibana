@@ -137,7 +137,7 @@ describe('TrustedAppsGrid', () => {
     });
 
     await act(async () => {
-      (await renderResult.findByTestId('deleteTrustedApp')).click();
+      (await renderResult.findByTestId('deleteTrustedAppAction')).click();
     });
 
     expect(store.dispatch).toBeCalledWith({

@@ -59,7 +59,7 @@ export const CriteriaConditions = memo<CriteriaConditionsProps>(
         </div>
         {entries.map(({ field, type, value }) => {
           return (
-            <div data-test-subj={getTestId('condition')}>
+            <div data-test-subj={getTestId('condition')} key={field + type + value}>
               <EuiExpression description={CONDITION_AND} value={field} color="subdued" />
               <EuiExpression
                 description={

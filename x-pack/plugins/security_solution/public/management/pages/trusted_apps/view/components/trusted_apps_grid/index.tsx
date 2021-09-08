@@ -135,7 +135,7 @@ export const TrustedAppsGrid = memo(() => {
                   })
                 );
               },
-              'data-test-subj': 'editTrustedApp',
+              'data-test-subj': 'editTrustedAppAction',
               children: i18n.translate('xpack.securitySolution.trustedapps.grid.cardAction.edit', {
                 defaultMessage: 'Edit trusted application',
               }),
@@ -148,7 +148,7 @@ export const TrustedAppsGrid = memo(() => {
                   payload: { entry: trustedApp },
                 });
               },
-              'data-test-subj': 'deleteTrustedApp',
+              'data-test-subj': 'deleteTrustedAppAction',
               children: i18n.translate(
                 'xpack.securitySolution.trustedapps.grid.cardAction.delete',
                 {

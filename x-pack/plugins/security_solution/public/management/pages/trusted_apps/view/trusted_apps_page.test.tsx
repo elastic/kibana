@@ -183,8 +183,13 @@ describe('When on the Trusted Apps Page', () => {
 
         beforeEach(async () => {
           renderResult = await renderWithListData();
+
+          await act(async () => {
+            (await renderResult.findAllByTestId('trustedAppCard-header-actions-button'))[0].click();
+          });
+
           act(() => {
-            fireEvent.click(renderResult.getByTestId('trustedAppEditButton'));
+            fireEvent.click(renderResult.getByTestId('editTrustedAppAction'));
           });
         });
 
