@@ -6,14 +6,15 @@
  */
 
 import { EuiPageHeaderProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   useKibana,
   KibanaPageTemplateProps,
 } from '../../../../../../../src/plugins/kibana_react/public';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { getNoDataConfig } from './no_data_config';
 
 /*
  * This template contains:
@@ -41,33 +42,16 @@ export function ApmMainTemplate({
   const ObservabilityPageTemplate =
     services.observability.navigation.PageTemplate;
 
-  // TODO: NEEDS A DATA CHECK
-  const hasData = true;
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !hasData
-    ? {
-        solution: i18n.translate('xpack.apm.noDataConfig.solutionName', {
-          defaultMessage: 'Observability',
-        }),
-        actions: {
-          beats: {
-            title: i18n.translate('xpack.apm.noDataConfig.beatsCard.title', {
-              defaultMessage: 'Add data with APM agents',
-            }),
-            description: i18n.translate(
-              'xpack.apm.noDataConfig.beatsCard.description',
-              {
-                defaultMessage:
-                  'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
-              }
-            ),
-            href: basePath + `/app/home#/tutorial/apm`,
-          },
-        },
-        docsLink: docLinks!.links.observability.guide,
-      }
-    : undefined;
+  const { data } = useFetcher((callApmApi) => {
+    return callApmApi({ endpoint: 'GET /api/apm/has_data' });
+  }, []);
 
-  // TODO: GET A CHECK
+  const noDataConfig = getNoDataConfig({
+    basePath,
+    docsLink: docLinks!.links.observability.guide,
+    hasData: data?.hasData,
+  });
+
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
