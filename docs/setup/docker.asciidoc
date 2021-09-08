@@ -145,6 +145,7 @@ images:
 
 [horizontal]
 `server.host`:: `"0.0.0.0"`
+`server.shutdownTimeout`:: `"5s"`
 `elasticsearch.hosts`:: `http://elasticsearch:9200`
 `monitoring.ui.container.elasticsearch.enabled`:: `true`
 
