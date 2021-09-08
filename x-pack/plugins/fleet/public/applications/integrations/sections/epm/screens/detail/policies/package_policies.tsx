@@ -48,6 +48,16 @@ import {
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
 
+interface PackagePoliciesPanelProps {
+  name: string;
+  version: string;
+}
+
+interface InMemoryPackagePolicyAndAgentPolicy {
+  packagePolicy: InMemoryPackagePolicy;
+  agentPolicy: GetAgentPoliciesResponseItem;
+}
+
 const AddAgentButton = styled(EuiButtonIcon)`
   margin-left: ${(props) => props.theme.eui.euiSizeS};
 `;
@@ -69,16 +79,6 @@ const IntegrationDetailsLink = memo<{
     </EuiLink>
   );
 });
-
-interface PackagePoliciesPanelProps {
-  name: string;
-  version: string;
-}
-
-interface InMemoryPackagePolicyAndAgentPolicy {
-  packagePolicy: InMemoryPackagePolicy;
-  agentPolicy: GetAgentPoliciesResponseItem;
-}
 
 export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps) => {
   const { search } = useLocation();
