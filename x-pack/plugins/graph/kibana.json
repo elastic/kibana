@@ -9,12 +9,12 @@
     "data",
     "navigation",
     "savedObjects",
-    "kibanaLegacy",
-    "spaces"
+    "kibanaLegacy"
   ],
   "optionalPlugins": [
     "home",
-    "features"
+    "features",
+    "spaces"
   ],
   "configPath": [
     "xpack",

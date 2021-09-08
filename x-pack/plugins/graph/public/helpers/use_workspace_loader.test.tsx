@@ -14,23 +14,29 @@ import { Workspace } from '../types';
 import { SavedObjectsClientCommon } from 'src/plugins/data/common';
 import { act } from 'react-dom/test-utils';
 
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    replace: jest.fn(),
-  }),
-  useLocation: () => ({
-    location: jest.fn(),
-  }),
-  useParams: () => ({
-    id: jest.fn(),
-  }),
-}));
+jest.mock('react-router-dom', () => {
+  const useLocation = () => ({
+    search: '2',
+  });
+
+  const replaceFn = jest.fn();
+
+  const useHistory = () => ({
+    replace: replaceFn,
+  });
+  return {
+    useHistory,
+    useLocation,
+    useParams: () => ({
+      id: '1',
+    }),
+  };
+});
 
 const mockSavedObjectsClient = ({
   resolve: jest.fn().mockResolvedValue({
     saved_object: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
-    outcome: 'aliasMatch',
-    alias_target_id: 'aliasTargetId',
+    outcome: 'exactMatch',
   }),
   find: jest.fn().mockResolvedValue({ title: 'test' }),
 } as unknown) as SavedObjectsClientCommon;
@@ -58,11 +64,30 @@ describe('use_workspace_loader', () => {
     spaces: spacesPluginMock.createStartContract(),
   };
 
-  it('should redirect if outcome is aliasMatch', async () => {
+  it('should not redirect if outcome is exactMatch', async () => {
     await act(async () => {
       await setup((defaultProps as unknown) as UseWorkspaceLoaderProps);
     });
-    expect(defaultProps.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
+    expect(defaultProps.spaces.ui.redirectLegacyUrl).not.toHaveBeenCalled();
+    expect(defaultProps.store.dispatch).toHaveBeenCalled();
+  });
+  it('should redirect if outcome is aliasMatch', async () => {
+    const props = {
+      ...defaultProps,
+      spaces: spacesPluginMock.createStartContract(),
+      savedObjectsClient: {
+        ...mockSavedObjectsClient,
+        resolve: jest.fn().mockResolvedValue({
+          saved_object: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
+          outcome: 'aliasMatch',
+          alias_target_id: 'aliasTargetId',
+        }),
+      },
+    };
+    await act(async () => {
+      await setup((props as unknown) as UseWorkspaceLoaderProps);
+    });
+    expect(props.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
       '#/workspace/aliasTargetId',
       'Graph'
     );

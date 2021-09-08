@@ -45,7 +45,7 @@ export interface GraphPluginStartDependencies {
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
   home?: HomePublicPluginStart;
-  spaces: SpacesApi;
+  spaces?: SpacesApi;
 }
 
 export class GraphPlugin

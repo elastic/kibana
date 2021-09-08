@@ -19,8 +19,8 @@ export interface UseWorkspaceLoaderProps {
   store: GraphStore;
   workspaceRef: React.MutableRefObject<Workspace | undefined>;
   savedObjectsClient: SavedObjectsClientContract;
-  spaces: SpacesApi;
   coreStart: CoreStart;
+  spaces?: SpacesApi;
 }
 
 interface WorkspaceUrlParams {
@@ -31,6 +31,12 @@ export interface SharingSavedObjectProps {
   aliasTargetId?: string;
 }
 
+interface WorkspaceLoadedState {
+  savedWorkspace?: GraphWorkspaceSavedObject;
+  indexPatterns?: IndexPatternSavedObject[];
+  sharingSavedObjectProps?: SharingSavedObjectProps;
+}
+
 export const useWorkspaceLoader = ({
   coreStart,
   spaces,
@@ -38,11 +44,9 @@ export const useWorkspaceLoader = ({
   store,
   savedObjectsClient,
 }: UseWorkspaceLoaderProps) => {
-  const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>();
-  const [savedWorkspace, setSavedWorkspace] = useState<GraphWorkspaceSavedObject>();
-  const [sharingSavedObjectProps, setSharingSavedObjectProps] = useState<SharingSavedObjectProps>();
-  const history = useHistory();
-  const location = useLocation();
+  const [state, setState] = useState<WorkspaceLoadedState>({});
+  const { replace: historyReplace } = useHistory();
+  const { search } = useLocation();
   const { id } = useParams<WorkspaceUrlParams>();
 
   /**
@@ -50,7 +54,7 @@ export const useWorkspaceLoader = ({
    * on changes in id parameter and URL query only.
    */
   useEffect(() => {
-    const urlQuery = new URLSearchParams(location.search).get('query');
+    const urlQuery = new URLSearchParams(search).get('query');
 
     function loadWorkspace(
       fetchedSavedWorkspace: GraphWorkspaceSavedObject,
@@ -91,7 +95,7 @@ export const useWorkspaceLoader = ({
                 defaultMessage: "Couldn't load graph with ID",
               }),
             });
-            history.replace('/home');
+            historyReplace('/home');
             // return promise that never returns to prevent the controller from loading
             return new Promise(() => {});
           })
@@ -127,24 +131,25 @@ export const useWorkspaceLoader = ({
       } else if (workspaceRef.current) {
         clearStore();
       }
-
-      setIndexPatterns(fetchedIndexPatterns);
-      setSavedWorkspace(fetchedSavedWorkspace);
-      setSharingSavedObjectProps(fetchedSharingSavedObjectProps);
+      setState({
+        savedWorkspace: fetchedSavedWorkspace,
+        indexPatterns: fetchedIndexPatterns,
+        sharingSavedObjectProps: fetchedSharingSavedObjectProps,
+      });
     }
 
     initializeWorkspace();
   }, [
     id,
-    location,
+    search,
     store,
-    history,
+    historyReplace,
     savedObjectsClient,
-    setSavedWorkspace,
+    setState,
     coreStart,
     workspaceRef,
     spaces,
   ]);
 
-  return { savedWorkspace, indexPatterns, sharingSavedObjectProps };
+  return state;
 };

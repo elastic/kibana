@@ -64,7 +64,7 @@ export interface GraphDependencies {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   uiSettings: IUiSettingsClient;
   history: ScopedHistory<unknown>;
-  spaces: SpacesApi;
+  spaces?: SpacesApi;
 }
 
 export type GraphServices = Omit<GraphDependencies, 'kibanaLegacy' | 'element' | 'history'>;
