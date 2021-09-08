@@ -26,6 +26,8 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
+  AGGREGATED_VIEW_SETTING,
+  AGGREGATED_VIEW_PREVIEW,
 } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
@@ -171,15 +173,14 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       name: 'discover:useLegacyDataGrid',
     },
   },
-  // @todo
-  ['discover:aggregatedView']: {
-    name: i18n.translate('discover.advancedSettings.defaultViewName', {
+  [AGGREGATED_VIEW_SETTING]: {
+    name: i18n.translate('discover.advancedSettings.aggregatedViewName', {
       defaultMessage: 'Aggregated view',
     }),
     value: false,
-    description: i18n.translate('discover.advancedSettings.defaultViewDescription', {
+    description: i18n.translate('discover.advancedSettings.aggregatedViewDescription', {
       defaultMessage:
-        'Turn on this option to use the aggregated view by default. Turn off to use the document view.',
+        'Turn on this option to show the aggregated view by default. Turn off to show the document view.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -188,13 +189,12 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       name: 'discover:useAggregatedView',
     },
   },
-  // @todo update terminology
-  ['discover:showAggregatedPreview']: {
-    name: i18n.translate('discover.advancedSettings.defaultViewName', {
+  [AGGREGATED_VIEW_PREVIEW]: {
+    name: i18n.translate('discover.advancedSettings.showAggregatedPreviewName', {
       defaultMessage: 'Show aggregated preview',
     }),
     value: false,
-    description: i18n.translate('discover.advancedSettings.defaultViewDescription', {
+    description: i18n.translate('discover.advancedSettings.showAggregatedPreviewDescription', {
       defaultMessage: 'Turn on this option to show the preview in the aggregated view by default.',
     }),
     category: ['discover'],

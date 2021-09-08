@@ -19,6 +19,7 @@ import {
   isErrorEmbeddable,
 } from '../../../../../embeddable/public';
 import { SavedSearch } from '../../../saved_searches';
+import { AGGREGATED_VIEW_PREVIEW } from '../../../../common';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   indexPattern: DataView;
@@ -90,7 +91,7 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   }, [embeddable, indexPattern, savedSearch, query, columns, filters]);
 
   useEffect(() => {
-    const showPreviewByDefault = uiSettings?.get('discover:showAggregatedPreview');
+    const showPreviewByDefault = uiSettings?.get(AGGREGATED_VIEW_PREVIEW);
     if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
@@ -110,9 +111,9 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
   }, [embeddable]);
 
   useEffect(() => {
-    // @todo: handle unmounted
+    let unmounted = false;
     const loadEmbeddable = async () => {
-      const showPreviewByDefault = uiSettings?.get('discover:showAggregatedPreview');
+      const showPreviewByDefault = uiSettings?.get(AGGREGATED_VIEW_PREVIEW);
 
       if (services?.embeddable) {
         const factory = services.embeddable.getEmbeddableFactory<
@@ -128,11 +129,16 @@ export const DiscoverDataVisualizerGrid = (props: DiscoverDataVisualizerGridProp
             query,
             showPreviewByDefault,
           });
-          setEmbeddable(initializedEmbeddable);
+          if (!unmounted) {
+            setEmbeddable(initializedEmbeddable);
+          }
         }
       }
     };
     loadEmbeddable();
+    return () => {
+      unmounted = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [services?.embeddable]);
 

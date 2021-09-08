@@ -8,7 +8,7 @@
 // @ts-ignore
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
-import { SerializableState } from '../../../../../../../src/plugins/kibana_utils/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import { RefreshInterval, TimeRange } from '../../../../../../../src/plugins/data/common';
 import { LocatorDefinition, LocatorPublic } from '../../../../../../../src/plugins/share/common';
 import { QueryState } from '../../../../../../../src/plugins/data/public';
@@ -17,7 +17,7 @@ import { SearchQueryLanguage } from '../types/combined_query';
 
 export const DATA_VISUALIZER_APP_LOCATOR = 'DATA_VISUALIZER_APP_LOCATOR';
 
-export interface IndexDataVisualizerLocatorParams extends SerializableState {
+export interface IndexDataVisualizerLocatorParams extends SerializableRecord {
   /**
    * Optionally set saved search ID.
    */
@@ -36,14 +36,14 @@ export interface IndexDataVisualizerLocatorParams extends SerializableState {
   /**
    * Optionally set the refresh interval.
    */
-  refreshInterval?: RefreshInterval & SerializableState;
+  refreshInterval?: RefreshInterval & SerializableRecord;
 
   /**
    * Optionally set a query.
    */
   query?: {
-    searchQuery: SerializableState;
-    searchString: string | SerializableState;
+    searchQuery: SerializableRecord;
+    searchString: string | SerializableRecord;
     searchQueryLanguage: SearchQueryLanguage;
   };
 
@@ -84,7 +84,7 @@ export class IndexDataVisualizerLocatorDefinition
     const appState: {
       searchQuery?: { [key: string]: any };
       searchQueryLanguage?: string;
-      searchString?: string | SerializableState;
+      searchString?: string | SerializableRecord;
       visibleFieldNames?: string[];
       visibleFieldTypes?: string[];
     } = {};
