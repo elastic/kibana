@@ -149,6 +149,8 @@ export function createEsChoroplethLayerDescriptor({
       scalingType: SCALING_TYPES.LIMIT,
       tooltipProperties: [leftJoinField],
       applyGlobalQuery: false,
+      applyGlobalTime: false,
+      applyForceRefresh: false,
     }),
     leftField: leftJoinField,
     rightIndexPatternId,
