@@ -65,7 +65,6 @@ export const PolicyDetails = React.memo(() => {
           path: endpointListPath,
         },
       ],
-      dataTestSubj: 'policyDetailsBackLink',
     };
   }, [getAppUrl, routeState?.backLink]);
 
@@ -78,7 +77,9 @@ export const PolicyDetails = React.memo(() => {
     />
   );
 
-  const backToEndpointList = <BackToExternalAppButton {...backLinkOptions} />;
+  const backToEndpointList = (
+    <BackToExternalAppButton {...backLinkOptions} data-test-subj="policyDetailsBackLink" />
+  );
 
   return (
     <AdministrationListPage
