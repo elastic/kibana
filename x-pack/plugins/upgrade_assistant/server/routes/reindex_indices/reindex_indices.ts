@@ -15,6 +15,7 @@ import {
 } from '../../../../../../src/core/server';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
+import { SecurityPluginStart } from '../../../../security/server';
 
 import { ReindexStatus } from '../../../common/types';
 
@@ -45,6 +46,7 @@ interface CreateReindexWorker {
   credentialStore: CredentialStore;
   savedObjects: SavedObjectsClient;
   licensing: LicensingPluginSetup;
+  security: SecurityPluginStart;
 }
 
 export function createReindexWorker({
@@ -53,9 +55,10 @@ export function createReindexWorker({
   credentialStore,
   savedObjects,
   licensing,
+  security,
 }: CreateReindexWorker) {
   const esClient = elasticsearchService.client;
-  return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing);
+  return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing, security);
 }
 
 const mapAnyErrorToKibanaHttpResponse = (e: any) => {

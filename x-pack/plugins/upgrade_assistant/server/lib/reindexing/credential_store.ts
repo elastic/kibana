@@ -11,7 +11,7 @@ import stringify from 'json-stable-stringify';
 import { KibanaRequest } from 'src/core/server';
 
 import { SecurityPluginStart } from '../../../../security/server';
-import { ReindexSavedObject } from '../../../common/types';
+import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 
 export type Credential = Record<string, any>;
 
@@ -28,12 +28,17 @@ export interface CredentialStore {
     request: KibanaRequest,
     security: SecurityPluginStart
   ): Promise<void>;
-  update(reindexOp: ReindexSavedObject, credential: Credential): void;
+  update(
+    reindexOp: ReindexSavedObject,
+    security: SecurityPluginStart,
+    credential: Credential
+  ): Promise<void>;
   clear(): void;
 }
 
 export const credentialStoreFactory = (): CredentialStore => {
   const credMap = new Map<string, Credential>();
+  const apiKeysMap = new Map<string, string>();
 
   // Generates a stable hash for the reindex operation's current state.
   const getHash = (reindexOp: ReindexSavedObject) =>
@@ -43,7 +48,8 @@ export const credentialStoreFactory = (): CredentialStore => {
 
   const createApiKey = async (
     request: KibanaRequest,
-    security: SecurityPluginStart
+    security: SecurityPluginStart,
+    reindexOpId: string
   ): Promise<string | undefined> => {
     const apiKeyResult = await security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'ua_reindex_api_key',
@@ -52,12 +58,21 @@ export const credentialStoreFactory = (): CredentialStore => {
 
     if (apiKeyResult) {
       const { api_key: apiKey, id } = apiKeyResult;
+      // Store each API key per reindex operation so that we can later invalidate it when the reindex operation is complete
+      apiKeysMap.set(reindexOpId, id);
+      // Return the base64 encoding of `id:api_key`
+      // This can be used when sending a request with an "Authorization: ApiKey xxx" header
       return Buffer.from(`${id}:${apiKey}`).toString('base64');
     }
   };
 
-  // TODO implement
-  // const invalidateApiKey = () => {};
+  const invalidateApiKey = async (apiKeyId: string, security: SecurityPluginStart) => {
+    try {
+      await security.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
+    } catch (error) {
+      // Swallow error if there's a problem invalidating API key
+    }
+  };
 
   return {
     get(reindexOp: ReindexSavedObject) {
@@ -70,7 +85,7 @@ export const credentialStoreFactory = (): CredentialStore => {
       security: SecurityPluginStart
     ) {
       const areApiKeysEnabled = (await security?.authc?.apiKeys?.areAPIKeysEnabled()) ?? false;
-      const apiKey = areApiKeysEnabled && (await createApiKey(request, security));
+      const apiKey = areApiKeysEnabled && (await createApiKey(request, security, reindexOp.id));
 
       if (apiKey) {
         credMap.set(getHash(reindexOp), {
@@ -84,7 +99,21 @@ export const credentialStoreFactory = (): CredentialStore => {
       credMap.set(getHash(reindexOp), request.headers);
     },
 
-    update(reindexOp: ReindexSavedObject, credential: Credential) {
+    async update(
+      reindexOp: ReindexSavedObject,
+      security: SecurityPluginStart,
+      credential: Credential
+    ) {
+      // If the reindex operation is completed, and an API key is being used, invalidate it
+      if (reindexOp.attributes.status === ReindexStatus.completed) {
+        const apiKeyId = apiKeysMap.get(reindexOp.id);
+        if (apiKeyId) {
+          await invalidateApiKey(apiKeyId, security);
+          return;
+        }
+      }
+
+      // Otherwise, re-associate the credentials
       credMap.set(getHash(reindexOp), credential);
     },
 

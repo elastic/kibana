@@ -171,6 +171,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       savedObjects: new SavedObjectsClient(
         this.savedObjectsServiceStart.createInternalRepository()
       ),
+      security: this.securityPluginStart,
     });
 
     this.worker.start();
