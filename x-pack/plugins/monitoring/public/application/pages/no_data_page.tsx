@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
@@ -14,25 +14,45 @@ import { NoData } from '../../components/no_data';
 import { PageTemplate } from './page_template';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import { Legacy } from '../../legacy_shims';
+import { GlobalStateContext } from '../global_state_context';
+
+const CODE_PATHS = [CODE_PATH_LICENSE];
 
 export const NoDataPage = () => {
-  const { services } = useKibana<{ data: any }>();
-  const [shouldRedirect, setShouldRedirect] = useState(false);
-
   const title = i18n.translate('xpack.monitoring.noData.routeTitle', {
     defaultMessage: 'Setup Monitoring',
   });
 
-  const url = '../api/monitoring/v1/clusters';
+  const { services } = useKibana<{ data: any }>();
 
-  const getData = async () => {
+  const state = useContext(GlobalStateContext);
+  const clusterUuid = state.cluster_uuid;
+  const ccs = state.ccs;
+
+  // TODO should we set these?
+  const [clusters, setClusters] = useState([] as any);
+
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const model = {
+    errors: [], // errors can happen from trying to check or set ES settings
+    checkMessage: null, // message to show while waiting for api response
+    isLoading: isLoading, // flag for in-progress state of checking for no data reason
+    isCollectionEnabledUpdating: false, // flags to indicate whether to show a spinner while waiting for ajax
+    isCollectionEnabledUpdated: false,
+    isCollectionIntervalUpdating: false,
+    isCollectionIntervalUpdated: false,
+  };
+
+  const getPageData = useCallback(async () => {
+    setIsLoading(true);
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const min = bounds.min.toISOString();
     const max = bounds.max.toISOString();
 
-    const codePaths = [CODE_PATH_LICENSE];
-
-    let catchReason;
+    const url = '../api/monitoring/v1/clusters';
 
     try {
       const response = await services.http?.fetch(url, {
@@ -43,11 +63,13 @@ export const NoDataPage = () => {
             min,
             max,
           },
-          codePaths,
+          codePaths: CODE_PATHS,
         }),
       });
 
       const clusters = formatClusters(response);
+      setIsLoading(false);
+      console.log('did a refresh from nodatapage');
 
       if (clusters && clusters.length) {
         setShouldRedirect(true);
@@ -55,19 +77,27 @@ export const NoDataPage = () => {
         // return clusters;
       }
     } catch (err) {
-      if (err && err.status === 503) {
-        // TODO something useful with the error reason
-        catchReason = {
-          property: 'custom',
-          message: err.message,
-        };
-      }
+      // TODO something useful with the error reason
+      // if (err && err.status === 503) {
+      //   catchReason = {
+      //     property: 'custom',
+      //     message: err.data.message,
+      //   };
+      // }
+      console.log(err);
     }
-  };
+  }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http, setIsLoading]);
+
+  const { updateModel } = new ModelUpdater(model);
+  const enabler = new Enabler(updateModel);
 
   return (
-    <PageTemplate title={title} getData={getData}>
-      {shouldRedirect ? <Redirect to="/home" /> : <NoData />}
+    <PageTemplate title={title} getPageData={getPageData}>
+      {shouldRedirect ? (
+        <Redirect to="/home" />
+      ) : (
+        <NoData {...model} enabler={enabler} isCloudEnabled={Legacy.shims.isCloud} />
+      )}
     </PageTemplate>
   );
 };
@@ -81,4 +111,71 @@ function formatCluster(cluster: any) {
     cluster.cluster_name = 'Standalone Cluster';
   }
   return cluster;
+}
+
+// From x-pack/plugins/monitoring/public/lib/elasticsearch_settings/enabler.js
+class Enabler {
+  updateModel: any;
+
+  constructor(updateModel: (properties: any) => void) {
+    this.updateModel = updateModel;
+  }
+
+  async enableCollectionInterval() {
+    try {
+      this.updateModel({ isCollectionIntervalUpdating: true });
+      // TODO actually set it
+      // await this.$http.put('../api/monitoring/v1/elasticsearch_settings/set/collection_interval');
+      this.updateModel({
+        isCollectionIntervalUpdated: true,
+        isCollectionIntervalUpdating: false,
+      });
+    } catch (err) {
+      this.updateModel({
+        errors: err.data,
+        isCollectionIntervalUpdated: false,
+        isCollectionIntervalUpdating: false,
+      });
+    }
+  }
+
+  async enableCollectionEnabled() {
+    try {
+      this.updateModel({ isCollectionEnabledUpdating: true });
+      // TODO actually set it
+      // await this.$http.put('../api/monitoring/v1/elasticsearch_settings/set/collection_enabled');
+      this.updateModel({
+        isCollectionEnabledUpdated: true,
+        isCollectionEnabledUpdating: false,
+      });
+    } catch (err) {
+      this.updateModel({
+        errors: err.data,
+        isCollectionEnabledUpdated: false,
+        isCollectionEnabledUpdating: false,
+      });
+    }
+  }
+}
+
+// From x-pack/plugins/monitoring/public/views/no_data/model_updater.js
+class ModelUpdater {
+  model: any;
+
+  constructor(model: any) {
+    this.model = model;
+    this.updateModel = this.updateModel.bind(this);
+  }
+
+  updateModel(properties: any) {
+    const model = this.model;
+    const keys = Object.keys(properties);
+    keys.forEach((key) => {
+      if (Array.isArray(model[key])) {
+        model[key].push(properties[key]);
+      } else {
+        model[key] = properties[key];
+      }
+    });
+  }
 }
