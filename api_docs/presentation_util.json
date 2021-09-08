@@ -794,7 +794,7 @@
         "children": [
           {
             "parentPluginId": "presentationUtil",
-            "id": "def-public.props",
+            "id": "def-public.LazyDashboardPicker.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -828,7 +828,7 @@
         "children": [
           {
             "parentPluginId": "presentationUtil",
-            "id": "def-public.props",
+            "id": "def-public.LazyLabsBeakerButton.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -862,7 +862,7 @@
         "children": [
           {
             "parentPluginId": "presentationUtil",
-            "id": "def-public.props",
+            "id": "def-public.LazyLabsFlyout.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -908,7 +908,7 @@
         "children": [
           {
             "parentPluginId": "presentationUtil",
-            "id": "def-public.props",
+            "id": "def-public.LazySavedObjectSaveModalDashboard.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -2051,7 +2051,7 @@
         "children": [
           {
             "parentPluginId": "presentationUtil",
-            "id": "def-public.params",
+            "id": "def-public.KibanaPluginServiceFactory.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -2090,7 +2090,7 @@
         "children": [
           {
             "parentPluginId": "presentationUtil",
-            "id": "def-public.params",
+            "id": "def-public.PluginServiceFactory.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
@@ -2352,7 +2352,7 @@
           "children": [
             {
               "parentPluginId": "presentationUtil",
-              "id": "def-public.props",
+              "id": "def-public.PresentationUtilPluginStart.ContextProvider.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "props",
@@ -2365,7 +2365,7 @@
             },
             {
               "parentPluginId": "presentationUtil",
-              "id": "def-public.context",
+              "id": "def-public.PresentationUtilPluginStart.ContextProvider.$2",
               "type": "Any",
               "tags": [],
               "label": "context",

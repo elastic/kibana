@@ -56,9 +56,8 @@ export function extractImportReferences(
         }
       } else {
         const section = getApiSectionId({
-          pluginName: plugin.manifest.id,
           scope: getScopeFromPath(path, plugin, log),
-          apiName: name,
+          id: name,
         });
         texts.push({
           pluginId: plugin.manifest.id,

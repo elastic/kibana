@@ -69,7 +69,7 @@
         "children": [
           {
             "parentPluginId": "expressionError",
-            "id": "def-public.props",
+            "id": "def-public.LazyDebugComponent.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -103,7 +103,7 @@
         "children": [
           {
             "parentPluginId": "expressionError",
-            "id": "def-public.props",
+            "id": "def-public.LazyErrorComponent.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
