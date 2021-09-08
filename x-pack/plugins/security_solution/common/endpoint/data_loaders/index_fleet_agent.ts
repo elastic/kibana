@@ -48,6 +48,10 @@ export const indexFleetAgentForHost = async (
 ): Promise<IndexedFleetAgentResponse> => {
   const agentDoc = fleetAgentGenerator.generateEsHit({
     _source: {
+      agent: {
+        id: endpointHost.agent.id,
+        version: endpointHost.agent.version,
+      },
       local_metadata: {
         elastic: {
           agent: {
