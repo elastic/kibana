@@ -21,6 +21,7 @@ import {
   PostTrustedAppCreateResponse,
   PutTrustedAppUpdateRequest,
   PutTrustedAppUpdateResponse,
+  GetTrustedAppsSummaryRequest,
 } from '../../../../common/endpoint/types';
 
 import {
@@ -205,11 +206,11 @@ export const updateTrustedApp = async (
 };
 
 export const getTrustedAppsSummary = async (
-  exceptionsListClient: ExceptionListClient
+  exceptionsListClient: ExceptionListClient,
+  { kuery }: GetTrustedAppsSummaryRequest
 ): Promise<GetTrustedAppsSummaryResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
-
   const summary = {
     linux: 0,
     windows: 0,
@@ -225,7 +226,7 @@ export const getTrustedAppsSummary = async (
       listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page,
       perPage,
-      filter: undefined,
+      filter: kuery,
       namespaceType: 'agnostic',
       sortField: undefined,
       sortOrder: undefined,

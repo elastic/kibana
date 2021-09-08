@@ -36,7 +36,7 @@ export const getDomainWithProtocol = async (domain: string) => {
 
   if (!domain.startsWith('https://') && !domain.startsWith('http://')) {
     try {
-      const route = '/api/app_search/crawler/validate_url';
+      const route = '/internal/app_search/crawler/validate_url';
       const checks = ['tcp', 'url_request'];
 
       const httpsCheckData: CrawlerDomainValidationResultFromServer = await http.post(route, {

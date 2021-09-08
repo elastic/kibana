@@ -32,7 +32,7 @@ export const CrawlerOverviewLogic = kea<MakeLogicType<{}, CrawlerOverviewActions
 
       try {
         const response = await http.delete(
-          `/api/app_search/engines/${engineName}/crawler/domains/${domain.id}`,
+          `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}`,
           {
             query: {
               respond_with: 'crawler_details',
