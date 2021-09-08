@@ -42,7 +42,6 @@ export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       <MyEuiButton
-        fill
         size="s"
         iconType="plusInCircle"
         onClick={isNested ? onAddClickWhenNested : onAndClicked}
