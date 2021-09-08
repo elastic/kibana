@@ -11,8 +11,8 @@ import { ActionFactory } from '../types';
 export const dynamicActionFactoriesCollector = (
   getActionFactory: (id: string) => undefined | ActionFactory,
   state: DynamicActionsState,
-  stats: Record<string, any>
-): Record<string, any> => {
+  stats: Record<string, string | number | boolean>
+): Record<string, string | number | boolean> => {
   for (const event of state.events) {
     const factory = getActionFactory(event.action.factoryId);
 

@@ -6,3 +6,4 @@
  */
 
 export { setupEnvironment, WithAppDependencies } from './setup_environment';
+export { kibanaDeprecationsServiceHelpers } from './kibana_deprecations_service.mock';
