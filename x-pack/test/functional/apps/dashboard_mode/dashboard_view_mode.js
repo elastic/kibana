@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const appsMenu = getService('appsMenu');
   const filterBar = getService('filterBar');
@@ -30,7 +29,6 @@ export default function ({ getService, getPageObjects }) {
     'share',
   ]);
   const dashboardName = 'Dashboard View Mode Test Dashboard';
-  const savedSearchName = 'Saved search for dashboard';
 
   describe('Dashboard View Mode', function () {
     this.tags(['skipFirefox']);
@@ -38,83 +36,40 @@ export default function ({ getService, getPageObjects }) {
     before('initialize tests', async () => {
       log.debug('Dashboard View Mode:initTests');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/dashboard_view_mode');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_view_mode'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await browser.setWindowSize(1600, 1000);
 
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setHistoricalDataRange();
-      await PageObjects.discover.saveSearch(savedSearchName);
-
       await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
-      await dashboardAddPanel.addSavedSearch(savedSearchName);
-      await PageObjects.dashboard.addVisualizations(
-        PageObjects.dashboard.getTestVisualizationNames()
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_view_mode'
       );
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      const types = [
+        'search',
+        'dashboard',
+        'visualization',
+        'search-session',
+        'core-usage-stats',
+        'event_loop_delays_daily',
+        'search-telemetry',
+        'core-usage-stats',
+      ];
+      await kibanaServer.savedObjects.clean({ types });
     });
 
     describe('Dashboard viewer', () => {
-      before('Create logstash data role', async () => {
-        await PageObjects.settings.navigateTo();
-        await testSubjects.click('roles');
-        await PageObjects.security.clickCreateNewRole();
-
-        await testSubjects.setValue('roleFormNameInput', 'logstash-data');
-        await PageObjects.security.addIndexToRole('logstash-*');
-        await PageObjects.security.addPrivilegeToRole('read');
-        await PageObjects.security.clickSaveEditRole();
-      });
-
-      before('Create dashboard only mode user', async () => {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.security.createUser({
-          username: 'dashuser',
-          password: '123456',
-          confirm_password: '123456',
-          email: 'example@example.com',
-          full_name: 'dashuser',
-          roles: ['kibana_dashboard_only_user', 'logstash-data'],
-        });
-      });
-
-      before('Create user with mixes roles', async () => {
-        await PageObjects.security.createUser({
-          username: 'mixeduser',
-          password: '123456',
-          confirm_password: '123456',
-          email: 'example@example.com',
-          full_name: 'mixeduser',
-          roles: ['kibana_dashboard_only_user', 'kibana_admin', 'logstash-data'],
-        });
-      });
-
-      before('Create user with dashboard and superuser role', async () => {
-        await PageObjects.security.createUser({
-          username: 'mysuperuser',
-          password: '123456',
-          confirm_password: '123456',
-          email: 'example@example.com',
-          full_name: 'mixeduser',
-          roles: ['kibana_dashboard_only_user', 'superuser'],
-        });
-      });
-
       after(async () => {
         await security.testUser.restoreDefaults();
       });
 
       it('shows only the dashboard app link', async () => {
-        await security.testUser.setRoles(
-          ['test_logstash_reader', 'kibana_dashboard_only_user'],
-          false
-        );
-
+        await security.testUser.setRoles(['test_logstash_reader', 'kibana_dashboard_only_user']);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.security.forceLogout();
-        await PageObjects.security.login('test_user', 'changeme');
-
         const appLinks = await appsMenu.readLinks();
         expect(appLinks).to.have.length(1);
         expect(appLinks[0]).to.have.property('text', 'Dashboard');
