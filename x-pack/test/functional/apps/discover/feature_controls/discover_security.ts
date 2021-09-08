@@ -112,7 +112,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('shows CSV reports', async () => {
+      it('does show CSV reports', async () => {
         await PageObjects.share.clickShareTopNavButton();
         await testSubjects.existOrFail('sharePanel-CSVReports');
         await PageObjects.share.clickShareTopNavButton();
@@ -226,12 +226,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`Permalinks doesn't show create short-url button`, async () => {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.createShortUrlMissingOrFail();
-        await PageObjects.share.clickShareTopNavButton();
-      });
-
-      it(`doesn't show CSV reports`, async () => {
-        await PageObjects.share.clickShareTopNavButton();
-        await testSubjects.missingOrFail('sharePanel-CSVReports');
         await PageObjects.share.clickShareTopNavButton();
       });
 
