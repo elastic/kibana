@@ -9,52 +9,51 @@ import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
 import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_configuration/configuration_types';
 import { AgentConfigSearchParams } from '../../../../plugins/apm/server/routes/settings/agent_configuration';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
-  const supertestRead = createApmApiSupertest(getService('supertestAsApmReadUser'));
-  const supertestWrite = createApmApiSupertest(getService('supertestAsApmWriteUser'));
+  const apmApiClient = getService('apmApiClient');
 
   const log = getService('log');
 
   const archiveName = 'apm_8.0.0';
 
   function getServices() {
-    return supertestRead({
+    return apmApiClient.readUser({
       endpoint: 'GET /api/apm/settings/agent-configuration/services',
     });
   }
 
   async function getEnvironments(serviceName: string) {
-    return supertestRead({
+    return apmApiClient.readUser({
       endpoint: 'GET /api/apm/settings/agent-configuration/environments',
       params: { query: { serviceName } },
     });
   }
 
   function getAgentName(serviceName: string) {
-    return supertestRead({
+    return apmApiClient.readUser({
       endpoint: 'GET /api/apm/settings/agent-configuration/agent_name',
       params: { query: { serviceName } },
     });
   }
 
   function searchConfigurations(configuration: AgentConfigSearchParams) {
-    return supertestRead({
+    return apmApiClient.readUser({
       endpoint: 'POST /api/apm/settings/agent-configuration/search',
       params: { body: configuration },
     });
   }
 
   function getAllConfigurations() {
-    return supertestRead({ endpoint: 'GET /api/apm/settings/agent-configuration' });
+    return apmApiClient.readUser({ endpoint: 'GET /api/apm/settings/agent-configuration' });
   }
 
   function createConfiguration(configuration: AgentConfigurationIntake, { user = 'write' } = {}) {
     log.debug('creating configuration', configuration.service);
-    const supertestClient = user === 'read' ? supertestRead : supertestWrite;
+    const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
 
     return supertestClient({
       endpoint: 'PUT /api/apm/settings/agent-configuration',
@@ -64,7 +63,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   function updateConfiguration(config: AgentConfigurationIntake, { user = 'write' } = {}) {
     log.debug('updating configuration', config.service);
-    const supertestClient = user === 'read' ? supertestRead : supertestWrite;
+    const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
 
     return supertestClient({
       endpoint: 'PUT /api/apm/settings/agent-configuration',
@@ -74,7 +73,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   function deleteConfiguration({ service }: AgentConfigurationIntake, { user = 'write' } = {}) {
     log.debug('deleting configuration', service);
-    const supertestClient = user === 'read' ? supertestRead : supertestWrite;
+    const supertestClient = user === 'read' ? apmApiClient.readUser : apmApiClient.writeUser;
 
     return supertestClient({
       endpoint: 'DELETE /api/apm/settings/agent-configuration',
