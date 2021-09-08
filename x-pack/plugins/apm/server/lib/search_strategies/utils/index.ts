@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export {
-  failedTransactionsCorrelationsSearchServiceProvider,
-  FailedTransactionsCorrelationsSearchServiceProvider,
-  FailedTransactionsCorrelationsSearchStrategy,
-} from './failed_transactions_correlations_search_service';
+export { computeExpectationsAndRanges } from './compute_expectations_and_ranges';
+export { hasPrefixToInclude } from './has_prefix_to_include';

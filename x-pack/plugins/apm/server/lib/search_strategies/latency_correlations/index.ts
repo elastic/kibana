@@ -6,7 +6,7 @@
  */
 
 export {
-  failedTransactionsCorrelationsSearchServiceProvider,
-  FailedTransactionsCorrelationsSearchServiceProvider,
-  FailedTransactionsCorrelationsSearchStrategy,
-} from './failed_transactions_correlations_search_service';
+  latencyCorrelationsSearchServiceProvider,
+  LatencyCorrelationsSearchServiceProvider,
+  LatencyCorrelationsSearchStrategy,
+} from './latency_correlations_search_service';
