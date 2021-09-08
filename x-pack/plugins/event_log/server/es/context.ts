@@ -54,6 +54,7 @@ class EsContextImpl implements EsContext {
       logger: params.logger,
       elasticsearchClientPromise: params.elasticsearchClientPromise,
       wait: () => this.readySignal.wait(),
+      kibanaVersion: params.kibanaVersion,
     });
   }
 

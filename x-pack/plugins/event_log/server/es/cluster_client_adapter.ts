@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Semver from 'semver';
 import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined, isNumber } from 'lodash';
@@ -13,6 +14,7 @@ import { Logger, ElasticsearchClient } from 'src/core/server';
 import util from 'util';
 import { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 
@@ -32,6 +34,7 @@ export interface ConstructorOpts {
   logger: Logger;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   wait: Wait;
+  kibanaVersion: string;
 }
 
 export interface QueryEventsBySavedObjectResult {
@@ -57,6 +60,7 @@ const LEGACY_ID_CUTOFF_VERSION = '8.0.0';
 
 export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string } = Doc> {
   private readonly logger: Logger;
+  private readonly kibanaVersion: string;
   private readonly elasticsearchClientPromise: Promise<ElasticsearchClient>;
   private readonly docBuffer$: Subject<TDoc>;
   private readonly wait: Wait;
@@ -67,7 +71,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     this.elasticsearchClientPromise = opts.elasticsearchClientPromise;
     this.wait = opts.wait;
     this.docBuffer$ = new Subject<TDoc>();
-
+    this.kibanaVersion = opts.kibanaVersion;
     // buffer event log docs for time / buffer length, ignore empty
     // buffers, then index the buffered docs; kick things off with a
     // promise on the observable, which we'll wait on in shutdown
@@ -282,38 +286,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
     const shouldQuery = [];
 
-    shouldQuery.push({
-      bool: {
-        must: [
-          {
-            nested: {
-              path: 'kibana.saved_objects',
-              query: {
-                bool: {
-                  must: [
-                    {
-                      terms: {
-                        // default maximum of 65,536 terms, configurable by index.max_terms_count
-                        'kibana.saved_objects.id': ids,
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          },
-          {
-            range: {
-              'kibana.version': {
-                gte: LEGACY_ID_CUTOFF_VERSION,
-              },
-            },
-          },
-        ],
-      },
-    });
-
-    if (legacyIds && legacyIds.length > 0) {
+    if (Semver.gte(this.kibanaVersion, LEGACY_ID_CUTOFF_VERSION)) {
       shouldQuery.push({
         bool: {
           must: [
@@ -326,7 +299,46 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
                       {
                         terms: {
                           // default maximum of 65,536 terms, configurable by index.max_terms_count
-                          'kibana.saved_objects.id': legacyIds,
+                          'kibana.saved_objects.id': ids,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            {
+              range: {
+                'kibana.version': {
+                  gte: LEGACY_ID_CUTOFF_VERSION,
+                },
+              },
+            },
+          ],
+        },
+      });
+    }
+
+    if (
+      (legacyIds && legacyIds.length > 0) ||
+      Semver.lt(this.kibanaVersion, LEGACY_ID_CUTOFF_VERSION)
+    ) {
+      const savedObjectIds = Semver.lt(this.kibanaVersion, LEGACY_ID_CUTOFF_VERSION)
+        ? ids
+        : legacyIds;
+      shouldQuery.push({
+        bool: {
+          must: [
+            {
+              nested: {
+                path: 'kibana.saved_objects',
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        terms: {
+                          // default maximum of 65,536 terms, configurable by index.max_terms_count
+                          'kibana.saved_objects.id': savedObjectIds,
                         },
                       },
                     ],
@@ -363,7 +375,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
     musts.push({
       bool: {
-        should: shouldQuery,
+        should: shouldQuery as QueryDslQueryContainer[],
       },
     });
 
