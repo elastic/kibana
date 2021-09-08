@@ -25,7 +25,10 @@ const EditScheduledQueryGroupPageComponent = () => {
 
   const { data } = useScheduledQueryGroup({ scheduledQueryGroupId });
 
-  useBreadcrumbs('scheduled_query_group_edit', { scheduledQueryGroupName: data?.name ?? '' });
+  useBreadcrumbs('scheduled_query_group_edit', {
+    scheduledQueryGroupId: data?.id ?? '',
+    scheduledQueryGroupName: data?.name ?? '',
+  });
 
   const LeftColumn = useMemo(
     () => (

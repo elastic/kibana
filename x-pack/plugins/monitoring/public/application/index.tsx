@@ -11,6 +11,7 @@ import ReactDOM from 'react-dom';
 import { Route, Switch, Redirect, Router } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { LoadingPage } from './pages/loading_page';
+import { LicensePage } from './pages/license_page';
 import { ClusterOverview } from './pages/cluster/overview_page';
 import { MonitoringStartPluginDependencies } from '../types';
 import { GlobalStateProvider } from './global_state_context';
@@ -54,7 +55,7 @@ const MonitoringApp: React.FC<{
                 <Route path="/loading" component={LoadingPage} />
                 <RouteInit
                   path="/license"
-                  component={License}
+                  component={LicensePage}
                   codePaths={['all']}
                   fetchAllClusters={false}
                 />
@@ -87,8 +88,4 @@ const MonitoringApp: React.FC<{
 
 const Home: React.FC<{}> = () => {
   return <div>Home page (Cluster listing)</div>;
-};
-
-const License: React.FC<{}> = () => {
-  return <div>License page</div>;
 };
