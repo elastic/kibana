@@ -47,35 +47,29 @@ export function addUpdatedField(
 }
 
 export const useFilterUpdate = (
-  fieldName?: string,
-  values?: string[],
-  notValues?: string[],
+  fieldName: string,
+  values: string[],
+  notValues: string[],
   shouldUpdateUrl: boolean = true
 ) => {
   const [getUrlParams, updateUrl] = useUrlParams();
 
-  const urlParams = getUrlParams();
+  const { filters, excludedFilters } = getUrlParams();
 
   useEffect(() => {
-    if (fieldName) {
-      const currentFiltersMap: Map<string, string[]> = parseFiltersMap(urlParams.filters);
-      const currentExclusionsMap: Map<string, string[]> = parseFiltersMap(
-        urlParams.excludedFilters
-      );
-      const newFiltersString = getUpdateFilters(currentFiltersMap, fieldName, values);
-      const newExclusionsString = getUpdateFilters(currentExclusionsMap, fieldName, notValues);
+    const currentFiltersMap: Map<string, string[]> = parseFiltersMap(filters);
+    const currentExclusionsMap: Map<string, string[]> = parseFiltersMap(excludedFilters);
+    const newFiltersString = getUpdateFilters(currentFiltersMap, fieldName, values);
+    const newExclusionsString = getUpdateFilters(currentExclusionsMap, fieldName, notValues);
 
-      const update: { [key: string]: string } = {};
+    const update: { [key: string]: string } = {};
 
-      addUpdatedField(urlParams.filters, 'filters', newFiltersString, update);
-      addUpdatedField(urlParams.excludedFilters, 'excludedFilters', newExclusionsString, update);
+    addUpdatedField(filters, 'filters', newFiltersString, update);
+    addUpdatedField(excludedFilters, 'excludedFilters', newExclusionsString, update);
 
-      if (shouldUpdateUrl && Object.keys(update).length > 0) {
-        // reset pagination whenever filters change
-        updateUrl({ ...update, pagination: '' });
-      }
+    if (shouldUpdateUrl && Object.keys(update).length > 0) {
+      // reset pagination whenever filters change
+      updateUrl({ ...update, pagination: '' });
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fieldName, values, notValues]);
+  }, [fieldName, values, notValues, filters, excludedFilters, shouldUpdateUrl, updateUrl]);
 };

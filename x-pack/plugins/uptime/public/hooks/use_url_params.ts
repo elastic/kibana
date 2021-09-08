@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { parse, stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,11 +26,9 @@ const getParsedParams = (search: string) => {
 };
 
 export const useGetUrlParams: GetUrlParams = () => {
-  const location = useLocation();
+  const { search } = useLocation();
 
-  const params = getParsedParams(location?.search);
-
-  return getSupportedUrlParams(params);
+  return useMemo(() => getSupportedUrlParams(getParsedParams(search)), [search]);
 };
 
 const getMapFromFilters = (value: any): Map<string, any> | undefined => {
