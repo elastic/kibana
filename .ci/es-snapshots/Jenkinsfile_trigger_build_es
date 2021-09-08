@@ -1,5 +1,8 @@
 #!/bin/groovy
 
+// Disable this pipeline, as it is now in Buildkite. Revert to re-enable.
+return
+
 if (!params.branches_yaml) {
   error "'branches_yaml' parameter must be specified"
 }
