@@ -15,9 +15,8 @@ import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher'
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import { AlertMetadata } from '../helper';
+import { AlertMetadata, getIntervalAndTimeRange, TIME_UNITS } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
-import { getIntervalAndTimeRange } from '../../../../common/chart_preview';
 
 export interface AlertParams {
   windowSize: number;
@@ -57,7 +56,7 @@ export function ErrorCountAlertTrigger(props: Props) {
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
-        windowUnit: params.windowUnit,
+        windowUnit: params.windowUnit as TIME_UNITS,
       });
       if (interval && start && end) {
         return callApmApi({

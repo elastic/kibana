@@ -23,9 +23,8 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata } from '../helper';
+import { AlertMetadata, getIntervalAndTimeRange, TIME_UNITS } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
-import { getIntervalAndTimeRange } from '../../../../common/chart_preview';
 
 interface AlertParams {
   windowSize: number;
@@ -76,7 +75,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
-        windowUnit: params.windowUnit,
+        windowUnit: params.windowUnit as TIME_UNITS,
       });
       if (interval && start && end) {
         return callApmApi({
