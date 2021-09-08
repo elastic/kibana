@@ -92,7 +92,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [stateContainer, chrome, docLinks]);
 
-  const resetCurSavedSearch = useCallback(() => {
+  const resetCurrentSavedSearch = useCallback(() => {
     resetSavedSearch(savedSearch.id);
   }, [resetSavedSearch, savedSearch]);
 
@@ -103,7 +103,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       inspectorAdapters={inspectorAdapters}
       onChangeIndexPattern={onChangeIndexPattern}
       onUpdateQuery={onUpdateQuery}
-      resetSavedSearch={resetCurSavedSearch}
+      resetSavedSearch={resetCurrentSavedSearch}
       navigateTo={navigateTo}
       savedSearch={savedSearch}
       savedSearchData$={data$}

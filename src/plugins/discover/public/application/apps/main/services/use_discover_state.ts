@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useState, useCallback, useRef } from 'react';
+import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { getState } from './discover_state';
@@ -39,8 +39,6 @@ export function useDiscoverState({
   const { timefilter } = data.query.timefilter;
 
   const indexPattern = savedSearch.searchSource.getField('index')!;
-  // Only needs for resetting dirty state of current saved search
-  const savedSearchDefaultIp = useRef(indexPattern);
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
@@ -150,7 +148,8 @@ export function useDiscoverState({
   const resetSavedSearch = useCallback(
     async (id?: string) => {
       const newSavedSearch = await services.getSavedSearchById(id);
-      newSavedSearch.searchSource.setField('index', savedSearchDefaultIp.current);
+      const newIndexPattern = newSavedSearch.searchSource.getField('index') || indexPattern;
+      newSavedSearch.searchSource.setField('index', newIndexPattern);
       const newAppState = getStateDefaults({
         config,
         data,
@@ -159,7 +158,7 @@ export function useDiscoverState({
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
-    [services, config, data, stateContainer]
+    [indexPattern, services, config, data, stateContainer]
   );
 
   /**
