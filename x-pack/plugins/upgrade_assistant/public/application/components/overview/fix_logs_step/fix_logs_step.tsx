@@ -48,7 +48,11 @@ const i18nTexts = {
   ),
 };
 
-const FixLogsStep: FunctionComponent<Partial<OverviewStepProps>> = ({ setIsComplete }) => {
+interface Props {
+  setIsComplete: OverviewStepProps['setIsComplete'];
+}
+
+const FixLogsStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   const state = useDeprecationLogging();
 
   return (
@@ -89,7 +93,7 @@ const FixLogsStep: FunctionComponent<Partial<OverviewStepProps>> = ({ setIsCompl
             <h4>{i18nTexts.deprecationsCountCheckpointTitle}</h4>
           </EuiText>
           <EuiSpacer size="m" />
-          <DeprecationsCountCheckpoint setHasNoDeprecationLogs={setIsComplete!} />
+          <DeprecationsCountCheckpoint setHasNoDeprecationLogs={setIsComplete} />
         </>
       )}
     </>

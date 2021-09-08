@@ -23,11 +23,15 @@ const i18nTexts = {
   }),
 };
 
-interface Props extends OverviewStepProps {
+interface Props {
+  setIsComplete: OverviewStepProps['setIsComplete'];
+}
+
+interface StepProps extends OverviewStepProps {
   nextMajor: number;
 }
 
-const FixIssuesStep: FunctionComponent<OverviewStepProps> = ({ setIsComplete }) => {
+const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   const [isEsFixed, setIsEsFixed] = useState(false);
   const [isKibanaFixed, setIsKibanaFixed] = useState(false);
 
@@ -48,7 +52,11 @@ const FixIssuesStep: FunctionComponent<OverviewStepProps> = ({ setIsComplete }) 
   );
 };
 
-export const getFixIssuesStep = ({ nextMajor, isComplete, setIsComplete }: Props): EuiStepProps => {
+export const getFixIssuesStep = ({
+  nextMajor,
+  isComplete,
+  setIsComplete,
+}: StepProps): EuiStepProps => {
   const status = isComplete ? 'complete' : 'incomplete';
 
   return {
@@ -69,7 +77,7 @@ export const getFixIssuesStep = ({ nextMajor, isComplete, setIsComplete }: Props
 
         <EuiSpacer size="m" />
 
-        <FixIssuesStep isComplete={isComplete} setIsComplete={setIsComplete} />
+        <FixIssuesStep setIsComplete={setIsComplete} />
       </>
     ),
   };
