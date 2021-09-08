@@ -13,7 +13,7 @@ import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_c
 import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 import { APMFtrConfigName } from '../configs';
-import { createSupertestClient } from './apm_api_supertest';
+import { createApmApiClient } from './apm_api_supertest';
 import { registry } from './registry';
 
 interface Config {
@@ -52,7 +52,7 @@ async function getApmApiClient(
     auth: `${apmUser}:${APM_TEST_PASSWORD}`,
   });
 
-  return createSupertestClient(supertest(url));
+  return createApmApiClient(supertest(url));
 }
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
