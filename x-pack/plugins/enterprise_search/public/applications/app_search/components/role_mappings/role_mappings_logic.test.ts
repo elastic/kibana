@@ -418,6 +418,16 @@ describe('RoleMappingsLogic', () => {
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
+
+      it('resets roleMapping state', () => {
+        mount({
+          ...mappingsServerProps,
+          roleMapping: asRoleMapping,
+        });
+        RoleMappingsLogic.actions.initializeRoleMappings();
+
+        expect(RoleMappingsLogic.values.roleMapping).toEqual(null);
+      });
     });
 
     describe('initializeRoleMapping', () => {

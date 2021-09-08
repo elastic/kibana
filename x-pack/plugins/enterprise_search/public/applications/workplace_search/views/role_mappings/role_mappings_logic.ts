@@ -168,6 +168,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       null,
       {
         setRoleMapping: (_, { roleMapping }) => roleMapping,
+        initializeRoleMappings: () => null,
         resetState: () => null,
         closeUsersAndRolesFlyout: () => null,
       },
