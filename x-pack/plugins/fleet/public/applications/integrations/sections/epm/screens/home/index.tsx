@@ -98,6 +98,13 @@ const InstalledPackages: React.FC = memo(() => {
     })[1];
     history.push(url);
   }
+  function setSearchTerm(search: string) {
+    const url = pagePathGetters.integrations_installed({
+      category: selectedCategory,
+      query: search,
+    })[1];
+    history.push(url);
+  }
 
   const allInstalledPackages = useMemo(
     () =>
@@ -156,6 +163,7 @@ const InstalledPackages: React.FC = memo(() => {
       controls={controls}
       category={selectedCategory}
       setSelectedCategory={setSelectedCategory}
+      onSearchChange={setSearchTerm}
       initialSearch={searchParam}
       title={title}
       list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
@@ -173,6 +181,11 @@ const AvailablePackages: React.FC = memo(() => {
   function setSelectedCategory(categoryId: string) {
     const url = pagePathGetters.integrations_all({ category: categoryId, query: searchParam })[1];
     history.push(url);
+  }
+  function setSearchTerm(search: string) {
+    history.push(
+      pagePathGetters.integrations_all({ category: selectedCategory, query: search })[1]
+    );
   }
 
   const { data: allCategoryPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages({
@@ -235,9 +248,8 @@ const AvailablePackages: React.FC = memo(() => {
       category={selectedCategory}
       initialSearch={searchParam}
       list={packages}
-      setSelectedCategory={(categoryId) => {
-        setSelectedCategory(categoryId);
-      }}
+      setSelectedCategory={setSelectedCategory}
+      onSearchChange={setSearchTerm}
       showMissingIntegrationMessage
     />
   );

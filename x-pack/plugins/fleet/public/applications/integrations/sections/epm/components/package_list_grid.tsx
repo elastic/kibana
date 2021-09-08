@@ -28,8 +28,6 @@ import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../../../hooks';
 
-import { pagePathGetters } from '../../../../../constants';
-
 import { PackageCard } from './package_card';
 
 interface ListProps {
@@ -39,24 +37,23 @@ interface ListProps {
   title: string;
   list: PackageList;
   initialSearch?: string;
-  setSelectedCategory?: (category: string) => void;
+  setSelectedCategory: (category: string) => void;
+  onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
 }
 
 export function PackageListGrid({
   isLoading,
-  category,
   controls,
   title,
   list,
   initialSearch,
-  setSelectedCategory = () => {},
+  onSearchChange,
+  setSelectedCategory,
   showMissingIntegrationMessage = false,
 }: ListProps) {
   const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
-
-  const history = useHistory();
 
   const onQueryChange = ({
     queryText: userInput,
@@ -65,8 +62,8 @@ export function PackageListGrid({
     queryText: string;
     error: { message: string } | null;
   }) => {
-    history.push(pagePathGetters.integrations_all({ category, query: userInput || '' })[1]);
     if (!error) {
+      onSearchChange(userInput);
       setSearchTerm(userInput);
     }
   };
