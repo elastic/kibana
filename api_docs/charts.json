@@ -529,7 +529,7 @@
         "children": [
           {
             "parentPluginId": "charts",
-            "id": "def-public.props",
+            "id": "def-public.LegendToggle.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -1641,7 +1641,7 @@
               },
               {
                 "parentPluginId": "charts",
-                "id": "def-public.PaletteDefinition.getColorForValue.$3.minmax",
+                "id": "def-public.PaletteDefinition.getColorForValue.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "{ min, max }",
@@ -1651,7 +1651,7 @@
                 "children": [
                   {
                     "parentPluginId": "charts",
-                    "id": "def-public.PaletteDefinition.getColorForValue.$3.minmax.min",
+                    "id": "def-public.PaletteDefinition.getColorForValue.$3.min",
                     "type": "number",
                     "tags": [],
                     "label": "min",
@@ -1661,7 +1661,7 @@
                   },
                   {
                     "parentPluginId": "charts",
-                    "id": "def-public.PaletteDefinition.getColorForValue.$3.minmax.max",
+                    "id": "def-public.PaletteDefinition.getColorForValue.$3.max",
                     "type": "number",
                     "tags": [],
                     "label": "max",

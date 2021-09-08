@@ -7,53 +7,25 @@
  */
 import { PropertySignature } from 'ts-morph';
 
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { FunctionTypeNode } from 'ts-morph';
 import { buildApiDecsForParameters } from './build_parameter_decs';
-import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
+import { ApiDeclaration, TypeKind } from '../types';
 import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
+import { BuildApiDecOpts } from './types';
 
 /**
  * Takes the various function-type node declaration types and converts them into an ApiDeclaration.
  */
-export function buildFunctionTypeDec({
-  node,
-  typeNode,
-  plugins,
-  anchorLink,
-  currentPluginId,
-  log,
-  captureReferences,
-}: {
-  node: PropertySignature;
-  typeNode: FunctionTypeNode;
-  plugins: KibanaPlatformPlugin[];
-  anchorLink: AnchorLink;
-  currentPluginId: string;
-  log: ToolingLog;
-  captureReferences: boolean;
-}): ApiDeclaration {
+export function buildFunctionTypeDec(
+  node: PropertySignature,
+  typeNode: FunctionTypeNode,
+  opts: BuildApiDecOpts
+): ApiDeclaration {
   const fn = {
-    ...buildBasicApiDeclaration({
-      currentPluginId,
-      anchorLink,
-      node,
-      captureReferences,
-      plugins,
-      log,
-      apiName: node.getName(),
-    }),
+    ...buildBasicApiDeclaration(node, opts),
     type: TypeKind.FunctionKind,
-    children: buildApiDecsForParameters(
-      typeNode.getParameters(),
-      plugins,
-      anchorLink,
-      currentPluginId,
-      log,
-      captureReferences,
-      getJSDocs(node)
-    ),
+    children: buildApiDecsForParameters(typeNode.getParameters(), opts, getJSDocs(node)),
     returnComment: getJSDocReturnTagComment(node),
   };
   return fn;

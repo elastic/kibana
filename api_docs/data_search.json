@@ -464,7 +464,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-public.request",
+                "id": "def-public.ISearchStart.search.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "request",
@@ -477,7 +477,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-public.options",
+                "id": "def-public.ISearchStart.search.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1250,7 +1250,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.sessionId",
+                "id": "def-server.IScopedSearchClient.saveSession.$1",
                 "type": "string",
                 "tags": [],
                 "label": "sessionId",
@@ -1260,7 +1260,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-server.attributes",
+                "id": "def-server.IScopedSearchClient.saveSession.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "attributes",
@@ -1291,7 +1291,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.sessionId",
+                "id": "def-server.IScopedSearchClient.getSession.$1",
                 "type": "string",
                 "tags": [],
                 "label": "sessionId",
@@ -1333,7 +1333,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.options",
+                "id": "def-server.IScopedSearchClient.findSessions.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -1396,7 +1396,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.sessionId",
+                "id": "def-server.IScopedSearchClient.updateSession.$1",
                 "type": "string",
                 "tags": [],
                 "label": "sessionId",
@@ -1406,7 +1406,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-server.attributes",
+                "id": "def-server.IScopedSearchClient.updateSession.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "attributes",
@@ -1435,7 +1435,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.sessionId",
+                "id": "def-server.IScopedSearchClient.cancelSession.$1",
                 "type": "string",
                 "tags": [],
                 "label": "sessionId",
@@ -1461,7 +1461,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.sessionId",
+                "id": "def-server.IScopedSearchClient.deleteSession.$1",
                 "type": "string",
                 "tags": [],
                 "label": "sessionId",
@@ -1495,7 +1495,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-server.sessionId",
+                "id": "def-server.IScopedSearchClient.extendSession.$1",
                 "type": "string",
                 "tags": [],
                 "label": "sessionId",
@@ -1505,7 +1505,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-server.expires",
+                "id": "def-server.IScopedSearchClient.extendSession.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "expires",
@@ -4621,7 +4621,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.agg",
+                "id": "def-common.AggParamType.makeAgg.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "agg",
@@ -4634,7 +4634,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.state",
+                "id": "def-common.AggParamType.makeAgg.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "state",
@@ -4889,7 +4889,7 @@
               "\nThe type the values produced by this agg will have in the final data table.\nIf not specified, the type of the field is used."
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false
@@ -4916,7 +4916,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.aggConfig",
+                "id": "def-common.AggType.makeLabel.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "aggConfig",
@@ -5032,7 +5032,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.aggConfig",
+                "id": "def-common.AggType.getRequestAggs.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "aggConfig",
@@ -5067,7 +5067,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.aggConfig",
+                "id": "def-common.AggType.getResponseAggs.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "aggConfig",
@@ -5145,7 +5145,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.resp",
+                "id": "def-common.AggType.postFlightRequest.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "resp",
@@ -5161,7 +5161,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.aggConfigs",
+                "id": "def-common.AggType.postFlightRequest.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "aggConfigs",
@@ -5182,7 +5182,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.aggConfig",
+                "id": "def-common.AggType.postFlightRequest.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "aggConfig",
@@ -5197,7 +5197,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.searchSource",
+                "id": "def-common.AggType.postFlightRequest.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "searchSource",
@@ -5386,7 +5386,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.inspectorRequestAdapter",
+                "id": "def-common.AggType.postFlightRequest.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "inspectorRequestAdapter",
@@ -5406,7 +5406,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.abortSignal",
+                "id": "def-common.AggType.postFlightRequest.$6",
                 "type": "Object",
                 "tags": [],
                 "label": "abortSignal",
@@ -5421,7 +5421,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.searchSessionId",
+                "id": "def-common.AggType.postFlightRequest.$7",
                 "type": "string",
                 "tags": [],
                 "label": "searchSessionId",
@@ -5464,7 +5464,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.agg",
+                "id": "def-common.AggType.getSerializedFormat.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "agg",
@@ -5495,7 +5495,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.agg",
+                "id": "def-common.AggType.getValue.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "agg",
@@ -5508,7 +5508,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.bucket",
+                "id": "def-common.AggType.getValue.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "bucket",
@@ -5877,7 +5877,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.aggConfig",
+                "id": "def-common.BaseParamType.write.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "aggConfig",
@@ -5890,7 +5890,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.output",
+                "id": "def-common.BaseParamType.write.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "output",
@@ -5903,7 +5903,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.aggConfigs",
+                "id": "def-common.BaseParamType.write.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "aggConfigs",
@@ -5923,7 +5923,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.locals",
+                "id": "def-common.BaseParamType.write.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "locals",
@@ -5952,7 +5952,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.value",
+                "id": "def-common.BaseParamType.serialize.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -5965,7 +5965,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.aggConfig",
+                "id": "def-common.BaseParamType.serialize.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "aggConfig",
@@ -5994,7 +5994,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.value",
+                "id": "def-common.BaseParamType.deserialize.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "value",
@@ -6007,7 +6007,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.aggConfig",
+                "id": "def-common.BaseParamType.deserialize.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "aggConfig",
@@ -6109,7 +6109,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.aggConfig",
+                "id": "def-common.BaseParamType.modifyAggConfigOnSearchRequestStart.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "aggConfig",
@@ -6122,7 +6122,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.searchSource",
+                "id": "def-common.BaseParamType.modifyAggConfigOnSearchRequestStart.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "searchSource",
@@ -6143,7 +6143,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.options",
+                "id": "def-common.BaseParamType.modifyAggConfigOnSearchRequestStart.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -6248,7 +6248,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.bucket",
+                "id": "def-common.BucketAggType.getKey.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "bucket",
@@ -6261,7 +6261,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.key",
+                "id": "def-common.BucketAggType.getKey.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "key",
@@ -6274,7 +6274,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.agg",
+                "id": "def-common.BucketAggType.getKey.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "agg",
@@ -6641,9 +6641,8 @@
             "label": "filterFieldTypes",
             "description": [],
             "signature": [
-              "\"*\" | ",
               "KBN_FIELD_TYPES",
-              " | ",
+              " | \"*\" | ",
               "KBN_FIELD_TYPES",
               "[]"
             ],
@@ -6713,8 +6712,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPatternField",
-                "text": "IndexPatternField"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               "[]"
             ],
@@ -6944,21 +6943,6 @@
             "description": [],
             "signature": [
               "() => string"
-            ],
-            "path": "src/plugins/data/common/search/aggs/utils/ip_address.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.IpAddress.valueOf",
-            "type": "Function",
-            "tags": [],
-            "label": "valueOf",
-            "description": [],
-            "signature": [
-              "() => number | bigint"
             ],
             "path": "src/plugins/data/common/search/aggs/utils/ip_address.ts",
             "deprecated": false,
@@ -8046,11 +8030,11 @@
             "references": [
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/angular/context/api/utils/fetch_hits_in_interval.ts"
+                "path": "src/plugins/discover/public/application/apps/context/services/anchor.ts"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/angular/context/api/anchor.ts"
+                "path": "src/plugins/discover/public/application/apps/context/services/utils/fetch_hits_in_interval.ts"
               },
               {
                 "plugin": "maps",
@@ -8298,8 +8282,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPatternsService",
-                "text": "IndexPatternsService"
+                "section": "def-common.DataViewsService",
+                "text": "DataViewsService"
               },
               ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserIndexPattern\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, dependencies: ",
               {
@@ -8351,8 +8335,8 @@
                     "pluginId": "data",
                     "scope": "common",
                     "docId": "kibDataIndexPatternsPluginApi",
-                    "section": "def-common.IndexPatternsService",
-                    "text": "IndexPatternsService"
+                    "section": "def-common.DataViewsService",
+                    "text": "DataViewsService"
                   },
                   ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserIndexPattern\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
                 ],
@@ -9305,8 +9289,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataIndexPatternsPluginApi",
-            "section": "def-common.IndexPatternsService",
-            "text": "IndexPatternsService"
+            "section": "def-common.DataViewsService",
+            "text": "DataViewsService"
           },
           ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserIndexPattern\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, searchSourceDependencies: ",
           {
@@ -9352,8 +9336,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPatternsService",
-                "text": "IndexPatternsService"
+                "section": "def-common.DataViewsService",
+                "text": "DataViewsService"
               },
               ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserIndexPattern\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
             ],
@@ -10338,7 +10322,7 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.getEsdslFn.$1.getStartDependencies",
+            "id": "def-common.getEsdslFn.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  getStartDependencies,\n}",
@@ -10348,7 +10332,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.getEsdslFn.$1.getStartDependencies.getStartDependencies",
+                "id": "def-common.getEsdslFn.$1.getStartDependencies",
                 "type": "Function",
                 "tags": [],
                 "label": "getStartDependencies",
@@ -10363,7 +10347,7 @@
                 "children": [
                   {
                     "parentPluginId": "data",
-                    "id": "def-common.getEsdslFn.$1.getStartDependencies.getStartDependencies.$1",
+                    "id": "def-common.getEsdslFn.$1.getStartDependencies.$1",
                     "type": "Any",
                     "tags": [],
                     "label": "getKibanaRequest",
@@ -10415,7 +10399,7 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.getFilterBucketAgg.$1.getConfig",
+            "id": "def-common.getFilterBucketAgg.$1",
             "type": "Object",
             "tags": [],
             "label": "{ getConfig }",
@@ -10425,7 +10409,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.getFilterBucketAgg.$1.getConfig.getConfig",
+                "id": "def-common.getFilterBucketAgg.$1.getConfig",
                 "type": "Function",
                 "tags": [],
                 "label": "getConfig",
@@ -10438,7 +10422,7 @@
                 "children": [
                   {
                     "parentPluginId": "data",
-                    "id": "def-common.getFilterBucketAgg.$1.getConfig.getConfig.$1",
+                    "id": "def-common.getFilterBucketAgg.$1.getConfig.$1",
                     "type": "string",
                     "tags": [],
                     "label": "key",
@@ -11345,7 +11329,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.getSearchParamsFromRequest.$2.dependencies",
+            "id": "def-common.getSearchParamsFromRequest.$2",
             "type": "Object",
             "tags": [],
             "label": "dependencies",
@@ -11355,7 +11339,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.getSearchParamsFromRequest.$2.dependencies.getConfig",
+                "id": "def-common.getSearchParamsFromRequest.$2.getConfig",
                 "type": "Function",
                 "tags": [],
                 "label": "getConfig",
@@ -11369,7 +11353,7 @@
                 "children": [
                   {
                     "parentPluginId": "data",
-                    "id": "def-common.key",
+                    "id": "def-common.getSearchParamsFromRequest.$2.getConfig.$1",
                     "type": "string",
                     "tags": [],
                     "label": "key",
@@ -11379,7 +11363,7 @@
                   },
                   {
                     "parentPluginId": "data",
-                    "id": "def-common.defaultOverride",
+                    "id": "def-common.getSearchParamsFromRequest.$2.getConfig.$2",
                     "type": "Uncategorized",
                     "tags": [],
                     "label": "defaultOverride",
@@ -12124,7 +12108,7 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.agg",
+            "id": "def-common.isNumberType.$1",
             "type": "Object",
             "tags": [],
             "label": "agg",
@@ -12216,7 +12200,7 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.agg",
+            "id": "def-common.isStringOrNumberType.$1",
             "type": "Object",
             "tags": [],
             "label": "agg",
@@ -12260,7 +12244,7 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.agg",
+            "id": "def-common.isStringType.$1",
             "type": "Object",
             "tags": [],
             "label": "agg",
@@ -13248,7 +13232,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".FILTER>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ geo_bounding_box?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
+              ".FILTER>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ geo_bounding_box?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -13332,7 +13316,7 @@
               },
               "<\"kibana_query\", ",
               "Query",
-              "> | undefined; }, never>, \"enabled\" | \"id\" | \"filter\" | \"customLabel\" | \"schema\" | \"geo_bounding_box\" | \"json\" | \"timeShift\">, ",
+              "> | undefined; }, never>, \"enabled\" | \"id\" | \"filter\" | \"schema\" | \"geo_bounding_box\" | \"json\" | \"customLabel\" | \"timeShift\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -13514,7 +13498,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".IP_RANGE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\"> & Pick<{ ranges?: (",
+              ".IP_RANGE>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\"> & Pick<{ ranges?: (",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13578,7 +13562,7 @@
                 "section": "def-common.IpRange",
                 "text": "IpRange"
               },
-              ">)[] | undefined; ipRangeType?: string | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"ipRangeType\" | \"ranges\">, ",
+              ">)[] | undefined; ipRangeType?: string | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"ipRangeType\" | \"ranges\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -13628,7 +13612,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".DATE_RANGE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"time_zone\"> & Pick<{ ranges?: ",
+              ".DATE_RANGE>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"time_zone\"> & Pick<{ ranges?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13660,7 +13644,7 @@
                 "section": "def-common.DateRange",
                 "text": "DateRange"
               },
-              ">[] | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"ranges\" | \"time_zone\">, ",
+              ">[] | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"ranges\" | \"time_zone\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -13710,7 +13694,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".RANGE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\"> & Pick<{ ranges?: ",
+              ".RANGE>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\"> & Pick<{ ranges?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13742,7 +13726,7 @@
                 "section": "def-common.NumericalRange",
                 "text": "NumericalRange"
               },
-              ">[] | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"ranges\">, ",
+              ">[] | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"ranges\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -13842,7 +13826,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".GEOHASH_GRID>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\"> & Pick<{ boundingBox?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
+              ".GEOHASH_GRID>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\"> & Pick<{ boundingBox?: ({ type: \"geo_bounding_box\"; } & GeoBox) | ({ type: \"geo_bounding_box\"; } & { top_left: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -13906,7 +13890,7 @@
                 "section": "def-common.GeoPoint",
                 "text": "GeoPoint"
               },
-              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\" | \"boundingBox\">, ",
+              "; }) | ({ type: \"geo_bounding_box\"; } & WellKnownText) | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"autoPrecision\" | \"precision\" | \"useGeocentroid\" | \"isFilteredByCollar\" | \"boundingBox\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -13956,7 +13940,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".HISTOGRAM>, \"enabled\" | \"interval\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\"> & Pick<{ extended_bounds?: ",
+              ".HISTOGRAM>, \"enabled\" | \"interval\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\"> & Pick<{ extended_bounds?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13988,7 +13972,7 @@
                 "section": "def-common.ExtendedBounds",
                 "text": "ExtendedBounds"
               },
-              "> | undefined; }, never>, \"enabled\" | \"interval\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\" | \"extended_bounds\">, ",
+              "> | undefined; }, never>, \"enabled\" | \"interval\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"used_interval\" | \"maxBars\" | \"intervalBase\" | \"min_doc_count\" | \"has_extended_bounds\" | \"extended_bounds\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14038,7 +14022,7 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".DATE_HISTOGRAM>, \"enabled\" | \"interval\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\"> & Pick<{ timeRange?: ",
+              ".DATE_HISTOGRAM>, \"enabled\" | \"interval\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\"> & Pick<{ timeRange?: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -14102,7 +14086,7 @@
                 "section": "def-common.ExtendedBounds",
                 "text": "ExtendedBounds"
               },
-              "> | undefined; }, never>, \"enabled\" | \"interval\" | \"timeRange\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"extended_bounds\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\">, ",
+              "> | undefined; }, never>, \"enabled\" | \"interval\" | \"timeRange\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"time_zone\" | \"used_interval\" | \"min_doc_count\" | \"extended_bounds\" | \"useNormalizedEsInterval\" | \"scaleMetricValues\" | \"used_time_zone\" | \"drop_partials\" | \"format\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14152,11 +14136,11 @@
                 "section": "def-common.BUCKET_TYPES",
                 "text": "BUCKET_TYPES"
               },
-              ".TERMS>, \"enabled\" | \"id\" | \"size\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"orderBy\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\"> & Pick<{ orderAgg?: ",
+              ".TERMS>, \"enabled\" | \"id\" | \"size\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"orderBy\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\"> & Pick<{ orderAgg?: ",
               "AggExpressionType",
               " | undefined; }, \"orderAgg\"> & Pick<{ orderAgg?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"size\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"field\" | \"orderBy\" | \"orderAgg\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"size\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"field\" | \"orderBy\" | \"orderAgg\" | \"order\" | \"missingBucket\" | \"missingBucketLabel\" | \"otherBucket\" | \"otherBucketLabel\" | \"exclude\" | \"include\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14256,7 +14240,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".AVG_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".AVG_BUCKET>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -14264,7 +14248,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14314,7 +14298,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".MAX_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".MAX_BUCKET>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -14322,7 +14306,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14372,7 +14356,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".MIN_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".MIN_BUCKET>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -14380,7 +14364,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14430,7 +14414,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".SUM_BUCKET>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".SUM_BUCKET>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -14438,7 +14422,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14488,7 +14472,7 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".FILTERED_METRIC>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\"> & Pick<{ customBucket?: ",
+              ".FILTERED_METRIC>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\"> & Pick<{ customBucket?: ",
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
@@ -14496,7 +14480,7 @@
               "AggExpressionType",
               " | undefined; customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"customBucket\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14646,11 +14630,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".CUMULATIVE_SUM>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
+              ".CUMULATIVE_SUM>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -14700,11 +14684,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".DERIVATIVE>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
+              ".DERIVATIVE>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -15054,11 +15038,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".MOVING_FN>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\"> & Pick<{ customMetric?: ",
+              ".MOVING_FN>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\" | \"window\" | \"script\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -15208,11 +15192,11 @@
                 "section": "def-common.METRIC_TYPES",
                 "text": "METRIC_TYPES"
               },
-              ".SERIAL_DIFF>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
+              ".SERIAL_DIFF>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"buckets_path\" | \"metricAgg\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
               " | undefined; }, \"customMetric\"> & Pick<{ customMetric?: ",
               "AggExpressionType",
-              " | undefined; }, never>, \"enabled\" | \"id\" | \"customLabel\" | \"schema\" | \"json\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
+              " | undefined; }, never>, \"enabled\" | \"id\" | \"schema\" | \"json\" | \"customLabel\" | \"timeShift\" | \"customMetric\" | \"buckets_path\" | \"metricAgg\">, ",
               "AggExpressionType",
               ", ",
               {
@@ -17862,7 +17846,7 @@
             "label": "valueType",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false
@@ -18202,9 +18186,8 @@
             "label": "filterFieldTypes",
             "description": [],
             "signature": [
-              "\"*\" | ",
               "KBN_FIELD_TYPES",
-              " | ",
+              " | \"*\" | ",
               "KBN_FIELD_TYPES",
               "[] | undefined"
             ],
@@ -18314,7 +18297,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.timeRange",
+                "id": "def-common.DateHistogramBucketAggDependencies.calculateBounds.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "timeRange",
@@ -18640,7 +18623,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.key",
+                "id": "def-common.FetchHandlers.getConfig.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -18650,7 +18633,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.defaultOverride",
+                "id": "def-common.FetchHandlers.getConfig.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "defaultOverride",
@@ -19560,7 +19543,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.request",
+                "id": "def-common.ISearchClient.search.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "request",
@@ -19573,7 +19556,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.options",
+                "id": "def-common.ISearchClient.search.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -19619,7 +19602,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.id",
+                "id": "def-common.ISearchClient.cancel.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -19629,7 +19612,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.options",
+                "id": "def-common.ISearchClient.cancel.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -19675,7 +19658,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.id",
+                "id": "def-common.ISearchClient.extend.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -19685,7 +19668,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.keepAlive",
+                "id": "def-common.ISearchClient.extend.$2",
                 "type": "string",
                 "tags": [],
                 "label": "keepAlive",
@@ -19695,7 +19678,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.options",
+                "id": "def-common.ISearchClient.extend.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -20093,9 +20076,8 @@
             "label": "filterFieldTypes",
             "description": [],
             "signature": [
-              "\"*\" | ",
               "KBN_FIELD_TYPES",
-              " | ",
+              " | \"*\" | ",
               "KBN_FIELD_TYPES",
               "[] | undefined"
             ],
@@ -21100,7 +21082,7 @@
             "children": [
               {
                 "parentPluginId": "data",
-                "id": "def-common.request",
+                "id": "def-common.SearchSourceDependencies.search.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "request",
@@ -21113,7 +21095,7 @@
               },
               {
                 "parentPluginId": "data",
-                "id": "def-common.options",
+                "id": "def-common.SearchSourceDependencies.search.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -24037,9 +24019,8 @@
         "label": "FieldTypes",
         "description": [],
         "signature": [
-          "\"*\" | ",
           "KBN_FIELD_TYPES",
-          " | ",
+          " | \"*\" | ",
           "KBN_FIELD_TYPES",
           "[]"
         ],
@@ -24518,7 +24499,7 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.id",
+            "id": "def-common.ISearchCancelGeneric.$1",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -24528,7 +24509,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.options",
+            "id": "def-common.ISearchCancelGeneric.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -24573,7 +24554,7 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.id",
+            "id": "def-common.ISearchExtendGeneric.$1",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -24583,7 +24564,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.keepAlive",
+            "id": "def-common.ISearchExtendGeneric.$2",
             "type": "string",
             "tags": [],
             "label": "keepAlive",
@@ -24593,7 +24574,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.options",
+            "id": "def-common.ISearchExtendGeneric.$3",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -24672,7 +24653,7 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.request",
+            "id": "def-common.ISearchGeneric.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "request",
@@ -24685,7 +24666,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.options",
+            "id": "def-common.ISearchGeneric.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -28527,9 +28508,9 @@
         "label": "migrateIncludeExcludeFormat",
         "description": [],
         "signature": [
-          "{ scriptable?: boolean | undefined; filterFieldTypes?: \"*\" | ",
+          "{ scriptable?: boolean | undefined; filterFieldTypes?: ",
           "KBN_FIELD_TYPES",
-          " | ",
+          " | \"*\" | ",
           "KBN_FIELD_TYPES",
           "[] | undefined; makeAgg?: ((agg: ",
           {

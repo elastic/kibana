@@ -191,13 +191,20 @@ describe('functions', () => {
     const hi = obj?.children?.find((c) => c.label === 'hi');
     expect(hi).toBeDefined();
 
-    const obj2 = fn?.children?.find((c) => c.label === '{ fn }');
+    const obj2 = fn?.children?.find((c) => c.label === '{ fn1, fn2 }');
     expect(obj2).toBeDefined();
-    expect(obj2!.children?.length).toBe(1);
+    expect(obj2!.children?.length).toBe(2);
+    expect(obj2!.id).toBe('def-public.crazyFunction.$2');
 
-    const fn2 = obj2?.children?.find((c) => c.label === 'fn');
-    expect(fn2).toBeDefined();
-    expect(fn2?.type).toBe(TypeKind.FunctionKind);
+    const fn1 = obj2?.children?.find((c) => c.label === 'fn1');
+    expect(fn1).toBeDefined();
+    expect(fn1?.type).toBe(TypeKind.FunctionKind);
+    expect(fn1!.id).toBe('def-public.crazyFunction.$2.fn1');
+
+    const fn3 = fn1?.children?.find((c) => c.label === 'foo');
+    expect(fn3).toBeDefined();
+    expect(fn3?.type).toBe(TypeKind.ObjectKind);
+    expect(fn3!.id).toBe('def-public.crazyFunction.$2.fn1.$1');
   });
 
   it('Fn with internal tag is not exported', () => {
@@ -551,6 +558,7 @@ describe('interfaces and classes', () => {
 
     const fn = exampleInterface?.children?.find((c) => c.label === 'fnTypeWithGeneric');
     expect(fn).toBeDefined();
+    expect(fn!.id).toBe('def-public.ExampleInterface.fnTypeWithGeneric');
 
     // `fnTypeWithGeneric` is defined as:
     //  fnTypeWithGeneric: FnTypeWithGeneric<string>;
@@ -560,6 +568,11 @@ describe('interfaces and classes', () => {
     // to be a function, and thus this doesn't show up as a single referenced type with no kids. If we ever fixed that,
     // it would be find to change expectations here to be no children and TypeKind instead of FunctionKind.
     expect(fn?.children).toBeDefined();
+
+    const t = fn!.children?.find((c) => c.label === 't');
+    expect(t).toBeDefined();
+    expect(t!.id).toBe('def-public.ExampleInterface.fnTypeWithGeneric.$1');
+
     expect(fn?.type).toBe(TypeKind.FunctionKind);
     expect(fn?.signature).toBeDefined();
     expect(linkCount(fn!.signature!)).toBe(2);

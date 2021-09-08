@@ -14,43 +14,6 @@
         "children": [
           {
             "parentPluginId": "kibanaLegacy",
-            "id": "def-public.KibanaLegacyPlugin.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/kibana_legacy/public/plugin.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "kibanaLegacy",
-                "id": "def-public.KibanaLegacyPlugin.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "initializerContext",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
-                  "<Readonly<{} & { defaultAppId: string; }>>"
-                ],
-                "path": "src/plugins/kibana_legacy/public/plugin.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaLegacy",
             "id": "def-public.KibanaLegacyPlugin.setup",
             "type": "Function",
             "tags": [],
@@ -65,7 +28,7 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<{}, { loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>) => {}"
+              "<{}, { loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; }>) => {}"
             ],
             "path": "src/plugins/kibana_legacy/public/plugin.ts",
             "deprecated": false,
@@ -85,7 +48,7 @@
                     "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<{}, { loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>"
+                  "<{}, { loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; }>"
                 ],
                 "path": "src/plugins/kibana_legacy/public/plugin.ts",
                 "deprecated": false,
@@ -102,7 +65,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ application, http: { basePath }, uiSettings }: ",
+              "({ uiSettings }: ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -110,7 +73,7 @@
                 "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
-              ") => { loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
+              ") => { loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; }"
             ],
             "path": "src/plugins/kibana_legacy/public/plugin.ts",
             "deprecated": false,
@@ -120,7 +83,7 @@
                 "id": "def-public.KibanaLegacyPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ application, http: { basePath }, uiSettings }",
+                "label": "{ uiSettings }",
                 "description": [],
                 "signature": [
                   {
@@ -305,7 +268,7 @@
           },
           {
             "parentPluginId": "kibanaLegacy",
-            "id": "def-public.configureAppAngularModule.$2.newPlatform",
+            "id": "def-public.configureAppAngularModule.$2",
             "type": "Object",
             "tags": [],
             "label": "newPlatform",
@@ -315,7 +278,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaLegacy",
-                "id": "def-public.configureAppAngularModule.$2.newPlatform.core",
+                "id": "def-public.configureAppAngularModule.$2.core",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -334,7 +297,7 @@
               },
               {
                 "parentPluginId": "kibanaLegacy",
-                "id": "def-public.configureAppAngularModule.$2.newPlatform.env",
+                "id": "def-public.configureAppAngularModule.$2.env",
                 "type": "Object",
                 "tags": [],
                 "label": "env",
@@ -401,7 +364,7 @@
         "children": [
           {
             "parentPluginId": "kibanaLegacy",
-            "id": "def-public.options",
+            "id": "def-public.createTopNavHelper.$1",
             "type": "Unknown",
             "tags": [],
             "label": "options",
@@ -1092,7 +1055,7 @@
         "children": [
           {
             "parentPluginId": "kibanaLegacy",
-            "id": "def-public.provider",
+            "id": "def-public.IPrivate.$1",
             "type": "Function",
             "tags": [],
             "label": "provider",
@@ -1106,7 +1069,7 @@
             "children": [
               {
                 "parentPluginId": "kibanaLegacy",
-                "id": "def-public.injectable",
+                "id": "def-public.IPrivate.$1.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "injectable",
@@ -1158,7 +1121,7 @@
         "label": "KibanaLegacyStart",
         "description": [],
         "signature": [
-          "{ loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
+          "{ loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; }"
         ],
         "path": "src/plugins/kibana_legacy/public/plugin.ts",
         "deprecated": false,

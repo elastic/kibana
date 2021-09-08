@@ -345,9 +345,7 @@
             "label": "getReportingJobPath",
             "description": [],
             "signature": [
-              "(exportType: string, jobParams: ",
-              "BaseParams",
-              ") => string"
+              "(exportType: string, jobParams: { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => string"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -374,7 +372,7 @@
                 "label": "jobParams",
                 "description": [],
                 "signature": [
-                  "BaseParams"
+                  "{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
                 ],
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
@@ -391,9 +389,7 @@
             "label": "createReportingJob",
             "description": [],
             "signature": [
-              "(exportType: string, jobParams: ",
-              "BaseParams",
-              ") => Promise<",
+              "(exportType: string, jobParams: { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => Promise<",
               "Job",
               ">"
             ],
@@ -422,7 +418,7 @@
                 "label": "jobParams",
                 "description": [],
                 "signature": [
-                  "BaseParams"
+                  "{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
                 ],
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
@@ -439,9 +435,7 @@
             "label": "createImmediateReport",
             "description": [],
             "signature": [
-              "(baseParams: ",
-              "BaseParams",
-              ") => Promise<any>"
+              "(baseParams: { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => Promise<any>"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -454,7 +448,7 @@
                 "label": "baseParams",
                 "description": [],
                 "signature": [
-                  "BaseParams"
+                  "{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
                 ],
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
@@ -471,10 +465,7 @@
             "label": "getDecoratedJobParams",
             "description": [],
             "signature": [
-              "<T extends Pick<",
-              "BaseParams",
-              ", \"title\" | \"layout\" | \"objectType\">>(baseParams: T) => ",
-              "BaseParams"
+              "<T extends Pick<{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }, \"title\" | \"layout\" | \"objectType\">>(baseParams: T) => { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,

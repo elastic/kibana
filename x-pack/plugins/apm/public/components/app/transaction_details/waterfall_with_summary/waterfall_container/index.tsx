@@ -19,14 +19,9 @@ import { useApmServiceContext } from '../../../../../context/apm_service/use_apm
 interface Props {
   urlParams: ApmUrlParams;
   waterfall: IWaterfall;
-  exceedsMax: boolean;
 }
 
-export function WaterfallContainer({
-  urlParams,
-  waterfall,
-  exceedsMax,
-}: Props) {
+export function WaterfallContainer({ urlParams, waterfall }: Props) {
   const { serviceName } = useApmServiceContext();
 
   if (!waterfall) {
@@ -83,7 +78,6 @@ export function WaterfallContainer({
       <Waterfall
         waterfallItemId={urlParams.waterfallItemId}
         waterfall={waterfall}
-        exceedsMax={exceedsMax}
       />
     </div>
   );

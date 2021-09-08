@@ -43,7 +43,7 @@
             "children": [
               {
                 "parentPluginId": "visTypeTimelion",
-                "id": "def-public.from",
+                "id": "def-public._LEGACY_.calculateInterval.$1",
                 "type": "number",
                 "tags": [],
                 "label": "from",
@@ -53,7 +53,7 @@
               },
               {
                 "parentPluginId": "visTypeTimelion",
-                "id": "def-public.to",
+                "id": "def-public._LEGACY_.calculateInterval.$2",
                 "type": "number",
                 "tags": [],
                 "label": "to",
@@ -63,7 +63,7 @@
               },
               {
                 "parentPluginId": "visTypeTimelion",
-                "id": "def-public.size",
+                "id": "def-public._LEGACY_.calculateInterval.$3",
                 "type": "number",
                 "tags": [],
                 "label": "size",
@@ -73,7 +73,7 @@
               },
               {
                 "parentPluginId": "visTypeTimelion",
-                "id": "def-public.interval",
+                "id": "def-public._LEGACY_.calculateInterval.$4",
                 "type": "string",
                 "tags": [],
                 "label": "interval",
@@ -83,7 +83,7 @@
               },
               {
                 "parentPluginId": "visTypeTimelion",
-                "id": "def-public.min",
+                "id": "def-public._LEGACY_.calculateInterval.$5",
                 "type": "string",
                 "tags": [],
                 "label": "min",
@@ -111,7 +111,7 @@
             "children": [
               {
                 "parentPluginId": "visTypeTimelion",
-                "id": "def-public.input",
+                "id": "def-public._LEGACY_.parseTimelionExpressionAsync.$1",
                 "type": "string",
                 "tags": [],
                 "label": "input",
@@ -166,7 +166,7 @@
             "children": [
               {
                 "parentPluginId": "visTypeTimelion",
-                "id": "def-public.config",
+                "id": "def-public._LEGACY_.getTimezone.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "config",
@@ -209,7 +209,7 @@
             "children": [
               {
                 "parentPluginId": "visTypeTimelion",
-                "id": "def-public.config",
+                "id": "def-public._LEGACY_.xaxisFormatterProvider.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "config",
