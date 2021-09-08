@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { tryCatch, fold } from 'fp-ts/lib/Either';
 
 import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
-import { Storage } from '../../shared_imports';
 
 export const validateRegExpString = (s: string) =>
   pipe(
@@ -35,24 +33,4 @@ export const getDeprecationsUpperLimit = (count: number) => {
   }
 
   return count.toString();
-};
-
-const LS_SETTING_ID = 'kibana.upgradeAssistant.lastCheckpoint';
-const localStorage = new Storage(window.localStorage);
-
-export const getLastCheckpointFromLS = () => {
-  const storedValue = moment(localStorage.get(LS_SETTING_ID));
-
-  if (storedValue.isValid()) {
-    return storedValue.toISOString();
-  }
-
-  const now = moment().toISOString();
-  localStorage.set(LS_SETTING_ID, now);
-
-  return now;
-};
-
-export const setLastCheckpointToLS = (value: string) => {
-  localStorage.set(LS_SETTING_ID, value);
 };

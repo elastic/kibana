@@ -19,7 +19,7 @@ import {
 } from '../../../../../common/constants';
 
 interface Props {
-  lastCheckpoint: string;
+  checkpoint: string;
 }
 
 const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) => {
@@ -41,7 +41,7 @@ const getDeprecationIndexPatternId = async (dataService: DataPublicPluginStart) 
   }
 };
 
-const DiscoverAppLink: FunctionComponent<Props> = ({ lastCheckpoint }) => {
+const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   const {
     services: { data: dataService },
     plugins: { share },
@@ -62,7 +62,7 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ lastCheckpoint }) => {
         indexPatternId,
         query: {
           language: 'kuery',
-          query: `@timestamp > "${lastCheckpoint}"`,
+          query: `@timestamp > "${checkpoint}"`,
         },
       });
 
@@ -70,7 +70,7 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ lastCheckpoint }) => {
     };
 
     getDiscoveryUrl();
-  }, [dataService, lastCheckpoint, share.url.locators]);
+  }, [dataService, checkpoint, share.url.locators]);
 
   return (
     <EuiLink href={discoveryUrl} data-test-subj="viewDiscoverLogs">
@@ -82,7 +82,7 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ lastCheckpoint }) => {
   );
 };
 
-const ObservabilityAppLink: FunctionComponent<Props> = ({ lastCheckpoint }) => {
+const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   const {
     services: {
       core: { http },
@@ -90,7 +90,7 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ lastCheckpoint }) => {
   } = useAppContext();
   const logStreamUrl = http?.basePath?.prepend(
     `/app/logs/stream?sourceId=${DEPRECATION_LOGS_SOURCE_ID}&logPosition=(end:now,start:${encode(
-      lastCheckpoint
+      checkpoint
     )})`
   );
 
@@ -104,7 +104,7 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ lastCheckpoint }) => {
   );
 };
 
-export const ExternalLinks: FunctionComponent<Props> = ({ lastCheckpoint }) => {
+export const ExternalLinks: FunctionComponent<Props> = ({ checkpoint }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -118,7 +118,7 @@ export const ExternalLinks: FunctionComponent<Props> = ({ lastCheckpoint }) => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <ObservabilityAppLink lastCheckpoint={lastCheckpoint} />
+          <ObservabilityAppLink checkpoint={checkpoint} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -132,7 +132,7 @@ export const ExternalLinks: FunctionComponent<Props> = ({ lastCheckpoint }) => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <DiscoverAppLink lastCheckpoint={lastCheckpoint} />
+          <DiscoverAppLink checkpoint={checkpoint} />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

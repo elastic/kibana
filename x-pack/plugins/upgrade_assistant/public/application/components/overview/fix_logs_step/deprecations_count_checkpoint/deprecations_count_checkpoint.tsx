@@ -48,19 +48,19 @@ const i18nTexts = {
 };
 
 interface Props {
-  lastCheckpoint: string;
-  resetLastCheckpoint: (value: string) => void;
+  checkpoint: string;
+  setCheckpoint: (value: string) => void;
 }
 
 export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
-  lastCheckpoint,
-  resetLastCheckpoint,
+  checkpoint,
+  setCheckpoint,
 }) => {
   const {
     services: { api },
   } = useAppContext();
   const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
-    lastCheckpoint
+    checkpoint
   );
 
   const warningsCount = data?.count || 0;
@@ -70,7 +70,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
 
   const onResetClick = () => {
     const now = moment().toISOString();
-    resetLastCheckpoint(now);
+    setCheckpoint(now);
   };
 
   if (isInitialRequest && isLoading) {
@@ -97,7 +97,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
 
   return (
     <EuiCallOut
-      title={i18nTexts.calloutTitle(warningsCount, lastCheckpoint)}
+      title={i18nTexts.calloutTitle(warningsCount, checkpoint)}
       color={calloutTint}
       iconType={calloutIcon}
       data-test-subj={calloutTestId}
