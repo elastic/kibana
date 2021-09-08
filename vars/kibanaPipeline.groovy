@@ -472,7 +472,7 @@ def withTasks(Map params = [:], Closure closure) {
 def allCiTasks() {
   parallel([
     general: {
-      withTasks {
+      withTasks([parallel: 20]) {
         tasks.check()
         tasks.lint()
         tasks.test()
