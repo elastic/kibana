@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
@@ -14,6 +15,7 @@ import type {
   IndexTemplateEntry,
   RegistryElasticsearch,
   InstallablePackage,
+  IndexTemplate,
 } from '../../../../types';
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
@@ -32,6 +34,7 @@ import {
   getTemplate,
   getTemplatePriority,
 } from './template';
+import { buildDefaultSettings } from './default_settings';
 
 export const installTemplates = async (
   installablePackage: InstallablePackage,
@@ -210,8 +213,9 @@ function buildComponentTemplates(params: {
   templateName: string;
   registryElasticsearch: RegistryElasticsearch | undefined;
   packageName: string;
+  defaultSettings: IndexTemplate['template']['settings'];
 }) {
-  const { templateName, registryElasticsearch, packageName } = params;
+  const { templateName, registryElasticsearch, packageName, defaultSettings } = params;
   const mappingsTemplateName = `${templateName}${mappingsSuffix}`;
   const settingsTemplateName = `${templateName}${settingsSuffix}`;
   const userSettingsTemplateName = `${templateName}${userSettingsSuffix}`;
@@ -228,14 +232,12 @@ function buildComponentTemplates(params: {
     };
   }
 
-  if (registryElasticsearch && registryElasticsearch['index_template.settings']) {
-    templatesMap[settingsTemplateName] = {
-      template: {
-        settings: registryElasticsearch['index_template.settings'],
-      },
-      _meta,
-    };
-  }
+  templatesMap[settingsTemplateName] = {
+    template: {
+      settings: merge(defaultSettings, registryElasticsearch?.['index_template.settings'] ?? {}),
+    },
+    _meta,
+  };
 
   // return empty/stub template
   templatesMap[userSettingsTemplateName] = {
@@ -253,9 +255,15 @@ async function installDataStreamComponentTemplates(params: {
   registryElasticsearch: RegistryElasticsearch | undefined;
   esClient: ElasticsearchClient;
   packageName: string;
+  defaultSettings: IndexTemplate['template']['settings'];
 }) {
-  const { templateName, registryElasticsearch, esClient, packageName } = params;
-  const templates = buildComponentTemplates({ templateName, registryElasticsearch, packageName });
+  const { templateName, registryElasticsearch, esClient, packageName, defaultSettings } = params;
+  const templates = buildComponentTemplates({
+    templateName,
+    registryElasticsearch,
+    packageName,
+    defaultSettings,
+  });
   const templateNames = Object.keys(templates);
   const templateEntries = Object.entries(templates);
 
@@ -362,11 +370,20 @@ export async function installTemplate({
     await esClient.indices.putIndexTemplate(updateIndexTemplateParams, { ignore: [404] });
   }
 
+  const defaultSettings = buildDefaultSettings({
+    templateName,
+    packageName,
+    fields,
+    type: dataStream.type,
+    ilmPolicy: dataStream.ilm_policy,
+  });
+
   const composedOfTemplates = await installDataStreamComponentTemplates({
     templateName,
     registryElasticsearch: dataStream.elasticsearch,
     esClient,
     packageName,
+    defaultSettings,
   });
 
   const template = getTemplate({
@@ -378,7 +395,6 @@ export async function installTemplate({
     packageName,
     composedOfTemplates,
     templatePriority,
-    ilmPolicy: dataStream.ilm_policy,
     hidden: dataStream.hidden,
   });
 
