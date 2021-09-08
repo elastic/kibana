@@ -209,45 +209,79 @@ export class TaskStore {
       return attrsById;
     }, new Map());
 
+    const doLog = docs.some((doc) => doc.taskType.startsWith(`alerting:`));
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
     try {
       ({
         saved_objects: updatedSavedObjects,
       } = await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
-        docs.map((doc) => ({
-          type: 'task',
-          id: doc.id,
-          options: { version: doc.version },
-          attributes: attributesByDocId.get(doc.id)!,
-        })),
-        {
-          refresh: false,
-        }
+        docs.map(
+          (doc) => ({
+            type: 'task',
+            id: doc.id,
+            version: doc.version,
+            attributes: attributesByDocId.get(doc.id)!,
+          }),
+          {
+            refresh: false,
+          }
+        )
       ));
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
 
-    return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) =>
-      isSavedObjectsUpdateResponse(updatedSavedObject)
-        ? asOk(
-            savedObjectToConcreteTaskInstance({
-              ...updatedSavedObject,
-              attributes: defaults(
-                updatedSavedObject.attributes,
-                attributesByDocId.get(updatedSavedObject.id)!
-              ),
-            })
-          )
-        : asErr({
-            // The SavedObjectsRepository maintains the order of the docs
-            // so we can rely on the index in the `docs` to match an error
-            // on the same index in the `bulkUpdate` result
-            entity: docs[index],
-            error: updatedSavedObject,
+    return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) => {
+      if (doLog) {
+        console.log(`updatedSavedObject ${JSON.stringify(updatedSavedObject)}`);
+      }
+
+      // Conflict errors are not thrown as errors in saved object bulk update.
+      // Instead they are returned as successes and the error object is inside the
+      // response. So we need special handling to check for that.
+      if (isSavedObjectsConflictError(updatedSavedObject)) {
+        if (doLog) {
+          console.log(`update failed due to conflict!`);
+        }
+        // If we return this asError, it will fail the whole task and log an error
+        // I don't think that's what we want. I think we want to log the conflict but
+        // still return the task as successful.
+        return asOk(
+          savedObjectToConcreteTaskInstance({
+            ...updatedSavedObject,
+            attributes: defaults(
+              updatedSavedObject.attributes,
+              attributesByDocId.get(updatedSavedObject.id)!
+            ),
           })
-    );
+        );
+      } else if (isSavedObjectsUpdateResponse(updatedSavedObject)) {
+        if (doLog) {
+          console.log(`update succeeded!`);
+        }
+        return asOk(
+          savedObjectToConcreteTaskInstance({
+            ...updatedSavedObject,
+            attributes: defaults(
+              updatedSavedObject.attributes,
+              attributesByDocId.get(updatedSavedObject.id)!
+            ),
+          })
+        );
+      } else {
+        if (doLog) {
+          console.log(`update failed with error ${(updatedSavedObject as Error).message}`);
+        }
+        return asErr({
+          // The SavedObjectsRepository maintains the order of the docs
+          // so we can rely on the index in the `docs` to match an error
+          // on the same index in the `bulkUpdate` result
+          entity: docs[index],
+          error: updatedSavedObject,
+        });
+      }
+    });
   }
 
   /**
@@ -479,4 +513,14 @@ function isSavedObjectsUpdateResponse(
   result: SavedObjectsUpdateResponse | Error
 ): result is SavedObjectsUpdateResponse {
   return result && typeof (result as SavedObjectsUpdateResponse).id === 'string';
+}
+
+function isSavedObjectsConflictError(
+  result: SavedObjectsUpdateResponse | Error
+): result is SavedObjectsUpdateResponse {
+  return (
+    result &&
+    typeof (result as SavedObjectsUpdateResponse).error === 'object' &&
+    (result as SavedObjectsUpdateResponse).error?.statusCode === 409
+  );
 }

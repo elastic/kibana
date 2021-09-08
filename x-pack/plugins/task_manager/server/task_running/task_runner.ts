@@ -255,12 +255,20 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
+    if (!this.instance.task.taskType.startsWith(`alerting:`)) {
+      return asOk(EMPTY_RUN_RESULT);
+    }
+
     this.logger.debug(`Running task ${this}`);
 
     const apmTrans = apm.startTransaction(this.taskType, 'taskManager run', {
       childOf: this.instance.task.traceparent,
     });
 
+    if (this.instance.task.taskType.startsWith(`alerting:`)) {
+      this.logger.info(`alerting task instance ${JSON.stringify(this.instance.task)}`);
+    }
+    const taskVersion = this.instance.task.version!;
     const modifiedContext = await this.beforeRun({
       taskInstance: this.instance.task,
     });
@@ -280,7 +288,7 @@ export class TaskManagerRunner implements TaskRunner {
       );
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
-        this.processResult(validatedResult, stopTaskTimer())
+        this.processResult(validatedResult, taskVersion, stopTaskTimer())
       );
       if (apmTrans) apmTrans.end('success');
       return processedResult;
@@ -291,6 +299,7 @@ export class TaskManagerRunner implements TaskRunner {
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(
           asErr({ error: err, state: modifiedContext.taskInstance.state }),
+          taskVersion,
           stopTaskTimer()
         )
       );
@@ -476,7 +485,8 @@ export class TaskManagerRunner implements TaskRunner {
   };
 
   private async processResultForRecurringTask(
-    result: Result<SuccessfulRunResult, FailedRunResult>
+    result: Result<SuccessfulRunResult, FailedRunResult>,
+    taskVersion: string
   ): Promise<TaskRunResult> {
     const hasTaskRunFailed = isOk(result);
     const fieldUpdates: Partial<ConcreteTaskInstance> & Pick<ConcreteTaskInstance, 'status'> = flow(
@@ -493,6 +503,7 @@ export class TaskManagerRunner implements TaskRunner {
             schedule: reschedule ?? schedule,
             attempts,
             status: TaskStatus.Idle,
+            version: 'WzI1NTAsMV0=', // taskVersion,
           });
         }
       ),
@@ -538,6 +549,7 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async processResult(
     result: Result<SuccessfulRunResult, FailedRunResult>,
+    taskVersion: string,
     taskTiming: TaskTiming
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
@@ -554,7 +566,7 @@ export class TaskManagerRunner implements TaskRunner {
                   ? TaskPersistence.Recurring
                   : TaskPersistence.NonRecurring,
               result: await (runAt || schedule || task.schedule
-                ? this.processResultForRecurringTask(result)
+                ? this.processResultForRecurringTask(result, taskVersion)
                 : this.processResultWhenDone()),
             }),
             taskTiming
@@ -568,7 +580,7 @@ export class TaskManagerRunner implements TaskRunner {
             asErr({
               task,
               persistence: task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
-              result: await this.processResultForRecurringTask(result),
+              result: await this.processResultForRecurringTask(result, taskVersion),
               error,
             }),
             taskTiming
