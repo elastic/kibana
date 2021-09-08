@@ -16,12 +16,15 @@ import {
   EuiInMemoryTable,
   EuiText,
   EuiToolTip,
+  getBreakpoint,
   HorizontalAlignment,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
+import useWindowSize from 'react-use/lib/useWindowSize';
+import useDebounce from 'react-use/lib/useDebounce';
 import { JOB_FIELD_TYPES, JobFieldType, DataVisualizerTableState } from '../../../../../common';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { DistinctValues } from './components/field_data_row/distinct_values';
@@ -51,6 +54,46 @@ interface DataVisualizerTableProps<T> {
   extendedColumns?: Array<EuiBasicTableColumn<T>>;
   showPreviewByDefault?: boolean;
 }
+
+export const calculateTableColumnsDimensions = (width: number, showDistributions: boolean) => {
+  const breakPoint = getBreakpoint(width - 300);
+  switch (breakPoint) {
+    case 'xs':
+    case 's':
+      return {
+        expander: '25px',
+        type: '40px',
+        docCount: '110px',
+        distinctValues: '75px',
+        distributions: showDistributions ? '120px' : '20px',
+        showIcons: false,
+        breakPoint,
+      };
+
+    case 'm':
+    case 'l':
+      return {
+        expander: '25px',
+        type: '40px',
+        docCount: '110px',
+        distinctValues: '75px',
+        distributions: showDistributions ? '120px' : '50px',
+        showIcons: false,
+        breakPoint,
+      };
+
+    default:
+      return {
+        expander: '40px',
+        type: '75px',
+        docCount: '175px',
+        distinctValues: '175px',
+        distributions: '150px',
+        showIcons: true,
+        breakPoint: 'xl',
+      };
+  }
+};
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   items,
   pageState,
@@ -68,6 +111,25 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     updatePageState
   );
   const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
+  const [dimensions, setDimensions] = useState({
+    expander: '40px',
+    type: '75px',
+    docCount: '175px',
+    distinctValues: '175px',
+    distributions: '150px',
+    showIcons: true,
+    breakPoint: 'xl',
+  });
+
+  const { width } = useWindowSize();
+
+  useDebounce(
+    () => {
+      setDimensions(calculateTableColumnsDimensions(width, showDistributions));
+    },
+    100,
+    [width, showDistributions]
+  );
 
   const toggleShowDistribution = () => {
     setShowDistributions(!showDistributions);
@@ -107,7 +169,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         />
       ),
       align: RIGHT_ALIGNMENT,
-      width: '40px',
+      width: dimensions.expander,
       isExpander: true,
       render: (item: DataVisualizerTableItem) => {
         const displayName = item.displayName ?? item.fieldName;
@@ -146,7 +208,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           // @todo: fix scripted
           return <FieldIcon type={fieldType} label={fieldType} scripted={false} />;
         },
-        width: '75px',
+        width: dimensions.type,
         sortable: true,
         align: CENTER_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnType',
@@ -176,28 +238,32 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           defaultMessage: 'Documents (%)',
         }),
         render: (value: number | undefined, item: DataVisualizerTableItem) => (
-          <DocumentStat config={item} />
+          <DocumentStat config={item} showIcons={dimensions.showIcons} />
         ),
         sortable: (item: DataVisualizerTableItem) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDocumentsCount',
-        width: '175px',
+        width: dimensions.docCount,
       },
       {
         field: 'stats.cardinality',
         name: i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
           defaultMessage: 'Distinct values',
         }),
-        render: (cardinality?: number) => <DistinctValues cardinality={cardinality} />,
+        render: (cardinality?: number) => (
+          <DistinctValues cardinality={cardinality} showIcons={dimensions.showIcons} />
+        ),
         sortable: true,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistinctValues',
-        width: '175px',
+        width: dimensions.distinctValues,
       },
       {
         name: (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <EuiIcon type={'visBarVertical'} style={{ paddingRight: 4 }} />
+            {dimensions.showIcons ? (
+              <EuiIcon type={'visBarVertical'} style={{ paddingRight: 4 }} />
+            ) : null}
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
             })}
@@ -253,14 +319,14 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
           return null;
         },
-        width: '150px',
+        width: dimensions.distributions,
         align: CENTER_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistribution',
       },
     ];
     return extendedColumns ? [...baseColumns, ...extendedColumns] : baseColumns;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expandAll, showDistributions, updatePageState, extendedColumns]);
+  }, [expandAll, showDistributions, updatePageState, extendedColumns, dimensions.breakPoint]);
 
   const itemIdToExpandedRowMap = useMemo(() => {
     let itemIds = expandedRowItemIds;

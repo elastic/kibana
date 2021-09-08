@@ -9,13 +9,20 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
 import React from 'react';
 
-export const DistinctValues = ({ cardinality }: { cardinality?: number }) => {
+interface Props {
+  cardinality?: number;
+  showIcons: boolean;
+}
+
+export const DistinctValues = ({ cardinality, showIcons }: Props) => {
   if (cardinality === undefined) return null;
   return (
     <EuiFlexGroup alignItems={'center'}>
-      <EuiFlexItem className={'dataVisualizerColumnHeaderIcon'}>
-        <EuiIcon type="database" size={'s'} />
-      </EuiFlexItem>
+      {showIcons ? (
+        <EuiFlexItem className={'dataVisualizerColumnHeaderIcon'}>
+          <EuiIcon type="database" size={'s'} />
+        </EuiFlexItem>
+      ) : null}
       <EuiText size={'s'}>
         <b>{cardinality}</b>
       </EuiText>

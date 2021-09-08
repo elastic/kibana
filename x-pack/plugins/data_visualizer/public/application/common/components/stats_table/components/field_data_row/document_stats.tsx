@@ -11,7 +11,10 @@ import React from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { roundToDecimalPlace } from '../../../utils';
 
-export const DocumentStat = ({ config }: FieldDataRowProps) => {
+interface Props extends FieldDataRowProps {
+  showIcons: boolean;
+}
+export const DocumentStat = ({ config, showIcons }: Props) => {
   const { stats } = config;
   if (stats === undefined) return null;
 
@@ -22,9 +25,11 @@ export const DocumentStat = ({ config }: FieldDataRowProps) => {
 
   return (
     <EuiFlexGroup alignItems={'center'}>
-      <EuiFlexItem className={'dataVisualizerColumnHeaderIcon'}>
-        <EuiIcon type="document" size={'s'} />
-      </EuiFlexItem>
+      {showIcons ? (
+        <EuiFlexItem className={'dataVisualizerColumnHeaderIcon'}>
+          <EuiIcon type="document" size={'s'} />
+        </EuiFlexItem>
+      ) : null}
       <EuiText size={'s'}>
         <b>{count}</b> ({docsPercent}%)
       </EuiText>

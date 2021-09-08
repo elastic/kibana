@@ -614,7 +614,7 @@ const useDataVisualizerGridData = (
         />
       ),
       actions,
-      width: '100px',
+      width: '75px',
     };
 
     return [actionColumn];
