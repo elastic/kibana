@@ -45,7 +45,7 @@ const i18nTexts = {
       'You must resolve all critical issues before upgrading. Back up recommended. Make sure you have a current snapshot before modifying your configuration or reindexing.',
   }),
   isLoading: i18n.translate('xpack.upgradeAssistant.esDeprecations.loadingText', {
-    defaultMessage: 'Loading deprecations issues…',
+    defaultMessage: 'Loading deprecation issues…',
   }),
 };
 

@@ -55,13 +55,13 @@ const i18nTexts = {
   kibanaDeprecationErrorTitle: i18n.translate(
     'xpack.upgradeAssistant.kibanaDeprecations.kibanaDeprecationErrorTitle',
     {
-      defaultMessage: 'Deprecation issues may be incomplete',
+      defaultMessage: 'List of deprecation issues might be incomplete',
     }
   ),
   getKibanaDeprecationErrorDescription: (pluginIds: string[]) =>
     i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.kibanaDeprecationErrorDescription', {
       defaultMessage:
-        'Failed to get deprecation issues for {pluginCount, plural, one {this plugin} other {these plugins}}: {pluginIds}. Check the Kibana server logs for more details.',
+        'Failed to get deprecation issues for {pluginCount, plural, one {this plugin} other {these plugins}}: {pluginIds}. Check the Kibana server logs for more information.',
       values: {
         pluginCount: pluginIds.length,
         pluginIds: pluginIds.join(', '),

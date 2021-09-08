@@ -53,7 +53,7 @@ describe('Error handling', () => {
 
     expect(exists('kibanaDeprecationErrors')).toBe(true);
     expect(find('kibanaDeprecationErrors').text()).toContain(
-      'Deprecation issues may be incomplete'
+      'List of deprecation issues might be incomplete'
     );
   });
 
