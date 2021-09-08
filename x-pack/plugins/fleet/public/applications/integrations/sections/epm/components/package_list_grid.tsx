@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { Fragment, useCallback, useState } from 'react';
-import { Redirect, useLocation, useHistory, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import type { Query } from '@elastic/eui';
 import {
   EuiFlexGrid,
@@ -69,7 +69,9 @@ export function PackageListGrid({
     queryText: string;
     error: { message: string } | null;
   }) => {
-    history.push(`/browse/${category}?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query.text}`);
+    history.push(
+      `/browse/${category}?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query ? query.text : ''}`
+    );
     if (!error) {
       setQuery(query);
       setSearchTerm(userInput);
