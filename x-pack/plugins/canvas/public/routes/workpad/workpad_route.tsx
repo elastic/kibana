@@ -81,12 +81,14 @@ export const ExportWorkpadRoute = () => {
   return (
     <Route
       path={'/export/workpad/pdf/:id/page/:pageNumber'}
-      children={ExportWorkpadRouteComponent}
+      children={(route: WorkpadRouteProps) => {
+        return <ExportWorkpadRouteComponent route={route} />;
+      }}
     />
   );
 };
 
-const ExportWorkpadRouteComponent: FC<WorkpadPageRouteProps> = ({ match }) => {
+const ExportWorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route: { match } }) => {
   const getRedirectPath = useCallback(
     (workpadId: string) => `/export/workpad/pdf/${workpadId}/page/${match.params.pageNumber}`,
     [match.params.pageNumber]
