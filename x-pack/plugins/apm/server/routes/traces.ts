@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getTrace } from '../lib/traces/get_trace';
+import { getTraceItems } from '../lib/traces/get_trace_items';
 import { getTopTransactionGroupList } from '../lib/transaction_groups';
 import { createApmServerRoute } from './create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from './default_api_types';
@@ -52,7 +52,7 @@ const tracesByIdRoute = createApmServerRoute({
     const { params } = resources;
 
     const { traceId } = params.path;
-    return getTrace(traceId, setup);
+    return getTraceItems(traceId, setup);
   },
 });
 
