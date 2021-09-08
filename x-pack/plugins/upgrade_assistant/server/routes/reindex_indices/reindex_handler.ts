@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
+import {
+  IScopedClusterClient,
+  Logger,
+  SavedObjectsClientContract,
+  KibanaRequest,
+} from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
 import { SecurityPluginStart } from '../../../../security/server';
@@ -24,7 +29,7 @@ interface ReindexHandlerArgs {
   indexName: string;
   log: Logger;
   licensing: LicensingPluginSetup;
-  headers: Record<string, any>;
+  request: KibanaRequest;
   credentialStore: CredentialStore;
   reindexOptions?: {
     enqueue?: boolean;
@@ -35,7 +40,7 @@ interface ReindexHandlerArgs {
 export const reindexHandler = async ({
   credentialStore,
   dataClient,
-  headers,
+  request,
   indexName,
   licensing,
   log,
@@ -65,7 +70,7 @@ export const reindexHandler = async ({
       : await reindexService.createReindexOperation(indexName, reindexOptions);
 
   // Add users credentials for the worker to use
-  await credentialStore.set(reindexOp, security, headers);
+  await credentialStore.set(reindexOp, request, security);
 
   return reindexOp.attributes;
 };

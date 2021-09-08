@@ -117,7 +117,7 @@ export function registerReindexIndicesRoutes(
             indexName,
             log,
             licensing,
-            headers: request.headers,
+            request,
             credentialStore,
             security: getSecurityPlugin(),
           });
@@ -203,7 +203,7 @@ export function registerReindexIndicesRoutes(
               indexName,
               log,
               licensing,
-              headers: request.headers,
+              request,
               credentialStore,
               reindexOptions: {
                 enqueue: true,

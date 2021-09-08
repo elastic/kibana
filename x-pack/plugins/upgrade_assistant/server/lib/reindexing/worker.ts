@@ -171,7 +171,7 @@ export class ReindexWorker {
             firstOpInQueue.attributes.indexName
           );
           // Re-associate the credentials
-          this.credentialStore.set(firstOpInQueue, credential);
+          this.credentialStore.update(firstOpInQueue, credential);
         }
       }
 
@@ -230,7 +230,7 @@ export class ReindexWorker {
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.
-    this.credentialStore.set(reindexOp, credential);
+    this.credentialStore.update(reindexOp, credential);
   };
 }
 

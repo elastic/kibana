@@ -8,6 +8,8 @@
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
+import { KibanaRequest } from 'src/core/server';
+
 import { SecurityPluginStart } from '../../../../security/server';
 import { ReindexSavedObject } from '../../../common/types';
 
@@ -21,7 +23,12 @@ export type Credential = Record<string, any>;
  */
 export interface CredentialStore {
   get(reindexOp: ReindexSavedObject): Credential | undefined;
-  set(reindexOp: ReindexSavedObject, security: SecurityPluginStart, credential: Credential): void;
+  set(
+    reindexOp: ReindexSavedObject,
+    request: KibanaRequest,
+    security: SecurityPluginStart
+  ): Promise<void>;
+  update(reindexOp: ReindexSavedObject, credential: Credential): void;
   clear(): void;
 }
 
@@ -34,6 +41,24 @@ export const credentialStoreFactory = (): CredentialStore => {
       .update(stringify({ id: reindexOp.id, ...reindexOp.attributes }))
       .digest('base64');
 
+  const createApiKey = async (
+    request: KibanaRequest,
+    security: SecurityPluginStart
+  ): Promise<string | undefined> => {
+    const apiKeyResult = await security.authc.apiKeys.grantAsInternalUser(request, {
+      name: 'ua_reindex_api_key',
+      role_descriptors: {},
+    });
+
+    if (apiKeyResult) {
+      const { api_key: apiKey, id } = apiKeyResult;
+      return Buffer.from(`${id}:${apiKey}`).toString('base64');
+    }
+  };
+
+  // TODO implement
+  // const invalidateApiKey = () => {};
+
   return {
     get(reindexOp: ReindexSavedObject) {
       return credMap.get(getHash(reindexOp));
@@ -41,10 +66,25 @@ export const credentialStoreFactory = (): CredentialStore => {
 
     async set(
       reindexOp: ReindexSavedObject,
-      security: SecurityPluginStart,
-      credential: Credential
+      request: KibanaRequest,
+      security: SecurityPluginStart
     ) {
-      // const areApiKeysEnabled = (await security?.authc.apiKeys.areAPIKeysEnabled()) ?? false;
+      const areApiKeysEnabled = (await security?.authc?.apiKeys?.areAPIKeysEnabled()) ?? false;
+      const apiKey = areApiKeysEnabled && (await createApiKey(request, security));
+
+      if (apiKey) {
+        credMap.set(getHash(reindexOp), {
+          ...request.headers,
+          authorization: `ApiKey ${apiKey}`,
+        });
+        return;
+      }
+
+      // Set the requestor's credentials in memory if apiKeys are not enabled
+      credMap.set(getHash(reindexOp), request.headers);
+    },
+
+    update(reindexOp: ReindexSavedObject, credential: Credential) {
       credMap.set(getHash(reindexOp), credential);
     },
 
