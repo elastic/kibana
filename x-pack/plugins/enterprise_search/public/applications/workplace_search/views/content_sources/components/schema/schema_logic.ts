@@ -271,8 +271,8 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       } = SourceLogic.values;
 
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/schemas`
-        : `/api/workplace_search/account/sources/${sourceId}/schemas`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/schemas`
+        : `/internal/workplace_search/account/sources/${sourceId}/schemas`;
 
       try {
         const response = await http.get(route);
@@ -285,8 +285,8 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       const { isOrganization } = AppLogic.values;
       const { http } = HttpLogic.values;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}`
-        : `/api/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}`
+        : `/internal/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}`;
 
       try {
         await actions.initializeSchema();
@@ -329,8 +329,8 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       const { sourceId } = values;
       const successMessage = isAdding ? SCHEMA_FIELD_ADDED_MESSAGE : SCHEMA_UPDATED_MESSAGE;
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/schemas`
-        : `/api/workplace_search/account/sources/${sourceId}/schemas`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/schemas`
+        : `/internal/workplace_search/account/sources/${sourceId}/schemas`;
 
       const emptyReindexJob = {
         percentageComplete: 100,
