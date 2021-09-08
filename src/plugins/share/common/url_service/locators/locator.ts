@@ -89,12 +89,16 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
 
   public getRedirectUrl(params: P, options: FormatSearchParamsOptions): string {
     const { baseUrl = '', version = '0.0.0' } = this.deps;
-    const opts: RedirectOptions = {
+    const redirectOptions: RedirectOptions = {
       id: this.definition.id,
       version,
       params,
     };
-    const search = formatSearchParams(opts, options).toString();
+    const formatOptions: FormatSearchParamsOptions = {
+      ...options,
+      lzCompress: options.lzCompress ?? true,
+    };
+    const search = formatSearchParams(redirectOptions, formatOptions).toString();
 
     return baseUrl + '/app/r?' + search;
   }
