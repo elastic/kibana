@@ -31,6 +31,7 @@ describe('test fetchTotalHits', () => {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
+      savedSearch: savedSearchMock,
       searchSessionId: '123',
       data: discoverServiceMock.data,
     } as unknown) as FetchAllSubDeps;
@@ -57,6 +58,7 @@ describe('test fetchTotalHits', () => {
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
+      savedSearch: savedSearchMock,
       searchSessionId: '123',
       data: discoverServiceMock.data,
     } as unknown) as FetchAllSubDeps;

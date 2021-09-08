@@ -146,6 +146,7 @@ describe('test fetchCharts', () => {
       data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
+      savedSearch: savedSearchMock,
       searchSessionId: '123',
     } as unknown) as FetchAllSubDeps;
 
