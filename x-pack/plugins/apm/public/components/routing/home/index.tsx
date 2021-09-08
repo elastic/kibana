@@ -8,12 +8,14 @@ import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { RedirectTo } from '../redirect_to';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { environmentRt } from '../../../../common/environment_rt';
 import { BackendDetailOverview } from '../../app/backend_detail_overview';
 import { BackendInventory } from '../../app/backend_inventory';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { ServiceInventory } from '../../app/service_inventory';
-import { ServiceMap } from '../../app/service_map';
+import { ServiceMapHome } from '../../app/service_map';
 import { TraceOverview } from '../../app/trace_overview';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 
@@ -43,10 +45,10 @@ export const ServiceInventoryTitle = i18n.translate(
   }
 );
 
-export const BackendInventoryTitle = i18n.translate(
-  'xpack.apm.views.backendInventory.title',
+export const DependenciesInventoryTitle = i18n.translate(
+  'xpack.apm.views.dependenciesInventory.title',
   {
-    defaultMessage: 'Backends',
+    defaultMessage: 'Dependencies',
   }
 );
 
@@ -55,13 +57,11 @@ export const home = {
   element: <Outlet />,
   params: t.type({
     query: t.intersection([
-      t.partial({
-        environment: t.string,
-        kuery: t.string,
-      }),
+      environmentRt,
       t.type({
         rangeFrom: t.string,
         rangeTo: t.string,
+        kuery: t.string,
       }),
     ]),
   }),
@@ -69,6 +69,8 @@ export const home = {
     query: {
       rangeFrom: 'now-15m',
       rangeTo: 'now',
+      environment: ENVIRONMENT_ALL.value,
+      kuery: '',
     },
   },
   children: [
@@ -89,7 +91,7 @@ export const home = {
       title: i18n.translate('xpack.apm.views.serviceMap.title', {
         defaultMessage: 'Service Map',
       }),
-      element: <ServiceMap />,
+      element: <ServiceMapHome />,
     }),
     {
       path: '/backends',
@@ -112,14 +114,14 @@ export const home = {
         },
         page({
           path: '/',
-          title: BackendInventoryTitle,
+          title: DependenciesInventoryTitle,
           element: <BackendInventory />,
         }),
       ],
     },
     {
       path: '/',
-      element: <Redirect to="/services" />,
+      element: <RedirectTo pathname="/services" />,
     },
   ],
 } as const;

@@ -6,6 +6,7 @@
  */
 
 import { Action } from 'redux';
+import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import {
   HostResultList,
   HostInfo,
@@ -161,8 +162,27 @@ export interface EndpointDetailsActivityLogUpdatePaging {
     disabled?: boolean;
     page: number;
     pageSize: number;
-    startDate?: string;
-    endDate?: string;
+    startDate: string;
+    endDate: string;
+  };
+}
+
+export interface UserUpdatedActivityLogRefreshOptions {
+  type: 'userUpdatedActivityLogRefreshOptions';
+  payload: {
+    autoRefreshOptions: { enabled: boolean; duration: number };
+  };
+}
+
+export interface UserUpdatedActivityLogRecentlyUsedDateRanges {
+  type: 'userUpdatedActivityLogRecentlyUsedDateRanges';
+  payload: EuiSuperDatePickerRecentRange[];
+}
+
+export interface EndpointDetailsLoad {
+  type: 'endpointDetailsLoad';
+  payload: {
+    endpointId: string;
   };
 }
 
@@ -187,6 +207,9 @@ export type EndpointAction =
   | EndpointDetailsActivityLogUpdatePaging
   | EndpointDetailsActivityLogUpdateIsInvalidDateRange
   | EndpointDetailsActivityLogChanged
+  | UserUpdatedActivityLogRefreshOptions
+  | UserUpdatedActivityLogRecentlyUsedDateRanges
+  | EndpointDetailsLoad
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding

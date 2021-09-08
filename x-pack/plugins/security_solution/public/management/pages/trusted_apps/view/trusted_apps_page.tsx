@@ -15,12 +15,12 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { ViewType } from '../state';
 import {
   checkingIfEntriesExist,
   entriesExist,
@@ -32,9 +32,7 @@ import {
 import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from './hooks';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { CreateTrustedAppFlyout } from './components/create_trusted_app_flyout';
-import { ControlPanel } from './components/control_panel';
 import { TrustedAppsGrid } from './components/trusted_apps_grid';
-import { TrustedAppsList } from './components/trusted_apps_list';
 import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
 import { TrustedAppsNotifications } from './trusted_apps_notifications';
 import { AppAction } from '../../../../common/store/actions';
@@ -73,9 +71,6 @@ export const TrustedAppsPage = memo(() => {
     show: undefined,
     id: undefined,
   }));
-  const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
-    view_type: viewType,
-  }));
 
   const handleOnSearch = useCallback(
     (query: string, includedPolicies?: string, excludedPolicies?: string) => {
@@ -86,6 +81,11 @@ export const TrustedAppsPage = memo(() => {
   );
 
   const showCreateFlyout = !!location.show;
+
+  const canDisplayContent = useCallback(
+    () => doEntriesExist || (isCheckingIfEntriesExists && didEntriesExist),
+    [didEntriesExist, doEntriesExist, isCheckingIfEntriesExists]
+  );
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {
@@ -104,7 +104,7 @@ export const TrustedAppsPage = memo(() => {
     >
       <FormattedMessage
         id="xpack.securitySolution.trustedapps.list.addButton"
-        defaultMessage="Add Trusted Application"
+        defaultMessage="Add trusted application"
       />
     </EuiButton>
   );
@@ -121,7 +121,7 @@ export const TrustedAppsPage = memo(() => {
         />
       )}
 
-      {doEntriesExist || (isCheckingIfEntriesExists && didEntriesExist) ? (
+      {canDisplayContent() ? (
         <>
           <SearchExceptions
             defaultValue={location.filter}
@@ -139,19 +139,18 @@ export const TrustedAppsPage = memo(() => {
           >
             <EuiSpacer size="m" />
             <EuiFlexItem grow={false}>
-              <ControlPanel
-                totalItemCount={totalItemsCount}
-                currentViewType={location.view_type}
-                onViewTypeChange={handleViewTypeChange}
-              />
+              <EuiText color="subdued" size="xs" data-test-subj="trustedAppsListViewCountLabel">
+                {i18n.translate('xpack.securitySolution.trustedapps.list.totalCount', {
+                  defaultMessage:
+                    'Showing {totalItemsCount, plural, one {# trusted application} other {# trusted applications}}',
+                  values: { totalItemsCount },
+                })}
+              </EuiText>
 
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiHorizontalRule margin="none" />
-
-              {location.view_type === 'grid' && <TrustedAppsGrid />}
-              {location.view_type === 'list' && <TrustedAppsList />}
+              <TrustedAppsGrid />
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
@@ -167,12 +166,12 @@ export const TrustedAppsPage = memo(() => {
       title={
         <FormattedMessage
           id="xpack.securitySolution.trustedapps.list.pageTitle"
-          defaultMessage="Trusted Applications"
+          defaultMessage="Trusted applications"
         />
       }
       headerBackComponent={backButton}
       subtitle={ABOUT_TRUSTED_APPS}
-      actions={doEntriesExist ? addButton : <></>}
+      actions={canDisplayContent() ? addButton : <></>}
     >
       <TrustedAppsNotifications />
 

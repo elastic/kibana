@@ -17,8 +17,10 @@ import React from 'react';
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 import {
   getComparisonChartTheme,
@@ -33,21 +35,26 @@ const INITIAL_STATE = {
 
 export function ServiceOverviewThroughputChart({
   height,
+  environment,
+  kuery,
+  transactionName,
 }: {
   height?: number;
+  environment: string;
+  kuery: string;
+  transactionName?: string;
 }) {
   const theme = useTheme();
 
   const {
-    urlParams: {
-      environment,
-      kuery,
-      start,
-      end,
-      comparisonEnabled,
-      comparisonType,
-    },
+    urlParams: { comparisonEnabled, comparisonType },
   } = useUrlParams();
+
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/:serviceName');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { transactionType, serviceName } = useApmServiceContext();
   const comparisonChartTheme = getComparisonChartTheme(theme);
@@ -75,6 +82,7 @@ export function ServiceOverviewThroughputChart({
               transactionType,
               comparisonStart,
               comparisonEnd,
+              transactionName,
             },
           },
         });
@@ -89,6 +97,7 @@ export function ServiceOverviewThroughputChart({
       transactionType,
       comparisonStart,
       comparisonEnd,
+      transactionName,
     ]
   );
 

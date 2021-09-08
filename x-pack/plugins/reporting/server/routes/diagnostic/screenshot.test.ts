@@ -36,7 +36,7 @@ describe('POST /diagnose/screenshot', () => {
         toPromise: () => (resp instanceof Error ? Promise.reject(resp) : Promise.resolve(resp)),
       }),
     }));
-    (generatePngObservableFactory as any).mockResolvedValue(generateMock);
+    (generatePngObservableFactory as jest.Mock).mockResolvedValue(generateMock);
   };
 
   const config = createMockConfigSchema({ queue: { timeout: 120000 } });
@@ -51,9 +51,6 @@ describe('POST /diagnose/screenshot', () => {
     );
 
     const mockSetupDeps = createMockPluginSetup({
-      elasticsearch: {
-        legacy: { client: { callAsInternalUser: jest.fn() } },
-      },
       router: httpSetup.createRouter(''),
     });
 

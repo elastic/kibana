@@ -31,7 +31,6 @@
 import { Type } from '@kbn/config-schema';
 import {
   ElasticsearchServiceSetup,
-  ILegacyScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
   IScopedClusterClient,
@@ -56,9 +55,9 @@ import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
-import { CoreUsageDataStart } from './core_usage_data';
+import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-import { DeprecationsServiceSetup } from './deprecations';
+import { DeprecationsServiceSetup, DeprecationsClient } from './deprecations';
 // Because of #79265 we need to explicitly import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
@@ -117,20 +116,11 @@ export type { ICspConfig } from './csp';
 
 export { ElasticsearchConfig } from './elasticsearch';
 export type {
-  LegacyClusterClient,
-  ILegacyClusterClient,
-  ILegacyCustomClusterClient,
-  LegacyScopedClusterClient,
-  ILegacyScopedClusterClient,
-  LegacyElasticsearchClientConfig,
-  LegacyElasticsearchError,
-  LegacyElasticsearchErrorHelpers,
   ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   NodesVersionCompatibility,
-  LegacyAPICaller,
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
@@ -147,17 +137,6 @@ export type {
   ElasticsearchConfigPreboot,
 } from './elasticsearch';
 
-export type {
-  LegacyCallAPIOptions,
-  AssistantAPIClientParams,
-  MIGRATION_ASSISTANCE_INDEX_ACTION,
-  MIGRATION_DEPRECATION_LEVEL,
-  AssistanceAPIResponse,
-  DeprecationAPIClientParams,
-  DeprecationInfo,
-  IndexSettingsDeprecationInfo,
-  DeprecationAPIResponse,
-} from './elasticsearch/legacy/api_types';
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
 export type {
   AuthenticationHandler,
@@ -193,7 +172,6 @@ export type {
   IKibanaResponse,
   LifecycleResponseFactory,
   KnownHeaders,
-  LegacyRequest,
   OnPreAuthHandler,
   OnPreAuthToolkit,
   OnPreRoutingHandler,
@@ -408,6 +386,7 @@ export type {
   RegisterDeprecationsConfig,
   GetDeprecationsContext,
   DeprecationsServiceSetup,
+  DeprecationsClient,
 } from './deprecations';
 
 export type { AppCategory } from '../types';
@@ -431,7 +410,13 @@ export type {
 export { ServiceStatusLevels } from './status';
 export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
 
-export type { CoreUsageDataStart } from './core_usage_data';
+export type {
+  CoreUsageDataSetup,
+  CoreUsageDataStart,
+  CoreUsageCounter,
+  CoreIncrementUsageCounter,
+  CoreIncrementCounterParams,
+} from './core_usage_data';
 
 /**
  * Plugin specific context passed to a route handler.
@@ -442,8 +427,6 @@ export type { CoreUsageDataStart } from './core_usage_data';
  *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
  *      all the registered types.
  *    - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch
- *      data client which uses the credentials of the incoming request
- *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - The legacy Elasticsearch
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
@@ -461,15 +444,12 @@ export interface RequestHandlerContext {
     };
     elasticsearch: {
       client: IScopedClusterClient;
-      legacy: {
-        /*
-         * @deprecated Use {@link IScopedClusterClient}.
-         */
-        client: ILegacyScopedClusterClient;
-      };
     };
     uiSettings: {
       client: IUiSettingsClient;
+    };
+    deprecations: {
+      client: DeprecationsClient;
     };
   };
 }
@@ -526,6 +506,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   deprecations: DeprecationsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+  /** @internal {@link CoreUsageDataSetup} */
+  coreUsageData: CoreUsageDataSetup;
 }
 
 /**

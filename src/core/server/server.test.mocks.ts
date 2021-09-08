@@ -101,3 +101,9 @@ export const mockPrebootService = prebootServiceMock.create();
 jest.doMock('./preboot/preboot_service', () => ({
   PrebootService: jest.fn(() => mockPrebootService),
 }));
+
+import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+export const mockDeprecationService = deprecationsServiceMock.create();
+jest.doMock('./deprecations/deprecations_service', () => ({
+  DeprecationsService: jest.fn(() => mockDeprecationService),
+}));

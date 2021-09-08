@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings']);
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/95376
+  // FLAKY: https://github.com/elastic/kibana/issues/95376
   describe.skip('runtime fields', function () {
     this.tags(['skipFirefox']);
 
@@ -44,7 +44,18 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await PageObjects.settings.getFieldsTabCount());
         await log.debug('add runtime field');
-        await PageObjects.settings.addRuntimeField(fieldName, 'Keyword', "emit('hello world')");
+        await PageObjects.settings.addRuntimeField(
+          fieldName,
+          'Keyword',
+          "emit('hello world')",
+          false
+        );
+
+        await log.debug('check that field preview is rendered');
+        expect(await testSubjects.exists('fieldPreviewItem', { timeout: 1500 })).to.be(true);
+
+        await PageObjects.settings.clickSaveField();
+
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getFieldsTabCount())).to.be(startingCount + 1);
         });

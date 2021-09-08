@@ -19,15 +19,15 @@ export interface ResponseHit {
 }
 
 export interface SearchServiceParams {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
   start?: string;
   end?: string;
   percentileThreshold?: number;
-  percentileThresholdValue?: number;
+  analyzeCorrelations?: boolean;
 }
 
 export interface SearchServiceFetchParams extends SearchServiceParams {
@@ -51,4 +51,13 @@ export interface AsyncSearchProviderProgress {
   loadedFieldCanditates: number;
   loadedFieldValuePairs: number;
   loadedHistograms: number;
+}
+
+export interface SearchServiceRawResponse {
+  ccsWarning: boolean;
+  log: string[];
+  overallHistogram?: HistogramItem[];
+  percentileThresholdValue?: number;
+  took: number;
+  values: SearchServiceValue[];
 }

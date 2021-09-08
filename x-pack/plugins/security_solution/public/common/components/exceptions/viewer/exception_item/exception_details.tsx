@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo, Fragment } from 'react';
 import styled, { css } from 'styled-components';
@@ -25,15 +26,28 @@ const MyExceptionDetails = styled(EuiFlexItem)`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiColorLightestShade};
     padding: ${theme.eui.euiSize};
+    .eventFiltersDescriptionList {
+      margin: ${theme.eui.euiSize} ${theme.eui.euiSize} 0 ${theme.eui.euiSize};
+    }
+    .eventFiltersDescriptionListTitle {
+      width: 40%;
+      margin-top: 0;
+      margin-bottom: ${theme.eui.euiSizeS};
+    }
+    .eventFiltersDescriptionListDescription {
+      width: 60%;
+      margin-top: 0;
+      margin-bottom: ${theme.eui.euiSizeS};
+    }
   `}
 `;
 
-const MyDescriptionListTitle = styled(EuiDescriptionListTitle)`
-  width: 40%;
-`;
-
-const MyDescriptionListDescription = styled(EuiDescriptionListDescription)`
-  width: 60%;
+const StyledCommentsSection = styled(EuiFlexItem)`
+  ${({ theme }) => css`
+    &&& {
+      margin: ${theme.eui.euiSizeXS} ${theme.eui.euiSize} ${theme.eui.euiSizeL} ${theme.eui.euiSize};
+    }
+  `}
 `;
 
 const ExceptionDetailsComponent = ({
@@ -77,19 +91,28 @@ const ExceptionDetailsComponent = ({
   return (
     <MyExceptionDetails grow={2}>
       <EuiFlexGroup direction="column" alignItems="flexStart">
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} className="eventFiltersDescriptionList">
           <EuiDescriptionList compressed type="column" data-test-subj="exceptionsViewerItemDetails">
             {descriptionListItems.map((item) => (
               <Fragment key={`${item.title}`}>
-                <MyDescriptionListTitle>{item.title}</MyDescriptionListTitle>
-                <MyDescriptionListDescription className="eui-textBreakWord">
-                  {item.description}
-                </MyDescriptionListDescription>
+                <EuiToolTip content={item.title} anchorClassName="eventFiltersDescriptionListTitle">
+                  <EuiDescriptionListTitle className="eui-textTruncate eui-fullWidth">
+                    {item.title}
+                  </EuiDescriptionListTitle>
+                </EuiToolTip>
+                <EuiToolTip
+                  content={item.description}
+                  anchorClassName="eventFiltersDescriptionListDescription"
+                >
+                  <EuiDescriptionListDescription className="eui-textBreakWord eui-textTruncate eui-fullWidth">
+                    {item.description}
+                  </EuiDescriptionListDescription>
+                </EuiToolTip>
               </Fragment>
             ))}
           </EuiDescriptionList>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{commentsSection}</EuiFlexItem>
+        <StyledCommentsSection grow={false}>{commentsSection}</StyledCommentsSection>
       </EuiFlexGroup>
     </MyExceptionDetails>
   );

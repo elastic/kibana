@@ -8,16 +8,41 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { estypes } from '@elastic/elasticsearch';
+import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import type { SavedObjectsRawDoc } from '../../serialization';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { isWriteBlockException } from './es_errors';
+import { isWriteBlockException, isIndexNotFoundException } from './es_errors';
 import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
-import type { TargetIndexHadWriteBlock } from './index';
+import type {
+  TargetIndexHadWriteBlock,
+  RequestEntityTooLargeException,
+  IndexNotFound,
+} from './index';
+
+/**
+ * Given a document and index, creates a valid body for the Bulk API.
+ */
+export const createBulkOperationBody = (doc: SavedObjectsRawDoc, index: string) => {
+  return [
+    {
+      index: {
+        _index: index,
+        _id: doc._id,
+        // overwrite existing documents
+        op_type: 'index',
+        // use optimistic concurrency control to ensure that outdated
+        // documents are only overwritten once with the latest version
+        if_seq_no: doc._seq_no,
+        if_primary_term: doc._primary_term,
+      },
+    },
+    doc._source,
+  ];
+};
 
 /** @internal */
 export interface BulkOverwriteTransformedDocumentsParams {
@@ -37,9 +62,16 @@ export const bulkOverwriteTransformedDocuments = ({
   transformedDocs,
   refresh = false,
 }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
-  RetryableEsClientError | TargetIndexHadWriteBlock,
+  | RetryableEsClientError
+  | TargetIndexHadWriteBlock
+  | IndexNotFound
+  | RequestEntityTooLargeException,
   'bulk_index_succeeded'
 > => () => {
+  const body = transformedDocs.flatMap((doc) => {
+    return createBulkOperationBody(doc, index);
+  });
+
   return client
     .bulk({
       // Because we only add aliases in the MARK_VERSION_INDEX_READY step we
@@ -53,23 +85,7 @@ export const bulkOverwriteTransformedDocuments = ({
       wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
       refresh,
       filter_path: ['items.*.error'],
-      body: transformedDocs.flatMap((doc) => {
-        return [
-          {
-            index: {
-              _index: index,
-              _id: doc._id,
-              // overwrite existing documents
-              op_type: 'index',
-              // use optimistic concurrency control to ensure that outdated
-              // documents are only overwritten once with the latest version
-              if_seq_no: doc._seq_no,
-              if_primary_term: doc._primary_term,
-            },
-          },
-          doc._source,
-        ];
-      }),
+      body,
     })
     .then((res) => {
       // Filter out version_conflict_engine_exception since these just mean
@@ -87,7 +103,20 @@ export const bulkOverwriteTransformedDocuments = ({
             type: 'target_index_had_write_block' as const,
           });
         }
+        if (errors.every(isIndexNotFoundException)) {
+          return Either.left({
+            type: 'index_not_found_exception' as const,
+            index,
+          });
+        }
         throw new Error(JSON.stringify(errors));
+      }
+    })
+    .catch((error) => {
+      if (error instanceof esErrors.ResponseError && error.statusCode === 413) {
+        return Either.left({ type: 'request_entity_too_large_exception' as const });
+      } else {
+        throw error;
       }
     })
     .catch(catchRetryableEsClientErrors);

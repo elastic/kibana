@@ -59,7 +59,6 @@ import { AlertsHistogramPanel } from '../../../../components/alerts_kpis/alerts_
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
-import { useAlertInfo } from '../../../../components/alerts_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import {
@@ -178,6 +177,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     (state) =>
       (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).graphEventId
   );
+  const updatedAt = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
+  );
+  const isAlertsLoading = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).isLoading
+  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -195,6 +200,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       hasEncryptionKey,
       canUserCRUD,
       hasIndexWrite,
+      hasIndexRead,
       hasIndexMaintenance,
       signalIndexName,
     },
@@ -225,6 +231,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
+  const [pageTabs, setTabs] = useState(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
@@ -234,7 +241,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           defineRuleData: null,
           scheduleRuleData: null,
         };
-  const [lastAlerts] = useAlertInfo({ ruleId });
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
@@ -255,6 +261,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       application: {
         capabilities: { actions },
       },
+      timelines: timelinesUi,
     },
   } = useKibana();
   const hasActionsPrivileges = useMemo(() => {
@@ -270,6 +277,18 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       setRule(maybeRule);
     }
   }, [maybeRule]);
+
+  useEffect(() => {
+    if (!hasIndexRead) {
+      setTabs(ruleDetailTabs.filter(({ id }) => id !== RuleDetailTabs.alerts));
+      setRuleDetailTab(RuleDetailTabs.exceptions);
+    } else {
+      setTabs(ruleDetailTabs);
+      setRuleDetailTab(RuleDetailTabs.alerts);
+    }
+  }, [hasIndexRead]);
+
+  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
 
   const title = useMemo(
     () => (
@@ -393,7 +412,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const tabs = useMemo(
     () => (
       <EuiTabs>
-        {ruleDetailTabs.map((tab) => (
+        {pageTabs.map((tab) => (
           <EuiTab
             onClick={() => setRuleDetailTab(tab.id)}
             isSelected={tab.id === ruleDetailTab}
@@ -406,7 +425,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         ))}
       </EuiTabs>
     ),
-    [ruleDetailTab, setRuleDetailTab]
+    [ruleDetailTab, setRuleDetailTab, pageTabs]
   );
   const ruleIndices = useMemo(
     () =>
@@ -455,7 +474,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       );
     } else if (
       currentStatus?.status === 'failed' &&
-      ruleDetailTab === RuleDetailTabs.alerts &&
+      (ruleDetailTab === RuleDetailTabs.alerts || ruleDetailTab === RuleDetailTabs.failures) &&
       currentStatus?.last_failure_at != null
     ) {
       return (
@@ -466,7 +485,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       );
     } else if (
       (currentStatus?.status === 'warning' || currentStatus?.status === 'partial failure') &&
-      ruleDetailTab === RuleDetailTabs.alerts &&
+      (ruleDetailTab === RuleDetailTabs.alerts || ruleDetailTab === RuleDetailTabs.failures) &&
       currentStatus?.last_success_at != null
     ) {
       return (
@@ -649,16 +668,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 }}
                 border
                 subtitle={subTitle}
-                subtitle2={[
-                  ...(lastAlerts != null
-                    ? [
-                        <>
-                          {detectionI18n.LAST_ALERT}
-                          {': '}
-                          {lastAlerts}
-                        </>,
-                      ]
-                    : []),
+                subtitle2={
                   <>
                     <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
                       <EuiFlexItem grow={false}>
@@ -667,8 +677,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       </EuiFlexItem>
                       {ruleStatusInfo}
                     </EuiFlexGroup>
-                  </>,
-                ]}
+                  </>
+                }
                 title={title}
                 badgeOptions={badgeOptions}
               >
@@ -690,7 +700,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           enabled={isExistingRule && (rule?.enabled ?? false)}
                           onChange={handleOnChangeEnabledRule}
                         />
-                        <EuiFlexItem>{i18n.ACTIVATED_RULE}</EuiFlexItem>
+                        <EuiFlexItem>{i18n.ACTIVATE_RULE}</EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiToolTip>
                   </EuiFlexItem>
@@ -757,10 +767,24 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               {tabs}
               <EuiSpacer />
             </Display>
-            {ruleDetailTab === RuleDetailTabs.alerts && (
+            {ruleDetailTab === RuleDetailTabs.alerts && hasIndexRead && (
               <>
-                <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
-                <EuiSpacer size="m" />
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <AlertsTableFilterGroup
+                      status={filterGroup}
+                      onFilterGroupChanged={onFilterGroupChangedCallback}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {updatedAt &&
+                      timelinesUi.getLastUpdated({
+                        updatedAt: updatedAt || Date.now(),
+                        showUpdating,
+                      })}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="l" />
                 <Display show={!globalFullScreen}>
                   <AlertsHistogramPanel
                     filters={alertMergedFilters}

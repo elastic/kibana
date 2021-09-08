@@ -14,7 +14,6 @@ import {
   SERVICE_NAME,
   CONTAINER_ID,
   HOSTNAME,
-  POD_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 
 export const getServiceInfrastructure = async ({
@@ -23,9 +22,9 @@ export const getServiceInfrastructure = async ({
   environment,
   setup,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
-  environment?: string;
+  environment: string;
   setup: Setup & SetupTimeRange;
 }) => {
   const { apmEventClient, start, end } = setup;
@@ -61,12 +60,6 @@ export const getServiceInfrastructure = async ({
             size: 500,
           },
         },
-        podNames: {
-          terms: {
-            field: POD_NAME,
-            size: 500,
-          },
-        },
       },
     },
   });
@@ -74,13 +67,11 @@ export const getServiceInfrastructure = async ({
   return {
     containerIds:
       response.aggregations?.containerIds?.buckets.map(
-        (bucket) => bucket.key
+        (bucket) => bucket.key as string
       ) ?? [],
     hostNames:
-      response.aggregations?.hostNames?.buckets.map((bucket) => bucket.key) ??
-      [],
-    podNames:
-      response.aggregations?.podNames?.buckets.map((bucket) => bucket.key) ??
-      [],
+      response.aggregations?.hostNames?.buckets.map(
+        (bucket) => bucket.key as string
+      ) ?? [],
   };
 };

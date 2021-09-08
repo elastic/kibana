@@ -29,6 +29,9 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
     crawl_rules: crawlRules,
     default_crawl_rule: defaultCrawlRule,
     entry_points: entryPoints,
+    deduplication_enabled: deduplicationEnabled,
+    deduplication_fields: deduplicationFields,
+    available_deduplication_fields: availableDeduplicationFields,
   } = payload;
 
   const clientPayload: CrawlerDomain = {
@@ -39,6 +42,9 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
     crawlRules,
     sitemaps,
     entryPoints,
+    deduplicationEnabled,
+    deduplicationFields,
+    availableDeduplicationFields,
   };
 
   if (lastCrawl) {
@@ -93,7 +99,7 @@ export function crawlDomainValidationToResult(
 
   if (warningResult) {
     return {
-      state: 'invalid',
+      state: 'warning',
       blockingFailure: !data.valid,
       message: warningResult.comment,
     };

@@ -244,6 +244,64 @@ describe('crawler routes', () => {
     });
   });
 
+  describe('PUT /api/app_search/engines/{name}/crawler/domains/{id}', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+      });
+    });
+
+    it('validates correctly with crawl rules', () => {
+      const request = {
+        params: { name: 'some-engine', id: '1234' },
+        body: {
+          crawl_rules: [
+            {
+              order: 1,
+              id: '5678',
+            },
+          ],
+        },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with deduplication enabled', () => {
+      const request = {
+        params: { name: 'some-engine', id: '1234' },
+        body: {
+          deduplication_enabled: true,
+        },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with deduplication fields', () => {
+      const request = {
+        params: { name: 'some-engine', id: '1234' },
+        body: {
+          deduplication_fields: ['title', 'description'],
+        },
+      };
+      mockRouter.shouldValidate(request);
+    });
+  });
+
   describe('GET /api/app_search/engines/{name}/crawler/domains/{id}', () => {
     let mockRouter: MockRouter;
 

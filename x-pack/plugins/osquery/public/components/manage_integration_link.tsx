@@ -13,22 +13,20 @@ import { INTEGRATIONS_PLUGIN_ID } from '../../../fleet/common';
 import { pagePathGetters } from '../../../fleet/public';
 
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
-import { useOsqueryIntegration } from '../common/hooks';
+import { useOsqueryIntegrationStatus } from '../common/hooks';
 
 const ManageIntegrationLinkComponent = () => {
   const {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
-  const { data: osqueryIntegration } = useOsqueryIntegration();
+  const { data: osqueryIntegration } = useOsqueryIntegrationStatus();
 
   const integrationHref = useMemo(() => {
     if (osqueryIntegration) {
       return getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
-        path:
-          '#' +
-          pagePathGetters.integration_details_policies({
-            pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
-          })[1],
+        path: pagePathGetters.integration_details_policies({
+          pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
+        })[1],
       });
     }
   }, [getUrlForApp, osqueryIntegration]);
@@ -39,11 +37,9 @@ const ManageIntegrationLinkComponent = () => {
         event.preventDefault();
         if (osqueryIntegration) {
           return navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-            path:
-              '#' +
-              pagePathGetters.integration_details_policies({
-                pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
-              })[1],
+            path: pagePathGetters.integration_details_policies({
+              pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
+            })[1],
           });
         }
       }

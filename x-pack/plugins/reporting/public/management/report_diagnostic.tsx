@@ -30,14 +30,12 @@ interface Props {
 type ResultStatus = 'danger' | 'incomplete' | 'complete';
 
 enum statuses {
-  configStatus = 'configStatus',
   chromeStatus = 'chromeStatus',
   screenshotStatus = 'screenshotStatus',
 }
 
 interface State {
   isFlyoutVisible: boolean;
-  configStatus: ResultStatus;
   chromeStatus: ResultStatus;
   screenshotStatus: ResultStatus;
   help: string[];
@@ -47,7 +45,6 @@ interface State {
 }
 
 const initialState: State = {
-  [statuses.configStatus]: 'incomplete',
   [statuses.chromeStatus]: 'incomplete',
   [statuses.screenshotStatus]: 'incomplete',
   isFlyoutVisible: false,
@@ -64,16 +61,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
       ...state,
       ...s,
     });
-  const {
-    configStatus,
-    isBusy,
-    screenshotStatus,
-    chromeStatus,
-    isFlyoutVisible,
-    help,
-    logs,
-    success,
-  } = state;
+  const { isBusy, screenshotStatus, chromeStatus, isFlyoutVisible, help, logs, success } = state;
 
   const closeFlyout = () => setState({ ...initialState, isFlyoutVisible: false });
   const showFlyout = () => setState({ isFlyoutVisible: true });
@@ -107,35 +95,6 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
 
   const steps = [
     {
-      title: i18n.translate('xpack.reporting.listing.diagnosticConfigTitle', {
-        defaultMessage: 'Verify Kibana configuration',
-      }),
-      children: (
-        <Fragment>
-          <FormattedMessage
-            id="xpack.reporting.listing.diagnosticConfigMessage"
-            defaultMessage="Ensure your Kibana configuration is properly set up for reports."
-          />
-          <EuiSpacer />
-          <EuiButton
-            disabled={isBusy || configStatus === 'complete'}
-            isLoading={isBusy && configStatus === 'incomplete'}
-            onClick={apiWrapper(() => apiClient.verifyConfig(), statuses.configStatus)}
-            iconType={configStatus === 'complete' ? 'check' : undefined}
-          >
-            <FormattedMessage
-              id="xpack.reporting.listing.diagnosticConfigButton"
-              defaultMessage="Verify configuration"
-            />
-          </EuiButton>
-        </Fragment>
-      ),
-      status: !success && configStatus !== 'complete' ? 'danger' : configStatus,
-    },
-  ];
-
-  if (configStatus === 'complete') {
-    steps.push({
       title: i18n.translate('xpack.reporting.listing.diagnosticBrowserTitle', {
         defaultMessage: 'Check browser',
       }),
@@ -160,8 +119,8 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
         </Fragment>
       ),
       status: !success && chromeStatus !== 'complete' ? 'danger' : chromeStatus,
-    });
-  }
+    },
+  ];
 
   if (chromeStatus === 'complete') {
     steps.push({

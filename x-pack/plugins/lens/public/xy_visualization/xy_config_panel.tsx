@@ -480,6 +480,21 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 legend: { ...state.legend, floatingColumns: val },
               });
             }}
+            maxLines={state?.legend.maxLines}
+            onMaxLinesChange={(val) => {
+              setState({
+                ...state,
+                legend: { ...state.legend, maxLines: val },
+              });
+            }}
+            shouldTruncate={state?.legend.shouldTruncate ?? true}
+            onTruncateLegendChange={() => {
+              const current = state?.legend.shouldTruncate ?? true;
+              setState({
+                ...state,
+                legend: { ...state.legend, shouldTruncate: !current },
+              });
+            }}
             onPositionChange={(id) => {
               setState({
                 ...state,

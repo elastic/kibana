@@ -44,8 +44,8 @@ export async function getServiceTransactionGroupDetailedStatistics({
   start,
   end,
 }: {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   serviceName: string;
   transactionNames: string[];
   setup: Setup;
@@ -202,8 +202,8 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   latencyAggregationType: LatencyAggregationType;
   comparisonStart?: number;
   comparisonEnd?: number;
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
 }) {
   const { start, end } = setup;
 

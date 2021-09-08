@@ -10,44 +10,41 @@ import ipaddr from 'ipaddr.js';
 import { IpAddress } from '../../utils';
 
 export class CidrMask {
+  private static getNetmask(size: number, prefix: number) {
+    return new Array(size).fill(255).map((byte, index) => {
+      const bytePrefix = 8 - Math.min(Math.max(prefix - index * 8, 0), 8);
+
+      // eslint-disable-next-line no-bitwise
+      return (byte >> bytePrefix) << bytePrefix;
+    });
+  }
+
   private address: number[];
-  private netmask: number;
+  private netmask: number[];
+  private prefix: number;
 
   constructor(cidr: string) {
     try {
-      const [address, netmask] = ipaddr.parseCIDR(cidr);
+      const [address, prefix] = ipaddr.parseCIDR(cidr);
 
       this.address = address.toByteArray();
-      this.netmask = netmask;
+      this.netmask = CidrMask.getNetmask(this.address.length, prefix);
+      this.prefix = prefix;
     } catch {
       throw Error('Invalid CIDR mask: ' + cidr);
     }
   }
 
   private getBroadcastAddress() {
-    /* eslint-disable no-bitwise */
-    const netmask = (1n << BigInt(this.address.length * 8 - this.netmask)) - 1n;
-    const broadcast = this.address.map((byte, index) => {
-      const offset = BigInt(this.address.length - index - 1) * 8n;
-      const mask = Number((netmask >> offset) & 255n);
-
-      return byte | mask;
-    });
-    /* eslint-enable no-bitwise */
+    // eslint-disable-next-line no-bitwise
+    const broadcast = this.address.map((byte, index) => byte | (this.netmask[index] ^ 255));
 
     return new IpAddress(broadcast).toString();
   }
 
   private getNetworkAddress() {
-    /* eslint-disable no-bitwise */
-    const netmask = (1n << BigInt(this.address.length * 8 - this.netmask)) - 1n;
-    const network = this.address.map((byte, index) => {
-      const offset = BigInt(this.address.length - index - 1) * 8n;
-      const mask = Number((netmask >> offset) & 255n) ^ 255;
-
-      return byte & mask;
-    });
-    /* eslint-enable no-bitwise */
+    // eslint-disable-next-line no-bitwise
+    const network = this.address.map((byte, index) => byte & this.netmask[index]);
 
     return new IpAddress(network).toString();
   }
@@ -60,6 +57,6 @@ export class CidrMask {
   }
 
   toString() {
-    return `${new IpAddress(this.address)}/${this.netmask}`;
+    return `${new IpAddress(this.address)}/${this.prefix}`;
   }
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { ReactNode, useCallback, useMemo } from 'react';
@@ -126,10 +127,18 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     };
   }, [hidePerPageOptions, items, page, pageSize, pagination]);
 
+  const showNoItemsMessage = useMemo(() => {
+    return isLoading
+      ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
+          defaultMessage: 'Loading…',
+        })
+      : noItemsMessage;
+  }, [isLoading, noItemsMessage]);
+
   return (
     <EuiBasicTable
       loading={isLoading}
-      noItemsMessage={noItemsMessage}
+      noItemsMessage={showNoItemsMessage}
       items={renderedItems}
       columns={(columns as unknown) as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
       sorting={sort}

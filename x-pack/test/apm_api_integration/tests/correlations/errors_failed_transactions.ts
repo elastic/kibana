@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
   const archiveName = 'apm_8.0.0';
   const range = archives_metadata[archiveName];
 
@@ -23,6 +23,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       start: range.start,
       end: range.end,
       fieldNames: 'user_agent.name,user_agent.os.name,url.original',
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
     },
   });
   registry.when(
@@ -38,7 +40,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/109660
+  registry.when.skip(
     'correlations errors failed transactions with data and default args',
     { config: 'trial', archives: ['apm_8.0.0'] },
     () => {

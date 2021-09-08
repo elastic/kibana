@@ -15,6 +15,25 @@ import type { DataPublicPluginStart } from '../../../../../src/plugins/data/publ
 import type { TGridProps } from '../types';
 import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from '../components';
 import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
+import { initialTGridState } from '../store/t_grid/reducer';
+import { createStore } from '../store/t_grid';
+import { TGridLoading } from '../components/t_grid/shared';
+
+const initializeStore = ({
+  store,
+  storage,
+  setStore,
+}: {
+  store?: Store;
+  storage: Storage;
+  setStore: (store: Store) => void;
+}) => {
+  let tGridStore = store;
+  if (!tGridStore) {
+    tGridStore = createStore(initialTGridState, storage);
+    setStore(tGridStore);
+  }
+};
 
 const TimelineLazy = lazy(() => import('../components'));
 export const getTGridLazy = (
@@ -31,8 +50,9 @@ export const getTGridLazy = (
     setStore: (store: Store) => void;
   }
 ) => {
+  initializeStore({ store, storage, setStore });
   return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
+    <Suspense fallback={<TGridLoading height={props.type === 'standalone' ? 'tall' : 'short'} />}>
       <TimelineLazy {...props} store={store} storage={storage} data={data} setStore={setStore} />
     </Suspense>
   );
@@ -66,7 +86,10 @@ export const getFieldsBrowserLazy = (props: FieldBrowserProps, { store }: { stor
 };
 
 const AddToCaseLazy = lazy(() => import('../components/actions/timeline/cases/add_to_case_action'));
-export const getAddToCaseLazy = (props: AddToCaseActionProps, store: Store) => {
+export const getAddToCaseLazy = (
+  props: AddToCaseActionProps,
+  { store, storage, setStore }: { store: Store; storage: Storage; setStore: (store: Store) => void }
+) => {
   return (
     <Suspense fallback={<span />}>
       <Provider store={store}>
@@ -81,7 +104,11 @@ export const getAddToCaseLazy = (props: AddToCaseActionProps, store: Store) => {
 const AddToCasePopover = lazy(
   () => import('../components/actions/timeline/cases/add_to_case_action_button')
 );
-export const getAddToCasePopoverLazy = (props: AddToCaseActionProps, store: Store) => {
+export const getAddToCasePopoverLazy = (
+  props: AddToCaseActionProps,
+  { store, storage, setStore }: { store: Store; storage: Storage; setStore: (store: Store) => void }
+) => {
+  initializeStore({ store, storage, setStore });
   return (
     <Suspense fallback={<span />}>
       <Provider store={store}>
@@ -96,7 +123,11 @@ export const getAddToCasePopoverLazy = (props: AddToCaseActionProps, store: Stor
 const AddToExistingButton = lazy(
   () => import('../components/actions/timeline/cases/add_to_existing_case_button')
 );
-export const getAddToExistingCaseButtonLazy = (props: AddToCaseActionProps, store: Store) => {
+export const getAddToExistingCaseButtonLazy = (
+  props: AddToCaseActionProps,
+  { store, storage, setStore }: { store: Store; storage: Storage; setStore: (store: Store) => void }
+) => {
+  initializeStore({ store, storage, setStore });
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <Provider store={store}>
@@ -111,7 +142,11 @@ export const getAddToExistingCaseButtonLazy = (props: AddToCaseActionProps, stor
 const AddToNewCaseButton = lazy(
   () => import('../components/actions/timeline/cases/add_to_new_case_button')
 );
-export const getAddToNewCaseButtonLazy = (props: AddToCaseActionProps, store: Store) => {
+export const getAddToNewCaseButtonLazy = (
+  props: AddToCaseActionProps,
+  { store, storage, setStore }: { store: Store; storage: Storage; setStore: (store: Store) => void }
+) => {
+  initializeStore({ store, storage, setStore });
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <Provider store={store}>

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import Url from 'url';
 import cypress from 'cypress';
 import { FtrProviderContext } from './ftr_provider_context';
 import archives_metadata from './cypress/fixtures/es_archiver/archives_metadata';
-import { createKibanaUserRole } from '../scripts/kibana-security/create_kibana_user_role';
+import { createApmUsersAndRoles } from '../scripts/create-apm-users-and-roles/create_apm_users_and_roles';
+import { esArchiverLoad, esArchiverUnload } from './cypress/tasks/es_archiver';
 
 export function cypressRunTests(spec?: string) {
   return async ({ getService }: FtrProviderContext) => {
@@ -47,7 +50,7 @@ async function cypressStart(
   });
 
   // Creates APM users
-  await createKibanaUserRole({
+  await createApmUsersAndRoles({
     elasticsearch: {
       username: config.get('servers.elasticsearch.username'),
       password: config.get('servers.elasticsearch.password'),
@@ -58,8 +61,11 @@ async function cypressStart(
     },
   });
 
-  return cypressExecution({
-    ...(spec !== 'undefined' ? { spec } : {}),
+  console.log('Loading esArchiver...');
+  await esArchiverLoad('apm_8.0.0');
+
+  const res = await cypressExecution({
+    ...(spec !== undefined ? { spec } : {}),
     config: { baseUrl: kibanaUrl },
     env: {
       START_DATE: start,
@@ -67,4 +73,9 @@ async function cypressStart(
       KIBANA_URL: kibanaUrl,
     },
   });
+
+  console.log('Removing esArchiver...');
+  await esArchiverUnload('apm_8.0.0');
+
+  return res;
 }

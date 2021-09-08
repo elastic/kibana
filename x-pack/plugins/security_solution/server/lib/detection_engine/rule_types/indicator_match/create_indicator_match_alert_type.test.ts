@@ -26,14 +26,7 @@ jest.mock('../utils/get_list_client', () => ({
   }),
 }));
 
-jest.mock('../../signals/rule_status_service', () => ({
-  ruleStatusServiceFactory: () => ({
-    goingToRun: jest.fn(),
-    success: jest.fn(),
-    partialFailure: jest.fn(),
-    error: jest.fn(),
-  }),
-}));
+jest.mock('../../rule_execution_log/rule_execution_log_client');
 
 describe('Indicator Match Alerts', () => {
   const params: Partial<RuleParams> = {
@@ -61,9 +54,9 @@ describe('Indicator Match Alerts', () => {
     const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
     const indicatorMatchAlertType = createIndicatorMatchAlertType({
       experimentalFeatures: allowedExperimentalValues,
-      indexAlias: 'alerts.security-alerts',
       lists: dependencies.lists,
       logger: dependencies.logger,
+      ignoreFields: [],
       mergeStrategy: 'allFields',
       ruleDataClient: dependencies.ruleDataClient,
       ruleDataService: dependencies.ruleDataService,
@@ -102,10 +95,10 @@ describe('Indicator Match Alerts', () => {
     const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
     const indicatorMatchAlertType = createIndicatorMatchAlertType({
       experimentalFeatures: allowedExperimentalValues,
-      indexAlias: 'alerts.security-alerts',
       lists: dependencies.lists,
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
+      ignoreFields: [],
       ruleDataClient: dependencies.ruleDataClient,
       ruleDataService: dependencies.ruleDataService,
       version: '1.0.0',
@@ -141,10 +134,10 @@ describe('Indicator Match Alerts', () => {
     const { services, dependencies, executor } = createRuleTypeMocks('threat_match', params);
     const indicatorMatchAlertType = createIndicatorMatchAlertType({
       experimentalFeatures: allowedExperimentalValues,
-      indexAlias: 'alerts.security-alerts',
       lists: dependencies.lists,
       logger: dependencies.logger,
       mergeStrategy: 'allFields',
+      ignoreFields: [],
       ruleDataClient: dependencies.ruleDataClient,
       ruleDataService: dependencies.ruleDataService,
       version: '1.0.0',

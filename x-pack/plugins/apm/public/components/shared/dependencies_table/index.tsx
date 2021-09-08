@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
@@ -24,8 +18,10 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { unit } from '../../../utils/style';
 import { SparkPlot } from '../charts/spark_plot';
 import { ImpactBar } from '../ImpactBar';
-import { TableFetchWrapper } from '../table_fetch_wrapper';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { ITableColumn, ManagedTable } from '../managed_table';
+import { EmptyMessage } from '../EmptyMessage';
+import { TableFetchWrapper } from '../table_fetch_wrapper';
 import { OverviewTableContainer } from '../overview_table_container';
 
 export type DependenciesItem = Omit<
@@ -38,7 +34,8 @@ export type DependenciesItem = Omit<
 
 interface Props {
   dependencies: DependenciesItem[];
-  link: React.ReactNode;
+  fixedHeight?: boolean;
+  link?: React.ReactNode;
   title: React.ReactNode;
   nameColumnTitle: React.ReactNode;
   status: FETCH_STATUS;
@@ -48,6 +45,7 @@ interface Props {
 export function DependenciesTable(props: Props) {
   const {
     dependencies,
+    fixedHeight,
     link,
     title,
     nameColumnTitle,
@@ -55,15 +53,7 @@ export function DependenciesTable(props: Props) {
     compact = true,
   } = props;
 
-  const pagination = compact
-    ? {
-        initialPageSize: 5,
-        pageSizeOptions: [5],
-        hidePerPageOptions: true,
-      }
-    : {};
-
-  const columns: Array<EuiBasicTableColumn<DependenciesItem>> = [
+  const columns: Array<ITableColumn<DependenciesItem>> = [
     {
       field: 'name',
       name: nameColumnTitle,
@@ -78,10 +68,11 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnLatency', {
         defaultMessage: 'Latency (avg.)',
       }),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
+            compact
             color="euiColorVis1"
             series={currentStats.latency.timeseries}
             comparisonSeries={previousStats?.latency.timeseries}
@@ -96,7 +87,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnThroughput', {
         defaultMessage: 'Throughput',
       }),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
@@ -167,6 +158,18 @@ export function DependenciesTable(props: Props) {
       impactValue: item.currentStats.impact,
     })) ?? [];
 
+  const noItemsMessage = !compact ? (
+    <EmptyMessage
+      heading={i18n.translate('xpack.apm.dependenciesTable.notFoundLabel', {
+        defaultMessage: 'No dependencies found',
+      })}
+    />
+  ) : (
+    i18n.translate('xpack.apm.dependenciesTable.notFoundLabel', {
+      defaultMessage: 'No dependencies found',
+    })
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -176,28 +179,26 @@ export function DependenciesTable(props: Props) {
               <h2>{title}</h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+          {link && <EuiFlexItem grow={false}>{link}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
           <OverviewTableContainer
-            isEmptyAndLoading={
-              items.length === 0 && status === FETCH_STATUS.LOADING
+            fixedHeight={fixedHeight}
+            isEmptyAndNotInitiated={
+              items.length === 0 && status === FETCH_STATUS.NOT_INITIATED
             }
           >
-            <EuiInMemoryTable
+            <ManagedTable
+              isLoading={status === FETCH_STATUS.LOADING}
               columns={columns}
               items={items}
-              allowNeutralSort={false}
-              loading={status === FETCH_STATUS.LOADING}
-              pagination={pagination}
-              sorting={{
-                sort: {
-                  direction: 'desc',
-                  field: 'impactValue',
-                },
-              }}
+              noItemsMessage={noItemsMessage}
+              initialSortField="impactValue"
+              initialSortDirection="desc"
+              initialPageSize={5}
+              pagination={true}
             />
           </OverviewTableContainer>
         </TableFetchWrapper>

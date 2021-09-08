@@ -14,12 +14,12 @@ import { APIReturnType } from '../../../../plugins/apm/public/services/rest/crea
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
+import { createSupertestClient } from '../../common/apm_api_supertest';
 import { getServiceNodeIds } from './get_service_node_ids';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const apmApiSupertest = createApmApiSupertest(supertest);
+  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiSupertest = createSupertestClient(supertest);
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -47,6 +47,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 serviceNodeIds: JSON.stringify(
                   await getServiceNodeIds({ apmApiSupertest, start, end })
                 ),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -81,6 +83,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 numBuckets: 20,
                 transactionType: 'request',
                 serviceNodeIds: JSON.stringify(serviceNodeIds),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -135,6 +139,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );

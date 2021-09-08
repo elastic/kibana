@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { TlsTranslations } from '../../../common/translations';
@@ -32,7 +33,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   defaultActionMessage,
   requiresAppContext: false,
   format: ({ fields }) => ({
-    reason: fields.reason,
+    reason: fields[ALERT_REASON] || '',
     link: `/app/uptime${CERTIFICATES_ROUTE}`,
   }),
 });

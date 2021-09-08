@@ -1,8 +1,9 @@
 {
   "extends": "../../../../../../../tsconfig.base.json",
-  "exclude": [],
+  "references": [{ "path": "../../../../../../../test/tsconfig.json" }],
   "include": ["./**/*"],
   "compilerOptions": {
-    "types": ["cypress", "node"]
+    "outDir": "../../../../target/cypress/types/shared",
+    "types": ["cypress", "cypress-axe", "node"]
   }
 }

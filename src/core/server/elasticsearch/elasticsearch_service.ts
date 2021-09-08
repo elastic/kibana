@@ -13,11 +13,7 @@ import { merge } from '@kbn/std';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import {
-  LegacyClusterClient,
-  ILegacyCustomClusterClient,
-  LegacyElasticsearchClientConfig,
-} from './legacy';
+
 import { ClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import type { InternalHttpServiceSetup, GetAuthHeaders } from '../http';
@@ -27,8 +23,10 @@ import {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from './types';
+import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
+import { isValidConnection } from './is_valid_connection';
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -44,13 +42,7 @@ export class ElasticsearchService
   private kibanaVersion: string;
   private getAuthHeaders?: GetAuthHeaders;
   private executionContextClient?: IExecutionContext;
-
-  private createLegacyCustomClient?: (
-    type: string,
-    clientConfig?: Partial<LegacyElasticsearchClientConfig>
-  ) => ILegacyCustomClusterClient;
-  private legacyClient?: LegacyClusterClient;
-
+  private esNodesCompatibility$?: Observable<NodesVersionCompatibility>;
   private client?: ClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -84,7 +76,6 @@ export class ElasticsearchService
 
     this.getAuthHeaders = deps.http.getAuthHeaders;
     this.executionContextClient = deps.executionContext;
-    this.legacyClient = this.createLegacyClusterClient('data', config);
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
@@ -95,34 +86,40 @@ export class ElasticsearchService
       kibanaVersion: this.kibanaVersion,
     }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
-    this.createLegacyCustomClient = (type, clientConfig = {}) => {
-      const finalConfig = merge({}, config, clientConfig);
-      return this.createLegacyClusterClient(type, finalConfig);
-    };
+    this.esNodesCompatibility$ = esNodesCompatibility$;
 
     return {
       legacy: {
         config$: this.config$,
-        client: this.legacyClient,
-        createClient: this.createLegacyCustomClient,
       },
       esNodesCompatibility$,
       status$: calculateStatus$(esNodesCompatibility$),
     };
   }
   public async start(): Promise<InternalElasticsearchServiceStart> {
-    if (!this.legacyClient || !this.createLegacyCustomClient) {
+    if (!this.client || !this.esNodesCompatibility$) {
       throw new Error('ElasticsearchService needs to be setup before calling start');
     }
 
     const config = await this.config$.pipe(first()).toPromise();
+
+    // Log every error we may encounter in the connection to Elasticsearch
+    this.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      if (!isCompatible && message) {
+        this.log.error(message);
+      }
+    });
+
+    if (!config.skipStartupConnectionCheck) {
+      // Ensure that the connection is established and the product is valid before moving on
+      await isValidConnection(this.esNodesCompatibility$);
+    }
+
     return {
       client: this.client!,
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       legacy: {
         config$: this.config$,
-        client: this.legacyClient,
-        createClient: this.createLegacyCustomClient,
       },
     };
   }
@@ -132,9 +129,6 @@ export class ElasticsearchService
     this.stop$.next();
     if (this.client) {
       await this.client.close();
-    }
-    if (this.legacyClient) {
-      this.legacyClient.close();
     }
   }
 
@@ -150,15 +144,6 @@ export class ElasticsearchService
       type,
       this.getAuthHeaders,
       () => this.executionContextClient?.getAsHeader()
-    );
-  }
-
-  private createLegacyClusterClient(type: string, config: LegacyElasticsearchClientConfig) {
-    return new LegacyClusterClient(
-      config,
-      this.coreContext.logger.get('elasticsearch'),
-      type,
-      this.getAuthHeaders
     );
   }
 }

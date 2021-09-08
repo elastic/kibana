@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RuleDataClient } from '../../../../../../rule_registry/server';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -19,12 +19,11 @@ import { getIdError, transform } from './utils';
 import { buildSiemResponse } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
-import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export const readRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: RuleDataClient | null
+  ruleDataClient?: IRuleDataClient | null
 ) => {
   router.get(
     {
@@ -48,7 +47,6 @@ export const readRulesRoute = (
       const { id, rule_id: ruleId } = request.query;
 
       const rulesClient = context.alerting?.getRulesClient();
-      const savedObjectsClient = context.core.savedObjects.client;
 
       try {
         if (!rulesClient) {
@@ -62,10 +60,6 @@ export const readRulesRoute = (
           ruleId,
         });
         if (rule != null) {
-          const ruleActions = await getRuleActionsSavedObject({
-            savedObjectsClient,
-            ruleAlertId: rule.id,
-          });
           const ruleStatuses = await ruleStatusClient.find({
             logsCount: 1,
             ruleId: rule.id,
@@ -78,7 +72,7 @@ export const readRulesRoute = (
             currentStatus.attributes.statusDate = rule.executionStatus.lastExecutionDate.toISOString();
             currentStatus.attributes.status = RuleExecutionStatus.failed;
           }
-          const transformed = transform(rule, ruleActions, currentStatus);
+          const transformed = transform(rule, currentStatus);
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {

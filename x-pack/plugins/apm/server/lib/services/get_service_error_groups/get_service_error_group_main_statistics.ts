@@ -25,11 +25,11 @@ export async function getServiceErrorGroupMainStatistics({
   transactionType,
   environment,
 }: {
-  kuery?: string;
+  kuery: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   transactionType: string;
-  environment?: string;
+  environment: string;
 }) {
   const { apmEventClient, start, end } = setup;
 

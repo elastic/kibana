@@ -6,34 +6,50 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { CoreStart } from '../../../../../src/core/public';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { AlertStatus } from '../../../timelines/common';
-
-export const DETECTION_ENGINE_SIGNALS_STATUS_URL = '/api/detection_engine/signals/status';
+import {
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  RAC_ALERTS_BULK_UPDATE_URL,
+} from '../../common/constants';
 
 /**
  * Update alert status by query
  *
- * @param query of alerts to update
- * @param status to update to('open' / 'closed' / 'in-progress')
- * @param signal AbortSignal for cancelling request
+ * @param status to update to('open' / 'closed' / 'acknowledged')
+ * @param index index to be updated
+ * @param query optional query object to update alerts by query.
+
  *
  * @throws An error if response is not OK
  */
-export const useUpdateAlertsStatus = (): {
+export const useUpdateAlertsStatus = (
+  timelineId: string
+): {
   updateAlertStatus: (params: {
-    query: object;
     status: AlertStatus;
+    index: string;
+    query: object;
   }) => Promise<estypes.UpdateByQueryResponse>;
 } => {
-  const { http } = useKibana().services;
-
+  const { http } = useKibana<CoreStart>().services;
   return {
-    updateAlertStatus: ({ query, status }) =>
-      http!.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
-        method: 'POST',
-        body: JSON.stringify({ status, query }),
-      }),
+    updateAlertStatus: async ({ status, index, query }) => {
+      if (['detections-page', 'detections-rules-details-page'].includes(timelineId)) {
+        return http!.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ status, query }),
+        });
+      } else {
+        const { body } = await http.post(RAC_ALERTS_BULK_UPDATE_URL, {
+          body: JSON.stringify({ index, status, query }),
+        });
+        return body;
+      }
+    },
   };
 };
+
+//

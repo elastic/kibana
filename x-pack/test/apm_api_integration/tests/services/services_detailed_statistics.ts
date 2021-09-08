@@ -16,7 +16,7 @@ import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_n
 type ServicesDetailedStatisticsReturn = APIReturnType<'GET /api/apm/services/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
@@ -31,7 +31,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/detailed_statistics`,
-            query: { start, end, serviceNames: JSON.stringify(serviceNames), offset: '1d' },
+            query: {
+              start,
+              end,
+              serviceNames: JSON.stringify(serviceNames),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
+              offset: '1d',
+            },
           })
         );
         expect(response.status).to.be(200);
@@ -50,7 +57,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/detailed_statistics`,
-            query: { start, end, serviceNames: JSON.stringify(serviceNames) },
+            query: {
+              start,
+              end,
+              serviceNames: JSON.stringify(serviceNames),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
+            },
           })
         );
         expect(response.status).to.be(200);
@@ -95,7 +108,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await supertest.get(
           url.format({
             pathname: `/api/apm/services/detailed_statistics`,
-            query: { start, end, serviceNames: JSON.stringify([]) },
+            query: {
+              start,
+              end,
+              serviceNames: JSON.stringify([]),
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
+            },
           })
         );
         expect(response.status).to.be(400);
@@ -111,6 +130,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end,
               serviceNames: JSON.stringify(serviceNames),
               environment: 'production',
+              kuery: '',
             },
           })
         );
@@ -126,6 +146,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               start,
               end,
               serviceNames: JSON.stringify(serviceNames),
+              environment: 'ENVIRONMENT_ALL',
               kuery: 'transaction.type : "invalid_transaction_type"',
             },
           })
@@ -150,6 +171,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end,
               serviceNames: JSON.stringify(serviceNames),
               offset: '15m',
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );

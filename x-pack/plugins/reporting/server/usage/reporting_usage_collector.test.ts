@@ -238,6 +238,147 @@ describe('data modeling', () => {
     expect(usageStats).toMatchSnapshot();
   });
 
+  test('usage data with meta.isDeprecated jobTypes', async () => {
+    const plugins = getPluginsMock();
+    const collector = getReportingUsageCollector(
+      mockCore,
+      plugins.usageCollection,
+      getLicenseMock(),
+      exportTypesRegistry,
+      function isReady() {
+        return Promise.resolve(true);
+      }
+    );
+    collectorFetchContext = getMockFetchClients(
+      getResponseMock({
+        aggregations: {
+          ranges: {
+            buckets: {
+              all: {
+                doc_count: 9,
+                layoutTypes: {
+                  doc_count: 0,
+                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+                },
+                statusByApp: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'completed',
+                      doc_count: 9,
+                      jobTypes: {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 0,
+                        buckets: [
+                          {
+                            key: 'csv_searchsource',
+                            doc_count: 5,
+                            appNames: {
+                              doc_count_error_upper_bound: 0,
+                              sum_other_doc_count: 0,
+                              buckets: [{ key: 'search', doc_count: 5 }],
+                            },
+                          },
+                          {
+                            key: 'csv',
+                            doc_count: 4,
+                            appNames: {
+                              doc_count_error_upper_bound: 0,
+                              sum_other_doc_count: 0,
+                              buckets: [{ key: 'search', doc_count: 4 }],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+                objectTypes: {
+                  doc_count: 0,
+                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+                },
+                statusTypes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [{ key: 'completed', doc_count: 9 }],
+                },
+                jobTypes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    { key: 'csv_searchsource', doc_count: 5, isDeprecated: { doc_count: 0 } },
+                    { key: 'csv', doc_count: 4, isDeprecated: { doc_count: 4 } },
+                  ],
+                },
+              },
+              last7Days: {
+                doc_count: 9,
+                layoutTypes: {
+                  doc_count: 0,
+                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+                },
+                statusByApp: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    {
+                      key: 'completed',
+                      doc_count: 9,
+                      jobTypes: {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 0,
+                        buckets: [
+                          {
+                            key: 'csv_searchsource',
+                            doc_count: 5,
+                            appNames: {
+                              doc_count_error_upper_bound: 0,
+                              sum_other_doc_count: 0,
+                              buckets: [{ key: 'search', doc_count: 5 }],
+                            },
+                          },
+                          {
+                            key: 'csv',
+                            doc_count: 4,
+                            appNames: {
+                              doc_count_error_upper_bound: 0,
+                              sum_other_doc_count: 0,
+                              buckets: [{ key: 'search', doc_count: 4 }],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+                objectTypes: {
+                  doc_count: 0,
+                  pdf: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+                },
+                statusTypes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [{ key: 'completed', doc_count: 9 }],
+                },
+                jobTypes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [
+                    { key: 'csv_searchsource', doc_count: 5, isDeprecated: { doc_count: 0 } },
+                    { key: 'csv', doc_count: 4, isDeprecated: { doc_count: 4 } },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      })
+    );
+    const usageStats = await collector.fetch(collectorFetchContext);
+    expect(usageStats).toMatchSnapshot();
+  });
+
   test('with sparse data', async () => {
     const plugins = getPluginsMock();
     const collector = getReportingUsageCollector(
@@ -346,6 +487,7 @@ describe('data modeling', () => {
     // just check that the example objects can be cast to ReportingUsageType
     check({
       PNG: { available: true, total: 7 },
+      PNGV2: { available: true, total: 7 },
       _all: 21,
       available: true,
       browser_type: 'chromium',
@@ -354,10 +496,17 @@ describe('data modeling', () => {
       enabled: true,
       last7Days: {
         PNG: { available: true, total: 0 },
+        PNGV2: { available: true, total: 0 },
         _all: 0,
         csv: { available: true, total: 0 },
         csv_searchsource: { available: true, total: 0 },
         printable_pdf: {
+          app: { dashboard: 0, visualization: 0 },
+          available: true,
+          layout: { preserve_layout: 0, print: 0 },
+          total: 0,
+        },
+        printable_pdf_v2: {
           app: { dashboard: 0, visualization: 0 },
           available: true,
           layout: { preserve_layout: 0, print: 0 },
@@ -372,17 +521,26 @@ describe('data modeling', () => {
         layout: { preserve_layout: 7, print: 3 },
         total: 10,
       },
+      printable_pdf_v2: {
+        app: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
+        available: true,
+        layout: { preserve_layout: 7, print: 3 },
+        total: 10,
+      },
       status: { completed: 21, failed: 0 },
       statuses: {
         completed: {
           PNG: { dashboard: 3, visualization: 4 },
+          PNGV2: { dashboard: 3, visualization: 4 },
           csv: {},
           printable_pdf: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
+          printable_pdf_v2: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
         },
       },
     });
     check({
       PNG: { available: true, total: 3 },
+      PNGV2: { available: true, total: 3 },
       _all: 4,
       available: true,
       browser_type: 'chromium',
@@ -391,10 +549,17 @@ describe('data modeling', () => {
       enabled: true,
       last7Days: {
         PNG: { available: true, total: 3 },
+        PNGV2: { available: true, total: 3 },
         _all: 4,
         csv: { available: true, total: 0 },
         csv_searchsource: { available: true, total: 0 },
         printable_pdf: {
+          app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
+          available: true,
+          layout: { preserve_layout: 1, print: 0 },
+          total: 1,
+        },
+        printable_pdf_v2: {
           app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
           available: true,
           layout: { preserve_layout: 1, print: 0 },
@@ -406,6 +571,12 @@ describe('data modeling', () => {
         },
       },
       printable_pdf: {
+        app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
+        available: true,
+        layout: { preserve_layout: 1, print: 0 },
+        total: 1,
+      },
+      printable_pdf_v2: {
         app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
         available: true,
         layout: { preserve_layout: 1, print: 0 },
@@ -430,9 +601,16 @@ describe('data modeling', () => {
           app: { dashboard: 0, visualization: 0 },
           layout: { preserve_layout: 0, print: 0 },
         },
+        printable_pdf_v2: {
+          available: true,
+          total: 0,
+          app: { dashboard: 0, visualization: 0 },
+          layout: { preserve_layout: 0, print: 0 },
+        },
         csv: { available: true, total: 0 },
         csv_searchsource: { available: true, total: 0 },
         PNG: { available: true, total: 0 },
+        PNGV2: { available: true, total: 0 },
       },
       _all: 0,
       status: { completed: 0, failed: 0 },
@@ -443,9 +621,16 @@ describe('data modeling', () => {
         app: { dashboard: 0, visualization: 0 },
         layout: { preserve_layout: 0, print: 0 },
       },
+      printable_pdf_v2: {
+        available: true,
+        total: 0,
+        app: { dashboard: 0, visualization: 0 },
+        layout: { preserve_layout: 0, print: 0 },
+      },
       csv: { available: true, total: 0 },
       csv_searchsource: { available: true, total: 0 },
       PNG: { available: true, total: 0 },
+      PNGV2: { available: true, total: 0 },
     });
   });
 });
@@ -462,730 +647,7 @@ describe('Ready for collection observable', () => {
     registerReportingUsageCollector(mockReporting, plugins);
 
     const [args] = makeCollectorSpy.firstCall.args;
-    expect(args).toMatchInlineSnapshot(`
-      Object {
-        "fetch": [Function],
-        "isReady": [Function],
-        "schema": Object {
-          "PNG": Object {
-            "available": Object {
-              "type": "boolean",
-            },
-            "total": Object {
-              "type": "long",
-            },
-          },
-          "_all": Object {
-            "type": "long",
-          },
-          "available": Object {
-            "type": "boolean",
-          },
-          "browser_type": Object {
-            "type": "keyword",
-          },
-          "csv": Object {
-            "available": Object {
-              "type": "boolean",
-            },
-            "total": Object {
-              "type": "long",
-            },
-          },
-          "csv_searchsource": Object {
-            "available": Object {
-              "type": "boolean",
-            },
-            "total": Object {
-              "type": "long",
-            },
-          },
-          "enabled": Object {
-            "type": "boolean",
-          },
-          "last7Days": Object {
-            "PNG": Object {
-              "available": Object {
-                "type": "boolean",
-              },
-              "total": Object {
-                "type": "long",
-              },
-            },
-            "_all": Object {
-              "type": "long",
-            },
-            "csv": Object {
-              "available": Object {
-                "type": "boolean",
-              },
-              "total": Object {
-                "type": "long",
-              },
-            },
-            "csv_searchsource": Object {
-              "available": Object {
-                "type": "boolean",
-              },
-              "total": Object {
-                "type": "long",
-              },
-            },
-            "printable_pdf": Object {
-              "app": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "available": Object {
-                "type": "boolean",
-              },
-              "layout": Object {
-                "preserve_layout": Object {
-                  "type": "long",
-                },
-                "print": Object {
-                  "type": "long",
-                },
-              },
-              "total": Object {
-                "type": "long",
-              },
-            },
-            "status": Object {
-              "cancelled": Object {
-                "type": "long",
-              },
-              "completed": Object {
-                "type": "long",
-              },
-              "completed_with_warnings": Object {
-                "type": "long",
-              },
-              "failed": Object {
-                "type": "long",
-              },
-              "pending": Object {
-                "type": "long",
-              },
-              "processing": Object {
-                "type": "long",
-              },
-            },
-            "statuses": Object {
-              "cancelled": Object {
-                "PNG": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv_searchsource": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "printable_pdf": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-              },
-              "completed": Object {
-                "PNG": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv_searchsource": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "printable_pdf": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-              },
-              "completed_with_warnings": Object {
-                "PNG": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv_searchsource": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "printable_pdf": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-              },
-              "failed": Object {
-                "PNG": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv_searchsource": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "printable_pdf": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-              },
-              "pending": Object {
-                "PNG": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv_searchsource": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "printable_pdf": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-              },
-              "processing": Object {
-                "PNG": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "csv_searchsource": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-                "printable_pdf": Object {
-                  "canvas workpad": Object {
-                    "type": "long",
-                  },
-                  "dashboard": Object {
-                    "type": "long",
-                  },
-                  "visualization": Object {
-                    "type": "long",
-                  },
-                },
-              },
-            },
-          },
-          "printable_pdf": Object {
-            "app": Object {
-              "canvas workpad": Object {
-                "type": "long",
-              },
-              "dashboard": Object {
-                "type": "long",
-              },
-              "visualization": Object {
-                "type": "long",
-              },
-            },
-            "available": Object {
-              "type": "boolean",
-            },
-            "layout": Object {
-              "preserve_layout": Object {
-                "type": "long",
-              },
-              "print": Object {
-                "type": "long",
-              },
-            },
-            "total": Object {
-              "type": "long",
-            },
-          },
-          "status": Object {
-            "cancelled": Object {
-              "type": "long",
-            },
-            "completed": Object {
-              "type": "long",
-            },
-            "completed_with_warnings": Object {
-              "type": "long",
-            },
-            "failed": Object {
-              "type": "long",
-            },
-            "pending": Object {
-              "type": "long",
-            },
-            "processing": Object {
-              "type": "long",
-            },
-          },
-          "statuses": Object {
-            "cancelled": Object {
-              "PNG": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv_searchsource": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "printable_pdf": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-            },
-            "completed": Object {
-              "PNG": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv_searchsource": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "printable_pdf": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-            },
-            "completed_with_warnings": Object {
-              "PNG": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv_searchsource": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "printable_pdf": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-            },
-            "failed": Object {
-              "PNG": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv_searchsource": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "printable_pdf": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-            },
-            "pending": Object {
-              "PNG": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv_searchsource": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "printable_pdf": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-            },
-            "processing": Object {
-              "PNG": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "csv_searchsource": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-              "printable_pdf": Object {
-                "canvas workpad": Object {
-                  "type": "long",
-                },
-                "dashboard": Object {
-                  "type": "long",
-                },
-                "visualization": Object {
-                  "type": "long",
-                },
-              },
-            },
-          },
-        },
-        "type": "reporting",
-      }
-    `);
+    expect(args).toMatchSnapshot();
 
     await expect(args.isReady()).resolves.toBe(true);
   });

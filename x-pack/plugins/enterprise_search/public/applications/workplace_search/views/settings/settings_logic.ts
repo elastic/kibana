@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 
 import {
   clearFlashMessages,
-  setQueuedSuccessMessage,
   flashSuccessToast,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
@@ -62,6 +61,7 @@ interface SettingsActions {
   updateOrgIcon(): void;
   resetOrgLogo(): void;
   resetOrgIcon(): void;
+  resetButtonLoading(): void;
   deleteSourceConfig(
     serviceType: string,
     name: string
@@ -80,6 +80,8 @@ interface SettingsValues {
   icon: string | null;
   stagedLogo: string | null;
   stagedIcon: string | null;
+  logoButtonLoading: boolean;
+  iconButtonLoading: boolean;
 }
 
 const imageRoute = '/api/workplace_search/org/settings/upload_images';
@@ -105,6 +107,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     updateOrgIcon: () => true,
     resetOrgLogo: () => true,
     resetOrgIcon: () => true,
+    resetButtonLoading: () => true,
     updateOauthApplication: () => true,
     deleteSourceConfig: (serviceType: string, name: string) => ({
       serviceType,
@@ -174,6 +177,22 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         setIcon: () => null,
       },
     ],
+    logoButtonLoading: [
+      false,
+      {
+        updateOrgLogo: () => true,
+        setLogo: () => false,
+        resetButtonLoading: () => false,
+      },
+    ],
+    iconButtonLoading: [
+      false,
+      {
+        updateOrgIcon: () => true,
+        setIcon: () => false,
+        resetButtonLoading: () => false,
+      },
+    ],
   },
   listeners: ({ actions, values }) => ({
     initializeSettings: async () => {
@@ -199,6 +218,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       }
     },
     updateOrgName: async () => {
+      clearFlashMessages();
       const { http } = HttpLogic.values;
       const route = '/api/workplace_search/org/settings/customize';
       const { orgNameInputValue: name } = values;
@@ -214,6 +234,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       }
     },
     updateOrgLogo: async () => {
+      clearFlashMessages();
       const { http } = HttpLogic.values;
       const { stagedLogo: logo } = values;
       const body = JSON.stringify({ logo });
@@ -223,10 +244,12 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         actions.setLogo(response.logo);
         flashSuccessToast(ORG_UPDATED_MESSAGE);
       } catch (e) {
+        actions.resetButtonLoading();
         flashAPIErrors(e);
       }
     },
     updateOrgIcon: async () => {
+      clearFlashMessages();
       const { http } = HttpLogic.values;
       const { stagedIcon: icon } = values;
       const body = JSON.stringify({ icon });
@@ -236,6 +259,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         actions.setIcon(response.icon);
         flashSuccessToast(ORG_UPDATED_MESSAGE);
       } catch (e) {
+        actions.resetButtonLoading();
         flashAPIErrors(e);
       }
     },
@@ -265,7 +289,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       try {
         await http.delete(route);
         KibanaLogic.values.navigateToUrl(ORG_SETTINGS_CONNECTORS_PATH);
-        setQueuedSuccessMessage(
+        flashSuccessToast(
           i18n.translate('xpack.enterpriseSearch.workplaceSearch.settings.configRemoved.message', {
             defaultMessage: 'Successfully removed configuration for {name}.',
             values: { name },
@@ -276,6 +300,12 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       }
     },
     resetSettingsState: () => {
+      clearFlashMessages();
+    },
+    setStagedLogo: () => {
+      clearFlashMessages();
+    },
+    setStagedIcon: () => {
       clearFlashMessages();
     },
     resetOrgLogo: () => {

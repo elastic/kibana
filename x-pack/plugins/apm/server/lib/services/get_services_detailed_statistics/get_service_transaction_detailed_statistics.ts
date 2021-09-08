@@ -39,8 +39,8 @@ export async function getServiceTransactionDetailedStatistics({
   offset,
 }: {
   serviceNames: string[];
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   offset?: string;

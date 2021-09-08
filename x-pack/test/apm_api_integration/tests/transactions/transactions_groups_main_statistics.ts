@@ -16,7 +16,7 @@ import { registry } from '../../common/registry';
 type TransactionsGroupsPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
@@ -34,6 +34,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end,
               latencyAggregationType: 'avg',
               transactionType: 'request',
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -59,6 +61,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end,
               transactionType: 'request',
               latencyAggregationType: 'avg',
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );
@@ -131,6 +135,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               end,
               transactionType: 'request',
               latencyAggregationType: 'p99',
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
             },
           })
         );

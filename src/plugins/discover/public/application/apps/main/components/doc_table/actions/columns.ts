@@ -7,7 +7,6 @@
  */
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../../../common';
-import { popularizeField } from '../../../../../../application/helpers/popularize_field';
 import {
   AppState as DiscoverState,
   GetStateReturn as DiscoverGetStateReturn,
@@ -15,8 +14,9 @@ import {
 import {
   AppState as ContextState,
   GetStateReturn as ContextGetStateReturn,
-} from '../../../../../../application/angular/context_state';
+} from '../../../../context/services/context_state';
 import { IndexPattern, IndexPatternsContract } from '../../../../../../../../data/public';
+import { popularizeField } from '../../../../../helpers/popularize_field';
 
 /**
  * Helper function to provide a fallback to a single _source column if the given array of columns
@@ -78,9 +78,7 @@ export function getStateColumnActions({
   state: DiscoverState | ContextState;
 }) {
   function onAddColumn(columnName: string) {
-    if (capabilities.discover.save) {
-      popularizeField(indexPattern, columnName, indexPatterns);
-    }
+    popularizeField(indexPattern, columnName, indexPatterns, capabilities);
     const columns = addColumn(state.columns || [], columnName, useNewFieldsApi);
     const defaultOrder = config.get(SORT_DEFAULT_ORDER_SETTING);
     const sort =
@@ -89,9 +87,7 @@ export function getStateColumnActions({
   }
 
   function onRemoveColumn(columnName: string) {
-    if (capabilities.discover.save) {
-      popularizeField(indexPattern, columnName, indexPatterns);
-    }
+    popularizeField(indexPattern, columnName, indexPatterns, capabilities);
     const columns = removeColumn(state.columns || [], columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const sort =

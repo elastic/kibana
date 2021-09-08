@@ -17,13 +17,11 @@ storiesOf('components/SavedElementsModal', module)
   .add('no custom elements', () => (
     <SavedElementsModal
       customElements={[] as CustomElement[]}
-      search=""
-      setSearch={action('setSearch')}
+      onAddCustomElement={action('onAddCustomElement')}
+      onSearch={action('onSearch')}
+      onUpdateCustomElement={action('onUpdateCustomElement')}
+      onRemoveCustomElement={action('onRemoveCustomElement')}
       onClose={action('onClose')}
-      addCustomElement={action('addCustomElement')}
-      findCustomElements={action('findCustomElements')}
-      updateCustomElement={action('updateCustomElement')}
-      removeCustomElement={action('removeCustomElement')}
     />
   ))
   .add(
@@ -31,13 +29,11 @@ storiesOf('components/SavedElementsModal', module)
     (_, props) => (
       <SavedElementsModal
         customElements={props?.testCustomElements}
-        search=""
-        setSearch={action('setSearch')}
+        onAddCustomElement={action('onAddCustomElement')}
+        onSearch={action('onSearch')}
+        onUpdateCustomElement={action('onUpdateCustomElement')}
+        onRemoveCustomElement={action('onRemoveCustomElement')}
         onClose={action('onClose')}
-        addCustomElement={action('addCustomElement')}
-        findCustomElements={action('findCustomElements')}
-        updateCustomElement={action('updateCustomElement')}
-        removeCustomElement={action('removeCustomElement')}
       />
     ),
     { decorators: [waitFor(getTestCustomElements())] }
@@ -47,13 +43,12 @@ storiesOf('components/SavedElementsModal', module)
     (_, props) => (
       <SavedElementsModal
         customElements={props?.testCustomElements}
-        search="Element 2"
+        initialSearch="Element 2"
+        onAddCustomElement={action('onAddCustomElement')}
+        onSearch={action('onSearch')}
+        onUpdateCustomElement={action('onUpdateCustomElement')}
+        onRemoveCustomElement={action('onRemoveCustomElement')}
         onClose={action('onClose')}
-        setSearch={action('setSearch')}
-        addCustomElement={action('addCustomElement')}
-        findCustomElements={action('findCustomElements')}
-        updateCustomElement={action('updateCustomElement')}
-        removeCustomElement={action('removeCustomElement')}
       />
     ),
     { decorators: [waitFor(getTestCustomElements())] }

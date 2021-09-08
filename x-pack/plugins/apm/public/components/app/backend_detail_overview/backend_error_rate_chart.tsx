@@ -8,7 +8,6 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useComparison } from '../../../hooks/use_comparison';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -31,14 +30,10 @@ export function BackendFailedTransactionRateChart({
   const theme = useTheme();
 
   const {
-    query: { rangeFrom, rangeTo },
+    query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/backends/:backendName/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const {
-    urlParams: { kuery, environment },
-  } = useUrlParams();
 
   const { offset, comparisonChartTheme } = useComparison();
 

@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('legacySupertestAsApmReadUser');
   const archiveName = 'apm_8.0.0';
   const range = archives_metadata[archiveName];
 
@@ -22,6 +22,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     query: {
       start: range.start,
       end: range.end,
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
     },
   });
 

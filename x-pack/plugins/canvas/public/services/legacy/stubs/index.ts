@@ -6,12 +6,10 @@
  */
 
 import { CanvasServices, services } from '../';
-import { labsService } from './labs';
 import { searchService } from './search';
 
 export const stubs: CanvasServices = {
   search: searchService,
-  labs: labsService,
 };
 
 export const startServices = async (providedServices: Partial<CanvasServices> = {}) => {

@@ -23,7 +23,7 @@ import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
 import {
   AlertTypeWithExecutor,
   PersistenceServices,
-  RuleDataClient,
+  IRuleDataClient,
 } from '../../../../../rule_registry/server';
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
@@ -93,14 +93,14 @@ type SecurityAlertTypeWithExecutor<
 };
 
 export type CreateSecurityRuleTypeFactory = (options: {
-  indexAlias: string;
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
-  ruleDataClient: RuleDataClient;
+  ignoreFields: ConfigType['alertIgnoreFields'];
+  ruleDataClient: IRuleDataClient;
   ruleDataService: IRuleDataPluginService;
 }) => <
-  TParams extends RuleParams & { index: string[] | undefined },
+  TParams extends RuleParams & { index?: string[] | undefined },
   TAlertInstanceContext extends AlertInstanceContext,
   TServices extends PersistenceServices<TAlertInstanceContext>,
   TState extends AlertTypeState
@@ -122,11 +122,12 @@ export type WrappedRACAlert = BaseHit<RACAlert>;
 
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
-  indexAlias: string;
   lists: SetupPlugins['lists'];
   logger: Logger;
   mergeStrategy: ConfigType['alertMergeStrategy'];
-  ruleDataClient: RuleDataClient;
+  ignoreFields: ConfigType['alertIgnoreFields'];
+  ml?: SetupPlugins['ml'];
+  ruleDataClient: IRuleDataClient;
   version: string;
   ruleDataService: IRuleDataPluginService;
 }

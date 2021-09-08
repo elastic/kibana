@@ -12,10 +12,12 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useUiTracker } from '../../../../../observability/public';
-import { getDateDifference } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useBreakPoints } from '../../../hooks/use_break_points';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../../shared/Links/url_helpers';
+import { getComparisonTypes } from './get_comparison_types';
 import {
   getTimeRangeComparison,
   TimeRangeComparisonType,
@@ -57,41 +59,6 @@ function formatDate({
   const momentStart = moment(previousPeriodStart);
   const momentEnd = moment(previousPeriodEnd);
   return `${momentStart.format(dateFormat)} - ${momentEnd.format(dateFormat)}`;
-}
-
-export function getComparisonTypes({
-  start,
-  end,
-}: {
-  start?: string;
-  end?: string;
-}) {
-  const momentStart = moment(start);
-  const momentEnd = moment(end);
-
-  const dateDiff = getDateDifference({
-    start: momentStart,
-    end: momentEnd,
-    unitOfTime: 'days',
-    precise: true,
-  });
-
-  // Less than or equals to one day
-  if (dateDiff <= 1) {
-    return [
-      TimeRangeComparisonType.DayBefore,
-      TimeRangeComparisonType.WeekBefore,
-    ];
-  }
-
-  // Less than or equals to one week
-  if (dateDiff <= 7) {
-    return [TimeRangeComparisonType.WeekBefore];
-  }
-  // }
-
-  // above one week or when rangeTo is not "now"
-  return [TimeRangeComparisonType.PeriodBefore];
 }
 
 export function getSelectOptions({
@@ -152,7 +119,16 @@ export function TimeComparison() {
   const history = useHistory();
   const { isSmall } = useBreakPoints();
   const {
-    urlParams: { comparisonEnabled, comparisonType, exactStart, exactEnd },
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services', '/backends/*', '/services/:serviceName');
+
+  const { exactStart, exactEnd } = useTimeRange({
+    rangeFrom,
+    rangeTo,
+  });
+
+  const {
+    urlParams: { comparisonEnabled, comparisonType },
   } = useUrlParams();
 
   const comparisonTypes = getComparisonTypes({

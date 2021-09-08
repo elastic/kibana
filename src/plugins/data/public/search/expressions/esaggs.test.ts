@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { ExecutionContext } from 'src/plugins/expressions/public';
@@ -88,6 +89,12 @@ describe('esaggs expression function - public', () => {
       {},
       args.aggs.map((agg) => agg.value)
     );
+  });
+
+  test('calls aggs.createAggConfigs with the empty aggs array when not provided', async () => {
+    await definition().fn(null, omit(args, 'aggs'), mockHandlers).toPromise();
+
+    expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, []);
   });
 
   test('calls getEsaggsMeta to retrieve meta', () => {

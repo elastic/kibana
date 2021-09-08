@@ -8,7 +8,7 @@
 import type { EVENT_KIND as EVENT_KIND_TYPED } from '@kbn/rule-data-utils';
 // @ts-expect-error
 import { EVENT_KIND as EVENT_KIND_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
-import { RuleDataClient } from '../../../../rule_registry/server';
+import { IRuleDataClient } from '../../../../rule_registry/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -26,11 +26,11 @@ export async function getServiceAlerts({
   environment,
   transactionType,
 }: {
-  ruleDataClient: RuleDataClient;
+  ruleDataClient: IRuleDataClient;
   start: number;
   end: number;
   serviceName: string;
-  environment?: string;
+  environment: string;
   transactionType: string;
 }) {
   const response = await ruleDataClient.getReader().search({

@@ -72,6 +72,18 @@ function getLensTopNavConfig(options: {
       });
 
   topNavMenu.push({
+    label: i18n.translate('xpack.lens.app.inspect', {
+      defaultMessage: 'Inspect',
+    }),
+    run: actions.inspect,
+    testId: 'lnsApp_inspectButton',
+    description: i18n.translate('xpack.lens.app.inspectAriaLabel', {
+      defaultMessage: 'inspect',
+    }),
+    disableButton: false,
+  });
+
+  topNavMenu.push({
     label: i18n.translate('xpack.lens.app.downloadCSV', {
       defaultMessage: 'Download as CSV',
     }),
@@ -131,6 +143,7 @@ export const LensTopNavMenu = ({
   setHeaderActionMenu,
   initialInput,
   indicateNoData,
+  lensInspector,
   setIsSaveModalVisible,
   getIsByValueMode,
   runSave,
@@ -166,6 +179,7 @@ export const LensTopNavMenu = ({
     activeDatasourceId,
     datasourceStates,
   } = useLensSelector((state) => state.lens);
+  const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
   useEffect(() => {
     const activeDatasource =
@@ -241,6 +255,7 @@ export const LensTopNavMenu = ({
           },
         },
         actions: {
+          inspect: lensInspector.inspect,
           exportToCSV: () => {
             if (!activeData) {
               return;
@@ -320,6 +335,7 @@ export const LensTopNavMenu = ({
       setIsSaveModalVisible,
       uiSettings,
       unsavedTitle,
+      lensInspector.inspect,
     ]
   );
 
@@ -390,7 +406,16 @@ export const LensTopNavMenu = ({
       dateRangeTo={to}
       indicateNoData={indicateNoData}
       showSearchBar={true}
-      showDatePicker={true}
+      showDatePicker={
+        indexPatterns.some((ip) => ip.isTimeBased()) ||
+        Boolean(
+          allLoaded &&
+            activeDatasourceId &&
+            datasourceMap[activeDatasourceId].isTimeBased(
+              datasourceStates[activeDatasourceId].state
+            )
+        )
+      }
       showQueryBar={true}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"

@@ -12,14 +12,14 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import type {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_TYPED,
-  ALERT_SEVERITY_VALUE as ALERT_SEVERITY_VALUE_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
+  ALERT_REASON as ALERT_REASON_TYPED,
 } from '@kbn/rule-data-utils';
 import {
   ALERT_EVALUATION_THRESHOLD as ALERT_EVALUATION_THRESHOLD_NON_TYPED,
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
-  ALERT_SEVERITY_LEVEL as ALERT_SEVERITY_LEVEL_NON_TYPED,
-  ALERT_SEVERITY_VALUE as ALERT_SEVERITY_VALUE_NON_TYPED,
+  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
+  ALERT_REASON as ALERT_REASON_NON_TYPED,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
@@ -37,6 +37,7 @@ import {
   AlertType,
   ALERT_TYPES_CONFIG,
   ANOMALY_ALERT_SEVERITY_TYPES,
+  formatTransactionDurationAnomalyReason,
 } from '../../../common/alert_types';
 import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
@@ -48,8 +49,8 @@ import {
 
 const ALERT_EVALUATION_THRESHOLD: typeof ALERT_EVALUATION_THRESHOLD_TYPED = ALERT_EVALUATION_THRESHOLD_NON_TYPED;
 const ALERT_EVALUATION_VALUE: typeof ALERT_EVALUATION_VALUE_TYPED = ALERT_EVALUATION_VALUE_NON_TYPED;
-const ALERT_SEVERITY_LEVEL: typeof ALERT_SEVERITY_LEVEL_TYPED = ALERT_SEVERITY_LEVEL_NON_TYPED;
-const ALERT_SEVERITY_VALUE: typeof ALERT_SEVERITY_VALUE_TYPED = ALERT_SEVERITY_VALUE_NON_TYPED;
+const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
+const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -254,10 +255,14 @@ export function registerTransactionDurationAnomalyAlertType({
                 ...getEnvironmentEsField(environment),
                 [TRANSACTION_TYPE]: transactionType,
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-                [ALERT_SEVERITY_LEVEL]: severityLevel,
-                [ALERT_SEVERITY_VALUE]: score,
+                [ALERT_SEVERITY]: severityLevel,
                 [ALERT_EVALUATION_VALUE]: score,
                 [ALERT_EVALUATION_THRESHOLD]: threshold,
+                [ALERT_REASON]: formatTransactionDurationAnomalyReason({
+                  measured: score,
+                  serviceName,
+                  severityLevel,
+                }),
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {

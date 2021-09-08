@@ -12,6 +12,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { Popover } from '.';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
@@ -97,7 +98,14 @@ const stories: Meta<Args> = {
 export default stories;
 
 export const Backend: Story<Args> = () => {
-  return <Popover />;
+  return (
+    <Popover
+      environment={ENVIRONMENT_ALL.value}
+      kuery=""
+      start="2021-08-20T10:00:00.000Z"
+      end="2021-08-20T10:15:00.000Z"
+    />
+  );
 };
 Backend.args = {
   nodeData: {
@@ -110,7 +118,14 @@ Backend.args = {
 };
 
 export const BackendWithLongTitle: Story<Args> = () => {
-  return <Popover />;
+  return (
+    <Popover
+      environment={ENVIRONMENT_ALL.value}
+      kuery=""
+      start="2021-08-20T10:00:00.000Z"
+      end="2021-08-20T10:15:00.000Z"
+    />
+  );
 };
 BackendWithLongTitle.args = {
   nodeData: {
@@ -124,14 +139,28 @@ BackendWithLongTitle.args = {
 };
 
 export const ExternalsList: Story<Args> = () => {
-  return <Popover />;
+  return (
+    <Popover
+      environment={ENVIRONMENT_ALL.value}
+      kuery=""
+      start="2021-08-20T10:00:00.000Z"
+      end="2021-08-20T10:15:00.000Z"
+    />
+  );
 };
 ExternalsList.args = {
   nodeData: exampleGroupedConnectionsData,
 };
 
 export const Resource: Story<Args> = () => {
-  return <Popover />;
+  return (
+    <Popover
+      environment={ENVIRONMENT_ALL.value}
+      kuery=""
+      start="2021-08-20T10:00:00.000Z"
+      end="2021-08-20T10:15:00.000Z"
+    />
+  );
 };
 Resource.args = {
   nodeData: {
@@ -144,7 +173,14 @@ Resource.args = {
 };
 
 export const Service: Story<Args> = () => {
-  return <Popover />;
+  return (
+    <Popover
+      environment={ENVIRONMENT_ALL.value}
+      kuery=""
+      start="2021-08-20T10:00:00.000Z"
+      end="2021-08-20T10:15:00.000Z"
+    />
+  );
 };
 Service.args = {
   nodeData: {

@@ -22,10 +22,15 @@ const topBackendsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/backends/top_backends',
   params: t.intersection([
     t.type({
-      query: t.intersection([rangeRt, t.type({ numBuckets: toNumberRt })]),
+      query: t.intersection([
+        rangeRt,
+        environmentRt,
+        kueryRt,
+        t.type({ numBuckets: toNumberRt }),
+      ]),
     }),
     t.partial({
-      query: t.intersection([environmentRt, offsetRt, kueryRt]),
+      query: offsetRt,
     }),
   ]),
   options: {
