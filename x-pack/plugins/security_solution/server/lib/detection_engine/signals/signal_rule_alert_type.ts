@@ -72,6 +72,7 @@ import { injectReferences, extractReferences } from './saved_object_references';
 import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
 import { IRuleDataPluginService } from '../rule_execution_log/types';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 
 export const signalRulesAlertType = ({
   logger,
@@ -81,6 +82,7 @@ export const signalRulesAlertType = ({
   ml,
   lists,
   mergeStrategy,
+  ignoreFields,
   ruleDataService,
 }: {
   logger: Logger;
@@ -90,6 +92,7 @@ export const signalRulesAlertType = ({
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
   mergeStrategy: ConfigType['alertMergeStrategy'];
+  ignoreFields: ConfigType['alertIgnoreFields'];
   ruleDataService: IRuleDataPluginService;
 }): SignalRuleAlertTypeDefinition => {
   return {
@@ -274,12 +277,14 @@ export const signalRulesAlertType = ({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
           mergeStrategy,
+          ignoreFields,
         });
 
         const wrapSequences = wrapSequencesFactory({
           ruleSO: savedObject,
           signalsIndex: params.outputIndex,
           mergeStrategy,
+          ignoreFields,
         });
 
         if (isMlRule(type)) {
@@ -405,7 +410,20 @@ export const signalRulesAlertType = ({
               buildRuleMessage(`Found ${result.createdSignalsCount} signals for notification.`)
             );
 
-            if (result.createdSignalsCount) {
+            if (savedObject.attributes.throttle != null) {
+              await scheduleThrottledNotificationActions({
+                alertInstance: services.alertInstanceFactory(alertId),
+                throttle: savedObject.attributes.throttle,
+                startedAt,
+                id: savedObject.id,
+                kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                  ?.kibana_siem_app_url,
+                outputIndex,
+                ruleId,
+                esClient: services.scopedClusterClient.asCurrentUser,
+                notificationRuleParams,
+              });
+            } else if (result.createdSignalsCount) {
               const alertInstance = services.alertInstanceFactory(alertId);
               scheduleNotificationActions({
                 alertInstance,

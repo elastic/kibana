@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { isEqual } from 'lodash';
-import { I18nProvider } from '@kbn/i18n/react';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
 import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
@@ -61,18 +60,16 @@ export class DocViewerTab extends React.Component<Props, State> {
     }
 
     if (render) {
-      // doc view is provided by a render function, e.g. for legacy Angular code
+      // doc view is provided by a render function
       return <DocViewRenderTab render={render} renderProps={renderProps} />;
     }
 
     // doc view is provided by a react component
     if (Component) {
       return (
-        <I18nProvider>
-          <KibanaContextProvider services={{ uiSettings: getServices().uiSettings }}>
-            <Component {...renderProps} />
-          </KibanaContextProvider>
-        </I18nProvider>
+        <KibanaContextProvider services={{ uiSettings: getServices().uiSettings }}>
+          <Component {...renderProps} />
+        </KibanaContextProvider>
       );
     }
 

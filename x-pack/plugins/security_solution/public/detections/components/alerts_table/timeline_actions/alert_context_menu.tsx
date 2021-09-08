@@ -32,15 +32,12 @@ import { useExceptionModal } from './use_add_exception_modal';
 import { useExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  ALERT_ORIGINAL_EVENT_MODULE,
-  ALERT_ORIGINAL_EVENT_KIND,
-} from '../../../../../../timelines/common/alerts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useInvestigateInResolverContextItem } from './investigate_in_resolver';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
+import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -82,17 +79,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
-
-  const isEndpointAlert = useMemo((): boolean => {
-    if (ecsRowData == null) {
-      return false;
-    }
-
-    const eventModules = getOr([], ALERT_ORIGINAL_EVENT_MODULE, ecsRowData);
-    const kinds = getOr([], ALERT_ORIGINAL_EVENT_KIND, ecsRowData);
-
-    return eventModules.includes('endpoint') && kinds.includes('alert');
-  }, [ecsRowData]);
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -158,7 +144,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   }, [closePopover, onAddEventFilterClick]);
 
   const { exceptionActionItems } = useExceptionActions({
-    isEndpointAlert,
+    isEndpointAlert: isAlertFromEndpointAlert({ ecsData: ecsRowData }),
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
   });
   const investigateInResolverActionItems = useInvestigateInResolverContextItem({

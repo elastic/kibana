@@ -2,6 +2,13 @@
 
 set -euo pipefail
 
+cd '.buildkite'
+yarn install
+cd -
+
+BUILDKITE_TOKEN="$(vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
+export BUILDKITE_TOKEN
+
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
 {
   ES_SNAPSHOT_MANIFEST=${ES_SNAPSHOT_MANIFEST:-$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST --default '')}
@@ -64,4 +71,9 @@ if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
     source .buildkite/scripts/common/setup_node.sh
     source .buildkite/scripts/common/setup_bazel.sh
   fi
+fi
+
+PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
+if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
+  source "$PIPELINE_PRE_COMMAND"
 fi

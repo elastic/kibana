@@ -84,8 +84,7 @@ export default function ({ getService }) {
         .then(ensureFieldsAreSorted);
     });
 
-    // https://github.com/elastic/kibana/issues/79813
-    it.skip('always returns a field for all passed meta fields', async () => {
+    it('always returns a field for all passed meta fields', async () => {
       await supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({
@@ -95,7 +94,7 @@ export default function ({ getService }) {
         .expect(200, {
           fields: [
             {
-              aggregatable: true,
+              aggregatable: false,
               name: '_id',
               esTypes: ['_id'],
               readFromDocValues: false,

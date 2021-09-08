@@ -15,7 +15,7 @@ export function registerSearchUIRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/search_ui/field_config',
+      path: '/internal/app_search/engines/{engineName}/search_ui/field_config',
       validate: {
         params: schema.object({
           engineName: schema.string(),

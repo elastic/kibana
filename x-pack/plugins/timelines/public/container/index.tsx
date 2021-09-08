@@ -41,14 +41,14 @@ import { useAppToasts } from '../hooks/use_app_toasts';
 import { TimelineId } from '../store/t_grid/types';
 import * as i18n from './translations';
 
-type InspectResponse = Inspect & { response: string[] };
+export type InspectResponse = Inspect & { response: string[] };
 
 export const detectionsTimelineIds = [
   TimelineId.detectionsPage,
   TimelineId.detectionsRulesDetailsPage,
 ];
 
-type Refetch = () => void;
+export type Refetch = () => void;
 
 export interface TimelineArgs {
   consumers: Record<string, number>;
@@ -134,7 +134,7 @@ export const useTimelineEvents = ({
   const refetch = useRef<Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activePage, setActivePage] = useState(0);
   const [timelineRequest, setTimelineRequest] = useState<TimelineRequest<typeof language> | null>(
     null

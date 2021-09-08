@@ -8,6 +8,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { IndexPattern } from 'src/plugins/data/common';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,7 +25,6 @@ import {
   keys,
 } from '@elastic/eui';
 import { DocViewer } from '../doc_viewer/doc_viewer';
-import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverServices } from '../../../build_services';
 import { getContextUrl } from '../../helpers/get_context_url';

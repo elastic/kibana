@@ -78,7 +78,8 @@ export class HeadlessChromiumDriverFactory {
     { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone?: string },
     pLogger: LevelLogger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
-    return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
+    // FIXME: 'create' is deprecated
+    return Rx.Observable.create(async (observer: InnerSubscriber<unknown, unknown>) => {
       const logger = pLogger.clone(['browser-driver']);
       logger.info(`Creating browser page driver`);
 

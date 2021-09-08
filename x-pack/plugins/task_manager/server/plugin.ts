@@ -95,6 +95,14 @@ export class TaskManagerPlugin
       this.config!
     );
 
+    core.status.derivedStatus$.subscribe((status) =>
+      this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
+    );
+    serviceStatus$.subscribe((status) =>
+      this.logger.debug(`status serviceStatus now set to ${status.level}`)
+    );
+
+    // here is where the system status is updated
     core.status.set(
       combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
         map(([derivedStatus, serviceStatus]) =>

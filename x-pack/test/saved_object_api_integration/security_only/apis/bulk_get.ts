@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SPACES, ALL_SPACES_ID } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -14,6 +15,10 @@ import {
   BulkGetTestDefinition,
 } from '../../common/suites/bulk_get';
 
+const {
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
 const { fail400, fail404 } = testCaseFailures;
 
 const createTestCases = () => {
@@ -31,6 +36,21 @@ const createTestCases = () => {
     { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, ...fail404() },
     CASES.NAMESPACE_AGNOSTIC,
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
+    {
+      ...CASES.SINGLE_NAMESPACE_SPACE_2,
+      namespaces: ['x', 'y'],
+      ...fail400(), // cannot be searched for in multiple spaces
+    },
+    { ...CASES.SINGLE_NAMESPACE_SPACE_2, namespaces: [SPACE_2_ID] }, // second try searches for it in a single other space, which is valid
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1,
+      namespaces: [ALL_SPACES_ID],
+      ...fail400(), // cannot be searched for in multiple spaces
+    },
+    { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, namespaces: [SPACE_1_ID] }, // second try searches for it in a single other space, which is valid
+    { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, namespaces: [SPACE_2_ID], ...fail404() },
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, namespaces: [SPACE_2_ID, 'x'] }, // unknown space is allowed / ignored
+    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, namespaces: [ALL_SPACES_ID] },
   ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
   const allTypes = normalTypes.concat(hiddenType);

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiLoadingContent, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -14,7 +13,6 @@ import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
-import { HeaderSection } from '../../../common/components/header_section';
 import {
   displayErrorToast,
   displaySuccessToast,
@@ -370,12 +368,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, [dispatch, defaultTimelineModel, filterManager, tGridEnabled, timelineId]);
 
   if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
-    return (
-      <EuiPanel hasBorder>
-        <HeaderSection title="" />
-        <EuiLoadingContent data-test-subj="loading-alerts-panel" />
-      </EuiPanel>
-    );
+    return null;
   }
 
   return (
@@ -383,7 +376,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       pageFilters={defaultFiltersMemo}
       defaultCellActions={defaultCellActions}
       defaultModel={defaultTimelineModel}
-      entityType="alerts"
+      entityType="events"
       end={to}
       currentFilter={filterGroup}
       id={timelineId}
@@ -394,7 +387,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       start={from}
       utilityBar={utilityBarCallback}
       additionalFilters={additionalFiltersComponent}
-      hasAlertsCrud={hasIndexWrite}
+      hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
     />
   );
 };

@@ -59,7 +59,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
       resolve(__dirname, './apps/reporting'),
-      resolve(__dirname, './apps/observability'),
 
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
@@ -94,13 +93,13 @@ export default async function ({ readConfigFile }) {
         '--timelion.ui.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
         '--xpack.observability.unsafe.cases.enabled=true',
+        '--xpack.observability.unsafe.alertingExperience.enabled=true', // NOTE: Can be removed once enabled by default
       ],
     },
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'visualization:visualize:legacyChartsLibrary': true,
         'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
@@ -206,6 +205,9 @@ export default async function ({ readConfigFile }) {
       },
       securitySolution: {
         pathname: '/app/security',
+      },
+      observability: {
+        pathname: '/app/observability',
       },
     },
 

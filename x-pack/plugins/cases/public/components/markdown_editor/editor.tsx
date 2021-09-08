@@ -9,17 +9,21 @@ import React, {
   memo,
   forwardRef,
   useCallback,
-  useMemo,
   useRef,
   useState,
   useImperativeHandle,
   ElementRef,
 } from 'react';
 import { PluggableList } from 'unified';
-import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import {
+  EuiMarkdownEditor,
+  EuiMarkdownEditorProps,
+  EuiMarkdownAstNode,
+  EuiMarkdownEditorUiPlugin,
+} from '@elastic/eui';
 import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
-import { CommentEditorContext } from './context';
+import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
@@ -43,20 +47,21 @@ export interface MarkdownEditorRef {
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
   ({ ariaLabel, dataTestSubj, editorId, height, onChange, value }, ref) => {
+    const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-    const onParse = useCallback((err, { messages }) => {
+    const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
       setMarkdownErrorMessages(err ? [err] : messages);
+      astRef.current = ast;
     }, []);
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
-    const commentEditorContextValue = useMemo(
-      () => ({
-        editorId,
-        value,
-      }),
-      [editorId, value]
-    );
+    useLensButtonToggle({
+      astRef,
+      uiPlugins,
+      editorRef: ref as React.MutableRefObject<MarkdownEditorRef>,
+      value,
+    });
 
     // @ts-expect-error
     useImperativeHandle(ref, () => {
@@ -73,22 +78,20 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
     });
 
     return (
-      <CommentEditorContext.Provider value={commentEditorContextValue}>
-        <EuiMarkdownEditor
-          ref={editorRef}
-          aria-label={ariaLabel}
-          editorId={editorId}
-          onChange={onChange}
-          value={value}
-          uiPlugins={uiPlugins}
-          parsingPluginList={parsingPlugins}
-          processingPluginList={processingPlugins}
-          onParse={onParse}
-          errors={markdownErrorMessages}
-          data-test-subj={dataTestSubj}
-          height={height}
-        />
-      </CommentEditorContext.Provider>
+      <EuiMarkdownEditor
+        ref={editorRef}
+        aria-label={ariaLabel}
+        editorId={editorId}
+        onChange={onChange}
+        value={value}
+        uiPlugins={uiPlugins}
+        parsingPluginList={parsingPlugins}
+        processingPluginList={processingPlugins}
+        onParse={onParse}
+        errors={markdownErrorMessages}
+        data-test-subj={dataTestSubj}
+        height={height}
+      />
     );
   }
 );

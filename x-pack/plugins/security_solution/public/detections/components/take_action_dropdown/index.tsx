@@ -22,7 +22,7 @@ import { useHostIsolationAction } from '../host_isolation/use_host_isolation_act
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
+import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
 
@@ -89,13 +89,6 @@ export const TakeActionDropdown = React.memo(
     ]);
     const isEvent = actionsData.eventKind === 'event';
 
-    const isEndpointAlert = useMemo((): boolean => {
-      if (detailsData == null) {
-        return false;
-      }
-      return endpointAlertCheck({ data: detailsData });
-    }, [detailsData]);
-
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
     }, [isPopoverOpen]);
@@ -133,7 +126,7 @@ export const TakeActionDropdown = React.memo(
     );
 
     const { exceptionActionItems } = useExceptionActions({
-      isEndpointAlert,
+      isEndpointAlert: isAlertFromEndpointAlert({ ecsData }),
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
 

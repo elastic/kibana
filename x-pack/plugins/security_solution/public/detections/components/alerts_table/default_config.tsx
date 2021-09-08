@@ -7,7 +7,7 @@
 
 import {
   ALERT_DURATION,
-  ALERT_ID,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_TO,
   ALERT_RULE_TYPE,
   ALERT_RULE_PRODUCER,
@@ -73,6 +73,32 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
         params: {
           query: status,
         },
+      },
+      query: combinedQuery,
+    },
+  ];
+};
+
+/**
+ * For backwards compatability issues, if `acknowledged` is a status prop, `in-progress` will likely have to be too
+ */
+export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
+  const combinedQuery = {
+    bool: {
+      should: statuses.map((status) => ({
+        term: {
+          'signal.status': status,
+        },
+      })),
+    },
+  };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
       },
       query: combinedQuery,
     },
@@ -213,6 +239,30 @@ export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => 
   ];
 };
 
+// TODO: Once we are past experimental phase this code should be removed
+export const buildAlertStatusesFilterRuleRegistry = (statuses: Status[]): Filter[] => {
+  const combinedQuery = {
+    bool: {
+      should: statuses.map((status) => ({
+        term: {
+          [ALERT_WORKFLOW_STATUS]: status,
+        },
+      })),
+    },
+  };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+      },
+      query: combinedQuery,
+    },
+  ];
+};
+
 export const buildShowBuildingBlockFilterRuleRegistry = (
   showBuildingBlockAlerts: boolean
 ): Filter[] =>
@@ -235,7 +285,7 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
 
 export const requiredFieldMappingsForActionsRuleRegistry = {
   '@timestamp': '@timestamp',
-  'alert.id': ALERT_ID,
+  'alert.instance.id': ALERT_INSTANCE_ID,
   'event.kind': 'event.kind',
   'alert.start': ALERT_START,
   'alert.uuid': ALERT_UUID,

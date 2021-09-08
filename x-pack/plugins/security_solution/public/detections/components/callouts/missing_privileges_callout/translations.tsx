@@ -10,10 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import {
-  DetectionsRequirementsLink,
-  SecuritySolutionRequirementsLink,
-} from '../../../../common/components/links_to_docs';
-import {
   DEFAULT_ITEMS_INDEX,
   DEFAULT_LISTS_INDEX,
   DEFAULT_SIGNALS_INDEX,
@@ -21,6 +17,10 @@ import {
 } from '../../../../../common/constants';
 import { CommaSeparatedValues } from './comma_separated_values';
 import { MissingPrivileges } from './use_missing_privileges';
+import {
+  DetectionsRequirementsLink,
+  SecuritySolutionRequirementsLink,
+} from '../../../../common/components/links_to_docs';
 
 export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageTitle',
@@ -46,17 +46,17 @@ const CANNOT_EDIT_LISTS = i18n.translate(
 const CANNOT_EDIT_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.cannotEditAlerts',
   {
-    defaultMessage: 'Without these privileges, you cannot open or close alerts.',
+    defaultMessage: 'Without these privileges, you cannot view or change status of alerts.',
   }
 );
 
 export const missingPrivilegesCallOutBody = ({
   indexPrivileges,
-  featurePrivileges,
+  featurePrivileges = [],
 }: MissingPrivileges) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.messageDetail"
-    defaultMessage="{essence} {indexPrivileges} {featurePrivileges} Related documentation: {docs}"
+    defaultMessage="{essence} {indexPrivileges} Related documentation: {docs}"
     values={{
       essence: (
         <p>
@@ -77,23 +77,30 @@ export const missingPrivilegesCallOutBody = ({
               {indexPrivileges.map(([index, missingPrivileges]) => (
                 <li key={index}>{missingIndexPrivileges(index, missingPrivileges)}</li>
               ))}
-            </ul>
-          </>
-        ) : null,
-      featurePrivileges:
-        featurePrivileges.length > 0 ? (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
-              defaultMessage="Missing Kibana feature privileges:"
-            />
-            <ul>
-              {featurePrivileges.map(([feature, missingPrivileges]) => (
+              {
+                // TODO: Uncomment once RBAC for alerts is reenabled
+                /* {featurePrivileges.map(([feature, missingPrivileges]) => (
                 <li key={feature}>{missingFeaturePrivileges(feature, missingPrivileges)}</li>
-              ))}
+              ))} */
+              }
             </ul>
           </>
         ) : null,
+      // TODO: Uncomment once RBAC for alerts is reenabled
+      // featurePrivileges:
+      //   featurePrivileges.length > 0 ? (
+      //     <>
+      //       <FormattedMessage
+      //         id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
+      //         defaultMessage="Missing Kibana feature privileges:"
+      //       />
+      //       <ul>
+      //         {featurePrivileges.map(([feature, missingPrivileges]) => (
+      //           <li key={feature}>{missingFeaturePrivileges(feature, missingPrivileges)}</li>
+      //         ))}
+      //       </ul>
+      //     </>
+      //   ) : null,
       docs: (
         <ul>
           <li>
@@ -152,14 +159,15 @@ const missingIndexPrivileges = (index: string, privileges: string[]) => (
   />
 );
 
-const missingFeaturePrivileges = (feature: string, privileges: string[]) => (
-  <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges"
-    defaultMessage="Missing {privileges} privileges for the {index} feature. {explanation}"
-    values={{
-      privileges: <CommaSeparatedValues values={privileges} />,
-      index: <EuiCode>{feature}</EuiCode>,
-      explanation: getPrivilegesExplanation(privileges, feature),
-    }}
-  />
-);
+// TODO: Uncomment once RBAC for alerts is reenabled
+// const missingFeaturePrivileges = (feature: string, privileges: string[]) => (
+//   <FormattedMessage
+//     id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges"
+//     defaultMessage="Missing {privileges} privileges for the {index} feature. {explanation}"
+//     values={{
+//       privileges: <CommaSeparatedValues values={privileges} />,
+//       index: <EuiCode>{feature}</EuiCode>,
+//       explanation: getPrivilegesExplanation(privileges, feature),
+//     }}
+//   />
+// );

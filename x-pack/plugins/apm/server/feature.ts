@@ -64,7 +64,7 @@ export const APM_FEATURE = {
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show', 'alerting:show', 'alerting:save'],
+      ui: ['show', 'alerting:show'],
     },
   },
   subFeatures: [

@@ -9,6 +9,7 @@ import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ExistsFilter, Filter } from '@kbn/es-query';
 import {
   buildAlertsRuleIdFilter,
+  buildAlertStatusesFilter,
   buildAlertStatusFilter,
   buildThreatMatchFilter,
 } from './default_config';
@@ -117,6 +118,42 @@ describe('alerts default_config', () => {
         query: {
           term: {
             [ALERT_WORKFLOW_STATUS]: 'open',
+          },
+        },
+      };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+  });
+
+  describe('buildAlertStatusesFilter', () => {
+    test('builds filter containing all statuses passed into function', () => {
+      const filters = buildAlertStatusesFilter(['open', 'acknowledged', 'in-progress']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'signal.status': 'open',
+                },
+              },
+              {
+                term: {
+                  'signal.status': 'acknowledged',
+                },
+              },
+              {
+                term: {
+                  'signal.status': 'in-progress',
+                },
+              },
+            ],
           },
         },
       };

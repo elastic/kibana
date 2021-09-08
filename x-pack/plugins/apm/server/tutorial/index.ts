@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { APMConfig } from '..';
 import {
   ArtifactsSchema,
   TutorialsCategory,
@@ -13,6 +14,8 @@ import {
 } from '../../../../../src/plugins/home/server';
 import { CloudSetup } from '../../../cloud/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
+import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_pattern_title';
+import { ApmIndicesConfig } from '../lib/settings/apm_indices/get_apm_indices';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
 import apmIndexPattern from './index_pattern.json';
@@ -24,24 +27,18 @@ const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
 const moduleName = 'apm';
 
 export const tutorialProvider = ({
-  isEnabled,
-  indexPatternTitle,
-  indices,
+  apmConfig,
+  apmIndices,
   cloud,
   isFleetPluginEnabled,
 }: {
-  isEnabled: boolean;
-  indexPatternTitle: string;
+  apmConfig: APMConfig;
+  apmIndices: ApmIndicesConfig;
   cloud?: CloudSetup;
-  indices: {
-    errorIndices: string;
-    transactionIndices: string;
-    metricsIndices: string;
-    sourcemapIndices: string;
-    onboardingIndices: string;
-  };
   isFleetPluginEnabled: boolean;
 }) => () => {
+  const indexPatternTitle = getApmIndexPatternTitle(apmIndices);
+
   const savedObjects = [
     {
       ...apmIndexPattern,
@@ -68,7 +65,7 @@ export const tutorialProvider = ({
     ],
   };
 
-  if (isEnabled) {
+  if (apmConfig['xpack.apm.ui.enabled']) {
     // @ts-expect-error artifacts.application is readonly
     artifacts.application = {
       path: '/app/apm',
@@ -106,7 +103,7 @@ It allows you to monitor the performance of thousands of applications in real ti
     euiIconType: 'apmApp',
     artifacts,
     customStatusCheckName: 'apm_fleet_server_status_check',
-    onPrem: onPremInstructions({ ...indices, isFleetPluginEnabled }),
+    onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),
     elasticCloud: createElasticCloudInstructions(cloud),
     previewImagePath: '/plugins/apm/assets/apm.png',
     savedObjects,
