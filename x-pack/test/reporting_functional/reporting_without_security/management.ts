@@ -56,7 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const tableElem = await testSubjects.find('reportJobListing');
       const tableRow = await tableElem.findByCssSelector('tbody tr td+td'); // find the title cell of the first row
       const tableCellText = await tableRow.getVisibleText();
-      expect(tableCellText).to.be(`Tiểu thuyết\nvisualization`);
+      expect(tableCellText).to.be(`Tiểu thuyết`);
     });
   });
 };
